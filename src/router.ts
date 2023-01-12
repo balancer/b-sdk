@@ -65,7 +65,7 @@ export class Router {
     
     const orderedQuotePaths = valueArr.map(item => item.item);
 
-    const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 2), swapKind, swapAmount);
+    const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 2), swapKind);
 
     return swap;
   }
