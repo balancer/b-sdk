@@ -7,6 +7,7 @@ export enum BatchOrSingle {
   SingleSwap,
 }
 
+// A Swap can be a single or multiple paths
 export class Swap {
 
   public static async fromPaths(

@@ -1,5 +1,5 @@
 import { SwapKind } from './types';
-import { BasePool, Path, Swap, Token, TokenAmount } from './entities';
+import { BasePool, Path, PathWithAmount, Swap, Token, TokenAmount } from './entities';
 import { WeightedPool } from './entities/pool/weighted';
 import { SubgraphPool } from './poolProvider';
 import { PathGraph } from './pathGraph/pathGraph';
@@ -43,10 +43,6 @@ export class Router {
       tokenOut,
     });
 
-    console.log(JSON.stringify(bestPaths));
-
-    // const [paths] = calculatePathLimits(bestPaths, swapKind);
-
     return bestPaths;
   }
 
@@ -55,7 +51,21 @@ export class Router {
     swapKind: SwapKind,
     swapAmount: TokenAmount
   ): Promise<Swap> => {
-    const swap = await Swap.fromPaths(paths, swapKind, swapAmount);
+    // TODO: Refactor these hacks so path outputAmount is not async
+    const quotePaths = paths.map(path => {
+      return new PathWithAmount(path.tokens, path.pools, swapAmount);
+    });
+    const valueArr = await Promise.all(quotePaths.map(async (item) => {
+      return {
+        item,
+        value: Number((await item.outputAmount()).amount)
+      }
+    }))
+    valueArr.sort((a, b) => b.value - a.value)
+    
+    const orderedQuotePaths = valueArr.map(item => item.item);
+
+    const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 2), swapKind, swapAmount);
 
     return swap;
   }

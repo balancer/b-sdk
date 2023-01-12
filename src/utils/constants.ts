@@ -13,6 +13,6 @@ export const SUBGRAPH_URLS = {
   [ChainId.GOERLI]:
       'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
   [ChainId.POLYGON]:
-      'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
+      'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-prune-v2',
   [ChainId.ARBITRUM_ONE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
 };
