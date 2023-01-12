@@ -1,95 +1,56 @@
-import { getAddress } from '@ethersproject/address';
 import { SwapKind } from './types';
-import { Path, Swap, TokenAmount } from './entities';
-
-import { Token } from './entities';
-import { SubgraphPool } from './poolProvider';
-import { BasePool } from './entities';
+import { BasePool, Path, Swap, Token, TokenAmount } from './entities';
 import { WeightedPool } from './entities/pool/weighted';
+import { SubgraphPool } from './poolProvider';
+import { PathGraph } from './pathGraph/pathGraph';
 
-export interface hopDictionary {
-  [hopToken: string]: Set<string>; // the set of pool ids
-}
+export class Router {
+  cache: Record<string, { paths: Path[] }> = {};
+  private readonly pathGraph: PathGraph;
 
-export interface PoolDictionary {
-  [poolId: string]: any;
-}
+  constructor() {
+    this.pathGraph = new PathGraph();
+  }
 
-export const getCandidatePaths = (
-  tokenIn: Token,
-  tokenOut: Token,
-  swapKind: SwapKind,
-  pools: SubgraphPool[]
-): Path[] => {
-  const directPools = filterPoolsOfInterest(pools, tokenIn, tokenOut);
+  public initPathGraphWithPools(pools: BasePool[]): void {
+    this.pathGraph.buildGraph({
+      pools: Object.values(pools),
+    });
+  }
+  
+  getCandidatePaths = (
+    tokenIn: Token,
+    tokenOut: Token,
+    swapKind: SwapKind,
+    rawPools: SubgraphPool[]
+  ): Path[] => {
 
-  const paths = producePaths(tokenIn, tokenOut, directPools);
+    if (!this.pathGraph.isGraphInitialized) {
+      const pools: BasePool[] = [];
+      rawPools.forEach(p => {
+        if (p.poolType === 'Weighted') {
+          pools.push(WeightedPool.fromRawPool(p));
+        }
+      });
 
-  return paths;
-}
-
-export const filterPoolsOfInterest = (
-  allPools: SubgraphPool[],
-  tokenIn: Token,
-  tokenOut: Token
-): SubgraphPool[] => {
-  const directPools: SubgraphPool[] = [];
-  const hopsIn: hopDictionary = {};
-  const hopsOut: hopDictionary = {};
-
-  allPools.forEach(p => {
-    const tokenListSet = new Set(p.tokensList.map(a => getAddress(a)));
-    const containsTokenIn = tokenListSet.has(tokenIn.address);
-    const containsTokenOut = tokenListSet.has(tokenOut.address);
-
-    // This is a direct pool as has both tokenIn and tokenOut
-    if (containsTokenIn && containsTokenOut) {
-      directPools.push(p);
-      return;
+      this.pathGraph.buildGraph({
+        pools,
+      });
     }
 
-    if (containsTokenIn && !containsTokenOut) {
-      for (const hopToken of tokenListSet) {
-        if (!hopsIn[hopToken as any]) hopsIn[hopToken as any] = new Set([]);
-        hopsIn[hopToken as any].add(p.id);
-      }
-    } else if (!containsTokenIn && containsTokenOut) {
-      for (const hopToken of [...tokenListSet]) {
-        if (!hopsOut[hopToken as any]) hopsOut[hopToken as any] = new Set([]);
-        hopsOut[hopToken as any].add(p.id);
-      }
-    }
-  });
-  return directPools;
-}
+    const bestPaths = this.pathGraph.traverseGraphAndFindBestPaths({
+      tokenIn,
+      tokenOut,
+    });
 
-export const producePaths = (
-  tokenIn: Token,
-  tokenOut: Token,
-  directPools: SubgraphPool[]
-): Path[] => {
-  const paths: Path[] = [];
+    console.log(JSON.stringify(bestPaths));
 
-  // Create direct paths
-  const pools: BasePool[] = [];
-  directPools.forEach(p => {
-    if (p.poolType === 'Weighted') {
-      pools.push(WeightedPool.fromRawPool(p));
-    }
-  });
+    // const [paths] = calculatePathLimits(bestPaths, swapKind);
 
-  const sortedPools = pools.sort((a, b) => {
-    return Number(b.getNormalizedLiquidity(tokenIn, tokenOut) -
-      a.getNormalizedLiquidity(tokenIn, tokenOut));
-  });
+    return bestPaths;
+  }
 
-  const path = new Path([tokenIn, tokenOut], [sortedPools[0]]);
-  paths.push(path);
-
-  return paths;
-}
-
-export const getBestPaths = async (
+  getBestPaths = async (
     paths: Path[],
     swapKind: SwapKind,
     swapAmount: TokenAmount
@@ -97,4 +58,7 @@ export const getBestPaths = async (
     const swap = await Swap.fromPaths(paths, swapKind, swapAmount);
 
     return swap;
+  }
+
 }
+

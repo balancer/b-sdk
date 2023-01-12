@@ -27,7 +27,6 @@ export class Swap {
       amounts[0] = swapAmount;
       for (let i = 0; i < path.pools.length; i++) {
         const pool = path.pools[i];
-        console.log(`got here`);
         const outputAmount = await pool.swapGivenIn(
           path.tokens[i],
           path.tokens[i + 1],

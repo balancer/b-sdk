@@ -25,9 +25,13 @@ export type SubgraphPool = {
   liquidity: string;
 }
 
+export interface PoolDataService {
+  getPools(): Promise<SubgraphPool[]>;
+}
+
 const PAGE_SIZE = 1000;
 
-export class SubgraphProvider {
+export class SubgraphProvider implements PoolDataService {
   private client: GraphQLClient;
 
   constructor(
@@ -108,8 +112,6 @@ export class SubgraphProvider {
           });
           pools = await Promise.race([getPoolsPromise, timerPromise]);
           return;
-        } catch (err) {
-          throw err;
         } finally {
           timeout.clear();
         }

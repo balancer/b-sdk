@@ -1,13 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
-import { SubgraphProvider } from './poolProvider';
-import { getCandidatePaths, getBestPaths } from './router';
+import { PoolDataService } from './poolProvider';
+import { Router } from './router';
 import { Swap, Token, TokenAmount, Path } from './entities';
 import { ChainId } from './utils';
-import {
-  SwapKind,
-  SorConfig
-} from './types';
+import { SwapKind, SorConfig } from './types';
 
 export interface FundManagement {
   sender: string;
@@ -40,13 +37,13 @@ export interface SwapInfo {
 export type TransactionData = {
   calldata: string;
   value: BigNumber;
-}
+};
 
-export class Sor {
+export class SmartOrderRouter {
   public chainId: ChainId;
   // public provider: BaseProvider;
-  private readonly poolProvider: SubgraphProvider;
-  // public readonly routeProposer: RouteProposer;
+  private readonly poolProvider: PoolDataService;
+  public readonly router: Router;
 
   constructor({
     chainId,
@@ -57,7 +54,7 @@ export class Sor {
     this.chainId = chainId;
     // this.provider = provider;
     this.poolProvider = poolProvider;
-    // this.routeProposer = new RouteProposer();
+    this.router = new Router();
   }
 
   async getSwaps(
@@ -68,28 +65,28 @@ export class Sor {
     swapOptions?: SwapOptions
   ): Promise<SwapInfo> {
 
-    // Pool data is kept raw and uses subgraph balances for potential routes
-    // and then later parsed into a Pool class to fetch onchain balances
+    console.time('poolProvider');
     const pools = await this.poolProvider.getPools();
+    console.timeEnd('poolProvider');
 
-    const candidatePaths = getCandidatePaths(
+    console.time('getCandidatePaths');
+    const candidatePaths = this.router.getCandidatePaths(
       tokenIn,
       tokenOut,
       swapKind,
-      pools,
+      pools
     );
+    console.timeEnd('getCandidatePaths');
 
-    const bestPaths = await getBestPaths(
-      candidatePaths,
-      swapKind,
-      swapAmount,
-    );
+    console.time('bestPaths');
+    const bestPaths = await this.router.getBestPaths(candidatePaths, swapKind, swapAmount);
+    console.timeEnd('bestPaths');
 
     const swapInfo = {
       quote: swapAmount,
       swap: bestPaths,
-      paths: bestPaths.paths
-    }
+      paths: bestPaths.paths,
+    };
 
     return swapInfo;
   }
