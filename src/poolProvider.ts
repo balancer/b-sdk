@@ -100,7 +100,7 @@ export class SubgraphProvider implements PoolDataService {
             pools = pools.concat(poolsPage);
 
             lastId = pools[pools.length - 1]!.id;
-          } while (poolsPage.length > 0);
+          } while (poolsPage.length === PAGE_SIZE);
 
           return pools;
         };
