@@ -52,6 +52,8 @@ export class Router {
     swapAmount: TokenAmount
   ): Promise<Swap> => {
     // TODO: Refactor these hacks so path outputAmount is not async
+    // TODO: swapAmount is being used in full on both paths
+    //       this should only be for ordering and then figuring out best split
     const quotePaths = paths.map(path => {
       return new PathWithAmount(path.tokens, path.pools, swapAmount);
     });

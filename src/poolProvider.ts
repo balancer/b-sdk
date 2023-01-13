@@ -11,13 +11,15 @@ export type SubgraphPoolToken = {
   name: string;
   decimals: number;
   balance: string;
-  weight: string;
+  weight?: string;
+  priceRate?: string;
 }
 
 export type SubgraphPool = {
   id: string;
   address: string;
   poolType: string;
+  amp: string;
   swapFee: string;
   swapEnabled: boolean;
   tokens: SubgraphPoolToken[]

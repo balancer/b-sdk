@@ -1,8 +1,6 @@
-export const ZERO = BigInt('0');
-export const ONE = BigInt('1');
-export const BONE = BigInt('1000000000000000000');
-export const TWO_BONE = BigInt('2000000000000000000');
-export const FOUR_BONE = BigInt('4000000000000000000');
+export const BONE = 1000000000000000000n;
+export const TWO_BONE = 2000000000000000000n;
+export const FOUR_BONE = 4000000000000000000n;
 
 const _require = (b: boolean, message: string) => {
   if (!b) throw new Error(message);
@@ -17,7 +15,7 @@ export class MathSol {
     return a < b ? a : b;
   }
 
-  static MAX_POW_RELATIVE_ERROR = BigInt(10000);
+  static MAX_POW_RELATIVE_ERROR = 10000n;
 
   static mulDownFixed(a: bigint, b: bigint): bigint {
     const product = a * b;
@@ -27,16 +25,16 @@ export class MathSol {
   static mulUpFixed(a: bigint, b: bigint): bigint {
     const product = a * b;
 
-    if (product == ZERO) {
-      return ZERO;
+    if (product == 0n) {
+      return 0n;
     } else {
-      return (product - ONE) / BONE + ONE;
+      return (product - 1n) / BONE + 1n;
     }
   }
 
   static divDownFixed(a: bigint, b: bigint): bigint {
-    if (a == ZERO) {
-      return ZERO;
+    if (a == 0n) {
+      return 0n;
     } else {
       const aInflated = a * BONE;
       return aInflated / b;
@@ -44,11 +42,11 @@ export class MathSol {
   }
 
   static divUpFixed(a: bigint, b: bigint): bigint {
-    if (a == ZERO) {
-      return ZERO;
+    if (a == 0n) {
+      return 0n;
     } else {
       const aInflated = a * BONE;
-      return (aInflated - ONE) / b + ONE;
+      return (aInflated - 1n) / b + 1n;
     }
   }
 
@@ -63,7 +61,7 @@ export class MathSol {
       return this.mulUpFixed(square, square);
     } else {
       const raw = LogExpMath.pow(x, y);
-      const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + ONE;
+      const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
       return raw + maxError;
     }
   }
@@ -78,9 +76,9 @@ export class MathSol {
       return this.mulUpFixed(square, square);
     } else {
       const raw = LogExpMath.pow(x, y);
-      const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + ONE;
+      const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
       if (raw < maxError) {
-        return ZERO;
+        return 0n;
       } else {
         return raw - maxError;
       }
@@ -89,7 +87,7 @@ export class MathSol {
 
   // Modification: Taken from the fixed point class
   static complementFixed(x: bigint): bigint {
-    return x < BONE ? BONE - x : ZERO;
+    return x < BONE ? BONE - x : 0n;
   }
 
 }
@@ -158,13 +156,13 @@ class LogExpMath {
 
   // All arguments and return values are 18 decimal fixed point numbers.
   static pow(x: bigint, y: bigint): bigint {
-    if (y === ZERO) {
+    if (y === 0n) {
       // We solve the 0^0 indetermination by making it equal one.
       return this.ONE_18;
     }
 
-    if (x == ZERO) {
-      return ZERO;
+    if (x == 0n) {
+      return 0n;
     }
 
     // Instead of computing x^y directly, we instead rely on the properties of logarithms and exponentiation to
@@ -433,7 +431,7 @@ class LogExpMath {
     // For each a_n, we test if that term is present in the decomposition (if a is larger than it), and if so divide
     // by it and compute the accumulated sum.
 
-    let sum = ZERO;
+    let sum = 0n;
     if (a >= this.a0 * this.ONE_18) {
       a /= this.a0; // Integer, not fixed point division
       sum += this.x0;
