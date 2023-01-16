@@ -6,81 +6,77 @@ import { BONE } from '../utils';
 export type BigintIsh = bigint | string | number;
 
 export class TokenAmount {
-  public readonly token: Token;
-  public readonly amount: bigint;
-  public readonly scalar: bigint;
-  public readonly decimalScale: bigint;
-  public readonly scale18: bigint;
+    public readonly token: Token;
+    public readonly amount: bigint;
+    public readonly scalar: bigint;
+    public readonly decimalScale: bigint;
+    public readonly scale18: bigint;
 
-  public static fromRawAmount(token: Token, rawAmount: BigintIsh) {
-    return new TokenAmount(token, rawAmount);
-  }
+    public static fromRawAmount(token: Token, rawAmount: BigintIsh) {
+        return new TokenAmount(token, rawAmount);
+    }
 
-  public static fromHumanAmount(token: Token, humanAmount: string) {
-    const rawAmount = parseUnits(humanAmount, token.decimals).toString();
-    return new TokenAmount(token, rawAmount);
-  }
+    public static fromHumanAmount(token: Token, humanAmount: string) {
+        const rawAmount = parseUnits(humanAmount, token.decimals).toString();
+        return new TokenAmount(token, rawAmount);
+    }
 
-  public static fromScale18Amount(token: Token, scale18Amount: BigintIsh) {
-    const scalar = BigInt(10) ** (BigInt(18 - token.decimals));
-    const rawAmount = BigInt(scale18Amount) / scalar;
-    return new TokenAmount(token, rawAmount);
-  }
+    public static fromScale18Amount(token: Token, scale18Amount: BigintIsh) {
+        const scalar = BigInt(10) ** BigInt(18 - token.decimals);
+        const rawAmount = BigInt(scale18Amount) / scalar;
+        return new TokenAmount(token, rawAmount);
+    }
 
-  protected constructor(token: Token, amount: BigintIsh) {
-    this.decimalScale = BigInt(10) ** (BigInt(token.decimals));
-    this.token = token;
-    this.amount = BigInt(amount);
-    this.scalar = BigInt(10) ** (BigInt(18 - token.decimals));
-    this.scale18 = this.amount * this.scalar;
-  }
+    protected constructor(token: Token, amount: BigintIsh) {
+        this.decimalScale = BigInt(10) ** BigInt(token.decimals);
+        this.token = token;
+        this.amount = BigInt(amount);
+        this.scalar = BigInt(10) ** BigInt(18 - token.decimals);
+        this.scale18 = this.amount * this.scalar;
+    }
 
-  public add(other: TokenAmount): TokenAmount {
-    return new TokenAmount(this.token, this.amount + other.amount);
-  }
+    public add(other: TokenAmount): TokenAmount {
+        return new TokenAmount(this.token, this.amount + other.amount);
+    }
 
-  public sub(other: TokenAmount): TokenAmount {
-    return new TokenAmount(this.token, this.amount - other.amount);
-  }
+    public sub(other: TokenAmount): TokenAmount {
+        return new TokenAmount(this.token, this.amount - other.amount);
+    }
 
-  // TODO Decide what to do for standard mul vs token mul
-  public mulFixed(other: bigint): TokenAmount {
-    const multiplied = (this.amount * other) / BONE;
-    return new TokenAmount(this.token, multiplied);
-  }
-  // TODO Decide what to do for standard div vs token div
-  public divide(other: bigint): TokenAmount {
-    const divided = (this.amount * this.decimalScale) / other;
-    return new TokenAmount(this.token, divided);
-  }
+    // TODO Decide what to do for standard mul vs token mul
+    public mulFixed(other: bigint): TokenAmount {
+        const multiplied = (this.amount * other) / BONE;
+        return new TokenAmount(this.token, multiplied);
+    }
+    // TODO Decide what to do for standard div vs token div
+    public divide(other: bigint): TokenAmount {
+        const divided = (this.amount * this.decimalScale) / other;
+        return new TokenAmount(this.token, divided);
+    }
 
-  public toSignificant(significantDigits: number = 6): string {
-    return new _Decimal(this.amount.toString())
-      .div(
-        new _Decimal(this.decimalScale.toString()).toDecimalPlaces(
-          significantDigits
-        )
-      )
-      .toString();
-  }
+    public toSignificant(significantDigits: number = 6): string {
+        return new _Decimal(this.amount.toString())
+            .div(new _Decimal(this.decimalScale.toString()).toDecimalPlaces(significantDigits))
+            .toString();
+    }
 }
 
 export class TokenAmountWeight extends TokenAmount {
-  public readonly weight: bigint;
+    public readonly weight: bigint;
 
-  public constructor(token: Token, amount: BigintIsh, weight: BigintIsh) {
-    super(token, amount);
-    this.weight = BigInt(weight);
-  }
+    public constructor(token: Token, amount: BigintIsh, weight: BigintIsh) {
+        super(token, amount);
+        this.weight = BigInt(weight);
+    }
 }
 
 export class TokenAmountRate extends TokenAmount {
-  public readonly rate: bigint;
-  public readonly scale18: bigint;
+    public readonly rate: bigint;
+    public readonly scale18: bigint;
 
-  public constructor(token: Token, amount: BigintIsh, rate: BigintIsh) {
-    super(token, amount);
-    this.rate = BigInt(rate);
-    this.scale18 = this.amount * this.rate;
-  }
+    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh) {
+        super(token, amount);
+        this.rate = BigInt(rate);
+        this.scale18 = this.amount * this.rate;
+    }
 }
