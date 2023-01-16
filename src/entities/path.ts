@@ -7,6 +7,12 @@ export class Path {
     public readonly tokens: Token[];
 
     public constructor(tokens: Token[], pools: BasePool[]) {
+        if (pools.length === 0 || tokens.length < 2) {
+            throw new Error('Invalid path: must contain at least 1 pool and 2 tokens.');
+        } else if (tokens.length !== pools.length + 1) {
+            throw new Error('Invalid path: tokens length must equal pools length + 1');
+        }
+
         this.pools = pools;
         this.tokens = tokens;
     }
@@ -20,6 +26,7 @@ export class PathWithAmount extends Path {
         super(tokens, pools);
         this.swapAmount = swapAmount;
 
+        //call to super ensures this array access is safe
         if (tokens[0].isEqual(swapAmount.token)) {
             this.swapKind = SwapKind.GivenIn;
         } else {
