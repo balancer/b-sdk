@@ -20,4 +20,8 @@ export class Token {
         this.symbol = symbol;
         this.name = name;
     }
+
+    public isEqual(token: Token) {
+        return this.chainId === token.chainId && this.address === token.address;
+    }
 }

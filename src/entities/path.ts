@@ -20,7 +20,7 @@ export class PathWithAmount extends Path {
         super(tokens, pools);
         this.swapAmount = swapAmount;
 
-        if (tokens[0] === swapAmount.token) {
+        if (tokens[0].isEqual(swapAmount.token)) {
             this.swapKind = SwapKind.GivenIn;
         } else {
             this.swapKind = SwapKind.GivenOut;
