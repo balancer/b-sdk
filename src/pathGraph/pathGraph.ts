@@ -1,69 +1,44 @@
-import { PoolType, PoolTokenPair } from '../types';
-import { Path, Token, BasePool } from '../entities';
-import { keyBy, orderBy, sortBy, uniq } from 'lodash';
-import { Graph } from 'graphlib';
+import { BasePool, Path, Token } from '../entities';
+import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
+import { PoolType } from '../types';
 
-import {
-    PathGraphEdge,
-    PathGraphEdgeLabel,
-    PathGraphTraversalConfig,
-    PoolAddressDictionary,
-    PoolPairMap,
-} from './pathGraphTypes';
+const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
 
 export class PathGraph {
-    private graph: Graph = new Graph({ multigraph: true });
-    private poolAddressMap: PoolAddressDictionary = {};
-    private graphIsInitialized = false;
-    private maxPathsPerTokenPair = 2;
+    private nodes: Map<string, { isPhantomBpt: boolean }>;
+    private edges: Map<string, Map<string, PathGraphEdgeData[]>>;
+    private poolAddressMap: Map<string, BasePool>;
+    private maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR;
 
-    public get isGraphInitialized(): boolean {
-        return this.graphIsInitialized;
+    constructor() {
+        this.nodes = new Map();
+        this.edges = new Map();
+        this.poolAddressMap = new Map();
     }
 
     // We build a directed graph for all pools.
     // Nodes are tokens and edges are triads: [pool.id, tokenIn, tokenOut].
     // The current criterion for including a pool path into this graph is the following:
-    // (a) We include every pool with phantom BPTs.
+    // (a) We include every path that includes a phantom BPT.
     // (b) For any token pair x -> y, we include only the most liquid ${maxPathsPerTokenPair}
     // pool pairs (default 2).
     public buildGraph({
         pools,
-        maxPathsPerTokenPair = 2,
+        maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair?: number;
-    }): void {
-        this.poolAddressMap = keyBy(pools, 'address');
-        const graph = new Graph({ multigraph: true });
-        const poolPairMap = this.buildSortedPoolPairMap(pools);
-
-        for (const id of Object.keys(poolPairMap)) {
-            const items = poolPairMap[id];
-
-            for (let i = 0; i < items.length; i++) {
-                const poolPair = items[i].poolPair;
-                const pool = this.poolAddressMap[poolPair.pool.address];
-
-                // we take the first `maxPathsPerTokenPair` most liquid pairs.
-                // Always include pairs where the pool has phantom bpt
-                if (
-                    i < maxPathsPerTokenPair ||
-                    pool.tokens.map(t => t.token.address).includes(poolPair.pool.address)
-                ) {
-                    this.addGraphEdgeForPoolPair({
-                        tokenIn: poolPair.tokenIn,
-                        tokenOut: poolPair.tokenOut,
-                        pool,
-                        graph,
-                    });
-                }
-            }
-        }
-
-        this.graph = graph;
-        this.graphIsInitialized = true;
+    }) {
+        this.poolAddressMap = new Map();
+        this.nodes = new Map();
+        this.edges = new Map();
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
+
+        this.buildPoolAddressMap(pools);
+
+        this.addAllTokensAsGraphNodes(pools);
+
+        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair });
     }
 
     // Since the path combinations here can get quite large, we use configurable parameters
@@ -79,7 +54,7 @@ export class PathGraph {
     // Additionally, we impose the following requirements for a path to be considered valid
     // (a) It does not visit the same token twice
     // (b) It does not use the same pool twice
-    public traverseGraphAndFindBestPaths({
+    public getCandidatePaths({
         tokenIn,
         tokenOut,
         pathConfig,
@@ -88,10 +63,6 @@ export class PathGraph {
         tokenOut: Token;
         pathConfig?: Partial<PathGraphTraversalConfig>;
     }): Path[] {
-        if (!this.graph.hasNode(tokenIn.address) || !this.graph.hasNode(tokenOut.address)) {
-            return [];
-        }
-
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
             maxDepth: 7,
@@ -101,43 +72,35 @@ export class PathGraph {
             ...pathConfig,
         };
 
-        const paths: PathGraphEdge[][] = [];
+        const tokenPaths = this.findAllValidTokenPaths({
+            token: tokenIn.address,
+            tokenIn: tokenIn.address,
+            tokenOut: tokenOut.address,
+            config,
+            tokenPath: [tokenIn.address],
+        });
+
+        const paths: PathGraphEdgeData[][] = [];
         const selectedPathIds: string[] = [];
         let seenPoolAddresses: string[] = [];
 
         while (paths.length < config.approxPathsToReturn) {
-            //the tokenPairIndex refers to the nth most liquid path for a token
-            //pair x -> y. maxPathsPerTokenPair is provided as a config on graph init
+            // the tokenPairIndex refers to the nth most liquid path for a token
+            // pair x -> y. maxPathsPerTokenPair is provided as a config on graph init
             for (let idx = 0; idx < this.maxPathsPerTokenPair; idx++) {
-                let foundPath = true;
-
-                //loop until we've found all unique paths from tokenIn -> tokenOut
-                //that meet validity and config criteria, preferring the ${idx}th most
-                //liquid pair. When there is less than ${idx+1} pairs, we default to the
-                //most liquid pair
-                while (foundPath) {
-                    foundPath = false;
-
-                    const path = this.traverseGraphAndFindUniquePath({
-                        token: tokenIn.address,
-                        tokenIn: tokenIn.address,
-                        tokenOut: tokenOut.address,
+                for (let i = 0; i < tokenPaths.length; i++) {
+                    const path = this.expandTokenPath({
+                        tokenPath: tokenPaths[i],
                         tokenPairIndex: idx,
-                        config,
-                        tokenPath: [tokenIn.address],
-                        seenPoolAddresses,
-                        selectedPathIds,
                     });
 
-                    if (path) {
+                    if (this.isValidPath({ path, seenPoolAddresses, selectedPathIds, config })) {
                         seenPoolAddresses = [
                             ...seenPoolAddresses,
-                            ...path.map(segment => segment.poolAddress),
+                            ...path.map(segment => segment.pool.address),
                         ];
-
-                        paths.push(path);
                         selectedPathIds.push(this.getIdForPath(path));
-                        foundPath = true;
+                        paths.push(path);
                     }
                 }
             }
@@ -165,282 +128,206 @@ export class PathGraph {
         }
 
         return paths.map(path => {
-            const pathTokens: Token[] = [...path.map(segment => segment.poolPair.tokenOut)];
-            pathTokens.unshift(path[0].poolPair.tokenIn);
+            const pathTokens: Token[] = [...path.map(segment => segment.tokenOut)];
+            pathTokens.unshift(path[0].tokenIn);
+
             return {
                 tokens: pathTokens,
-                pools: path.map(segment => this.poolAddressMap[segment.poolAddress]),
+                pools: path.map(segment => segment.pool),
             };
         });
     }
 
-    private buildSortedPoolPairMap(pools: BasePool[]): PoolPairMap {
-        const poolPairMap: PoolPairMap = {};
+    private buildPoolAddressMap(pools: BasePool[]) {
+        for (const pool of pools) {
+            this.poolAddressMap.set(pool.address, pool);
+        }
+    }
 
+    private addAllTokensAsGraphNodes(pools: BasePool[]) {
+        for (const pool of pools) {
+            for (const tokenAmount of pool.tokens) {
+                const token = tokenAmount.token;
+
+                if (!this.nodes.has(token.address)) {
+                    this.addNode(token);
+                }
+            }
+        }
+    }
+
+    private addTokenPairsAsGraphEdges({
+        pools,
+        maxPathsPerTokenPair,
+    }: {
+        pools: BasePool[];
+        maxPathsPerTokenPair: number;
+    }) {
         for (const pool of pools) {
             for (let i = 0; i < pool.tokens.length - 1; i++) {
                 for (let j = i + 1; j < pool.tokens.length; j++) {
-                    const id = `${pool.tokens[i].token.address}-${pool.tokens[j].token.address}`;
-                    const reverseId = `${pool.tokens[j].token.address}-${pool.tokens[i].token.address}`;
+                    const tokenI = pool.tokens[i].token;
+                    const tokenJ = pool.tokens[j].token;
 
-                    if (!poolPairMap[id]) {
-                        poolPairMap[id] = [];
-                    }
-
-                    if (!poolPairMap[reverseId]) {
-                        poolPairMap[reverseId] = [];
-                    }
-
-                    const poolPair: PoolTokenPair = {
-                        id,
-                        pool,
-                        tokenIn: pool.tokens[i].token,
-                        tokenOut: pool.tokens[j].token,
-                    };
-
-                    poolPairMap[id].push({
-                        poolPair,
-                        normalizedLiquidity: pool.getNormalizedLiquidity(
-                            pool.tokens[i].token,
-                            pool.tokens[j].token,
-                        ),
+                    this.addEdge({
+                        edgeProps: {
+                            pool,
+                            tokenIn: tokenI,
+                            tokenOut: tokenJ,
+                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
+                        },
+                        maxPathsPerTokenPair,
                     });
 
-                    const poolPairReverse: PoolTokenPair = {
-                        id: reverseId,
-                        pool,
-                        tokenIn: pool.tokens[j].token,
-                        tokenOut: pool.tokens[i].token,
-                    };
-
-                    poolPairMap[reverseId].push({
-                        poolPair: poolPairReverse,
-                        normalizedLiquidity: pool.getNormalizedLiquidity(
-                            pool.tokens[j].token,
-                            pool.tokens[i].token,
-                        ),
+                    this.addEdge({
+                        edgeProps: {
+                            pool,
+                            tokenIn: tokenJ,
+                            tokenOut: tokenI,
+                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenJ, tokenI),
+                        },
+                        maxPathsPerTokenPair,
                     });
                 }
             }
         }
-
-        for (const id of Object.keys(poolPairMap)) {
-            poolPairMap[id] = orderBy(
-                poolPairMap[id],
-                item => Number(item.normalizedLiquidity),
-                'desc',
-            );
-        }
-
-        return poolPairMap;
     }
 
-    private addGraphEdgeForPoolPair({
-        tokenIn,
-        tokenOut,
-        pool,
-        graph,
+    private addNode(token: Token): void {
+        this.nodes.set(token.address, {
+            isPhantomBpt: !!this.poolAddressMap[token.address],
+        });
+
+        if (!this.edges.has(token.address)) {
+            this.edges.set(token.address, new Map());
+        }
+    }
+
+    /**
+     * Returns the vertices connected to a given vertex
+     */
+    public getConnectedVertices(tokenAddress: string): string[] {
+        const result: string[] = [];
+        const edges = this.edges.get(tokenAddress) || [];
+
+        for (const [otherToken] of edges) {
+            result.push(otherToken);
+        }
+
+        return result;
+    }
+
+    /**
+     * Adds a directed edge from a source vertex to a destination
+     */
+    private addEdge({
+        edgeProps,
+        maxPathsPerTokenPair,
     }: {
-        tokenIn: Token;
-        tokenOut: Token;
-        pool: BasePool;
-        graph: Graph;
-    }) {
-        const poolPair: PoolTokenPair = {
-            id: `${tokenIn.address}-${tokenOut.address}`,
-            pool,
-            tokenIn,
-            tokenOut,
-        };
+        edgeProps: PathGraphEdgeData;
+        maxPathsPerTokenPair: number;
+    }): void {
+        const tokenInVertex = this.nodes.get(edgeProps.tokenIn.address);
+        const tokenOutVertex = this.nodes.get(edgeProps.tokenOut.address);
+        const tokenInNode = this.edges.get(edgeProps.tokenIn.address);
 
-        const label: PathGraphEdgeLabel = {
-            poolId: pool.id,
-            poolAddress: pool.address,
-            poolPair,
-            normalizedLiquidity: pool.getNormalizedLiquidity(tokenIn, tokenOut),
-            isPhantomBptHop:
-                !!this.poolAddressMap[tokenIn.address] || !!this.poolAddressMap[tokenOut.address],
-        };
+        if (!tokenInVertex || !tokenOutVertex || !tokenInNode) {
+            throw new Error('Attempting to add invalid edge');
+        }
 
-        graph.setEdge(
-            {
-                name: `${pool.id}-${tokenIn.address}-${tokenOut.address}`,
-                v: tokenIn.address,
-                w: tokenOut.address,
-            },
-            label,
+        const hasPhantomBpt = tokenInVertex.isPhantomBpt || tokenOutVertex.isPhantomBpt;
+        const existingEdges = tokenInNode.get(edgeProps.tokenOut.address) || [];
+
+        //TODO: ideally we don't call sort every time, this isn't performant
+        const sorted = [...existingEdges, edgeProps].sort((a, b) =>
+            a.normalizedLiquidity > b.normalizedLiquidity ? -1 : 1,
+        );
+
+        tokenInNode.set(
+            edgeProps.tokenOut.address,
+            sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, 2) : sorted,
         );
     }
 
-    private traverseGraphAndFindUniquePath({
+    public findAllValidTokenPaths(args: {
+        token: string;
+        tokenIn: string;
+        tokenOut: string;
+        tokenPath: string[];
+        config: PathGraphTraversalConfig;
+    }): string[][] {
+        const tokenPaths: string[][] = [];
+
+        this.traverseBfs({
+            ...args,
+            callback: tokenPath => {
+                tokenPaths.push(tokenPath);
+            },
+        });
+
+        return tokenPaths;
+    }
+
+    public expandTokenPath({
+        tokenPath,
+        tokenPairIndex,
+    }: {
+        tokenPath: string[];
+        tokenPairIndex: number;
+    }) {
+        const segments: PathGraphEdgeData[] = [];
+
+        for (let i = 0; i < tokenPath.length - 1; i++) {
+            const edge = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
+
+            if (!edge || edge.length === 0) {
+                throw new Error(`Missing edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
+            }
+
+            segments.push(edge[tokenPairIndex] || edge[0]);
+        }
+
+        return segments;
+    }
+
+    private traverseBfs({
         token,
         tokenIn,
         tokenOut,
         tokenPath,
-        tokenPairIndex,
+        callback,
         config,
-        seenPoolAddresses,
-        selectedPathIds,
     }: {
         token: string;
         tokenIn: string;
         tokenOut: string;
         tokenPath: string[];
-        tokenPairIndex: number;
+        callback: (tokenPath: string[]) => void;
         config: PathGraphTraversalConfig;
-        seenPoolAddresses: string[];
-        selectedPathIds: string[];
-    }): null | PathGraphEdge[] {
-        if (!this.isValidTokenPath({ tokenPath, config, tokenIn, tokenOut })) {
-            return null;
-        }
+    }): void {
+        const neighbors = this.getConnectedVertices(token);
 
-        const successors = (this.graph.successors(token) || []).filter(
-            successor => !tokenPath.includes(successor),
-        );
-
-        if (successors.includes(tokenOut)) {
-            const path = this.buildPath({
-                tokenPath: [...tokenPath, tokenOut],
-                tokenPairIndex,
-            });
-
-            if (
-                path &&
-                this.isValidPath({
-                    path,
-                    seenPoolAddresses,
-                    selectedPathIds,
-                    config,
-                })
-            ) {
-                return path;
-            }
-        }
-
-        // we peek ahead one level, and optimistically sort the successors
-        const sortedAndFiltered = sortBy(successors, successor => {
-            const children = this.graph.successors(successor) || [];
-            return children.includes(tokenOut) ? -1 : 1;
-        }).filter(successor => !tokenPath.includes(successor));
-
-        for (const successor of sortedAndFiltered) {
-            const result = this.traverseGraphAndFindUniquePath({
-                token: successor,
+        for (const neighbor of neighbors) {
+            const validTokenPath = this.isValidTokenPath({
+                tokenPath: [...tokenPath, neighbor],
                 tokenIn,
                 tokenOut,
-                tokenPath: [...tokenPath, successor],
-                tokenPairIndex,
                 config,
-                seenPoolAddresses,
-                selectedPathIds,
             });
 
-            if (result != null) {
-                return result;
+            if (validTokenPath && neighbor === tokenOut) {
+                callback([...tokenPath, neighbor]);
+            } else if (validTokenPath && !tokenPath.includes(neighbor)) {
+                this.traverseBfs({
+                    tokenPath: [...tokenPath, neighbor],
+                    token: neighbor,
+                    tokenIn,
+                    tokenOut,
+                    callback,
+                    config,
+                });
             }
         }
-
-        return null;
-    }
-
-    private buildPath({
-        tokenPath,
-        tokenPairIndex,
-    }: {
-        tokenPath: string[];
-        tokenPairIndex: number;
-    }): PathGraphEdge[] | null {
-        const path: PathGraphEdge[] = [];
-        let isUnique = false;
-
-        for (let i = 0; i < tokenPath.length - 1; i++) {
-            const outEdges = this.graph.outEdges(tokenPath[i], tokenPath[i + 1]) || [];
-
-            if (outEdges.length > tokenPairIndex) {
-                //if no part of this path uses the current tokenPairIndex, it
-                //will be a duplicate path, so we ignore it.
-                isUnique = true;
-            }
-
-            //this edge has already been qualified in the traversal, so it's safe
-            //to assume its here
-            const edge = outEdges[tokenPairIndex] || outEdges[0];
-            const edgeLabel: PathGraphEdgeLabel = this.graph.edge(edge);
-
-            path.push({
-                tokenIn: tokenPath[i],
-                tokenOut: tokenPath[i + 1],
-                ...edgeLabel,
-            });
-        }
-
-        return isUnique ? path : null;
-    }
-
-    private isValidPath({
-        path,
-        seenPoolAddresses,
-        selectedPathIds,
-        config,
-    }: {
-        path: PathGraphEdge[];
-        seenPoolAddresses: string[];
-        selectedPathIds: string[];
-        config: PathGraphTraversalConfig;
-    }) {
-        if (config.poolIdsToInclude) {
-            for (const edge of path) {
-                if (!config.poolIdsToInclude.includes(edge.poolId)) {
-                    //path includes a pool that is not allowed for this traversal
-                    return false;
-                }
-            }
-        }
-
-        const isBoostedPath =
-            path.filter(
-                edge => this.poolAddressMap[edge.tokenIn] || this.poolAddressMap[edge.tokenOut],
-            ).length > 0;
-
-        if (!isBoostedPath && path.length + 1 > config.maxNonBoostedPathDepth) {
-            return false;
-        }
-
-        const uniquePools = uniq(path.map(edge => edge.poolId));
-
-        //dont include any path that hops through the same pool twice
-        if (uniquePools.length !== path.length) {
-            return false;
-        }
-
-        const intersection = path.filter(segment =>
-            seenPoolAddresses.includes(segment.poolAddress),
-        );
-
-        //this path contains a pool that has already been used
-        if (intersection.length > 0) {
-            return false;
-        }
-
-        //this is a duplicate path
-        if (selectedPathIds.includes(this.getIdForPath(path))) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private getIdForPath(path: PathGraphEdge[]): string {
-        return path
-            .map(segment => `${segment.poolId}-${segment.tokenIn}-${segment.tokenOut}`)
-            .join('_');
-    }
-
-    private filterVolatilePools(poolAddresses: string[]): string[] {
-        return poolAddresses.filter(
-            address => this.poolAddressMap[address].poolType === PoolType.Weighted,
-        );
     }
 
     private isValidTokenPath({
@@ -454,9 +341,12 @@ export class PathGraph {
         tokenIn: string;
         tokenOut: string;
     }) {
+        const isCompletePath = tokenPath[tokenPath.length - 1] === tokenOut;
         const hopTokens = tokenPath.filter(token => token !== tokenIn && token !== tokenOut);
-        const numStandardHopTokens = hopTokens.filter(token => !this.poolAddressMap[token]).length;
-        const isBoostedPath = tokenPath.filter(token => this.poolAddressMap[token]).length > 0;
+        const numStandardHopTokens = hopTokens.filter(
+            token => !this.poolAddressMap.has(token),
+        ).length;
+        const isBoostedPath = tokenPath.filter(token => this.poolAddressMap.has(token)).length > 0;
 
         if (tokenPath.length > config.maxDepth) {
             return false;
@@ -475,6 +365,79 @@ export class PathGraph {
             return false;
         }
 
+        if (isCompletePath && !isBoostedPath && tokenPath.length > config.maxNonBoostedPathDepth) {
+            return false;
+        }
+
         return true;
+    }
+
+    private isValidPath({
+        path,
+        seenPoolAddresses,
+        selectedPathIds,
+        config,
+    }: {
+        path: PathGraphEdgeData[];
+        seenPoolAddresses: string[];
+        selectedPathIds: string[];
+        config: PathGraphTraversalConfig;
+    }) {
+        const poolIdsInPath = path.map(segment => segment.pool.id);
+        const uniquePools = [...new Set(poolIdsInPath)];
+
+        if (config.poolIdsToInclude) {
+            for (const poolId of poolIdsInPath) {
+                if (!config.poolIdsToInclude.includes(poolId)) {
+                    //path includes a pool that is not allowed for this traversal
+                    return false;
+                }
+            }
+        }
+
+        //dont include any path that hops through the same pool twice
+        if (uniquePools.length !== poolIdsInPath.length) {
+            return false;
+        }
+
+        for (const segment of path) {
+            if (seenPoolAddresses.includes(segment.pool.address)) {
+                //this path contains a pool that has already been used
+                return false;
+            }
+        }
+
+        //this is a duplicate path
+        if (selectedPathIds.includes(this.getIdForPath(path))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private getIdForPath(path: PathGraphEdgeData[]): string {
+        let id = '';
+
+        for (const segment of path) {
+            if (id.length > 0) {
+                id += '_';
+            }
+
+            id += `${segment.pool.id}-${segment.tokenIn}-${segment.tokenOut}`;
+        }
+
+        return id;
+    }
+
+    private filterVolatilePools(poolAddresses: string[]): string[] {
+        const filtered: string[] = [];
+
+        for (const poolAddress of poolAddresses) {
+            if (this.poolAddressMap.get(poolAddress)?.poolType === PoolType.Weighted) {
+                filtered.push(poolAddress);
+            }
+        }
+
+        return filtered;
     }
 }

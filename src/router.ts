@@ -3,6 +3,7 @@ import { BasePool, Path, PathWithAmount, Swap, Token, TokenAmount } from './enti
 import { WeightedPool } from './entities/pool/weighted';
 import { SubgraphPool } from './poolProvider';
 import { PathGraph } from './pathGraph/pathGraph';
+import { StablePool } from './entities/pool/stable';
 
 export class Router {
     cache: Record<string, { paths: Path[] }> = {};
@@ -12,37 +13,27 @@ export class Router {
         this.pathGraph = new PathGraph();
     }
 
-    public initPathGraphWithPools(pools: BasePool[]): void {
-        this.pathGraph.buildGraph({
-            pools: Object.values(pools),
-        });
-    }
-
     getCandidatePaths = (
         tokenIn: Token,
         tokenOut: Token,
         swapKind: SwapKind,
         rawPools: SubgraphPool[],
     ): Path[] => {
-        if (!this.pathGraph.isGraphInitialized) {
-            const pools: BasePool[] = [];
-            rawPools.forEach(p => {
-                if (p.poolType === 'Weighted') {
-                    pools.push(WeightedPool.fromRawPool(p));
-                }
-            });
+        const pools: BasePool[] = [];
 
-            this.pathGraph.buildGraph({
-                pools,
-            });
+        for (const rawPool of rawPools) {
+            if (rawPool.poolType === 'Weighted') {
+                pools.push(WeightedPool.fromRawPool(rawPool));
+            }
         }
 
-        const bestPaths = this.pathGraph.traverseGraphAndFindBestPaths({
-            tokenIn,
-            tokenOut,
-        });
+        console.time('build graph and get candidate paths');
+        this.pathGraph.buildGraph({ pools });
 
-        return bestPaths;
+        const candidatePaths = this.pathGraph.getCandidatePaths({ tokenIn, tokenOut });
+        console.timeEnd('build graph and get candidate paths');
+
+        return candidatePaths;
     };
 
     getBestPaths = async (
