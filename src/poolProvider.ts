@@ -25,6 +25,7 @@ export type SubgraphPool = {
     tokens: SubgraphPoolToken[];
     tokensList: string[];
     liquidity: string;
+    totalShares: string;
 };
 
 export interface PoolDataService {
@@ -61,6 +62,7 @@ export class SubgraphProvider implements PoolDataService {
                     swapEnabled
                     swapFee
                     totalLiquidity
+                    totalShares
                 }
             }
         `;
@@ -113,8 +115,11 @@ export class SubgraphProvider implements PoolDataService {
             },
         );
 
-        const poolsFiltered = pools.filter(pool => pool.swapEnabled === true);
-
-        return poolsFiltered;
+        return pools.filter(
+            pool =>
+                pool.swapEnabled &&
+                pool.totalShares !== '0' &&
+                pool.totalShares !== '0.000000000001',
+        );
     }
 }
