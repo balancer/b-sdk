@@ -8,7 +8,7 @@ BigInt.prototype['toJSON'] = function () {
     return this.toString();
 };
 
-export async function test(): Promise<void> {
+export async function testWeight(): Promise<void> {
     const chainId = ChainId.MAINNET;
     const subgraphPoolDataService = new SubgraphProvider(chainId);
     const provider = new JsonRpcProvider(process.env["ETHEREUM_RPC_URL"]);
@@ -25,4 +25,22 @@ export async function test(): Promise<void> {
     console.log(onchain);
 }
 
-test();
+export async function testStable(): Promise<void> {
+    const chainId = ChainId.MAINNET;
+    const subgraphPoolDataService = new SubgraphProvider(chainId);
+    const provider = new JsonRpcProvider(process.env["ETHEREUM_RPC_URL"]);
+    const sor = new SmartOrderRouter({ chainId, provider, poolProvider: subgraphPoolDataService });
+
+    const USDC = new Token(chainId, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC');
+    const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
+    const inputAmount = TokenAmount.fromHumanAmount(USDC, '100');
+
+    const { swap, quote } = await sor.getSwaps(USDC, DAI, 0, inputAmount);
+
+    const onchain = await swap.query(provider);
+    console.log(quote);
+    console.log(onchain);
+}
+
+// testWeight();
+testStable();

@@ -5,7 +5,7 @@ import { StablePool } from './stable';
 
 export class StablePoolFactory implements BasePoolFactory {
     public isPoolForFactory(pool: SubgraphPool): boolean {
-        return pool.poolType === PoolType.Stable;
+        return pool.poolType === PoolType.ComposableStable;
     }
 
     public create(pool: SubgraphPool): BasePool {
