@@ -5,6 +5,7 @@ import { Router } from './router';
 import { Swap, Token, TokenAmount, Path } from './entities';
 import { ChainId } from './utils';
 import { SwapKind, SorConfig } from './types';
+import { PoolParser } from './entities/pool/poolParser';
 
 export interface FundManagement {
     sender: string;
@@ -44,17 +45,20 @@ export class SmartOrderRouter {
     // public provider: BaseProvider;
     private readonly poolProvider: PoolDataService;
     public readonly router: Router;
+    private readonly poolParser: PoolParser;
 
     constructor({
         chainId,
         // provider,
         poolProvider,
         options,
+        customPoolFactories = [],
     }: SorConfig) {
         this.chainId = chainId;
         // this.provider = provider;
         this.poolProvider = poolProvider;
         this.router = new Router();
+        this.poolParser = new PoolParser(customPoolFactories);
     }
 
     async getSwaps(
@@ -65,8 +69,12 @@ export class SmartOrderRouter {
         swapOptions?: SwapOptions,
     ): Promise<SwapInfo> {
         console.time('poolProvider');
-        const pools = await this.poolProvider.getPools();
+        const rawPools = await this.poolProvider.getPools();
         console.timeEnd('poolProvider');
+
+        console.time('poolParser');
+        const pools = this.poolParser.parseRawPools(rawPools);
+        console.timeEnd('poolParser');
 
         console.time('getCandidatePaths');
         const candidatePaths = this.router.getCandidatePaths(tokenIn, tokenOut, swapKind, pools);

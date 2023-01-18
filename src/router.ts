@@ -1,9 +1,6 @@
 import { SwapKind } from './types';
 import { BasePool, Path, PathWithAmount, Swap, Token, TokenAmount } from './entities';
-import { WeightedPool } from './entities/pool/weighted';
-import { SubgraphPool } from './poolProvider';
 import { PathGraph } from './pathGraph/pathGraph';
-import { StablePool } from './entities/pool/stable';
 
 export class Router {
     cache: Record<string, { paths: Path[] }> = {};
@@ -17,16 +14,8 @@ export class Router {
         tokenIn: Token,
         tokenOut: Token,
         swapKind: SwapKind,
-        rawPools: SubgraphPool[],
+        pools: BasePool[],
     ): Path[] => {
-        const pools: BasePool[] = [];
-
-        for (const rawPool of rawPools) {
-            if (rawPool.poolType === 'Weighted') {
-                pools.push(WeightedPool.fromRawPool(rawPool));
-            }
-        }
-
         console.time('build graph and get candidate paths');
         this.pathGraph.buildGraph({ pools });
 
