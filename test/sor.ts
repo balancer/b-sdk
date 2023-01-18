@@ -14,16 +14,13 @@ export async function test(): Promise<void> {
     const provider = new JsonRpcProvider(process.env["ETHEREUM_RPC_URL"]);
     const sor = new SmartOrderRouter({ chainId, provider, poolProvider: subgraphPoolDataService });
 
-    const block = 16415500;
     const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
     const WETH = new Token(chainId, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH');
     const inputAmount = TokenAmount.fromHumanAmount(BAL, '1');
 
-    const { swap, quote } = await sor.getSwaps(BAL, WETH, 0, inputAmount, {
-        block,
-    });
+    const { swap, quote } = await sor.getSwaps(BAL, WETH, 0, inputAmount);
 
-    const onchain = await swap.query(provider, block);
+    const onchain = await swap.query(provider);
     console.log(quote);
     console.log(onchain);
 }

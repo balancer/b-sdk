@@ -1,10 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { SubgraphProvider } from './poolProvider';
-<<<<<<< HEAD
 import { Token, TokenAmount, BasePool, BasePoolFactory } from './entities';
-=======
-import { Token, BasePool } from './entities';
->>>>>>> 7fa57c9 (onchain query and multiple math libs)
 import { BaseProvider } from '@ethersproject/providers';
 
 export enum PoolType {
@@ -63,15 +59,6 @@ export interface PoolTokenPair {
     pool: BasePool;
     tokenIn: Token;
     tokenOut: Token;
-}
-
-export interface SingleSwap {
-    poolId: string;
-    kind: SwapKind;
-    assetIn: string;
-    assetOut: string;
-    amount: string;
-    userData: string;
 }
 
 export interface SingleSwap {

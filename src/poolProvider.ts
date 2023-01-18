@@ -3,6 +3,7 @@ import Timeout from 'await-timeout';
 import { gql, GraphQLClient } from 'graphql-request';
 import { SUBGRAPH_URLS } from './utils';
 import { ChainId } from './utils';
+import { SwapOptions } from './types';
 
 export type SubgraphPoolToken = {
     address: string;
@@ -29,7 +30,7 @@ export type SubgraphPool = {
 };
 
 export interface PoolDataService {
-    getPools(SwapOptions): Promise<SubgraphPool[]>;
+    getPools(swapOptions? : SwapOptions): Promise<SubgraphPool[]>;
 }
 
 const PAGE_SIZE = 1000;
@@ -45,8 +46,8 @@ export class SubgraphProvider implements PoolDataService {
         this.client = new GraphQLClient(subgraphUrl);
     }
 
-    public async getPools({ block }): Promise<SubgraphPool[]> {
-        const blockQuery = block ? `block: { number: ${block} }` : '';
+    public async getPools(swapOptions? : SwapOptions): Promise<SubgraphPool[]> {
+        const blockQuery = swapOptions && swapOptions.block ? `block: { number: ${swapOptions.block} }` : '';
         const query = gql`
       query getPools($pageSize: Int!, $id: String) {
         pools(
