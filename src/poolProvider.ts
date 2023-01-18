@@ -63,11 +63,13 @@ export class SubgraphProvider implements PoolDataService {
             address
             balance
             weight
+            priceRate
             decimals
           }
           tokensList
           swapEnabled
           swapFee
+          amp
           totalLiquidity
           totalShares
         }

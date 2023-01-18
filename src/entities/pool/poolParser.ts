@@ -11,7 +11,7 @@ export class PoolParser {
             // custom pool factories take precedence over base factories
             ...customPoolFactories,
             new WeightedPoolFactory(),
-            //new StablePoolFactory(),
+            new StablePoolFactory(),
         ];
     }
 

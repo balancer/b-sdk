@@ -1,21 +1,13 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { SubgraphProvider } from './poolProvider';
-import { Token, TokenAmount, BasePool, BasePoolFactory } from './entities';
+import { Token, BasePool, BasePoolFactory } from './entities';
 import { BaseProvider } from '@ethersproject/providers';
 
 export enum PoolType {
     Weighted = 'Weighted',
-    Investment = 'Investment',
-    Stable = 'Stable',
     ComposableStable = 'ComposableStable',
     MetaStable = 'MetaStable',
-    StablePhantom = 'StablePhantom',
-    LiquidityBootstrapping = 'LiquidityBootstrapping',
     AaveLinear = 'AaveLinear',
-    ERC4626Linear = 'ERC4626Linear',
-    Element = 'Element',
-    Gyro2 = 'Gyro2',
-    Gyro3 = 'Gyro3',
 }
 
 export enum SwapKind {
