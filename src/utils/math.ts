@@ -50,29 +50,13 @@ export class MathSol {
         }
     }
 
-    static powUpFixedV1(x: bigint, y: bigint): bigint {
-        const raw = LogExpMath.pow(x, y);
-        const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
-        return raw + maxError;
-    }
-
-    static powDownFixedV1(x: bigint, y: bigint): bigint {
-        const raw = LogExpMath.pow(x, y);
-        const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
-        if (raw < maxError) {
-            return 0n;
-        } else {
-            return raw - maxError;
-        }
-    }
-
-    // Modification: Taken from the fixed point class
-    static powUpFixedV2(x: bigint, y: bigint): bigint {
-        if (y === BONE) {
+    // version = poolTypeVersion
+    static powUpFixed(x: bigint, y: bigint, version?: number): bigint {
+        if (y === BONE && version !== 1) {
             return x;
-        } else if (y === TWO_BONE) {
+        } else if (y === TWO_BONE && version !== 1) {
             return this.mulUpFixed(x, x);
-        } else if (y === FOUR_BONE) {
+        } else if (y === FOUR_BONE && version !== 1) {
             const square = this.mulUpFixed(x, x);
             return this.mulUpFixed(square, square);
         } else {
@@ -82,12 +66,13 @@ export class MathSol {
         }
     }
 
-    static powDownFixedV2(x: bigint, y: bigint): bigint {
-        if (y === BONE) {
+    // version = poolTypeVersion
+    static powDownFixed(x: bigint, y: bigint, version?: number): bigint {
+        if (y === BONE && version !== 1) {
             return x;
-        } else if (y === TWO_BONE) {
+        } else if (y === TWO_BONE && version !== 1) {
             return this.mulUpFixed(x, x);
-        } else if (y === FOUR_BONE) {
+        } else if (y === FOUR_BONE && version !== 1) {
             const square = this.mulUpFixed(x, x);
             return this.mulUpFixed(square, square);
         } else {
@@ -101,7 +86,6 @@ export class MathSol {
         }
     }
 
-    // Modification: Taken from the fixed point class
     static complementFixed(x: bigint): bigint {
         return x < BONE ? BONE - x : 0n;
     }
