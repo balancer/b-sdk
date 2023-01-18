@@ -27,13 +27,13 @@ export class WeightedPool implements BasePool {
 
     static fromRawPool(pool: SubgraphPool): WeightedPool {
         const poolTokens = pool.tokens.map(t => {
+            if (!t.weight) throw new Error('Weighted pool token does not have a weight');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
-            // TODO Fix weight parse hack
             return new WeightedPoolToken(
                 token,
                 tokenAmount.amount,
-                parseEther(Number(t.weight).toString()).toString(),
+                parseEther(t.weight).toString(),
             );
         });
         const weightedPool = new WeightedPool(

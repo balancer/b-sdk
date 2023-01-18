@@ -30,13 +30,13 @@ export class StablePool implements BasePool {
 
     static fromRawPool(pool: SubgraphPool): StablePool {
         const poolTokens = pool.tokens.map(t => {
+            if (!t.priceRate) throw new Error('Stable pool token does not have a price rate');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
-            // TODO Fix rate parse hack
             return new StablePoolToken(
                 token,
                 tokenAmount.amount,
-                parseEther((Number(t.priceRate) * 100).toString()).toString(),
+                parseEther(t.priceRate).toString(),
             );
         });
         const stablePool = new StablePool(
