@@ -60,23 +60,3 @@ export class TokenAmount {
             .toString();
     }
 }
-
-export class TokenAmountWeight extends TokenAmount {
-    public readonly weight: bigint;
-
-    public constructor(token: Token, amount: BigintIsh, weight: BigintIsh) {
-        super(token, amount);
-        this.weight = BigInt(weight);
-    }
-}
-
-export class TokenAmountRate extends TokenAmount {
-    public readonly rate: bigint;
-    public readonly scale18: bigint;
-
-    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh) {
-        super(token, amount);
-        this.rate = BigInt(rate);
-        this.scale18 = this.amount * this.rate;
-    }
-}

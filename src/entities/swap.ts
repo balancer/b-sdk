@@ -1,11 +1,7 @@
 import { Path, PathWithAmount } from './path';
-import { TokenAmount } from './tokenAmount';
-import { SwapKind } from '../types';
-
-export enum BatchOrSingle {
-    BatchSwap,
-    SingleSwap,
-}
+import { Token, TokenAmount } from './';
+import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
+import { DEFAULT_USERDATA } from '../utils';
 
 // A Swap can be a single or multiple paths
 export class Swap {
@@ -49,17 +45,69 @@ export class Swap {
     }) {
         this.paths = paths;
         this.swapKind = swapKind;
+        this.isBatchSwap = paths.length > 1 || paths[0].path.pools.length > 2 ? true : false;
+        this.assets = [
+            ...new Set(
+                paths
+                    .map(p => p.path.tokens)
+                    .flat()
+                    .map(t => t.address),
+            ),
+        ];
+        if (!this.isBatchSwap) {
+            this.swaps = {
+                poolId: this.paths[0].path.pools[0].id,
+                kind: this.swapKind,
+                assetIn: this.paths[0].path.tokens[0].address,
+                assetOut: this.paths[0].path.tokens[1].address,
+                amount: '',
+                userData: DEFAULT_USERDATA,
+            };
+        } else {
+            let swaps: BatchSwapStep[] = [];
+            paths.map(p => {
+                p.path.pools.map((pool, i) => {
+                    swaps.push({
+                        poolId: pool.id,
+                        assetInIndex: this.assets.indexOf(p.path.tokens[i].address),
+                        assetOutIndex: this.assets.indexOf(p.path.tokens[i + 1].address),
+                        amount: i === 0 ? p.inputAmount.amount.toString() : '0',
+                        userData: DEFAULT_USERDATA,
+                    });
+                });
+            });
+            this.swaps = swaps;
+        }
     }
 
+    public readonly isBatchSwap: boolean;
     public readonly paths: {
         path: Path;
         inputAmount: TokenAmount;
         outputAmount: TokenAmount;
     }[];
+    public readonly assets: string[];
     public readonly swapKind: SwapKind;
+    public swaps: SingleSwap | BatchSwapStep[];
 
-    // public get inputAmount(): TokenAmount {}
-    // public get outputAmount(): TokenAmount {}
+    public get inputAmount(): TokenAmount {
+        if (!this.paths.every(p => p.inputAmount.token === this.paths[0].inputAmount.token)) {
+            throw new Error(
+                'Input amount can only be calculated if all paths have the same input token',
+            );
+        }
+        const amounts = this.paths.map(path => path.inputAmount);
+        return amounts.reduce((a, b) => a.add(b));
+    }
+
+    public get outputAmount(): TokenAmount {
+        // TODO: This check is not working
+        // if (!this.paths.every(p => p.outputAmount.token === this.paths[0].outputAmount.token)) {
+        //   throw new Error('Output amount can only be calculated if all paths have the same output token');
+        // }
+        const amounts = this.paths.map(path => path.outputAmount);
+        return amounts.reduce((a, b) => a.add(b));
+    }
 
     // public get executionPrice(): Price {}
     // public get priceImpact(): Percent {}

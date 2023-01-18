@@ -14,3 +14,12 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-prune-v2',
     [ChainId.ARBITRUM_ONE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
 };
+
+export const DEFAULT_FUND_MANAGMENT = {
+    sender: ZERO_ADDRESS,
+    recipient: ZERO_ADDRESS,
+    fromInternalBalance: false,
+    toInternalBalance: false,
+};
+
+export const DEFAULT_USERDATA = '0x';

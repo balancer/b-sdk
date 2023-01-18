@@ -1,6 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { SubgraphProvider } from './poolProvider';
 import { Token, TokenAmount, BasePool, BasePoolFactory } from './entities';
+import { BaseProvider } from '@ethersproject/providers';
 
 export enum PoolType {
     Weighted = 'Weighted',
@@ -22,6 +23,20 @@ export enum SwapKind {
     GivenOut = 1,
 }
 
+export interface SwapOptions {
+    block?: number;
+    slippage?: BigNumber;
+    funds?: FundManagement;
+    deadline?: BigNumber;
+}
+
+export interface FundManagement {
+    sender: string;
+    fromInternalBalance: boolean;
+    recipient: boolean;
+    toInternalBalance: boolean;
+}
+
 export type SorOptions = {
     onchainBalances: boolean;
     minPercentForPath: number;
@@ -29,6 +44,7 @@ export type SorOptions = {
 
 export type SorConfig = {
     chainId: number;
+    provider: BaseProvider;
     poolProvider: SubgraphProvider;
     options?: SorOptions;
     customPoolFactories?: BasePoolFactory[];
@@ -43,6 +59,24 @@ export interface PoolTokenPair {
     pool: BasePool;
     tokenIn: Token;
     tokenOut: Token;
+}
+
+export interface SingleSwap {
+    poolId: string;
+    kind: SwapKind;
+    assetIn: string;
+    assetOut: string;
+    amount: string;
+    userData: string;
+}
+
+export interface SingleSwap {
+    poolId: string;
+    kind: SwapKind;
+    assetIn: string;
+    assetOut: string;
+    amount: string;
+    userData: string;
 }
 
 export interface BatchSwapStep {

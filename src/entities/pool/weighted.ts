@@ -1,26 +1,35 @@
 import { parseEther } from '@ethersproject/units';
 import { PoolType, SwapKind } from '../../types';
-import { Token, TokenAmount, TokenAmountWeight } from '../../entities/';
+import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
 import { SubgraphPool } from '../../poolProvider';
-import { BONE } from '../../utils';
+import { BONE, getPoolAddress } from '../../utils';
 import { _calcOutGivenIn } from './weightedMath';
+
+export class WeightedPoolToken extends TokenAmount {
+    public readonly weight: bigint;
+
+    public constructor(token: Token, amount: BigintIsh, weight: BigintIsh) {
+        super(token, amount);
+        this.weight = BigInt(weight);
+    }
+}
 
 export class WeightedPool implements BasePool {
     id: string;
     address: string;
     poolType: PoolType = PoolType.Weighted;
     swapFee: bigint;
-    tokens: TokenAmountWeight[];
-    MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
-    MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
+    tokens: WeightedPoolToken[];
+    MAX_IN_RATIO = 300000000000000000n; // 0.3
+    MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
     static fromRawPool(pool: SubgraphPool): WeightedPool {
         const poolTokens = pool.tokens.map(t => {
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
             // TODO Fix weight parse hack
-            return new TokenAmountWeight(
+            return new WeightedPoolToken(
                 token,
                 tokenAmount.amount,
                 parseEther((Number(t.weight) * 100).toString()).toString(),
@@ -34,10 +43,10 @@ export class WeightedPool implements BasePool {
         return weightedPool;
     }
 
-    constructor(id: string, swapFee: bigint, tokens: TokenAmountWeight[]) {
+    constructor(id: string, swapFee: bigint, tokens: WeightedPoolToken[]) {
         this.id = id;
         this.tokens = tokens;
-        this.address = id;
+        this.address = getPoolAddress(id);
         this.swapFee = swapFee;
     }
 

@@ -1,18 +1,28 @@
 import { parseEther } from '@ethersproject/units';
 import { PoolType, SwapKind } from '../../types';
-import { Token, TokenAmount, TokenAmountRate } from '../../entities/';
+import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
 import { SubgraphPool } from '../../poolProvider';
-import { BONE } from '../../utils';
+import { BONE, getPoolAddress } from '../../utils';
 import { _calculateInvariant, _calcOutGivenIn } from './stableMath';
 
+export class StablePoolToken extends TokenAmount {
+    public readonly rate: bigint;
+    public readonly scale18: bigint;
+
+    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh) {
+        super(token, amount);
+        this.rate = BigInt(rate);
+        this.scale18 = this.amount * this.rate;
+    }
+}
 export class StablePool implements BasePool {
     id: string;
     address: string;
     poolType: PoolType = PoolType.ComposableStable;
     amp: bigint;
     swapFee: bigint;
-    tokens: TokenAmountRate[];
+    tokens: StablePoolToken[];
     balances: bigint[];
     // TODO: Stable limits
     MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
@@ -23,7 +33,7 @@ export class StablePool implements BasePool {
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
             // TODO Fix rate parse hack
-            return new TokenAmountRate(
+            return new StablePoolToken(
                 token,
                 tokenAmount.amount,
                 parseEther((Number(t.priceRate) * 100).toString()).toString(),
@@ -38,10 +48,10 @@ export class StablePool implements BasePool {
         return stablePool;
     }
 
-    constructor(id: string, amp: bigint, swapFee: bigint, tokens: TokenAmountRate[]) {
+    constructor(id: string, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
         this.id = id;
         this.tokens = tokens;
-        this.address = id;
+        this.address = getPoolAddress(id);
         this.amp = amp;
         this.swapFee = swapFee;
         this.balances = tokens.map(t => t.scale18);

@@ -29,7 +29,7 @@ export type SubgraphPool = {
 };
 
 export interface PoolDataService {
-    getPools(): Promise<SubgraphPool[]>;
+  getPools(SwapOptions): Promise<SubgraphPool[]>;
 }
 
 const PAGE_SIZE = 1000;
@@ -45,27 +45,34 @@ export class SubgraphProvider implements PoolDataService {
         this.client = new GraphQLClient(subgraphUrl);
     }
 
-    public async getPools(_tokenIn?: Token, _tokenOut?: Token): Promise<SubgraphPool[]> {
-        const query = gql`
-            query getPools($pageSize: Int!, $id: String) {
-                pools(first: $pageSize, where: { id_gt: $id }) {
-                    id
-                    address
-                    poolType
-                    tokens {
-                        address
-                        balance
-                        weight
-                        decimals
-                    }
-                    tokensList
-                    swapEnabled
-                    swapFee
-                    totalLiquidity
-                    totalShares
-                }
-            }
-        `;
+  public async getPools(
+    { block }
+  ): Promise<SubgraphPool[]> {
+
+    const blockQuery = block ? `block: { number: ${block} }` : '';
+    const query = gql`
+      query getPools($pageSize: Int!, $id: String) {
+        pools(
+          first: $pageSize
+          where: { id_gt: $id }
+          ${blockQuery}
+        ) {
+          id
+          address
+          poolType
+          tokens {
+            address
+            balance
+            weight
+            decimals
+          }
+          tokensList
+          swapEnabled
+          swapFee
+          totalLiquidity
+        }
+      }
+    `;
 
         let pools: SubgraphPool[] = [];
 

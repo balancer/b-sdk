@@ -27,12 +27,11 @@ export interface PathWithAmount {
 }
 
 export interface SwapInfo {
-    quote: TokenAmount;
-    swap: Swap;
-    paths: PathWithAmount[];
-    // gasPriceWei: BigNumber;
-    // estimateTxGas: BigNumber;
-    // transactionData: TransactionData;
+  quote: TokenAmount;
+  swap: Swap;
+  // gasPriceWei: BigNumber;
+  // estimateTxGas: BigNumber;
+  // transactionData: TransactionData;
 }
 
 export type TransactionData = {
@@ -42,24 +41,24 @@ export type TransactionData = {
 
 export class SmartOrderRouter {
     public chainId: ChainId;
-    // public provider: BaseProvider;
+    public provider: BaseProvider;
     private readonly poolProvider: PoolDataService;
     public readonly router: Router;
     private readonly poolParser: PoolParser;
 
-    constructor({
-        chainId,
-        // provider,
-        poolProvider,
-        options,
+  constructor({
+    chainId,
+    provider,
+    poolProvider,
+    options,
         customPoolFactories = [],
-    }: SorConfig) {
-        this.chainId = chainId;
-        // this.provider = provider;
-        this.poolProvider = poolProvider;
-        this.router = new Router();
+  }: SorConfig) {
+    this.chainId = chainId;
+    this.provider = provider;
+    this.poolProvider = poolProvider;
+    this.router = new Router();
         this.poolParser = new PoolParser(customPoolFactories);
-    }
+  }
 
     async getSwaps(
         tokenIn: Token,
@@ -84,11 +83,10 @@ export class SmartOrderRouter {
         const bestPaths = await this.router.getBestPaths(candidatePaths, swapKind, swapAmount);
         console.timeEnd('bestPaths');
 
-        const swapInfo = {
-            quote: swapAmount,
-            swap: bestPaths,
-            paths: bestPaths.paths,
-        };
+    const swapInfo = {
+      quote: swapKind === SwapKind.GivenIn ? bestPaths.outputAmount : bestPaths.inputAmount,
+      swap: bestPaths,
+    };
 
         return swapInfo;
     }

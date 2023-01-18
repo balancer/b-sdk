@@ -25,18 +25,20 @@
         "async-retry": "^1.3.3",
         "await-timeout": "^1.1.1",
         "decimal.js-light": "^2.5.1",
-        "graphql-request": "^5.0.0"
+        "graphlib": "^2.1.8",
+        "graphql-request": "^5.0.0",
+        "tiny-invariant": "^1.3.1"
     },
     "devDependencies": {
         "@balancer-labs/sor": "^4.0.1-beta.16",
         "@types/async-retry": "^1.4.4",
         "@types/await-timeout": "^0.3.1",
         "@types/jest": "^24.0.25",
+        "@types/node": "^18.11.18",
         "@typescript-eslint/eslint-plugin": "^5.40.1",
         "@typescript-eslint/parser": "^5.40.1",
         "eslint": "^8.26.0",
         "eslint-config-prettier": "^8.5.0",
-        "eslint-plugin-simple-import-sort": "^8.0.0",
-        "prettier": "^2.8.3"
+        "eslint-plugin-simple-import-sort": "^8.0.0"
     }
 }
