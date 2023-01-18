@@ -2,7 +2,6 @@ import { default as retry } from 'async-retry';
 import Timeout from 'await-timeout';
 import { gql, GraphQLClient } from 'graphql-request';
 import { SUBGRAPH_URLS } from './utils';
-import { Token } from './entities';
 import { ChainId } from './utils';
 
 export type SubgraphPoolToken = {
@@ -19,6 +18,7 @@ export type SubgraphPool = {
     id: string;
     address: string;
     poolType: string;
+    poolTypeVersion: number;
     amp: string;
     swapFee: string;
     swapEnabled: boolean;
@@ -29,7 +29,7 @@ export type SubgraphPool = {
 };
 
 export interface PoolDataService {
-  getPools(SwapOptions): Promise<SubgraphPool[]>;
+    getPools(SwapOptions): Promise<SubgraphPool[]>;
 }
 
 const PAGE_SIZE = 1000;
@@ -45,12 +45,9 @@ export class SubgraphProvider implements PoolDataService {
         this.client = new GraphQLClient(subgraphUrl);
     }
 
-  public async getPools(
-    { block }
-  ): Promise<SubgraphPool[]> {
-
-    const blockQuery = block ? `block: { number: ${block} }` : '';
-    const query = gql`
+    public async getPools({ block }): Promise<SubgraphPool[]> {
+        const blockQuery = block ? `block: { number: ${block} }` : '';
+        const query = gql`
       query getPools($pageSize: Int!, $id: String) {
         pools(
           first: $pageSize
@@ -60,6 +57,7 @@ export class SubgraphProvider implements PoolDataService {
           id
           address
           poolType
+          poolTypeVersion
           tokens {
             address
             balance
@@ -70,6 +68,7 @@ export class SubgraphProvider implements PoolDataService {
           swapEnabled
           swapFee
           totalLiquidity
+          totalShares
         }
       }
     `;

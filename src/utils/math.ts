@@ -50,8 +50,24 @@ export class MathSol {
         }
     }
 
+    static powUpFixedV1(x: bigint, y: bigint): bigint {
+        const raw = LogExpMath.pow(x, y);
+        const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
+        return raw + maxError;
+    }
+
+    static powDownFixedV1(x: bigint, y: bigint): bigint {
+        const raw = LogExpMath.pow(x, y);
+        const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
+        if (raw < maxError) {
+            return 0n;
+        } else {
+            return raw - maxError;
+        }
+    }
+
     // Modification: Taken from the fixed point class
-    static powUpFixed(x: bigint, y: bigint): bigint {
+    static powUpFixedV2(x: bigint, y: bigint): bigint {
         if (y === BONE) {
             return x;
         } else if (y === TWO_BONE) {
@@ -66,7 +82,7 @@ export class MathSol {
         }
     }
 
-    static powDownFixed(x: bigint, y: bigint): bigint {
+    static powDownFixedV2(x: bigint, y: bigint): bigint {
         if (y === BONE) {
             return x;
         } else if (y === TWO_BONE) {

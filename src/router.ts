@@ -47,8 +47,7 @@ export class Router {
         valueArr.sort((a, b) => b.value - a.value);
 
         const orderedQuotePaths = valueArr.map(item => item.item);
-
-        const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 2), swapKind);
+        const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 1), swapKind);
 
         return swap;
     };
