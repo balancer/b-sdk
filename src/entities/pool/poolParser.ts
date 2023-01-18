@@ -22,6 +22,7 @@ export class PoolParser {
             for (const factory of this.poolFactories) {
                 if (factory.isPoolForFactory(rawPool)) {
                     pools.push(factory.create(rawPool));
+                    break;
                 }
             }
         }
