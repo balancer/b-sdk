@@ -23,6 +23,10 @@ export type SubgraphPool = {
     amp: string;
     swapFee: string;
     swapEnabled: boolean;
+    mainIndex: number;
+    wrappedIndex: number;
+    lowerTarget: string;
+    upperTarget: string;
     tokens: SubgraphPoolToken[];
     tokensList: string[];
     liquidity: string;
