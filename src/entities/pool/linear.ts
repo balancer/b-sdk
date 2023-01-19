@@ -4,7 +4,12 @@ import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
 import { SubgraphPool } from '../../poolProvider';
 import { BONE, MathSol, getPoolAddress } from '../../utils';
-import { _calcWrappedOutPerMainIn, _calcBptOutPerMainIn, _calcMainOutPerWrappedIn, _calcBptOutPerWrappedIn } from './linearMath';
+import {
+    _calcWrappedOutPerMainIn,
+    _calcBptOutPerMainIn,
+    _calcMainOutPerWrappedIn,
+    _calcBptOutPerWrappedIn,
+} from './linearMath';
 
 export class BPT extends TokenAmount {
     public readonly rate: bigint;
@@ -19,7 +24,7 @@ export class BPT extends TokenAmount {
 
 export class WrappedToken extends TokenAmount {
     public readonly rate: bigint;
-    
+
     public constructor(token: Token, amount: BigintIsh, rate: BigintIsh) {
         super(token, amount);
         this.rate = BigInt(rate);
@@ -49,7 +54,7 @@ export class LinearPool implements BasePool {
 
     static fromRawPool(pool: SubgraphPool): LinearPool {
         const swapFee = BigInt(parseEther(pool.swapFee).toString());
-        
+
         const mT = pool.tokens[pool.mainIndex];
         const mToken = new Token(1, mT.address, mT.decimals, mT.symbol, mT.name);
         const lowerTarget = TokenAmount.fromHumanAmount(mToken, pool.lowerTarget);
@@ -61,7 +66,11 @@ export class LinearPool implements BasePool {
         const rate = BigInt(parseEther(wT.priceRate).toString());
         const wToken = new Token(1, wT.address, wT.decimals, wT.symbol, wT.name);
         const wTokenAmount = TokenAmount.fromHumanAmount(wToken, wT.balance);
-        const wrappedToken = new WrappedToken(wToken, wTokenAmount.amount, parseEther(wT.priceRate).toString());
+        const wrappedToken = new WrappedToken(
+            wToken,
+            wTokenAmount.amount,
+            parseEther(wT.priceRate).toString(),
+        );
 
         const bptIndex: number = pool.tokens.findIndex(t => t.address === pool.address);
         const bT = pool.tokens[bptIndex];
@@ -87,7 +96,14 @@ export class LinearPool implements BasePool {
         return linearPool;
     }
 
-    constructor(id: string, poolTypeVersion: number, params: Params, mainToken: MainToken, wrappedToken: WrappedToken, bptToken: BPT) {
+    constructor(
+        id: string,
+        poolTypeVersion: number,
+        params: Params,
+        mainToken: MainToken,
+        wrappedToken: WrappedToken,
+        bptToken: BPT,
+    ) {
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;
         this.mainToken = mainToken;
@@ -139,7 +155,7 @@ export class LinearPool implements BasePool {
         const tokenOutScale18 = _calcWrappedOutPerMainIn(
             swapAmount.scale18,
             this.mainToken.scale18,
-            this.params
+            this.params,
         );
 
         return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18);
@@ -151,7 +167,7 @@ export class LinearPool implements BasePool {
             this.mainToken.scale18,
             this.wrappedToken.scale18,
             this.bptToken.virtualBalance,
-            this.params
+            this.params,
         );
 
         return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
@@ -161,7 +177,7 @@ export class LinearPool implements BasePool {
         const tokenOutScale18 = _calcMainOutPerWrappedIn(
             swapAmount.scale18,
             this.mainToken.scale18,
-            this.params
+            this.params,
         );
 
         return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18);
@@ -173,7 +189,7 @@ export class LinearPool implements BasePool {
             this.mainToken.scale18,
             this.wrappedToken.scale18,
             this.bptToken.virtualBalance,
-            this.params
+            this.params,
         );
 
         return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
