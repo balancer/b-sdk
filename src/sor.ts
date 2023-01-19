@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
-import { PoolDataService } from './poolProvider';
+import { PoolDataService, SubgraphPool } from './poolProvider';
 import { Router } from './router';
 import { Swap, Token, TokenAmount, Path } from './entities';
 import { ChainId } from './utils';
@@ -23,14 +23,14 @@ export type TransactionData = {
 export class SmartOrderRouter {
     public chainId: ChainId;
     public provider: BaseProvider;
-    private readonly poolProvider: PoolDataService;
+    private readonly poolProviders: PoolDataService[];
     public readonly router: Router;
     private readonly poolParser: PoolParser;
 
     constructor({ chainId, provider, poolProvider, options, customPoolFactories = [] }: SorConfig) {
         this.chainId = chainId;
         this.provider = provider;
-        this.poolProvider = poolProvider;
+        this.poolProviders = Array.isArray(poolProvider) ? poolProvider : [poolProvider];
         this.router = new Router();
         this.poolParser = new PoolParser(customPoolFactories);
     }
@@ -43,7 +43,7 @@ export class SmartOrderRouter {
         swapOptions?: SwapOptions,
     ): Promise<SwapInfo> {
         console.time('poolProvider');
-        const rawPools = await this.poolProvider.getPools(swapOptions);
+        const rawPools = await this.loadPools(swapOptions);
         console.timeEnd('poolProvider');
 
         console.time('poolParser');
@@ -64,5 +64,13 @@ export class SmartOrderRouter {
         };
 
         return swapInfo;
+    }
+
+    private async loadPools(swapOptions?: SwapOptions): Promise<SubgraphPool[]> {
+        const responses = await Promise.all(
+            this.poolProviders.map(provider => provider.getPools(swapOptions)),
+        );
+
+        return responses.flat();
     }
 }
