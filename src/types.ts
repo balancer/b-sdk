@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { SubgraphProvider } from './poolProvider';
+import { PoolDataService } from './poolProvider';
 import { Token, BasePool, BasePoolFactory } from './entities';
 import { BaseProvider } from '@ethersproject/providers';
 
@@ -37,7 +37,7 @@ export type SorOptions = {
 export type SorConfig = {
     chainId: number;
     provider: BaseProvider;
-    poolProvider: SubgraphProvider;
+    poolProvider: PoolDataService | PoolDataService[];
     options?: SorOptions;
     customPoolFactories?: BasePoolFactory[];
 };
