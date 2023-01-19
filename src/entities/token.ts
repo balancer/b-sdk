@@ -15,7 +15,7 @@ export class Token {
         name?: string,
     ) {
         this.chainId = chainId;
-        this.address = getAddress(address);
+        this.address = address.toLowerCase();
         this.decimals = decimals;
         this.symbol = symbol;
         this.name = name;
