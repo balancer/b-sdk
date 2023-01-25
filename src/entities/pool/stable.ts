@@ -2,9 +2,9 @@ import { parseEther } from '@ethersproject/units';
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
-import { SubgraphPool } from '../../poolProvider';
 import { BONE, getPoolAddress } from '../../utils';
 import { _calculateInvariant, _calcOutGivenIn } from './stableMath';
+import { RawPool } from '../../poolData/types';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -28,7 +28,7 @@ export class StablePool implements BasePool {
     MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
     MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
-    static fromRawPool(pool: SubgraphPool): StablePool {
+    static fromRawPool(pool: RawPool): StablePool {
         const poolTokens = pool.tokens.map(t => {
             if (!t.priceRate) throw new Error('Stable pool token does not have a price rate');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
@@ -80,7 +80,10 @@ export class StablePool implements BasePool {
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        if (tokenIn === this.tokens[this.bptIndex].token || tokenOut === this.tokens[this.bptIndex].token) {
+        if (
+            tokenIn === this.tokens[this.bptIndex].token ||
+            tokenOut === this.tokens[this.bptIndex].token
+        ) {
             throw new Error('BPT swap not implemented yet');
             // swapWithBpt()
         } else {
@@ -97,7 +100,7 @@ export class StablePool implements BasePool {
             const balancesNoBpt = tokensNoBpt.map(t => t.scale18);
 
             const invariant = _calculateInvariant(this.amp, balancesNoBpt);
-            
+
             const tokenOutScale18 = _calcOutGivenIn(
                 this.amp,
                 balancesNoBpt,
@@ -110,7 +113,6 @@ export class StablePool implements BasePool {
             // TODO: Scale rate back down in TokenAmountRate class
             return TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
         }
-
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {

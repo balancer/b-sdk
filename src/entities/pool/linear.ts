@@ -2,7 +2,6 @@ import { parseEther } from '@ethersproject/units';
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
-import { SubgraphPool } from '../../poolProvider';
 import { BONE, MathSol, getPoolAddress } from '../../utils';
 import {
     _calcWrappedOutPerMainIn,
@@ -10,6 +9,7 @@ import {
     _calcMainOutPerWrappedIn,
     _calcBptOutPerWrappedIn,
 } from './linearMath';
+import { RawPool } from '../../poolData/types';
 
 export class BPT extends TokenAmount {
     public readonly rate: bigint;
@@ -52,7 +52,7 @@ export class LinearPool implements BasePool {
     MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
     MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
-    static fromRawPool(pool: SubgraphPool): LinearPool {
+    static fromRawPool(pool: RawPool): LinearPool {
         const swapFee = BigInt(parseEther(pool.swapFee).toString());
 
         const mT = pool.tokens[pool.mainIndex];

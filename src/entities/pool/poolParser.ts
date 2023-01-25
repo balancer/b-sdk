@@ -1,7 +1,7 @@
 import { BasePool, BasePoolFactory } from './index';
 import { WeightedPoolFactory } from './weightedFactory';
 import { StablePoolFactory } from './stableFactory';
-import { SubgraphPool } from '../../poolProvider';
+import { RawPool } from '../../poolData/types';
 
 export class PoolParser {
     private readonly poolFactories: BasePoolFactory[];
@@ -15,7 +15,7 @@ export class PoolParser {
         ];
     }
 
-    public parseRawPools(rawPools: SubgraphPool[]): BasePool[] {
+    public parseRawPools(rawPools: RawPool[]): BasePool[] {
         const pools: BasePool[] = [];
 
         for (const rawPool of rawPools) {

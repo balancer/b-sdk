@@ -2,9 +2,9 @@ import { parseEther } from '@ethersproject/units';
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
-import { SubgraphPool } from '../../poolProvider';
 import { BONE, getPoolAddress } from '../../utils';
 import { _calcOutGivenIn } from './weightedMath';
+import { RawPool } from '../../poolData/types';
 
 export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -25,7 +25,7 @@ export class WeightedPool implements BasePool {
     MAX_IN_RATIO = 300000000000000000n; // 0.3
     MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
-    static fromRawPool(pool: SubgraphPool): WeightedPool {
+    static fromRawPool(pool: RawPool): WeightedPool {
         const poolTokens = pool.tokens.map(t => {
             if (!t.weight) throw new Error('Weighted pool token does not have a weight');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
@@ -88,7 +88,7 @@ export class WeightedPool implements BasePool {
             tOut.scale18,
             tOut.weight,
             amountWithFee.scale18,
-            this.poolTypeVersion
+            this.poolTypeVersion,
         );
 
         return TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
