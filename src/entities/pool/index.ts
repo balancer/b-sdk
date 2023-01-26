@@ -1,6 +1,6 @@
 import { PoolType } from '../../types';
 import { Token, TokenAmount } from '../';
-import { AaveReserve, SubgraphPool } from '../../poolProvider';
+import { RawPool } from '../../poolData/types';
 
 export interface BasePool {
     poolType: PoolType | string;
@@ -13,6 +13,6 @@ export interface BasePool {
 }
 
 export interface BasePoolFactory {
-    isPoolForFactory(pool: SubgraphPool): boolean;
-    create(pool: SubgraphPool, rates?: AaveReserve[]): BasePool;
+    isPoolForFactory(pool: RawPool): boolean;
+    create(pool: RawPool): BasePool;
 }

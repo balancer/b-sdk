@@ -1,17 +1,17 @@
 import { PoolType, SwapKind } from '../../types';
-import { Token, TokenAmount, BigintIsh } from '../../entities/';
+import { BigintIsh, Token, TokenAmount } from '../../entities/';
 import { BasePool } from './';
-import { AaveReserve, SubgraphPool } from '../../poolProvider';
-import { WAD, MAX_UINT256, getPoolAddress, getNormalizedIncome } from '../../utils';
+import { getPoolAddress, MAX_UINT256, WAD } from '../../utils';
 import { unsafeFastParseEther } from '../../utils/ether';
 import {
-    _calcWrappedOutPerMainIn,
     _calcBptOutPerMainIn,
-    _calcMainOutPerWrappedIn,
     _calcBptOutPerWrappedIn,
     _calcMainOutPerBptIn,
+    _calcMainOutPerWrappedIn,
     _calcWrappedOutPerBptIn,
+    _calcWrappedOutPerMainIn,
 } from './linearMath';
+import { RawPool } from '../../poolData/types';
 
 export class BPT extends TokenAmount {
     public readonly rate: bigint;
@@ -57,8 +57,7 @@ export class LinearPool implements BasePool {
     MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
     MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
-    static fromRawPool(pool: SubgraphPool, rates: AaveReserve[]): LinearPool {
-
+    static fromRawPool(pool: RawPool): LinearPool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
         const swapFee = BigInt(unsafeFastParseEther(pool.swapFee).toString());
 
@@ -69,21 +68,11 @@ export class LinearPool implements BasePool {
         const mTokenAmount = TokenAmount.fromHumanAmount(mToken, mT.balance);
 
         const wT = orderedTokens[pool.wrappedIndex];
-        const rateData = rates.find(r => r.underlyingAsset === mT.address);
-        if (!rateData) throw new Error('Wrapped pool token does not have a price rate');
-        const rate = getNormalizedIncome(
-            BigInt(rateData.liquidityIndex.toString()),
-            BigInt(rateData.liquidityRate.toString()),
-            BigInt(rateData.lastUpdateTimestamp),
-        );
+        const wTRate = BigInt(unsafeFastParseEther(wT.priceRate || '1.0').toString());
 
         const wToken = new Token(1, wT.address, wT.decimals, wT.symbol, wT.name);
         const wTokenAmount = TokenAmount.fromHumanAmount(wToken, wT.balance);
-        const wrappedToken = new WrappedToken(
-            wToken,
-            wTokenAmount.amount,
-            rate,
-        );
+        const wrappedToken = new WrappedToken(wToken, wTokenAmount.amount, wTRate);
 
         const bptIndex: number = orderedTokens.findIndex(t => t.address === pool.address);
         const bT = orderedTokens[bptIndex];
@@ -95,7 +84,7 @@ export class LinearPool implements BasePool {
 
         const params: Params = {
             fee: swapFee,
-            rate: rate,
+            rate: wTRate,
             lowerTarget: lowerTarget.scale18,
             upperTarget: upperTarget.scale18,
         };

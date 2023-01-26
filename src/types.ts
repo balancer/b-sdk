@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { PoolDataService } from './poolProvider';
 import { Token, BasePool, BasePoolFactory } from './entities';
 import { BaseProvider } from '@ethersproject/providers';
+import { PoolDataEnricher, PoolDataProvider } from './poolData/types';
 
 export enum PoolType {
     Weighted = 'Weighted',
@@ -37,9 +37,10 @@ export type SorOptions = {
 export type SorConfig = {
     chainId: number;
     provider: BaseProvider;
-    poolProvider: PoolDataService | PoolDataService[];
     options?: SorOptions;
     customPoolFactories?: BasePoolFactory[];
+    poolDataProviders: PoolDataProvider | PoolDataProvider[];
+    poolDataEnrichers?: PoolDataEnricher | PoolDataEnricher[];
 };
 
 export type PoolFilters = {

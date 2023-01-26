@@ -1,10 +1,10 @@
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
-import { SubgraphPool } from '../../poolProvider';
 import { WAD, getPoolAddress } from '../../utils';
 import { _calculateInvariant, _calcOutGivenIn } from './stableMath';
 import { unsafeFastParseEther } from '../../utils/ether';
+import { RawPool } from '../../poolData/types';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -28,7 +28,7 @@ export class StablePool implements BasePool {
     MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
     MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
-    static fromRawPool(pool: SubgraphPool): StablePool {
+    static fromRawPool(pool: RawPool): StablePool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
         const poolTokens = orderedTokens.map(t => {
             if (!t.priceRate) throw new Error('Stable pool token does not have a price rate');
