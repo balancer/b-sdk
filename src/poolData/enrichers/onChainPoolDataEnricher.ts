@@ -2,20 +2,17 @@ import BalancerSorQueriesAbi from '../../abi/BalancerSorQueries.json';
 import { LoadPoolsOptions, PoolDataEnricher, RawPool } from '../types';
 import { Interface } from '@ethersproject/abi';
 import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 
 interface OnChainPoolData {
     id: string;
-    amp?: string[];
-    weights?: string[];
-    poolTokens: {
-        tokens: string[];
-        balances: string[];
-    };
-    totalSupply: string;
-    virtualSupply?: string;
-    rate?: string;
-    wrappedTokenRate?: string;
-    actualSupply?: string;
+    balances: BigNumber[];
+    totalSupply: BigNumber;
+    swapFee?: BigNumber;
+
+    amp?: BigNumber;
+    weights?: BigNumber[];
+    wrappedTokenRate?: BigNumber;
 }
 
 enum TotalSupplyType {
@@ -67,109 +64,50 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         }
 
         const { poolIds, config } = this.getPoolDataQueryParams(rawPools, syncedToBlockNumber);
-        const data = this.sorQueriesInterface.encodeFunctionData('getPoolData', [poolIds, config]);
 
         console.time('jsonRpcFetch');
-        const fetchResponse = await jsonRpcFetch({
-            rpcUrl: this.rpcUrl,
-            to: this.sorQueriesAddress,
-            data,
-        });
+        const { balances, amps, linearWrappedTokenRates, totalSupplies, weights } =
+            await this.fetchOnChainPoolData({ poolIds, config });
         console.timeEnd('jsonRpcFetch');
 
-        const result = this.sorQueriesInterface.decodeFunctionResult('getPoolData', fetchResponse);
-
-        return [];
+        return poolIds.map((poolId, i) => ({
+            id: poolIds[i],
+            balances: balances[i],
+            totalSupply: totalSupplies[i],
+            weights: config.weightedPoolIdxs.includes(i)
+                ? weights[config.weightedPoolIdxs.indexOf(i)]
+                : undefined,
+            amp: config.ampPoolIdxs.includes(i) ? amps[config.ampPoolIdxs.indexOf(i)] : undefined,
+            wrappedTokenRate: config.linearPoolIdxs.includes(i)
+                ? linearWrappedTokenRates[config.linearPoolIdxs.indexOf(i)]
+                : undefined,
+        }));
     }
 
     public enrichPoolsWithData(pools: RawPool[], additionalPoolData: OnChainPoolData[]): RawPool[] {
-        /*const enrichedPools: RawPool[] = [];
+        return pools.map(pool => {
+            const data = additionalPoolData.find(item => item.id === pool.id);
 
-        // we filter out any pools with missing or malformed data
-        for (const pool of pools) {
-            const additional = additionalPoolData.find(item => item.id === pool.id);
-
-            if (!additional) {
-                enrichedPools.push(pool);
-                continue;
-            }
-
-            const {
-                poolTokens,
-                weights,
-                totalSupply,
-                virtualSupply,
-                actualSupply,
-                amp,
-                rate,
-                wrappedTokenRate,
-            } = additional;
-
-            if (this.isStablePoolType(pool.poolType)) {
-                if (!amp) {
-                    console.error(`Stable Pool Missing Amp: ${pool.id}`);
-                    continue;
-                } else {
-                    // Need to scale amp by precision to match expected Subgraph scale
-                    // amp is stored with 3 decimals of precision
-                    pool.amp = formatFixed(amp[0], 3).split('.')[0];
-                }
-            }
-
-            if (this.isLinearPoolType(pool.poolType)) {
-                const wrappedIndex = pool.wrappedIndex;
-                if (wrappedIndex === undefined || wrappedTokenRate === undefined) {
-                    console.error(
-                        `Linear Pool Missing WrappedIndex or WrappedTokenRate: ${pool.id} ${wrappedIndex} ${rate}`,
-                    );
-                    continue;
-                }
-
-                pool.tokens[wrappedIndex].priceRate = formatFixed(wrappedTokenRate, 18);
-            }
-
-            try {
-                poolTokens.tokens.forEach((token, i) => {
-                    const tokens = pool.tokens;
-                    const T = tokens.find(t => t.address.toLowerCase() === token.toLowerCase());
-
-                    if (!T) {
-                        throw new Error(`Pool Missing Expected Token: ${pool.id} ${token}`);
-                    }
-
-                    T.balance = formatFixed(poolTokens.balances[i], T.decimals);
-                    if (weights) {
-                        // Only expected for LBPs
-                        T.weight = formatFixed(weights[i], 18);
-                    }
-                });
-            } catch {
-                continue;
-            }
-
-            // Pools with pre minted BPT
-            if (this.isLinearPoolType(pool.poolType) || pool.poolType === 'StablePhantom') {
-                if (virtualSupply === undefined) {
-                    console.error(`Pool with pre-minted BPT missing Virtual Supply: ${pool.id}`);
-                    continue;
-                }
-                pool.totalShares = formatFixed(virtualSupply, 18);
-            } else if (pool.poolType === 'ComposableStable') {
-                if (actualSupply === undefined) {
-                    console.error(`ComposableStable missing Actual Supply: ${pool.id}`);
-                    continue;
-                }
-                pool.totalShares = formatFixed(actualSupply, 18);
-            } else {
-                pool.totalShares = formatFixed(totalSupply, 18);
-            }
-
-            enrichedPools.push(pool);
-        }
-
-        return enrichedPools;*/
-
-        return pools;
+            return {
+                ...pool,
+                tokens: pool.tokens.map((token, idx) => ({
+                    ...token,
+                    balance:
+                        data?.balances && data.balances.length > 0
+                            ? formatFixed(data.balances[idx], token.decimals)
+                            : token.balance,
+                    priceRate:
+                        data?.wrappedTokenRate && pool.wrappedIndex === idx
+                            ? formatFixed(data.wrappedTokenRate, 18)
+                            : token.priceRate,
+                    weight: data?.weights ? formatFixed(data.weights[idx], 18) : token.weight,
+                })),
+                totalShares: data?.totalSupply
+                    ? formatFixed(data.totalSupply, 18)
+                    : pool.totalShares,
+                amp: data?.amp ? formatFixed(data.amp, 3).split('.')[0] : pool.amp,
+            };
+        });
     }
 
     private getPoolDataQueryParams(
@@ -187,7 +125,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
             poolIds.push(pool.id);
             totalSupplyTypes.push(
-                pool.poolType === 'PhantomStable'
+                pool.poolType === 'PhantomStable' || this.isLinearPoolType(pool.poolType)
                     ? TotalSupplyType.VIRTUAL_SUPPLY
                     : pool.poolType === 'ComposableStable'
                     ? TotalSupplyType.ACTUAL_SUPPLY
@@ -227,6 +165,30 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 swapFeeTypes: [],
             },
         };
+    }
+
+    private async fetchOnChainPoolData({
+        poolIds,
+        config,
+    }: {
+        poolIds: string[];
+        config: SorPoolDataQueryConfig;
+    }) {
+        return jsonRpcFetch<{
+            balances: BigNumber[][];
+            totalSupplies: BigNumber[];
+            swapFees: BigNumber[];
+            linearWrappedTokenRates: BigNumber[];
+            weights: BigNumber[][];
+            tokenRates: BigNumber[][];
+            amps: BigNumber[];
+        }>({
+            rpcUrl: this.rpcUrl,
+            to: this.sorQueriesAddress,
+            contractInterface: this.sorQueriesInterface,
+            functionFragment: 'getPoolData',
+            values: [poolIds, config],
+        });
     }
 
     private isStablePoolType(poolType: string): boolean {

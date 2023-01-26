@@ -1,17 +1,25 @@
 import fetch from 'node-fetch';
 import { ZERO_ADDRESS } from './constants';
+import { FunctionFragment } from '@ethersproject/abi/src.ts/fragments';
+import { Interface } from '@ethersproject/abi';
 
-export async function jsonRpcFetch({
+export async function jsonRpcFetch<T>({
     rpcUrl,
     from = ZERO_ADDRESS,
     to,
-    data,
+    contractInterface,
+    functionFragment,
+    values,
 }: {
     rpcUrl: string;
     from?: string;
     to: string;
-    data: string;
-}): Promise<string> {
+    contractInterface: Interface;
+    functionFragment: FunctionFragment | string;
+    values?: ReadonlyArray<any>;
+}): Promise<T> {
+    const data = contractInterface.encodeFunctionData(functionFragment, values);
+
     const rawResponse = await fetch(rpcUrl, {
         method: 'POST',
         headers: {
@@ -28,5 +36,5 @@ export async function jsonRpcFetch({
 
     const content = await rawResponse.json();
 
-    return content.result;
+    return contractInterface.decodeFunctionResult('getPoolData', content.result) as unknown as T;
 }
