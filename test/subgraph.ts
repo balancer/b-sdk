@@ -1,9 +1,9 @@
-import { SubgraphProvider } from '../src/poolProvider';
+import { SubgraphPoolProvider } from '../src/poolData/providers/subgraphPoolProvider';
 import { ChainId } from '../src/utils';
 
 export async function test(): Promise<void> {
     const chainId = ChainId.MAINNET;
-    const subgraphPoolDataService = new SubgraphProvider(chainId);
+    const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
 
     console.time();
     await subgraphPoolDataService.getPools();

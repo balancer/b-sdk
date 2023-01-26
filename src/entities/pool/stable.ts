@@ -1,10 +1,10 @@
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
-import { SubgraphPool } from '../../poolProvider';
-import { BONE, getPoolAddress } from '../../utils';
+import { WAD, getPoolAddress } from '../../utils';
 import { _calculateInvariant, _calcOutGivenIn } from './stableMath';
 import { unsafeFastParseEther } from '../../utils/ether';
+import { RawPool } from '../../poolData/types';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -13,7 +13,7 @@ export class StablePoolToken extends TokenAmount {
     public constructor(token: Token, amount: BigintIsh, rate: BigintIsh) {
         super(token, amount);
         this.rate = BigInt(rate);
-        this.scale18 = (this.amount * this.scalar * this.rate) / BONE;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
     }
 }
 export class StablePool implements BasePool {
@@ -28,8 +28,9 @@ export class StablePool implements BasePool {
     MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
     MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
-    static fromRawPool(pool: SubgraphPool): StablePool {
-        const poolTokens = pool.tokens.map(t => {
+    static fromRawPool(pool: RawPool): StablePool {
+        const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
+        const poolTokens = orderedTokens.map(t => {
             if (!t.priceRate) throw new Error('Stable pool token does not have a price rate');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
@@ -39,9 +40,10 @@ export class StablePool implements BasePool {
                 unsafeFastParseEther(t.priceRate),
             );
         });
+        const amp = BigInt(pool.amp) * 1000n;
         const stablePool = new StablePool(
             pool.id,
-            BigInt(pool.amp),
+            amp,
             BigInt(unsafeFastParseEther(pool.swapFee)),
             poolTokens,
         );
@@ -73,9 +75,9 @@ export class StablePool implements BasePool {
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
 
         if (swapKind === SwapKind.GivenIn) {
-            return (tIn.amount * this.MAX_IN_RATIO) / BONE;
+            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
         } else {
-            return (tOut.amount * this.MAX_OUT_RATIO) / BONE;
+            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
         }
     }
 

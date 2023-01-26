@@ -103,10 +103,10 @@ export function _getTokenBalanceGivenInvariantAndAllOtherBalances(
     sum = sum - balances[tokenIndex];
     const inv2 = invariant * invariant;
     const c = (inv2 / (ampTimesTotal * P_D)) * AMP_PRECISION * balances[tokenIndex];
-    const b = sum + (invariant / ampTimesTotal) * AMP_PRECISION;
+    const b = sum + ((invariant / ampTimesTotal) * AMP_PRECISION);
 
     let prevTokenBalance = 0n;
-    let tokenBalance = (inv2 + c) / (inv2 + b);
+    let tokenBalance = (inv2 + c) / (invariant + b);
 
     for (let i = 0; i < 255; i++) {
         prevTokenBalance = tokenBalance;

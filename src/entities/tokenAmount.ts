@@ -1,7 +1,7 @@
 import { Token } from './token';
 import { parseUnits } from '@ethersproject/units';
 import _Decimal from 'decimal.js-light';
-import { BONE } from '../utils';
+import { WAD } from '../utils';
 
 export type BigintIsh = bigint | string | number;
 
@@ -45,7 +45,7 @@ export class TokenAmount {
 
     // TODO Decide what to do for standard mul vs token mul
     public mulFixed(other: bigint): TokenAmount {
-        const multiplied = (this.amount * other) / BONE;
+        const multiplied = (this.amount * other) / WAD;
         return new TokenAmount(this.token, multiplied);
     }
     // TODO Decide what to do for standard div vs token div

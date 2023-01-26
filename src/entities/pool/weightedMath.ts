@@ -1,4 +1,4 @@
-import { MathSol, BONE } from '../../utils/math';
+import { MathSol, WAD } from '../../utils/math';
 
 export function _calcOutGivenIn(
     balanceIn: bigint,
@@ -26,6 +26,6 @@ export function _calcInGivenOut(
     const base = MathSol.divUpFixed(balanceOut, balanceOut - amountOut);
     const exponent = MathSol.divUpFixed(weightOut, weightIn);
     const power = MathSol.powUpFixed(base, exponent, version);
-    const ratio = power - BONE;
+    const ratio = power - WAD;
     return MathSol.mulUpFixed(balanceIn, ratio);
 }

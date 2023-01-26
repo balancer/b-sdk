@@ -4,6 +4,7 @@ import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
 import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT } from '../utils';
 import { BaseProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
+import { Interface } from '@ethersproject/abi';
 import vaultAbi from '../abi/Vault.json';
 
 // A Swap can be a single or multiple paths
@@ -125,6 +126,17 @@ export class Swap {
             deltas[this.assets.indexOf(this.paths[0].outputAmount.token.address)].abs(),
         );
         return outputAmount;
+    }
+
+    public async callData(): Promise<string> {
+        const iface = new Interface(vaultAbi);
+        const callData = await iface.encodeFunctionData('queryBatchSwap', [
+            SwapKind.GivenIn,
+            this.swaps,
+            this.assets,
+            DEFAULT_FUND_MANAGMENT,
+        ]);
+        return callData;
     }
 
     // public get executionPrice(): Price {}

@@ -1,11 +1,11 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
-import { PoolDataService, SubgraphPool } from './poolProvider';
 import { Router } from './router';
-import { Swap, Token, TokenAmount, Path } from './entities';
+import { Swap, Token, TokenAmount } from './entities';
 import { ChainId } from './utils';
-import { SwapKind, SwapOptions, SorConfig } from './types';
+import { SorConfig, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pool/poolParser';
+import { PoolDataService } from './poolData/poolDataService';
 
 export interface SwapInfo {
     quote: TokenAmount;
@@ -23,16 +23,26 @@ export type TransactionData = {
 export class SmartOrderRouter {
     public chainId: ChainId;
     public provider: BaseProvider;
-    private readonly poolProviders: PoolDataService[];
     public readonly router: Router;
     private readonly poolParser: PoolParser;
+    private readonly poolDataService: PoolDataService;
 
-    constructor({ chainId, provider, poolProvider, options, customPoolFactories = [] }: SorConfig) {
+    constructor({
+        chainId,
+        provider,
+        options,
+        poolDataProviders,
+        poolDataEnrichers = [],
+        customPoolFactories = [],
+    }: SorConfig) {
         this.chainId = chainId;
         this.provider = provider;
-        this.poolProviders = Array.isArray(poolProvider) ? poolProvider : [poolProvider];
         this.router = new Router();
         this.poolParser = new PoolParser(customPoolFactories);
+        this.poolDataService = new PoolDataService(
+            Array.isArray(poolDataProviders) ? poolDataProviders : [poolDataProviders],
+            Array.isArray(poolDataEnrichers) ? poolDataEnrichers : [poolDataEnrichers],
+        );
     }
 
     async getSwaps(
@@ -43,7 +53,7 @@ export class SmartOrderRouter {
         swapOptions?: SwapOptions,
     ): Promise<SwapInfo> {
         console.time('poolProvider');
-        const rawPools = await this.loadPools(swapOptions);
+        const rawPools = await this.poolDataService.getEnrichedPools(swapOptions);
         console.timeEnd('poolProvider');
 
         console.time('poolParser');
@@ -64,13 +74,5 @@ export class SmartOrderRouter {
         };
 
         return swapInfo;
-    }
-
-    private async loadPools(swapOptions?: SwapOptions): Promise<SubgraphPool[]> {
-        const responses = await Promise.all(
-            this.poolProviders.map(provider => provider.getPools(swapOptions)),
-        );
-
-        return responses.flat();
     }
 }

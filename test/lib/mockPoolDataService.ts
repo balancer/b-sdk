@@ -1,13 +1,13 @@
-import { PoolDataService, SubgraphPool } from '../../src/poolProvider';
+import { PoolDataProvider, RawPool } from '../../src/poolData/types';
 
-export class MockPoolDataService implements PoolDataService {
-    constructor(private pools: SubgraphPool[] = []) {}
+export class MockPoolDataService implements PoolDataProvider {
+    constructor(private pools: RawPool[] = []) {}
 
-    public async getPools(): Promise<SubgraphPool[]> {
+    public async getPools(): Promise<RawPool[]> {
         return this.pools;
     }
 
-    public setPools(pools: SubgraphPool[]): void {
+    public setPools(pools: RawPool[]): void {
         this.pools = pools;
     }
 }
