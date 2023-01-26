@@ -1,9 +1,9 @@
-import { parseEther } from '@ethersproject/units';
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
 import { AaveReserve, SubgraphPool } from '../../poolProvider';
 import { WAD, MAX_UINT256, getPoolAddress, getNormalizedIncome } from '../../utils';
+import { unsafeFastParseEther } from '../../utils/ether';
 import {
     _calcWrappedOutPerMainIn,
     _calcBptOutPerMainIn,
@@ -60,7 +60,7 @@ export class LinearPool implements BasePool {
     static fromRawPool(pool: SubgraphPool, rates: AaveReserve[]): LinearPool {
 
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
-        const swapFee = BigInt(parseEther(pool.swapFee).toString());
+        const swapFee = BigInt(unsafeFastParseEther(pool.swapFee).toString());
 
         const mT = orderedTokens[pool.mainIndex];
         const mToken = new Token(1, mT.address, mT.decimals, mT.symbol, mT.name);

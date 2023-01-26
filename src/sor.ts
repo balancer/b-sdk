@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
-import { PoolDataService } from './poolProvider';
+import { AaveReserve, PoolDataService, SubgraphPool } from './poolProvider';
 import { Router } from './router';
 import { Swap, Token, TokenAmount, Path } from './entities';
 import { ChainId } from './utils';
@@ -23,14 +23,14 @@ export type TransactionData = {
 export class SmartOrderRouter {
     public chainId: ChainId;
     public provider: BaseProvider;
-    private readonly poolProvider: PoolDataService;
+    private readonly poolProviders: PoolDataService[];
     public readonly router: Router;
     private readonly poolParser: PoolParser;
 
     constructor({ chainId, provider, poolProvider, options, customPoolFactories = [] }: SorConfig) {
         this.chainId = chainId;
         this.provider = provider;
-        this.poolProvider = poolProvider;
+        this.poolProviders = Array.isArray(poolProvider) ? poolProvider : [poolProvider];
         this.router = new Router();
         this.poolParser = new PoolParser(customPoolFactories);
     }
@@ -44,10 +44,8 @@ export class SmartOrderRouter {
     ): Promise<SwapInfo> {
         
         console.time('poolProvider');
-        const [rawPools, rawRates] = await Promise.all([
-            this.poolProvider.getPools(swapOptions),
-            this.poolProvider.getRates(swapOptions)
-        ]);
+        const rawPools = await this.loadPools(swapOptions);
+        const rawRates = await this.loadRates(swapOptions);
         console.timeEnd('poolProvider');
 
         console.time('poolParser');
@@ -68,5 +66,21 @@ export class SmartOrderRouter {
         };
 
         return swapInfo;
+    }
+
+    private async loadPools(swapOptions?: SwapOptions): Promise<SubgraphPool[]> {
+        const responses = await Promise.all(
+            this.poolProviders.map(provider => provider.getPools(swapOptions)),
+        );
+
+        return responses.flat();
+    }
+
+    private async loadRates(swapOptions?: SwapOptions): Promise<AaveReserve[]> {
+        const responses = await Promise.all(
+            this.poolProviders.map(provider => provider.getRates(swapOptions)),
+        );
+
+        return responses.flat();
     }
 }

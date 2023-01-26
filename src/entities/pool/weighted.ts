@@ -1,10 +1,10 @@
-import { parseEther } from '@ethersproject/units';
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
 import { SubgraphPool } from '../../poolProvider';
 import { WAD, getPoolAddress } from '../../utils';
 import { _calcOutGivenIn } from './weightedMath';
+import { unsafeFastParseEther } from '../../utils/ether';
 
 export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -30,16 +30,13 @@ export class WeightedPool implements BasePool {
             if (!t.weight) throw new Error('Weighted pool token does not have a weight');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
-            return new WeightedPoolToken(
-                token,
-                tokenAmount.amount,
-                parseEther(t.weight).toString(),
-            );
+
+            return new WeightedPoolToken(token, tokenAmount.amount, unsafeFastParseEther(t.weight));
         });
         const weightedPool = new WeightedPool(
             pool.id,
             pool.poolTypeVersion,
-            BigInt(parseEther(pool.swapFee).toString()),
+            BigInt(unsafeFastParseEther(pool.swapFee)),
             poolTokens,
         );
         return weightedPool;
@@ -88,7 +85,7 @@ export class WeightedPool implements BasePool {
             tOut.scale18,
             tOut.weight,
             amountWithFee.scale18,
-            this.poolTypeVersion
+            this.poolTypeVersion,
         );
 
         return TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
