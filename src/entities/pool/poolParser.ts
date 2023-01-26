@@ -1,7 +1,8 @@
 import { BasePool, BasePoolFactory } from './index';
 import { WeightedPoolFactory } from './weightedFactory';
 import { StablePoolFactory } from './stableFactory';
-import { SubgraphPool } from '../../poolProvider';
+import { LinearPoolFactory } from './linearFactory';
+import { AaveReserve, SubgraphPool } from '../../poolProvider';
 
 export class PoolParser {
     private readonly poolFactories: BasePoolFactory[];
@@ -12,16 +13,21 @@ export class PoolParser {
             ...customPoolFactories,
             new WeightedPoolFactory(),
             new StablePoolFactory(),
+            new LinearPoolFactory(),
         ];
     }
 
-    public parseRawPools(rawPools: SubgraphPool[]): BasePool[] {
+    public parseRawPools(rawPools: SubgraphPool[], rawRates: AaveReserve[]): BasePool[] {
         const pools: BasePool[] = [];
 
         for (const rawPool of rawPools) {
             for (const factory of this.poolFactories) {
                 if (factory.isPoolForFactory(rawPool)) {
-                    pools.push(factory.create(rawPool));
+                    if (factory instanceof LinearPoolFactory) {
+                        pools.push(factory.create(rawPool, rawRates));
+                    } else {
+                        pools.push(factory.create(rawPool));
+                    }
                     break;
                 }
             }

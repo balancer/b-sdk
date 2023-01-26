@@ -42,12 +42,16 @@ export class SmartOrderRouter {
         swapAmount: TokenAmount,
         swapOptions?: SwapOptions,
     ): Promise<SwapInfo> {
+        
         console.time('poolProvider');
-        const rawPools = await this.poolProvider.getPools(swapOptions);
+        const [rawPools, rawRates] = await Promise.all([
+            this.poolProvider.getPools(swapOptions),
+            this.poolProvider.getRates(swapOptions)
+        ]);
         console.timeEnd('poolProvider');
 
         console.time('poolParser');
-        const pools = this.poolParser.parseRawPools(rawPools);
+        const pools = this.poolParser.parseRawPools(rawPools, rawRates);
         console.timeEnd('poolParser');
 
         console.time('getCandidatePaths');

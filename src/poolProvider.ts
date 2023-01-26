@@ -7,6 +7,7 @@ import { SwapOptions } from './types';
 
 export type SubgraphPoolToken = {
     address: string;
+    index: number;
     symbol: string;
     name: string;
     decimals: number;
@@ -33,7 +34,16 @@ export type SubgraphPool = {
     totalShares: string;
 };
 
+export type AaveReserve = {
+    id: string;
+    underlyingAsset: string;
+    liquidityRate: string;
+    liquidityIndex: string;
+    lastUpdateTimestamp: string;
+};
+
 export interface PoolDataService {
+    getRates(swapOptions? : SwapOptions): Promise<any>;
     getPools(swapOptions? : SwapOptions): Promise<SubgraphPool[]>;
 }
 
@@ -41,6 +51,7 @@ const PAGE_SIZE = 1000;
 
 export class SubgraphProvider implements PoolDataService {
     private client: GraphQLClient;
+    private aaveClient: GraphQLClient;
 
     constructor(private chainId: ChainId, private retries = 2, private timeout = 30000) {
         const subgraphUrl = SUBGRAPH_URLS[this.chainId];
@@ -48,6 +59,56 @@ export class SubgraphProvider implements PoolDataService {
             throw new Error(`No subgraph url for chain id: ${this.chainId}`);
         }
         this.client = new GraphQLClient(subgraphUrl);
+        this.aaveClient = new GraphQLClient('https://api.thegraph.com/subgraphs/name/aave/protocol-v2');
+    }
+
+    public async getRates(swapOptions? : SwapOptions): Promise<any> {
+        const query = gql`
+        query getRates {
+            reserves {
+                id
+                underlyingAsset
+                liquidityRate
+                liquidityIndex
+                lastUpdateTimestamp
+            }
+        }
+        `;
+
+        let rates: AaveReserve[] = [];
+
+        await retry(
+            async () => {
+                const timeout = new Timeout();
+
+                const getRates = async (): Promise<AaveReserve[]> => {
+                    const ratesResult = await this.aaveClient.request<{
+                        reserves: AaveReserve[];
+                    }>(query, {});
+
+                    return ratesResult.reserves;
+                };
+
+                try {
+                    const getRatesPromise = getRates();
+                    const timerPromise = timeout.set(this.timeout).then(() => {
+                        throw new Error(`Timed out getting rates from subgraph: ${this.timeout}`);
+                    });
+                    rates = await Promise.race([getRatesPromise, timerPromise]);
+                    return;
+                } finally {
+                    timeout.clear();
+                }
+            },
+            {
+                retries: this.retries,
+                onRetry: (err, retry) => {
+                    console.log(err, retry);
+                },
+            },
+        );
+
+        return rates;
     }
 
     public async getPools(swapOptions? : SwapOptions): Promise<SubgraphPool[]> {
@@ -65,6 +126,7 @@ export class SubgraphProvider implements PoolDataService {
           poolTypeVersion
           tokens {
             address
+            index
             balance
             weight
             priceRate
@@ -74,6 +136,10 @@ export class SubgraphProvider implements PoolDataService {
           swapEnabled
           swapFee
           amp
+          mainIndex
+          wrappedIndex
+          lowerTarget
+          upperTarget
           totalLiquidity
           totalShares
         }

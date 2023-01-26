@@ -1,4 +1,4 @@
-import { MathSol, BONE } from '../../utils/math';
+import { MathSol, WAD } from '../../utils/math';
 import { Params } from './linear';
 
 export function _calcWrappedOutPerMainIn(
@@ -69,8 +69,48 @@ export function _calcBptOutPerWrappedIn(
     const newInvariant = _calcInvariant(nominalMain, newWrappedBalance);
 
     const newBptBalance = (bptSupply * newInvariant) / previousInvariant;
-
     return newBptBalance - bptSupply;
+}
+
+export function _calcMainOutPerBptIn(
+    bptIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount out, so we round down overall.
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariant(
+        previousNominalMain,
+        wrappedBalance
+    );
+    const deltaNominalMain = (invariant * bptIn) / bptSupply;
+    const afterNominalMain = previousNominalMain - deltaNominalMain;
+    const newMainBalance = _fromNominal(afterNominalMain, params);
+    return mainBalance - newMainBalance;
+}
+
+export function _calcWrappedOutPerBptIn(
+    bptIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount out, so we round down overall.
+    const nominalMain = _toNominal(mainBalance, params);
+    const previousInvariant = _calcInvariant(
+        nominalMain,
+        wrappedBalance
+    );
+    const newBptBalance = bptSupply - bptIn;
+    const newWrappedBalance = MathSol.divUpFixed(
+        ((newBptBalance * previousInvariant) / bptSupply) - nominalMain,
+        params.rate
+    );
+
+    return wrappedBalance - newWrappedBalance;
 }
 
 function _calcInvariant(
@@ -105,14 +145,14 @@ function _fromNominal(nominal: bigint, params: Params): bigint {
     if (nominal < params.lowerTarget) {
         return MathSol.divDownFixed(
             nominal + MathSol.mulDownFixed(params.fee, params.lowerTarget),
-            BONE + params.fee
+            WAD + params.fee
         );
     } else if (nominal <= params.upperTarget) {
         return nominal;
     } else {
         return MathSol.divDownFixed(
             nominal - MathSol.mulDownFixed(params.fee, params.upperTarget),
-            BONE - params.fee
+            WAD - params.fee
         );
     }
 }

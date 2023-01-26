@@ -3,7 +3,7 @@ import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
 import { SubgraphPool } from '../../poolProvider';
-import { BONE, getPoolAddress } from '../../utils';
+import { WAD, getPoolAddress } from '../../utils';
 import { _calcOutGivenIn } from './weightedMath';
 
 export class WeightedPoolToken extends TokenAmount {
@@ -68,9 +68,9 @@ export class WeightedPool implements BasePool {
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
 
         if (swapKind === SwapKind.GivenIn) {
-            return (tIn.amount * this.MAX_IN_RATIO) / BONE;
+            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
         } else {
-            return (tOut.amount * this.MAX_OUT_RATIO) / BONE;
+            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
         }
     }
 
