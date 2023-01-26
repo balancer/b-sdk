@@ -1,6 +1,7 @@
 import { BasePool, BasePoolFactory } from './index';
 import { WeightedPoolFactory } from './weightedFactory';
 import { StablePoolFactory } from './stableFactory';
+import { LinearPoolFactory } from './linearFactory';
 import { RawPool } from '../../poolData/types';
 
 export class PoolParser {
@@ -12,6 +13,7 @@ export class PoolParser {
             ...customPoolFactories,
             new WeightedPoolFactory(),
             new StablePoolFactory(),
+            new LinearPoolFactory(),
         ];
     }
 
@@ -22,6 +24,7 @@ export class PoolParser {
             for (const factory of this.poolFactories) {
                 if (factory.isPoolForFactory(rawPool)) {
                     pools.push(factory.create(rawPool));
+
                     break;
                 }
             }

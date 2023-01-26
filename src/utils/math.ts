@@ -1,6 +1,7 @@
-export const BONE = 1000000000000000000n;
-export const TWO_BONE = 2000000000000000000n;
-export const FOUR_BONE = 4000000000000000000n;
+export const WAD = 1000000000000000000n;
+export const RAY = 1000000000000000000000000000n;
+export const TWO_WAD = 2000000000000000000n;
+export const FOUR_WAD = 4000000000000000000n;
 
 const _require = (b: boolean, message: string) => {
     if (!b) throw new Error(message);
@@ -19,7 +20,7 @@ export class MathSol {
 
     static mulDownFixed(a: bigint, b: bigint): bigint {
         const product = a * b;
-        return product / BONE;
+        return product / WAD;
     }
 
     static mulUpFixed(a: bigint, b: bigint): bigint {
@@ -28,7 +29,7 @@ export class MathSol {
         if (product == 0n) {
             return 0n;
         } else {
-            return (product - 1n) / BONE + 1n;
+            return (product - 1n) / WAD + 1n;
         }
     }
 
@@ -36,7 +37,7 @@ export class MathSol {
         if (a == 0n) {
             return 0n;
         } else {
-            const aInflated = a * BONE;
+            const aInflated = a * WAD;
             return aInflated / b;
         }
     }
@@ -45,18 +46,18 @@ export class MathSol {
         if (a == 0n) {
             return 0n;
         } else {
-            const aInflated = a * BONE;
+            const aInflated = a * WAD;
             return (aInflated - 1n) / b + 1n;
         }
     }
 
     // version = poolTypeVersion
     static powUpFixed(x: bigint, y: bigint, version?: number): bigint {
-        if (y === BONE && version !== 1) {
+        if (y === WAD && version !== 1) {
             return x;
-        } else if (y === TWO_BONE && version !== 1) {
+        } else if (y === TWO_WAD && version !== 1) {
             return this.mulUpFixed(x, x);
-        } else if (y === FOUR_BONE && version !== 1) {
+        } else if (y === FOUR_WAD && version !== 1) {
             const square = this.mulUpFixed(x, x);
             return this.mulUpFixed(square, square);
         } else {
@@ -68,11 +69,11 @@ export class MathSol {
 
     // version = poolTypeVersion
     static powDownFixed(x: bigint, y: bigint, version?: number): bigint {
-        if (y === BONE && version !== 1) {
+        if (y === WAD && version !== 1) {
             return x;
-        } else if (y === TWO_BONE && version !== 1) {
+        } else if (y === TWO_WAD && version !== 1) {
             return this.mulUpFixed(x, x);
-        } else if (y === FOUR_BONE && version !== 1) {
+        } else if (y === FOUR_WAD && version !== 1) {
             const square = this.mulUpFixed(x, x);
             return this.mulUpFixed(square, square);
         } else {
@@ -87,7 +88,7 @@ export class MathSol {
     }
 
     static complementFixed(x: bigint): bigint {
-        return x < BONE ? BONE - x : 0n;
+        return x < WAD ? WAD - x : 0n;
     }
 }
 

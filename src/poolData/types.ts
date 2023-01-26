@@ -21,6 +21,7 @@ export interface RawPool {
 
 export interface RawPoolToken {
     address: string;
+    index: number;
     symbol: string;
     name: string;
     decimals: number;

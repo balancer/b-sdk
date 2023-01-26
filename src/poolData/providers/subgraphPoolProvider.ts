@@ -170,6 +170,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                 amp
                 totalLiquidity
                 totalShares
+                mainIndex
                 wrappedIndex
                 lowerTarget
                 upperTarget

@@ -1,9 +1,9 @@
-import { parseEther } from '@ethersproject/units';
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount, BigintIsh } from '../../entities/';
 import { BasePool } from './';
-import { BONE, getPoolAddress } from '../../utils';
+import { WAD, getPoolAddress } from '../../utils';
 import { _calcOutGivenIn } from './weightedMath';
+import { unsafeFastParseEther } from '../../utils/ether';
 import { RawPool } from '../../poolData/types';
 
 export class WeightedPoolToken extends TokenAmount {
@@ -30,16 +30,13 @@ export class WeightedPool implements BasePool {
             if (!t.weight) throw new Error('Weighted pool token does not have a weight');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
-            return new WeightedPoolToken(
-                token,
-                tokenAmount.amount,
-                parseEther(t.weight).toString(),
-            );
+
+            return new WeightedPoolToken(token, tokenAmount.amount, unsafeFastParseEther(t.weight));
         });
         const weightedPool = new WeightedPool(
             pool.id,
             pool.poolTypeVersion,
-            BigInt(parseEther(pool.swapFee).toString()),
+            BigInt(unsafeFastParseEther(pool.swapFee)),
             poolTokens,
         );
         return weightedPool;
@@ -68,9 +65,9 @@ export class WeightedPool implements BasePool {
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
 
         if (swapKind === SwapKind.GivenIn) {
-            return (tIn.amount * this.MAX_IN_RATIO) / BONE;
+            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
         } else {
-            return (tOut.amount * this.MAX_OUT_RATIO) / BONE;
+            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
         }
     }
 

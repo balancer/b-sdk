@@ -7,6 +7,8 @@ import { SubgraphPoolProvider } from '../src/poolData/providers/subgraphPoolProv
 import { ChainId, SUBGRAPH_URLS } from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/poolData/enrichers/onChainPoolDataEnricher';
+import { SwapOptions } from '../src/types';
+import { AaveReserveEnricher } from '../src/poolData/enrichers/aaveReserveEnricher';
 
 BigInt.prototype['toJSON'] = function () {
     return this.toString();
@@ -17,7 +19,6 @@ const SOR_QUERIES = '0x40f7218fa50ead995c4343eB0bB46dD414F9da7A';
 
 export async function testWeight(): Promise<void> {
     const chainId = ChainId.MAINNET;
-    console.log('rpc url');
     const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
     const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
     const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
@@ -25,11 +26,13 @@ export async function testWeight(): Promise<void> {
         SOR_QUERIES,
         process.env['ETHEREUM_RPC_URL']!,
     );
+    const aaveReserveEnricher = new AaveReserveEnricher();
+
     const sor = new SmartOrderRouter({
         chainId,
         provider,
         poolDataProviders: subgraphPoolDataService,
-        poolDataEnrichers: onChainPoolDataEnricher,
+        poolDataEnrichers: aaveReserveEnricher,
     });
 
     const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
@@ -52,20 +55,26 @@ export async function testStable(): Promise<void> {
         SOR_QUERIES,
         process.env['ETHEREUM_RPC_URL']!,
     );
+    const aaveReserveEnricher = new AaveReserveEnricher();
+
     const sor = new SmartOrderRouter({
         chainId,
         provider,
         poolDataProviders: subgraphPoolDataService,
-        poolDataEnrichers: onChainPoolDataEnricher,
+        poolDataEnrichers: aaveReserveEnricher,
     });
 
     const USDC = new Token(chainId, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC');
     const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
     const inputAmount = TokenAmount.fromHumanAmount(USDC, '100');
 
-    const { swap, quote } = await sor.getSwaps(USDC, DAI, 0, inputAmount);
+    const swapOptions: SwapOptions = {
+        block: 16443618,
+    };
 
-    const onchain = await swap.query(provider);
+    const { swap, quote } = await sor.getSwaps(USDC, DAI, 0, inputAmount, swapOptions);
+
+    const onchain = await swap.query(provider, swapOptions.block);
     console.log(quote);
     console.log(onchain);
 }

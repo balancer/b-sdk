@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { BasePool, BasePoolFactory, Token } from './entities';
+import { Token, BasePool, BasePoolFactory } from './entities';
 import { BaseProvider } from '@ethersproject/providers';
 import { PoolDataEnricher, PoolDataProvider } from './poolData/types';
 
