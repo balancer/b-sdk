@@ -1,4 +1,4 @@
-export function unsafeFastParseEther(value: string): string {
+export const unsafeFastParseEther = (value: string): string => {
     const parts = value.split('.');
     parts[0] = parts[0] || '';
     parts[1] = parts[1] || '';

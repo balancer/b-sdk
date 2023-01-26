@@ -1,10 +1,9 @@
-import { PoolType, SwapKind } from '../../types';
-import { Token, TokenAmount, BigintIsh } from '../../entities/';
-import { BasePool } from './';
-import { WAD, getPoolAddress } from '../../utils';
-import { _calculateInvariant, _calcOutGivenIn } from './stableMath';
-import { unsafeFastParseEther } from '../../utils/ether';
-import { RawPool } from '../../poolData/types';
+import { PoolType, SwapKind } from '@/types';
+import { Token, TokenAmount, BigintIsh } from '@/entities/';
+import { BasePool } from '@/entities/pools';
+import { WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
+import { _calculateInvariant, _calcOutGivenIn } from './math';
+import { RawPool } from '@/data/types';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;

@@ -4,8 +4,8 @@ import { Router } from './router';
 import { Swap, Token, TokenAmount } from './entities';
 import { ChainId } from './utils';
 import { SorConfig, SwapKind, SwapOptions } from './types';
-import { PoolParser } from './entities/pool/poolParser';
-import { PoolDataService } from './poolData/poolDataService';
+import { PoolParser } from './entities/pools/parser';
+import { PoolDataService } from './data/poolDataService';
 
 export interface SwapInfo {
     quote: TokenAmount;

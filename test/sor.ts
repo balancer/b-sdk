@@ -3,12 +3,12 @@ dotenv.config();
 
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SmartOrderRouter } from '../src/sor';
-import { SubgraphPoolProvider } from '../src/poolData/providers/subgraphPoolProvider';
+import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
 import { ChainId, SUBGRAPH_URLS } from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
-import { OnChainPoolDataEnricher } from '../src/poolData/enrichers/onChainPoolDataEnricher';
+import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapOptions } from '../src/types';
-import { AaveReserveEnricher } from '../src/poolData/enrichers/aaveReserveEnricher';
+import { AaveReserveEnricher } from '../src/data/enrichers/aaveReserveEnricher';
 
 BigInt.prototype['toJSON'] = function () {
     return this.toString();

@@ -1,8 +1,8 @@
-import { BasePool, BasePoolFactory } from './index';
-import { WeightedPoolFactory } from './weightedFactory';
-import { StablePoolFactory } from './stableFactory';
-import { LinearPoolFactory } from './linearFactory';
-import { RawPool } from '../../poolData/types';
+import { BasePool, BasePoolFactory } from './';
+import { WeightedPoolFactory } from './weighted/factory';
+import { StablePoolFactory } from './stable/factory';
+import { LinearPoolFactory } from './linear/factory';
+import { RawPool } from '@/data/types';
 
 export class PoolParser {
     private readonly poolFactories: BasePoolFactory[];

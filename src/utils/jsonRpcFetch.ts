@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { ZERO_ADDRESS } from './constants';
-import { FunctionFragment } from '@ethersproject/abi/src.ts/fragments';
+import { FunctionFragment } from '@ethersproject/abi';
 import { Interface } from '@ethersproject/abi';
 
 export async function jsonRpcFetch<T>({

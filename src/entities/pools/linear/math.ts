@@ -1,5 +1,5 @@
-import { MathSol, WAD } from '../../utils/math';
-import { Params } from './linear';
+import { MathSol, WAD } from '@/utils/';
+import { Params } from './';
 
 export function _calcWrappedOutPerMainIn(
     mainIn: bigint,

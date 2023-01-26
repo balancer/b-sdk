@@ -13,7 +13,7 @@
     ],
     "module": "dist/sdk.esm.js",
     "scripts": {
-        "build": "tsc build",
+        "build": "tsc",
         "lint": "eslint . --ext .js,.ts --max-warnings 0"
     },
     "dependencies": {

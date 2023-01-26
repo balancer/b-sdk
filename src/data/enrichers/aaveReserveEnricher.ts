@@ -2,7 +2,7 @@ import { gql, GraphQLClient } from 'graphql-request';
 import { default as retry } from 'async-retry';
 import Timeout from 'await-timeout';
 import { LoadPoolsOptions, PoolDataEnricher, RawPool } from '../types';
-import { RAY, SECONDS_PER_YEAR, WAD } from '../../utils';
+import { RAY, SECONDS_PER_YEAR, WAD } from '@/utils';
 import { formatFixed } from '@ethersproject/bignumber';
 
 interface AaveReserve {

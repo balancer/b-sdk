@@ -1,4 +1,4 @@
-import { SubgraphPoolProvider } from '../src/poolData/providers/subgraphPoolProvider';
+import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
 import { ChainId } from '../src/utils';
 
 export async function test(): Promise<void> {

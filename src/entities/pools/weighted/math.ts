@@ -1,4 +1,4 @@
-import { MathSol, WAD } from '../../utils/math';
+import { MathSol, WAD } from '@/utils/math';
 
 export function _calcOutGivenIn(
     balanceIn: bigint,

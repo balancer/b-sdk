@@ -1,8 +1,7 @@
-import { PoolType, SwapKind } from '../../types';
-import { BigintIsh, Token, TokenAmount } from '../../entities/';
-import { BasePool } from './';
-import { getPoolAddress, MAX_UINT256, WAD } from '../../utils';
-import { unsafeFastParseEther } from '../../utils/ether';
+import { PoolType, SwapKind } from '@/types';
+import { BigintIsh, Token, TokenAmount } from '@/entities/';
+import { BasePool } from '@/entities/pools';
+import { getPoolAddress, MAX_UINT256, WAD, unsafeFastParseEther } from '@/utils';
 import {
     _calcBptOutPerMainIn,
     _calcBptOutPerWrappedIn,
@@ -10,8 +9,8 @@ import {
     _calcMainOutPerWrappedIn,
     _calcWrappedOutPerBptIn,
     _calcWrappedOutPerMainIn,
-} from './linearMath';
-import { RawPool } from '../../poolData/types';
+} from './math';
+import { RawPool } from '@/data/types';
 
 export class BPT extends TokenAmount {
     public readonly rate: bigint;
