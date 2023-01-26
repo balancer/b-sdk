@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Token, BasePool, BasePoolFactory } from './entities';
 import { BaseProvider } from '@ethersproject/providers';
-import { PoolDataEnricher, PoolDataProvider } from './poolData/types';
+import { PoolDataEnricher, PoolDataProvider } from './data/types';
 
 export enum PoolType {
     Weighted = 'Weighted',

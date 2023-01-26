@@ -1,6 +1,6 @@
-import { BasePool } from './pool/';
+import { BasePool } from './pools/';
 import { Token, TokenAmount } from './';
-import { SwapKind } from '../types';
+import { SwapKind } from '@/types';
 
 export class Path {
     public readonly pools: BasePool[];

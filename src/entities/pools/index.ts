@@ -1,6 +1,6 @@
 import { PoolType } from '../../types';
 import { Token, TokenAmount } from '../';
-import { RawPool } from '../../poolData/types';
+import { RawPool } from '../../data/types';
 
 export interface BasePool {
     poolType: PoolType | string;

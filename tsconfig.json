@@ -3,6 +3,11 @@
     "compilerOptions": {
         "target": "es2020",
         "module": "esnext",
+        "baseUrl": "src",
+        "paths": {
+            "@/*": ["*"]
+        },
+        "outDir": "dist",
         "importHelpers": true,
         "declaration": true,
         "sourceMap": true,

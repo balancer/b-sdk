@@ -1,5 +1,5 @@
-import { PoolTokenPair } from '../types';
-import { BasePool } from '../entities';
+import { PoolTokenPair } from '@/types';
+import { BasePool } from '@/entities';
 
 export type PoolAddressDictionary = {
   [address: string]: BasePool;
