@@ -20,7 +20,11 @@ export interface SwapOptions {
     slippage?: BigNumber;
     funds?: FundManagement;
     deadline?: BigNumber;
-    poolsSupportingGradualWeightUpdatesToInclude: string[];
+    // pool types that support gradual weight updates (LBPs, investment pools, etc) are excluded
+    // from SOR routing by default. This has the added benefit of limiting the amount of on chain
+    // queries that need to be performed . To include any pool that supports a gradual weight
+    // update, define them individually in the swap options
+    poolsSupportingGradualWeightUpdatesToInclude?: string[];
 }
 
 export interface FundManagement {
