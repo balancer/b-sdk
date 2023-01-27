@@ -1,7 +1,7 @@
 import { PoolType, SwapKind } from '@/types';
 import { BigintIsh, Token, TokenAmount } from '@/entities/';
 import { BasePool } from '@/entities/pools';
-import { getPoolAddress, MAX_UINT256, WAD, unsafeFastParseEther } from '@/utils';
+import { getPoolAddress, MAX_UINT256, unsafeFastParseEther, WAD } from '@/utils';
 import {
     _calcBptOutPerMainIn,
     _calcBptOutPerWrappedIn,
@@ -10,7 +10,7 @@ import {
     _calcWrappedOutPerBptIn,
     _calcWrappedOutPerMainIn,
 } from './math';
-import { RawPool } from '@/data/types';
+import { RawLinearPool } from '@/data/types';
 
 export class BPT extends TokenAmount {
     public readonly rate: bigint;
@@ -56,7 +56,7 @@ export class LinearPool implements BasePool {
     MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
     MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
-    static fromRawPool(pool: RawPool): LinearPool {
+    static fromRawPool(pool: RawLinearPool): LinearPool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
         const swapFee = BigInt(unsafeFastParseEther(pool.swapFee).toString());
 

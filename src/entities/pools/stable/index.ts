@@ -3,7 +3,7 @@ import { Token, TokenAmount, BigintIsh } from '@/entities/';
 import { BasePool } from '@/entities/pools';
 import { WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
 import { _calculateInvariant, _calcOutGivenIn } from './math';
-import { RawPool } from '@/data/types';
+import { RawComposableStablePool, RawPool } from '@/data/types';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -27,7 +27,7 @@ export class StablePool implements BasePool {
     MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
     MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
-    static fromRawPool(pool: RawPool): StablePool {
+    static fromRawPool(pool: RawComposableStablePool): StablePool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
         const poolTokens = orderedTokens.map(t => {
             if (!t.priceRate) throw new Error('Stable pool token does not have a price rate');

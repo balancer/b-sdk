@@ -3,7 +3,7 @@ import { Token, TokenAmount, BigintIsh } from '@/entities/';
 import { BasePool } from '@/entities/pools';
 import { MathSol, WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
 import { _calcOutGivenIn, _calcInGivenOut } from './math';
-import { RawPool } from '@/data/types';
+import { RawPool, RawWeightedPool } from '@/data/types';
 
 export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -24,7 +24,7 @@ export class WeightedPool implements BasePool {
     MAX_IN_RATIO = 300000000000000000n; // 0.3
     MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
-    static fromRawPool(pool: RawPool): WeightedPool {
+    static fromRawPool(pool: RawWeightedPool): WeightedPool {
         const poolTokens = pool.tokens.map(t => {
             if (!t.weight) throw new Error('Weighted pool token does not have a weight');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
