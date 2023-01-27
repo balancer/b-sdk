@@ -1,4 +1,4 @@
-import { PoolType, SwapKind } from '@/types';
+import { PoolType } from '@/types';
 import { BigintIsh, Token, TokenAmount } from '@/entities/';
 import { BasePool } from '@/entities/pools';
 import { getPoolAddress, MAX_UINT256, unsafeFastParseEther, WAD } from '@/utils';
@@ -52,9 +52,6 @@ export class LinearPool implements BasePool {
     wrappedToken: WrappedToken;
     bptToken: BPT;
     params: Params;
-    // TODO: Stable limits
-    MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
-    MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
     static fromRawPool(pool: RawLinearPool): LinearPool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
@@ -129,20 +126,11 @@ export class LinearPool implements BasePool {
         return tOut.amount;
     }
 
-    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const tIn = this.tokens.find(t => t.token.address === tokenIn.address);
-        const tOut = this.tokens.find(t => t.token.address === tokenOut.address);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
-
-        if (swapKind === SwapKind.GivenIn) {
-            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
-        } else {
-            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
-        }
-    }
-
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+        const tInIndex = this.tokens.findIndex(t => t.token.address === tokenIn.address);
+        if (swapAmount.amount > this.tokens[tInIndex].amount)
+            throw new Error('Swap amount exceeds the pool limit');
+
         if (tokenIn.isEqual(this.mainToken.token)) {
             if (tokenOut.isEqual(this.wrappedToken.token)) {
                 return this._exactMainTokenInForWrappedOut(swapAmount);
@@ -160,6 +148,34 @@ export class LinearPool implements BasePool {
                 return this._exactBptInForMainOut(swapAmount);
             } else {
                 return this._exactBptInForWrappedOut(swapAmount);
+            }
+        } else {
+            throw new Error('Pool does not contain the tokens provided');
+        }
+    }
+
+    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+        const tOutIndex = this.tokens.findIndex(t => t.token.address === tokenOut.address);
+        if (swapAmount.amount > this.tokens[tOutIndex].amount)
+            throw new Error('Swap amount exceeds the pool limit');
+
+        if (tokenIn.isEqual(this.mainToken.token)) {
+            if (tokenOut.isEqual(this.wrappedToken.token)) {
+                return this._mainTokenInForExactWrappedOut(swapAmount);
+            } else {
+                return this._mainTokenInForExactBptOut(swapAmount);
+            }
+        } else if (tokenIn.isEqual(this.wrappedToken.token)) {
+            if (tokenOut.isEqual(this.mainToken.token)) {
+                return this._wrappedTokenInForExactMainOut(swapAmount);
+            } else {
+                return this._wrappedTokenInForExactBptOut(swapAmount);
+            }
+        } else if (tokenIn.isEqual(this.bptToken.token)) {
+            if (tokenOut.isEqual(this.mainToken.token)) {
+                return this._bptInForExactMainOut(swapAmount);
+            } else {
+                return this._bptInForExactWrappedOut(swapAmount);
             }
         } else {
             throw new Error('Pool does not contain the tokens provided');
@@ -223,6 +239,74 @@ export class LinearPool implements BasePool {
     }
 
     private _exactBptInForWrappedOut(swapAmount: TokenAmount): TokenAmount {
+        const tokenOutScale18 = _calcWrappedOutPerBptIn(
+            swapAmount.scale18,
+            this.mainToken.scale18,
+            this.wrappedToken.scale18,
+            this.bptToken.virtualBalance,
+            this.params,
+        );
+
+        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18);
+    }
+
+    private _mainTokenInForExactWrappedOut(swapAmount: TokenAmount): TokenAmount {
+        const tokenOutScale18 = _calcWrappedOutPerMainIn(
+            swapAmount.scale18,
+            this.mainToken.scale18,
+            this.params,
+        );
+
+        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18);
+    }
+
+    private _mainTokenInForExactBptOut(swapAmount: TokenAmount): TokenAmount {
+        const tokenOutScale18 = _calcBptOutPerMainIn(
+            swapAmount.scale18,
+            this.mainToken.scale18,
+            this.wrappedToken.scale18,
+            this.bptToken.virtualBalance,
+            this.params,
+        );
+
+        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
+    }
+
+    private _wrappedTokenInForExactMainOut(swapAmount: TokenAmount): TokenAmount {
+        const tokenOutScale18 = _calcMainOutPerWrappedIn(
+            swapAmount.scale18,
+            this.mainToken.scale18,
+            this.params,
+        );
+
+        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18);
+    }
+
+    private _wrappedTokenInForExactBptOut(swapAmount: TokenAmount): TokenAmount {
+        const tokenOutScale18 = _calcBptOutPerWrappedIn(
+            swapAmount.scale18,
+            this.mainToken.scale18,
+            this.wrappedToken.scale18,
+            this.bptToken.virtualBalance,
+            this.params,
+        );
+
+        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
+    }
+
+    private _bptInForExactMainOut(swapAmount: TokenAmount): TokenAmount {
+        const tokenOutScale18 = _calcMainOutPerBptIn(
+            swapAmount.scale18,
+            this.mainToken.scale18,
+            this.wrappedToken.scale18,
+            this.bptToken.virtualBalance,
+            this.params,
+        );
+
+        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18);
+    }
+
+    private _bptInForExactWrappedOut(swapAmount: TokenAmount): TokenAmount {
         const tokenOutScale18 = _calcWrappedOutPerBptIn(
             swapAmount.scale18,
             this.mainToken.scale18,

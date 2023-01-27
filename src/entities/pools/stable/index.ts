@@ -1,9 +1,9 @@
-import { PoolType, SwapKind } from '@/types';
+import { PoolType } from '@/types';
 import { Token, TokenAmount, BigintIsh } from '@/entities/';
 import { BasePool } from '@/entities/pools';
-import { WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
-import { _calculateInvariant, _calcOutGivenIn } from './math';
-import { RawComposableStablePool, RawPool } from '@/data/types';
+import { MathSol, WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
+import { _calculateInvariant, _calcOutGivenIn, _calcInGivenOut } from './math';
+import { RawComposableStablePool } from '@/data/types';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -23,9 +23,6 @@ export class StablePool implements BasePool {
     swapFee: bigint;
     tokens: StablePoolToken[];
     bptIndex: number;
-    // TODO: Stable limits
-    MAX_IN_RATIO = BigInt('300000000000000000'); // 0.3
-    MAX_OUT_RATIO = BigInt('300000000000000000'); // 0.3
 
     static fromRawPool(pool: RawComposableStablePool): StablePool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
@@ -67,19 +64,6 @@ export class StablePool implements BasePool {
         return tOut.amount * this.amp;
     }
 
-    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const tIn = this.tokens.find(t => t.token.address === tokenIn.address);
-        const tOut = this.tokens.find(t => t.token.address === tokenOut.address);
-
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
-
-        if (swapKind === SwapKind.GivenIn) {
-            return (tIn.amount * this.MAX_IN_RATIO) / WAD;
-        } else {
-            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
-        }
-    }
-
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         if (
             tokenIn === this.tokens[this.bptIndex].token ||
@@ -96,6 +80,9 @@ export class StablePool implements BasePool {
             if (tInIndex < 0 || tOutIndex < 0)
                 throw new Error('Pool does not contain the tokens provided');
 
+            if (swapAmount.amount > this.tokens[tInIndex].amount)
+                throw new Error('Swap amount exceeds the pool limit');
+
             const amountWithFee = this.subtractSwapFeeAmount(swapAmount);
             const amountWithRate = amountWithFee.mulFixed(this.tokens[tInIndex].rate);
             const balancesNoBpt = tokensNoBpt.map(t => t.scale18);
@@ -111,13 +98,56 @@ export class StablePool implements BasePool {
                 invariant,
             );
 
-            // TODO: Scale rate back down in TokenAmountRate class
             return TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
+        }
+    }
+
+    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+        if (
+            tokenIn === this.tokens[this.bptIndex].token ||
+            tokenOut === this.tokens[this.bptIndex].token
+        ) {
+            throw new Error('BPT swap not implemented yet');
+            // swapWithBpt()
+        } else {
+            const tokensNoBpt = [...this.tokens];
+            tokensNoBpt.splice(this.bptIndex, 1);
+            const tInIndex = tokensNoBpt.findIndex(t => t.token.address === tokenIn.address);
+            const tOutIndex = tokensNoBpt.findIndex(t => t.token.address === tokenOut.address);
+
+            if (tInIndex < 0 || tOutIndex < 0)
+                throw new Error('Pool does not contain the tokens provided');
+
+            if (swapAmount.amount > this.tokens[tOutIndex].amount)
+                throw new Error('Swap amount exceeds the pool limit');
+
+            const amountWithRate = swapAmount.mulFixed(this.tokens[tInIndex].rate);
+            const balancesNoBpt = tokensNoBpt.map(t => t.scale18);
+
+            const invariant = _calculateInvariant(this.amp, balancesNoBpt);
+
+            const tokenInScale18 = _calcInGivenOut(
+                this.amp,
+                balancesNoBpt,
+                tInIndex,
+                tOutIndex,
+                amountWithRate.scale18,
+                invariant,
+            );
+
+            const tokenInAmount = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18);
+            const amountWithFee = this.addSwapFeeAmount(tokenInAmount);
+
+            return amountWithFee;
         }
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
         const feeAmount = amount.mulFixed(this.swapFee);
         return amount.sub(feeAmount);
+    }
+
+    public addSwapFeeAmount(amount: TokenAmount): TokenAmount {
+        return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 }

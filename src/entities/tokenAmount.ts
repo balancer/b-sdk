@@ -43,19 +43,18 @@ export class TokenAmount {
         return new TokenAmount(this.token, this.amount - other.amount);
     }
 
-    // TODO Decide what to do for standard mul vs token mul
     public mulFixed(other: bigint): TokenAmount {
         const multiplied = (this.amount * other) / WAD;
         return new TokenAmount(this.token, multiplied);
     }
 
-    public divFixed(other: bigint): TokenAmount {
-        const divided = (this.amount * WAD) / other;
+    public divUpFixed(other: bigint): TokenAmount {
+        const divided = (this.amount * WAD + other - 1n) / other;
         return new TokenAmount(this.token, divided);
     }
-    // TODO Decide what to do for standard div vs token div
-    public divide(other: bigint): TokenAmount {
-        const divided = (this.amount * this.decimalScale) / other;
+
+    public divDownFixed(other: bigint): TokenAmount {
+        const divided = (this.amount * WAD) / other;
         return new TokenAmount(this.token, divided);
     }
 

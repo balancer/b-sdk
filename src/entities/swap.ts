@@ -62,12 +62,15 @@ export class Swap {
             });
         } else {
             paths.map(p => {
-                p.path.pools.map((pool, i) => {
+                // Vault expects given out swaps to be in reverse order
+                const reversedPools = [...p.path.pools].reverse();
+                const reversedTokens = [...p.path.tokens].reverse();
+                reversedPools.map((pool, i) => {
                     swaps.push({
                         poolId: pool.id,
-                        assetInIndex: this.assets.indexOf(p.path.tokens[i].address),
-                        assetOutIndex: this.assets.indexOf(p.path.tokens[i + 1].address),
-                        amount: i === p.path.pools.length - 1 ? p.outputAmount.amount.toString() : '0',
+                        assetInIndex: this.assets.indexOf(reversedTokens[i + 1].address),
+                        assetOutIndex: this.assets.indexOf(reversedTokens[i].address),
+                        amount: i === 0 ? p.outputAmount.amount.toString() : '0',
                         userData: DEFAULT_USERDATA,
                     });
                 });
@@ -97,16 +100,15 @@ export class Swap {
     }
 
     public get outputAmount(): TokenAmount {
-        // TODO: This check is not working
-        // if (!this.paths.every(p => p.outputAmount.token === this.paths[0].outputAmount.token)) {
-        //   throw new Error('Output amount can only be calculated if all paths have the same output token');
-        // }
+        if (!this.paths.every(p => p.outputAmount.token === this.paths[0].outputAmount.token)) {
+            throw new Error(
+                'Output amount can only be calculated if all paths have the same output token',
+            );
+        }
         const amounts = this.paths.map(path => path.outputAmount);
         return amounts.reduce((a, b) => a.add(b));
     }
 
-    // TODO: Decide if query should stay on the swap class
-    // TODO: Decide if provider should be passed to the constructor
     public async query(provider: BaseProvider, block?: number): Promise<TokenAmount> {
         const vault = new Contract(
             `0xBA12222222228d8Ba445958a75a0704d566BF2C8`,
@@ -124,13 +126,16 @@ export class Swap {
             },
         );
 
-        const amount = this.swapKind === SwapKind.GivenIn ? TokenAmount.fromRawAmount(
-            this.paths[0].outputAmount.token,
-            deltas[this.assets.indexOf(this.paths[0].outputAmount.token.address)].abs(),
-        ) : TokenAmount.fromRawAmount(
-            this.paths[0].inputAmount.token,
-            deltas[this.assets.indexOf(this.paths[0].inputAmount.token.address)].abs(),
-        );
+        const amount =
+            this.swapKind === SwapKind.GivenIn
+                ? TokenAmount.fromRawAmount(
+                      this.paths[0].outputAmount.token,
+                      deltas[this.assets.indexOf(this.paths[0].outputAmount.token.address)].abs(),
+                  )
+                : TokenAmount.fromRawAmount(
+                      this.paths[0].inputAmount.token,
+                      deltas[this.assets.indexOf(this.paths[0].inputAmount.token.address)].abs(),
+                  );
         return amount;
     }
 
