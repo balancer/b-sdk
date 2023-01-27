@@ -48,6 +48,11 @@ export class TokenAmount {
         const multiplied = (this.amount * other) / WAD;
         return new TokenAmount(this.token, multiplied);
     }
+
+    public divFixed(other: bigint): TokenAmount {
+        const divided = (this.amount * WAD) / other;
+        return new TokenAmount(this.token, divided);
+    }
     // TODO Decide what to do for standard div vs token div
     public divide(other: bigint): TokenAmount {
         const divided = (this.amount * this.decimalScale) / other;

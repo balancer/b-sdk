@@ -30,21 +30,41 @@ export class Router {
         swapKind: SwapKind,
         swapAmount: TokenAmount,
     ): Promise<Swap> => {
-        // TODO: Refactor these hacks so path outputAmount is not async
+        if (paths.length === 0) {
+            throw new Error('No potential swap paths provided');
+        }
         // TODO: swapAmount is being used in full on both paths
         //       this should only be for ordering and then figuring out best split
-        const quotePaths = paths.map(path => {
-            return new PathWithAmount(path.tokens, path.pools, swapAmount);
+        const quotePaths: PathWithAmount[] = [];
+
+        // Check if PathWithAmount is valid (each hop pool swap limit)
+        paths.forEach(path => {
+            try {
+                quotePaths.push(new PathWithAmount(path.tokens, path.pools, swapAmount));
+            } catch {
+                return;
+            }
         });
-        const valueArr = await Promise.all(
-            quotePaths.map(async item => {
+        let valueArr: { item: PathWithAmount; value: number }[];
+
+        if (swapKind === SwapKind.GivenIn) {
+            valueArr = quotePaths.map(item => {
                 return {
                     item,
-                    value: Number((await item.outputAmount()).amount),
+                    value: Number((item.outputAmount).amount),
                 };
             }),
-        );
-        valueArr.sort((a, b) => b.value - a.value);
+            valueArr.sort((a, b) => b.value - a.value);
+        } else {
+            valueArr = quotePaths.map(item => {
+                return {
+                    item,
+                    value: Number((item.inputAmount).amount),
+                };
+            }),
+            valueArr.sort((a, b) => a.value - b.value);
+        }
+        
 
         const orderedQuotePaths = valueArr.map(item => item.item);
         const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 1), swapKind);

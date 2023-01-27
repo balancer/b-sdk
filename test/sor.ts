@@ -17,7 +17,7 @@ BigInt.prototype['toJSON'] = function () {
 const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 const SOR_QUERIES = '0x40f7218fa50ead995c4343eB0bB46dD414F9da7A';
 
-export async function testWeight(): Promise<void> {
+export async function testWeightIn(): Promise<void> {
     const chainId = ChainId.MAINNET;
     const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
     const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
@@ -44,6 +44,37 @@ export async function testWeight(): Promise<void> {
     const onchain = await swap.query(provider);
     console.log(quote);
     console.log(onchain);
+}
+
+export async function testWeightOut(): Promise<void> {
+    const chainId = ChainId.MAINNET;
+    const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
+    const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
+    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+        VAULT,
+        SOR_QUERIES,
+        process.env['ETHEREUM_RPC_URL']!,
+    );
+    const aaveReserveEnricher = new AaveReserveEnricher();
+
+    const sor = new SmartOrderRouter({
+        chainId,
+        provider,
+        poolDataProviders: subgraphPoolDataService,
+        poolDataEnrichers: aaveReserveEnricher,
+    });
+
+    const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
+    const WETH = new Token(chainId, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH');
+    const outputAmount = TokenAmount.fromHumanAmount(WETH, '1');
+
+    const { swap, quote } = await sor.getSwaps(BAL, WETH, 1, outputAmount);
+
+    const calldata = swap.callData();
+    const onchain = await swap.query(provider);
+    console.log(quote);
+    console.log(onchain);
+    console.log(calldata);
 }
 
 export async function testStable(): Promise<void> {
@@ -79,5 +110,6 @@ export async function testStable(): Promise<void> {
     console.log(onchain);
 }
 
-// testWeight();
-testStable();
+// testWeightIn();
+testWeightOut();
+// testStable();

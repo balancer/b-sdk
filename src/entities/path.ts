@@ -21,6 +21,8 @@ export class Path {
 export class PathWithAmount extends Path {
     public readonly swapAmount: TokenAmount;
     public readonly swapKind: SwapKind;
+    public readonly outputAmount: TokenAmount;
+    public readonly inputAmount: TokenAmount;
 
     public constructor(tokens: Token[], pools: BasePool[], swapAmount: TokenAmount) {
         super(tokens, pools);
@@ -32,15 +34,22 @@ export class PathWithAmount extends Path {
         } else {
             this.swapKind = SwapKind.GivenOut;
         }
+
+        try {
+            this.outputAmount = this.calcOutputAmount();
+            this.inputAmount = this.calcInputAmount();
+        } catch (error) {
+            throw new Error(`Invalid path, swap amount exceeds maximum for pool`);
+        }
     }
 
-    public async outputAmount(): Promise<TokenAmount> {
+    private calcOutputAmount(): TokenAmount {
         if (this.swapKind === SwapKind.GivenIn) {
             const amounts: TokenAmount[] = new Array(this.tokens.length);
             amounts[0] = this.swapAmount;
             for (let i = 0; i < this.pools.length; i++) {
                 const pool = this.pools[i];
-                const outputAmount = await pool.swapGivenIn(
+                const outputAmount = pool.swapGivenIn(
                     this.tokens[i],
                     this.tokens[i + 1],
                     amounts[i],
@@ -49,6 +58,26 @@ export class PathWithAmount extends Path {
             }
             const outputAmount = amounts[amounts.length - 1];
             return outputAmount;
+        } else {
+            return this.swapAmount;
+        }
+    }
+
+    private calcInputAmount(): TokenAmount {
+        if (this.swapKind === SwapKind.GivenOut) {
+            const amounts: TokenAmount[] = new Array(this.tokens.length);
+            amounts[amounts.length - 1] = this.swapAmount;
+            for (let i = this.pools.length; i >= 1; i--) {
+                const pool = this.pools[i - 1];
+                const inputAmount = pool.swapGivenOut(
+                    this.tokens[i - 1],
+                    this.tokens[i],
+                    amounts[i],
+                );
+                amounts[i - 1] = inputAmount;
+            }
+            const inputAmount = amounts[0];
+            return inputAmount;
         } else {
             return this.swapAmount;
         }
