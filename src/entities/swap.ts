@@ -1,6 +1,6 @@
 import { Path, PathWithAmount } from './path';
 import { TokenAmount } from './';
-import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
+import { SwapKind, BatchSwapStep } from '../types';
 import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT } from '../utils';
 import { BaseProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -17,19 +17,8 @@ export class Swap {
         }[] = [];
 
         for (const path of fromPaths) {
-            const amounts: TokenAmount[] = new Array(path.tokens.length);
-            amounts[0] = path.swapAmount;
-            for (let i = 0; i < path.pools.length; i++) {
-                const pool = path.pools[i];
-                const outputAmount = await pool.swapGivenIn(
-                    path.tokens[i],
-                    path.tokens[i + 1],
-                    amounts[i],
-                );
-                amounts[i + 1] = outputAmount;
-            }
-            const inputAmount = amounts[0];
-            const outputAmount = amounts[amounts.length - 1];
+            const inputAmount = path.inputAmount;
+            const outputAmount = path.outputAmount;
             paths.push({ path, inputAmount, outputAmount });
         }
 
@@ -59,17 +48,31 @@ export class Swap {
             ),
         ];
         const swaps = [] as BatchSwapStep[];
-        paths.map(p => {
-            p.path.pools.map((pool, i) => {
-                swaps.push({
-                    poolId: pool.id,
-                    assetInIndex: this.assets.indexOf(p.path.tokens[i].address),
-                    assetOutIndex: this.assets.indexOf(p.path.tokens[i + 1].address),
-                    amount: i === 0 ? p.inputAmount.amount.toString() : '0',
-                    userData: DEFAULT_USERDATA,
+        if (this.swapKind === SwapKind.GivenIn) {
+            paths.map(p => {
+                p.path.pools.map((pool, i) => {
+                    swaps.push({
+                        poolId: pool.id,
+                        assetInIndex: this.assets.indexOf(p.path.tokens[i].address),
+                        assetOutIndex: this.assets.indexOf(p.path.tokens[i + 1].address),
+                        amount: i === 0 ? p.inputAmount.amount.toString() : '0',
+                        userData: DEFAULT_USERDATA,
+                    });
                 });
             });
-        });
+        } else {
+            paths.map(p => {
+                p.path.pools.map((pool, i) => {
+                    swaps.push({
+                        poolId: pool.id,
+                        assetInIndex: this.assets.indexOf(p.path.tokens[i].address),
+                        assetOutIndex: this.assets.indexOf(p.path.tokens[i + 1].address),
+                        amount: i === p.path.pools.length - 1 ? p.outputAmount.amount.toString() : '0',
+                        userData: DEFAULT_USERDATA,
+                    });
+                });
+            });
+        }
         this.swaps = swaps;
     }
 
@@ -112,7 +115,7 @@ export class Swap {
         );
 
         const deltas = await vault.callStatic.queryBatchSwap(
-            SwapKind.GivenIn,
+            this.swapKind,
             this.swaps,
             this.assets,
             DEFAULT_FUND_MANAGMENT,
@@ -121,17 +124,20 @@ export class Swap {
             },
         );
 
-        const outputAmount = TokenAmount.fromRawAmount(
+        const amount = this.swapKind === SwapKind.GivenIn ? TokenAmount.fromRawAmount(
             this.paths[0].outputAmount.token,
             deltas[this.assets.indexOf(this.paths[0].outputAmount.token.address)].abs(),
+        ) : TokenAmount.fromRawAmount(
+            this.paths[0].inputAmount.token,
+            deltas[this.assets.indexOf(this.paths[0].inputAmount.token.address)].abs(),
         );
-        return outputAmount;
+        return amount;
     }
 
-    public async callData(): Promise<string> {
+    public callData(): string {
         const iface = new Interface(vaultAbi);
-        const callData = await iface.encodeFunctionData('queryBatchSwap', [
-            SwapKind.GivenIn,
+        const callData = iface.encodeFunctionData('queryBatchSwap', [
+            this.swapKind,
             this.swaps,
             this.assets,
             DEFAULT_FUND_MANAGMENT,

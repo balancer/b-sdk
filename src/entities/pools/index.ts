@@ -10,6 +10,7 @@ export interface BasePool {
     tokens: TokenAmount[];
     getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint;
     swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount;
+    swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount;
 }
 
 export interface BasePoolFactory {
