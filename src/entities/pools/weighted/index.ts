@@ -1,8 +1,8 @@
 import { PoolType, SwapKind } from '@/types';
 import { Token, TokenAmount, BigintIsh } from '@/entities/';
 import { BasePool } from '@/entities/pools';
-import { WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
-import { _calcOutGivenIn } from './math';
+import { MathSol, WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
+import { _calcOutGivenIn, _calcInGivenOut } from './math';
 import { RawPool } from '@/data/types';
 
 export class WeightedPoolToken extends TokenAmount {
@@ -75,6 +75,8 @@ export class WeightedPool implements BasePool {
         const tOut = this.tokens.find(t => t.token.address === tokenOut.address);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenIn))
+            throw new Error('Swap amount exceeds the pool limit');
 
         const amountWithFee = this.subtractSwapFeeAmount(swapAmount);
 
@@ -87,11 +89,40 @@ export class WeightedPool implements BasePool {
             this.poolTypeVersion,
         );
 
-        return TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
+        const tokenOutAmount = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
+
+        return tokenOutAmount;
+    }
+
+    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+        const tIn = this.tokens.find(t => t.token.address === tokenIn.address);
+        const tOut = this.tokens.find(t => t.token.address === tokenOut.address);
+
+        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenOut))
+            throw new Error('Swap amount exceeds the pool limit');
+
+        const tokenInScale18 = _calcInGivenOut(
+            tIn.scale18,
+            tIn.weight,
+            tOut.scale18,
+            tOut.weight,
+            swapAmount.scale18,
+            this.poolTypeVersion,
+        );
+
+        const tokenInAmount = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18);
+        const amountWithFee = this.addSwapFeeAmount(tokenInAmount);
+
+        return amountWithFee;
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
         const feeAmount = amount.mulFixed(this.swapFee);
         return amount.sub(feeAmount);
+    }
+
+    public addSwapFeeAmount(amount: TokenAmount): TokenAmount {
+        return amount.divFixed(MathSol.complementFixed(this.swapFee));
     }
 }
