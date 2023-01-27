@@ -1,6 +1,6 @@
 import { BasePool, BasePoolFactory } from '@/entities/pools';
 import { LinearPool } from './';
-import { RawPool } from '@/data/types';
+import { RawLinearPool, RawPool } from '@/data/types';
 
 export class LinearPoolFactory implements BasePoolFactory {
     public isPoolForFactory(pool: RawPool): boolean {
@@ -8,6 +8,6 @@ export class LinearPoolFactory implements BasePoolFactory {
     }
 
     public create(pool: RawPool): BasePool {
-        return LinearPool.fromRawPool(pool);
+        return LinearPool.fromRawPool(pool as RawLinearPool);
     }
 }
