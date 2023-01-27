@@ -16,7 +16,6 @@ export interface RawPool {
     totalShares: string;
 
     hasActiveAmpUpdate?: boolean;
-    hasActiveWeightUpdate?: boolean;
 }
 
 export interface RawPoolToken {
@@ -32,6 +31,7 @@ export interface RawPoolToken {
 
 export interface LoadPoolsOptions {
     block?: number;
+    poolsSupportingGradualWeightUpdatesToInclude?: string[];
 }
 
 export interface PoolDataProvider {

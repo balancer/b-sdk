@@ -1,4 +1,5 @@
 import { LoadPoolsOptions, PoolDataEnricher, PoolDataProvider, RawPool } from './types';
+import { poolSupportsGradualWeightUpdates } from '@/utils';
 
 export class PoolDataService {
     constructor(
@@ -12,7 +13,20 @@ export class PoolDataService {
             this.providers.map(provider => provider.getPools(options)),
         );
 
-        let pools = responses.map(response => response.pools).flat();
+        const poolsSupportingGradualWeightUpdatesToInclude =
+            options?.poolsSupportingGradualWeightUpdatesToInclude || [];
+
+        let pools = responses
+            .map(response => response.pools)
+            .flat()
+            .filter(pool => {
+                if (poolSupportsGradualWeightUpdates(pool.poolType)) {
+                    return poolsSupportingGradualWeightUpdatesToInclude.includes(pool.id);
+                }
+
+                return true;
+            });
+
         //we take the smallest block number from the set
         const syncedToBlockNumber = responses
             .map(response => response.syncedToBlockNumber || 0)
@@ -30,5 +44,9 @@ export class PoolDataService {
         }
 
         return pools;
+    }
+
+    private poolHasWeightUpdates(pool: RawPool) {
+        return pool.poolType === 'LiquidityBootstrapping' || pool.poolType === 'Investment';
     }
 }

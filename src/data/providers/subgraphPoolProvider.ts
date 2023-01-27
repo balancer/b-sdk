@@ -30,18 +30,8 @@ export class SubgraphPoolProvider implements PoolDataProvider {
         const query = gql`
             query poolsQuery($pageSize: Int!, $id: String) {
                 ${poolsFragment}
-                gradualWeightUpdates(where: { endTimestamp_gte: ${timestampMinusOneHour}, startTimestamp_lte: ${timestampPlusOneHour} }) {
-                    poolId {
-                        id
-                    }
-                }
                 ampUpdates(where: { endTimestamp_gte: ${timestampMinusOneHour}, startTimestamp_lte: ${timestampPlusOneHour} }) {
                     poolId {
-                        id
-                    }
-                }
-                swapFeeUpdates(where: { startTimestamp_gte: ${timestampMinusOneHour} }) {
-                    pool {
                         id
                     }
                 }
@@ -60,7 +50,6 @@ export class SubgraphPoolProvider implements PoolDataProvider {
         `;
 
         let pools: RawPool[] = [];
-        let weightUpdates: PoolUpdate[] = [];
         let ampUpdates: PoolUpdate[] = [];
         let syncedToBlockNumber: number = 0;
 
@@ -90,7 +79,6 @@ export class SubgraphPoolProvider implements PoolDataProvider {
 
                         if (lastId === '') {
                             ampUpdates = poolsResult.ampUpdates || [];
-                            weightUpdates = poolsResult.gradualWeightUpdates || [];
                         }
 
                         if (poolsResult._meta) {
@@ -122,6 +110,8 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             },
         );
 
+        const poolsWithAmpUpdates = new Set(ampUpdates.map(update => update.poolId.id));
+
         const filtered = pools.filter(
             pool =>
                 pool.swapEnabled &&
@@ -129,16 +119,10 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                 pool.totalShares !== '0.000000000001',
         );
 
-        const poolsWithAmpUpdates = new Set(ampUpdates.map(update => update.poolId.id));
-        const poolsWithWeightUpdates = new Set(weightUpdates.map(update => update.poolId.id));
-
-        console.log('syncedToBlockNumber', syncedToBlockNumber);
-
         return {
             pools: filtered.map(pool => ({
                 ...pool,
                 hasActiveAmpUpdate: poolsWithAmpUpdates.has(pool.id),
-                hasActiveWeightUpdate: poolsWithWeightUpdates.has(pool.id),
             })),
             syncedToBlockNumber,
         };

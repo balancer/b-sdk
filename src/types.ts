@@ -20,6 +20,7 @@ export interface SwapOptions {
     slippage?: BigNumber;
     funds?: FundManagement;
     deadline?: BigNumber;
+    poolsSupportingGradualWeightUpdatesToInclude: string[];
 }
 
 export interface FundManagement {

@@ -3,6 +3,7 @@ import { LoadPoolsOptions, PoolDataEnricher, RawPool } from '../types';
 import { Interface } from '@ethersproject/abi';
 import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { poolSupportsGradualWeightUpdates } from '../../utils/pool';
 
 interface OnChainPoolData {
     id: string;
@@ -136,7 +137,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 linearPoolIdxs.push(i);
             }
 
-            if (pool.hasActiveWeightUpdate) {
+            if (poolSupportsGradualWeightUpdates(pool.poolType)) {
                 weightedPoolIdxs.push(i);
             }
 
