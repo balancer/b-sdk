@@ -3,7 +3,7 @@ import { Token, TokenAmount, BigintIsh } from '@/entities/';
 import { BasePool } from '@/entities/pools';
 import { MathSol, WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
 import { _calcOutGivenIn, _calcInGivenOut } from './math';
-import { RawPool, RawWeightedPool } from '@/data/types';
+import { RawWeightedPool } from '@/data/types';
 
 export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -123,6 +123,6 @@ export class WeightedPool implements BasePool {
     }
 
     public addSwapFeeAmount(amount: TokenAmount): TokenAmount {
-        return amount.divFixed(MathSol.complementFixed(this.swapFee));
+        return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 }
