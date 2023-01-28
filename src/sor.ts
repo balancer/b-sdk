@@ -94,4 +94,10 @@ export class SmartOrderRouter {
 
         return swapInfo;
     }
+
+    async fetchPools(swapOptions?: SwapOptions): Promise<BasePool[]> {
+        const rawPools = await this.poolDataService.getEnrichedPools(swapOptions);
+        const pools = this.poolParser.parseRawPools(rawPools);
+        return pools;
+    }
 }
