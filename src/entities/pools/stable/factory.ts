@@ -1,6 +1,6 @@
-import { BasePool, BasePoolFactory } from '@/entities/pools';
+import { BasePool, BasePoolFactory } from '../';
 import { StablePool } from './';
-import { RawComposableStablePool, RawPool } from '@/data/types';
+import { RawComposableStablePool, RawPool } from '../../../data/types';
 
 export class StablePoolFactory implements BasePoolFactory {
     public isPoolForFactory(pool: RawPool): boolean {

@@ -1,4 +1,4 @@
-import { MathSol, WAD } from '@/utils/';
+import { MathSol, WAD } from '../../../utils/';
 import { Params } from './';
 
 export function _calcWrappedOutPerMainIn(
