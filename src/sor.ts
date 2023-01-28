@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import { Router } from './router';
-import { Swap, Token, TokenAmount } from './entities';
+import { BasePool, Swap, Token, TokenAmount } from './entities';
 import { ChainId } from './utils';
 import { SorConfig, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
