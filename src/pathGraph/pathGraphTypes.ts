@@ -1,28 +1,28 @@
-import { PoolTokenPair } from '@/types';
-import { BasePool } from '@/entities';
+import { PoolTokenPair } from '../types';
+import { BasePool, Token } from '../entities';
 
 export type PoolAddressDictionary = {
-  [address: string]: BasePool;
+    [address: string]: BasePool;
 };
 
 export type PoolPairMap = {
-  [tokenInTokenOut: string]: {
-    poolPair: PoolTokenPair;
-    normalizedLiquidity: bigint;
-  }[];
+    [tokenInTokenOut: string]: {
+        poolPair: PoolTokenPair;
+        normalizedLiquidity: bigint;
+    }[];
 };
 
 export interface PathGraphEdgeLabel {
-  poolId: string;
-  poolAddress: string;
-  normalizedLiquidity: bigint;
-  poolPair: PoolTokenPair;
-  isPhantomBptHop: boolean;
+    poolId: string;
+    poolAddress: string;
+    normalizedLiquidity: bigint;
+    poolPair: PoolTokenPair;
+    isPhantomBptHop: boolean;
 }
 
 export interface PathGraphEdge extends PathGraphEdgeLabel {
-  tokenIn: string;
-  tokenOut: string;
+    tokenIn: string;
+    tokenOut: string;
 }
 
 export interface PathGraphTraversalConfig {

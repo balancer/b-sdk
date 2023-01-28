@@ -1,9 +1,9 @@
-import { PoolType, SwapKind } from '@/types';
-import { Token, TokenAmount, BigintIsh } from '@/entities/';
-import { BasePool } from '@/entities/pools';
-import { MathSol, WAD, getPoolAddress, unsafeFastParseEther } from '@/utils';
+import { PoolType, SwapKind } from '../../../types';
+import { Token, TokenAmount, BigintIsh } from '../../';
+import { BasePool } from '../';
+import { MathSol, WAD, getPoolAddress, unsafeFastParseEther } from '../../../utils';
 import { _calcOutGivenIn, _calcInGivenOut } from './math';
-import { RawWeightedPool } from '@/data/types';
+import { RawWeightedPool } from '../../../data/types';
 
 export class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
