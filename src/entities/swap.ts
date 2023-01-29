@@ -9,7 +9,11 @@ import vaultAbi from '../abi/Vault.json';
 
 // A Swap can be a single or multiple paths
 export class Swap {
-    public static async fromPaths(fromPaths: PathWithAmount[], swapKind: SwapKind): Promise<Swap> {
+    public static async fromPaths(
+        fromPaths: PathWithAmount[],
+        swapKind: SwapKind,
+        swapAmount: TokenAmount,
+    ): Promise<Swap> {
         const paths: {
             path: Path;
             inputAmount: TokenAmount;
@@ -22,12 +26,13 @@ export class Swap {
             paths.push({ path, inputAmount, outputAmount });
         }
 
-        return new Swap({ paths, swapKind });
+        return new Swap({ paths, swapKind, swapAmount });
     }
 
     protected constructor({
         paths,
         swapKind,
+        swapAmount,
     }: {
         paths: {
             path: Path;
@@ -35,9 +40,11 @@ export class Swap {
             outputAmount: TokenAmount;
         }[];
         swapKind: SwapKind;
+        swapAmount: TokenAmount;
     }) {
         this.paths = paths;
         this.swapKind = swapKind;
+        this.isNativeSwap = swapAmount.token.isNative;
         this.isBatchSwap = paths.length > 1 || paths[0].path.pools.length > 2 ? true : false;
         this.assets = [
             ...new Set(
@@ -76,9 +83,16 @@ export class Swap {
                 });
             });
         }
+
+        if (this.isNativeSwap) {
+            const idx = this.assets.findIndex(a => a === swapAmount.token.wrapped);
+            this.assets[idx] = swapAmount.token.address;
+        }
+
         this.swaps = swaps;
     }
 
+    public readonly isNativeSwap: boolean;
     public readonly isBatchSwap: boolean;
     public readonly paths: {
         path: Path;

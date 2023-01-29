@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import { Router } from './router';
-import { Swap, Token, TokenAmount } from './entities';
+import { BasePool, Swap, Token, TokenAmount } from './entities';
 import { ChainId } from './utils';
 import { SorConfig, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
@@ -74,5 +74,30 @@ export class SmartOrderRouter {
         };
 
         return swapInfo;
+    }
+
+    async getSwapsWithPools(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapKind: SwapKind,
+        swapAmount: TokenAmount,
+        pools: BasePool[],
+        swapOptions?: SwapOptions,
+    ): Promise<SwapInfo> {
+        const candidatePaths = this.router.getCandidatePaths(tokenIn, tokenOut, swapKind, pools);
+        const bestPaths = await this.router.getBestPaths(candidatePaths, swapKind, swapAmount);
+
+        const swapInfo = {
+            quote: swapKind === SwapKind.GivenIn ? bestPaths.outputAmount : bestPaths.inputAmount,
+            swap: bestPaths,
+        };
+
+        return swapInfo;
+    }
+
+    async fetchPools(swapOptions?: SwapOptions): Promise<BasePool[]> {
+        const rawPools = await this.poolDataService.getEnrichedPools(swapOptions);
+        const pools = this.poolParser.parseRawPools(rawPools);
+        return pools;
     }
 }

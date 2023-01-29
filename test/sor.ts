@@ -4,7 +4,7 @@ dotenv.config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SmartOrderRouter } from '../src/sor';
 import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import { ChainId, SUBGRAPH_URLS } from '../src/utils';
+import { ChainId, ETH, SUBGRAPH_URLS } from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapOptions } from '../src/types';
@@ -38,10 +38,9 @@ export async function testWeightIn(): Promise<void> {
     });
 
     const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
-    const WETH = new Token(chainId, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH');
-    const inputAmount = TokenAmount.fromHumanAmount(BAL, '1');
+    const inputAmount = TokenAmount.fromHumanAmount(ETH, '1');
 
-    const { swap, quote } = await sor.getSwaps(BAL, WETH, 0, inputAmount);
+    const { swap, quote } = await sor.getSwaps(ETH, BAL, 0, inputAmount);
 
     const onchain = await swap.query(provider);
     console.log(quote);
@@ -144,6 +143,6 @@ export async function testStableOut(): Promise<void> {
 }
 
 testWeightIn();
-testWeightOut();
-testStableIn();
-testStableOut();
+// testWeightOut();
+// testStableIn();
+// testStableOut();
