@@ -1,3 +1,5 @@
+import { Token } from '../entities/token';
+
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const MAX_UINT256 = 5192296858534827628530496329220095n;
 
@@ -16,6 +18,21 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-prune-v2',
     [ChainId.ARBITRUM_ONE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
 };
+
+export const NATIVE_ASSETS = {
+    [ChainId.MAINNET]: new Token(
+        ChainId.MAINNET,
+        ZERO_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    ),
+    [ChainId.GOERLI]: new Token(ChainId.GOERLI, ZERO_ADDRESS, 18, 'ETH', 'Ether'),
+    [ChainId.POLYGON]: new Token(ChainId.POLYGON, ZERO_ADDRESS, 18, 'MATIC', 'Matic'),
+};
+
+export const ETH = NATIVE_ASSETS[ChainId.MAINNET];
 
 export const DEFAULT_FUND_MANAGMENT = {
     sender: ZERO_ADDRESS,

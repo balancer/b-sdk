@@ -73,11 +73,11 @@ export class PathGraph {
         };
 
         const tokenPaths = this.findAllValidTokenPaths({
-            token: tokenIn.address,
-            tokenIn: tokenIn.address,
-            tokenOut: tokenOut.address,
+            token: tokenIn.wrapped,
+            tokenIn: tokenIn.wrapped,
+            tokenOut: tokenOut.wrapped,
             config,
-            tokenPath: [tokenIn.address],
+            tokenPath: [tokenIn.wrapped],
         });
 
         const paths: PathGraphEdgeData[][] = [];
@@ -149,7 +149,7 @@ export class PathGraph {
             for (const tokenAmount of pool.tokens) {
                 const token = tokenAmount.token;
 
-                if (!this.nodes.has(token.address)) {
+                if (!this.nodes.has(token.wrapped)) {
                     this.addNode(token);
                 }
             }
@@ -194,12 +194,12 @@ export class PathGraph {
     }
 
     private addNode(token: Token): void {
-        this.nodes.set(token.address, {
-            isPhantomBpt: !!this.poolAddressMap[token.address],
+        this.nodes.set(token.wrapped, {
+            isPhantomBpt: !!this.poolAddressMap[token.wrapped],
         });
 
-        if (!this.edges.has(token.address)) {
-            this.edges.set(token.address, new Map());
+        if (!this.edges.has(token.wrapped)) {
+            this.edges.set(token.wrapped, new Map());
         }
     }
 
@@ -227,16 +227,16 @@ export class PathGraph {
         edgeProps: PathGraphEdgeData;
         maxPathsPerTokenPair: number;
     }): void {
-        const tokenInVertex = this.nodes.get(edgeProps.tokenIn.address);
-        const tokenOutVertex = this.nodes.get(edgeProps.tokenOut.address);
-        const tokenInNode = this.edges.get(edgeProps.tokenIn.address);
+        const tokenInVertex = this.nodes.get(edgeProps.tokenIn.wrapped);
+        const tokenOutVertex = this.nodes.get(edgeProps.tokenOut.wrapped);
+        const tokenInNode = this.edges.get(edgeProps.tokenIn.wrapped);
 
         if (!tokenInVertex || !tokenOutVertex || !tokenInNode) {
             throw new Error('Attempting to add invalid edge');
         }
 
         const hasPhantomBpt = tokenInVertex.isPhantomBpt || tokenOutVertex.isPhantomBpt;
-        const existingEdges = tokenInNode.get(edgeProps.tokenOut.address) || [];
+        const existingEdges = tokenInNode.get(edgeProps.tokenOut.wrapped) || [];
 
         //TODO: ideally we don't call sort every time, this isn't performant
         const sorted = [...existingEdges, edgeProps].sort((a, b) =>
@@ -244,7 +244,7 @@ export class PathGraph {
         );
 
         tokenInNode.set(
-            edgeProps.tokenOut.address,
+            edgeProps.tokenOut.wrapped,
             sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, 2) : sorted,
         );
     }
