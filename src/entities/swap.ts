@@ -1,7 +1,7 @@
 import { Path, PathWithAmount } from './path';
 import { TokenAmount } from './';
 import { SwapKind, BatchSwapStep } from '../types';
-import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT } from '../utils';
+import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT, ZERO_ADDRESS } from '../utils';
 import { BaseProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { Interface } from '@ethersproject/abi';
@@ -86,7 +86,7 @@ export class Swap {
 
         if (this.isNativeSwap) {
             const idx = this.assets.findIndex(a => a === swapAmount.token.wrapped);
-            this.assets[idx] = swapAmount.token.address;
+            this.assets[idx] = ZERO_ADDRESS;
         }
 
         this.swaps = swaps;

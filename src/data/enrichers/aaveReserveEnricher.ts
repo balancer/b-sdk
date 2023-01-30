@@ -27,14 +27,20 @@ export class AaveReserveEnricher implements PoolDataEnricher {
         syncedToBlockNumber?: number,
         options?: LoadPoolsOptions,
     ): Promise<AaveReserve[]> {
+        const blockQuery = options && options.block ? `block: { number: ${options.block} }` : '';
+
+        // This assumes that the aave reserve with the most liqudity matches the aToken Balancer uses
+        // Since later a [].find() is used to get the first matching underlying token
+        // Prevents an intermediate wrapped token -> aToken call since this isn't stored in the subgraph
         const query = gql`
             query getRates {
-                reserves {
+                reserves(orderBy: totalLiquidity, orderDirection: desc) {
                     id
                     underlyingAsset
                     liquidityRate
                     liquidityIndex
                     lastUpdateTimestamp
+                    totalLiquidity
                 }
             }
         `;
@@ -78,7 +84,8 @@ export class AaveReserveEnricher implements PoolDataEnricher {
     public enrichPoolsWithData(pools: RawPool[], additionalPoolData: AaveReserve[]): RawPool[] {
         for (const pool of pools) {
             if (pool.poolType === 'AaveLinear') {
-                const mT = pool.tokens[pool.mainIndex];
+                const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
+                const mT = orderedTokens[pool.mainIndex];
                 const rateData = additionalPoolData.find(r => r.underlyingAsset === mT.address);
 
                 if (!rateData) {
@@ -96,7 +103,7 @@ export class AaveReserveEnricher implements PoolDataEnricher {
                     BigInt(rateData.lastUpdateTimestamp),
                 );
 
-                pool.tokens[pool.wrappedIndex].priceRate = formatFixed(rate.toString(), 18);
+                orderedTokens[pool.wrappedIndex].priceRate = formatFixed(rate.toString(), 18);
             }
         }
 

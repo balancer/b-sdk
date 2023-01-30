@@ -67,7 +67,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
         console.time('jsonRpcFetch');
         const { balances, amps, linearWrappedTokenRates, totalSupplies, weights } =
-            await this.fetchOnChainPoolData({ poolIds, config });
+            await this.fetchOnChainPoolData({ poolIds, config, options });
         console.timeEnd('jsonRpcFetch');
 
         return poolIds.map((poolId, i) => ({
@@ -170,9 +170,11 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
     private async fetchOnChainPoolData({
         poolIds,
         config,
+        options,
     }: {
         poolIds: string[];
         config: SorPoolDataQueryConfig;
+        options?: LoadPoolsOptions;
     }) {
         return jsonRpcFetch<{
             balances: BigNumber[][];
@@ -188,6 +190,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             contractInterface: this.sorQueriesInterface,
             functionFragment: 'getPoolData',
             values: [poolIds, config],
+            options,
         });
     }
 
