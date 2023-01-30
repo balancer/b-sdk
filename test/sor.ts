@@ -91,7 +91,7 @@ export async function testStableIn(): Promise<void> {
         chainId,
         provider,
         poolDataProviders: subgraphPoolDataService,
-        poolDataEnrichers: aaveReserveEnricher,
+        poolDataEnrichers: onChainPoolDataEnricher,
     });
 
     const USDC = new Token(chainId, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC');
@@ -99,12 +99,12 @@ export async function testStableIn(): Promise<void> {
     const inputAmount = TokenAmount.fromHumanAmount(USDC, '100');
 
     const swapOptions: SwapOptions = {
-        block: 16443618,
+        block: 16516264,
     };
 
     const { swap, quote } = await sor.getSwaps(USDC, DAI, 0, inputAmount, swapOptions);
 
-    const onchain = await swap.query(provider, swapOptions.block);
+    const onchain = await swap.query(provider);
     console.log(quote);
     console.log(onchain);
 }
@@ -131,18 +131,14 @@ export async function testStableOut(): Promise<void> {
     const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
     const outputAmount = TokenAmount.fromHumanAmount(DAI, '100');
 
-    const swapOptions: SwapOptions = {
-        block: 16443618,
-    };
+    const { swap, quote } = await sor.getSwaps(USDC, DAI, 1, outputAmount);
 
-    const { swap, quote } = await sor.getSwaps(USDC, DAI, 1, outputAmount, swapOptions);
-
-    const onchain = await swap.query(provider, swapOptions.block);
+    const onchain = await swap.query(provider);
     console.log(quote);
     console.log(onchain);
 }
 
-testWeightIn();
+// testWeightIn();
 // testWeightOut();
-// testStableIn();
+testStableIn();
 // testStableOut();
