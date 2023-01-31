@@ -1,4 +1,4 @@
-import { PoolType } from '../../../types';
+import { PoolType, SwapKind } from '../../../types';
 import { BigintIsh, Token, TokenAmount } from '../../';
 import { BasePool } from '../../pools';
 import { getPoolAddress, MAX_UINT256, unsafeFastParseEther, WAD } from '../../../utils';
@@ -11,6 +11,11 @@ import {
     _calcWrappedOutPerMainIn,
 } from './math';
 import { RawLinearPool } from '../../../data/types';
+
+const ALMOST_ONE = BigInt(unsafeFastParseEther('0.99'));
+const ONE = BigInt(unsafeFastParseEther('1'));
+const MAX_RATIO = BigInt(unsafeFastParseEther('10'));
+const MAX_TOKEN_BALANCE = MAX_UINT256 - 1n;
 
 export class BPT extends TokenAmount {
     public readonly rate: bigint;
@@ -179,6 +184,33 @@ export class LinearPool implements BasePool {
             }
         } else {
             throw new Error('Pool does not contain the tokens provided');
+        }
+    }
+
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+        const tIn = this.tokens.find(t => t.token.address === tokenIn.address);
+        const tOut = this.tokens.find(t => t.token.address === tokenOut.address);
+
+        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+
+        if (swapKind === SwapKind.GivenIn) {
+            if (tokenOut.isEqual(this.bptToken.token)) {
+                // Swapping to BPT allows for a very large amount so using pre-minted amount as estimation
+                return MAX_TOKEN_BALANCE;
+            } else {
+                const amount = TokenAmount.fromRawAmount(
+                    tokenOut,
+                    (tOut.amount * ALMOST_ONE) / ONE,
+                );
+
+                return this.swapGivenOut(tokenIn, tokenOut, amount).amount;
+            }
+        } else {
+            if (tokenOut.isEqual(this.bptToken.token)) {
+                return (tOut.amount * MAX_RATIO) / ONE;
+            } else {
+                return (tOut.amount * ALMOST_ONE) / ONE;
+            }
         }
     }
 
