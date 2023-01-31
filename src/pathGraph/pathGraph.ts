@@ -115,7 +115,7 @@ export class PathGraph {
     }
 
     private sortAndFilterPaths(paths: PathGraphEdgeData[][]): PathGraphEdgeData[][] {
-        const pathsWithLimits: { path: PathGraphEdgeData[]; limit: bigint }[] = paths
+        const pathsWithLimits = paths
             .map(path => {
                 let limit = 0n;
 
