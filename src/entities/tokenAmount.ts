@@ -60,7 +60,8 @@ export class TokenAmount {
 
     public toSignificant(significantDigits: number = 6): string {
         return new _Decimal(this.amount.toString())
-            .div(new _Decimal(this.decimalScale.toString()).toDecimalPlaces(significantDigits))
+            .div(new _Decimal(this.decimalScale.toString()))
+            .toDecimalPlaces(significantDigits)
             .toString();
     }
 }
