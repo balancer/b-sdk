@@ -303,7 +303,7 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
     }
 
     private _bptInForExactWrappedOut(swapAmount: TokenAmount): TokenAmount {
