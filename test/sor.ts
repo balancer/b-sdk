@@ -34,7 +34,7 @@ export async function testWeightIn(): Promise<void> {
         chainId,
         provider,
         poolDataProviders: subgraphPoolDataService,
-        poolDataEnrichers: aaveReserveEnricher,
+        poolDataEnrichers: onChainPoolDataEnricher,
     });
 
     const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
@@ -138,7 +138,7 @@ export async function testStableOut(): Promise<void> {
     console.log(onchain);
 }
 
-// testWeightIn();
+testWeightIn();
 // testWeightOut();
-testStableIn();
+// testStableIn();
 // testStableOut();
