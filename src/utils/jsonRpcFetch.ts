@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch from 'isomorphic-fetch';
 import { ZERO_ADDRESS } from './constants';
 import { FunctionFragment } from '@ethersproject/abi';
 import { Interface } from '@ethersproject/abi';
