@@ -1,4 +1,4 @@
-import { PoolDataEnricher, PoolDataProvider, RawPool } from './types';
+import { GetPoolsResponse, PoolDataEnricher, PoolDataProvider, RawPool } from './types';
 import { SwapOptions } from '../types';
 
 export class PoolDataService {
@@ -14,15 +14,23 @@ export class PoolDataService {
         );
 
         let pools = responses.map(response => response.pools).flat();
-        //we take the smallest block number from the set
-        const syncedToBlockNumber = responses
-            .map(response => response.syncedToBlockNumber || 0)
-            .sort()[0];
+
+        const data: GetPoolsResponse = {
+            pools: responses.map(response => response.pools).flat(),
+            //we take the smallest block number from the set
+            syncedToBlockNumber: responses
+                .map(response => response.syncedToBlockNumber || 0)
+                .sort()[0],
+            poolsWithActiveWeightUpdates: responses
+                .map(response => response.poolsWithActiveWeightUpdates || [])
+                .flat(),
+            poolsWithActiveAmpUpdates: responses
+                .map(response => response.poolsWithActiveAmpUpdates || [])
+                .flat(),
+        };
 
         const additionalPoolData = await Promise.all(
-            this.enrichers.map(provider =>
-                provider.fetchAdditionalPoolData(pools, options, syncedToBlockNumber),
-            ),
+            this.enrichers.map(provider => provider.fetchAdditionalPoolData(data, options)),
         );
 
         // We enrich the pools in order of the enrichers array

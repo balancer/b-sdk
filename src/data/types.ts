@@ -100,9 +100,8 @@ export interface PoolDataProvider {
 // data (ie: Promise.all). The pools are then enriched by the enrichers in order.
 export interface PoolDataEnricher {
     fetchAdditionalPoolData(
-        pools: RawPool[],
+        data: GetPoolsResponse,
         options: SwapOptions,
-        syncedToBlockNumber?: number,
     ): Promise<AdditionalPoolData[]>;
 
     enrichPoolsWithData(pools: RawPool[], additionalPoolData: AdditionalPoolData[]): RawPool[];

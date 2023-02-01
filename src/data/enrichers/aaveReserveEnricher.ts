@@ -1,7 +1,7 @@
 import { gql, GraphQLClient } from 'graphql-request';
 import { default as retry } from 'async-retry';
 import Timeout from 'await-timeout';
-import { PoolDataEnricher, RawLinearPool, RawPool } from '../types';
+import { GetPoolsResponse, PoolDataEnricher, RawLinearPool, RawPool } from '../types';
 import { RAY, SECONDS_PER_YEAR, WAD } from '../../utils';
 import { formatFixed } from '@ethersproject/bignumber';
 import { SwapOptions } from '../../types';
@@ -24,9 +24,8 @@ export class AaveReserveEnricher implements PoolDataEnricher {
     }
 
     public async fetchAdditionalPoolData(
-        pools: RawPool[],
+        data: GetPoolsResponse,
         options: SwapOptions,
-        syncedToBlockNumber?: number,
     ): Promise<AaveReserve[]> {
         const blockQuery = options && options.block ? `block: { number: ${options.block} }` : '';
 

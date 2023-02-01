@@ -1,5 +1,5 @@
 import BalancerSorQueriesAbi from '../../abi/BalancerSorQueries.json';
-import { PoolDataEnricher, RawPool, RawLinearPool, RawBaseStablePool } from '../types';
+import { GetPoolsResponse, PoolDataEnricher, RawPool } from '../types';
 import { Interface } from '@ethersproject/abi';
 import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
@@ -40,18 +40,9 @@ interface OnChainPoolDataQueryConfig {
     loadSwapFees: boolean;
     loadLinearWrappedTokenRates: boolean;
     loadScalingFactors: boolean;
-    loadWeightsForPools: {
-        poolIds?: string[];
-        poolTypes?: string[];
-    };
-    loadAmpForPools: {
-        poolIds?: string[];
-        poolTypes?: string[];
-    };
-    loadScalingFactorsForPools: {
-        poolIds?: string[];
-        poolTypes?: string[];
-    };
+    loadWeightsForPoolTypes: string[];
+    loadAmpForPoolTypes: string[];
+    loadScalingFactorsForPoolTypes: string[];
 }
 
 interface SorPoolDataQueryConfig {
@@ -89,18 +80,19 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             loadLinearWrappedTokenRates: true,
             loadSwapFees: false,
             loadScalingFactors: false,
-            loadWeightsForPools: {},
-            loadAmpForPools: {},
-            loadScalingFactorsForPools: {},
+            loadAmpForPoolTypes: [],
+            loadScalingFactorsForPoolTypes: [],
+            loadWeightsForPoolTypes: [],
             ...config,
         };
     }
 
     public async fetchAdditionalPoolData(
-        rawPools: RawPool[],
+        data: GetPoolsResponse,
         options: SwapOptions,
-        syncedToBlockNumber?: number,
     ): Promise<OnChainPoolData[]> {
+        const rawPools = data.pools;
+
         if (rawPools.length === 0) {
             return [];
         }
@@ -113,7 +105,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             totalSupplyTypes,
             scalingFactorPoolIdxs,
             swapFeeTypes,
-        } = this.getPoolDataQueryParams(rawPools);
+        } = this.getPoolDataQueryParams(data);
 
         console.time('jsonRpcFetch');
         const { balances, amps, linearWrappedTokenRates, totalSupplies, weights } =
@@ -129,7 +121,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                     loadScalingFactors: scalingFactorPoolIdxs.length > 0,
                     loadAmps: ampPoolIdxs.length > 0,
 
-                    blockNumber: syncedToBlockNumber || 0,
+                    blockNumber: data.syncedToBlockNumber || 0,
                     totalSupplyTypes,
                     swapFeeTypes,
                     linearPoolIdxs,
@@ -187,15 +179,9 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         });
     }
 
-    private getPoolDataQueryParams(rawPools: RawPool[]) {
-        const poolIdsToLoadWeightsFor = this.config.loadWeightsForPools.poolIds || [];
-        const poolTypesToLoadWeightsFor = this.config.loadWeightsForPools.poolTypes || [];
-        const poolIdsToLoadAmpFor = this.config.loadAmpForPools.poolIds || [];
-        const poolTypesToLoadAmpFor = this.config.loadAmpForPools.poolTypes || [];
-        const poolIdsToLoadScalingFactorsFor = this.config.loadScalingFactorsForPools.poolIds || [];
-        const poolTypesToLoadScalingFactorsFor =
-            this.config.loadScalingFactorsForPools.poolTypes || [];
-
+    private getPoolDataQueryParams(data: GetPoolsResponse) {
+        const poolsWithActiveWeightUpdates = data.poolsWithActiveWeightUpdates || [];
+        const poolsWithActiveAmpUpdates = data.poolsWithActiveAmpUpdates || [];
         const poolIds: string[] = [];
         const totalSupplyTypes: TotalSupplyType[] = [];
         const linearPoolIdxs: number[] = [];
@@ -204,8 +190,8 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         const scalingFactorPoolIdxs: number[] = [];
         const swapFeeTypes: SwapFeeType[] = [];
 
-        for (let i = 0; i < rawPools.length; i++) {
-            const pool = rawPools[i];
+        for (let i = 0; i < data.pools.length; i++) {
+            const pool = data.pools[i];
 
             poolIds.push(pool.id);
 
@@ -222,23 +208,20 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             }
 
             if (
-                poolIdsToLoadWeightsFor.includes(pool.id) ||
-                poolTypesToLoadWeightsFor.includes(pool.poolType)
+                this.config.loadWeightsForPoolTypes.includes(pool.poolType) ||
+                poolsWithActiveWeightUpdates.includes(pool.poolType)
             ) {
                 weightedPoolIdxs.push(i);
             }
 
             if (
-                poolIdsToLoadAmpFor.includes(pool.id) ||
-                poolTypesToLoadAmpFor.includes(pool.poolType)
+                poolsWithActiveAmpUpdates.includes(pool.id) ||
+                this.config.loadAmpForPoolTypes.includes(pool.poolType)
             ) {
                 ampPoolIdxs.push(i);
             }
 
-            if (
-                poolIdsToLoadScalingFactorsFor.includes(pool.id) ||
-                poolTypesToLoadScalingFactorsFor.includes(pool.poolType)
-            ) {
+            if (this.config.loadScalingFactorsForPoolTypes.includes(pool.poolType)) {
                 scalingFactorPoolIdxs.push(i);
             }
 
