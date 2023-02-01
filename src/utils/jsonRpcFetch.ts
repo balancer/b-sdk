@@ -1,9 +1,8 @@
 import fetch from 'node-fetch';
 import { ZERO_ADDRESS } from './constants';
-import { FunctionFragment } from '@ethersproject/abi';
-import { Interface } from '@ethersproject/abi';
+import { FunctionFragment, Interface } from '@ethersproject/abi';
 import { hexlify } from '@ethersproject/bytes';
-import { LoadPoolsOptions } from '../data/types';
+import { SwapOptions } from '../types';
 
 export async function jsonRpcFetch<T>({
     rpcUrl,
@@ -20,7 +19,7 @@ export async function jsonRpcFetch<T>({
     contractInterface: Interface;
     functionFragment: FunctionFragment | string;
     values?: ReadonlyArray<any>;
-    options?: LoadPoolsOptions;
+    options?: SwapOptions;
 }): Promise<T> {
     const data = contractInterface.encodeFunctionData(functionFragment, values);
 

@@ -45,7 +45,7 @@ export class SmartOrderRouter {
         );
     }
 
-    async getSwaps(
+    public async getSwaps(
         tokenIn: Token,
         tokenOut: Token,
         swapKind: SwapKind,
@@ -53,7 +53,7 @@ export class SmartOrderRouter {
         swapOptions?: SwapOptions,
     ): Promise<SwapInfo> {
         console.time('poolProvider');
-        const rawPools = await this.poolDataService.getEnrichedPools(swapOptions);
+        const rawPools = await this.poolDataService.getEnrichedPools(swapOptions || {});
         console.timeEnd('poolProvider');
 
         console.time('poolParser');
@@ -76,7 +76,7 @@ export class SmartOrderRouter {
         return swapInfo;
     }
 
-    async getSwapsWithPools(
+    public async getSwapsWithPools(
         tokenIn: Token,
         tokenOut: Token,
         swapKind: SwapKind,
@@ -95,8 +95,8 @@ export class SmartOrderRouter {
         return swapInfo;
     }
 
-    async fetchPools(swapOptions?: SwapOptions): Promise<BasePool[]> {
-        const rawPools = await this.poolDataService.getEnrichedPools(swapOptions);
+    public async fetchPools(swapOptions?: SwapOptions): Promise<BasePool[]> {
+        const rawPools = await this.poolDataService.getEnrichedPools(swapOptions || {});
         const pools = this.poolParser.parseRawPools(rawPools);
         return pools;
     }

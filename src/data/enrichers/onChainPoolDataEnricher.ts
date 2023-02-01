@@ -1,8 +1,10 @@
 import BalancerSorQueriesAbi from '../../abi/BalancerSorQueries.json';
-import { LoadPoolsOptions, PoolDataEnricher, RawPool } from '../types';
+import { PoolDataEnricher, RawPool } from '../types';
 import { Interface } from '@ethersproject/abi';
 import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { poolHasActualSupply, poolHasVirtualSupply, poolIsLinearPool } from '../../utils';
+import { SwapOptions } from '../../types';
 
 interface OnChainPoolData {
     id: string;
@@ -26,60 +28,109 @@ enum SwapFeeType {
     PERCENT_FEE,
 }
 
+interface OnChainPoolDataQueryConfig {
+    loadTokenBalanceUpdatesAfterBlock: boolean;
+    blockNumber: number;
+    loadTotalSupply: boolean;
+    loadSwapFees: boolean;
+    loadLinearWrappedTokenRates: boolean;
+    loadScalingFactors: boolean;
+    loadWeightsForPools: {
+        poolIds?: string[];
+        poolTypes?: string[];
+    };
+    loadAmpForPools: {
+        poolIds?: string[];
+        poolTypes?: string[];
+    };
+    loadScalingFactorsForPools: {
+        poolIds?: string[];
+        poolTypes?: string[];
+    };
+}
+
 interface SorPoolDataQueryConfig {
     loadTokenBalanceUpdatesAfterBlock: boolean;
     loadTotalSupply: boolean;
     loadSwapFees: boolean;
     loadLinearWrappedTokenRates: boolean;
     loadNormalizedWeights: boolean;
-    loadTokenRates: boolean;
+    loadScalingFactors: boolean;
     loadAmps: boolean;
     blockNumber: number;
     totalSupplyTypes: TotalSupplyType[];
     swapFeeTypes: SwapFeeType[];
     linearPoolIdxs: number[];
     weightedPoolIdxs: number[];
-    tokenRatePoolIdxs: number[];
+    scalingFactorPoolIdxs: number[];
     ampPoolIdxs: number[];
 }
 
 export class OnChainPoolDataEnricher implements PoolDataEnricher {
     private readonly sorQueriesInterface: Interface;
+    private readonly config: OnChainPoolDataQueryConfig;
 
     constructor(
-        private readonly vaultAddress: string,
-        private readonly sorQueriesAddress: string,
         private readonly rpcUrl: string,
+        private readonly sorQueriesAddress: string,
+        config?: Partial<OnChainPoolDataQueryConfig>,
     ) {
         this.sorQueriesInterface = new Interface(BalancerSorQueriesAbi);
+
+        this.config = {
+            loadTokenBalanceUpdatesAfterBlock: true,
+            blockNumber: 0,
+            loadTotalSupply: true,
+            loadLinearWrappedTokenRates: true,
+            loadSwapFees: true,
+            loadScalingFactors: false,
+            loadWeightsForPools: {},
+            loadAmpForPools: {},
+            loadScalingFactorsForPools: {},
+            ...config,
+        };
     }
 
     public async fetchAdditionalPoolData(
         rawPools: RawPool[],
+        options: SwapOptions,
         syncedToBlockNumber?: number,
-        options?: LoadPoolsOptions,
     ): Promise<OnChainPoolData[]> {
         if (rawPools.length === 0) {
             return [];
         }
 
-        const { poolIds, config } = this.getPoolDataQueryParams(rawPools, syncedToBlockNumber);
+        const { poolIds, weightedPoolIdxs, ampPoolIdxs, linearPoolIdxs, ...rest } =
+            this.getPoolDataQueryParams(rawPools);
 
         console.time('jsonRpcFetch');
         const { balances, amps, linearWrappedTokenRates, totalSupplies, weights } =
-            await this.fetchOnChainPoolData({ poolIds, config, options });
+            await this.fetchOnChainPoolData({
+                poolIds,
+                config: {
+                    ...this.config,
+                    ...rest,
+                    blockNumber: syncedToBlockNumber || 0,
+                    weightedPoolIdxs,
+                    ampPoolIdxs,
+                    linearPoolIdxs,
+                    loadAmps: ampPoolIdxs.length > 0,
+                    loadNormalizedWeights: weightedPoolIdxs.length > 0,
+                },
+                options,
+            });
         console.timeEnd('jsonRpcFetch');
 
         return poolIds.map((poolId, i) => ({
             id: poolIds[i],
             balances: balances[i],
             totalSupply: totalSupplies[i],
-            weights: config.weightedPoolIdxs.includes(i)
-                ? weights[config.weightedPoolIdxs.indexOf(i)]
+            weights: weightedPoolIdxs.includes(i)
+                ? weights[weightedPoolIdxs.indexOf(i)]
                 : undefined,
-            amp: config.ampPoolIdxs.includes(i) ? amps[config.ampPoolIdxs.indexOf(i)] : undefined,
-            wrappedTokenRate: config.linearPoolIdxs.includes(i)
-                ? linearWrappedTokenRates[config.linearPoolIdxs.indexOf(i)]
+            amp: ampPoolIdxs.includes(i) ? amps[ampPoolIdxs.indexOf(i)] : undefined,
+            wrappedTokenRate: linearPoolIdxs.includes(i)
+                ? linearWrappedTokenRates[linearPoolIdxs.indexOf(i)]
                 : undefined,
         }));
     }
@@ -97,7 +148,9 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                             ? formatFixed(data.balances[idx], token.decimals)
                             : token.balance,
                     priceRate:
-                        data?.wrappedTokenRate && pool.wrappedIndex === idx
+                        data?.wrappedTokenRate &&
+                        'wrappedIndex' in pool &&
+                        pool.wrappedIndex === idx
                             ? formatFixed(data.wrappedTokenRate, 18)
                             : token.priceRate,
                     weight: data?.weights ? formatFixed(data.weights[idx], 18) : token.weight,
@@ -105,65 +158,87 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 totalShares: data?.totalSupply
                     ? formatFixed(data.totalSupply, 18)
                     : pool.totalShares,
-                amp: data?.amp ? formatFixed(data.amp, 3).split('.')[0] : pool.amp,
+                amp: data?.amp
+                    ? formatFixed(data.amp, 3).split('.')[0]
+                    : 'amp' in pool
+                    ? pool.amp
+                    : undefined,
             };
         });
     }
 
-    private getPoolDataQueryParams(
-        rawPools: RawPool[],
-        syncedToBlockNumber?: number,
-    ): { poolIds: string[]; config: SorPoolDataQueryConfig } {
+    private getPoolDataQueryParams(rawPools: RawPool[]) {
+        const poolIdsToLoadWeightsFor = this.config.loadWeightsForPools.poolIds || [];
+        const poolTypesToLoadWeightsFor = this.config.loadWeightsForPools.poolTypes || [];
+        const poolIdsToLoadAmpFor = this.config.loadAmpForPools.poolIds || [];
+        const poolTypesToLoadAmpFor = this.config.loadAmpForPools.poolTypes || [];
+        const poolIdsToLoadScalingFactorsFor = this.config.loadScalingFactorsForPools.poolIds || [];
+        const poolTypesToLoadScalingFactorsFor =
+            this.config.loadScalingFactorsForPools.poolTypes || [];
+
         const poolIds: string[] = [];
         const totalSupplyTypes: TotalSupplyType[] = [];
         const linearPoolIdxs: number[] = [];
         const weightedPoolIdxs: number[] = [];
         const ampPoolIdxs: number[] = [];
+        const scalingFactorPoolIdxs: number[] = [];
+        const swapFeeTypes: SwapFeeType[] = [];
 
         for (let i = 0; i < rawPools.length; i++) {
             const pool = rawPools[i];
 
             poolIds.push(pool.id);
+
             totalSupplyTypes.push(
-                pool.poolType === 'PhantomStable' || this.isLinearPoolType(pool.poolType)
+                poolHasVirtualSupply(pool.poolType)
                     ? TotalSupplyType.VIRTUAL_SUPPLY
-                    : pool.poolType === 'ComposableStable'
+                    : poolHasActualSupply(pool.poolType)
                     ? TotalSupplyType.ACTUAL_SUPPLY
                     : TotalSupplyType.TOTAL_SUPPLY,
             );
 
-            if (this.isLinearPoolType(pool.poolType)) {
+            if (poolIsLinearPool(pool.poolType)) {
                 linearPoolIdxs.push(i);
             }
 
-            if (pool.hasActiveWeightUpdate) {
+            if (
+                poolIdsToLoadWeightsFor.includes(pool.id) ||
+                poolTypesToLoadWeightsFor.includes(pool.poolType)
+            ) {
                 weightedPoolIdxs.push(i);
             }
 
-            if (pool.hasActiveAmpUpdate) {
+            if (
+                poolIdsToLoadAmpFor.includes(pool.id) ||
+                poolTypesToLoadAmpFor.includes(pool.poolType)
+            ) {
                 ampPoolIdxs.push(i);
+            }
+
+            if (
+                poolIdsToLoadScalingFactorsFor.includes(pool.id) ||
+                poolTypesToLoadScalingFactorsFor.includes(pool.poolType)
+            ) {
+                scalingFactorPoolIdxs.push(i);
+            }
+
+            if (this.config.loadSwapFees) {
+                swapFeeTypes.push(
+                    pool.poolType === 'Element'
+                        ? SwapFeeType.PERCENT_FEE
+                        : SwapFeeType.SWAP_FEE_PERCENTAGE,
+                );
             }
         }
 
         return {
             poolIds,
-            config: {
-                loadTokenBalanceUpdatesAfterBlock: true,
-                loadTotalSupply: true,
-                loadLinearWrappedTokenRates: true,
-                loadNormalizedWeights: true,
-                loadAmps: true,
-                loadSwapFees: false,
-                loadTokenRates: false,
-
-                blockNumber: syncedToBlockNumber || 0,
-                totalSupplyTypes,
-                linearPoolIdxs,
-                weightedPoolIdxs,
-                ampPoolIdxs,
-                tokenRatePoolIdxs: [],
-                swapFeeTypes: [],
-            },
+            totalSupplyTypes,
+            linearPoolIdxs,
+            weightedPoolIdxs,
+            ampPoolIdxs,
+            scalingFactorPoolIdxs,
+            swapFeeTypes,
         };
     }
 
@@ -174,7 +249,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
     }: {
         poolIds: string[];
         config: SorPoolDataQueryConfig;
-        options?: LoadPoolsOptions;
+        options?: SwapOptions;
     }) {
         return jsonRpcFetch<{
             balances: BigNumber[][];
@@ -192,18 +267,5 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             values: [poolIds, config],
             options,
         });
-    }
-
-    private isStablePoolType(poolType: string): boolean {
-        return (
-            poolType === 'Stable' ||
-            poolType === 'MetaStable' ||
-            poolType === 'StablePhantom' ||
-            poolType === 'ComposableStable'
-        );
-    }
-
-    private isLinearPoolType(poolType: string): boolean {
-        return poolType.includes('Linear');
     }
 }

@@ -1,9 +1,10 @@
-import { default as retry } from 'async-retry';
-import Timeout from 'await-timeout';
 import { gql, GraphQLClient } from 'graphql-request';
-import { LoadPoolsOptions, PoolDataProvider, RawPool } from '../types';
+import { GetPoolsResponse, PoolDataProvider, RawPool } from '../types';
+import { SwapOptions } from '../../types';
+import { fetchWithRetry } from '../../utils/fetch';
 
 const PAGE_SIZE = 1000;
+const SECS_IN_HOUR = 3600;
 
 interface PoolUpdate {
     poolId: {
@@ -11,167 +12,180 @@ interface PoolUpdate {
     };
 }
 
+interface SubgraphPoolProviderConfig {
+    retries: number;
+    timeout: number;
+    poolTypeIn?: string[];
+    poolTypeNotIn?: string[];
+    poolIdIn?: string[];
+    poolIdNotIn?: string[];
+    loadActiveAmpUpdates?: boolean;
+    loadActiveWeightUpdates?: boolean;
+    // if you need to fetch additional pool fields, you can provide them here.
+    // this field is typed as a string to allow for the expansion of nested field values
+    gqlAdditionalPoolQueryFields?: string;
+}
+
 export class SubgraphPoolProvider implements PoolDataProvider {
     private client: GraphQLClient;
+    private readonly config: SubgraphPoolProviderConfig;
 
-    constructor(private subgraphUrl: string, private retries = 2, private timeout = 30000) {
+    constructor(subgraphUrl: string, config?: Partial<SubgraphPoolProviderConfig>) {
         this.client = new GraphQLClient(subgraphUrl);
+        const hasFilterConfig =
+            config &&
+            (config.poolIdNotIn || config.poolIdIn || config.poolTypeIn || config.poolTypeNotIn);
+
+        this.config = {
+            retries: 2,
+            timeout: 30000,
+            loadActiveAmpUpdates: true,
+            // by default, we exclude pool types with weight updates.
+            // if any filtering config is provided, this exclusion is removed.
+            poolTypeNotIn: !hasFilterConfig ? ['Investment', 'LiquidityBootstrapping'] : undefined,
+            ...config,
+        };
     }
 
-    public async getPools(
-        options?: LoadPoolsOptions,
-    ): Promise<{ pools: RawPool[]; syncedToBlockNumber: number }> {
-        const timestamp = Math.floor(new Date().getTime() / 1000);
-        const timestampMinusOneHour = timestamp - 3600;
-        const timestampPlusOneHour = timestamp + 3600;
-
-        const poolsFragment = this.getPoolsQueryFragment(options);
-
-        const query = gql`
-            query poolsQuery($pageSize: Int!, $id: String) {
-                ${poolsFragment}
-                gradualWeightUpdates(where: { endTimestamp_gte: ${timestampMinusOneHour}, startTimestamp_lte: ${timestampPlusOneHour} }) {
-                    poolId {
-                        id
-                    }
-                }
-                ampUpdates(where: { endTimestamp_gte: ${timestampMinusOneHour}, startTimestamp_lte: ${timestampPlusOneHour} }) {
-                    poolId {
-                        id
-                    }
-                }
-                swapFeeUpdates(where: { startTimestamp_gte: ${timestampMinusOneHour} }) {
-                    pool {
-                        id
-                    }
-                }
-                _meta {
-                    block {
-                        number
-                    }
-                }
-            }
-        `;
-
-        const queryWithoutUpdates = gql`
-            query poolsQuery($pageSize: Int!, $id: String) {
-                ${poolsFragment}
-            }
-        `;
-
-        let pools: RawPool[] = [];
-        let weightUpdates: PoolUpdate[] = [];
-        let ampUpdates: PoolUpdate[] = [];
-        let syncedToBlockNumber: number = 0;
-
-        await retry(
-            async () => {
-                const timeout = new Timeout();
-
-                const getPools = async (): Promise<RawPool[]> => {
-                    let lastId: string = '';
-                    let pools: RawPool[] = [];
-                    let poolsPage: RawPool[] = [];
-
-                    do {
-                        const poolsResult = await this.client.request<{
-                            pools: RawPool[];
-                            gradualWeightUpdates?: PoolUpdate[];
-                            ampUpdates?: PoolUpdate[];
-                            _meta?: { block: { number: number } };
-                        }>(lastId === '' ? query : queryWithoutUpdates, {
-                            pageSize: PAGE_SIZE,
-                            id: lastId,
-                        });
-
-                        poolsPage = poolsResult.pools;
-
-                        pools = pools.concat(poolsPage);
-
-                        if (lastId === '') {
-                            ampUpdates = poolsResult.ampUpdates || [];
-                            weightUpdates = poolsResult.gradualWeightUpdates || [];
-                        }
-
-                        if (poolsResult._meta) {
-                            syncedToBlockNumber = poolsResult._meta.block.number;
-                        }
-
-                        lastId = pools[pools.length - 1]!.id;
-                    } while (poolsPage.length === PAGE_SIZE);
-
-                    return pools;
-                };
-
-                try {
-                    const getPoolsPromise = getPools();
-                    const timerPromise = timeout.set(this.timeout).then(() => {
-                        throw new Error(`Timed out getting pools from subgraph: ${this.timeout}`);
-                    });
-                    pools = await Promise.race([getPoolsPromise, timerPromise]);
-                    return;
-                } finally {
-                    timeout.clear();
-                }
-            },
-            {
-                retries: this.retries,
-                onRetry: (err, retry) => {
-                    console.log(err, retry);
-                },
-            },
+    public async getPools(options?: SwapOptions): Promise<GetPoolsResponse> {
+        const response = await fetchWithRetry<GetPoolsResponse>(() =>
+            this.fetchDataFromSubgraph(options),
         );
-
-        const filtered = pools.filter(
-            pool =>
-                pool.swapEnabled &&
-                pool.totalShares !== '0' &&
-                pool.totalShares !== '0.000000000001',
-        );
-
-        const poolsWithAmpUpdates = new Set(ampUpdates.map(update => update.poolId.id));
-        const poolsWithWeightUpdates = new Set(weightUpdates.map(update => update.poolId.id));
 
         return {
-            pools: filtered.map(pool => ({
-                ...pool,
-                hasActiveAmpUpdate: poolsWithAmpUpdates.has(pool.id),
-                hasActiveWeightUpdate: poolsWithWeightUpdates.has(pool.id),
-            })),
+            ...response,
+            pools: response?.pools || [],
+            syncedToBlockNumber: response?.syncedToBlockNumber || 0,
+        };
+    }
+
+    private async fetchDataFromSubgraph(options?: SwapOptions): Promise<GetPoolsResponse> {
+        let ampUpdates: PoolUpdate[] = [];
+        let syncedToBlockNumber: number = 0;
+        let lastId: string = '';
+        let pools: RawPool[] = [];
+        let poolsPage: RawPool[] = [];
+        const timestamp = Math.floor(new Date().getTime() / 1000);
+        const nowMinusOneHour =
+            Math.round((timestamp - SECS_IN_HOUR) / SECS_IN_HOUR) * SECS_IN_HOUR;
+        const nowPlusOneHour = Math.round((timestamp + SECS_IN_HOUR) / SECS_IN_HOUR) * SECS_IN_HOUR;
+
+        do {
+            const poolsResult = await this.client.request<{
+                pools: RawPool[];
+                gradualWeightUpdates?: PoolUpdate[];
+                ampUpdates?: PoolUpdate[];
+                _meta?: { block: { number: number } };
+            }>(this.getPoolsQuery(lastId === ''), {
+                pageSize: PAGE_SIZE,
+                where: {
+                    id: lastId || undefined,
+                    totalShares_gt: 0.000000000001,
+                    swapEnabled: true,
+                    poolType_in: this.config.poolTypeIn,
+                    poolType_not_in: this.config.poolTypeNotIn,
+                    id_in: this.config.poolIdIn,
+                    id_not_in: this.config.poolIdNotIn,
+                },
+                block: {
+                    number: options?.block,
+                },
+                ampUpdatesWhere: {
+                    endTimestamp_gte: nowMinusOneHour,
+                    startTimestamp_lte: nowPlusOneHour,
+                },
+                weightedUpdatesWhere: {
+                    endTimestamp_gte: nowMinusOneHour,
+                    startTimestamp_lte: nowPlusOneHour,
+                },
+            });
+
+            poolsPage = poolsResult.pools;
+            pools = pools.concat(poolsPage);
+
+            if (lastId === '') {
+                ampUpdates = poolsResult.ampUpdates || [];
+            }
+
+            if (poolsResult._meta) {
+                syncedToBlockNumber = poolsResult._meta.block.number;
+            }
+
+            lastId = pools[pools.length - 1]!.id;
+        } while (poolsPage.length === PAGE_SIZE);
+
+        console.log(pools[0]);
+
+        return {
+            pools,
+            poolsWithActiveAmpUpdates: ampUpdates.map(update => update.poolId.id),
             syncedToBlockNumber,
         };
     }
 
-    private getPoolsQueryFragment(options?: LoadPoolsOptions) {
-        const blockQuery = options && options.block ? `block: { number: ${options.block} }` : '';
+    private getPoolsQuery(isFirstQuery: boolean) {
+        const { loadActiveAmpUpdates, loadActiveWeightUpdates, gqlAdditionalPoolQueryFields } =
+            this.config;
+
+        const blockNumberFragment = `
+            _meta {
+                block {
+                    number
+                }
+            }
+        `;
+
+        const ampUpdatesFragment = `
+            ampUpdates(where: $ampUpdatesWhere) {
+                poolId {
+                    id
+                }
+            }
+        `;
+
+        const weightUpdatesFragment = `
+            gradualWeightUpdates(where: $weightedUpdatesWhere) {
+                poolId {
+                    id
+                }
+            }
+        `;
 
         return gql`
-            pools(
-                first: $pageSize
-                where: { id_gt: $id }
-                ${blockQuery}
+            query poolsQuery(
+                $pageSize: Int!
+                $where: Pool_filter
+                $block: Block_height
+                $ampUpdatesWhere: AmpUpdate_filter
+                $weightedUpdatesWhere: GradualWeightUpdate_filter
             ) {
-                id
-                address
-                poolType
-                poolTypeVersion
-                tokens {
+                pools(first: $pageSize, where: $where, block: $block) {
+                    id
                     address
-                    balance
-                    weight
-                    priceRate
-                    decimals
+                    poolType
+                    poolTypeVersion
+                    tokens {
+                        address
+                        balance
+                        weight
+                        priceRate
+                        decimals
+                    }
+                    tokensList
+                    swapEnabled
+                    swapFee
+                    amp
+                    totalLiquidity
+                    totalShares
+                    mainIndex
+                    wrappedIndex
+                    lowerTarget
+                    upperTarget
+                    ${gqlAdditionalPoolQueryFields || ''}
                 }
-                tokensList
-                swapEnabled
-                swapFee
-                amp
-                totalLiquidity
-                totalShares
-                mainIndex
-                wrappedIndex
-                lowerTarget
-                upperTarget
+                ${isFirstQuery ? blockNumberFragment : ''}
+                ${isFirstQuery && loadActiveAmpUpdates ? ampUpdatesFragment : ''}
+                ${isFirstQuery && loadActiveWeightUpdates ? weightUpdatesFragment : ''}
             }
         `;
     }

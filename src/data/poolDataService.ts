@@ -1,4 +1,5 @@
-import { LoadPoolsOptions, PoolDataEnricher, PoolDataProvider, RawPool } from './types';
+import { PoolDataEnricher, PoolDataProvider, RawPool } from './types';
+import { SwapOptions } from '../types';
 
 export class PoolDataService {
     constructor(
@@ -6,7 +7,7 @@ export class PoolDataService {
         private readonly enrichers: PoolDataEnricher[],
     ) {}
 
-    public async getEnrichedPools(options?: LoadPoolsOptions): Promise<RawPool[]> {
+    public async getEnrichedPools(options: SwapOptions): Promise<RawPool[]> {
         //TODO: might be necessary to remove duplicates, decide which take precendence
         const responses = await Promise.all(
             this.providers.map(provider => provider.getPools(options)),
@@ -20,7 +21,7 @@ export class PoolDataService {
 
         const additionalPoolData = await Promise.all(
             this.enrichers.map(provider =>
-                provider.fetchAdditionalPoolData(pools, syncedToBlockNumber, options),
+                provider.fetchAdditionalPoolData(pools, options, syncedToBlockNumber),
             ),
         );
 

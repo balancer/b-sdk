@@ -1,9 +1,10 @@
 import { gql, GraphQLClient } from 'graphql-request';
 import { default as retry } from 'async-retry';
 import Timeout from 'await-timeout';
-import { LoadPoolsOptions, PoolDataEnricher, RawPool } from '../types';
+import { PoolDataEnricher, RawLinearPool, RawPool } from '../types';
 import { RAY, SECONDS_PER_YEAR, WAD } from '../../utils';
 import { formatFixed } from '@ethersproject/bignumber';
+import { SwapOptions } from '../../types';
 
 interface AaveReserve {
     id: string;
@@ -24,8 +25,8 @@ export class AaveReserveEnricher implements PoolDataEnricher {
 
     public async fetchAdditionalPoolData(
         pools: RawPool[],
+        options: SwapOptions,
         syncedToBlockNumber?: number,
-        options?: LoadPoolsOptions,
     ): Promise<AaveReserve[]> {
         const blockQuery = options && options.block ? `block: { number: ${options.block} }` : '';
 
@@ -84,14 +85,14 @@ export class AaveReserveEnricher implements PoolDataEnricher {
     public enrichPoolsWithData(pools: RawPool[], additionalPoolData: AaveReserve[]): RawPool[] {
         for (const pool of pools) {
             if (pool.poolType === 'AaveLinear') {
-                const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
-                const mT = orderedTokens[pool.mainIndex];
+                const linearPool = pool as RawLinearPool;
+                const mT = linearPool.tokens[linearPool.mainIndex];
                 const rateData = additionalPoolData.find(r => r.underlyingAsset === mT.address);
 
                 if (!rateData) {
                     console.error(
                         'Wrapped pool token does not have a price rate',
-                        pool.id,
+                        linearPool.id,
                         mT.address,
                     );
                     continue;
@@ -103,7 +104,10 @@ export class AaveReserveEnricher implements PoolDataEnricher {
                     BigInt(rateData.lastUpdateTimestamp),
                 );
 
-                orderedTokens[pool.wrappedIndex].priceRate = formatFixed(rate.toString(), 18);
+                linearPool.tokens[linearPool.wrappedIndex].priceRate = formatFixed(
+                    rate.toString(),
+                    18,
+                );
             }
         }
 

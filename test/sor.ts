@@ -9,13 +9,13 @@ import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapOptions } from '../src/types';
 import { AaveReserveEnricher } from '../src/data/enrichers/aaveReserveEnricher';
+import { gql } from 'graphql-request';
 
 BigInt.prototype['toJSON'] = function () {
     return this.toString();
 };
 
-const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
-const SOR_QUERIES = '0x40f7218fa50ead995c4343eB0bB46dD414F9da7A';
+const SOR_QUERIES = '0x974D3FF709D84Ba44cde3257C0B5B0b14C081Ce9';
 
 // Temp test file before structure for unit tests is set up
 
@@ -24,9 +24,8 @@ export async function testWeightIn(): Promise<void> {
     const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
     const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
     const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-        VAULT,
-        SOR_QUERIES,
         process.env['ETHEREUM_RPC_URL']!,
+        SOR_QUERIES,
     );
     const aaveReserveEnricher = new AaveReserveEnricher();
 
@@ -34,7 +33,7 @@ export async function testWeightIn(): Promise<void> {
         chainId,
         provider,
         poolDataProviders: subgraphPoolDataService,
-        poolDataEnrichers: aaveReserveEnricher,
+        poolDataEnrichers: onChainPoolDataEnricher,
     });
 
     const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
@@ -52,9 +51,8 @@ export async function testWeightOut(): Promise<void> {
     const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
     const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
     const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-        VAULT,
-        SOR_QUERIES,
         process.env['ETHEREUM_RPC_URL']!,
+        SOR_QUERIES,
     );
     const aaveReserveEnricher = new AaveReserveEnricher();
 
@@ -81,9 +79,8 @@ export async function testStableIn(): Promise<void> {
     const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
     const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
     const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-        VAULT,
-        SOR_QUERIES,
         process.env['ETHEREUM_RPC_URL']!,
+        SOR_QUERIES,
     );
     const aaveReserveEnricher = new AaveReserveEnricher();
 
@@ -114,9 +111,8 @@ export async function testStableOut(): Promise<void> {
     const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
     const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
     const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-        VAULT,
-        SOR_QUERIES,
         process.env['ETHEREUM_RPC_URL']!,
+        SOR_QUERIES,
     );
     const aaveReserveEnricher = new AaveReserveEnricher();
 
