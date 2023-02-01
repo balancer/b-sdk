@@ -1,5 +1,11 @@
 import BalancerSorQueriesAbi from '../../abi/BalancerSorQueries.json';
-import { LoadPoolsOptions, PoolDataEnricher, RawPool } from '../types';
+import {
+    LoadPoolsOptions,
+    PoolDataEnricher,
+    RawPool,
+    RawLinearPool,
+    RawBaseStablePool,
+} from '../types';
 import { Interface } from '@ethersproject/abi';
 import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
@@ -65,10 +71,8 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
         const { poolIds, config } = this.getPoolDataQueryParams(rawPools, syncedToBlockNumber);
 
-        console.time('jsonRpcFetch');
         const { balances, amps, linearWrappedTokenRates, totalSupplies, weights } =
             await this.fetchOnChainPoolData({ poolIds, config, options });
-        console.timeEnd('jsonRpcFetch');
 
         return poolIds.map((poolId, i) => ({
             id: poolIds[i],
@@ -97,7 +101,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                             ? formatFixed(data.balances[idx], token.decimals)
                             : token.balance,
                     priceRate:
-                        data?.wrappedTokenRate && pool.wrappedIndex === idx
+                        data?.wrappedTokenRate && (pool as RawLinearPool).wrappedIndex === idx
                             ? formatFixed(data.wrappedTokenRate, 18)
                             : token.priceRate,
                     weight: data?.weights ? formatFixed(data.weights[idx], 18) : token.weight,
@@ -105,7 +109,9 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 totalShares: data?.totalSupply
                     ? formatFixed(data.totalSupply, 18)
                     : pool.totalShares,
-                amp: data?.amp ? formatFixed(data.amp, 3).split('.')[0] : pool.amp,
+                amp: data?.amp
+                    ? formatFixed(data.amp, 3).split('.')[0]
+                    : (pool as RawBaseStablePool).amp,
             };
         });
     }
@@ -134,14 +140,6 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
             if (this.isLinearPoolType(pool.poolType)) {
                 linearPoolIdxs.push(i);
-            }
-
-            if (pool.hasActiveWeightUpdate) {
-                weightedPoolIdxs.push(i);
-            }
-
-            if (pool.hasActiveAmpUpdate) {
-                ampPoolIdxs.push(i);
             }
         }
 

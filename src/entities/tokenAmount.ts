@@ -21,9 +21,11 @@ export class TokenAmount {
         return new TokenAmount(token, rawAmount);
     }
 
-    public static fromScale18Amount(token: Token, scale18Amount: BigintIsh) {
+    public static fromScale18Amount(token: Token, scale18Amount: BigintIsh, divUp?: boolean) {
         const scalar = BigInt(10) ** BigInt(18 - token.decimals);
-        const rawAmount = BigInt(scale18Amount) / scalar;
+        const rawAmount = divUp
+            ? 1n + (BigInt(scale18Amount) - 1n) / scalar
+            : BigInt(scale18Amount) / scalar;
         return new TokenAmount(token, rawAmount);
     }
 
@@ -60,7 +62,8 @@ export class TokenAmount {
 
     public toSignificant(significantDigits: number = 6): string {
         return new _Decimal(this.amount.toString())
-            .div(new _Decimal(this.decimalScale.toString()).toDecimalPlaces(significantDigits))
+            .div(new _Decimal(this.decimalScale.toString()))
+            .toDecimalPlaces(significantDigits)
             .toString();
     }
 }

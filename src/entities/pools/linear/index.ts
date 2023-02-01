@@ -1,4 +1,4 @@
-import { PoolType } from '../../../types';
+import { PoolType, SwapKind } from '../../../types';
 import { BigintIsh, Token, TokenAmount } from '../../';
 import { BasePool } from '../../pools';
 import { getPoolAddress, MAX_UINT256, unsafeFastParseEther, WAD } from '../../../utils';
@@ -9,8 +9,19 @@ import {
     _calcMainOutPerWrappedIn,
     _calcWrappedOutPerBptIn,
     _calcWrappedOutPerMainIn,
+    _calcMainInPerWrappedOut,
+    _calcMainInPerBptOut,
+    _calcWrappedInPerMainOut,
+    _calcWrappedInPerBptOut,
+    _calcBptInPerWrappedOut,
+    _calcBptInPerMainOut,
 } from './math';
 import { RawLinearPool } from '../../../data/types';
+
+const ALMOST_ONE = BigInt(unsafeFastParseEther('0.99'));
+const ONE = BigInt(unsafeFastParseEther('1'));
+const MAX_RATIO = BigInt(unsafeFastParseEther('10'));
+const MAX_TOKEN_BALANCE = MAX_UINT256 - 1n;
 
 export class BPT extends TokenAmount {
     public readonly rate: bigint;
@@ -182,6 +193,33 @@ export class LinearPool implements BasePool {
         }
     }
 
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+        const tIn = this.tokens.find(t => t.token.address === tokenIn.address);
+        const tOut = this.tokens.find(t => t.token.address === tokenOut.address);
+
+        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+
+        if (swapKind === SwapKind.GivenIn) {
+            if (tokenOut.isEqual(this.bptToken.token)) {
+                // Swapping to BPT allows for a very large amount so using pre-minted amount as estimation
+                return MAX_TOKEN_BALANCE;
+            } else {
+                const amount = TokenAmount.fromRawAmount(
+                    tokenOut,
+                    (tOut.amount * ALMOST_ONE) / ONE,
+                );
+
+                return this.swapGivenOut(tokenIn, tokenOut, amount).amount;
+            }
+        } else {
+            if (tokenOut.isEqual(this.bptToken.token)) {
+                return (tOut.amount * MAX_RATIO) / ONE;
+            } else {
+                return (tOut.amount * ALMOST_ONE) / ONE;
+            }
+        }
+    }
+
     private _exactMainTokenInForWrappedOut(swapAmount: TokenAmount): TokenAmount {
         const tokenOutScale18 = _calcWrappedOutPerMainIn(
             swapAmount.scale18,
@@ -251,17 +289,17 @@ export class LinearPool implements BasePool {
     }
 
     private _mainTokenInForExactWrappedOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcWrappedOutPerMainIn(
+        const tokenOutScale18 = _calcMainInPerWrappedOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18, true);
     }
 
     private _mainTokenInForExactBptOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcBptOutPerMainIn(
+        const tokenOutScale18 = _calcMainInPerBptOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.wrappedToken.scale18,
@@ -269,21 +307,21 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18, true);
     }
 
     private _wrappedTokenInForExactMainOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcMainOutPerWrappedIn(
+        const tokenOutScale18 = _calcWrappedInPerMainOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18, true);
     }
 
     private _wrappedTokenInForExactBptOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcBptOutPerWrappedIn(
+        const tokenOutScale18 = _calcWrappedInPerBptOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.wrappedToken.scale18,
@@ -291,11 +329,11 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18, true);
     }
 
     private _bptInForExactMainOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcMainOutPerBptIn(
+        const tokenOutScale18 = _calcBptInPerMainOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.wrappedToken.scale18,
@@ -303,11 +341,11 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18, true);
     }
 
     private _bptInForExactWrappedOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcWrappedOutPerBptIn(
+        const tokenOutScale18 = _calcBptInPerWrappedOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.wrappedToken.scale18,
@@ -315,6 +353,6 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18, true);
     }
 }

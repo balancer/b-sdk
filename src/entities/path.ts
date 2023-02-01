@@ -82,4 +82,46 @@ export class PathWithAmount extends Path {
             return this.swapAmount;
         }
     }
+
+    public print(): void {
+        // TODO: cleanup
+        const printPath: any = [];
+        if (this.swapKind === SwapKind.GivenIn) {
+            const amounts: TokenAmount[] = new Array(this.tokens.length);
+            amounts[0] = this.swapAmount;
+            for (let i = 0; i < this.pools.length; i++) {
+                const pool = this.pools[i];
+                const outputAmount = pool.swapGivenIn(
+                    this.tokens[i],
+                    this.tokens[i + 1],
+                    amounts[i],
+                );
+                amounts[i + 1] = outputAmount;
+                printPath.push({
+                    pool: pool.id,
+                    input: amounts[i].amount.toString() + ' ' + this.tokens[i].symbol,
+                    output: outputAmount.amount.toString() + ' ' + this.tokens[i + 1].symbol,
+                });
+            }
+        } else {
+            const amounts: TokenAmount[] = new Array(this.tokens.length);
+            amounts[amounts.length - 1] = this.swapAmount;
+            for (let i = this.pools.length; i >= 1; i--) {
+                const pool = this.pools[i - 1];
+                const inputAmount = pool.swapGivenOut(
+                    this.tokens[i - 1],
+                    this.tokens[i],
+                    amounts[i],
+                );
+                amounts[i - 1] = inputAmount;
+                printPath.push({
+                    pool: pool.id,
+                    input: inputAmount.amount.toString() + ' ' + this.tokens[i - 1].symbol,
+                    output: amounts[i].amount.toString() + ' ' + this.tokens[i].symbol,
+                });
+            }
+        }
+
+        console.table(printPath);
+    }
 }

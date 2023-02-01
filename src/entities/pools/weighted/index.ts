@@ -111,7 +111,7 @@ export class WeightedPool implements BasePool {
             this.poolTypeVersion,
         );
 
-        const tokenInAmount = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18);
+        const tokenInAmount = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true);
         const amountWithFee = this.addSwapFeeAmount(tokenInAmount);
 
         return amountWithFee;

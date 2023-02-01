@@ -45,6 +45,7 @@ export class Router {
                 return;
             }
         });
+
         let valueArr: { item: PathWithAmount; value: number }[];
 
         if (swapKind === SwapKind.GivenIn) {
