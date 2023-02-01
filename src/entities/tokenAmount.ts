@@ -21,9 +21,11 @@ export class TokenAmount {
         return new TokenAmount(token, rawAmount);
     }
 
-    public static fromScale18Amount(token: Token, scale18Amount: BigintIsh) {
+    public static fromScale18Amount(token: Token, scale18Amount: BigintIsh, divUp?: boolean) {
         const scalar = BigInt(10) ** BigInt(18 - token.decimals);
-        const rawAmount = BigInt(scale18Amount) / scalar;
+        const rawAmount = divUp
+            ? 1n + (BigInt(scale18Amount) - 1n) / scalar
+            : BigInt(scale18Amount) / scalar;
         return new TokenAmount(token, rawAmount);
     }
 

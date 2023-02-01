@@ -9,6 +9,12 @@ import {
     _calcMainOutPerWrappedIn,
     _calcWrappedOutPerBptIn,
     _calcWrappedOutPerMainIn,
+    _calcMainInPerWrappedOut,
+    _calcMainInPerBptOut,
+    _calcWrappedInPerMainOut,
+    _calcWrappedInPerBptOut,
+    _calcBptInPerWrappedOut,
+    _calcBptInPerMainOut,
 } from './math';
 import { RawLinearPool } from '../../../data/types';
 
@@ -283,17 +289,17 @@ export class LinearPool implements BasePool {
     }
 
     private _mainTokenInForExactWrappedOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcWrappedOutPerMainIn(
+        const tokenOutScale18 = _calcMainInPerWrappedOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18, true);
     }
 
     private _mainTokenInForExactBptOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcBptOutPerMainIn(
+        const tokenOutScale18 = _calcMainInPerBptOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.wrappedToken.scale18,
@@ -301,21 +307,21 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18, true);
     }
 
     private _wrappedTokenInForExactMainOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcMainOutPerWrappedIn(
+        const tokenOutScale18 = _calcWrappedInPerMainOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.mainToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18, true);
     }
 
     private _wrappedTokenInForExactBptOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcBptOutPerWrappedIn(
+        const tokenOutScale18 = _calcWrappedInPerBptOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.wrappedToken.scale18,
@@ -323,11 +329,11 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18, true);
     }
 
     private _bptInForExactMainOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcMainOutPerBptIn(
+        const tokenOutScale18 = _calcBptInPerMainOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.wrappedToken.scale18,
@@ -335,11 +341,11 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18, true);
     }
 
     private _bptInForExactWrappedOut(swapAmount: TokenAmount): TokenAmount {
-        const tokenOutScale18 = _calcWrappedOutPerBptIn(
+        const tokenOutScale18 = _calcBptInPerWrappedOut(
             swapAmount.scale18,
             this.mainToken.scale18,
             this.wrappedToken.scale18,
@@ -347,6 +353,6 @@ export class LinearPool implements BasePool {
             this.params,
         );
 
-        return TokenAmount.fromScale18Amount(this.wrappedToken.token, tokenOutScale18);
+        return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18, true);
     }
 }

@@ -131,8 +131,6 @@ export function _calcMainInPerBptOut(
 export function _calcWrappedInPerMainOut(
     mainOut: bigint,
     mainBalance: bigint,
-    wrappedBalance: bigint,
-    bptSupply: bigint,
     params: Params,
 ): bigint {
     const previousNominalMain = _toNominal(mainBalance, params);

@@ -71,7 +71,7 @@ export function _calcInGivenOut(
     tokenAmountOut: bigint,
     invariant: bigint,
 ): bigint {
-    balances[tokenIndexIn] = balances[tokenIndexIn] - tokenAmountOut;
+    balances[tokenIndexOut] = balances[tokenIndexOut] - tokenAmountOut;
 
     const finalBalanceIn = _getTokenBalanceGivenInvariantAndAllOtherBalances(
         amplificationParameter,
@@ -103,7 +103,7 @@ export function _getTokenBalanceGivenInvariantAndAllOtherBalances(
     sum = sum - balances[tokenIndex];
     const inv2 = invariant * invariant;
     const c = (inv2 / (ampTimesTotal * P_D)) * AMP_PRECISION * balances[tokenIndex];
-    const b = sum + ((invariant / ampTimesTotal) * AMP_PRECISION);
+    const b = sum + (invariant / ampTimesTotal) * AMP_PRECISION;
 
     let prevTokenBalance = 0n;
     let tokenBalance = (inv2 + c) / (invariant + b);

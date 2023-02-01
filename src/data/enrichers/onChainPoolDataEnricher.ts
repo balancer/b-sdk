@@ -71,10 +71,8 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
         const { poolIds, config } = this.getPoolDataQueryParams(rawPools, syncedToBlockNumber);
 
-        console.time('jsonRpcFetch');
         const { balances, amps, linearWrappedTokenRates, totalSupplies, weights } =
             await this.fetchOnChainPoolData({ poolIds, config, options });
-        console.timeEnd('jsonRpcFetch');
 
         return poolIds.map((poolId, i) => ({
             id: poolIds[i],
