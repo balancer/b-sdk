@@ -3,7 +3,12 @@ import { PoolDataEnricher, RawPool } from '../types';
 import { Interface } from '@ethersproject/abi';
 import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { poolHasActualSupply, poolHasVirtualSupply, poolIsLinearPool } from '../../utils';
+import {
+    poolHasActualSupply,
+    poolHasPercentFee,
+    poolHasVirtualSupply,
+    poolIsLinearPool,
+} from '../../utils';
 import { SwapOptions } from '../../types';
 
 interface OnChainPoolData {
@@ -224,7 +229,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
             if (this.config.loadSwapFees) {
                 swapFeeTypes.push(
-                    pool.poolType === 'Element'
+                    poolHasPercentFee(pool.poolType)
                         ? SwapFeeType.PERCENT_FEE
                         : SwapFeeType.SWAP_FEE_PERCENTAGE,
                 );

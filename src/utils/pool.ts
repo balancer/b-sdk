@@ -19,3 +19,7 @@ export function poolHasVirtualSupply(poolType: string) {
 export function poolHasActualSupply(poolType: string) {
     return poolType === 'ComposableStable';
 }
+
+export function poolHasPercentFee(poolType: string) {
+    return poolType === 'Element';
+}
