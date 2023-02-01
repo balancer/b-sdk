@@ -87,7 +87,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             blockNumber: 0,
             loadTotalSupply: true,
             loadLinearWrappedTokenRates: true,
-            loadSwapFees: true,
+            loadSwapFees: false,
             loadScalingFactors: false,
             loadWeightsForPools: {},
             loadAmpForPools: {},
@@ -105,22 +105,37 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             return [];
         }
 
-        const { poolIds, weightedPoolIdxs, ampPoolIdxs, linearPoolIdxs, ...rest } =
-            this.getPoolDataQueryParams(rawPools);
+        const {
+            poolIds,
+            weightedPoolIdxs,
+            ampPoolIdxs,
+            linearPoolIdxs,
+            totalSupplyTypes,
+            scalingFactorPoolIdxs,
+            swapFeeTypes,
+        } = this.getPoolDataQueryParams(rawPools);
 
         console.time('jsonRpcFetch');
         const { balances, amps, linearWrappedTokenRates, totalSupplies, weights } =
             await this.fetchOnChainPoolData({
                 poolIds,
                 config: {
-                    ...this.config,
-                    ...rest,
-                    blockNumber: syncedToBlockNumber || 0,
-                    weightedPoolIdxs,
-                    ampPoolIdxs,
-                    linearPoolIdxs,
-                    loadAmps: ampPoolIdxs.length > 0,
+                    loadTokenBalanceUpdatesAfterBlock:
+                        this.config.loadTokenBalanceUpdatesAfterBlock,
+                    loadTotalSupply: this.config.loadTotalSupply,
+                    loadSwapFees: false,
+                    loadLinearWrappedTokenRates: this.config.loadLinearWrappedTokenRates,
                     loadNormalizedWeights: weightedPoolIdxs.length > 0,
+                    loadScalingFactors: scalingFactorPoolIdxs.length > 0,
+                    loadAmps: ampPoolIdxs.length > 0,
+
+                    blockNumber: syncedToBlockNumber || 0,
+                    totalSupplyTypes,
+                    swapFeeTypes,
+                    linearPoolIdxs,
+                    weightedPoolIdxs,
+                    scalingFactorPoolIdxs,
+                    ampPoolIdxs,
                 },
                 options,
             });

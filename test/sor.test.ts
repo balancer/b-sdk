@@ -40,7 +40,7 @@ describe('SmartOrderRouter', () => {
         const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
 
         const swapOptions: SwapOptions = {
-            block: 16500000,
+            block: 16532433,
         };
 
         describe('Weighted Pools', () => {

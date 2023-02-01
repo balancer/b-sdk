@@ -12,6 +12,7 @@ export enum ChainId {
 }
 
 export const SUBGRAPH_URLS = {
+    //[ChainId.MAINNET]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
     [ChainId.MAINNET]: 'https://balancer-v2-decentraliced-analytics.stellate.sh/',
     [ChainId.GOERLI]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [ChainId.POLYGON]:
