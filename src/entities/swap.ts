@@ -15,7 +15,7 @@ export class Swap {
         swapAmount: TokenAmount,
     ): Promise<Swap> {
         const paths: {
-            path: Path;
+            path: PathWithAmount;
             inputAmount: TokenAmount;
             outputAmount: TokenAmount;
         }[] = [];
@@ -35,7 +35,7 @@ export class Swap {
         swapAmount,
     }: {
         paths: {
-            path: Path;
+            path: PathWithAmount;
             inputAmount: TokenAmount;
             outputAmount: TokenAmount;
         }[];
@@ -95,7 +95,7 @@ export class Swap {
     public readonly isNativeSwap: boolean;
     public readonly isBatchSwap: boolean;
     public readonly paths: {
-        path: Path;
+        path: PathWithAmount;
         inputAmount: TokenAmount;
         outputAmount: TokenAmount;
     }[];

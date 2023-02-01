@@ -1,5 +1,5 @@
 import BalancerSorQueriesAbi from '../../abi/BalancerSorQueries.json';
-import { PoolDataEnricher, RawPool } from '../types';
+import { PoolDataEnricher, RawPool, RawLinearPool, RawBaseStablePool } from '../types';
 import { Interface } from '@ethersproject/abi';
 import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';

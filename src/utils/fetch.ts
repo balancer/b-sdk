@@ -1,7 +1,5 @@
 import { default as retry } from 'async-retry';
 import Timeout from 'await-timeout';
-import { RawPool } from '../data/types';
-import { GraphQLClient } from 'graphql-request';
 
 export async function fetchWithRetry<T>(
     fetch: () => Promise<T>,

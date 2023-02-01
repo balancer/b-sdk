@@ -114,8 +114,6 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             lastId = pools[pools.length - 1]!.id;
         } while (poolsPage.length === PAGE_SIZE);
 
-        console.log(pools[0]);
-
         return {
             pools,
             poolsWithActiveAmpUpdates: ampUpdates.map(update => update.poolId.id),
@@ -170,6 +168,8 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                         weight
                         priceRate
                         decimals
+                        name
+                        symbol
                     }
                     tokensList
                     swapEnabled
