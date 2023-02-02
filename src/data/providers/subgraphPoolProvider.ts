@@ -15,13 +15,16 @@ interface PoolUpdate {
 interface SubgraphPoolProviderConfig {
     retries: number;
     timeout: number;
+    //pool type and id filters
     poolTypeIn?: string[];
     poolTypeNotIn?: string[];
     poolIdIn?: string[];
     poolIdNotIn?: string[];
-    loadActiveAmpUpdates?: boolean;
+    // whether to include a query for active gradualWeightUpdates
     loadActiveWeightUpdates?: boolean;
-    // Whether to apply pool filtering on the gql query or in code. Depending on the subgraph
+    // whether to include a query for active ampUpdates
+    loadActiveAmpUpdates?: boolean;
+    // whether to apply pool filtering on the gql query or in code. Depending on the subgraph
     // endpoint, it is sometimes more efficient to query the full data set and filter post.
     addFilterToPoolQuery?: boolean;
     // if you need to fetch additional pool fields, you can provide them here.
