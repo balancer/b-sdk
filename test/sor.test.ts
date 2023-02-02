@@ -14,7 +14,7 @@ BigInt.prototype['toJSON'] = function () {
 };
 
 const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
-const SOR_QUERIES = '0x974D3FF709D84Ba44cde3257C0B5B0b14C081Ce9';
+const SOR_QUERIES = '0x6732d651EeA0bc98FcF4EFF8B62e0CdCB0064f4b';
 
 describe('SmartOrderRouter', () => {
     describe('Mainnet', () => {
@@ -40,7 +40,7 @@ describe('SmartOrderRouter', () => {
         const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
 
         const swapOptions: SwapOptions = {
-            block: 16532433,
+            block: 16538341,
         };
 
         describe('Weighted Pools', () => {

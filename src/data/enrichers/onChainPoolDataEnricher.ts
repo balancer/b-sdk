@@ -1,5 +1,5 @@
 import BalancerSorQueriesAbi from '../../abi/BalancerSorQueries.json';
-import { GetPoolsResponse, PoolDataEnricher, RawPool } from '../types';
+import { GetPoolsResponse, PoolDataEnricher, RawPool, RawPoolTokenWithRate } from '../types';
 import { Interface } from '@ethersproject/abi';
 import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
@@ -20,6 +20,7 @@ interface OnChainPoolData {
     amp?: BigNumber;
     weights?: BigNumber[];
     wrappedTokenRate?: BigNumber;
+    scalingFactors?: BigNumber[];
 }
 
 enum TotalSupplyType {
@@ -86,7 +87,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             blockNumber: 0,
             loadTotalSupply: true,
             loadLinearWrappedTokenRates: true,
-            loadSwapFees: false,
+            loadSwapFees: true,
             loadAmpForPools: {},
             loadScalingFactorForPools: {},
             loadWeightsForPools: {},
@@ -115,29 +116,35 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         } = this.getPoolDataQueryParams(data);
 
         console.time('jsonRpcFetch');
-        const { balances, amps, linearWrappedTokenRates, totalSupplies, weights } =
-            await this.fetchOnChainPoolData({
-                poolIds,
-                config: {
-                    loadTokenBalanceUpdatesAfterBlock:
-                        this.config.loadTokenBalanceUpdatesAfterBlock,
-                    loadTotalSupply: this.config.loadTotalSupply,
-                    loadSwapFees: this.config.loadSwapFees,
-                    loadLinearWrappedTokenRates: this.config.loadLinearWrappedTokenRates,
-                    loadNormalizedWeights: weightedPoolIdxs.length > 0,
-                    loadScalingFactors: scalingFactorPoolIdxs.length > 0,
-                    loadAmps: ampPoolIdxs.length > 0,
+        const {
+            balances,
+            amps,
+            linearWrappedTokenRates,
+            totalSupplies,
+            weights,
+            scalingFactors,
+            swapFees,
+        } = await this.fetchOnChainPoolData({
+            poolIds,
+            config: {
+                loadTokenBalanceUpdatesAfterBlock: this.config.loadTokenBalanceUpdatesAfterBlock,
+                loadTotalSupply: this.config.loadTotalSupply,
+                loadSwapFees: this.config.loadSwapFees,
+                loadLinearWrappedTokenRates: this.config.loadLinearWrappedTokenRates,
+                loadNormalizedWeights: weightedPoolIdxs.length > 0,
+                loadScalingFactors: scalingFactorPoolIdxs.length > 0,
+                loadAmps: ampPoolIdxs.length > 0,
 
-                    blockNumber: data.syncedToBlockNumber || 0,
-                    totalSupplyTypes,
-                    swapFeeTypes,
-                    linearPoolIdxs,
-                    weightedPoolIdxs,
-                    scalingFactorPoolIdxs,
-                    ampPoolIdxs,
-                },
-                options,
-            });
+                blockNumber: data.syncedToBlockNumber || 0,
+                totalSupplyTypes,
+                swapFeeTypes,
+                linearPoolIdxs,
+                weightedPoolIdxs,
+                scalingFactorPoolIdxs,
+                ampPoolIdxs,
+            },
+            options,
+        });
         console.timeEnd('jsonRpcFetch');
 
         return poolIds.map((poolId, i) => ({
@@ -151,6 +158,8 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             wrappedTokenRate: linearPoolIdxs.includes(i)
                 ? linearWrappedTokenRates[linearPoolIdxs.indexOf(i)]
                 : undefined,
+            scalingFactors: scalingFactors[i],
+            swapFee: swapFees[i],
         }));
     }
 
@@ -166,12 +175,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                         data?.balances && data.balances.length > 0
                             ? formatFixed(data.balances[idx], token.decimals)
                             : token.balance,
-                    priceRate:
-                        data?.wrappedTokenRate &&
-                        'wrappedIndex' in pool &&
-                        pool.wrappedIndex === idx
-                            ? formatFixed(data.wrappedTokenRate, 18)
-                            : token.priceRate,
+                    priceRate: this.getPoolTokenRate({ pool, token, data, index: idx }),
                     weight: data?.weights ? formatFixed(data.weights[idx], 18) : token.weight,
                 })),
                 totalShares: data?.totalSupply
@@ -182,6 +186,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                     : 'amp' in pool
                     ? pool.amp
                     : undefined,
+                swapFee: data?.swapFee ? formatFixed(data.swapFee, 18) : pool.swapFee,
             };
         });
     }
@@ -303,7 +308,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             swapFees: BigNumber[];
             linearWrappedTokenRates: BigNumber[];
             weights: BigNumber[][];
-            tokenRates: BigNumber[][];
+            scalingFactors: BigNumber[][];
             amps: BigNumber[];
         }>({
             rpcUrl: this.rpcUrl,
@@ -313,5 +318,27 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             values: [poolIds, config],
             options,
         });
+    }
+
+    private getPoolTokenRate({
+        pool,
+        token,
+        data,
+        index,
+    }: {
+        pool: RawPool;
+        token: RawPoolTokenWithRate;
+        data?: OnChainPoolData;
+        index: number;
+    }): string {
+        if (data?.wrappedTokenRate && 'wrappedIndex' in pool && pool.wrappedIndex === index) {
+            return formatFixed(data.wrappedTokenRate, 18);
+        }
+
+        if (data?.scalingFactors) {
+            return formatFixed(data.scalingFactors[index], 18);
+        }
+
+        return token.priceRate;
     }
 }
