@@ -21,6 +21,9 @@ interface SubgraphPoolProviderConfig {
     poolIdNotIn?: string[];
     loadActiveAmpUpdates?: boolean;
     loadActiveWeightUpdates?: boolean;
+    // Whether to apply pool filtering on the gql query or in code. Depending on the subgraph
+    // endpoint, it is sometimes more efficient to query the full data set and filter post.
+    addFilterToPoolQuery?: boolean;
     // if you need to fetch additional pool fields, you can provide them here.
     // this field is typed as a string to allow for the expansion of nested field values
     gqlAdditionalPoolQueryFields?: string;
@@ -40,6 +43,8 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             retries: 2,
             timeout: 30000,
             loadActiveAmpUpdates: true,
+            // we assume a public subgraph is being used, so default to false
+            addFilterToPoolQuery: false,
             // by default, we exclude pool types with weight updates.
             // if any filtering config is provided, this exclusion is removed.
             poolTypeNotIn: !hasFilterConfig ? ['Investment', 'LiquidityBootstrapping'] : undefined,
@@ -80,12 +85,16 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                 pageSize: PAGE_SIZE,
                 where: {
                     id: lastId || undefined,
-                    totalShares_gt: 0.000000000001,
-                    swapEnabled: true,
-                    poolType_in: this.config.poolTypeIn,
-                    poolType_not_in: this.config.poolTypeNotIn,
-                    id_in: this.config.poolIdIn,
-                    id_not_in: this.config.poolIdNotIn,
+                    ...(this.config.addFilterToPoolQuery
+                        ? {
+                              totalShares_gt: 0.000000000001,
+                              swapEnabled: true,
+                              poolType_in: this.config.poolTypeIn,
+                              poolType_not_in: this.config.poolTypeNotIn,
+                              id_in: this.config.poolIdIn,
+                              id_not_in: this.config.poolIdNotIn,
+                          }
+                        : {}),
                 },
                 block: {
                     number: options?.block,
@@ -113,6 +122,11 @@ export class SubgraphPoolProvider implements PoolDataProvider {
 
             lastId = pools[pools.length - 1]!.id;
         } while (poolsPage.length === PAGE_SIZE);
+
+        // we apply the filter after querying if not set in the config
+        if (!this.config.addFilterToPoolQuery) {
+            pools = pools.filter(pool => this.poolMatchesFilter(pool));
+        }
 
         return {
             pools,
@@ -188,5 +202,33 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                 ${isFirstQuery && loadActiveWeightUpdates ? weightUpdatesFragment : ''}
             }
         `;
+    }
+
+    private poolMatchesFilter(pool: RawPool) {
+        if (
+            !pool.swapEnabled ||
+            pool.totalShares === '0.000000000001' ||
+            pool.totalShares === '0.0'
+        ) {
+            return false;
+        }
+
+        if (this.config.poolTypeIn && !this.config.poolTypeIn.includes(pool.poolType)) {
+            return false;
+        }
+
+        if (this.config.poolTypeNotIn && this.config.poolTypeNotIn.includes(pool.poolType)) {
+            return false;
+        }
+
+        if (this.config.poolIdIn && !this.config.poolIdIn.includes(pool.id)) {
+            return false;
+        }
+
+        if (this.config.poolIdNotIn && this.config.poolIdNotIn.includes(pool.id)) {
+            return false;
+        }
+
+        return true;
     }
 }
