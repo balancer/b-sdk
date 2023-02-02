@@ -39,10 +39,18 @@ interface OnChainPoolDataQueryConfig {
     loadTotalSupply: boolean;
     loadSwapFees: boolean;
     loadLinearWrappedTokenRates: boolean;
-    loadScalingFactors: boolean;
-    loadWeightsForPoolTypes: string[];
-    loadAmpForPoolTypes: string[];
-    loadScalingFactorsForPoolTypes: string[];
+    loadWeightsForPools: {
+        poolIds?: string[];
+        poolTypes?: string[];
+    };
+    loadAmpForPools: {
+        poolIds?: string[];
+        poolTypes?: string[];
+    };
+    loadScalingFactorForPools: {
+        poolIds?: string[];
+        poolTypes?: string[];
+    };
 }
 
 interface SorPoolDataQueryConfig {
@@ -79,10 +87,9 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             loadTotalSupply: true,
             loadLinearWrappedTokenRates: true,
             loadSwapFees: false,
-            loadScalingFactors: false,
-            loadAmpForPoolTypes: [],
-            loadScalingFactorsForPoolTypes: [],
-            loadWeightsForPoolTypes: [],
+            loadAmpForPools: {},
+            loadScalingFactorForPools: {},
+            loadWeightsForPools: {},
             ...config,
         };
     }
@@ -180,8 +187,6 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
     }
 
     private getPoolDataQueryParams(data: GetPoolsResponse) {
-        const poolsWithActiveWeightUpdates = data.poolsWithActiveWeightUpdates || [];
-        const poolsWithActiveAmpUpdates = data.poolsWithActiveAmpUpdates || [];
         const poolIds: string[] = [];
         const totalSupplyTypes: TotalSupplyType[] = [];
         const linearPoolIdxs: number[] = [];
@@ -189,6 +194,15 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         const ampPoolIdxs: number[] = [];
         const scalingFactorPoolIdxs: number[] = [];
         const swapFeeTypes: SwapFeeType[] = [];
+
+        const {
+            loadScalingFactorForPoolTypes,
+            loadScalingFactorForPoolIds,
+            loadWeightsForPoolTypes,
+            loadAmpForPoolTypes,
+            loadAmpForPoolIds,
+            loadWeightsForPoolIds,
+        } = this.getMergedFilterConfig(data);
 
         for (let i = 0; i < data.pools.length; i++) {
             const pool = data.pools[i];
@@ -207,21 +221,18 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 linearPoolIdxs.push(i);
             }
 
-            if (
-                this.config.loadWeightsForPoolTypes.includes(pool.poolType) ||
-                poolsWithActiveWeightUpdates.includes(pool.poolType)
-            ) {
+            if (loadWeightsForPoolTypes.has(pool.poolType) || loadWeightsForPoolIds.has(pool.id)) {
                 weightedPoolIdxs.push(i);
             }
 
-            if (
-                poolsWithActiveAmpUpdates.includes(pool.id) ||
-                this.config.loadAmpForPoolTypes.includes(pool.poolType)
-            ) {
+            if (loadAmpForPoolTypes.has(pool.poolType) || loadAmpForPoolIds.has(pool.id)) {
                 ampPoolIdxs.push(i);
             }
 
-            if (this.config.loadScalingFactorsForPoolTypes.includes(pool.poolType)) {
+            if (
+                loadScalingFactorForPoolIds.has(pool.id) ||
+                loadScalingFactorForPoolTypes.has(pool.poolType)
+            ) {
                 scalingFactorPoolIdxs.push(i);
             }
 
@@ -242,6 +253,38 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             ampPoolIdxs,
             scalingFactorPoolIdxs,
             swapFeeTypes,
+        };
+    }
+
+    private getMergedFilterConfig({
+        poolsWithActiveWeightUpdates = [],
+        poolsWithActiveAmpUpdates = [],
+    }: {
+        poolsWithActiveWeightUpdates?: string[];
+        poolsWithActiveAmpUpdates?: string[];
+    }) {
+        const { loadWeightsForPools, loadScalingFactorForPools, loadAmpForPools } = this.config;
+
+        const loadWeightsForPoolIds = new Set([
+            ...poolsWithActiveWeightUpdates,
+            ...(loadWeightsForPools.poolIds || []),
+        ]);
+        const loadAmpForPoolIds = new Set([
+            ...poolsWithActiveAmpUpdates,
+            ...(loadAmpForPools.poolIds || []),
+        ]);
+        const loadScalingFactorForPoolIds = new Set(loadScalingFactorForPools.poolIds || []);
+        const loadWeightsForPoolTypes = new Set(loadWeightsForPools.poolTypes || []);
+        const loadAmpForPoolTypes = new Set(loadAmpForPools.poolTypes || []);
+        const loadScalingFactorForPoolTypes = new Set(loadScalingFactorForPools.poolTypes || []);
+
+        return {
+            loadWeightsForPoolIds,
+            loadAmpForPoolIds,
+            loadScalingFactorForPoolIds,
+            loadWeightsForPoolTypes,
+            loadAmpForPoolTypes,
+            loadScalingFactorForPoolTypes,
         };
     }
 
