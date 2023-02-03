@@ -14,7 +14,7 @@ BigInt.prototype['toJSON'] = function () {
 };
 
 const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
-const SOR_QUERIES = '0x40f7218fa50ead995c4343eB0bB46dD414F9da7A';
+const SOR_QUERIES = '0x6732d651EeA0bc98FcF4EFF8B62e0CdCB0064f4b';
 
 describe('SmartOrderRouter', () => {
     describe('Mainnet', () => {
@@ -22,9 +22,8 @@ describe('SmartOrderRouter', () => {
         const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
         const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-            VAULT,
-            SOR_QUERIES,
             process.env['ETHEREUM_RPC_URL']!,
+            SOR_QUERIES,
         );
 
         const sor = new SmartOrderRouter({
@@ -32,6 +31,7 @@ describe('SmartOrderRouter', () => {
             provider,
             poolDataProviders: subgraphPoolDataService,
             poolDataEnrichers: onChainPoolDataEnricher,
+            rpcUrl: process.env['ETHEREUM_RPC_URL']!,
         });
 
         const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
@@ -41,7 +41,7 @@ describe('SmartOrderRouter', () => {
         const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
 
         const swapOptions: SwapOptions = {
-            block: 16500000,
+            block: 16538341,
         };
 
         describe('Weighted Pools', () => {

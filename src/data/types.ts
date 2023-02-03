@@ -1,5 +1,7 @@
 // These are only the known pool types, additional pool types can be added via
 // extension through custom PoolFactories and PoolDataProviders
+import { SwapOptions } from '../types';
+
 export type SupportedRawPoolTypes =
     | LinearPoolType
     | 'Weighted'
@@ -44,7 +46,6 @@ export interface RawLinearPool extends RawBasePool {
 
 export interface RawBaseStablePool extends RawBasePool {
     amp: string;
-    hasActiveAmpUpdate?: boolean;
 }
 
 export interface RawStablePool extends RawBaseStablePool {
@@ -84,23 +85,27 @@ export interface RawPoolTokenWithRate extends RawPoolToken {
     priceRate: string;
 }
 
-export interface LoadPoolsOptions {
-    block?: number;
+export interface GetPoolsResponse {
+    pools: RawPool[];
+    syncedToBlockNumber?: number;
+    poolsWithActiveAmpUpdates?: string[];
+    poolsWithActiveWeightUpdates?: string[];
+}
+
+export interface ProviderSwapOptions extends SwapOptions {
+    timestamp: number;
 }
 
 export interface PoolDataProvider {
-    getPools(
-        options?: LoadPoolsOptions,
-    ): Promise<{ pools: RawPool[]; syncedToBlockNumber?: number }>;
+    getPools(options: ProviderSwapOptions): Promise<GetPoolsResponse>;
 }
 
 // Pool enrichment is split into two parts to allow for parallel fetching of additional
 // data (ie: Promise.all). The pools are then enriched by the enrichers in order.
 export interface PoolDataEnricher {
     fetchAdditionalPoolData(
-        pools: RawPool[],
-        syncedToBlockNumber?: number,
-        options?: LoadPoolsOptions,
+        data: GetPoolsResponse,
+        options: ProviderSwapOptions,
     ): Promise<AdditionalPoolData[]>;
 
     enrichPoolsWithData(pools: RawPool[], additionalPoolData: AdditionalPoolData[]): RawPool[];

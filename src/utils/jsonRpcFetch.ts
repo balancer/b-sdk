@@ -1,9 +1,9 @@
 import fetch from 'isomorphic-fetch';
 import { ZERO_ADDRESS } from './constants';
-import { FunctionFragment } from '@ethersproject/abi';
-import { Interface } from '@ethersproject/abi';
+import { FunctionFragment, Interface } from '@ethersproject/abi';
 import { hexlify } from '@ethersproject/bytes';
-import { LoadPoolsOptions } from '../data/types';
+import { SwapOptions } from '../types';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export async function jsonRpcFetch<T>({
     rpcUrl,
@@ -20,7 +20,7 @@ export async function jsonRpcFetch<T>({
     contractInterface: Interface;
     functionFragment: FunctionFragment | string;
     values?: ReadonlyArray<any>;
-    options?: LoadPoolsOptions;
+    options?: SwapOptions;
 }): Promise<T> {
     const data = contractInterface.encodeFunctionData(functionFragment, values);
 
@@ -48,4 +48,30 @@ export async function jsonRpcFetch<T>({
     const content = await rawResponse.json();
 
     return contractInterface.decodeFunctionResult('getPoolData', content.result) as unknown as T;
+}
+
+export async function jsonRpcGetBlockTimestampByNumber({
+    rpcUrl,
+    blockNumber,
+}: {
+    rpcUrl: string;
+    blockNumber: number;
+}) {
+    const rawResponse = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 2,
+            method: 'eth_getBlockByNumber',
+            params: [hexlify(blockNumber), false],
+        }),
+    });
+
+    const content = await rawResponse.json();
+
+    return BigNumber.from(content.result.timestamp).toNumber();
 }
