@@ -1,5 +1,5 @@
 import { gql, GraphQLClient } from 'graphql-request';
-import { GetPoolsResponse, PoolDataProvider, RawPool } from '../types';
+import { GetPoolsResponse, PoolDataProvider, ProviderSwapOptions, RawPool } from '../types';
 import { SwapOptions } from '../../types';
 import { fetchWithRetry } from '../../utils/fetch';
 
@@ -55,7 +55,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
         };
     }
 
-    public async getPools(options?: SwapOptions): Promise<GetPoolsResponse> {
+    public async getPools(options: ProviderSwapOptions): Promise<GetPoolsResponse> {
         const response = await fetchWithRetry<GetPoolsResponse>(() =>
             this.fetchDataFromSubgraph(options),
         );
@@ -67,16 +67,16 @@ export class SubgraphPoolProvider implements PoolDataProvider {
         };
     }
 
-    private async fetchDataFromSubgraph(options?: SwapOptions): Promise<GetPoolsResponse> {
+    private async fetchDataFromSubgraph(options: ProviderSwapOptions): Promise<GetPoolsResponse> {
         let ampUpdates: PoolUpdate[] = [];
         let syncedToBlockNumber: number = 0;
         let lastId: string = '';
         let pools: RawPool[] = [];
         let poolsPage: RawPool[] = [];
-        const timestamp = Math.floor(new Date().getTime() / 1000);
         const nowMinusOneHour =
-            Math.round((timestamp - SECS_IN_HOUR) / SECS_IN_HOUR) * SECS_IN_HOUR;
-        const nowPlusOneHour = Math.round((timestamp + SECS_IN_HOUR) / SECS_IN_HOUR) * SECS_IN_HOUR;
+            Math.round((options.timestamp - SECS_IN_HOUR) / SECS_IN_HOUR) * SECS_IN_HOUR;
+        const nowPlusOneHour =
+            Math.round((options.timestamp + SECS_IN_HOUR) / SECS_IN_HOUR) * SECS_IN_HOUR;
 
         do {
             const poolsResult = await this.client.request<{

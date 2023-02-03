@@ -41,6 +41,7 @@ export type SorConfig = {
     customPoolFactories?: BasePoolFactory[];
     poolDataProviders: PoolDataProvider | PoolDataProvider[];
     poolDataEnrichers?: PoolDataEnricher | PoolDataEnricher[];
+    rpcUrl: string;
 };
 
 export type PoolFilters = {

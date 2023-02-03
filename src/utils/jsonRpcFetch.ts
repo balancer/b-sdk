@@ -3,6 +3,7 @@ import { ZERO_ADDRESS } from './constants';
 import { FunctionFragment, Interface } from '@ethersproject/abi';
 import { hexlify } from '@ethersproject/bytes';
 import { SwapOptions } from '../types';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export async function jsonRpcFetch<T>({
     rpcUrl,
@@ -47,4 +48,30 @@ export async function jsonRpcFetch<T>({
     const content = await rawResponse.json();
 
     return contractInterface.decodeFunctionResult('getPoolData', content.result) as unknown as T;
+}
+
+export async function jsonRpcGetBlockTimestampByNumber({
+    rpcUrl,
+    blockNumber,
+}: {
+    rpcUrl: string;
+    blockNumber: number;
+}) {
+    const rawResponse = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 2,
+            method: 'eth_getBlockByNumber',
+            params: [hexlify(blockNumber), false],
+        }),
+    });
+
+    const content = await rawResponse.json();
+
+    return BigNumber.from(content.result.timestamp).toNumber();
 }

@@ -31,6 +31,7 @@ describe('SmartOrderRouter', () => {
             provider,
             poolDataProviders: subgraphPoolDataService,
             poolDataEnrichers: onChainPoolDataEnricher,
+            rpcUrl: process.env['ETHEREUM_RPC_URL']!,
         });
 
         const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');

@@ -1,16 +1,36 @@
-import { GetPoolsResponse, PoolDataEnricher, PoolDataProvider, RawPool } from './types';
+import {
+    GetPoolsResponse,
+    PoolDataEnricher,
+    PoolDataProvider,
+    ProviderSwapOptions,
+    RawPool,
+} from './types';
 import { SwapOptions } from '../types';
+import { jsonRpcGetBlockTimestampByNumber } from '../utils/jsonRpcFetch';
 
 export class PoolDataService {
     constructor(
         private readonly providers: PoolDataProvider[],
         private readonly enrichers: PoolDataEnricher[],
+        private readonly rpcUrl: string,
     ) {}
 
     public async getEnrichedPools(options: SwapOptions): Promise<RawPool[]> {
+        const timestamp = options.block
+            ? await jsonRpcGetBlockTimestampByNumber({
+                  rpcUrl: this.rpcUrl,
+                  blockNumber: options.block,
+              })
+            : Math.floor(new Date().getTime() / 1000);
+
+        const providerOptions: ProviderSwapOptions = {
+            ...options,
+            timestamp,
+        };
+
         //TODO: might be necessary to remove duplicates, decide which take precendence
         const responses = await Promise.all(
-            this.providers.map(provider => provider.getPools(options)),
+            this.providers.map(provider => provider.getPools(providerOptions)),
         );
 
         let pools = responses.map(response => response.pools).flat();
@@ -30,7 +50,7 @@ export class PoolDataService {
         };
 
         const additionalPoolData = await Promise.all(
-            this.enrichers.map(provider => provider.fetchAdditionalPoolData(data, options)),
+            this.enrichers.map(provider => provider.fetchAdditionalPoolData(data, providerOptions)),
         );
 
         // We enrich the pools in order of the enrichers array

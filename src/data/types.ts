@@ -92,8 +92,12 @@ export interface GetPoolsResponse {
     poolsWithActiveWeightUpdates?: string[];
 }
 
+export interface ProviderSwapOptions extends SwapOptions {
+    timestamp: number;
+}
+
 export interface PoolDataProvider {
-    getPools(options: SwapOptions): Promise<GetPoolsResponse>;
+    getPools(options: ProviderSwapOptions): Promise<GetPoolsResponse>;
 }
 
 // Pool enrichment is split into two parts to allow for parallel fetching of additional
@@ -101,7 +105,7 @@ export interface PoolDataProvider {
 export interface PoolDataEnricher {
     fetchAdditionalPoolData(
         data: GetPoolsResponse,
-        options: SwapOptions,
+        options: ProviderSwapOptions,
     ): Promise<AdditionalPoolData[]>;
 
     enrichPoolsWithData(pools: RawPool[], additionalPoolData: AdditionalPoolData[]): RawPool[];

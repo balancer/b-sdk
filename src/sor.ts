@@ -32,6 +32,7 @@ export class SmartOrderRouter {
         provider,
         options,
         poolDataProviders,
+        rpcUrl,
         poolDataEnrichers = [],
         customPoolFactories = [],
     }: SorConfig) {
@@ -42,6 +43,7 @@ export class SmartOrderRouter {
         this.poolDataService = new PoolDataService(
             Array.isArray(poolDataProviders) ? poolDataProviders : [poolDataProviders],
             Array.isArray(poolDataEnrichers) ? poolDataEnrichers : [poolDataEnrichers],
+            rpcUrl,
         );
     }
 
