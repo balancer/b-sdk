@@ -2,6 +2,7 @@ import { Token } from './token';
 import { parseUnits } from '@ethersproject/units';
 import _Decimal from 'decimal.js-light';
 import { WAD } from '../utils';
+import { HumanAmount } from '../types';
 
 export type BigintIsh = bigint | string | number;
 
@@ -16,7 +17,7 @@ export class TokenAmount {
         return new TokenAmount(token, rawAmount);
     }
 
-    public static fromHumanAmount(token: Token, humanAmount: string) {
+    public static fromHumanAmount(token: Token, humanAmount: HumanAmount) {
         const rawAmount = parseUnits(humanAmount, token.decimals).toString();
         return new TokenAmount(token, rawAmount);
     }
