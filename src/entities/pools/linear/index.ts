@@ -58,7 +58,6 @@ export class LinearPool implements BasePool {
     readonly poolType: PoolType = PoolType.AaveLinear;
     readonly poolTypeVersion: number;
     swapFee: bigint;
-    tokens: Array<BPT | TokenAmount | WrappedToken>;
     mainToken: TokenAmount;
     wrappedToken: WrappedToken;
     bptToken: BPT;
@@ -87,8 +86,6 @@ export class LinearPool implements BasePool {
         const bTokenAmount = TokenAmount.fromHumanAmount(bToken, bT.balance);
         const bptToken = new BPT(bToken, bTokenAmount.amount);
 
-        const tokens: TokenAmount[] = [mTokenAmount, wrappedToken, bptToken];
-
         const params: Params = {
             fee: swapFee,
             rate: wTRate,
@@ -99,7 +96,6 @@ export class LinearPool implements BasePool {
         const linearPool = new LinearPool(
             pool.id,
             pool.poolTypeVersion,
-            tokens,
             params,
             mTokenAmount,
             wrappedToken,
@@ -111,7 +107,6 @@ export class LinearPool implements BasePool {
     constructor(
         id: string,
         poolTypeVersion: number,
-        tokens: Array<BPT | TokenAmount | WrappedToken>,
         params: Params,
         mainToken: TokenAmount,
         wrappedToken: WrappedToken,
@@ -120,12 +115,15 @@ export class LinearPool implements BasePool {
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;
         this.swapFee = params.fee;
-        this.tokens = tokens;
         this.mainToken = mainToken;
         this.wrappedToken = wrappedToken;
         this.bptToken = bptToken;
         this.address = getPoolAddress(id);
         this.params = params;
+    }
+
+    public get tokens() {
+        return [this.mainToken, this.wrappedToken, this.bptToken];
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
