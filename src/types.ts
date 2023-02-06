@@ -71,3 +71,5 @@ export interface BatchSwapStep {
     amount: string;
     userData: string;
 }
+
+export type HumanAmount = string;

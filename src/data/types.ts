@@ -1,6 +1,6 @@
 // These are only the known pool types, additional pool types can be added via
 // extension through custom PoolFactories and PoolDataProviders
-import { SwapOptions } from '../types';
+import { HumanAmount, SwapOptions } from '../types';
 
 export type SupportedRawPoolTypes =
     | LinearPoolType
@@ -27,20 +27,20 @@ export interface RawBasePool {
     address: string;
     poolType: string;
     poolTypeVersion: number;
-    swapFee: string;
+    swapFee: HumanAmount;
     swapEnabled: boolean;
     tokens: RawPoolToken[];
     tokensList: string[];
-    liquidity: string;
-    totalShares: string;
+    liquidity: HumanAmount;
+    totalShares: HumanAmount;
 }
 
 export interface RawLinearPool extends RawBasePool {
     poolType: LinearPoolType;
     mainIndex: number;
     wrappedIndex: number;
-    lowerTarget: string;
-    upperTarget: string;
+    lowerTarget: HumanAmount;
+    upperTarget: HumanAmount;
     tokens: RawPoolTokenWithRate[];
 }
 
@@ -74,15 +74,15 @@ export interface RawPoolToken {
     symbol: string;
     name: string;
     decimals: number;
-    balance: string;
+    balance: HumanAmount;
 }
 
 export interface RawWeightedPoolToken extends RawPoolToken {
-    weight: string;
+    weight: HumanAmount;
 }
 
 export interface RawPoolTokenWithRate extends RawPoolToken {
-    priceRate: string;
+    priceRate: HumanAmount;
 }
 
 export interface GetPoolsResponse {

@@ -35,7 +35,7 @@ export class WeightedPool implements BasePool {
         const weightedPool = new WeightedPool(
             pool.id,
             pool.poolTypeVersion,
-            BigInt(unsafeFastParseEther(pool.swapFee)),
+            unsafeFastParseEther(pool.swapFee),
             poolTokens,
         );
         return weightedPool;
