@@ -5,7 +5,7 @@ import { MathSol, WAD, getPoolAddress, unsafeFastParseEther } from '../../../uti
 import { _calculateInvariant, _calcOutGivenIn, _calcInGivenOut } from './math';
 import { RawComposableStablePool } from '../../../data/types';
 
-const ALMOST_ONE = BigInt(unsafeFastParseEther('0.99'));
+const ALMOST_ONE = unsafeFastParseEther('0.99');
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -42,7 +42,7 @@ export class StablePool implements BasePool {
         const stablePool = new StablePool(
             pool.id,
             amp,
-            BigInt(unsafeFastParseEther(pool.swapFee)),
+            unsafeFastParseEther(pool.swapFee),
             poolTokens,
         );
         return stablePool;

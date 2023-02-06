@@ -1,4 +1,4 @@
-export const unsafeFastParseEther = (value: string): string => {
+export const unsafeFastParseEther = (value: string): bigint => {
     const parts = value.split('.');
     parts[0] = parts[0] || '';
     parts[1] = parts[1] || '';
@@ -10,5 +10,5 @@ export const unsafeFastParseEther = (value: string): string => {
         etherValue += '0';
     }
 
-    return etherValue;
-}
+    return BigInt(etherValue);
+};
