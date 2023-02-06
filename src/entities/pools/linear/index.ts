@@ -53,10 +53,10 @@ export type Params = {
 };
 
 export class LinearPool implements BasePool {
-    id: string;
-    address: string;
-    poolType: PoolType = PoolType.AaveLinear;
-    poolTypeVersion: number;
+    readonly id: string;
+    readonly address: string;
+    readonly poolType: PoolType = PoolType.AaveLinear;
+    readonly poolTypeVersion: number;
     swapFee: bigint;
     tokens: Array<BPT | TokenAmount | WrappedToken>;
     mainToken: TokenAmount;

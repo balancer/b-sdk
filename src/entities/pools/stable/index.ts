@@ -18,13 +18,13 @@ export class StablePoolToken extends TokenAmount {
     }
 }
 export class StablePool implements BasePool {
-    id: string;
-    address: string;
-    poolType: PoolType = PoolType.ComposableStable;
+    readonly id: string;
+    readonly address: string;
+    readonly poolType: PoolType = PoolType.ComposableStable;
     amp: bigint;
     swapFee: bigint;
     tokens: StablePoolToken[];
-    bptIndex: number;
+    readonly bptIndex: number;
 
     static fromRawPool(pool: RawComposableStablePool): StablePool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
