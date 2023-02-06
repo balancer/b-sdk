@@ -3,9 +3,9 @@ import { Token, TokenAmount } from '../';
 import { RawPool } from '../../data/types';
 
 export interface BasePool {
-    poolType: PoolType | string;
-    id: string;
-    address: string;
+    readonly poolType: PoolType | string;
+    readonly id: string;
+    readonly address: string;
     swapFee: bigint;
     tokens: TokenAmount[];
     getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint;

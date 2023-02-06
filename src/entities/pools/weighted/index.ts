@@ -15,14 +15,14 @@ export class WeightedPoolToken extends TokenAmount {
 }
 
 export class WeightedPool implements BasePool {
-    id: string;
-    address: string;
-    poolType: PoolType = PoolType.Weighted;
-    poolTypeVersion: number;
+    readonly id: string;
+    readonly address: string;
+    readonly poolType: PoolType = PoolType.Weighted;
+    readonly poolTypeVersion: number;
     swapFee: bigint;
     tokens: WeightedPoolToken[];
-    MAX_IN_RATIO = 300000000000000000n; // 0.3
-    MAX_OUT_RATIO = 300000000000000000n; // 0.3
+    private readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
+    private readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
     static fromRawPool(pool: RawWeightedPool): WeightedPool {
         const poolTokens = pool.tokens.map(t => {
