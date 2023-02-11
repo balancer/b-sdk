@@ -130,11 +130,11 @@ export class PathGraph {
             .sort((a, b) => (a.limit < b.limit ? 1 : -1));
 
         const filtered: PathGraphEdgeData[][] = [];
-        let seenPools: string[] = [];
 
         // Remove any paths with duplicate pools. since the paths are now sorted by limit,
         // selecting the first path will always be the optimal.
         for (const { path } of pathsWithLimits) {
+            let seenPools: string[] = [];
             let isValid = true;
 
             for (const segment of path) {

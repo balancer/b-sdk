@@ -118,7 +118,7 @@ export class WeightedPool implements BasePool {
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
-        const feeAmount = amount.mulFixed(this.swapFee);
+        const feeAmount = amount.mulUpFixed(this.swapFee);
         return amount.sub(feeAmount);
     }
 

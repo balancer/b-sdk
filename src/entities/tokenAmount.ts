@@ -46,7 +46,13 @@ export class TokenAmount {
         return new TokenAmount(this.token, this.amount - other.amount);
     }
 
-    public mulFixed(other: bigint): TokenAmount {
+    public mulUpFixed(other: bigint): TokenAmount {
+        const product = this.amount * other;
+        const multiplied = (product - 1n) / WAD + 1n;
+        return new TokenAmount(this.token, multiplied);
+    }
+
+    public mulDownFixed(other: bigint): TokenAmount {
         const multiplied = (this.amount * other) / WAD;
         return new TokenAmount(this.token, multiplied);
     }
