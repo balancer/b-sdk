@@ -76,10 +76,10 @@ export class MetaStablePool implements BasePool {
             throw new Error('Swap amount exceeds the pool limit');
 
         const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
-        const amountInWithRate = amountInWithFee.mulFixed(this.tokens[tInIndex].rate);
+        const amountInWithRate = amountInWithFee.mulDownFixed(this.tokens[tInIndex].rate);
         const balances = this.tokens.map(t => t.scale18);
 
-        const invariant = _calculateInvariant(this.amp, balances);
+        const invariant = _calculateInvariant(this.amp, [...balances], true);
 
         const tokenOutScale18 = _calcOutGivenIn(
             this.amp,
@@ -106,11 +106,11 @@ export class MetaStablePool implements BasePool {
         if (swapAmount.amount > this.tokens[tOutIndex].amount)
             throw new Error('Swap amount exceeds the pool limit');
 
-        const amountOutWithRate = swapAmount.mulFixed(this.tokens[tOutIndex].rate);
+        const amountOutWithRate = swapAmount.mulDownFixed(this.tokens[tOutIndex].rate);
 
         const balances = this.tokens.map(t => t.scale18);
 
-        const invariant = _calculateInvariant(this.amp, balances);
+        const invariant = _calculateInvariant(this.amp, balances, true);
 
         const tokenInScale18 = _calcInGivenOut(
             this.amp,
@@ -129,7 +129,7 @@ export class MetaStablePool implements BasePool {
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
-        const feeAmount = amount.mulFixed(this.swapFee);
+        const feeAmount = amount.mulUpFixed(this.swapFee);
         return amount.sub(feeAmount);
     }
 

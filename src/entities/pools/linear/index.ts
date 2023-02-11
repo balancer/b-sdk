@@ -136,35 +136,40 @@ export class LinearPool implements BasePool {
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const tInIndex = this.tokens.findIndex(t => t.token.address === tokenIn.address);
-        if (swapAmount.amount > this.tokens[tInIndex].amount)
-            throw new Error('Swap amount exceeds the pool limit');
+        const tOutIndex = this.tokens.findIndex(t => t.token.address === tokenOut.address);
 
+        let output: TokenAmount;
         if (tokenIn.isEqual(this.mainToken.token)) {
             if (tokenOut.isEqual(this.wrappedToken.token)) {
-                return this._exactMainTokenInForWrappedOut(swapAmount);
+                output = this._exactMainTokenInForWrappedOut(swapAmount);
             } else {
-                return this._exactMainTokenInForBptOut(swapAmount);
+                output = this._exactMainTokenInForBptOut(swapAmount);
             }
         } else if (tokenIn.isEqual(this.wrappedToken.token)) {
             if (tokenOut.isEqual(this.mainToken.token)) {
-                return this._exactWrappedTokenInForMainOut(swapAmount);
+                output = this._exactWrappedTokenInForMainOut(swapAmount);
             } else {
-                return this._exactWrappedTokenInForBptOut(swapAmount);
+                output = this._exactWrappedTokenInForBptOut(swapAmount);
             }
         } else if (tokenIn.isEqual(this.bptToken.token)) {
             if (tokenOut.isEqual(this.mainToken.token)) {
-                return this._exactBptInForMainOut(swapAmount);
+                output = this._exactBptInForMainOut(swapAmount);
             } else {
-                return this._exactBptInForWrappedOut(swapAmount);
+                output = this._exactBptInForWrappedOut(swapAmount);
             }
         } else {
             throw new Error('Pool does not contain the tokens provided');
         }
+
+        if (output.amount > this.tokens[tOutIndex].amount)
+            throw new Error('Swap amount exceeds the pool limit');
+
+        return output;
     }
 
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         const tOutIndex = this.tokens.findIndex(t => t.token.address === tokenOut.address);
+
         if (swapAmount.amount > this.tokens[tOutIndex].amount)
             throw new Error('Swap amount exceeds the pool limit');
 

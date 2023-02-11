@@ -1,7 +1,11 @@
 const AMP_PRECISION = 1000n;
 import { MathSol, WAD } from '../../../utils/';
 
-export function _calculateInvariant(amplificationParameter: bigint, balances: bigint[]): bigint {
+export function _calculateInvariant(
+    amplificationParameter: bigint,
+    balances: bigint[],
+    roundUp?: boolean,
+): bigint {
     let sum = 0n;
     const numTokens = balances.length;
     for (let i = 0; i < numTokens; i++) {
@@ -20,15 +24,22 @@ export function _calculateInvariant(amplificationParameter: bigint, balances: bi
         let D_P = invariant;
 
         for (let j = 0; j < numTokens; j++) {
-            D_P = (D_P * invariant) / (balances[j] * BigInt(numTokens));
+            D_P = roundUp
+                ? MathSol.divUp(D_P * invariant, balances[j] * BigInt(numTokens))
+                : (D_P * invariant) / (balances[j] * BigInt(numTokens));
         }
 
         prevInvariant = invariant;
 
-        invariant =
-            (((ampTimesTotal * sum) / AMP_PRECISION + D_P * BigInt(numTokens)) * invariant) /
-            (((ampTimesTotal - AMP_PRECISION) * invariant) / AMP_PRECISION +
-                (BigInt(numTokens) + 1n) * D_P);
+        invariant = roundUp
+            ? MathSol.divUp(
+                  ((ampTimesTotal * sum) / AMP_PRECISION + D_P * BigInt(numTokens)) * invariant,
+                  MathSol.divUp((ampTimesTotal - AMP_PRECISION) * invariant, AMP_PRECISION) +
+                      (BigInt(numTokens) + 1n) * D_P,
+              )
+            : (((ampTimesTotal * sum) / AMP_PRECISION + D_P * BigInt(numTokens)) * invariant) /
+              (((ampTimesTotal - AMP_PRECISION) * invariant) / AMP_PRECISION +
+                  (BigInt(numTokens) + 1n) * D_P);
 
         if (invariant > prevInvariant) {
             if (invariant - prevInvariant <= 1n) {
@@ -274,15 +285,18 @@ export function _getTokenBalanceGivenInvariantAndAllOtherBalances(
 
     sum = sum - balances[tokenIndex];
     const inv2 = invariant * invariant;
-    const c = (inv2 / (ampTimesTotal * P_D)) * AMP_PRECISION * balances[tokenIndex];
+    const c = MathSol.divUp(inv2, ampTimesTotal * P_D) * AMP_PRECISION * balances[tokenIndex];
     const b = sum + (invariant / ampTimesTotal) * AMP_PRECISION;
 
     let prevTokenBalance = 0n;
-    let tokenBalance = (inv2 + c) / (invariant + b);
+    let tokenBalance = MathSol.divUp(inv2 + c, invariant + b);
 
     for (let i = 0; i < 255; i++) {
         prevTokenBalance = tokenBalance;
-        tokenBalance = (tokenBalance * tokenBalance + c) / (tokenBalance * 2n + b - invariant);
+        tokenBalance = MathSol.divUp(
+            tokenBalance * tokenBalance + c,
+            tokenBalance * 2n + b - invariant,
+        );
 
         if (tokenBalance > prevTokenBalance) {
             if (tokenBalance - prevTokenBalance <= 1n) {

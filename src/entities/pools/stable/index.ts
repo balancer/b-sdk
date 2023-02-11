@@ -124,7 +124,7 @@ export class StablePool implements BasePool {
                 throw new Error('Swap amount exceeds the pool limit');
 
             const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
-            const amountInWithRate = amountInWithFee.mulFixed(this.tokensNoBpt[tInIndex].rate);
+            const amountInWithRate = amountInWithFee.mulDownFixed(this.tokensNoBpt[tInIndex].rate);
             const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);
 
             const invariant = _calculateInvariant(this.amp, balancesNoBpt);
@@ -159,7 +159,7 @@ export class StablePool implements BasePool {
             if (swapAmount.amount > this.tokensNoBpt[tOutIndex].amount)
                 throw new Error('Swap amount exceeds the pool limit');
 
-            const amountOutWithRate = swapAmount.mulFixed(this.tokensNoBpt[tOutIndex].rate);
+            const amountOutWithRate = swapAmount.mulDownFixed(this.tokensNoBpt[tOutIndex].rate);
 
             const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);
 
@@ -183,7 +183,7 @@ export class StablePool implements BasePool {
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
-        const feeAmount = amount.mulFixed(this.swapFee);
+        const feeAmount = amount.mulUpFixed(this.swapFee);
         return amount.sub(feeAmount);
     }
 
@@ -215,7 +215,7 @@ export class StablePool implements BasePool {
         const tInIndex = this.tokensNoBpt.findIndex(t => t.token.address === tokenIn.address);
         const amountsIn = new Array(this.tokensNoBpt.length).fill(0n);
 
-        const amountInWithRate = swapAmount.mulFixed(this.tokensNoBpt[tInIndex].rate);
+        const amountInWithRate = swapAmount.mulDownFixed(this.tokensNoBpt[tInIndex].rate);
         amountsIn[tInIndex] = amountInWithRate.scale18;
 
         const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);
@@ -246,7 +246,7 @@ export class StablePool implements BasePool {
             t => t.token.address === swapAmount.token.address,
         );
 
-        const amountOutWithRate = swapAmount.mulFixed(this.tokens[this.bptIndex].rate);
+        const amountOutWithRate = swapAmount.mulDownFixed(this.tokens[this.bptIndex].rate);
 
         const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);
         const invariant = _calculateInvariant(this.amp, balancesNoBpt);
@@ -275,7 +275,7 @@ export class StablePool implements BasePool {
     ): TokenAmount {
         const tOutIndex = this.tokensNoBpt.findIndex(t => t.token.address === tokenOut.address);
 
-        const amountInWithRate = swapAmount.mulFixed(this.tokens[this.bptIndex].rate);
+        const amountInWithRate = swapAmount.mulDownFixed(this.tokens[this.bptIndex].rate);
 
         const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);
         const invariant = _calculateInvariant(this.amp, balancesNoBpt);
@@ -304,7 +304,7 @@ export class StablePool implements BasePool {
         const tOutIndex = this.tokensNoBpt.findIndex(t => t.token.address === tokenOut.address);
         const amountsOut = new Array(this.tokensNoBpt.length);
 
-        const amountOutWithRate = swapAmount.mulFixed(this.tokensNoBpt[tOutIndex].rate);
+        const amountOutWithRate = swapAmount.mulDownFixed(this.tokensNoBpt[tOutIndex].rate);
         amountsOut[tOutIndex] = amountOutWithRate.scale18;
 
         const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);

@@ -51,6 +51,14 @@ export class MathSol {
         }
     }
 
+    static divUp(a: bigint, b: bigint): bigint {
+        if (a == 0n) {
+            return 0n;
+        } else {
+            return 1n + (a - 1n) / b;
+        }
+    }
+
     // version = poolTypeVersion
     static powUpFixed(x: bigint, y: bigint, version?: number): bigint {
         if (y === WAD && version !== 1) {
