@@ -42,6 +42,9 @@ export class Router {
             try {
                 quotePaths.push(new PathWithAmount(path.tokens, path.pools, swapAmount));
             } catch {
+                console.debug(
+                    `Invalid path: ${path.tokens.map(token => token.symbol).join(' -> ')}`,
+                );
                 return;
             }
         });

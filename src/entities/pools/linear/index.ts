@@ -1,7 +1,7 @@
 import { PoolType, SwapKind } from '../../../types';
 import { BigintIsh, Token, TokenAmount } from '../../';
 import { BasePool } from '../../pools';
-import { getPoolAddress, MAX_UINT256, unsafeFastParseEther, WAD } from '../../../utils';
+import { getPoolAddress, MAX_UINT112, unsafeFastParseEther, WAD } from '../../../utils';
 import {
     _calcBptOutPerMainIn,
     _calcBptOutPerWrappedIn,
@@ -21,7 +21,7 @@ import { RawLinearPool } from '../../../data/types';
 const ALMOST_ONE = unsafeFastParseEther('0.99');
 const ONE = unsafeFastParseEther('1');
 const MAX_RATIO = unsafeFastParseEther('10');
-const MAX_TOKEN_BALANCE = MAX_UINT256 - 1n;
+const MAX_TOKEN_BALANCE = MAX_UINT112 - 1n;
 
 export class BPT extends TokenAmount {
     public readonly rate: bigint;
@@ -29,8 +29,8 @@ export class BPT extends TokenAmount {
 
     public constructor(token: Token, amount: BigintIsh) {
         super(token, amount);
-        this.rate = 1n;
-        this.virtualBalance = MAX_UINT256 - this.amount;
+        this.rate = WAD;
+        this.virtualBalance = MAX_TOKEN_BALANCE - this.amount;
     }
 }
 
