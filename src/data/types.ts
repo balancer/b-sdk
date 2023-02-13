@@ -1,6 +1,6 @@
 // These are only the known pool types, additional pool types can be added via
 // extension through custom PoolFactories and PoolDataProviders
-import { HumanAmount, SwapOptions } from '../types';
+import { HumanAmount } from '../types';
 
 export type SupportedRawPoolTypes =
     | LinearPoolType
@@ -92,7 +92,8 @@ export interface GetPoolsResponse {
     poolsWithActiveWeightUpdates?: string[];
 }
 
-export interface ProviderSwapOptions extends SwapOptions {
+export interface ProviderSwapOptions {
+    block?: number;
     timestamp: number;
 }
 

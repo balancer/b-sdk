@@ -5,7 +5,6 @@ import {
     ProviderSwapOptions,
     RawPool,
 } from './types';
-import { SwapOptions } from '../types';
 import { jsonRpcGetBlockTimestampByNumber } from '../utils/jsonRpcFetch';
 
 export class PoolDataService {
@@ -15,17 +14,12 @@ export class PoolDataService {
         private readonly rpcUrl: string,
     ) {}
 
-    public async getEnrichedPools(options: SwapOptions): Promise<RawPool[]> {
-        const timestamp = options.block
-            ? await jsonRpcGetBlockTimestampByNumber({
-                  rpcUrl: this.rpcUrl,
-                  blockNumber: options.block,
-              })
-            : Math.floor(new Date().getTime() / 1000);
-
+    public async fetchEnrichedPools(
+        blockNumber?: number,
+    ): Promise<{ rawPools: RawPool[]; providerData: GetPoolsResponse }> {
         const providerOptions: ProviderSwapOptions = {
-            ...options,
-            timestamp,
+            block: blockNumber,
+            timestamp: await this.getTimestampForBlockNumber(blockNumber),
         };
 
         //TODO: might be necessary to remove duplicates, decide which take precendence
@@ -33,9 +27,7 @@ export class PoolDataService {
             this.providers.map(provider => provider.getPools(providerOptions)),
         );
 
-        let pools = responses.map(response => response.pools).flat();
-
-        const data: GetPoolsResponse = {
+        const providerData: GetPoolsResponse = {
             pools: responses.map(response => response.pools).flat(),
             //we take the smallest block number from the set
             syncedToBlockNumber: responses
@@ -49,6 +41,15 @@ export class PoolDataService {
                 .flat(),
         };
 
+        return {
+            rawPools: await this.enrichPools(providerData, providerOptions),
+            providerData,
+        };
+    }
+
+    public async enrichPools(data: GetPoolsResponse, providerOptions: ProviderSwapOptions) {
+        let pools = data.pools;
+
         const additionalPoolData = await Promise.all(
             this.enrichers.map(provider => provider.fetchAdditionalPoolData(data, providerOptions)),
         );
@@ -59,5 +60,14 @@ export class PoolDataService {
         }
 
         return pools;
+    }
+
+    public async getTimestampForBlockNumber(blockNumber?: number) {
+        return blockNumber
+            ? await jsonRpcGetBlockTimestampByNumber({
+                  rpcUrl: this.rpcUrl,
+                  blockNumber,
+              })
+            : Math.floor(new Date().getTime() / 1000);
     }
 }

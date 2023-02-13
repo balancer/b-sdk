@@ -1,6 +1,5 @@
 import { gql, GraphQLClient } from 'graphql-request';
 import { GetPoolsResponse, PoolDataProvider, ProviderSwapOptions, RawPool } from '../types';
-import { SwapOptions } from '../../types';
 import { fetchWithRetry } from '../../utils/fetch';
 
 const PAGE_SIZE = 1000;
