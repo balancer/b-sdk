@@ -58,7 +58,11 @@ export class SmartOrderRouter {
             timestamp: await this.poolDataService.getTimestampForBlockNumber(blockNumber),
         };
 
-        await this.poolDataService.enrichPools(this.poolsProviderData, providerOptions);
+        const enriched = await this.poolDataService.enrichPools(
+            this.poolsProviderData,
+            providerOptions,
+        );
+        this.pools = this.poolParser.parseRawPools(enriched);
     }
 
     public get isInitialized(): boolean {
