@@ -1,11 +1,12 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { Router } from './router';
-import { BasePool, Path, Token, TokenAmount } from './entities';
+import { BasePool, BasePoolFactory, Path, Token, TokenAmount } from './entities';
 import { ChainId } from './utils';
 import { SorConfig, SwapInfo, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
 import { PoolDataService } from './data/poolDataService';
-import { GetPoolsResponse } from './data/types';
+import { GetPoolsResponse, RawPool } from './data/types';
+import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 
 export class SmartOrderRouter {
     private readonly chainId: ChainId;
@@ -108,5 +109,44 @@ export class SmartOrderRouter {
             this.pools,
             options?.graphTraversalConfig,
         );
+    }
+
+    public static async getSwapsWithPools({
+        tokenIn,
+        tokenOut,
+        swapKind,
+        swapAmount,
+        pools,
+        swapOptions,
+        customPoolFactories = [],
+    }: {
+        tokenIn: Token;
+        tokenOut: Token;
+        swapKind: SwapKind;
+        swapAmount: TokenAmount;
+        pools: RawPool[];
+        customPoolFactories?: BasePoolFactory[];
+        // we remove poolIdsToInclude from the graphTraversalConfig, since pools are provided as input
+        swapOptions?: Omit<SwapOptions, 'graphTraversalConfig'> & {
+            graphTraversalConfig: Omit<PathGraphTraversalConfig, 'poolIdsToInclude'>;
+        };
+    }) {
+        const poolParser = new PoolParser(customPoolFactories);
+        const parsedPools = poolParser.parseRawPools(pools);
+        const router = new Router();
+
+        const candidatePaths = router.getCandidatePaths(
+            tokenIn,
+            tokenOut,
+            swapKind,
+            parsedPools,
+            swapOptions?.graphTraversalConfig,
+        );
+        const bestPaths = await router.getBestPaths(candidatePaths, swapKind, swapAmount);
+
+        return {
+            quote: swapKind === SwapKind.GivenIn ? bestPaths.outputAmount : bestPaths.inputAmount,
+            swap: bestPaths,
+        };
     }
 }
