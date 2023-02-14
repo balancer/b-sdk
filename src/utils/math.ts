@@ -1,7 +1,10 @@
+import { unsafeFastParseEther } from './ether';
+
 export const WAD = 1000000000000000000n;
 export const RAY = 1000000000000000000000000000n;
 export const TWO_WAD = 2000000000000000000n;
 export const FOUR_WAD = 4000000000000000000n;
+export const ALMOST_ONE = unsafeFastParseEther('0.99');
 
 const _require = (b: boolean, message: string) => {
     if (!b) throw new Error(message);
