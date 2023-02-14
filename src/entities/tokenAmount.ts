@@ -1,7 +1,6 @@
 import { Token } from './token';
-import { parseUnits } from '@ethersproject/units';
 import _Decimal from 'decimal.js-light';
-import { WAD } from '../utils';
+import { unsafeFastParseUnits, WAD } from '../utils';
 import { HumanAmount } from '../types';
 
 export type BigintIsh = bigint | string | number;
@@ -18,7 +17,7 @@ export class TokenAmount {
     }
 
     public static fromHumanAmount(token: Token, humanAmount: HumanAmount) {
-        const rawAmount = parseUnits(humanAmount, token.decimals).toString();
+        const rawAmount = unsafeFastParseUnits(humanAmount, token.decimals);
         return new TokenAmount(token, rawAmount);
     }
 

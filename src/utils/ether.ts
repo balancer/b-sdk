@@ -1,9 +1,13 @@
 export const unsafeFastParseEther = (value: string): bigint => {
+    return unsafeFastParseUnits(value, 18);
+};
+
+export const unsafeFastParseUnits = (value: string, decimals: number): bigint => {
     const parts = value.split('.');
     parts[0] = parts[0] || '';
     parts[1] = parts[1] || '';
 
-    const zerosToAdd = 18 - parts[1].length;
+    const zerosToAdd = decimals - parts[1].length;
     let etherValue = `${parts[0] !== '0' ? parts[0] : ''}${parts[1]}`;
 
     for (let i = 0; i < zerosToAdd; i++) {

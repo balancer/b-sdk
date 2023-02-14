@@ -1,7 +1,7 @@
 import { PoolType, SwapKind } from '../../../types';
 import { BigintIsh, Token, TokenAmount } from '../../';
 import { BasePool } from '../../pools';
-import { getPoolAddress, MAX_UINT112, unsafeFastParseEther, WAD } from '../../../utils';
+import { ALMOST_ONE, getPoolAddress, MAX_UINT112, unsafeFastParseEther, WAD } from '../../../utils';
 import {
     _calcBptOutPerMainIn,
     _calcBptOutPerWrappedIn,
@@ -18,30 +18,33 @@ import {
 } from './math';
 import { RawLinearPool } from '../../../data/types';
 
-const ALMOST_ONE = unsafeFastParseEther('0.99');
 const ONE = unsafeFastParseEther('1');
 const MAX_RATIO = unsafeFastParseEther('10');
 const MAX_TOKEN_BALANCE = MAX_UINT112 - 1n;
 
-export class BPT extends TokenAmount {
+class BPT extends TokenAmount {
     public readonly rate: bigint;
     public readonly virtualBalance: bigint;
+    public readonly index: number;
 
-    public constructor(token: Token, amount: BigintIsh) {
+    public constructor(token: Token, amount: BigintIsh, index: number) {
         super(token, amount);
         this.rate = WAD;
         this.virtualBalance = MAX_TOKEN_BALANCE - this.amount;
+        this.index = index;
     }
 }
 
-export class WrappedToken extends TokenAmount {
+class WrappedToken extends TokenAmount {
     public readonly rate: bigint;
     public readonly scale18: bigint;
+    public readonly index: number;
 
-    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh) {
+    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
         super(token, amount);
         this.rate = BigInt(rate);
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        this.index = index;
     }
 }
 
@@ -53,15 +56,18 @@ export type Params = {
 };
 
 export class LinearPool implements BasePool {
-    readonly id: string;
-    readonly address: string;
-    readonly poolType: PoolType = PoolType.AaveLinear;
-    readonly poolTypeVersion: number;
-    swapFee: bigint;
-    mainToken: TokenAmount;
-    wrappedToken: WrappedToken;
-    bptToken: BPT;
-    params: Params;
+    public readonly id: string;
+    public readonly address: string;
+    public readonly poolType: PoolType = PoolType.AaveLinear;
+    public readonly poolTypeVersion: number;
+    public readonly swapFee: bigint;
+    public readonly mainToken: TokenAmount;
+    public readonly wrappedToken: WrappedToken;
+    public readonly bptToken: BPT;
+    public readonly params: Params;
+    public readonly tokens: (BPT | WrappedToken | TokenAmount)[];
+
+    private readonly tokenMap: Map<string, BPT | WrappedToken | TokenAmount>;
 
     static fromRawPool(pool: RawLinearPool): LinearPool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
@@ -78,13 +84,13 @@ export class LinearPool implements BasePool {
 
         const wToken = new Token(1, wT.address, wT.decimals, wT.symbol, wT.name);
         const wTokenAmount = TokenAmount.fromHumanAmount(wToken, wT.balance);
-        const wrappedToken = new WrappedToken(wToken, wTokenAmount.amount, wTRate);
+        const wrappedToken = new WrappedToken(wToken, wTokenAmount.amount, wTRate, wT.index);
 
         const bptIndex: number = orderedTokens.findIndex(t => t.address === pool.address);
         const bT = orderedTokens[bptIndex];
         const bToken = new Token(1, bT.address, bT.decimals, bT.symbol, bT.name);
         const bTokenAmount = TokenAmount.fromHumanAmount(bToken, bT.balance);
-        const bptToken = new BPT(bToken, bTokenAmount.amount);
+        const bptToken = new BPT(bToken, bTokenAmount.amount, bT.index);
 
         const params: Params = {
             fee: swapFee,
@@ -93,7 +99,7 @@ export class LinearPool implements BasePool {
             upperTarget: upperTarget.scale18,
         };
 
-        const linearPool = new LinearPool(
+        return new LinearPool(
             pool.id,
             pool.poolTypeVersion,
             params,
@@ -101,7 +107,6 @@ export class LinearPool implements BasePool {
             wrappedToken,
             bptToken,
         );
-        return linearPool;
     }
 
     constructor(
@@ -120,15 +125,14 @@ export class LinearPool implements BasePool {
         this.bptToken = bptToken;
         this.address = getPoolAddress(id);
         this.params = params;
-    }
 
-    public get tokens() {
-        return [this.mainToken, this.wrappedToken, this.bptToken];
+        this.tokens = [this.mainToken, this.wrappedToken, this.bptToken];
+        this.tokenMap = new Map(this.tokens.map(token => [token.token.address, token]));
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokens.find(t => t.token.address === tokenIn.address);
-        const tOut = this.tokens.find(t => t.token.address === tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
         // TODO: Fix linear normalized liquidity calc
@@ -136,7 +140,7 @@ export class LinearPool implements BasePool {
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const tOutIndex = this.tokens.findIndex(t => t.token.address === tokenOut.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         let output: TokenAmount;
         if (tokenIn.isEqual(this.mainToken.token)) {
@@ -161,17 +165,19 @@ export class LinearPool implements BasePool {
             throw new Error('Pool does not contain the tokens provided');
         }
 
-        if (output.amount > this.tokens[tOutIndex].amount)
+        if (output.amount > (tOut?.amount || 0n)) {
             throw new Error('Swap amount exceeds the pool limit');
+        }
 
         return output;
     }
 
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const tOutIndex = this.tokens.findIndex(t => t.token.address === tokenOut.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
-        if (swapAmount.amount > this.tokens[tOutIndex].amount)
+        if (swapAmount.amount > (tOut?.amount || 0n)) {
             throw new Error('Swap amount exceeds the pool limit');
+        }
 
         if (tokenIn.isEqual(this.mainToken.token)) {
             if (tokenOut.isEqual(this.wrappedToken.token)) {
@@ -197,8 +203,8 @@ export class LinearPool implements BasePool {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const tIn = this.tokens.find(t => t.token.address === tokenIn.address);
-        const tOut = this.tokens.find(t => t.token.address === tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
 
