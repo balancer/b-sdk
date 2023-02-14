@@ -1,7 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { Token, BasePool, BasePoolFactory } from './entities';
+import { Token, BasePool, BasePoolFactory, TokenAmount, Swap } from './entities';
 import { BaseProvider } from '@ethersproject/providers';
 import { PoolDataEnricher, PoolDataProvider } from './data/types';
+import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 
 export enum PoolType {
     Weighted = 'Weighted',
@@ -20,6 +21,7 @@ export interface SwapOptions {
     slippage?: BigNumber;
     funds?: FundManagement;
     deadline?: BigNumber;
+    graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
 }
 
 export interface FundManagement {
@@ -30,7 +32,6 @@ export interface FundManagement {
 }
 
 export type SorOptions = {
-    onchainBalances: boolean;
     minPercentForPath: number;
 };
 
@@ -70,6 +71,14 @@ export interface BatchSwapStep {
     assetOutIndex: number;
     amount: string;
     userData: string;
+}
+
+export interface SwapInfo {
+    quote: TokenAmount;
+    swap: Swap;
+    // gasPriceWei: BigNumber;
+    // estimateTxGas: BigNumber;
+    // transactionData: TransactionData;
 }
 
 export type HumanAmount = string;

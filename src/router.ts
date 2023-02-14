@@ -1,35 +1,40 @@
 import { SwapKind } from './types';
 import { BasePool, Path, PathWithAmount, Swap, Token, TokenAmount } from './entities';
 import { PathGraph } from './pathGraph/pathGraph';
+import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 
 export class Router {
-    cache: Record<string, { paths: Path[] }> = {};
     private readonly pathGraph: PathGraph;
 
     constructor() {
         this.pathGraph = new PathGraph();
     }
 
-    getCandidatePaths = (
+    public getCandidatePaths(
         tokenIn: Token,
         tokenOut: Token,
         swapKind: SwapKind,
         pools: BasePool[],
-    ): Path[] => {
+        graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
+    ): Path[] {
         console.time('build graph and get candidate paths');
         this.pathGraph.buildGraph({ pools });
 
-        const candidatePaths = this.pathGraph.getCandidatePaths({ tokenIn, tokenOut });
+        const candidatePaths = this.pathGraph.getCandidatePaths({
+            tokenIn,
+            tokenOut,
+            graphTraversalConfig,
+        });
         console.timeEnd('build graph and get candidate paths');
 
         return candidatePaths;
-    };
+    }
 
-    getBestPaths = async (
+    public async getBestPaths(
         paths: Path[],
         swapKind: SwapKind,
         swapAmount: TokenAmount,
-    ): Promise<Swap> => {
+    ): Promise<Swap> {
         if (paths.length === 0) {
             throw new Error('No potential swap paths provided');
         }
@@ -73,5 +78,5 @@ export class Router {
         const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 1), swapKind, swapAmount);
 
         return swap;
-    };
+    }
 }

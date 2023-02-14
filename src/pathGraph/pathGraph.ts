@@ -57,11 +57,11 @@ export class PathGraph {
     public getCandidatePaths({
         tokenIn,
         tokenOut,
-        pathConfig,
+        graphTraversalConfig,
     }: {
         tokenIn: Token;
         tokenOut: Token;
-        pathConfig?: Partial<PathGraphTraversalConfig>;
+        graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
     }): Path[] {
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
@@ -69,7 +69,7 @@ export class PathGraph {
             maxNonBoostedPathDepth: 3,
             maxNonBoostedHopTokensInBoostedPath: 1,
             approxPathsToReturn: 5,
-            ...pathConfig,
+            ...graphTraversalConfig,
         };
 
         const tokenPaths = this.findAllValidTokenPaths({
