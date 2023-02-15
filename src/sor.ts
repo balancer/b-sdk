@@ -111,6 +111,18 @@ export class SmartOrderRouter {
         );
     }
 
+    public static parseRawPools({
+        pools,
+        customPoolFactories = [],
+    }: {
+        pools: RawPool[];
+        customPoolFactories?: BasePoolFactory[];
+    }): BasePool[] {
+        const poolParser = new PoolParser(customPoolFactories);
+
+        return poolParser.parseRawPools(pools);
+    }
+
     public static async getSwapsWithPools({
         tokenIn,
         tokenOut,
@@ -118,28 +130,24 @@ export class SmartOrderRouter {
         swapAmount,
         pools,
         swapOptions,
-        customPoolFactories = [],
     }: {
         tokenIn: Token;
         tokenOut: Token;
         swapKind: SwapKind;
         swapAmount: TokenAmount;
-        pools: RawPool[];
-        customPoolFactories?: BasePoolFactory[];
+        pools: BasePool[];
         // we remove poolIdsToInclude from the graphTraversalConfig, since pools are provided as input
         swapOptions?: Omit<SwapOptions, 'graphTraversalConfig'> & {
             graphTraversalConfig: Omit<PathGraphTraversalConfig, 'poolIdsToInclude'>;
         };
     }) {
-        const poolParser = new PoolParser(customPoolFactories);
-        const parsedPools = poolParser.parseRawPools(pools);
         const router = new Router();
 
         const candidatePaths = router.getCandidatePaths(
             tokenIn,
             tokenOut,
             swapKind,
-            parsedPools,
+            pools,
             swapOptions?.graphTraversalConfig,
         );
         const bestPaths = await router.getBestPaths(candidatePaths, swapKind, swapAmount);
