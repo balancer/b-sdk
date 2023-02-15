@@ -185,6 +185,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                         priceRate
                         decimals
                         name
+                        index
                         symbol
                     }
                     tokensList
