@@ -98,9 +98,13 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                           }
                         : {}),
                 },
-                block: {
-                    number: options?.block,
-                },
+                ...(options?.block
+                    ? {
+                          block: {
+                              number: options.block,
+                          },
+                      }
+                    : {}),
                 ampUpdatesWhere: {
                     endTimestamp_gte: nowMinusOneHour,
                     startTimestamp_lte: nowPlusOneHour,
