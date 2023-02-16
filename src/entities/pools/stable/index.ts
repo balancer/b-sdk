@@ -149,8 +149,6 @@ export class StablePool implements BasePool {
         const tInIndexNoBpt = this.tokenNoBptIndexMap.get(tokenIn.address);
         const tOutIndexNoBpt = this.tokenNoBptIndexMap.get(tokenOut.address);
 
-        const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
-        const amountInWithRate = amountInWithFee.mulDownFixed(this.tokens[tInIndex].rate);
         const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);
 
         const invariant = _calculateInvariant(this.amp, balancesNoBpt);
@@ -159,6 +157,8 @@ export class StablePool implements BasePool {
         if (tokenIn.isEqual(this.tokens[this.bptIndex].token)) {
             if (typeof tOutIndexNoBpt !== 'number')
                 throw new Error('Pool does not contain the tokens provided');
+
+            const amountInWithRate = swapAmount.mulDownFixed(this.tokens[tInIndex].rate);
 
             tokenOutScale18 = _calcTokenOutGivenExactBptIn(
                 this.amp,
@@ -173,6 +173,8 @@ export class StablePool implements BasePool {
             const amountsIn = new Array(this.tokensNoBpt.length).fill(0n);
             if (typeof tInIndexNoBpt !== 'number')
                 throw new Error('Pool does not contain the tokens provided');
+
+            const amountInWithRate = swapAmount.mulDownFixed(this.tokens[tInIndex].rate);
             amountsIn[tInIndexNoBpt] = amountInWithRate.scale18;
 
             tokenOutScale18 = _calcBptOutGivenExactTokensIn(
@@ -184,6 +186,8 @@ export class StablePool implements BasePool {
                 this.swapFee,
             );
         } else {
+            const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
+            const amountInWithRate = amountInWithFee.mulDownFixed(this.tokens[tInIndex].rate);
             if (typeof tInIndexNoBpt !== 'number' || typeof tOutIndexNoBpt !== 'number')
                 throw new Error('Pool does not contain the tokens provided');
             tokenOutScale18 = _calcOutGivenIn(
@@ -223,14 +227,14 @@ export class StablePool implements BasePool {
 
         const invariant = _calculateInvariant(this.amp, balancesNoBpt);
 
-        let tokenInScale18: bigint;
+        let amountIn: TokenAmount;
         if (tokenIn.isEqual(this.tokens[this.bptIndex].token)) {
             if (typeof tOutIndexNoBpt !== 'number')
                 throw new Error('Pool does not contain the tokens provided');
             const amountsOut = new Array(this.tokensNoBpt.length).fill(0n);
             amountsOut[tOutIndexNoBpt] = amountOutWithRate.scale18;
 
-            tokenInScale18 = _calcBptInGivenExactTokensOut(
+            const tokenInScale18 = _calcBptInGivenExactTokensOut(
                 this.amp,
                 [...balancesNoBpt],
                 amountsOut,
@@ -238,10 +242,14 @@ export class StablePool implements BasePool {
                 invariant,
                 this.swapFee,
             );
+
+            amountIn = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true).divDownFixed(
+                this.tokens[tInIndex].rate,
+            );
         } else if (tokenOut.isEqual(this.tokens[this.bptIndex].token)) {
             if (typeof tInIndexNoBpt !== 'number')
                 throw new Error('Pool does not contain the tokens provided');
-            tokenInScale18 = _calcTokenInGivenExactBptOut(
+            const tokenInScale18 = _calcTokenInGivenExactBptOut(
                 this.amp,
                 [...balancesNoBpt],
                 tInIndexNoBpt,
@@ -250,10 +258,15 @@ export class StablePool implements BasePool {
                 invariant,
                 this.swapFee,
             );
+
+            amountIn = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true).divDownFixed(
+                this.tokens[tInIndex].rate,
+            );
         } else {
             if (typeof tInIndexNoBpt !== 'number' || typeof tOutIndexNoBpt !== 'number')
                 throw new Error('Pool does not contain the tokens provided');
-            tokenInScale18 = _calcInGivenOut(
+
+            const tokenInScale18 = _calcInGivenOut(
                 this.amp,
                 [...balancesNoBpt],
                 tInIndexNoBpt,
@@ -261,12 +274,14 @@ export class StablePool implements BasePool {
                 amountOutWithRate.scale18,
                 invariant,
             );
+
+            const amountInWithoutFee = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true);
+            const amountInWithFee = this.addSwapFeeAmount(amountInWithoutFee);
+
+            amountIn = amountInWithFee.divDownFixed(this.tokens[tInIndex].rate);
         }
 
-        const amountIn = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true);
-        const amountInWithFee = this.addSwapFeeAmount(amountIn);
-
-        return amountInWithFee.divDownFixed(this.tokens[tInIndex].rate);
+        return amountIn;
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
