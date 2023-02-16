@@ -38,13 +38,15 @@ export class SmartOrderRouter {
         );
     }
 
-    public async fetchAndCachePools(blockNumber?: number): Promise<void> {
+    public async fetchAndCachePools(blockNumber?: number): Promise<BasePool[]> {
         const { rawPools, providerData } = await this.poolDataService.fetchEnrichedPools(
             blockNumber,
         );
         this.pools = this.poolParser.parseRawPools(rawPools);
         this.blockNumber = typeof blockNumber === 'number' ? blockNumber : null;
         this.poolsProviderData = providerData;
+
+        return this.pools;
     }
 
     public async fetchAndCacheLatestPoolEnrichmentData(blockNumber?: number) {
