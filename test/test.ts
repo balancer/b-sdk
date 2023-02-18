@@ -40,19 +40,13 @@ const USDT = new Token(chainId, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6,
 const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
 
 async function getSwaps() {
-    const inputAmount = TokenAmount.fromHumanAmount(WETH, '1');
+    const inputAmount = TokenAmount.fromHumanAmount(WETH, '0.1');
 
-    const { swap, quote } = await sor.getSwaps(
-        USDC,
-        WETH,
-        SwapKind.GivenOut,
-        inputAmount,
-        swapOptions,
-    );
+    const { swap, quote } = await sor.getSwaps(WETH, USDC, SwapKind.GivenIn, inputAmount);
 
-    const onchain = await swap.query(provider, swapOptions.block);
+    const onchain = await swap.query(provider);
 
-    swap.paths[0].path.print();
+    swap.paths.forEach(p => p.path.print());
 
     console.log(quote);
     console.log(onchain);

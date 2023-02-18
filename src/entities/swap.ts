@@ -1,4 +1,4 @@
-import { Path, PathWithAmount } from './path';
+import { PathWithAmount } from './path';
 import { TokenAmount } from './';
 import { SwapKind, BatchSwapStep } from '../types';
 import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT, ZERO_ADDRESS } from '../utils';

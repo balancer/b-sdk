@@ -1,4 +1,5 @@
 import { SwapKind } from './types';
+import { WAD } from './utils/math';
 import { BasePool, Path, PathWithAmount, Swap, Token, TokenAmount } from './entities';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
@@ -38,8 +39,7 @@ export class Router {
         if (paths.length === 0) {
             throw new Error('No potential swap paths provided');
         }
-        // TODO: swapAmount is being used in full on both paths
-        //       this should only be for ordering and then figuring out best split
+
         const quotePaths: PathWithAmount[] = [];
 
         // Check if PathWithAmount is valid (each hop pool swap limit)
@@ -72,8 +72,37 @@ export class Router {
         }
 
         const orderedQuotePaths = valueArr.map(item => item.item);
-        const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 1), swapKind, swapAmount);
 
-        return swap;
+        // Split swapAmount in half, making sure not to lose dust
+        const swapAmount50up = swapAmount.mulDownFixed(WAD / 2n);
+        const swapAmount50down = swapAmount.sub(swapAmount50up);
+
+        const path50up = new PathWithAmount(
+            orderedQuotePaths[0].tokens,
+            orderedQuotePaths[0].pools,
+            swapAmount50up,
+        );
+        const path50down = new PathWithAmount(
+            orderedQuotePaths[1].tokens,
+            orderedQuotePaths[1].pools,
+            swapAmount50down,
+        );
+
+        const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 1), swapKind, swapAmount);
+        const swapSplit = await Swap.fromPaths([path50up, path50down], swapKind, swapAmount);
+
+        if (swapKind === SwapKind.GivenIn) {
+            if (swap.outputAmount.amount > swapSplit.outputAmount.amount) {
+                return swap;
+            } else {
+                return swapSplit;
+            }
+        } else {
+            if (swap.inputAmount.amount < swapSplit.inputAmount.amount) {
+                return swap;
+            } else {
+                return swapSplit;
+            }
+        }
     }
 }
