@@ -86,6 +86,7 @@ export class PathWithAmount extends Path {
     public print(): void {
         // TODO: cleanup
         const printPath: any = [];
+        let reversedPrintPath: any = [];
         if (this.swapKind === SwapKind.GivenIn) {
             const amounts: TokenAmount[] = new Array(this.tokens.length);
             amounts[0] = this.swapAmount;
@@ -103,6 +104,8 @@ export class PathWithAmount extends Path {
                     output: outputAmount.amount.toString() + ' ' + this.tokens[i + 1].symbol,
                 });
             }
+
+            console.table(printPath);
         } else {
             const amounts: TokenAmount[] = new Array(this.tokens.length);
             amounts[amounts.length - 1] = this.swapAmount;
@@ -120,8 +123,9 @@ export class PathWithAmount extends Path {
                     output: amounts[i].amount.toString() + ' ' + this.tokens[i].symbol,
                 });
             }
-        }
 
-        console.table(printPath);
+            reversedPrintPath = printPath.reverse();
+            console.table(reversedPrintPath);
+        }
     }
 }
