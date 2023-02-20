@@ -105,7 +105,7 @@ export class Swap {
     public swaps: BatchSwapStep[];
 
     public get inputAmount(): TokenAmount {
-        if (!this.paths.every(p => p.inputAmount.token === this.paths[0].inputAmount.token)) {
+        if (!this.paths.every(p => p.inputAmount.token.isEqual(this.paths[0].inputAmount.token))) {
             throw new Error(
                 'Input amount can only be calculated if all paths have the same input token',
             );
@@ -115,7 +115,9 @@ export class Swap {
     }
 
     public get outputAmount(): TokenAmount {
-        if (!this.paths.every(p => p.outputAmount.token === this.paths[0].outputAmount.token)) {
+        if (
+            !this.paths.every(p => p.outputAmount.token.isEqual(this.paths[0].outputAmount.token))
+        ) {
             throw new Error(
                 'Output amount can only be calculated if all paths have the same output token',
             );

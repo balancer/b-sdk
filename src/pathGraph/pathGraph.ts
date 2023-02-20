@@ -69,6 +69,7 @@ export class PathGraph {
             maxNonBoostedPathDepth: 3,
             maxNonBoostedHopTokensInBoostedPath: 1,
             approxPathsToReturn: 5,
+            pathSearchTimeoutMs: 1000,
             ...graphTraversalConfig,
         };
 
@@ -83,7 +84,11 @@ export class PathGraph {
         const paths: PathGraphEdgeData[][] = [];
         const selectedPathIds: string[] = [];
 
-        while (paths.length < config.approxPathsToReturn) {
+        const startTime = Date.now();
+        while (
+            paths.length < config.approxPathsToReturn &&
+            Date.now() - startTime < config.pathSearchTimeoutMs
+        ) {
             // the tokenPairIndex refers to the nth most liquid path for a token
             // pair x -> y. maxPathsPerTokenPair is provided as a config on graph init
             for (let idx = 0; idx < this.maxPathsPerTokenPair; idx++) {

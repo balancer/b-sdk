@@ -73,6 +73,11 @@ export class Router {
 
         const orderedQuotePaths = valueArr.map(item => item.item);
 
+        // If there is only one path, return it
+        if (orderedQuotePaths.length === 1) {
+            return await Swap.fromPaths(orderedQuotePaths, swapKind, swapAmount);
+        }
+
         // Split swapAmount in half, making sure not to lose dust
         const swapAmount50up = swapAmount.mulDownFixed(WAD / 2n);
         const swapAmount50down = swapAmount.sub(swapAmount50up);
