@@ -146,7 +146,7 @@ export class LinearPool implements BasePool {
         if (tokenIn.isEqual(this.mainToken.token)) {
             if (tokenOut.isEqual(this.wrappedToken.token)) {
                 output = this._exactMainTokenInForWrappedOut(swapAmount);
-                output = output.mulDownFixed(this.wrappedToken.rate);
+                output = output.divDownFixed(this.wrappedToken.rate);
             } else {
                 output = this._exactMainTokenInForBptOut(swapAmount);
             }
@@ -162,7 +162,7 @@ export class LinearPool implements BasePool {
                 output = this._exactBptInForMainOut(swapAmount);
             } else {
                 output = this._exactBptInForWrappedOut(swapAmount);
-                output = output.mulDownFixed(this.wrappedToken.rate);
+                output = output.divDownFixed(this.wrappedToken.rate);
             }
         } else {
             throw new Error('Pool does not contain the tokens provided');

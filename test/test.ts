@@ -30,7 +30,7 @@ const sor = new SmartOrderRouter({
 
 const swapOptions: SwapOptions = {
     // block: 16603490,
-    block: 16637787,
+    block: 16687634,
 };
 
 const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
@@ -40,14 +40,21 @@ const USDT = new Token(chainId, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6,
 const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
 
 async function getSwaps() {
-    const inputAmount = TokenAmount.fromHumanAmount(WETH, '0.1');
+    const inputAmount = TokenAmount.fromHumanAmount(USDC, '1000');
 
-    const { swap, quote } = await sor.getSwaps(WETH, USDC, SwapKind.GivenIn, inputAmount);
+    const { swap, quote } = await sor.getSwaps(
+        USDC,
+        DAI,
+        SwapKind.GivenIn,
+        inputAmount,
+        swapOptions,
+    );
 
-    const onchain = await swap.query(provider);
+    const onchain = await swap.query(provider, swapOptions.block);
 
     swap.paths.forEach(p => p.path.print());
 
+    console.log(swap.callData());
     console.log(quote);
     console.log(onchain);
 }

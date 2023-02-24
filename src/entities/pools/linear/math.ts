@@ -9,6 +9,7 @@ export function _calcWrappedOutPerMainIn(
     // Amount out, so we round down overall.
     const previousNominalMain = _toNominal(mainBalance, params);
     const afterNominalMain = _toNominal(mainBalance + mainIn, params);
+
     return afterNominalMain - previousNominalMain;
 }
 
@@ -29,6 +30,7 @@ export function _calcBptOutPerMainIn(
     const afterNominalMain = _toNominal(mainBalance + mainIn, params);
     const deltaNominalMain = afterNominalMain - previousNominalMain;
     const invariant = _calcInvariant(previousNominalMain, wrappedBalance);
+
     return (bptSupply * deltaNominalMain) / invariant;
 }
 
@@ -40,6 +42,7 @@ export function _calcMainOutPerWrappedIn(
     const previousNominalMain = _toNominal(mainBalance, params);
     const afterNominalMain = previousNominalMain - wrappedIn;
     const newMainBalance = _fromNominal(afterNominalMain, params);
+
     return mainBalance - newMainBalance;
 }
 
@@ -56,11 +59,10 @@ export function _calcBptOutPerWrappedIn(
 
     const nominalMain = _toNominal(mainBalance, params);
     const previousInvariant = _calcInvariant(nominalMain, wrappedBalance);
-
     const newWrappedBalance = wrappedBalance + wrappedIn;
     const newInvariant = _calcInvariant(nominalMain, newWrappedBalance);
-
     const newBptBalance = (bptSupply * newInvariant) / previousInvariant;
+
     return newBptBalance - bptSupply;
 }
 
@@ -77,6 +79,7 @@ export function _calcMainOutPerBptIn(
     const deltaNominalMain = (invariant * bptIn) / bptSupply;
     const afterNominalMain = previousNominalMain - deltaNominalMain;
     const newMainBalance = _fromNominal(afterNominalMain, params);
+
     return mainBalance - newMainBalance;
 }
 
@@ -90,10 +93,7 @@ export function _calcWrappedOutPerBptIn(
     const nominalMain = _toNominal(mainBalance, params);
     const previousInvariant = _calcInvariant(nominalMain, wrappedBalance);
     const newBptBalance = bptSupply - bptIn;
-    const newWrappedBalance = MathSol.divUpFixed(
-        (newBptBalance * previousInvariant) / bptSupply - nominalMain,
-        params.rate,
-    );
+    const newWrappedBalance = (newBptBalance * previousInvariant) / bptSupply - nominalMain;
 
     return wrappedBalance - newWrappedBalance;
 }
@@ -104,9 +104,9 @@ export function _calcMainInPerWrappedOut(
     params: Params,
 ): bigint {
     const previousNominalMain = _toNominal(mainBalance, params);
-    const deltaNominalMain = MathSol.mulUpFixed(wrappedOut, params.rate);
-    const afterNominalMain = previousNominalMain + deltaNominalMain;
+    const afterNominalMain = previousNominalMain + wrappedOut;
     const newMainBalance = _fromNominal(afterNominalMain, params);
+
     return newMainBalance - mainBalance;
 }
 
@@ -125,6 +125,7 @@ export function _calcMainInPerBptOut(
     const deltaNominalMain = (invariant * bptOut) / bptSupply;
     const afterNominalMain = previousNominalMain + deltaNominalMain;
     const newMainBalance = _fromNominal(afterNominalMain, params);
+
     return newMainBalance - mainBalance;
 }
 
@@ -135,8 +136,8 @@ export function _calcWrappedInPerMainOut(
 ): bigint {
     const previousNominalMain = _toNominal(mainBalance, params);
     const afterNominalMain = _toNominal(mainBalance - mainOut, params);
-    const deltaNominalMain = previousNominalMain - afterNominalMain;
-    return MathSol.divUpFixed(deltaNominalMain, params.rate);
+
+    return previousNominalMain - afterNominalMain;
 }
 
 export function _calcWrappedInPerBptOut(
@@ -147,16 +148,13 @@ export function _calcWrappedInPerBptOut(
     params: Params,
 ): bigint {
     if (bptSupply == 0n) {
-        return MathSol.divUpFixed(bptOut, params.rate);
+        return bptOut;
     }
 
     const nominalMain = _toNominal(mainBalance, params);
     const previousInvariant = _calcInvariant(nominalMain, wrappedBalance);
     const newBptBalance = bptSupply + bptOut;
-    const newWrappedBalance = MathSol.divUpFixed(
-        (newBptBalance * previousInvariant) / bptSupply - nominalMain,
-        params.rate,
-    );
+    const newWrappedBalance = (newBptBalance * previousInvariant) / bptSupply - nominalMain;
 
     return newWrappedBalance - wrappedBalance;
 }
@@ -188,6 +186,7 @@ export function _calcBptInPerMainOut(
     const afterNominalMain = _toNominal(mainBalance - mainOut, params);
     const deltaNominalMain = previousNominalMain - afterNominalMain;
     const invariant = _calcInvariant(previousNominalMain, wrappedBalance);
+
     return (bptSupply * deltaNominalMain) / invariant;
 }
 
