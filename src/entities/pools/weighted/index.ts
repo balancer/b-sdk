@@ -103,7 +103,12 @@ export class WeightedPool implements BasePool {
         return TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
     }
 
-    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenOut(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenOut)) {

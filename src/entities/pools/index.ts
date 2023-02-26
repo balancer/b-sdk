@@ -9,8 +9,18 @@ export interface BasePool {
     swapFee: bigint;
     tokens: TokenAmount[];
     getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint;
-    swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount;
-    swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount;
+    swapGivenIn(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount;
+    swapGivenOut(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount;
     getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint;
 }
 

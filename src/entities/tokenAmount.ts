@@ -7,10 +7,10 @@ export type BigintIsh = bigint | string | number;
 
 export class TokenAmount {
     public readonly token: Token;
-    public readonly amount: bigint;
     public readonly scalar: bigint;
     public readonly decimalScale: bigint;
-    public readonly scale18: bigint;
+    public amount: bigint;
+    public scale18: bigint;
 
     public static fromRawAmount(token: Token, rawAmount: BigintIsh) {
         return new TokenAmount(token, rawAmount);

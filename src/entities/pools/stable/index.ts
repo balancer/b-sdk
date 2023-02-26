@@ -22,8 +22,8 @@ import { RawComposableStablePool } from '../../../data/types';
 
 class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
-    public readonly scale18: bigint;
     public readonly index: number;
+    public scale18: bigint;
 
     public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
         super(token, amount);
@@ -31,18 +31,17 @@ class StablePoolToken extends TokenAmount {
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         this.index = index;
     }
-}
 
-class BPT extends TokenAmount {
-    public readonly rate: bigint;
-    public readonly virtualBalance: bigint;
-    public readonly index: number;
+    public increase(amount: bigint): TokenAmount {
+        this.amount = this.amount + amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
+    }
 
-    public constructor(token: Token, amount: BigintIsh, index: number) {
-        super(token, amount);
-        this.rate = WAD;
-        this.virtualBalance = PREMINTED_STABLE_BPT - this.amount;
-        this.index = index;
+    public decrease(amount: bigint): TokenAmount {
+        this.amount = this.amount - amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
     }
 }
 
@@ -52,35 +51,30 @@ export class StablePool implements BasePool {
     public readonly poolType: PoolType = PoolType.ComposableStable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
-    public readonly tokens: (StablePoolToken | BPT)[];
-    public readonly tokensNoBpt: StablePoolToken[];
-    public readonly totalShares: bigint;
     public readonly bptIndex: number;
 
-    private readonly tokenMap: Map<string, StablePoolToken | BPT>;
+    public totalShares: bigint;
+    public tokens: StablePoolToken[];
+
+    private readonly tokenMap: Map<string, StablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
-    private readonly tokenNoBptIndexMap: Map<string, number>;
 
     static fromRawPool(pool: RawComposableStablePool): StablePool {
-        const poolTokens: (BPT | StablePoolToken)[] = [];
+        const poolTokens: StablePoolToken[] = [];
 
         for (const t of pool.tokens) {
             if (!t.priceRate) throw new Error('Stable pool token does not have a price rate');
             const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
 
-            if (t.address === pool.address) {
-                poolTokens.push(new BPT(token, tokenAmount.amount, t.index));
-            } else {
-                poolTokens.push(
-                    new StablePoolToken(
-                        token,
-                        tokenAmount.amount,
-                        unsafeFastParseEther(t.priceRate),
-                        t.index,
-                    ),
-                );
-            }
+            poolTokens.push(
+                new StablePoolToken(
+                    token,
+                    tokenAmount.amount,
+                    unsafeFastParseEther(t.priceRate),
+                    t.index,
+                ),
+            );
         }
 
         const totalShares = unsafeFastParseEther(pool.totalShares);
@@ -112,15 +106,6 @@ export class StablePool implements BasePool {
         this.tokenMap = new Map(this.tokens.map(token => [token.token.address, token]));
         this.tokenIndexMap = new Map(this.tokens.map(token => [token.token.address, token.index]));
         this.bptIndex = this.tokenIndexMap.get(this.address) || -1;
-        this.tokensNoBpt = [...this.tokens];
-        // Splice outside assigment, otherwise returns the removed element
-        this.tokensNoBpt.splice(this.bptIndex, 1);
-        this.tokenNoBptIndexMap = new Map(
-            this.tokensNoBpt.map(token => [
-                token.token.address,
-                token.index > this.bptIndex ? token.index - 1 : token.index,
-            ]),
-        );
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -140,42 +125,33 @@ export class StablePool implements BasePool {
             throw new Error('Pool does not contain the tokens provided');
         }
 
+        const balancesNoBpt = this.dropBptItem(this.tokens.map(t => t.scale18));
+
         // TODO: Fix stable swap limit
         if (swapAmount.scale18 > this.tokens[tInIndex].scale18) {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
-        // Don't use || assignment - if map get returns 0 index that is falsey
-        const tInIndexNoBpt = this.tokenNoBptIndexMap.get(tokenIn.address);
-        const tOutIndexNoBpt = this.tokenNoBptIndexMap.get(tokenOut.address);
-
-        const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);
-
         const invariant = _calculateInvariant(this.amp, balancesNoBpt);
 
         let tokenOutScale18: bigint;
         if (tokenIn.isEqual(this.tokens[this.bptIndex].token)) {
-            if (typeof tOutIndexNoBpt !== 'number')
-                throw new Error('Pool does not contain the tokens provided');
-
             const amountInWithRate = swapAmount.mulDownFixed(this.tokens[tInIndex].rate);
 
             tokenOutScale18 = _calcTokenOutGivenExactBptIn(
                 this.amp,
                 [...balancesNoBpt],
-                tOutIndexNoBpt,
+                this.skipBptIndex(tOutIndex),
                 amountInWithRate.scale18,
                 this.totalShares,
                 invariant,
                 this.swapFee,
             );
         } else if (tokenOut.isEqual(this.tokens[this.bptIndex].token)) {
-            const amountsIn = new Array(this.tokensNoBpt.length).fill(0n);
-            if (typeof tInIndexNoBpt !== 'number')
-                throw new Error('Pool does not contain the tokens provided');
+            const amountsIn = new Array(balancesNoBpt.length).fill(0n);
 
             const amountInWithRate = swapAmount.mulDownFixed(this.tokens[tInIndex].rate);
-            amountsIn[tInIndexNoBpt] = amountInWithRate.scale18;
+            amountsIn[this.skipBptIndex(tInIndex)] = amountInWithRate.scale18;
 
             tokenOutScale18 = _calcBptOutGivenExactTokensIn(
                 this.amp,
@@ -188,13 +164,12 @@ export class StablePool implements BasePool {
         } else {
             const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
             const amountInWithRate = amountInWithFee.mulDownFixed(this.tokens[tInIndex].rate);
-            if (typeof tInIndexNoBpt !== 'number' || typeof tOutIndexNoBpt !== 'number')
-                throw new Error('Pool does not contain the tokens provided');
+
             tokenOutScale18 = _calcOutGivenIn(
                 this.amp,
                 [...balancesNoBpt],
-                tInIndexNoBpt,
-                tOutIndexNoBpt,
+                this.skipBptIndex(tInIndex),
+                this.skipBptIndex(tOutIndex),
                 amountInWithRate.scale18,
                 invariant,
             );
@@ -205,7 +180,12 @@ export class StablePool implements BasePool {
         return amountOut.divDownFixed(this.tokens[tOutIndex].rate);
     }
 
-    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenOut(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const tInIndex = this.tokenIndexMap.get(tokenIn.address);
         const tOutIndex = this.tokenIndexMap.get(tokenOut.address);
 
@@ -213,26 +193,21 @@ export class StablePool implements BasePool {
             throw new Error('Pool does not contain the tokens provided');
         }
 
+        const balancesNoBpt = this.dropBptItem(this.tokens.map(t => t.scale18));
+
         // TODO: Fix stable swap limit
         if (swapAmount.scale18 > this.tokens[tOutIndex].scale18) {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
-        // Don't use || assignment - if map get returns 0 index that is falsey
-        const tInIndexNoBpt = this.tokenNoBptIndexMap.get(tokenIn.address);
-        const tOutIndexNoBpt = this.tokenNoBptIndexMap.get(tokenOut.address);
-
         const amountOutWithRate = swapAmount.mulDownFixed(this.tokens[tOutIndex].rate);
-        const balancesNoBpt = this.tokensNoBpt.map(t => t.scale18);
 
         const invariant = _calculateInvariant(this.amp, balancesNoBpt);
 
         let amountIn: TokenAmount;
         if (tokenIn.isEqual(this.tokens[this.bptIndex].token)) {
-            if (typeof tOutIndexNoBpt !== 'number')
-                throw new Error('Pool does not contain the tokens provided');
-            const amountsOut = new Array(this.tokensNoBpt.length).fill(0n);
-            amountsOut[tOutIndexNoBpt] = amountOutWithRate.scale18;
+            const amountsOut = new Array(balancesNoBpt.length).fill(0n);
+            amountsOut[this.skipBptIndex(tOutIndex)] = amountOutWithRate.scale18;
 
             const tokenInScale18 = _calcBptInGivenExactTokensOut(
                 this.amp,
@@ -247,12 +222,10 @@ export class StablePool implements BasePool {
                 this.tokens[tInIndex].rate,
             );
         } else if (tokenOut.isEqual(this.tokens[this.bptIndex].token)) {
-            if (typeof tInIndexNoBpt !== 'number')
-                throw new Error('Pool does not contain the tokens provided');
             const tokenInScale18 = _calcTokenInGivenExactBptOut(
                 this.amp,
                 [...balancesNoBpt],
-                tInIndexNoBpt,
+                this.skipBptIndex(tInIndex),
                 amountOutWithRate.scale18,
                 this.totalShares,
                 invariant,
@@ -263,14 +236,11 @@ export class StablePool implements BasePool {
                 this.tokens[tInIndex].rate,
             );
         } else {
-            if (typeof tInIndexNoBpt !== 'number' || typeof tOutIndexNoBpt !== 'number')
-                throw new Error('Pool does not contain the tokens provided');
-
             const tokenInScale18 = _calcInGivenOut(
                 this.amp,
                 [...balancesNoBpt],
-                tInIndexNoBpt,
-                tOutIndexNoBpt,
+                this.skipBptIndex(tInIndex),
+                this.skipBptIndex(tOutIndex),
                 amountOutWithRate.scale18,
                 invariant,
             );
@@ -279,6 +249,17 @@ export class StablePool implements BasePool {
             const amountInWithFee = this.addSwapFeeAmount(amountInWithoutFee);
 
             amountIn = amountInWithFee.divDownFixed(this.tokens[tInIndex].rate);
+        }
+
+        if (mutateBalances) {
+            this.tokens[tInIndex].increase(amountIn.amount);
+            this.tokens[tOutIndex].decrease(swapAmount.amount);
+
+            if (tInIndex === this.bptIndex) {
+                this.totalShares = this.totalShares - amountIn.amount;
+            } else if (tOutIndex === this.bptIndex) {
+                this.totalShares = this.totalShares + swapAmount.amount;
+            }
         }
 
         return amountIn;
@@ -307,5 +288,18 @@ export class StablePool implements BasePool {
             // Return max amount of tokenOut - approx is almost all balance
             return (tOut.amount * ALMOST_ONE) / tOut.rate;
         }
+    }
+
+    public skipBptIndex(index: number): number {
+        if (index === this.bptIndex) throw new Error('Cannot skip BPT index');
+        return index < this.bptIndex ? index : index - 1;
+    }
+
+    public dropBptItem(amounts: bigint[]): bigint[] {
+        const amountsWithoutBpt = new Array(amounts.length - 1).fill(0n);
+        for (let i = 0; i < amountsWithoutBpt.length; i++) {
+            amountsWithoutBpt[i] = amounts[i < this.bptIndex ? i : i + 1];
+        }
+        return amountsWithoutBpt;
     }
 }

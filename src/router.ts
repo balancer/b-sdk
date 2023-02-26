@@ -31,11 +31,11 @@ export class Router {
         return candidatePaths;
     }
 
-    public async getBestPaths(
+    public getBestPaths(
         paths: Path[],
         swapKind: SwapKind,
         swapAmount: TokenAmount,
-    ): Promise<Swap> {
+    ): PathWithAmount[] {
         if (paths.length === 0) {
             throw new Error('No potential swap paths provided');
         }
@@ -75,7 +75,7 @@ export class Router {
 
         // If there is only one path, return it
         if (orderedQuotePaths.length === 1) {
-            return await Swap.fromPaths(orderedQuotePaths, swapKind, swapAmount);
+            return orderedQuotePaths;
         }
 
         // Split swapAmount in half, making sure not to lose dust
@@ -93,20 +93,23 @@ export class Router {
             swapAmount50down,
         );
 
-        const swap = await Swap.fromPaths(orderedQuotePaths.slice(0, 1), swapKind, swapAmount);
-        const swapSplit = await Swap.fromPaths([path50up, path50down], swapKind, swapAmount);
-
         if (swapKind === SwapKind.GivenIn) {
-            if (swap.outputAmount.amount > swapSplit.outputAmount.amount) {
-                return swap;
+            if (
+                orderedQuotePaths[0].outputAmount.amount >
+                path50up.outputAmount.amount + path50down.outputAmount.amount
+            ) {
+                return orderedQuotePaths.slice(0, 1);
             } else {
-                return swapSplit;
+                return [path50up, path50down];
             }
         } else {
-            if (swap.inputAmount.amount < swapSplit.inputAmount.amount) {
-                return swap;
+            if (
+                orderedQuotePaths[0].inputAmount.amount <
+                path50up.inputAmount.amount + path50down.inputAmount.amount
+            ) {
+                return orderedQuotePaths.slice(0, 1);
             } else {
-                return swapSplit;
+                return [path50up, path50down];
             }
         }
     }

@@ -1,6 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { Router } from './router';
-import { BasePool, BasePoolFactory, Path, Token, TokenAmount } from './entities';
+import { BasePool, BasePoolFactory, Path, Token, TokenAmount, Swap } from './entities';
 import { ChainId } from './utils';
 import { SorConfig, SwapInfo, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
@@ -85,11 +85,14 @@ export class SmartOrderRouter {
             swapKind,
             swapOptions,
         );
-        const bestPaths = await this.router.getBestPaths(candidatePaths, swapKind, swapAmount);
+
+        const bestPaths = this.router.getBestPaths(candidatePaths, swapKind, swapAmount);
+
+        const swap = new Swap({ paths: bestPaths, tokenIn, tokenOut, swapKind });
 
         return {
-            quote: swapKind === SwapKind.GivenIn ? bestPaths.outputAmount : bestPaths.inputAmount,
-            swap: bestPaths,
+            quote: swapKind === SwapKind.GivenIn ? swap.outputAmount : swap.inputAmount,
+            swap,
         };
     }
 
@@ -152,11 +155,13 @@ export class SmartOrderRouter {
             pools,
             swapOptions?.graphTraversalConfig,
         );
-        const bestPaths = await router.getBestPaths(candidatePaths, swapKind, swapAmount);
+        const bestPaths = router.getBestPaths(candidatePaths, swapKind, swapAmount);
+
+        const swap = new Swap({ paths: bestPaths, tokenIn, tokenOut, swapKind });
 
         return {
-            quote: swapKind === SwapKind.GivenIn ? bestPaths.outputAmount : bestPaths.inputAmount,
-            swap: bestPaths,
+            quote: swapKind === SwapKind.GivenIn ? swap.outputAmount : swap.inputAmount,
+            swap,
         };
     }
 }
