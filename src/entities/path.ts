@@ -53,6 +53,7 @@ export class PathWithAmount extends Path {
                         this.tokens[i],
                         this.tokens[i + 1],
                         amounts[i],
+                        this.mutateBalances,
                     );
                     amounts[i + 1] = outputAmount;
                     this.printPath.push({

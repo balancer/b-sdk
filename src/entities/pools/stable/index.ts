@@ -117,7 +117,12 @@ export class StablePool implements BasePool {
         return tOut.amount * this.amp;
     }
 
-    public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenIn(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const tInIndex = this.tokenIndexMap.get(tokenIn.address);
         const tOutIndex = this.tokenIndexMap.get(tokenOut.address);
 
@@ -176,6 +181,17 @@ export class StablePool implements BasePool {
         }
 
         const amountOut = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
+
+        if (mutateBalances) {
+            this.tokens[tInIndex].increase(swapAmount.amount);
+            this.tokens[tOutIndex].decrease(amountOut.amount);
+
+            if (tInIndex === this.bptIndex) {
+                this.totalShares = this.totalShares - swapAmount.amount;
+            } else if (tOutIndex === this.bptIndex) {
+                this.totalShares = this.totalShares + amountOut.amount;
+            }
+        }
 
         return amountOut.divDownFixed(this.tokens[tOutIndex].rate);
     }
