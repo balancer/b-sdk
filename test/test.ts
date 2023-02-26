@@ -9,6 +9,10 @@ import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapKind, SwapOptions } from '../src/types';
 
+BigInt.prototype['toJSON'] = function () {
+    return this.toString();
+};
+
 const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 const SOR_QUERIES = '0x6732d651EeA0bc98FcF4EFF8B62e0CdCB0064f4b';
 
@@ -40,21 +44,21 @@ const USDT = new Token(chainId, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6,
 const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
 
 async function getSwaps() {
-    const inputAmount = TokenAmount.fromHumanAmount(USDC, '1000');
+    const inputAmount = TokenAmount.fromHumanAmount(USDC, '10000');
 
     const { swap, quote } = await sor.getSwaps(
+        WETH,
         USDC,
-        DAI,
-        SwapKind.GivenIn,
+        SwapKind.GivenOut,
         inputAmount,
         swapOptions,
     );
 
+    swap.paths.forEach(p => p.print());
+
     const onchain = await swap.query(provider, swapOptions.block);
 
-    swap.paths.forEach(p => p.path.print());
-
-    console.log(swap.callData());
+    // console.log(swap.callData());
     console.log(quote);
     console.log(onchain);
 }

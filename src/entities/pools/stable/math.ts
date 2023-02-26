@@ -198,36 +198,35 @@ export function _calcBptInGivenExactTokensOut(
         sumBalances += balances[i];
     }
 
-    const balanceRatiosWithFee = new Array(amountsOut.length);
-    let invariantRatioWithFees = 0n;
+    const balanceRatiosWithoutFee = new Array(amountsOut.length);
+    let invariantRatioWithoutFees = 0n;
     for (let i = 0; i < balances.length; i++) {
         const currentWeight = MathSol.divUpFixed(balances[i], sumBalances);
-        balanceRatiosWithFee[i] = balances[i] - MathSol.divUpFixed(amountsOut[i], balances[i]);
-        invariantRatioWithFees += MathSol.mulUpFixed(balanceRatiosWithFee[i], currentWeight);
+        balanceRatiosWithoutFee[i] = MathSol.divUpFixed(balances[i] - amountsOut[i], balances[i]);
+        invariantRatioWithoutFees += MathSol.mulUpFixed(balanceRatiosWithoutFee[i], currentWeight);
     }
 
     const newBalances = new Array(balances.length);
     for (let i = 0; i < balances.length; i++) {
-        let amountOutWithoutFee: bigint;
+        let amountOutWithFee: bigint;
 
-        if (invariantRatioWithFees > balanceRatiosWithFee[i]) {
+        if (invariantRatioWithoutFees > balanceRatiosWithoutFee[i]) {
             const nonTaxableAmount = MathSol.mulDownFixed(
                 balances[i],
-                MathSol.complementFixed(invariantRatioWithFees),
+                MathSol.complementFixed(invariantRatioWithoutFees),
             );
             const taxableAmount = amountsOut[i] - nonTaxableAmount;
 
-            amountOutWithoutFee =
-                nonTaxableAmount + MathSol.divUpFixed(taxableAmount, WAD - swapFee);
+            amountOutWithFee = nonTaxableAmount + MathSol.divUpFixed(taxableAmount, WAD - swapFee);
         } else {
-            amountOutWithoutFee = amountsOut[i];
+            amountOutWithFee = amountsOut[i];
         }
 
-        newBalances[i] = balances[i] - amountOutWithoutFee;
+        newBalances[i] = balances[i] - amountOutWithFee;
     }
 
     const newInvariant = _calculateInvariant(amp, newBalances);
-    const invariantRatio = MathSol.divDownFixed(currentInvariant, newInvariant);
+    const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
 
     return MathSol.mulUpFixed(bptTotalSupply, MathSol.complementFixed(invariantRatio));
 }

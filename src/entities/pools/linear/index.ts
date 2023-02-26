@@ -175,7 +175,12 @@ export class LinearPool implements BasePool {
         return output;
     }
 
-    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenOut(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const tOut = this.tokenMap.get(tokenOut.address);
 
         if (swapAmount.amount > (tOut?.amount || 0n)) {

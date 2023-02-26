@@ -1,5 +1,5 @@
 import { PathWithAmount } from './path';
-import { TokenAmount } from './';
+import { Token, TokenAmount } from './';
 import { SwapKind, BatchSwapStep } from '../types';
 import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT, ZERO_ADDRESS } from '../utils';
 import { BaseProvider } from '@ethersproject/providers';
@@ -9,75 +9,75 @@ import vaultAbi from '../abi/Vault.json';
 
 // A Swap can be a single or multiple paths
 export class Swap {
-    public static async fromPaths(
-        fromPaths: PathWithAmount[],
-        swapKind: SwapKind,
-        swapAmount: TokenAmount,
-    ): Promise<Swap> {
-        const paths: {
-            path: PathWithAmount;
-            inputAmount: TokenAmount;
-            outputAmount: TokenAmount;
-        }[] = [];
-
-        for (const path of fromPaths) {
-            const inputAmount = path.inputAmount;
-            const outputAmount = path.outputAmount;
-            paths.push({ path, inputAmount, outputAmount });
-        }
-
-        return new Swap({ paths, swapKind, swapAmount });
-    }
-
-    protected constructor({
+    public constructor({
         paths,
+        tokenIn,
+        tokenOut,
         swapKind,
-        swapAmount,
     }: {
-        paths: {
-            path: PathWithAmount;
-            inputAmount: TokenAmount;
-            outputAmount: TokenAmount;
-        }[];
+        paths: PathWithAmount[];
+        tokenIn: Token;
+        tokenOut: Token;
         swapKind: SwapKind;
-        swapAmount: TokenAmount;
     }) {
         if (paths.length === 0) throw new Error('Invalid swap: must contain at least 1 path.');
-        this.paths = paths;
+        // Recalculate paths while mutating pool balances
+        this.paths = paths.map(
+            path => new PathWithAmount(path.tokens, path.pools, path.swapAmount, true),
+        );
+        this.tokenIn = tokenIn;
+        this.tokenOut = tokenOut;
         this.swapKind = swapKind;
-        this.isNativeSwap = swapAmount.token.isNative;
-        this.isBatchSwap = paths.length > 1 || paths[0].path.pools.length > 2 ? true : false;
-        this.assets = [
-            ...new Set(
-                paths
-                    .map(p => p.path.tokens)
-                    .flat()
-                    .map(t => t.address),
-            ),
-        ];
+        this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 2 ? true : false;
+        this.assets = paths
+            .map(p => p.tokens)
+            .flat()
+            .map(t => t.address);
+
+        if (tokenIn.isNative) this.assets[0] = ZERO_ADDRESS;
+        if (tokenOut.isNative) this.assets[this.assets.length - 1] = ZERO_ADDRESS;
+
+        // TODO: Fix how native assets are handled and asset indexes are calculated
         const swaps = [] as BatchSwapStep[];
         if (this.swapKind === SwapKind.GivenIn) {
-            paths.map(p => {
-                p.path.pools.map((pool, i) => {
+            this.paths.map(p => {
+                p.pools.map((pool, i) => {
+                    let assetInIndex = this.assets.indexOf(p.tokens[i].address);
+                    let assetOutIndex = this.assets.indexOf(p.tokens[i + 1].address);
+                    if (i === 0 && tokenIn.isNative) {
+                        assetInIndex = 0;
+                        assetOutIndex = this.assets.indexOf(p.tokens[i + 1].address);
+                    } else if (i === p.pools.length - 1 && tokenOut.isNative) {
+                        assetInIndex = this.assets.indexOf(p.tokens[i].address);
+                        assetOutIndex = this.assets.length - 1;
+                    }
                     swaps.push({
                         poolId: pool.id,
-                        assetInIndex: this.assets.indexOf(p.path.tokens[i].address),
-                        assetOutIndex: this.assets.indexOf(p.path.tokens[i + 1].address),
+                        assetInIndex,
+                        assetOutIndex,
                         amount: i === 0 ? p.inputAmount.amount.toString() : '0',
                         userData: DEFAULT_USERDATA,
                     });
                 });
             });
         } else {
-            paths.map(p => {
+            this.paths.map(p => {
                 // Vault expects given out swaps to be in reverse order
-                const reversedPools = [...p.path.pools].reverse();
-                const reversedTokens = [...p.path.tokens].reverse();
+                const reversedPools = [...p.pools].reverse();
+                const reversedTokens = [...p.tokens].reverse();
                 reversedPools.map((pool, i) => {
+                    let assetInIndex = this.assets.indexOf(reversedTokens[i + 1].address);
+                    let assetOutIndex = this.assets.indexOf(reversedTokens[i].address);
+                    if (i === 0 && tokenOut.isNative) {
+                        assetOutIndex = this.assets.length - 1;
+                    } else if (i === reversedPools.length - 1 && tokenIn.isNative) {
+                        assetInIndex = 0;
+                    }
+
                     swaps.push({
                         poolId: pool.id,
-                        assetInIndex: this.assets.indexOf(reversedTokens[i + 1].address),
-                        assetOutIndex: this.assets.indexOf(reversedTokens[i].address),
+                        assetInIndex,
+                        assetOutIndex,
                         amount: i === 0 ? p.outputAmount.amount.toString() : '0',
                         userData: DEFAULT_USERDATA,
                     });
@@ -85,22 +85,14 @@ export class Swap {
             });
         }
 
-        if (this.isNativeSwap) {
-            const idx = this.assets.findIndex(a => a === swapAmount.token.wrapped);
-            this.assets[idx] = ZERO_ADDRESS;
-        }
-
         this.swaps = swaps;
     }
 
-    public readonly isNativeSwap: boolean;
     public readonly isBatchSwap: boolean;
-    public readonly paths: {
-        path: PathWithAmount;
-        inputAmount: TokenAmount;
-        outputAmount: TokenAmount;
-    }[];
+    public readonly paths: PathWithAmount[];
     public readonly assets: string[];
+    public readonly tokenIn;
+    public readonly tokenOut;
     public readonly swapKind: SwapKind;
     public swaps: BatchSwapStep[];
 
@@ -111,7 +103,8 @@ export class Swap {
             );
         }
         const amounts = this.paths.map(path => path.inputAmount);
-        return amounts.reduce((a, b) => a.add(b));
+        const total = amounts.reduce((a, b) => a.add(b));
+        return TokenAmount.fromRawAmount(this.tokenIn, total.amount);
     }
 
     public get outputAmount(): TokenAmount {
@@ -123,7 +116,8 @@ export class Swap {
             );
         }
         const amounts = this.paths.map(path => path.outputAmount);
-        return amounts.reduce((a, b) => a.add(b));
+        const total = amounts.reduce((a, b) => a.add(b));
+        return TokenAmount.fromRawAmount(this.tokenOut, total.amount);
     }
 
     public async query(provider: BaseProvider, block?: number): Promise<TokenAmount> {
@@ -145,14 +139,8 @@ export class Swap {
 
         const amount =
             this.swapKind === SwapKind.GivenIn
-                ? TokenAmount.fromRawAmount(
-                      this.paths[0].outputAmount.token,
-                      deltas[this.assets.indexOf(this.paths[0].outputAmount.token.address)].abs(),
-                  )
-                : TokenAmount.fromRawAmount(
-                      this.paths[0].inputAmount.token,
-                      deltas[this.assets.indexOf(this.paths[0].inputAmount.token.address)].abs(),
-                  );
+                ? TokenAmount.fromRawAmount(this.tokenOut, deltas[deltas.length - 1].abs())
+                : TokenAmount.fromRawAmount(this.tokenIn, deltas[0].abs());
         return amount;
     }
 
