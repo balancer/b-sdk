@@ -34,4 +34,8 @@ export class Token {
     public isEqual(token: Token) {
         return this.chainId === token.chainId && this.address === token.address;
     }
+
+    public isUnderlyingEqual(token: Token) {
+        return this.chainId === token.chainId && this.wrapped === token.wrapped;
+    }
 }

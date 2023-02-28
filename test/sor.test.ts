@@ -65,8 +65,8 @@ describe('SmartOrderRouter', () => {
                 expect(swap.inputAmount.amount).toEqual(inputAmount.amount);
                 expect(swap.outputAmount.amount).toEqual(quote.amount);
                 expect(swap.paths.length).toEqual(1);
-                expect(swap.paths[0].path.pools.length).toEqual(1);
-                expect(swap.paths[0].path.pools[0].id).toEqual(
+                expect(swap.paths[0].pools.length).toEqual(1);
+                expect(swap.paths[0].pools[0].id).toEqual(
                     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
                 );
             });
@@ -92,8 +92,8 @@ describe('SmartOrderRouter', () => {
                 expect(swap.inputAmount.amount).toEqual(quote.amount);
                 expect(swap.outputAmount.amount).toEqual(outputAmount.amount);
                 expect(swap.paths.length).toEqual(1);
-                expect(swap.paths[0].path.pools.length).toEqual(1);
-                expect(swap.paths[0].path.pools[0].id).toEqual(
+                expect(swap.paths[0].pools.length).toEqual(1);
+                expect(swap.paths[0].pools[0].id).toEqual(
                     '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019',
                 );
             });

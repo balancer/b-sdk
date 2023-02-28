@@ -14,6 +14,18 @@ class WeightedPoolToken extends TokenAmount {
         this.weight = BigInt(weight);
         this.index = index;
     }
+
+    public increase(amount: bigint): TokenAmount {
+        this.amount = this.amount + amount;
+        this.scale18 = (this.amount * this.scalar) / WAD;
+        return this;
+    }
+
+    public decrease(amount: bigint): TokenAmount {
+        this.amount = this.amount - amount;
+        this.scale18 = (this.amount * this.scalar) / WAD;
+        return this;
+    }
 }
 
 export class WeightedPool implements BasePool {
@@ -82,7 +94,12 @@ export class WeightedPool implements BasePool {
         }
     }
 
-    public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenIn(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenIn)) {
@@ -100,7 +117,14 @@ export class WeightedPool implements BasePool {
             this.poolTypeVersion,
         );
 
-        return TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
+        const tokenOutAmount = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
+
+        if (mutateBalances) {
+            tIn.increase(swapAmount.amount);
+            tOut.decrease(tokenOutAmount.amount);
+        }
+
+        return tokenOutAmount;
     }
 
     public swapGivenOut(
@@ -124,9 +148,16 @@ export class WeightedPool implements BasePool {
             this.poolTypeVersion,
         );
 
-        const tokenInAmount = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true);
+        const tokenInAmount = this.addSwapFeeAmount(
+            TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true),
+        );
 
-        return this.addSwapFeeAmount(tokenInAmount);
+        if (mutateBalances) {
+            tIn.increase(tokenInAmount.amount);
+            tOut.decrease(swapAmount.amount);
+        }
+
+        return tokenInAmount;
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
@@ -142,8 +173,8 @@ export class WeightedPool implements BasePool {
         tokenIn: Token,
         tokenOut: Token,
     ): { tIn: WeightedPoolToken; tOut: WeightedPoolToken } {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) {
             throw new Error('Pool does not contain the tokens provided');

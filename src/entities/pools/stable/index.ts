@@ -109,8 +109,8 @@ export class StablePool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
         // TODO: Fix stable normalized liquidity calc
@@ -123,8 +123,8 @@ export class StablePool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const tInIndex = this.tokenIndexMap.get(tokenIn.address);
-        const tOutIndex = this.tokenIndexMap.get(tokenOut.address);
+        const tInIndex = this.tokenIndexMap.get(tokenIn.wrapped);
+        const tOutIndex = this.tokenIndexMap.get(tokenOut.wrapped);
 
         if (typeof tInIndex !== 'number' || typeof tOutIndex !== 'number') {
             throw new Error('Pool does not contain the tokens provided');
@@ -140,7 +140,7 @@ export class StablePool implements BasePool {
         const invariant = _calculateInvariant(this.amp, balancesNoBpt);
 
         let tokenOutScale18: bigint;
-        if (tokenIn.isEqual(this.tokens[this.bptIndex].token)) {
+        if (tokenIn.isUnderlyingEqual(this.tokens[this.bptIndex].token)) {
             const amountInWithRate = swapAmount.mulDownFixed(this.tokens[tInIndex].rate);
 
             tokenOutScale18 = _calcTokenOutGivenExactBptIn(
@@ -152,7 +152,7 @@ export class StablePool implements BasePool {
                 invariant,
                 this.swapFee,
             );
-        } else if (tokenOut.isEqual(this.tokens[this.bptIndex].token)) {
+        } else if (tokenOut.isUnderlyingEqual(this.tokens[this.bptIndex].token)) {
             const amountsIn = new Array(balancesNoBpt.length).fill(0n);
 
             const amountInWithRate = swapAmount.mulDownFixed(this.tokens[tInIndex].rate);
@@ -202,8 +202,8 @@ export class StablePool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const tInIndex = this.tokenIndexMap.get(tokenIn.address);
-        const tOutIndex = this.tokenIndexMap.get(tokenOut.address);
+        const tInIndex = this.tokenIndexMap.get(tokenIn.wrapped);
+        const tOutIndex = this.tokenIndexMap.get(tokenOut.wrapped);
 
         if (typeof tInIndex !== 'number' || typeof tOutIndex !== 'number') {
             throw new Error('Pool does not contain the tokens provided');
@@ -221,7 +221,7 @@ export class StablePool implements BasePool {
         const invariant = _calculateInvariant(this.amp, balancesNoBpt);
 
         let amountIn: TokenAmount;
-        if (tokenIn.isEqual(this.tokens[this.bptIndex].token)) {
+        if (tokenIn.isUnderlyingEqual(this.tokens[this.bptIndex].token)) {
             const amountsOut = new Array(balancesNoBpt.length).fill(0n);
             amountsOut[this.skipBptIndex(tOutIndex)] = amountOutWithRate.scale18;
 
@@ -237,7 +237,7 @@ export class StablePool implements BasePool {
             amountIn = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true).divDownFixed(
                 this.tokens[tInIndex].rate,
             );
-        } else if (tokenOut.isEqual(this.tokens[this.bptIndex].token)) {
+        } else if (tokenOut.isUnderlyingEqual(this.tokens[this.bptIndex].token)) {
             const tokenInScale18 = _calcTokenInGivenExactBptOut(
                 this.amp,
                 [...balancesNoBpt],
