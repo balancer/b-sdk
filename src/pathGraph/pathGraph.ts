@@ -66,7 +66,7 @@ export class PathGraph {
         console.log(`getCandidatePaths: ${tokenIn.address} -> ${tokenOut.address}`);
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
-            maxDepth: 7,
+            maxDepth: 6,
             maxNonBoostedPathDepth: 3,
             maxNonBoostedHopTokensInBoostedPath: 1,
             approxPathsToReturn: 5,

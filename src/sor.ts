@@ -128,24 +128,14 @@ export class SmartOrderRouter {
         return poolParser.parseRawPools(pools);
     }
 
-    public static async getSwapsWithPools({
-        tokenIn,
-        tokenOut,
-        swapKind,
-        swapAmount,
-        pools,
-        swapOptions,
-    }: {
-        tokenIn: Token;
-        tokenOut: Token;
-        swapKind: SwapKind;
-        swapAmount: TokenAmount;
-        pools: BasePool[];
-        // we remove poolIdsToInclude from the graphTraversalConfig, since pools are provided as input
-        swapOptions?: Omit<SwapOptions, 'graphTraversalConfig'> & {
-            graphTraversalConfig: Omit<PathGraphTraversalConfig, 'poolIdsToInclude'>;
-        };
-    }) {
+    public static async getSwapsWithPools(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapKind: SwapKind,
+        swapAmount: TokenAmount,
+        pools: BasePool[],
+        swapOptions?: Omit<SwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
+    ): Promise<SwapInfo> {
         const router = new Router();
 
         const candidatePaths = router.getCandidatePaths(
