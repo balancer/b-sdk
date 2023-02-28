@@ -51,6 +51,8 @@ export class Router {
             }
         });
 
+        if (quotePaths.length === 0) throw new Error('No valid paths provided');
+
         let valueArr: { item: PathWithAmount; value: number }[];
 
         if (swapKind === SwapKind.GivenIn) {

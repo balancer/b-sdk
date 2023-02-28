@@ -88,7 +88,7 @@ export class SmartOrderRouter {
 
         const bestPaths = this.router.getBestPaths(candidatePaths, swapKind, swapAmount);
 
-        const swap = new Swap({ paths: bestPaths, tokenIn, tokenOut, swapKind });
+        const swap = new Swap({ paths: bestPaths, swapKind });
 
         return {
             quote: swapKind === SwapKind.GivenIn ? swap.outputAmount : swap.inputAmount,
@@ -157,7 +157,7 @@ export class SmartOrderRouter {
         );
         const bestPaths = router.getBestPaths(candidatePaths, swapKind, swapAmount);
 
-        const swap = new Swap({ paths: bestPaths, tokenIn, tokenOut, swapKind });
+        const swap = new Swap({ paths: bestPaths, swapKind });
 
         return {
             quote: swapKind === SwapKind.GivenIn ? swap.outputAmount : swap.inputAmount,

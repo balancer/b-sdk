@@ -63,6 +63,7 @@ export class PathGraph {
         tokenOut: Token;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
     }): Path[] {
+        console.log(`getCandidatePaths: ${tokenIn.address} -> ${tokenOut.address}`);
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
             maxDepth: 7,
@@ -110,7 +111,8 @@ export class PathGraph {
 
         return this.sortAndFilterPaths(paths).map(path => {
             const pathTokens: Token[] = [...path.map(segment => segment.tokenOut)];
-            pathTokens.unshift(path[0].tokenIn);
+            pathTokens.unshift(tokenIn);
+            pathTokens[pathTokens.length - 1] = tokenOut;
 
             return {
                 tokens: pathTokens,

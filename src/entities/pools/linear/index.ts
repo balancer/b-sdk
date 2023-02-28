@@ -131,8 +131,8 @@ export class LinearPool implements BasePool {
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
         // TODO: Fix linear normalized liquidity calc
@@ -140,7 +140,7 @@ export class LinearPool implements BasePool {
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         let output: TokenAmount;
         if (tokenIn.isEqual(this.mainToken.token)) {
@@ -181,7 +181,7 @@ export class LinearPool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (swapAmount.amount > (tOut?.amount || 0n)) {
             throw new Error('Swap amount exceeds the pool limit');
@@ -217,8 +217,8 @@ export class LinearPool implements BasePool {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
 
