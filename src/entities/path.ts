@@ -37,7 +37,7 @@ export class PathWithAmount extends Path {
         this.mutateBalances = Boolean(mutateBalances);
 
         //call to super ensures this array access is safe
-        if (tokens[0].wrapped === swapAmount.token.wrapped) {
+        if (tokens[0].isUnderlyingEqual(swapAmount.token)) {
             this.swapKind = SwapKind.GivenIn;
         } else {
             this.swapKind = SwapKind.GivenOut;
