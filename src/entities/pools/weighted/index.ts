@@ -17,18 +17,19 @@ class WeightedPoolToken extends TokenAmount {
 
     public increase(amount: bigint): TokenAmount {
         this.amount = this.amount + amount;
-        this.scale18 = (this.amount * this.scalar) / WAD;
+        this.scale18 = this.amount * this.scalar;
         return this;
     }
 
     public decrease(amount: bigint): TokenAmount {
         this.amount = this.amount - amount;
-        this.scale18 = (this.amount * this.scalar) / WAD;
+        this.scale18 = this.amount * this.scalar;
         return this;
     }
 }
 
 export class WeightedPool implements BasePool {
+    public readonly chainId: number;
     public readonly id: string;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.Weighted;
@@ -40,7 +41,7 @@ export class WeightedPool implements BasePool {
     private readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
     private readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
-    static fromRawPool(pool: RawWeightedPool): WeightedPool {
+    static fromRawPool(chainId: number, pool: RawWeightedPool): WeightedPool {
         const poolTokens: WeightedPoolToken[] = [];
 
         for (const t of pool.tokens) {
@@ -48,7 +49,7 @@ export class WeightedPool implements BasePool {
                 throw new Error('Weighted pool token does not have a weight');
             }
 
-            const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
+            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
 
             poolTokens.push(
@@ -70,6 +71,7 @@ export class WeightedPool implements BasePool {
     }
 
     constructor(id: string, poolTypeVersion: number, swapFee: bigint, tokens: WeightedPoolToken[]) {
+        this.chainId = tokens[0].token.chainId;
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;
         this.address = getPoolAddress(id);

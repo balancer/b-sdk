@@ -56,6 +56,7 @@ export type Params = {
 };
 
 export class LinearPool implements BasePool {
+    public readonly chainId: number;
     public readonly id: string;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.AaveLinear;
@@ -69,12 +70,12 @@ export class LinearPool implements BasePool {
 
     private readonly tokenMap: Map<string, BPT | WrappedToken | TokenAmount>;
 
-    static fromRawPool(pool: RawLinearPool): LinearPool {
+    static fromRawPool(chainId: number, pool: RawLinearPool): LinearPool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
         const swapFee = unsafeFastParseEther(pool.swapFee);
 
         const mT = orderedTokens[pool.mainIndex];
-        const mToken = new Token(1, mT.address, mT.decimals, mT.symbol, mT.name);
+        const mToken = new Token(chainId, mT.address, mT.decimals, mT.symbol, mT.name);
         const lowerTarget = TokenAmount.fromHumanAmount(mToken, pool.lowerTarget);
         const upperTarget = TokenAmount.fromHumanAmount(mToken, pool.upperTarget);
         const mTokenAmount = TokenAmount.fromHumanAmount(mToken, mT.balance);
@@ -117,6 +118,7 @@ export class LinearPool implements BasePool {
         wrappedToken: WrappedToken,
         bptToken: BPT,
     ) {
+        this.chainId = mainToken.token.chainId;
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;
         this.swapFee = params.fee;

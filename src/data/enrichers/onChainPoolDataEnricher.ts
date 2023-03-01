@@ -134,7 +134,6 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 loadNormalizedWeights: weightedPoolIdxs.length > 0,
                 loadScalingFactors: scalingFactorPoolIdxs.length > 0,
                 loadAmps: ampPoolIdxs.length > 0,
-
                 blockNumber: data.syncedToBlockNumber || 0,
                 totalSupplyTypes,
                 swapFeeTypes,

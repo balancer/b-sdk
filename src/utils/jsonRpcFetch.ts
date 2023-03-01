@@ -1,7 +1,7 @@
 import fetch from 'isomorphic-fetch';
 import { ZERO_ADDRESS } from './constants';
 import { FunctionFragment, Interface } from '@ethersproject/abi';
-import { hexlify } from '@ethersproject/bytes';
+import { hexValue } from '@ethersproject/bytes';
 import { SwapOptions } from '../types';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -26,7 +26,7 @@ export async function jsonRpcFetch<T>({
 
     let block: string;
     if (options?.block) {
-        block = hexlify(options.block);
+        block = hexValue(options.block);
     } else {
         block = 'latest';
     }
@@ -46,6 +46,10 @@ export async function jsonRpcFetch<T>({
     });
 
     const content = await rawResponse.json();
+
+    if (content.error) {
+        throw new Error(content.error);
+    }
 
     return contractInterface.decodeFunctionResult('getPoolData', content.result) as unknown as T;
 }
@@ -67,7 +71,7 @@ export async function jsonRpcGetBlockTimestampByNumber({
             jsonrpc: '2.0',
             id: 2,
             method: 'eth_getBlockByNumber',
-            params: [hexlify(blockNumber), false],
+            params: [hexValue(blockNumber), false],
         }),
     });
 

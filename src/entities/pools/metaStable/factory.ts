@@ -7,7 +7,7 @@ export class MetaStablePoolFactory implements BasePoolFactory {
         return pool.poolType === 'MetaStable';
     }
 
-    public create(pool: RawPool): BasePool {
-        return MetaStablePool.fromRawPool(pool as RawMetaStablePool);
+    public create(chainId: number, pool: RawPool): BasePool {
+        return MetaStablePool.fromRawPool(chainId, pool as RawMetaStablePool);
     }
 }

@@ -46,6 +46,7 @@ class StablePoolToken extends TokenAmount {
 }
 
 export class StablePool implements BasePool {
+    public readonly chainId: number;
     public readonly id: string;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.ComposableStable;
@@ -59,12 +60,12 @@ export class StablePool implements BasePool {
     private readonly tokenMap: Map<string, StablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
-    static fromRawPool(pool: RawComposableStablePool): StablePool {
+    static fromRawPool(chainId: number, pool: RawComposableStablePool): StablePool {
         const poolTokens: StablePoolToken[] = [];
 
         for (const t of pool.tokens) {
             if (!t.priceRate) throw new Error('Stable pool token does not have a price rate');
-            const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
+            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
 
             poolTokens.push(
@@ -96,6 +97,7 @@ export class StablePool implements BasePool {
         tokens: StablePoolToken[],
         totalShares: bigint,
     ) {
+        this.chainId = tokens[0].token.chainId;
         this.id = id;
         this.address = getPoolAddress(id);
         this.amp = amp;

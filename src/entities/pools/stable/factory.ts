@@ -7,7 +7,7 @@ export class StablePoolFactory implements BasePoolFactory {
         return pool.poolType === 'ComposableStable';
     }
 
-    public create(pool: RawPool): BasePool {
-        return StablePool.fromRawPool(pool as RawComposableStablePool);
+    public create(chainId: number, pool: RawPool): BasePool {
+        return StablePool.fromRawPool(chainId, pool as RawComposableStablePool);
     }
 }
