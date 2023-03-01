@@ -7,7 +7,7 @@ export class LinearPoolFactory implements BasePoolFactory {
         return pool.poolType.includes('Linear');
     }
 
-    public create(pool: RawPool): BasePool {
-        return LinearPool.fromRawPool(pool as RawLinearPool);
+    public create(chainId: number, pool: RawPool): BasePool {
+        return LinearPool.fromRawPool(chainId, pool as RawLinearPool);
     }
 }

@@ -19,6 +19,7 @@ class StablePoolToken extends TokenAmount {
 }
 
 export class MetaStablePool implements BasePool {
+    public readonly chainId: number;
     public readonly id: string;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.MetaStable;
@@ -29,12 +30,12 @@ export class MetaStablePool implements BasePool {
     private readonly tokenMap: Map<string, StablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
-    static fromRawPool(pool: RawMetaStablePool): MetaStablePool {
+    static fromRawPool(chainId: number, pool: RawMetaStablePool): MetaStablePool {
         const poolTokens: StablePoolToken[] = [];
 
         for (const t of pool.tokens) {
             if (!t.priceRate) throw new Error('Meta Stable pool token does not have a price rate');
-            const token = new Token(1, t.address, t.decimals, t.symbol, t.name);
+            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
             poolTokens.push(
                 new StablePoolToken(
@@ -52,6 +53,7 @@ export class MetaStablePool implements BasePool {
     }
 
     constructor(id: string, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
+        this.chainId = tokens[0].token.chainId;
         this.id = id;
         this.address = getPoolAddress(id);
         this.amp = amp;

@@ -6,8 +6,6 @@ import { SorConfig, SwapInfo, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
 import { PoolDataService } from './data/poolDataService';
 import { GetPoolsResponse, RawPool } from './data/types';
-import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
-
 export class SmartOrderRouter {
     private readonly chainId: ChainId;
     private readonly provider: BaseProvider;
@@ -30,7 +28,7 @@ export class SmartOrderRouter {
         this.chainId = chainId;
         this.provider = provider;
         this.router = new Router();
-        this.poolParser = new PoolParser(customPoolFactories);
+        this.poolParser = new PoolParser(chainId, customPoolFactories);
         this.poolDataService = new PoolDataService(
             Array.isArray(poolDataProviders) ? poolDataProviders : [poolDataProviders],
             Array.isArray(poolDataEnrichers) ? poolDataEnrichers : [poolDataEnrichers],
@@ -117,13 +115,15 @@ export class SmartOrderRouter {
     }
 
     public static parseRawPools({
+        chainId,
         pools,
         customPoolFactories = [],
     }: {
+        chainId: number;
         pools: RawPool[];
         customPoolFactories?: BasePoolFactory[];
     }): BasePool[] {
-        const poolParser = new PoolParser(customPoolFactories);
+        const poolParser = new PoolParser(chainId, customPoolFactories);
 
         return poolParser.parseRawPools(pools);
     }

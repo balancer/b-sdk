@@ -1,6 +1,7 @@
 import { gql, GraphQLClient } from 'graphql-request';
 import { GetPoolsResponse, PoolDataProvider, ProviderSwapOptions, RawPool } from '../types';
 import { fetchWithRetry } from '../../utils/fetch';
+import { SUBGRAPH_URLS } from '../../utils';
 
 const PAGE_SIZE = 1000;
 const SECS_IN_HOUR = 3600;
@@ -35,8 +36,16 @@ export class SubgraphPoolProvider implements PoolDataProvider {
     private client: GraphQLClient;
     private readonly config: SubgraphPoolProviderConfig;
 
-    constructor(subgraphUrl: string, config?: Partial<SubgraphPoolProviderConfig>) {
-        this.client = new GraphQLClient(subgraphUrl);
+    constructor(
+        chainId: number,
+        subgraphUrl?: string,
+        config?: Partial<SubgraphPoolProviderConfig>,
+    ) {
+        // if subgraphUrl isnt provided, use the default for the chainId
+        const defaultSubgraphUrl = SUBGRAPH_URLS[chainId];
+        const urlToUse = subgraphUrl ?? defaultSubgraphUrl;
+
+        this.client = new GraphQLClient(urlToUse);
         const hasFilterConfig =
             config &&
             (config.poolIdNotIn || config.poolIdIn || config.poolTypeIn || config.poolTypeNotIn);

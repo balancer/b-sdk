@@ -26,5 +26,5 @@ export interface BasePool {
 
 export interface BasePoolFactory {
     isPoolForFactory(pool: RawPool): boolean;
-    create(pool: RawPool): BasePool;
+    create(chainId: number, pool: RawPool): BasePool;
 }

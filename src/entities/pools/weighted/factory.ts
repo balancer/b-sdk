@@ -7,7 +7,7 @@ export class WeightedPoolFactory implements BasePoolFactory {
         return pool.poolType === 'Weighted';
     }
 
-    public create(pool: RawPool): BasePool {
-        return WeightedPool.fromRawPool(pool as RawWeightedPool);
+    public create(chainId: number, pool: RawPool): BasePool {
+        return WeightedPool.fromRawPool(chainId, pool as RawWeightedPool);
     }
 }

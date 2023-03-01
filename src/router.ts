@@ -47,6 +47,7 @@ export class Router {
             try {
                 quotePaths.push(new PathWithAmount(path.tokens, path.pools, swapAmount));
             } catch {
+                console.debug(path.tokens.map(token => token.symbol).join(' -> '));
                 return;
             }
         });
