@@ -1,5 +1,5 @@
 import { PathWithAmount } from './path';
-import { Token, TokenAmount } from './';
+import { TokenAmount } from './tokenAmount';
 import { SwapKind, BatchSwapStep } from '../types';
 import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT, ZERO_ADDRESS, NATIVE_ASSETS } from '../utils';
 import { BaseProvider } from '@ethersproject/providers';
