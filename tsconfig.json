@@ -2,8 +2,8 @@
     "include": ["src"],
     "compilerOptions": {
         "target": "es2020",
-        "module": "esnext",
-        "outDir": "dist",
+        "module": "commonjs",
+        "outDir": "dist/cjs",
         "importHelpers": true,
         "declaration": true,
         "sourceMap": true,

@@ -6,13 +6,11 @@
     },
     "version": "0.0.1",
     "description": "",
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
-    "files": [
-        "dist"
-    ],
+    "main": "dist/cjs/index.js",
+    "module": "dist/esm/index.js",
+    "typings": "dist/cjs/index.d.ts",
     "scripts": {
-        "build": "tsc",
+        "build": "tsc && tsc -p tsconfig.module.json",
         "lint": "eslint . --ext .js,.ts --max-warnings 0",
         "test": "jest"
     },
@@ -44,5 +42,11 @@
         "jest": "^29.4.1",
         "prettier": "^2.8.3",
         "ts-jest": "^29.0.5"
-    }
+    },
+    "files": [
+        "dist/cjs",
+        "dist/esm",
+        "LICENSE",
+        "README.md"
+    ]
 }
