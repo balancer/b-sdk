@@ -68,12 +68,14 @@ export class StablePool implements BasePool {
             const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
 
+            const tokenIndex = t.index ?? pool.tokensList.findIndex(t => t === token.address);
+
             poolTokens.push(
                 new StablePoolToken(
                     token,
                     tokenAmount.amount,
                     unsafeFastParseEther(t.priceRate),
-                    t.index,
+                    tokenIndex,
                 ),
             );
         }
@@ -107,7 +109,8 @@ export class StablePool implements BasePool {
         this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(this.tokens.map(token => [token.token.address, token]));
         this.tokenIndexMap = new Map(this.tokens.map(token => [token.token.address, token.index]));
-        this.bptIndex = this.tokenIndexMap.get(this.address) || -1;
+
+        this.bptIndex = this.tokens.findIndex(t => t.token.address === this.address);
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -115,6 +118,7 @@ export class StablePool implements BasePool {
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        // console.log(`stable pool normalized liquidity: ${tOut.amount * this.amp}`);
         // TODO: Fix stable normalized liquidity calc
         return tOut.amount * this.amp;
     }
