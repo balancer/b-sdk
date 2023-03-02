@@ -6,6 +6,7 @@ import { SorConfig, SwapInfo, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
 import { PoolDataService } from './data/poolDataService';
 import { GetPoolsResponse, RawPool } from './data/types';
+
 export class SmartOrderRouter {
     private readonly chainId: ChainId;
     private readonly provider: BaseProvider;

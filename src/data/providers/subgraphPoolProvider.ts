@@ -95,7 +95,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             }>(this.getPoolsQuery(lastId === ''), {
                 pageSize: PAGE_SIZE,
                 where: {
-                    id: lastId || undefined,
+                    id_gt: lastId || undefined,
                     ...(this.config.addFilterToPoolQuery
                         ? {
                               totalShares_gt: 0.000000000001,
@@ -224,7 +224,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
         if (
             !pool.swapEnabled ||
             pool.totalShares === '0.000000000001' ||
-            pool.totalShares === '0.0'
+            pool.totalShares === '0'
         ) {
             return false;
         }

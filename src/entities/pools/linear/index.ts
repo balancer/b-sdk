@@ -83,13 +83,13 @@ export class LinearPool implements BasePool {
         const wT = orderedTokens[pool.wrappedIndex];
         const wTRate = unsafeFastParseEther(wT.priceRate || '1.0');
 
-        const wToken = new Token(1, wT.address, wT.decimals, wT.symbol, wT.name);
+        const wToken = new Token(chainId, wT.address, wT.decimals, wT.symbol, wT.name);
         const wTokenAmount = TokenAmount.fromHumanAmount(wToken, wT.balance);
         const wrappedToken = new WrappedToken(wToken, wTokenAmount.amount, wTRate, wT.index);
 
         const bptIndex: number = orderedTokens.findIndex(t => t.address === pool.address);
         const bT = orderedTokens[bptIndex];
-        const bToken = new Token(1, bT.address, bT.decimals, bT.symbol, bT.name);
+        const bToken = new Token(chainId, bT.address, bT.decimals, bT.symbol, bT.name);
         const bTokenAmount = TokenAmount.fromHumanAmount(bToken, bT.balance);
         const bptToken = new BPT(bToken, bTokenAmount.amount, bT.index);
 

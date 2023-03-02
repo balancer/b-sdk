@@ -124,14 +124,7 @@ export class PathGraph {
     private sortAndFilterPaths(paths: PathGraphEdgeData[][]): PathGraphEdgeData[][] {
         const pathsWithLimits = paths
             .map(path => {
-                let limit = 0n;
-
-                try {
-                    limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
-                } catch {
-                    // TODO: remove this once bpt swaps are implemented on the stable pool
-                }
-
+                const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
                 return { path, limit };
             })
             .sort((a, b) => (a.limit < b.limit ? 1 : -1));
