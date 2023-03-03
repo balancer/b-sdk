@@ -1,7 +1,14 @@
 import { PathWithAmount } from './path';
 import { TokenAmount } from './tokenAmount';
+import { Percent } from './percent';
 import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
-import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT, ZERO_ADDRESS, NATIVE_ASSETS } from '../utils';
+import {
+    DEFAULT_USERDATA,
+    DEFAULT_FUND_MANAGMENT,
+    ZERO_ADDRESS,
+    NATIVE_ASSETS,
+    WAD,
+} from '../utils';
 import { BaseProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { Interface } from '@ethersproject/abi';
@@ -161,13 +168,43 @@ export class Swap {
         return amount;
     }
 
+    public limits(slippage: Percent): bigint[] | bigint {
+        let limits: bigint[] | bigint;
+        if (this.swapKind === SwapKind.GivenIn) {
+            const minAmountOut = this.outputAmount.mulDownFixed(WAD - slippage.value);
+            if (this.isBatchSwap) {
+                limits = new Array<bigint>(this.assets.length).fill(BigInt(0));
+                limits[
+                    this.assets.indexOf(
+                        this.convertNativeAddressToZero(this.outputAmount.token.address),
+                    )
+                ] = minAmountOut.amount;
+            } else {
+                limits = minAmountOut.amount;
+            }
+        } else {
+            const maxAmountIn = this.inputAmount.mulDownFixed(WAD + slippage.value);
+            if (this.isBatchSwap) {
+                limits = new Array<bigint>(this.assets.length).fill(BigInt(0));
+                limits[
+                    this.assets.indexOf(
+                        this.convertNativeAddressToZero(this.inputAmount.token.address),
+                    )
+                ] = maxAmountIn.amount;
+            } else {
+                limits = maxAmountIn.amount;
+            }
+        }
+        return limits;
+    }
+
     private convertNativeAddressToZero(address: string): string {
         return address === NATIVE_ASSETS[this.inputAmount.token.chainId].address
             ? ZERO_ADDRESS
             : address;
     }
 
-    public callData(): string {
+    public queryCallData(): string {
         const iface = new Interface(balancerQueriesAbi);
 
         let callData: string;
