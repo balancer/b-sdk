@@ -37,12 +37,15 @@ export class MetaStablePool implements BasePool {
             if (!t.priceRate) throw new Error('Meta Stable pool token does not have a price rate');
             const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
+
+            const tokenIndex = t.index ?? pool.tokensList.findIndex(t => t === token.address);
+
             poolTokens.push(
                 new StablePoolToken(
                     token,
                     tokenAmount.amount,
                     unsafeFastParseEther(t.priceRate),
-                    t.index,
+                    tokenIndex,
                 ),
             );
         }
@@ -78,6 +81,9 @@ export class MetaStablePool implements BasePool {
         const tOutIndex = this.tokenIndexMap.get(tokenOut.address);
 
         if (typeof tInIndex !== 'number' || typeof tOutIndex !== 'number') {
+            console.debug(
+                `${this.id} ${tokenIn.symbol} ${tokenIn.address} ${tokenOut.symbol} ${tokenOut.address}`,
+            );
             throw new Error('Pool does not contain the tokens provided');
         }
 
@@ -110,6 +116,9 @@ export class MetaStablePool implements BasePool {
         const tOutIndex = this.tokenIndexMap.get(tokenOut.address);
 
         if (typeof tInIndex !== 'number' || typeof tOutIndex !== 'number') {
+            console.debug(
+                `${this.id} ${tokenIn.symbol} ${tokenIn.address} ${tokenOut.symbol} ${tokenOut.address}`,
+            );
             throw new Error('Pool does not contain the tokens provided');
         }
 

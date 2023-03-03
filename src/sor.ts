@@ -1,7 +1,7 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { Router } from './router';
 import { BasePool, BasePoolFactory, Path, Token, TokenAmount, Swap } from './entities';
-import { ChainId } from './utils';
+import { ChainId, checkInputs } from './utils';
 import { SorConfig, SwapInfo, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
 import { PoolDataService } from './data/poolDataService';
@@ -78,6 +78,7 @@ export class SmartOrderRouter {
         swapAmount: TokenAmount,
         swapOptions?: SwapOptions,
     ): Promise<SwapInfo> {
+        checkInputs(tokenIn, tokenOut, swapKind, swapAmount);
         const candidatePaths = await this.getCandidatePaths(
             tokenIn,
             tokenOut,
@@ -137,6 +138,7 @@ export class SmartOrderRouter {
         pools: BasePool[],
         swapOptions?: Omit<SwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
     ): Promise<SwapInfo> {
+        checkInputs(tokenIn, tokenOut, swapKind, swapAmount);
         const router = new Router();
 
         const candidatePaths = router.getCandidatePaths(
