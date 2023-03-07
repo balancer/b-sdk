@@ -16,7 +16,7 @@ export class Swap {
             path => new PathWithAmount(path.tokens, path.pools, path.swapAmount, true),
         );
         this.swapKind = swapKind;
-        this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 2 ? true : false;
+        this.isBatchSwap = paths.length > 1 || paths[0].pools.length >= 2 ? true : false;
         this.assets = [
             ...new Set(
                 paths
