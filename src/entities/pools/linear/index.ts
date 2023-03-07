@@ -22,10 +22,12 @@ const ONE = unsafeFastParseEther('1');
 const MAX_RATIO = unsafeFastParseEther('10');
 const MAX_TOKEN_BALANCE = MAX_UINT112 - 1n;
 
+type LinearPoolToken = BPT | WrappedToken | MainToken;
+
 class BPT extends TokenAmount {
     public readonly rate: bigint;
-    public readonly virtualBalance: bigint;
     public readonly index: number;
+    public virtualBalance: bigint;
 
     public constructor(token: Token, amount: BigintIsh, index: number) {
         super(token, amount);
@@ -33,18 +35,72 @@ class BPT extends TokenAmount {
         this.virtualBalance = MAX_TOKEN_BALANCE - this.amount;
         this.index = index;
     }
+
+    // TODO: move this to the base class
+    public increase(amount: bigint): TokenAmount {
+        this.amount = this.amount + amount;
+        this.virtualBalance = this.virtualBalance + amount;
+        this.scale18 = this.amount * this.scalar;
+        return this;
+    }
+
+    public decrease(amount: bigint): TokenAmount {
+        this.amount = this.amount - amount;
+        this.virtualBalance = this.virtualBalance - amount;
+        this.scale18 = this.amount * this.scalar;
+        return this;
+    }
 }
 
-class WrappedToken extends TokenAmount {
+class MainToken extends TokenAmount {
     public readonly rate: bigint;
-    public readonly scale18: bigint;
     public readonly index: number;
+    public scale18: bigint;
 
     public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
         super(token, amount);
         this.rate = BigInt(rate);
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         this.index = index;
+    }
+
+    // TODO: move this to the base class
+    public increase(amount: bigint): TokenAmount {
+        this.amount = this.amount + amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
+    }
+
+    public decrease(amount: bigint): TokenAmount {
+        this.amount = this.amount - amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
+    }
+}
+
+class WrappedToken extends TokenAmount {
+    public readonly rate: bigint;
+    public readonly index: number;
+    public scale18: bigint;
+
+    public constructor(token: Token, amount: BigintIsh, rate: BigintIsh, index: number) {
+        super(token, amount);
+        this.rate = BigInt(rate);
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        this.index = index;
+    }
+
+    // TODO: move this to the base class
+    public increase(amount: bigint): TokenAmount {
+        this.amount = this.amount + amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
+    }
+
+    public decrease(amount: bigint): TokenAmount {
+        this.amount = this.amount - amount;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
+        return this;
     }
 }
 
@@ -62,23 +118,25 @@ export class LinearPool implements BasePool {
     public readonly poolType: PoolType = PoolType.AaveLinear;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    public readonly mainToken: TokenAmount;
+    public readonly mainToken: MainToken;
     public readonly wrappedToken: WrappedToken;
     public readonly bptToken: BPT;
     public readonly params: Params;
-    public readonly tokens: (BPT | WrappedToken | TokenAmount)[];
+    public readonly tokens: LinearPoolToken[];
 
-    private readonly tokenMap: Map<string, BPT | WrappedToken | TokenAmount>;
+    private readonly tokenMap: Map<string, LinearPoolToken>;
 
     static fromRawPool(chainId: number, pool: RawLinearPool): LinearPool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
         const swapFee = unsafeFastParseEther(pool.swapFee);
 
         const mT = orderedTokens[pool.mainIndex];
+        const mTRate = unsafeFastParseEther(mT.priceRate || '1.0');
         const mToken = new Token(chainId, mT.address, mT.decimals, mT.symbol, mT.name);
         const lowerTarget = TokenAmount.fromHumanAmount(mToken, pool.lowerTarget);
         const upperTarget = TokenAmount.fromHumanAmount(mToken, pool.upperTarget);
         const mTokenAmount = TokenAmount.fromHumanAmount(mToken, mT.balance);
+        const mainToken = new MainToken(mToken, mTokenAmount.amount, mTRate, mT.index);
 
         const wT = orderedTokens[pool.wrappedIndex];
         const wTRate = unsafeFastParseEther(wT.priceRate || '1.0');
@@ -104,7 +162,7 @@ export class LinearPool implements BasePool {
             pool.id,
             pool.poolTypeVersion,
             params,
-            mTokenAmount,
+            mainToken,
             wrappedToken,
             bptToken,
         );
@@ -114,7 +172,7 @@ export class LinearPool implements BasePool {
         id: string,
         poolTypeVersion: number,
         params: Params,
-        mainToken: TokenAmount,
+        mainToken: MainToken,
         wrappedToken: WrappedToken,
         bptToken: BPT,
     ) {
@@ -141,8 +199,13 @@ export class LinearPool implements BasePool {
         return tOut.amount;
     }
 
-    public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+    public swapGivenIn(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         let output: TokenAmount;
         if (tokenIn.isEqual(this.mainToken.token)) {
@@ -174,6 +237,11 @@ export class LinearPool implements BasePool {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
+        if (mutateBalances) {
+            tIn.increase(swapAmount.amount);
+            tOut.decrease(output.amount);
+        }
+
         return output;
     }
 
@@ -183,7 +251,7 @@ export class LinearPool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         if (swapAmount.amount > (tOut?.amount || 0n)) {
             throw new Error('Swap amount exceeds the pool limit');
@@ -213,6 +281,11 @@ export class LinearPool implements BasePool {
             }
         } else {
             throw new Error('Pool does not contain the tokens provided');
+        }
+
+        if (mutateBalances) {
+            tIn.increase(input.amount);
+            tOut.decrease(swapAmount.amount);
         }
 
         return input;
@@ -379,5 +452,19 @@ export class LinearPool implements BasePool {
         );
 
         return TokenAmount.fromScale18Amount(this.bptToken.token, tokenOutScale18, true);
+    }
+
+    private getRequiredTokenPair(
+        tokenIn: Token,
+        tokenOut: Token,
+    ): { tIn: LinearPoolToken; tOut: LinearPoolToken } {
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
+
+        if (!tIn || !tOut) {
+            throw new Error('Pool does not contain the tokens provided');
+        }
+
+        return { tIn, tOut };
     }
 }

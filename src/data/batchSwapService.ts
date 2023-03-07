@@ -1,6 +1,5 @@
 import { SUBGRAPH_URLS } from '../utils';
 import { gql, GraphQLClient } from 'graphql-request';
-import { RawPool } from './types';
 
 export interface SubgraphSwap {
     id: string;
@@ -12,7 +11,9 @@ export interface SubgraphSwap {
     tokenAmountIn: string;
     tokenAmountOut: string;
     valueUSD: string;
-    poolId: string;
+    poolId: {
+        id: string;
+    };
     userAddress: {
         id: string;
     };
@@ -25,20 +26,23 @@ const PAGE_SIZE = 1000;
 export class BatchSwapService {
     private client: GraphQLClient;
 
-    constructor(chainId: number, subgraphUrl: string) {
+    constructor(chainId: number, subgraphUrl?: string) {
         const defaultSubgraphUrl = SUBGRAPH_URLS[chainId];
         const urlToUse = subgraphUrl ?? defaultSubgraphUrl;
 
         this.client = new GraphQLClient(urlToUse);
     }
 
-    public async getBatchSwaps(pageNumber = 0): Promise<SubgraphSwap[][]> {
+    public async getBatchSwaps(pageNumber = 0, afterTimestamp = 0): Promise<SubgraphSwap[][]> {
         const sets: SubgraphSwap[][] = [];
         const { swaps } = await this.client.request<{
             swaps: SubgraphSwap[];
         }>(this.getSwapsQuery(), {
             pageSize: PAGE_SIZE,
             skip: pageNumber * PAGE_SIZE,
+            where: {
+                timestamp_gt: afterTimestamp,
+            },
         });
 
         const groupedByTxAndUser = this.groupByTxAndUser(swaps);
