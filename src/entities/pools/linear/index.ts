@@ -1,7 +1,8 @@
+import { Hex, parseEther } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
 import { BigintIsh, Token, TokenAmount } from '../../';
 import { BasePool } from '../../pools';
-import { ALMOST_ONE, getPoolAddress, MAX_UINT112, unsafeFastParseEther, WAD } from '../../../utils';
+import { getPoolAddress, MAX_UINT112, WAD } from '../../../utils';
 import {
     _calcBptOutPerMainIn,
     _calcBptOutPerWrappedIn,
@@ -18,8 +19,8 @@ import {
 } from './math';
 import { RawLinearPool } from '../../../data/types';
 
-const ONE = unsafeFastParseEther('1');
-const MAX_RATIO = unsafeFastParseEther('10');
+const ONE = parseEther('1');
+const MAX_RATIO = parseEther('10');
 const MAX_TOKEN_BALANCE = MAX_UINT112 - 1n;
 
 type LinearPoolToken = BPT | WrappedToken | MainToken;
@@ -113,7 +114,7 @@ export type Params = {
 
 export class LinearPool implements BasePool {
     public readonly chainId: number;
-    public readonly id: string;
+    public readonly id: Hex;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.AaveLinear;
     public readonly poolTypeVersion: number;
@@ -128,10 +129,10 @@ export class LinearPool implements BasePool {
 
     static fromRawPool(chainId: number, pool: RawLinearPool): LinearPool {
         const orderedTokens = pool.tokens.sort((a, b) => a.index - b.index);
-        const swapFee = unsafeFastParseEther(pool.swapFee);
+        const swapFee = parseEther(pool.swapFee);
 
         const mT = orderedTokens[pool.mainIndex];
-        const mTRate = unsafeFastParseEther(mT.priceRate || '1.0');
+        const mTRate = parseEther(mT.priceRate || '1.0');
         const mToken = new Token(chainId, mT.address, mT.decimals, mT.symbol, mT.name);
         const lowerTarget = TokenAmount.fromHumanAmount(mToken, pool.lowerTarget);
         const upperTarget = TokenAmount.fromHumanAmount(mToken, pool.upperTarget);
@@ -139,7 +140,7 @@ export class LinearPool implements BasePool {
         const mainToken = new MainToken(mToken, mTokenAmount.amount, mTRate, mT.index);
 
         const wT = orderedTokens[pool.wrappedIndex];
-        const wTRate = unsafeFastParseEther(wT.priceRate || '1.0');
+        const wTRate = parseEther(wT.priceRate || '1.0');
 
         const wToken = new Token(chainId, wT.address, wT.decimals, wT.symbol, wT.name);
         const wTokenAmount = TokenAmount.fromHumanAmount(wToken, wT.balance);
@@ -169,7 +170,7 @@ export class LinearPool implements BasePool {
     }
 
     constructor(
-        id: string,
+        id: Hex,
         poolTypeVersion: number,
         params: Params,
         mainToken: MainToken,
@@ -302,10 +303,7 @@ export class LinearPool implements BasePool {
                 // Swapping to BPT allows for a very large amount so using pre-minted amount as estimation
                 return MAX_TOKEN_BALANCE;
             } else {
-                const amount = TokenAmount.fromRawAmount(
-                    tokenOut,
-                    (tOut.amount * ALMOST_ONE) / ONE,
-                );
+                const amount = TokenAmount.fromRawAmount(tokenOut, tOut.amount);
 
                 return this.swapGivenOut(tokenIn, tokenOut, amount).amount;
             }
@@ -313,7 +311,7 @@ export class LinearPool implements BasePool {
             if (tokenOut.isEqual(this.bptToken.token)) {
                 return (tOut.amount * MAX_RATIO) / ONE;
             } else {
-                return (tOut.amount * ALMOST_ONE) / ONE;
+                return tOut.amount;
             }
         }
     }

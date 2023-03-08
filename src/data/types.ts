@@ -1,7 +1,8 @@
-// These are only the known pool types, additional pool types can be added via
-// extension through custom PoolFactories and PoolDataProviders
+import { Address, Hex } from 'viem';
 import { HumanAmount } from '../types';
 
+// These are only the known pool types, additional pool types can be added via
+// extension through custom PoolFactories and PoolDataProviders
 export type SupportedRawPoolTypes =
     | LinearPoolType
     | 'Weighted'
@@ -23,14 +24,14 @@ export type RawPool =
     | RawMetaStablePool;
 
 export interface RawBasePool {
-    id: SupportedRawPoolTypes | string;
-    address: string;
-    poolType: string;
+    id: Hex;
+    address: Address;
+    poolType: SupportedRawPoolTypes | string;
     poolTypeVersion: number;
     swapFee: HumanAmount;
     swapEnabled: boolean;
     tokens: RawPoolToken[];
-    tokensList: string[];
+    tokensList: Address[];
     liquidity: HumanAmount;
     totalShares: HumanAmount;
 }
@@ -69,7 +70,7 @@ export interface RawWeightedPool extends RawBasePool {
 }
 
 export interface RawPoolToken {
-    address: string;
+    address: Address;
     index: number;
     symbol: string;
     name: string;
@@ -87,14 +88,14 @@ export interface RawPoolTokenWithRate extends RawPoolToken {
 
 export interface GetPoolsResponse {
     pools: RawPool[];
-    syncedToBlockNumber?: number;
+    syncedToBlockNumber?: bigint;
     poolsWithActiveAmpUpdates?: string[];
     poolsWithActiveWeightUpdates?: string[];
 }
 
 export interface ProviderSwapOptions {
-    block?: number;
-    timestamp: number;
+    block?: bigint;
+    timestamp: bigint;
 }
 
 export interface PoolDataProvider {

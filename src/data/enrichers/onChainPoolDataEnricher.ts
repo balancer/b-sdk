@@ -1,26 +1,31 @@
-import BalancerSorQueriesAbi from '../../abi/BalancerSorQueries.json';
-import { GetPoolsResponse, PoolDataEnricher, RawPool, RawPoolTokenWithRate } from '../types';
-import { Interface } from '@ethersproject/abi';
-import { jsonRpcFetch } from '../../utils/jsonRpcFetch';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { Address, createPublicClient, formatUnits, Hex, http } from 'viem';
+import { sorQueriesAbi } from '../../abi/';
+import {
+    GetPoolsResponse,
+    PoolDataEnricher,
+    RawPool,
+    RawPoolTokenWithRate,
+    RawWeightedPoolToken,
+} from '../types';
+
 import {
     poolHasActualSupply,
     poolHasPercentFee,
     poolHasVirtualSupply,
     poolIsLinearPool,
 } from '../../utils';
-import { SwapOptions } from '../../types';
+import { HumanAmount, SwapOptions } from '../../types';
 
 interface OnChainPoolData {
     id: string;
-    balances: BigNumber[];
-    totalSupply: BigNumber;
-    swapFee?: BigNumber;
+    balances: readonly bigint[];
+    totalSupply: bigint;
+    swapFee?: bigint;
 
-    amp?: BigNumber;
-    weights?: BigNumber[];
-    wrappedTokenRate?: BigNumber;
-    scalingFactors?: BigNumber[];
+    amp?: bigint;
+    weights?: readonly bigint[];
+    wrappedTokenRate?: bigint;
+    scalingFactors?: readonly bigint[];
 }
 
 enum TotalSupplyType {
@@ -36,7 +41,7 @@ enum SwapFeeType {
 
 interface OnChainPoolDataQueryConfig {
     loadTokenBalances: 'all' | 'updates-after-block' | 'none';
-    blockNumber: number;
+    blockNumber: bigint;
     loadTotalSupply: boolean;
     loadSwapFees: boolean;
     loadLinearWrappedTokenRates: boolean;
@@ -62,29 +67,26 @@ interface SorPoolDataQueryConfig {
     loadNormalizedWeights: boolean;
     loadScalingFactors: boolean;
     loadAmps: boolean;
-    blockNumber: number;
+    blockNumber: bigint;
     totalSupplyTypes: TotalSupplyType[];
     swapFeeTypes: SwapFeeType[];
-    linearPoolIdxs: number[];
-    weightedPoolIdxs: number[];
-    scalingFactorPoolIdxs: number[];
-    ampPoolIdxs: number[];
+    linearPoolIdxs: bigint[];
+    weightedPoolIdxs: bigint[];
+    scalingFactorPoolIdxs: bigint[];
+    ampPoolIdxs: bigint[];
 }
 
 export class OnChainPoolDataEnricher implements PoolDataEnricher {
-    private readonly sorQueriesInterface: Interface;
     private readonly config: OnChainPoolDataQueryConfig;
 
     constructor(
         private readonly rpcUrl: string,
-        private readonly sorQueriesAddress: string,
+        private readonly sorQueriesAddress: Address,
         config?: Partial<OnChainPoolDataQueryConfig>,
     ) {
-        this.sorQueriesInterface = new Interface(BalancerSorQueriesAbi);
-
         this.config = {
             loadTokenBalances: 'updates-after-block',
-            blockNumber: 0,
+            blockNumber: 0n,
             loadTotalSupply: true,
             loadLinearWrappedTokenRates: true,
             loadSwapFees: true,
@@ -115,51 +117,58 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             swapFeeTypes,
         } = this.getPoolDataQueryParams(data);
 
-        console.time('jsonRpcFetch');
-        const {
+        const client = createPublicClient({
+            transport: http(this.rpcUrl),
+        });
+
+        const [
             balances,
-            amps,
-            linearWrappedTokenRates,
             totalSupplies,
+            swapFees,
+            linearWrappedTokenRates,
             weights,
             scalingFactors,
-            swapFees,
-        } = await this.fetchOnChainPoolData({
-            poolIds,
-            config: {
-                loadTokenBalanceUpdatesAfterBlock: this.config.loadTokenBalances !== 'none',
-                loadTotalSupply: this.config.loadTotalSupply,
-                loadSwapFees: this.config.loadSwapFees,
-                loadLinearWrappedTokenRates: this.config.loadLinearWrappedTokenRates,
-                loadNormalizedWeights: weightedPoolIdxs.length > 0,
-                loadScalingFactors: scalingFactorPoolIdxs.length > 0,
-                loadAmps: ampPoolIdxs.length > 0,
-                blockNumber:
-                    data.syncedToBlockNumber &&
-                    this.config.loadTokenBalances === 'updates-after-block'
-                        ? data.syncedToBlockNumber
-                        : 0,
-                totalSupplyTypes,
-                swapFeeTypes,
-                linearPoolIdxs,
-                weightedPoolIdxs,
-                scalingFactorPoolIdxs,
-                ampPoolIdxs,
-            },
-            options,
+            amps,
+        ] = await client.readContract({
+            address: this.sorQueriesAddress,
+            abi: sorQueriesAbi,
+            functionName: 'getPoolData',
+            args: [
+                poolIds,
+                {
+                    loadTokenBalanceUpdatesAfterBlock: this.config.loadTokenBalances !== 'none',
+                    loadTotalSupply: this.config.loadTotalSupply,
+                    loadSwapFees: this.config.loadSwapFees,
+                    loadLinearWrappedTokenRates: this.config.loadLinearWrappedTokenRates,
+                    loadNormalizedWeights: weightedPoolIdxs.length > 0,
+                    loadScalingFactors: scalingFactorPoolIdxs.length > 0,
+                    loadAmps: ampPoolIdxs.length > 0,
+                    blockNumber:
+                        data.syncedToBlockNumber &&
+                        this.config.loadTokenBalances === 'updates-after-block'
+                            ? data.syncedToBlockNumber
+                            : 0n,
+                    totalSupplyTypes,
+                    swapFeeTypes,
+                    linearPoolIdxs,
+                    weightedPoolIdxs,
+                    scalingFactorPoolIdxs,
+                    ampPoolIdxs,
+                },
+            ],
+            blockNumber: options.block,
         });
-        console.timeEnd('jsonRpcFetch');
 
         return poolIds.map((poolId, i) => ({
             id: poolIds[i],
             balances: balances[i],
             totalSupply: totalSupplies[i],
-            weights: weightedPoolIdxs.includes(i)
-                ? weights[weightedPoolIdxs.indexOf(i)]
+            weights: weightedPoolIdxs.includes(BigInt(i))
+                ? weights[weightedPoolIdxs.indexOf(BigInt(i))]
                 : undefined,
-            amp: ampPoolIdxs.includes(i) ? amps[ampPoolIdxs.indexOf(i)] : undefined,
-            wrappedTokenRate: linearPoolIdxs.includes(i)
-                ? linearWrappedTokenRates[linearPoolIdxs.indexOf(i)]
+            amp: ampPoolIdxs.includes(BigInt(i)) ? amps[ampPoolIdxs.indexOf(BigInt(i))] : undefined,
+            wrappedTokenRate: linearPoolIdxs.includes(BigInt(i))
+                ? linearWrappedTokenRates[linearPoolIdxs.indexOf(BigInt(i))]
                 : undefined,
             scalingFactors: scalingFactors[i],
             swapFee: swapFees[i],
@@ -172,35 +181,51 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
             return {
                 ...pool,
-                tokens: pool.tokens.map((token, idx) => ({
-                    ...token,
-                    balance:
-                        data?.balances && data.balances.length > 0
-                            ? formatFixed(data.balances[idx], token.decimals)
-                            : token.balance,
-                    priceRate: this.getPoolTokenRate({ pool, token, data, index: idx }),
-                    weight: data?.weights ? formatFixed(data.weights[idx], 18) : token.weight,
-                })),
+                tokens: pool.tokens
+                    .sort((a, b) => a.index - b.index)
+                    .map(token => {
+                        return {
+                            ...token,
+                            balance:
+                                data?.balances && data.balances.length > 0
+                                    ? (formatUnits(
+                                          data.balances[token.index],
+                                          token.decimals,
+                                      ) as HumanAmount)
+                                    : token.balance,
+                            priceRate: this.getPoolTokenRate({
+                                pool,
+                                token: token as RawPoolTokenWithRate,
+                                data,
+                                index: token.index,
+                            }),
+                            weight: data?.weights
+                                ? formatUnits(data.weights[token.index], 18)
+                                : (token as RawWeightedPoolToken).weight,
+                        };
+                    }),
                 totalShares: data?.totalSupply
-                    ? formatFixed(data.totalSupply, 18)
+                    ? (formatUnits(data.totalSupply, 18) as HumanAmount)
                     : pool.totalShares,
                 amp: data?.amp
-                    ? formatFixed(data.amp, 3).split('.')[0]
+                    ? formatUnits(data.amp, 3).split('.')[0]
                     : 'amp' in pool
                     ? pool.amp
                     : undefined,
-                swapFee: data?.swapFee ? formatFixed(data.swapFee, 18) : pool.swapFee,
+                swapFee: data?.swapFee
+                    ? (formatUnits(data.swapFee, 18) as HumanAmount)
+                    : pool.swapFee,
             };
         });
     }
 
     private getPoolDataQueryParams(data: GetPoolsResponse) {
-        const poolIds: string[] = [];
+        const poolIds: Hex[] = [];
         const totalSupplyTypes: TotalSupplyType[] = [];
-        const linearPoolIdxs: number[] = [];
-        const weightedPoolIdxs: number[] = [];
-        const ampPoolIdxs: number[] = [];
-        const scalingFactorPoolIdxs: number[] = [];
+        const linearPoolIdxs: bigint[] = [];
+        const weightedPoolIdxs: bigint[] = [];
+        const ampPoolIdxs: bigint[] = [];
+        const scalingFactorPoolIdxs: bigint[] = [];
         const swapFeeTypes: SwapFeeType[] = [];
 
         const {
@@ -226,22 +251,22 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             );
 
             if (poolIsLinearPool(pool.poolType)) {
-                linearPoolIdxs.push(i);
+                linearPoolIdxs.push(BigInt(i));
             }
 
             if (loadWeightsForPoolTypes.has(pool.poolType) || loadWeightsForPoolIds.has(pool.id)) {
-                weightedPoolIdxs.push(i);
+                weightedPoolIdxs.push(BigInt(i));
             }
 
             if (loadAmpForPoolTypes.has(pool.poolType) || loadAmpForPoolIds.has(pool.id)) {
-                ampPoolIdxs.push(i);
+                ampPoolIdxs.push(BigInt(i));
             }
 
             if (
                 loadScalingFactorForPoolIds.has(pool.id) ||
                 loadScalingFactorForPoolTypes.has(pool.poolType)
             ) {
-                scalingFactorPoolIdxs.push(i);
+                scalingFactorPoolIdxs.push(BigInt(i));
             }
 
             if (this.config.loadSwapFees) {
@@ -296,33 +321,6 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         };
     }
 
-    private async fetchOnChainPoolData({
-        poolIds,
-        config,
-        options,
-    }: {
-        poolIds: string[];
-        config: SorPoolDataQueryConfig;
-        options?: SwapOptions;
-    }) {
-        return jsonRpcFetch<{
-            balances: BigNumber[][];
-            totalSupplies: BigNumber[];
-            swapFees: BigNumber[];
-            linearWrappedTokenRates: BigNumber[];
-            weights: BigNumber[][];
-            scalingFactors: BigNumber[][];
-            amps: BigNumber[];
-        }>({
-            rpcUrl: this.rpcUrl,
-            to: this.sorQueriesAddress,
-            contractInterface: this.sorQueriesInterface,
-            functionFragment: 'getPoolData',
-            values: [poolIds, config],
-            options,
-        });
-    }
-
     private getPoolTokenRate({
         pool,
         token,
@@ -335,11 +333,11 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         index: number;
     }): string {
         if (data?.wrappedTokenRate && 'wrappedIndex' in pool && pool.wrappedIndex === index) {
-            return formatFixed(data.wrappedTokenRate, 18);
+            return formatUnits(data.wrappedTokenRate, 18);
         }
 
         if (data?.scalingFactors) {
-            return formatFixed(data.scalingFactors[index], 18);
+            return formatUnits(data.scalingFactors[index], 18);
         }
 
         return token.priceRate;

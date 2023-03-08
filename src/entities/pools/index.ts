@@ -1,10 +1,11 @@
+import { Hex } from 'viem';
 import { PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount } from '../';
 import { RawPool } from '../../data/types';
 
 export interface BasePool {
     readonly poolType: PoolType | string;
-    readonly id: string;
+    readonly id: Hex;
     readonly address: string;
     swapFee: bigint;
     tokens: TokenAmount[];

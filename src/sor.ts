@@ -1,4 +1,3 @@
-import { BaseProvider } from '@ethersproject/providers';
 import { Router } from './router';
 import { BasePool, BasePoolFactory, Path, Token, TokenAmount, Swap } from './entities';
 import { ChainId, checkInputs } from './utils';
@@ -9,17 +8,15 @@ import { GetPoolsResponse, RawPool } from './data/types';
 
 export class SmartOrderRouter {
     private readonly chainId: ChainId;
-    private readonly provider: BaseProvider;
     private readonly router: Router;
     private readonly poolParser: PoolParser;
     private readonly poolDataService: PoolDataService;
     private pools: BasePool[] = [];
-    private blockNumber: number | null = null;
+    private blockNumber: bigint | null = null;
     private poolsProviderData: GetPoolsResponse | null = null;
 
     constructor({
         chainId,
-        provider,
         options,
         poolDataProviders,
         rpcUrl,
@@ -27,7 +24,6 @@ export class SmartOrderRouter {
         customPoolFactories = [],
     }: SorConfig) {
         this.chainId = chainId;
-        this.provider = provider;
         this.router = new Router();
         this.poolParser = new PoolParser(chainId, customPoolFactories);
         this.poolDataService = new PoolDataService(
@@ -37,18 +33,18 @@ export class SmartOrderRouter {
         );
     }
 
-    public async fetchAndCachePools(blockNumber?: number): Promise<BasePool[]> {
+    public async fetchAndCachePools(blockNumber?: bigint): Promise<BasePool[]> {
         const { rawPools, providerData } = await this.poolDataService.fetchEnrichedPools(
             blockNumber,
         );
         this.pools = this.poolParser.parseRawPools(rawPools);
-        this.blockNumber = typeof blockNumber === 'number' ? blockNumber : null;
+        this.blockNumber = typeof blockNumber === 'bigint' ? blockNumber : null;
         this.poolsProviderData = providerData;
 
         return this.pools;
     }
 
-    public async fetchAndCacheLatestPoolEnrichmentData(blockNumber?: number) {
+    public async fetchAndCacheLatestPoolEnrichmentData(blockNumber?: bigint) {
         if (!this.poolsProviderData) {
             throw new Error(
                 'fetchAndCacheLatestPoolEnrichmentData can only be called after a successful call to fetchAndCachePools',

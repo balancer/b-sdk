@@ -1,8 +1,7 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import { Token, BasePool, BasePoolFactory, TokenAmount, Swap } from './entities';
-import { BaseProvider } from '@ethersproject/providers';
 import { PoolDataEnricher, PoolDataProvider } from './data/types';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
+import { Address, Hex } from 'viem';
 
 export enum PoolType {
     Weighted = 'Weighted',
@@ -17,10 +16,10 @@ export enum SwapKind {
 }
 
 export interface SwapOptions {
-    block?: number;
-    slippage?: BigNumber;
+    block?: bigint;
+    slippage?: bigint;
     funds?: FundManagement;
-    deadline?: BigNumber;
+    deadline?: bigint;
     graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
 }
 
@@ -37,7 +36,6 @@ export type SorOptions = {
 
 export type SorConfig = {
     chainId: number;
-    provider: BaseProvider;
     options?: SorOptions;
     customPoolFactories?: BasePoolFactory[];
     poolDataProviders: PoolDataProvider | PoolDataProvider[];
@@ -57,20 +55,20 @@ export interface PoolTokenPair {
 }
 
 export interface SingleSwap {
-    poolId: string;
+    poolId: Hex;
     kind: SwapKind;
-    assetIn: string;
-    assetOut: string;
-    amount: string;
-    userData: string;
+    assetIn: Address;
+    assetOut: Address;
+    amount: bigint;
+    userData: Hex;
 }
 
 export interface BatchSwapStep {
-    poolId: string;
-    assetInIndex: number;
-    assetOutIndex: number;
-    amount: string;
-    userData: string;
+    poolId: Hex;
+    assetInIndex: bigint;
+    assetOutIndex: bigint;
+    amount: bigint;
+    userData: Hex;
 }
 
 export interface SwapInfo {
@@ -81,4 +79,4 @@ export interface SwapInfo {
     // transactionData: TransactionData;
 }
 
-export type HumanAmount = string;
+export type HumanAmount = `${number}`;

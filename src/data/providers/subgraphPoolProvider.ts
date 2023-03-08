@@ -4,7 +4,7 @@ import { fetchWithRetry } from '../../utils/fetch';
 import { SUBGRAPH_URLS } from '../../utils';
 
 const PAGE_SIZE = 1000;
-const SECS_IN_HOUR = 3600;
+const SECS_IN_HOUR = 3600n;
 
 interface PoolUpdate {
     poolId: {
@@ -71,20 +71,18 @@ export class SubgraphPoolProvider implements PoolDataProvider {
         return {
             ...response,
             pools: response?.pools || [],
-            syncedToBlockNumber: response?.syncedToBlockNumber || 0,
+            syncedToBlockNumber: response?.syncedToBlockNumber || 0n,
         };
     }
 
     private async fetchDataFromSubgraph(options: ProviderSwapOptions): Promise<GetPoolsResponse> {
         let ampUpdates: PoolUpdate[] = [];
-        let syncedToBlockNumber: number = 0;
+        let syncedToBlockNumber: bigint = 0n;
         let lastId: string = '';
         let pools: RawPool[] = [];
         let poolsPage: RawPool[] = [];
-        const nowMinusOneHour =
-            Math.round((options.timestamp - SECS_IN_HOUR) / SECS_IN_HOUR) * SECS_IN_HOUR;
-        const nowPlusOneHour =
-            Math.round((options.timestamp + SECS_IN_HOUR) / SECS_IN_HOUR) * SECS_IN_HOUR;
+        const nowMinusOneHour = options.timestamp - SECS_IN_HOUR;
+        const nowPlusOneHour = options.timestamp + SECS_IN_HOUR;
 
         do {
             const poolsResult = await this.client.request<{
@@ -110,7 +108,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                 ...(options?.block
                     ? {
                           block: {
-                              number: options.block,
+                              number: Number(options.block),
                           },
                       }
                     : {}),
@@ -132,7 +130,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             }
 
             if (poolsResult._meta) {
-                syncedToBlockNumber = poolsResult._meta.block.number;
+                syncedToBlockNumber = BigInt(poolsResult._meta.block.number);
             }
 
             lastId = pools[pools.length - 1]!.id;
