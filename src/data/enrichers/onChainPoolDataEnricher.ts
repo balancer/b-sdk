@@ -1,6 +1,12 @@
 import { Address, createPublicClient, formatUnits, Hex, http } from 'viem';
 import { sorQueriesAbi } from '../../abi/';
-import { GetPoolsResponse, PoolDataEnricher, RawPool, RawPoolTokenWithRate } from '../types';
+import {
+    GetPoolsResponse,
+    PoolDataEnricher,
+    RawPool,
+    RawPoolTokenWithRate,
+    RawWeightedPoolToken,
+} from '../types';
 
 import {
     poolHasActualSupply,
@@ -117,12 +123,12 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
         const [
             balances,
-            amps,
-            linearWrappedTokenRates,
             totalSupplies,
+            swapFees,
+            linearWrappedTokenRates,
             weights,
             scalingFactors,
-            swapFees,
+            amps,
         ] = await client.readContract({
             address: this.sorQueriesAddress,
             abi: sorQueriesAbi,
@@ -172,15 +178,29 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
             return {
                 ...pool,
-                tokens: pool.tokens.map((token, idx) => ({
-                    ...token,
-                    balance:
-                        data?.balances && data.balances.length > 0
-                            ? formatUnits(data.balances[idx], token.decimals)
-                            : token.balance,
-                    priceRate: this.getPoolTokenRate({ pool, token, data, index: idx }),
-                    weight: data?.weights ? formatUnits(data.weights[idx], 18) : token.weight,
-                })),
+                tokens: pool.tokens
+                    .sort((a, b) => a.index - b.index)
+                    .map(token => {
+                        return {
+                            ...token,
+                            balance:
+                                data?.balances && data.balances.length > 0
+                                    ? (formatUnits(
+                                          data.balances[token.index],
+                                          token.decimals,
+                                      ) as HumanAmount)
+                                    : token.balance,
+                            priceRate: this.getPoolTokenRate({
+                                pool,
+                                token: token as RawPoolTokenWithRate,
+                                data,
+                                index: token.index,
+                            }),
+                            weight: data?.weights
+                                ? formatUnits(data.weights[token.index], 18)
+                                : (token as RawWeightedPoolToken).weight,
+                        };
+                    }),
                 totalShares: data?.totalSupply
                     ? (formatUnits(data.totalSupply, 18) as HumanAmount)
                     : pool.totalShares,

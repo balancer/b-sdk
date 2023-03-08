@@ -108,7 +108,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                 ...(options?.block
                     ? {
                           block: {
-                              number: options.block,
+                              number: Number(options.block),
                           },
                       }
                     : {}),
