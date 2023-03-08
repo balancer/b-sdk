@@ -31,6 +31,8 @@ export const STELLATE_URLS = {
     [ChainId.ARBITRUM_ONE]: 'https://balancer-arbitrum-v2.stellate.balancer.fi',
 };
 
+export const BALANCER_SOR_QUERIES_ADDRESS = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
+
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(
         ChainId.MAINNET,
