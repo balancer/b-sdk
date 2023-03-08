@@ -35,7 +35,7 @@ enum SwapFeeType {
 }
 
 interface OnChainPoolDataQueryConfig {
-    loadTokenBalanceUpdatesAfterBlock: boolean;
+    loadTokenBalances: 'all' | 'updates-after-block' | 'none';
     blockNumber: number;
     loadTotalSupply: boolean;
     loadSwapFees: boolean;
@@ -83,7 +83,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         this.sorQueriesInterface = new Interface(BalancerSorQueriesAbi);
 
         this.config = {
-            loadTokenBalanceUpdatesAfterBlock: true,
+            loadTokenBalances: 'updates-after-block',
             blockNumber: 0,
             loadTotalSupply: true,
             loadLinearWrappedTokenRates: true,
@@ -127,14 +127,18 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         } = await this.fetchOnChainPoolData({
             poolIds,
             config: {
-                loadTokenBalanceUpdatesAfterBlock: this.config.loadTokenBalanceUpdatesAfterBlock,
+                loadTokenBalanceUpdatesAfterBlock: this.config.loadTokenBalances !== 'none',
                 loadTotalSupply: this.config.loadTotalSupply,
                 loadSwapFees: this.config.loadSwapFees,
                 loadLinearWrappedTokenRates: this.config.loadLinearWrappedTokenRates,
                 loadNormalizedWeights: weightedPoolIdxs.length > 0,
                 loadScalingFactors: scalingFactorPoolIdxs.length > 0,
                 loadAmps: ampPoolIdxs.length > 0,
-                blockNumber: data.syncedToBlockNumber || 0,
+                blockNumber:
+                    data.syncedToBlockNumber &&
+                    this.config.loadTokenBalances === 'updates-after-block'
+                        ? data.syncedToBlockNumber
+                        : 0,
                 totalSupplyTypes,
                 swapFeeTypes,
                 linearPoolIdxs,
