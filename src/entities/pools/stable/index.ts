@@ -1,14 +1,8 @@
+import { Hex, parseEther } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
 import { BigintIsh, Token, TokenAmount } from '../../';
 import { BasePool } from '../';
-import {
-    ALMOST_ONE,
-    getPoolAddress,
-    MathSol,
-    PREMINTED_STABLE_BPT,
-    unsafeFastParseEther,
-    WAD,
-} from '../../../utils';
+import { getPoolAddress, MathSol, WAD } from '../../../utils';
 import {
     _calcBptInGivenExactTokensOut,
     _calcBptOutGivenExactTokensIn,
@@ -47,7 +41,7 @@ class StablePoolToken extends TokenAmount {
 
 export class StablePool implements BasePool {
     public readonly chainId: number;
-    public readonly id: string;
+    public readonly id: Hex;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.ComposableStable;
     public readonly amp: bigint;
@@ -71,29 +65,18 @@ export class StablePool implements BasePool {
             const tokenIndex = t.index ?? pool.tokensList.findIndex(t => t === token.address);
 
             poolTokens.push(
-                new StablePoolToken(
-                    token,
-                    tokenAmount.amount,
-                    unsafeFastParseEther(t.priceRate),
-                    tokenIndex,
-                ),
+                new StablePoolToken(token, tokenAmount.amount, parseEther(t.priceRate), tokenIndex),
             );
         }
 
-        const totalShares = unsafeFastParseEther(pool.totalShares);
+        const totalShares = parseEther(pool.totalShares);
         const amp = BigInt(pool.amp) * 1000n;
 
-        return new StablePool(
-            pool.id,
-            amp,
-            unsafeFastParseEther(pool.swapFee),
-            poolTokens,
-            totalShares,
-        );
+        return new StablePool(pool.id, amp, parseEther(pool.swapFee), poolTokens, totalShares);
     }
 
     constructor(
-        id: string,
+        id: Hex,
         amp: bigint,
         swapFee: bigint,
         tokens: StablePoolToken[],
@@ -305,10 +288,10 @@ export class StablePool implements BasePool {
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn
             // As an approx - use almost the total balance of token out as we can add any amount of tokenIn and expect some back
-            return (tIn.amount * ALMOST_ONE) / tIn.rate;
+            return (tIn.amount * WAD) / tIn.rate;
         } else {
             // Return max amount of tokenOut - approx is almost all balance
-            return (tOut.amount * ALMOST_ONE) / tOut.rate;
+            return (tOut.amount * WAD) / tOut.rate;
         }
     }
 

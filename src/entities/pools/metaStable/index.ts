@@ -1,7 +1,8 @@
+import { Hex, parseEther } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
 import { BigintIsh, Token, TokenAmount } from '../../';
 import { BasePool } from '../';
-import { ALMOST_ONE, getPoolAddress, MathSol, unsafeFastParseEther, WAD } from '../../../utils';
+import { getPoolAddress, MathSol, WAD } from '../../../utils';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/math';
 import { RawMetaStablePool } from '../../../data/types';
 
@@ -20,7 +21,7 @@ class StablePoolToken extends TokenAmount {
 
 export class MetaStablePool implements BasePool {
     public readonly chainId: number;
-    public readonly id: string;
+    public readonly id: Hex;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.MetaStable;
     public readonly amp: bigint;
@@ -41,21 +42,16 @@ export class MetaStablePool implements BasePool {
             const tokenIndex = t.index ?? pool.tokensList.findIndex(t => t === token.address);
 
             poolTokens.push(
-                new StablePoolToken(
-                    token,
-                    tokenAmount.amount,
-                    unsafeFastParseEther(t.priceRate),
-                    tokenIndex,
-                ),
+                new StablePoolToken(token, tokenAmount.amount, parseEther(t.priceRate), tokenIndex),
             );
         }
 
         const amp = BigInt(pool.amp) * 1000n;
 
-        return new MetaStablePool(pool.id, amp, unsafeFastParseEther(pool.swapFee), poolTokens);
+        return new MetaStablePool(pool.id, amp, parseEther(pool.swapFee), poolTokens);
     }
 
-    constructor(id: string, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
+    constructor(id: Hex, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
         this.chainId = tokens[0].token.chainId;
         this.id = id;
         this.address = getPoolAddress(id);
@@ -165,10 +161,10 @@ export class MetaStablePool implements BasePool {
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn
             // As an approx - use almost the total balance of token out as we can add any amount of tokenIn and expect some back
-            return (tIn.amount * ALMOST_ONE) / tIn.rate;
+            return (tIn.amount * WAD) / tIn.rate;
         } else {
             // Return max amount of tokenOut - approx is almost all balance
-            return (tOut.amount * ALMOST_ONE) / tOut.rate;
+            return (tOut.amount * WAD) / tOut.rate;
         }
     }
 }

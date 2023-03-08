@@ -5,7 +5,7 @@ import {
     ProviderSwapOptions,
     RawPool,
 } from './types';
-import { jsonRpcGetBlockTimestampByNumber } from '../utils/jsonRpcFetch';
+import { createPublicClient, http } from 'viem';
 
 export class PoolDataService {
     constructor(
@@ -15,7 +15,7 @@ export class PoolDataService {
     ) {}
 
     public async fetchEnrichedPools(
-        blockNumber?: number,
+        blockNumber?: bigint,
     ): Promise<{ rawPools: RawPool[]; providerData: GetPoolsResponse }> {
         const providerOptions: ProviderSwapOptions = {
             block: blockNumber,
@@ -31,7 +31,7 @@ export class PoolDataService {
             pools: responses.map(response => response.pools).flat(),
             //we take the smallest block number from the set
             syncedToBlockNumber: responses
-                .map(response => response.syncedToBlockNumber || 0)
+                .map(response => response.syncedToBlockNumber || 0n)
                 .sort()[0],
             poolsWithActiveWeightUpdates: responses
                 .map(response => response.poolsWithActiveWeightUpdates || [])
@@ -62,12 +62,15 @@ export class PoolDataService {
         return pools;
     }
 
-    public async getTimestampForBlockNumber(blockNumber?: number) {
-        return blockNumber
-            ? await jsonRpcGetBlockTimestampByNumber({
-                  rpcUrl: this.rpcUrl,
-                  blockNumber,
-              })
-            : Math.floor(new Date().getTime() / 1000);
+    public async getTimestampForBlockNumber(blockNumber?: bigint) {
+        if (blockNumber) {
+            const client = createPublicClient({
+                transport: http(this.rpcUrl),
+            });
+
+            return (await client.getBlock({ blockNumber })).timestamp;
+        } else {
+            return BigInt(Math.floor(new Date().getTime() / 1000));
+        }
     }
 }

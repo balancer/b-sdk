@@ -1,6 +1,7 @@
+import { Address } from 'viem';
 export class Token {
     public readonly chainId: number;
-    public readonly address: string;
+    public readonly address: Address;
     public readonly decimals: number;
     public readonly symbol?: string;
     public readonly name?: string;
@@ -8,14 +9,14 @@ export class Token {
 
     public constructor(
         chainId: number,
-        address: string,
+        address: Address,
         decimals: number,
         symbol?: string,
         name?: string,
         wrapped?: string,
     ) {
         this.chainId = chainId;
-        this.address = address.toLowerCase();
+        this.address = address.toLowerCase() as Address;
         this.decimals = decimals;
         this.symbol = symbol;
         this.name = name;

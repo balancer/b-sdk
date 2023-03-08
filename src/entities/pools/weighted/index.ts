@@ -1,7 +1,8 @@
+import { Hex, parseEther } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
 import { Token, TokenAmount, BigintIsh } from '../../';
 import { BasePool } from '../';
-import { MathSol, WAD, getPoolAddress, unsafeFastParseEther } from '../../../utils';
+import { MathSol, WAD, getPoolAddress } from '../../../utils';
 import { _calcOutGivenIn, _calcInGivenOut } from './math';
 import { RawWeightedPool } from '../../../data/types';
 
@@ -30,7 +31,7 @@ class WeightedPoolToken extends TokenAmount {
 
 export class WeightedPool implements BasePool {
     public readonly chainId: number;
-    public readonly id: string;
+    public readonly id: Hex;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.Weighted;
     public readonly poolTypeVersion: number;
@@ -53,24 +54,19 @@ export class WeightedPool implements BasePool {
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
 
             poolTokens.push(
-                new WeightedPoolToken(
-                    token,
-                    tokenAmount.amount,
-                    unsafeFastParseEther(t.weight),
-                    t.index,
-                ),
+                new WeightedPoolToken(token, tokenAmount.amount, parseEther(t.weight), t.index),
             );
         }
 
         return new WeightedPool(
             pool.id,
             pool.poolTypeVersion,
-            unsafeFastParseEther(pool.swapFee),
+            parseEther(pool.swapFee),
             poolTokens,
         );
     }
 
-    constructor(id: string, poolTypeVersion: number, swapFee: bigint, tokens: WeightedPoolToken[]) {
+    constructor(id: Hex, poolTypeVersion: number, swapFee: bigint, tokens: WeightedPoolToken[]) {
         this.chainId = tokens[0].token.chainId;
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;

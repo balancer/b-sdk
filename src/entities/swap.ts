@@ -1,11 +1,15 @@
 import { PathWithAmount } from './path';
 import { TokenAmount } from './tokenAmount';
 import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
-import { DEFAULT_USERDATA, DEFAULT_FUND_MANAGMENT, ZERO_ADDRESS, NATIVE_ASSETS } from '../utils';
-import { BaseProvider } from '@ethersproject/providers';
-import { Contract } from '@ethersproject/contracts';
-import { Interface } from '@ethersproject/abi';
-import balancerQueriesAbi from '../abi/BalancerQueries.json';
+import {
+    abs,
+    DEFAULT_USERDATA,
+    DEFAULT_FUND_MANAGMENT,
+    ZERO_ADDRESS,
+    NATIVE_ASSETS,
+} from '../utils';
+import { Address, createPublicClient, encodeFunctionData, http } from 'viem';
+import { balancerQueriesAbi } from '../abi/';
 
 // A Swap can be a single or multiple paths
 export class Swap {
@@ -33,9 +37,9 @@ export class Swap {
                     p.pools.map((pool, i) => {
                         (swaps as BatchSwapStep[]).push({
                             poolId: pool.id,
-                            assetInIndex: this.assets.indexOf(p.tokens[i].address),
-                            assetOutIndex: this.assets.indexOf(p.tokens[i + 1].address),
-                            amount: i === 0 ? p.inputAmount.amount.toString() : '0',
+                            assetInIndex: BigInt(this.assets.indexOf(p.tokens[i].address)),
+                            assetOutIndex: BigInt(this.assets.indexOf(p.tokens[i + 1].address)),
+                            amount: i === 0 ? p.inputAmount.amount : 0n,
                             userData: DEFAULT_USERDATA,
                         });
                     });
@@ -48,9 +52,11 @@ export class Swap {
                     reversedPools.map((pool, i) => {
                         (swaps as BatchSwapStep[]).push({
                             poolId: pool.id,
-                            assetInIndex: this.assets.indexOf(reversedTokens[i + 1].address),
-                            assetOutIndex: this.assets.indexOf(reversedTokens[i].address),
-                            amount: i === 0 ? p.outputAmount.amount.toString() : '0',
+                            assetInIndex: BigInt(
+                                this.assets.indexOf(reversedTokens[i + 1].address),
+                            ),
+                            assetOutIndex: BigInt(this.assets.indexOf(reversedTokens[i].address)),
+                            amount: i === 0 ? p.outputAmount.amount : 0n,
                             userData: DEFAULT_USERDATA,
                         });
                     });
@@ -66,7 +72,7 @@ export class Swap {
                 kind: this.swapKind,
                 assetIn,
                 assetOut,
-                amount: path.swapAmount.amount.toString(),
+                amount: path.swapAmount.amount,
                 userData: DEFAULT_USERDATA,
             } as SingleSwap;
         }
@@ -80,7 +86,7 @@ export class Swap {
 
     public readonly isBatchSwap: boolean;
     public readonly paths: PathWithAmount[];
-    public readonly assets: string[];
+    public readonly assets: Address[];
     public readonly swapKind: SwapKind;
     public swaps: BatchSwapStep[] | SingleSwap;
 
@@ -106,83 +112,96 @@ export class Swap {
         return amounts.reduce((a, b) => a.add(b));
     }
 
-    public async query(provider: BaseProvider, block?: number): Promise<TokenAmount> {
-        const queries = new Contract(
-            `0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5`,
-            balancerQueriesAbi,
-            provider,
-        );
+    // rpcUrl is optional recommended to prevent rate limiting
+    public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
+        const client = createPublicClient({
+            transport: http(rpcUrl),
+        });
 
         let amount: TokenAmount;
         if (this.isBatchSwap) {
-            const deltas = await queries.callStatic.queryBatchSwap(
-                this.swapKind,
-                this.swaps,
-                this.assets,
-                DEFAULT_FUND_MANAGMENT,
-                {
-                    blockTag: block,
-                },
-            );
+            const { result } = await client.simulateContract({
+                address: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+                abi: balancerQueriesAbi,
+                functionName: 'queryBatchSwap',
+                args: [
+                    this.swapKind,
+                    this.swaps as BatchSwapStep[],
+                    this.assets,
+                    DEFAULT_FUND_MANAGMENT,
+                ],
+                blockNumber: block,
+            });
 
             amount =
                 this.swapKind === SwapKind.GivenIn
                     ? TokenAmount.fromRawAmount(
                           this.outputAmount.token,
-                          deltas[
-                              this.assets.indexOf(
-                                  this.convertNativeAddressToZero(this.outputAmount.token.address),
-                              )
-                          ].abs(),
+                          abs(
+                              result[
+                                  this.assets.indexOf(
+                                      this.convertNativeAddressToZero(
+                                          this.outputAmount.token.address,
+                                      ),
+                                  )
+                              ],
+                          ),
                       )
                     : TokenAmount.fromRawAmount(
                           this.inputAmount.token,
-                          deltas[
-                              this.assets.indexOf(
-                                  this.convertNativeAddressToZero(this.inputAmount.token.address),
-                              )
-                          ].abs(),
+                          abs(
+                              result[
+                                  this.assets.indexOf(
+                                      this.convertNativeAddressToZero(
+                                          this.inputAmount.token.address,
+                                      ),
+                                  )
+                              ],
+                          ),
                       );
         } else {
-            const queryAmount = await queries.callStatic.querySwap(
-                this.swaps as SingleSwap,
-                DEFAULT_FUND_MANAGMENT,
-                {
-                    blockTag: block,
-                },
-            );
+            const { result } = await client.simulateContract({
+                address: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+                abi: balancerQueriesAbi,
+                functionName: 'querySwap',
+                args: [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
+                blockNumber: block,
+            });
 
             amount =
                 this.swapKind === SwapKind.GivenIn
-                    ? TokenAmount.fromRawAmount(this.outputAmount.token, queryAmount)
-                    : TokenAmount.fromRawAmount(this.inputAmount.token, queryAmount);
+                    ? TokenAmount.fromRawAmount(this.outputAmount.token, result)
+                    : TokenAmount.fromRawAmount(this.inputAmount.token, result);
         }
 
         return amount;
     }
 
-    private convertNativeAddressToZero(address: string): string {
+    private convertNativeAddressToZero(address: Address): Address {
         return address === NATIVE_ASSETS[this.inputAmount.token.chainId].address
             ? ZERO_ADDRESS
             : address;
     }
 
     public callData(): string {
-        const iface = new Interface(balancerQueriesAbi);
-
         let callData: string;
         if (this.isBatchSwap) {
-            callData = iface.encodeFunctionData('queryBatchSwap', [
-                this.swapKind,
-                this.swaps as BatchSwapStep[],
-                this.assets,
-                DEFAULT_FUND_MANAGMENT,
-            ]);
+            callData = encodeFunctionData({
+                abi: balancerQueriesAbi,
+                functionName: 'queryBatchSwap',
+                args: [
+                    this.swapKind,
+                    this.swaps as BatchSwapStep[],
+                    this.assets,
+                    DEFAULT_FUND_MANAGMENT,
+                ],
+            });
         } else {
-            callData = iface.encodeFunctionData('querySwap', [
-                this.swaps as SingleSwap,
-                DEFAULT_FUND_MANAGMENT,
-            ]);
+            callData = encodeFunctionData({
+                abi: balancerQueriesAbi,
+                functionName: 'querySwap',
+                args: [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
+            });
         }
         return callData;
     }
