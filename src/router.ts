@@ -18,7 +18,6 @@ export class Router {
         pools: BasePool[],
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
     ): Path[] {
-        console.time('build graph and get candidate paths');
         this.pathGraph.buildGraph({ pools });
 
         const candidatePaths = this.pathGraph.getCandidatePaths({
@@ -26,7 +25,6 @@ export class Router {
             tokenOut,
             graphTraversalConfig,
         });
-        console.timeEnd('build graph and get candidate paths');
 
         return candidatePaths;
     }

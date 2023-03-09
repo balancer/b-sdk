@@ -1,18 +1,20 @@
+import { Address } from 'viem';
 import { SUBGRAPH_URLS } from '../utils';
 import { gql, GraphQLClient } from 'graphql-request';
 
 export interface SubgraphSwap {
     id: string;
     caller: string;
-    tokenIn: string;
+    tokenIn: Address;
     tokenInSym: string;
-    tokenOut: string;
+    tokenOut: Address;
     tokenOutSym: string;
-    tokenAmountIn: string;
-    tokenAmountOut: string;
+    tokenAmountIn: `${number}`;
+    tokenAmountOut: `${number}`;
     valueUSD: string;
     poolId: {
         id: string;
+        poolType: string;
     };
     userAddress: {
         id: string;
@@ -129,12 +131,12 @@ export class BatchSwapService {
                     tokenAmountIn
                     tokenAmountOut
                     valueUSD
-                    poolId
                     userAddress {
                         id
                     }
                     poolId {
                         id
+                        poolType
                     }
                     timestamp
                     tx

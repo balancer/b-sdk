@@ -5,7 +5,6 @@ import { SwapInfo, SwapKind, SwapOptions } from './types';
 import { BALANCER_SOR_QUERIES_ADDRESS, ChainId, checkInputs, SUBGRAPH_URLS } from './utils';
 import { Router } from './router';
 import { SmartOrderRouter } from './sor';
-import { JsonRpcProvider } from '@ethersproject/providers';
 
 export function sorParseRawPools(
     chainId: ChainId,
@@ -46,7 +45,6 @@ export async function sorGetSwapsWithPools(
 }
 
 export function sorInitForChain(chainId: ChainId, rpcUrl: string): SmartOrderRouter {
-    const provider = new JsonRpcProvider(rpcUrl);
     const subgraphPoolDataService = new SubgraphPoolProvider(chainId, SUBGRAPH_URLS[chainId]);
     const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
         rpcUrl,
@@ -55,7 +53,6 @@ export function sorInitForChain(chainId: ChainId, rpcUrl: string): SmartOrderRou
 
     return new SmartOrderRouter({
         chainId,
-        provider,
         poolDataProviders: subgraphPoolDataService,
         poolDataEnrichers: onChainPoolDataEnricher,
         rpcUrl,
