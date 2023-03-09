@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { SmartOrderRouter } from '../src/sor';
+import { sorGetSwapsWithPools } from '../src/static';
 import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import { ChainId, ETH, SUBGRAPH_URLS } from '../src/utils';
+import { ChainId, ETH } from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapKind, SwapOptions } from '../src/types';
@@ -15,24 +15,20 @@ BigInt.prototype['toJSON'] = function () {
 };
 
 const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
-const SOR_QUERIES = '0x6732d651EeA0bc98FcF4EFF8B62e0CdCB0064f4b';
+const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 describe('SmartOrderRouter', () => {
     describe('Mainnet', () => {
         const chainId = ChainId.MAINNET;
-        const provider = new JsonRpcProvider(process.env['ETHEREUM_RPC_URL']);
-        const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
-        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-            process.env['ETHEREUM_RPC_URL']!,
-            SOR_QUERIES,
-        );
+        const rpcUrl = process.env['ETHEREUM_RPC_URL'] || '';
+        const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(rpcUrl, SOR_QUERIES);
 
         const sor = new SmartOrderRouter({
             chainId,
-            provider,
             poolDataProviders: subgraphPoolDataService,
             poolDataEnrichers: onChainPoolDataEnricher,
-            rpcUrl: process.env['ETHEREUM_RPC_URL']!,
+            rpcUrl: rpcUrl,
         });
 
         const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
@@ -42,7 +38,7 @@ describe('SmartOrderRouter', () => {
         const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');
 
         const swapOptions: SwapOptions = {
-            block: 16700000,
+            block: 16740000n,
         };
 
         let pools: BasePool[];
@@ -56,11 +52,11 @@ describe('SmartOrderRouter', () => {
             // ETH -> BAL swapGivenIn single hop
             // Weighted pool
             // 0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014
-            // Block 16700000
+            // Block 16740000
             test('Native ETH -> Token givenIn single hop', async () => {
                 const inputAmount = TokenAmount.fromHumanAmount(ETH, '1');
 
-                const { swap, quote } = await SmartOrderRouter.getSwapsWithPools(
+                const { swap, quote } = await sorGetSwapsWithPools(
                     ETH,
                     BAL,
                     SwapKind.GivenIn,
@@ -68,7 +64,7 @@ describe('SmartOrderRouter', () => {
                     pools,
                     swapOptions,
                 );
-                const onchain = await swap.query(provider, swapOptions.block);
+                const onchain = await swap.query(rpcUrl, swapOptions.block);
 
                 expect(quote.amount).toEqual(onchain.amount);
                 expect(swap.inputAmount.amount).toEqual(inputAmount.amount);
@@ -83,18 +79,19 @@ describe('SmartOrderRouter', () => {
             // ETH -> BAL swapGivenOut single hop
             // Weighted pool
             // 0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014
-            // Block 16700000
+            // Block 16740000
             test('Native ETH -> Token givenOut single hop', async () => {
                 const outputAmount = TokenAmount.fromHumanAmount(BAL, '100');
 
-                const { swap, quote } = await sor.getSwaps(
+                const { swap, quote } = await sorGetSwapsWithPools(
                     ETH,
                     BAL,
                     SwapKind.GivenOut,
                     outputAmount,
+                    pools,
                     swapOptions,
                 );
-                const onchain = await swap.query(provider, swapOptions.block);
+                const onchain = await swap.query(rpcUrl, swapOptions.block);
 
                 expect(quote.amount).toEqual(onchain.amount);
                 expect(swap.inputAmount.amount).toEqual(quote.amount);
@@ -117,15 +114,16 @@ describe('SmartOrderRouter', () => {
             test('DAI -> USDT givenIn boosted', async () => {
                 const inputAmount = TokenAmount.fromHumanAmount(DAI, '100000');
 
-                const { swap, quote } = await sor.getSwaps(
+                const { swap, quote } = await sorGetSwapsWithPools(
                     DAI,
                     USDT,
                     SwapKind.GivenIn,
                     inputAmount,
+                    pools,
                     swapOptions,
                 );
 
-                const onchain = await swap.query(provider, swapOptions.block);
+                const onchain = await swap.query(rpcUrl, swapOptions.block);
                 expect(quote.amount).toEqual(onchain.amount);
                 expect(swap.inputAmount.amount).toEqual(inputAmount.amount);
                 expect(swap.outputAmount.amount).toEqual(quote.amount);
@@ -142,15 +140,16 @@ describe('SmartOrderRouter', () => {
             test('USDC -> DAI givenOut boosted', async () => {
                 const outputAmount = TokenAmount.fromHumanAmount(DAI, '1000000');
 
-                const { swap, quote } = await sor.getSwaps(
+                const { swap, quote } = await sorGetSwapsWithPools(
                     USDC,
                     DAI,
                     SwapKind.GivenOut,
                     outputAmount,
+                    pools,
                     swapOptions,
                 );
 
-                const onchain = await swap.query(provider, swapOptions.block);
+                const onchain = await swap.query(rpcUrl, swapOptions.block);
                 console.log(`quote: ${quote.amount} ${quote.token.symbol}`);
                 console.log(`onchain: ${onchain.amount} ${onchain.token.symbol}`);
                 expect(quote.amount).toEqual(onchain.amount);

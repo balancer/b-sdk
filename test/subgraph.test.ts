@@ -1,14 +1,18 @@
 import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import { ChainId, SUBGRAPH_URLS } from '../src/utils';
+import { ChainId } from '../src/utils';
 import { ProviderSwapOptions } from '../src/data/types';
+
+BigInt.prototype['toJSON'] = function () {
+    return this.toString();
+};
 
 describe('SubgraphPoolProvider', () => {
     test('getPools mainnet', async () => {
         const chainId = ChainId.MAINNET;
-        const subgraphPoolDataService = new SubgraphPoolProvider(SUBGRAPH_URLS[chainId]);
+        const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
 
         const providerOptions: ProviderSwapOptions = {
-            timestamp: Math.floor(new Date().getTime() / 1000),
+            timestamp: BigInt(Math.floor(new Date().getTime() / 1000)),
         };
 
         const { pools } = await subgraphPoolDataService.getPools(providerOptions);

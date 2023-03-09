@@ -1,8 +1,8 @@
 import { BasePool, BasePoolFactory } from './';
-import { WeightedPoolFactory } from './weighted/factory';
-import { StablePoolFactory } from './stable/factory';
-import { MetaStablePoolFactory } from './metaStable/factory';
-import { LinearPoolFactory } from './linear/factory';
+import { WeightedPoolFactory } from './weighted';
+import { StablePoolFactory } from './stable';
+import { MetaStablePoolFactory } from './metastable';
+import { LinearPoolFactory } from './linear';
 import { RawPool } from '../../data/types';
 
 export class PoolParser {
