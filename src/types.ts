@@ -81,4 +81,30 @@ export interface SwapInfo {
     // transactionData: TransactionData;
 }
 
+export type HexString = `0x${string}`;
+
+export interface Exit {
+        poolId: HexString;
+        sender: HexString;
+        recipient: HexString;
+        request: ExitPoolRequest;
+}
+
+ export interface ExitPoolRequest {
+        assets: HexString[];
+        minAmountsOut: bigint[]
+        userData: HexString;
+        toInternalBalance: boolean;
+    }
+
+export type ExitAction = {
+    poolId: HexString;
+    sender: HexString;
+    recipient: HexString;
+    assets: HexString[];
+    toInternalBalance: boolean;
+}
+
+export type Actions = ExitAction | BatchSwapStep;
+
 export type HumanAmount = `${number}`;
