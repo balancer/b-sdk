@@ -2,7 +2,6 @@ import { Token } from './token';
 import _Decimal from 'decimal.js-light';
 import { parseUnits } from 'viem';
 import { WAD } from '../utils';
-import { HumanAmount } from '../types';
 
 export type BigintIsh = bigint | string | number;
 

@@ -1,6 +1,7 @@
 import { SwapKind } from './types';
+import { logger } from './utils/logger';
 import { WAD } from './utils/math';
-import { BasePool, Path, PathWithAmount, Swap, Token, TokenAmount } from './entities';
+import { BasePool, Path, PathWithAmount, Token, TokenAmount } from './entities';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 
@@ -33,7 +34,7 @@ export class Router {
         paths: Path[],
         swapKind: SwapKind,
         swapAmount: TokenAmount,
-    ): PathWithAmount[] {
+    ): PathWithAmount[] | null {
         if (paths.length === 0) {
             throw new Error('No potential swap paths provided');
         }
@@ -45,13 +46,17 @@ export class Router {
             try {
                 quotePaths.push(new PathWithAmount(path.tokens, path.pools, swapAmount));
             } catch {
-                // console.debug(path.tokens.map(token => token.symbol).join(' -> '));
-                // console.debug(path.pools.map(pool => pool.id).join(' -> '));
+                logger.trace('Invalid path:');
+                logger.trace(path.tokens.map(token => token.symbol).join(' -> '));
+                logger.trace(path.pools.map(pool => pool.id).join(' -> '));
                 return;
             }
         });
 
-        if (quotePaths.length === 0) throw new Error('No valid paths provided');
+        if (quotePaths.length === 0) {
+            logger.info('No valid paths found');
+            return null;
+        }
 
         let valueArr: { item: PathWithAmount; value: number }[];
 

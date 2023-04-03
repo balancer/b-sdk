@@ -1,8 +1,9 @@
 import { Router } from './router';
 import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
-import { ChainId, checkInputs } from './utils';
-import { SorConfig, SwapInfo, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
+import { BALANCER_SOR_QUERIES_ADDRESS, ChainId, checkInputs, SUBGRAPH_URLS } from './utils';
+import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
+import { OnChainPoolDataEnricher, SubgraphPoolProvider } from './data';
 import { PoolDataService } from './data/poolDataService';
 import { GetPoolsResponse } from './data/types';
 
@@ -17,15 +18,18 @@ export class SmartOrderRouter {
 
     constructor({
         chainId,
-        options,
-        poolDataProviders,
         rpcUrl,
-        poolDataEnrichers = [],
+        poolDataProviders,
+        poolDataEnrichers,
         customPoolFactories = [],
     }: SorConfig) {
         this.chainId = chainId;
         this.router = new Router();
         this.poolParser = new PoolParser(chainId, customPoolFactories);
+        poolDataProviders =
+            poolDataProviders || new SubgraphPoolProvider(chainId, SUBGRAPH_URLS[chainId]);
+        poolDataEnrichers =
+            poolDataEnrichers || new OnChainPoolDataEnricher(rpcUrl, BALANCER_SOR_QUERIES_ADDRESS);
         this.poolDataService = new PoolDataService(
             Array.isArray(poolDataProviders) ? poolDataProviders : [poolDataProviders],
             Array.isArray(poolDataEnrichers) ? poolDataEnrichers : [poolDataEnrichers],
@@ -73,7 +77,7 @@ export class SmartOrderRouter {
         swapKind: SwapKind,
         swapAmount: SwapInputRawAmount | TokenAmount,
         swapOptions?: SwapOptions,
-    ): Promise<SwapInfo> {
+    ): Promise<Swap | null> {
         swapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmount);
         const candidatePaths = await this.getCandidatePaths(
             tokenIn,
@@ -84,12 +88,9 @@ export class SmartOrderRouter {
 
         const bestPaths = this.router.getBestPaths(candidatePaths, swapKind, swapAmount);
 
-        const swap = new Swap({ paths: bestPaths, swapKind });
+        if (!bestPaths) return null;
 
-        return {
-            quote: swapKind === SwapKind.GivenIn ? swap.outputAmount : swap.inputAmount,
-            swap,
-        };
+        return new Swap({ paths: bestPaths, swapKind });
     }
 
     public async getCandidatePaths(

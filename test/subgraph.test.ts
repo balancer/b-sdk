@@ -2,10 +2,6 @@ import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider
 import { ChainId } from '../src/utils';
 import { ProviderSwapOptions } from '../src/data/types';
 
-BigInt.prototype['toJSON'] = function () {
-    return this.toString();
-};
-
 describe('SubgraphPoolProvider', () => {
     test('getPools mainnet', async () => {
         const chainId = ChainId.MAINNET;

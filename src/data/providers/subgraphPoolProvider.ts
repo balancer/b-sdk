@@ -3,6 +3,10 @@ import { GetPoolsResponse, PoolDataProvider, ProviderSwapOptions, RawPool } from
 import { fetchWithRetry } from '../../utils/fetch';
 import { SUBGRAPH_URLS } from '../../utils';
 
+BigInt.prototype['toJSON'] = function () {
+    return this.toString();
+};
+
 const PAGE_SIZE = 1000;
 const SECS_IN_HOUR = 3600n;
 

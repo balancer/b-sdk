@@ -186,6 +186,8 @@ export class LinearPool implements BasePool {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
+        if (output.amount < 0n) throw new Error('Swap amount is negative');
+
         if (mutateBalances) {
             tIn.increase(swapAmount.amount);
             tOut.decrease(output.amount);
@@ -231,6 +233,8 @@ export class LinearPool implements BasePool {
         } else {
             throw new Error('Pool does not contain the tokens provided');
         }
+
+        if (input.amount < 0n) throw new Error('Swap amount is negative');
 
         if (mutateBalances) {
             tIn.increase(input.amount);

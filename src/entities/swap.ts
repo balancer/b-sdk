@@ -6,7 +6,7 @@ import {
     DEFAULT_USERDATA,
     DEFAULT_FUND_MANAGMENT,
     ZERO_ADDRESS,
-    NATIVE_ASSETS,
+    NATIVE_ADDRESS,
 } from '../utils';
 import { Address, createPublicClient, encodeFunctionData, http } from 'viem';
 import { balancerQueriesAbi } from '../abi/';
@@ -19,6 +19,7 @@ export class Swap {
         this.paths = paths.map(
             path => new PathWithAmount(path.tokens, path.pools, path.swapAmount, true),
         );
+        this.chainId = paths[0].tokens[0].chainId;
         this.swapKind = swapKind;
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
         this.assets = [
@@ -84,11 +85,16 @@ export class Swap {
         this.swaps = swaps;
     }
 
+    public readonly chainId: number;
     public readonly isBatchSwap: boolean;
     public readonly paths: PathWithAmount[];
     public readonly assets: Address[];
     public readonly swapKind: SwapKind;
     public swaps: BatchSwapStep[] | SingleSwap;
+
+    public get quote(): TokenAmount {
+        return this.swapKind === SwapKind.GivenIn ? this.outputAmount : this.inputAmount;
+    }
 
     public get inputAmount(): TokenAmount {
         if (!this.paths.every(p => p.inputAmount.token.isEqual(this.paths[0].inputAmount.token))) {
@@ -112,7 +118,7 @@ export class Swap {
         return amounts.reduce((a, b) => a.add(b));
     }
 
-    // rpcUrl is optional recommended to prevent rate limiting
+    // rpcUrl is optional, but recommended to prevent rate limiting
     public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
         const client = createPublicClient({
             transport: http(rpcUrl),
@@ -178,12 +184,10 @@ export class Swap {
     }
 
     private convertNativeAddressToZero(address: Address): Address {
-        return address === NATIVE_ASSETS[this.inputAmount.token.chainId].address
-            ? ZERO_ADDRESS
-            : address;
+        return address === NATIVE_ADDRESS ? ZERO_ADDRESS : address;
     }
 
-    public callData(): string {
+    public queryCallData(): string {
         let callData: string;
         if (this.isBatchSwap) {
             callData = encodeFunctionData({

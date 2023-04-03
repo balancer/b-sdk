@@ -10,10 +10,6 @@ import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEn
 import { SwapKind, SwapOptions } from '../src/types';
 import { BasePool } from '../src/entities/pools';
 
-BigInt.prototype['toJSON'] = function () {
-    return this.toString();
-};
-
 const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
@@ -56,7 +52,7 @@ describe('SmartOrderRouter', () => {
             test('Native ETH -> Token givenIn single hop', async () => {
                 const inputAmount = TokenAmount.fromHumanAmount(ETH, '1');
 
-                const { swap, quote } = await sorGetSwapsWithPools(
+                const swap = await sorGetSwapsWithPools(
                     ETH,
                     BAL,
                     SwapKind.GivenIn,
@@ -64,11 +60,14 @@ describe('SmartOrderRouter', () => {
                     pools,
                     swapOptions,
                 );
+
+                if (!swap) throw new Error('Swap is undefined');
+
                 const onchain = await swap.query(rpcUrl, swapOptions.block);
 
-                expect(quote.amount).toEqual(onchain.amount);
+                expect(swap.quote.amount).toEqual(onchain.amount);
                 expect(swap.inputAmount.amount).toEqual(inputAmount.amount);
-                expect(swap.outputAmount.amount).toEqual(quote.amount);
+                expect(swap.outputAmount.amount).toEqual(swap.quote.amount);
                 expect(swap.paths.length).toEqual(1);
                 expect(swap.paths[0].pools.length).toEqual(1);
                 expect(swap.paths[0].pools[0].id).toEqual(
@@ -83,7 +82,7 @@ describe('SmartOrderRouter', () => {
             test('Native ETH -> Token givenOut single hop', async () => {
                 const outputAmount = TokenAmount.fromHumanAmount(BAL, '100');
 
-                const { swap, quote } = await sorGetSwapsWithPools(
+                const swap = await sorGetSwapsWithPools(
                     ETH,
                     BAL,
                     SwapKind.GivenOut,
@@ -91,10 +90,13 @@ describe('SmartOrderRouter', () => {
                     pools,
                     swapOptions,
                 );
+
+                if (!swap) throw new Error('Swap is undefined');
+
                 const onchain = await swap.query(rpcUrl, swapOptions.block);
 
-                expect(quote.amount).toEqual(onchain.amount);
-                expect(swap.inputAmount.amount).toEqual(quote.amount);
+                expect(swap.quote.amount).toEqual(onchain.amount);
+                expect(swap.inputAmount.amount).toEqual(swap.quote.amount);
                 expect(swap.outputAmount.amount).toEqual(outputAmount.amount);
                 expect(swap.paths.length).toEqual(1);
                 expect(swap.paths[0].pools.length).toEqual(1);
@@ -114,7 +116,7 @@ describe('SmartOrderRouter', () => {
             test('DAI -> USDT givenIn boosted', async () => {
                 const inputAmount = TokenAmount.fromHumanAmount(DAI, '100000');
 
-                const { swap, quote } = await sorGetSwapsWithPools(
+                const swap = await sorGetSwapsWithPools(
                     DAI,
                     USDT,
                     SwapKind.GivenIn,
@@ -123,10 +125,12 @@ describe('SmartOrderRouter', () => {
                     swapOptions,
                 );
 
+                if (!swap) throw new Error('Swap is undefined');
+
                 const onchain = await swap.query(rpcUrl, swapOptions.block);
-                expect(quote.amount).toEqual(onchain.amount);
+                expect(swap.quote.amount).toEqual(onchain.amount);
                 expect(swap.inputAmount.amount).toEqual(inputAmount.amount);
-                expect(swap.outputAmount.amount).toEqual(quote.amount);
+                expect(swap.outputAmount.amount).toEqual(swap.quote.amount);
                 expect(swap.paths.length).toEqual(1);
                 expect(swap.paths[0].pools.length).toEqual(3);
             });
@@ -140,7 +144,7 @@ describe('SmartOrderRouter', () => {
             test('USDC -> DAI givenOut boosted', async () => {
                 const outputAmount = TokenAmount.fromHumanAmount(DAI, '1000000');
 
-                const { swap, quote } = await sorGetSwapsWithPools(
+                const swap = await sorGetSwapsWithPools(
                     USDC,
                     DAI,
                     SwapKind.GivenOut,
@@ -149,10 +153,10 @@ describe('SmartOrderRouter', () => {
                     swapOptions,
                 );
 
+                if (!swap) throw new Error('Swap is undefined');
+
                 const onchain = await swap.query(rpcUrl, swapOptions.block);
-                console.log(`quote: ${quote.amount} ${quote.token.symbol}`);
-                console.log(`onchain: ${onchain.amount} ${onchain.token.symbol}`);
-                expect(quote.amount).toEqual(onchain.amount);
+                expect(swap.quote.amount).toEqual(onchain.amount);
             });
         });
     });

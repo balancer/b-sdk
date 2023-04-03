@@ -59,23 +59,6 @@ interface OnChainPoolDataQueryConfig {
     };
 }
 
-interface SorPoolDataQueryConfig {
-    loadTokenBalanceUpdatesAfterBlock: boolean;
-    loadTotalSupply: boolean;
-    loadSwapFees: boolean;
-    loadLinearWrappedTokenRates: boolean;
-    loadNormalizedWeights: boolean;
-    loadScalingFactors: boolean;
-    loadAmps: boolean;
-    blockNumber: bigint;
-    totalSupplyTypes: TotalSupplyType[];
-    swapFeeTypes: SwapFeeType[];
-    linearPoolIdxs: bigint[];
-    weightedPoolIdxs: bigint[];
-    scalingFactorPoolIdxs: bigint[];
-    ampPoolIdxs: bigint[];
-}
-
 export class OnChainPoolDataEnricher implements PoolDataEnricher {
     private readonly config: OnChainPoolDataQueryConfig;
 

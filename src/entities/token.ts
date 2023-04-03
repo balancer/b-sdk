@@ -16,6 +16,7 @@ export class Token {
         wrapped?: string,
     ) {
         this.chainId = chainId;
+        // Addresses are always lowercased for speed
         this.address = address.toLowerCase() as Address;
         this.decimals = decimals;
         this.symbol = symbol;

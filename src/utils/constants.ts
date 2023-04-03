@@ -2,6 +2,8 @@ import { Address } from 'viem';
 import { Token } from '../entities/token';
 
 export const ZERO_ADDRESS: Address = '0x0000000000000000000000000000000000000000';
+export const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
 export const PREMINTED_STABLE_BPT = 2596148429267413814265248164610048n; // 2**111
 
@@ -10,18 +12,35 @@ export const SECONDS_PER_YEAR = 31536000n;
 export enum ChainId {
     MAINNET = 1,
     GOERLI = 5,
+    OPTIMISM = 10,
+    BSC = 56,
     GNOSIS_CHAIN = 100,
     POLYGON = 137,
+    ZKSYNC_TESTNET = 280,
+    ZKSYNC = 324,
+    ZKEVM = 1101,
     ARBITRUM_ONE = 42161,
+    AVALANCHE = 43114,
+    BASE_GOERLI = 84531,
 }
 
 export const SUBGRAPH_URLS = {
     [ChainId.MAINNET]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
     [ChainId.GOERLI]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
+    [ChainId.OPTIMISM]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-optimism-v2',
     [ChainId.GNOSIS_CHAIN]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2',
     [ChainId.POLYGON]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
+    [ChainId.ZKSYNC_TESTNET]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zktestnet-v2',
+    [ChainId.ZKSYNC]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zksync-v2',
+    [ChainId.ZKEVM]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zkevm-v2',
     [ChainId.ARBITRUM_ONE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
+    [ChainId.AVALANCHE]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2',
+    [ChainId.BASE_GOERLI]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-base-goerli-v2',
 };
 
 export const STELLATE_URLS = {
@@ -37,7 +56,7 @@ export const BALANCER_SOR_QUERIES_ADDRESS = '0x1814a3b3e4362caf4eb54cd85b82d39bd
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(
         ChainId.MAINNET,
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        NATIVE_ADDRESS,
         18,
         'ETH',
         'Ether',
@@ -45,7 +64,7 @@ export const NATIVE_ASSETS = {
     ),
     [ChainId.GOERLI]: new Token(
         ChainId.GOERLI,
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        NATIVE_ADDRESS,
         18,
         'ETH',
         'Ether',
@@ -53,7 +72,7 @@ export const NATIVE_ASSETS = {
     ),
     [ChainId.GNOSIS_CHAIN]: new Token(
         ChainId.GNOSIS_CHAIN,
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        NATIVE_ADDRESS,
         18,
         'xDAI',
         'xDAI',
@@ -61,7 +80,7 @@ export const NATIVE_ASSETS = {
     ),
     [ChainId.POLYGON]: new Token(
         ChainId.POLYGON,
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        NATIVE_ADDRESS,
         18,
         'MATIC',
         'Matic',
@@ -69,7 +88,7 @@ export const NATIVE_ASSETS = {
     ),
     [ChainId.ARBITRUM_ONE]: new Token(
         ChainId.ARBITRUM_ONE,
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        NATIVE_ADDRESS,
         18,
         'ETH',
         'Ether',
