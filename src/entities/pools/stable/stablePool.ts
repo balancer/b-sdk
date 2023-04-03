@@ -101,7 +101,6 @@ export class StablePool implements BasePool {
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
-        // console.log(`stable pool normalized liquidity: ${tOut.amount * this.amp}`);
         // TODO: Fix stable normalized liquidity calc
         return tOut.amount * this.amp;
     }
@@ -171,6 +170,8 @@ export class StablePool implements BasePool {
 
         const amountOut = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
         const amountOutWithRate = amountOut.divDownFixed(this.tokens[tOutIndex].rate);
+
+        if (amountOutWithRate.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
             this.tokens[tInIndex].increase(swapAmount.amount);
@@ -256,6 +257,8 @@ export class StablePool implements BasePool {
 
             amountIn = amountInWithFee.divDownFixed(this.tokens[tInIndex].rate);
         }
+
+        if (amountIn.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
             this.tokens[tInIndex].increase(amountIn.amount);

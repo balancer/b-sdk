@@ -58,8 +58,8 @@ export class PathWithAmount extends Path {
                     amounts[i + 1] = outputAmount;
                     this.printPath.push({
                         pool: pool.id,
-                        input: amounts[i].amount.toString() + ' ' + this.tokens[i].symbol,
-                        output: outputAmount.amount.toString() + ' ' + this.tokens[i + 1].symbol,
+                        input: `${amounts[i].amount.toString()} ${this.tokens[i].symbol}`,
+                        output: `${outputAmount.amount.toString()} ${this.tokens[i + 1].symbol}`,
                     });
                 }
                 this.outputAmount = amounts[amounts.length - 1];
@@ -78,16 +78,16 @@ export class PathWithAmount extends Path {
                     amounts[i - 1] = inputAmount;
                     this.printPath.push({
                         pool: pool.id,
-                        input: inputAmount.amount.toString() + ' ' + this.tokens[i - 1].symbol,
-                        output: amounts[i].amount.toString() + ' ' + this.tokens[i].symbol,
+                        input: `${inputAmount.amount.toString()} ${this.tokens[i - 1].symbol}`,
+                        output: `${amounts[i].amount.toString()} ${this.tokens[i].symbol}`,
                     });
                 }
                 this.printPath = this.printPath.reverse();
                 this.inputAmount = amounts[0];
                 this.outputAmount = this.swapAmount;
             }
-        } catch (error) {
-            throw new Error(`Invalid path, swap amount exceeds maximum for pool`);
+        } catch {
+            throw new Error('Invalid path, swap amount exceeds maximum for pool');
         }
     }
 

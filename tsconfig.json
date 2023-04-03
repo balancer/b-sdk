@@ -1,9 +1,9 @@
 {
     "include": ["src"],
     "compilerOptions": {
-        "target": "es2020",
-        "module": "commonjs",
-        "outDir": "dist/cjs",
+        "target": "ESNext",
+        "module": "ESNext",
+        "outDir": "dist",
         "importHelpers": true,
         "declaration": true,
         "sourceMap": true,
@@ -17,7 +17,6 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
         "moduleResolution": "node",
         "esModuleInterop": true,
         "resolveJsonModule": true

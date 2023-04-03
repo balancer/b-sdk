@@ -1,4 +1,4 @@
-import { BigintIsh, Token, BasePool, BasePoolFactory, TokenAmount, Swap } from './entities';
+import { BigintIsh, Token, BasePool, BasePoolFactory } from './entities';
 import { PoolDataEnricher, PoolDataProvider } from './data/types';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { Address, Hex } from 'viem';
@@ -32,21 +32,12 @@ export interface FundManagement {
     toInternalBalance: boolean;
 }
 
-export type SorOptions = {
-    minPercentForPath: number;
-};
-
 export type SorConfig = {
     chainId: number;
-    options?: SorOptions;
-    customPoolFactories?: BasePoolFactory[];
-    poolDataProviders: PoolDataProvider | PoolDataProvider[];
-    poolDataEnrichers?: PoolDataEnricher | PoolDataEnricher[];
     rpcUrl: string;
-};
-
-export type PoolFilters = {
-    topN: number;
+    poolDataProviders?: PoolDataProvider | PoolDataProvider[];
+    poolDataEnrichers?: PoolDataEnricher | PoolDataEnricher[];
+    customPoolFactories?: BasePoolFactory[];
 };
 
 export interface PoolTokenPair {
@@ -71,14 +62,6 @@ export interface BatchSwapStep {
     assetOutIndex: bigint;
     amount: bigint;
     userData: Hex;
-}
-
-export interface SwapInfo {
-    quote: TokenAmount;
-    swap: Swap;
-    // gasPriceWei: BigNumber;
-    // estimateTxGas: BigNumber;
-    // transactionData: TransactionData;
 }
 
 export type HumanAmount = `${number}`;

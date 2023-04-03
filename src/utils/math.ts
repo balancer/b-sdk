@@ -1,5 +1,4 @@
 export const WAD = 1000000000000000000n;
-export const RAY = 1000000000000000000000000000n;
 export const TWO_WAD = 2000000000000000000n;
 export const FOUR_WAD = 4000000000000000000n;
 
@@ -28,7 +27,7 @@ export class MathSol {
     static mulUpFixed(a: bigint, b: bigint): bigint {
         const product = a * b;
 
-        if (product == 0n) {
+        if (product === 0n) {
             return 0n;
         } else {
             return (product - 1n) / WAD + 1n;
@@ -36,7 +35,7 @@ export class MathSol {
     }
 
     static divDownFixed(a: bigint, b: bigint): bigint {
-        if (a == 0n) {
+        if (a === 0n) {
             return 0n;
         } else {
             const aInflated = a * WAD;
@@ -45,7 +44,7 @@ export class MathSol {
     }
 
     static divUpFixed(a: bigint, b: bigint): bigint {
-        if (a == 0n) {
+        if (a === 0n) {
             return 0n;
         } else {
             const aInflated = a * WAD;
@@ -54,7 +53,7 @@ export class MathSol {
     }
 
     static divUp(a: bigint, b: bigint): bigint {
-        if (a == 0n) {
+        if (a === 0n) {
             return 0n;
         } else {
             return 1n + (a - 1n) / b;
@@ -166,7 +165,7 @@ class LogExpMath {
             return this.ONE_18;
         }
 
-        if (x == 0n) {
+        if (x === 0n) {
             return 0n;
         }
 

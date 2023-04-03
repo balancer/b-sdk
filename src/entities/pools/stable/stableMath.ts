@@ -12,7 +12,7 @@ export function _calculateInvariant(
         sum += balances[i];
     }
 
-    if (sum == 0n) {
+    if (sum === 0n) {
         return 0n;
     }
 

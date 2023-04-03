@@ -95,6 +95,8 @@ export class MetaStablePool implements BasePool {
         const amountOut = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
         const amountOutWithRate = amountOut.divDownFixed(this.tokens[tOutIndex].rate);
 
+        if (amountOutWithRate.amount < 0n) throw new Error('Swap output negative');
+
         if (mutateBalances) {
             this.tokens[tInIndex].increase(swapAmount.amount);
             this.tokens[tOutIndex].decrease(amountOutWithRate.amount);
@@ -138,6 +140,8 @@ export class MetaStablePool implements BasePool {
         const amountIn = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true);
         const amountInWithFee = this.addSwapFeeAmount(amountIn);
         const amountInWithRate = amountInWithFee.divDownFixed(this.tokens[tInIndex].rate);
+
+        if (amountInWithRate.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
             this.tokens[tInIndex].increase(amountInWithRate.amount);

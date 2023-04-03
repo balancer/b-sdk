@@ -1,10 +1,9 @@
-import { OnChainPoolDataEnricher, RawPool, SubgraphPoolProvider } from './data';
+import { RawPool } from './data';
 import { BasePool, BasePoolFactory, Swap, Token, TokenAmount } from './entities';
 import { PoolParser } from './entities/pools/parser';
-import { SwapInfo, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
-import { BALANCER_SOR_QUERIES_ADDRESS, ChainId, checkInputs, SUBGRAPH_URLS } from './utils';
+import { SwapInputRawAmount, SwapKind, SwapOptions } from './types';
+import { ChainId, checkInputs } from './utils';
 import { Router } from './router';
-import { SmartOrderRouter } from './sor';
 
 export function sorParseRawPools(
     chainId: ChainId,
@@ -23,38 +22,19 @@ export async function sorGetSwapsWithPools(
     swapAmount: SwapInputRawAmount | TokenAmount,
     pools: BasePool[],
     swapOptions?: Omit<SwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
-): Promise<SwapInfo> {
+): Promise<Swap | null> {
     swapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmount);
     const router = new Router();
 
     const candidatePaths = router.getCandidatePaths(
         tokenIn,
         tokenOut,
-        swapKind,
         pools,
         swapOptions?.graphTraversalConfig,
     );
     const bestPaths = router.getBestPaths(candidatePaths, swapKind, swapAmount);
 
-    const swap = new Swap({ paths: bestPaths, swapKind });
+    if (!bestPaths) return null;
 
-    return {
-        quote: swapKind === SwapKind.GivenIn ? swap.outputAmount : swap.inputAmount,
-        swap,
-    };
-}
-
-export function sorInitForChain(chainId: ChainId, rpcUrl: string): SmartOrderRouter {
-    const subgraphPoolDataService = new SubgraphPoolProvider(chainId, SUBGRAPH_URLS[chainId]);
-    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-        rpcUrl,
-        BALANCER_SOR_QUERIES_ADDRESS,
-    );
-
-    return new SmartOrderRouter({
-        chainId,
-        poolDataProviders: subgraphPoolDataService,
-        poolDataEnrichers: onChainPoolDataEnricher,
-        rpcUrl,
-    });
+    return new Swap({ paths: bestPaths, swapKind });
 }

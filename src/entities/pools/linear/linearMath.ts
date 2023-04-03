@@ -22,7 +22,7 @@ export function _calcBptOutPerMainIn(
 ): bigint {
     // Amount out, so we round down overall.
 
-    if (bptSupply == 0n) {
+    if (bptSupply === 0n) {
         return _toNominal(mainIn, params);
     }
 
@@ -117,7 +117,7 @@ export function _calcMainInPerBptOut(
     bptSupply: bigint,
     params: Params,
 ): bigint {
-    if (bptSupply == 0n) {
+    if (bptSupply === 0n) {
         return _fromNominal(bptOut, params);
     }
     const previousNominalMain = _toNominal(mainBalance, params);
@@ -147,7 +147,7 @@ export function _calcWrappedInPerBptOut(
     bptSupply: bigint,
     params: Params,
 ): bigint {
-    if (bptSupply == 0n) {
+    if (bptSupply === 0n) {
         return bptOut;
     }
 
