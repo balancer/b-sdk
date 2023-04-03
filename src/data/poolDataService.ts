@@ -28,17 +28,15 @@ export class PoolDataService {
         );
 
         const providerData: GetPoolsResponse = {
-            pools: responses.map(response => response.pools).flat(),
+            pools: responses.flatMap(response => response.pools),
             //we take the smallest block number from the set
             syncedToBlockNumber: responses
                 .map(response => response.syncedToBlockNumber || 0n)
                 .sort()[0],
             poolsWithActiveWeightUpdates: responses
-                .map(response => response.poolsWithActiveWeightUpdates || [])
-                .flat(),
+                .flatMap(response => response.poolsWithActiveWeightUpdates || []),
             poolsWithActiveAmpUpdates: responses
-                .map(response => response.poolsWithActiveAmpUpdates || [])
-                .flat(),
+                .flatMap(response => response.poolsWithActiveAmpUpdates || []),
         };
 
         return {

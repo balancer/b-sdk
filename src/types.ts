@@ -1,4 +1,4 @@
-import { BigintIsh, Token, BasePool, BasePoolFactory, TokenAmount, Swap } from './entities';
+import { BigintIsh, Token, BasePool, BasePoolFactory } from './entities';
 import { PoolDataEnricher, PoolDataProvider } from './data/types';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { Address, Hex } from 'viem';

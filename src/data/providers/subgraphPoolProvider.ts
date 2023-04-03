@@ -1,4 +1,3 @@
-import { gql, GraphQLClient } from 'graphql-request';
 import { GetPoolsResponse, PoolDataProvider, ProviderSwapOptions, RawPool } from '../types';
 import { fetchWithRetry } from '../../utils/fetch';
 import { SUBGRAPH_URLS } from '../../utils';
@@ -37,7 +36,7 @@ interface SubgraphPoolProviderConfig {
 }
 
 export class SubgraphPoolProvider implements PoolDataProvider {
-    private client: GraphQLClient;
+    private readonly url: string;
     private readonly config: SubgraphPoolProviderConfig;
 
     constructor(
@@ -47,9 +46,8 @@ export class SubgraphPoolProvider implements PoolDataProvider {
     ) {
         // if subgraphUrl isnt provided, use the default for the chainId
         const defaultSubgraphUrl = SUBGRAPH_URLS[chainId];
-        const urlToUse = subgraphUrl ?? defaultSubgraphUrl;
+        this.url = subgraphUrl ?? defaultSubgraphUrl;
 
-        this.client = new GraphQLClient(urlToUse);
         const hasFilterConfig =
             config &&
             (config.poolIdNotIn || config.poolIdIn || config.poolTypeIn || config.poolTypeNotIn);
@@ -89,12 +87,8 @@ export class SubgraphPoolProvider implements PoolDataProvider {
         const nowPlusOneHour = options.timestamp + SECS_IN_HOUR;
 
         do {
-            const poolsResult = await this.client.request<{
-                pools: RawPool[];
-                gradualWeightUpdates?: PoolUpdate[];
-                ampUpdates?: PoolUpdate[];
-                _meta?: { block: { number: number } };
-            }>(this.getPoolsQuery(lastId === ''), {
+            const query = this.getPoolsQuery(lastId === '');
+            const variables = {
                 pageSize: PAGE_SIZE,
                 where: {
                     id_gt: lastId || undefined,
@@ -124,9 +118,22 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                     endTimestamp_gte: nowMinusOneHour,
                     startTimestamp_lte: nowPlusOneHour,
                 },
+            };
+
+            const response = await fetch(this.url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query,
+                    variables,
+                }),
             });
 
-            poolsPage = poolsResult.pools;
+            const poolsResult = await response.json();
+
+            poolsPage = poolsResult.data.pools;
             pools = pools.concat(poolsPage);
 
             if (lastId === '') {
@@ -180,7 +187,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             }
         `;
 
-        return gql`
+        return `
             query poolsQuery(
                 $pageSize: Int!
                 $where: Pool_filter
@@ -235,7 +242,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             return false;
         }
 
-        if (this.config.poolTypeNotIn && this.config.poolTypeNotIn.includes(pool.poolType)) {
+        if (this.config.poolTypeNotIn?.includes(pool.poolType)) {
             return false;
         }
 
@@ -243,7 +250,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             return false;
         }
 
-        if (this.config.poolIdNotIn && this.config.poolIdNotIn.includes(pool.id)) {
+        if (this.config.poolIdNotIn?.includes(pool.id)) {
             return false;
         }
 

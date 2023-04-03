@@ -30,13 +30,13 @@ interface OnChainPoolData {
 
 enum TotalSupplyType {
     TOTAL_SUPPLY = 0,
-    VIRTUAL_SUPPLY,
-    ACTUAL_SUPPLY,
+    VIRTUAL_SUPPLY = 1,
+    ACTUAL_SUPPLY = 2,
 }
 
 enum SwapFeeType {
     SWAP_FEE_PERCENTAGE = 0,
-    PERCENT_FEE,
+    PERCENT_FEE = 1,
 }
 
 interface OnChainPoolDataQueryConfig {
@@ -142,7 +142,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             blockNumber: options.block,
         });
 
-        return poolIds.map((poolId, i) => ({
+        return poolIds.map((_poolId, i) => ({
             id: poolIds[i],
             balances: balances[i],
             totalSupply: totalSupplies[i],

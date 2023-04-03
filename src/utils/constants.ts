@@ -36,7 +36,7 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zktestnet-v2',
     [ChainId.ZKSYNC]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zksync-v2',
     [ChainId.ZKEVM]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zkevm-v2',
-    [ChainId.ARBITRUM_ONE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
+    [ChainId.ARBITRUM_ONE]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
     [ChainId.AVALANCHE]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2',
     [ChainId.BASE_GOERLI]:
@@ -51,6 +51,7 @@ export const STELLATE_URLS = {
     [ChainId.ARBITRUM_ONE]: 'https://balancer-arbitrum-v2.stellate.balancer.fi',
 };
 
+export const BALANCER_QUERIES = '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5';
 export const BALANCER_SOR_QUERIES_ADDRESS = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 export const NATIVE_ASSETS = {

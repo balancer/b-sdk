@@ -10,7 +10,6 @@ import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEn
 import { SwapKind, SwapOptions } from '../src/types';
 import { BasePool } from '../src/entities/pools';
 
-const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 describe('SmartOrderRouter', () => {
@@ -28,7 +27,6 @@ describe('SmartOrderRouter', () => {
         });
 
         const BAL = new Token(chainId, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL');
-        const WETH = new Token(chainId, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18, 'WETH');
         const USDC = new Token(chainId, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC');
         const USDT = new Token(chainId, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT');
         const DAI = new Token(chainId, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18, 'DAI');

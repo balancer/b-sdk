@@ -82,7 +82,6 @@ export class SmartOrderRouter {
         const candidatePaths = await this.getCandidatePaths(
             tokenIn,
             tokenOut,
-            swapKind,
             swapOptions,
         );
 
@@ -96,7 +95,6 @@ export class SmartOrderRouter {
     public async getCandidatePaths(
         tokenIn: Token,
         tokenOut: Token,
-        swapKind: SwapKind,
         options?: Pick<SwapOptions, 'block' | 'graphTraversalConfig'>,
     ): Promise<Path[]> {
         // fetch pools if we haven't yet, or if a block number is provided that doesn't match the existing.
@@ -107,7 +105,6 @@ export class SmartOrderRouter {
         return this.router.getCandidatePaths(
             tokenIn,
             tokenOut,
-            swapKind,
             this.pools,
             options?.graphTraversalConfig,
         );

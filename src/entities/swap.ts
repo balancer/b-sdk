@@ -3,12 +3,13 @@ import { TokenAmount } from './tokenAmount';
 import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
 import {
     abs,
+    BALANCER_QUERIES,
     DEFAULT_USERDATA,
     DEFAULT_FUND_MANAGMENT,
     ZERO_ADDRESS,
     NATIVE_ADDRESS,
 } from '../utils';
-import { Address, createPublicClient, encodeFunctionData, http } from 'viem';
+import { Address, createPublicClient, encodeFunctionData, getContract, http } from 'viem';
 import { balancerQueriesAbi } from '../abi/';
 
 // A Swap can be a single or multiple paths
@@ -25,8 +26,7 @@ export class Swap {
         this.assets = [
             ...new Set(
                 paths
-                    .map(p => p.tokens)
-                    .flat()
+                    .flatMap(p => p.tokens)
                     .map(t => t.address),
             ),
         ];
@@ -120,24 +120,24 @@ export class Swap {
 
     // rpcUrl is optional, but recommended to prevent rate limiting
     public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
-        const client = createPublicClient({
+        const publicClient = createPublicClient({
             transport: http(rpcUrl),
+        });
+
+        const queriesContract = getContract({
+            address: BALANCER_QUERIES,
+            abi: balancerQueriesAbi,
+            publicClient,
         });
 
         let amount: TokenAmount;
         if (this.isBatchSwap) {
-            const { result } = await client.simulateContract({
-                address: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
-                abi: balancerQueriesAbi,
-                functionName: 'queryBatchSwap',
-                args: [
-                    this.swapKind,
-                    this.swaps as BatchSwapStep[],
-                    this.assets,
-                    DEFAULT_FUND_MANAGMENT,
-                ],
-                blockNumber: block,
-            });
+            const { result } = await queriesContract.simulate.queryBatchSwap(
+                [this.swapKind, this.swaps as BatchSwapStep[], this.assets, DEFAULT_FUND_MANAGMENT],
+                {
+                    blockNumber: block,
+                },
+            );
 
             amount =
                 this.swapKind === SwapKind.GivenIn
@@ -166,13 +166,10 @@ export class Swap {
                           ),
                       );
         } else {
-            const { result } = await client.simulateContract({
-                address: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
-                abi: balancerQueriesAbi,
-                functionName: 'querySwap',
-                args: [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
-                blockNumber: block,
-            });
+            const { result } = await queriesContract.simulate.querySwap(
+                [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
+                { blockNumber: block },
+            );
 
             amount =
                 this.swapKind === SwapKind.GivenIn

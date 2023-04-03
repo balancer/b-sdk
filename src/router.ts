@@ -15,7 +15,6 @@ export class Router {
     public getCandidatePaths(
         tokenIn: Token,
         tokenOut: Token,
-        swapKind: SwapKind,
         pools: BasePool[],
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
     ): Path[] {

@@ -29,7 +29,6 @@ export async function sorGetSwapsWithPools(
     const candidatePaths = router.getCandidatePaths(
         tokenIn,
         tokenOut,
-        swapKind,
         pools,
         swapOptions?.graphTraversalConfig,
     );
