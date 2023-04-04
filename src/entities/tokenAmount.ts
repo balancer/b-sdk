@@ -1,7 +1,7 @@
 import { Token } from './token';
 import _Decimal from 'decimal.js-light';
 import { parseUnits } from 'viem';
-import { WAD } from '../utils';
+import { DECIMAL_SCALES, WAD } from '../utils';
 
 export type BigintIsh = bigint | string | number;
 
@@ -22,7 +22,7 @@ export class TokenAmount {
     }
 
     public static fromScale18Amount(token: Token, scale18Amount: BigintIsh, divUp?: boolean) {
-        const scalar = BigInt(10) ** BigInt(18 - token.decimals);
+        const scalar = DECIMAL_SCALES[18 - token.decimals];
         const rawAmount = divUp
             ? 1n + (BigInt(scale18Amount) - 1n) / scalar
             : BigInt(scale18Amount) / scalar;
@@ -30,10 +30,10 @@ export class TokenAmount {
     }
 
     protected constructor(token: Token, amount: BigintIsh) {
-        this.decimalScale = BigInt(10) ** BigInt(token.decimals);
+        this.decimalScale = DECIMAL_SCALES[token.decimals];
         this.token = token;
         this.amount = BigInt(amount);
-        this.scalar = BigInt(10) ** BigInt(18 - token.decimals);
+        this.scalar = DECIMAL_SCALES[18 - token.decimals];
         this.scale18 = this.amount * this.scalar;
     }
 

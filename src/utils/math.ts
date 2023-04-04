@@ -128,7 +128,9 @@ class LogExpMath {
     static LN_36_LOWER_BOUND: bigint = BigInt(LogExpMath.ONE_18) - BigInt('100000000000000000');
     static LN_36_UPPER_BOUND: bigint = BigInt(LogExpMath.ONE_18) + BigInt('100000000000000000');
 
-    static MILD_EXPONENT_BOUND: bigint = BigInt(2) ** BigInt(254) / LogExpMath.ONE_20;
+    // static MILD_EXPONENT_BOUND: bigint = BigInt(2) ** BigInt(254) / LogExpMath.ONE_20;
+    // Precomputed value of the above expression
+    static MILD_EXPONENT_BOUND: bigint = BigInt('289480223093290488558927462521719769633174961664101410098');
 
     // 18 decimal constants
     static x0 = BigInt('128000000000000000000'); // 2ˆ7
