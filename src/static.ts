@@ -9,7 +9,7 @@ export function sorParseRawPools(
     chainId: ChainId,
     pools: RawPool[],
     customPoolFactories: BasePoolFactory[] = [],
-): BasePool[] {
+): { pools: BasePool[], tokenMap: Map<string, Token> } {
     const poolParser = new PoolParser(chainId, customPoolFactories);
 
     return poolParser.parseRawPools(pools);

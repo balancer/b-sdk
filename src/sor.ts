@@ -13,6 +13,7 @@ export class SmartOrderRouter {
     private readonly poolParser: PoolParser;
     private readonly poolDataService: PoolDataService;
     private pools: BasePool[] = [];
+    private tokenMap: Map<string, Token> = new Map();
     private blockNumber: bigint | null = null;
     private poolsProviderData: GetPoolsResponse | null = null;
 
@@ -41,7 +42,9 @@ export class SmartOrderRouter {
         const { rawPools, providerData } = await this.poolDataService.fetchEnrichedPools(
             blockNumber,
         );
-        this.pools = this.poolParser.parseRawPools(rawPools);
+        const { pools, tokenMap } = this.poolParser.parseRawPools(rawPools);
+        this.pools = pools;
+        this.tokenMap = tokenMap;
         this.blockNumber = typeof blockNumber === 'bigint' ? blockNumber : null;
         this.poolsProviderData = providerData;
 
@@ -64,7 +67,10 @@ export class SmartOrderRouter {
             this.poolsProviderData,
             providerOptions,
         );
-        this.pools = this.poolParser.parseRawPools(enriched);
+
+        const { pools, tokenMap } = this.poolParser.parseRawPools(enriched);
+        this.pools = pools;
+        this.tokenMap = tokenMap;
     }
 
     public get isInitialized(): boolean {
@@ -72,12 +78,15 @@ export class SmartOrderRouter {
     }
 
     public async getSwaps(
-        tokenIn: Token,
-        tokenOut: Token,
+        tokenIn: Token | string,
+        tokenOut: Token | string,
         swapKind: SwapKind,
         swapAmount: SwapInputRawAmount | TokenAmount,
         swapOptions?: SwapOptions,
     ): Promise<Swap | null> {
+        tokenIn = this.getRequiredToken(tokenIn);
+        tokenOut = this.getRequiredToken(tokenOut);
+
         swapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmount);
         const candidatePaths = await this.getCandidatePaths(
             tokenIn,
@@ -93,10 +102,13 @@ export class SmartOrderRouter {
     }
 
     public async getCandidatePaths(
-        tokenIn: Token,
-        tokenOut: Token,
+        tokenIn: Token | string,
+        tokenOut: Token | string,
         options?: Pick<SwapOptions, 'block' | 'graphTraversalConfig'>,
     ): Promise<Path[]> {
+        tokenIn = this.getRequiredToken(tokenIn);
+        tokenOut = this.getRequiredToken(tokenOut);
+
         // fetch pools if we haven't yet, or if a block number is provided that doesn't match the existing.
         if (!this.isInitialized || (options?.block && options.block !== this.blockNumber)) {
             await this.fetchAndCachePools(options?.block);
@@ -109,4 +121,16 @@ export class SmartOrderRouter {
             options?.graphTraversalConfig,
         );
     }
+
+    private getRequiredToken(token: Token | string): Token {
+        const tokenAddress = typeof token === 'string' ? token.toLowerCase() : token.address;
+        const tokenObj = this.tokenMap.get(tokenAddress);
+
+        if (!tokenObj) {
+            throw new Error('Unknown token address');
+        }
+
+        return tokenObj;
+    }
+
 }

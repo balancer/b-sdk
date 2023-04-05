@@ -4,6 +4,7 @@ import { StablePoolFactory } from './stable';
 import { MetaStablePoolFactory } from './metastable';
 import { LinearPoolFactory } from './linear';
 import { RawPool } from '../../data/types';
+import { Token } from "../token";
 
 export class PoolParser {
     private readonly poolFactories: BasePoolFactory[];
@@ -20,19 +21,28 @@ export class PoolParser {
         ];
     }
 
-    public parseRawPools(rawPools: RawPool[]): BasePool[] {
+    public parseRawPools(rawPools: RawPool[]): { pools: BasePool[], tokenMap: Map<string, Token> } {
         const pools: BasePool[] = [];
+        const tokenMap = new Map<string, Token>();
 
         for (const rawPool of rawPools) {
             for (const factory of this.poolFactories) {
                 if (factory.isPoolForFactory(rawPool)) {
-                    pools.push(factory.create(this.chainId, rawPool));
+                    const pool = factory.create(this.chainId, rawPool);
+
+                    for (const token of pool.tokens) {
+                        if (!tokenMap.has(token.token.address)) {
+                            tokenMap.set(token.token.address, token.token);
+                        }
+                    }
+
+                    pools.push(pool);
 
                     break;
                 }
             }
         }
 
-        return pools;
+        return { pools, tokenMap };
     }
 }
