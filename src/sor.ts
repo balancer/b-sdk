@@ -127,7 +127,7 @@ export class SmartOrderRouter {
         const tokenObj = this.tokenMap.get(tokenAddress);
 
         if (!tokenObj) {
-            throw new Error('Unknown token address');
+            throw new Error(`Unknown token address: ${tokenAddress}`);
         }
 
         return tokenObj;
