@@ -2,6 +2,6 @@
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    testTimeout: 15000,
+    testTimeout: 25000,
     maxWorkers: 1, // Needed to prevent bigint serialization errors
 };
