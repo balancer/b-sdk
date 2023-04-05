@@ -25,7 +25,10 @@ export function _calculateInvariant(
 
         for (let j = 0; j < numTokens; j++) {
             D_P = roundUp
-                ? MathSol.divUp(D_P * invariant, balances[j] * BigInt(numTokens))
+                ? MathSol.divUp(
+                      D_P * invariant,
+                      balances[j] * BigInt(numTokens),
+                  )
                 : (D_P * invariant) / (balances[j] * BigInt(numTokens));
         }
 
@@ -33,11 +36,18 @@ export function _calculateInvariant(
 
         invariant = roundUp
             ? MathSol.divUp(
-                  ((ampTimesTotal * sum) / AMP_PRECISION + D_P * BigInt(numTokens)) * invariant,
-                  MathSol.divUp((ampTimesTotal - AMP_PRECISION) * invariant, AMP_PRECISION) +
+                  ((ampTimesTotal * sum) / AMP_PRECISION +
+                      D_P * BigInt(numTokens)) *
+                      invariant,
+                  MathSol.divUp(
+                      (ampTimesTotal - AMP_PRECISION) * invariant,
+                      AMP_PRECISION,
+                  ) +
                       (BigInt(numTokens) + 1n) * D_P,
               )
-            : (((ampTimesTotal * sum) / AMP_PRECISION + D_P * BigInt(numTokens)) * invariant) /
+            : (((ampTimesTotal * sum) / AMP_PRECISION +
+                  D_P * BigInt(numTokens)) *
+                  invariant) /
               (((ampTimesTotal - AMP_PRECISION) * invariant) / AMP_PRECISION +
                   (BigInt(numTokens) + 1n) * D_P);
 
@@ -115,9 +125,13 @@ export function _calcBptOutGivenExactTokensIn(
 
     for (let i = 0; i < balances.length; i++) {
         const currentWeight = MathSol.divDownFixed(balances[i], sumBalances);
-        balanceRatiosWithFee[i] = MathSol.divDownFixed(balances[i] + amountsIn[i], balances[i]);
+        balanceRatiosWithFee[i] = MathSol.divDownFixed(
+            balances[i] + amountsIn[i],
+            balances[i],
+        );
         invariantRatioWithFees =
-            invariantRatioWithFees + MathSol.mulDownFixed(balanceRatiosWithFee[i], currentWeight);
+            invariantRatioWithFees +
+            MathSol.mulDownFixed(balanceRatiosWithFee[i], currentWeight);
     }
 
     const newBalances = new Array(balances.length);
@@ -132,7 +146,8 @@ export function _calcBptOutGivenExactTokensIn(
             const taxableAmount = amountsIn[i] - nonTaxableAmount;
 
             amountInWithoutFee =
-                nonTaxableAmount + MathSol.mulDownFixed(taxableAmount, WAD - swapFee);
+                nonTaxableAmount +
+                MathSol.mulDownFixed(taxableAmount, WAD - swapFee);
         } else {
             amountInWithoutFee = amountsIn[i];
         }
@@ -164,12 +179,13 @@ export function _calcTokenInGivenExactBptOut(
         currentInvariant,
     );
 
-    const newBalanceTokenIndex = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amp,
-        balances,
-        newInvariant,
-        tokenIndex,
-    );
+    const newBalanceTokenIndex =
+        _getTokenBalanceGivenInvariantAndAllOtherBalances(
+            amp,
+            balances,
+            newInvariant,
+            tokenIndex,
+        );
     const amountInWithoutFee = newBalanceTokenIndex - balances[tokenIndex];
 
     let sumBalances = 0n;
@@ -177,9 +193,15 @@ export function _calcTokenInGivenExactBptOut(
         sumBalances += balances[i];
     }
 
-    const currentWeight = MathSol.divDownFixed(balances[tokenIndex], sumBalances);
+    const currentWeight = MathSol.divDownFixed(
+        balances[tokenIndex],
+        sumBalances,
+    );
     const taxablePercentage = MathSol.complementFixed(currentWeight);
-    const taxableAmount = MathSol.mulUpFixed(amountInWithoutFee, taxablePercentage);
+    const taxableAmount = MathSol.mulUpFixed(
+        amountInWithoutFee,
+        taxablePercentage,
+    );
     const nonTaxableAmount = amountInWithoutFee - taxableAmount;
 
     return nonTaxableAmount + MathSol.divUpFixed(taxableAmount, WAD - swapFee);
@@ -202,8 +224,14 @@ export function _calcBptInGivenExactTokensOut(
     let invariantRatioWithoutFees = 0n;
     for (let i = 0; i < balances.length; i++) {
         const currentWeight = MathSol.divUpFixed(balances[i], sumBalances);
-        balanceRatiosWithoutFee[i] = MathSol.divUpFixed(balances[i] - amountsOut[i], balances[i]);
-        invariantRatioWithoutFees += MathSol.mulUpFixed(balanceRatiosWithoutFee[i], currentWeight);
+        balanceRatiosWithoutFee[i] = MathSol.divUpFixed(
+            balances[i] - amountsOut[i],
+            balances[i],
+        );
+        invariantRatioWithoutFees += MathSol.mulUpFixed(
+            balanceRatiosWithoutFee[i],
+            currentWeight,
+        );
     }
 
     const newBalances = new Array(balances.length);
@@ -217,7 +245,9 @@ export function _calcBptInGivenExactTokensOut(
             );
             const taxableAmount = amountsOut[i] - nonTaxableAmount;
 
-            amountOutWithFee = nonTaxableAmount + MathSol.divUpFixed(taxableAmount, WAD - swapFee);
+            amountOutWithFee =
+                nonTaxableAmount +
+                MathSol.divUpFixed(taxableAmount, WAD - swapFee);
         } else {
             amountOutWithFee = amountsOut[i];
         }
@@ -228,7 +258,10 @@ export function _calcBptInGivenExactTokensOut(
     const newInvariant = _calculateInvariant(amp, newBalances);
     const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
 
-    return MathSol.mulUpFixed(bptTotalSupply, MathSol.complementFixed(invariantRatio));
+    return MathSol.mulUpFixed(
+        bptTotalSupply,
+        MathSol.complementFixed(invariantRatio),
+    );
 }
 
 export function _calcTokenOutGivenExactBptIn(
@@ -245,12 +278,13 @@ export function _calcTokenOutGivenExactBptIn(
         currentInvariant,
     );
 
-    const newBalanceTokenIndex = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amp,
-        balances,
-        newInvariant,
-        tokenIndex,
-    );
+    const newBalanceTokenIndex =
+        _getTokenBalanceGivenInvariantAndAllOtherBalances(
+            amp,
+            balances,
+            newInvariant,
+            tokenIndex,
+        );
     const amountOutWithoutFee = balances[tokenIndex] - newBalanceTokenIndex;
 
     let sumBalances = 0n;
@@ -258,13 +292,21 @@ export function _calcTokenOutGivenExactBptIn(
         sumBalances += balances[i];
     }
 
-    const currentWeight = MathSol.divDownFixed(balances[tokenIndex], sumBalances);
+    const currentWeight = MathSol.divDownFixed(
+        balances[tokenIndex],
+        sumBalances,
+    );
     const taxablePercentage = MathSol.complementFixed(currentWeight);
 
-    const taxableAmount = MathSol.mulUpFixed(amountOutWithoutFee, taxablePercentage);
+    const taxableAmount = MathSol.mulUpFixed(
+        amountOutWithoutFee,
+        taxablePercentage,
+    );
     const nonTaxableAmount = amountOutWithoutFee - taxableAmount;
 
-    return nonTaxableAmount + MathSol.mulDownFixed(taxableAmount, WAD - swapFee);
+    return (
+        nonTaxableAmount + MathSol.mulDownFixed(taxableAmount, WAD - swapFee)
+    );
 }
 
 export function _getTokenBalanceGivenInvariantAndAllOtherBalances(
@@ -284,7 +326,10 @@ export function _getTokenBalanceGivenInvariantAndAllOtherBalances(
 
     sum = sum - balances[tokenIndex];
     const inv2 = invariant * invariant;
-    const c = MathSol.divUp(inv2, ampTimesTotal * P_D) * AMP_PRECISION * balances[tokenIndex];
+    const c =
+        MathSol.divUp(inv2, ampTimesTotal * P_D) *
+        AMP_PRECISION *
+        balances[tokenIndex];
     const b = sum + (invariant / ampTimesTotal) * AMP_PRECISION;
 
     let prevTokenBalance = 0n;

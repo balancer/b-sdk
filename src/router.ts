@@ -41,13 +41,17 @@ export class Router {
         const quotePaths: PathWithAmount[] = [];
 
         // Check if PathWithAmount is valid (each hop pool swap limit)
-        paths.forEach(path => {
+        paths.forEach((path) => {
             try {
-                quotePaths.push(new PathWithAmount(path.tokens, path.pools, swapAmount));
+                quotePaths.push(
+                    new PathWithAmount(path.tokens, path.pools, swapAmount),
+                );
             } catch {
                 logger.trace('Invalid path:');
-                logger.trace(path.tokens.map(token => token.symbol).join(' -> '));
-                logger.trace(path.pools.map(pool => pool.id).join(' -> '));
+                logger.trace(
+                    path.tokens.map((token) => token.symbol).join(' -> '),
+                );
+                logger.trace(path.pools.map((pool) => pool.id).join(' -> '));
                 return;
             }
         });
@@ -60,7 +64,7 @@ export class Router {
         let valueArr: { item: PathWithAmount; value: number }[];
 
         if (swapKind === SwapKind.GivenIn) {
-            (valueArr = quotePaths.map(item => {
+            (valueArr = quotePaths.map((item) => {
                 return {
                     item,
                     value: Number(item.outputAmount.amount),
@@ -68,7 +72,7 @@ export class Router {
             })),
                 valueArr.sort((a, b) => b.value - a.value);
         } else {
-            (valueArr = quotePaths.map(item => {
+            (valueArr = quotePaths.map((item) => {
                 return {
                     item,
                     value: Number(item.inputAmount.amount),
@@ -77,7 +81,7 @@ export class Router {
                 valueArr.sort((a, b) => a.value - b.value);
         }
 
-        const orderedQuotePaths = valueArr.map(item => item.item);
+        const orderedQuotePaths = valueArr.map((item) => item.item);
 
         // If there is only one path, return it
         if (orderedQuotePaths.length === 1) {

@@ -1,4 +1,9 @@
-import { GetPoolsResponse, PoolDataProvider, ProviderSwapOptions, RawPool } from '../types';
+import {
+    GetPoolsResponse,
+    PoolDataProvider,
+    ProviderSwapOptions,
+    RawPool,
+} from '../types';
 import { fetchWithRetry } from '../../utils/fetch';
 import { SUBGRAPH_URLS } from '../../utils';
 
@@ -50,7 +55,10 @@ export class SubgraphPoolProvider implements PoolDataProvider {
 
         const hasFilterConfig =
             config &&
-            (config.poolIdNotIn || config.poolIdIn || config.poolTypeIn || config.poolTypeNotIn);
+            (config.poolIdNotIn ||
+                config.poolIdIn ||
+                config.poolTypeIn ||
+                config.poolTypeNotIn);
 
         this.config = {
             retries: 2,
@@ -60,12 +68,16 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             addFilterToPoolQuery: false,
             // by default, we exclude pool types with weight updates.
             // if any filtering config is provided, this exclusion is removed.
-            poolTypeNotIn: !hasFilterConfig ? ['Investment', 'LiquidityBootstrapping'] : undefined,
+            poolTypeNotIn: !hasFilterConfig
+                ? ['Investment', 'LiquidityBootstrapping']
+                : undefined,
             ...config,
         };
     }
 
-    public async getPools(options: ProviderSwapOptions): Promise<GetPoolsResponse> {
+    public async getPools(
+        options: ProviderSwapOptions,
+    ): Promise<GetPoolsResponse> {
         const response = await fetchWithRetry<GetPoolsResponse>(() =>
             this.fetchDataFromSubgraph(options),
         );
@@ -77,7 +89,9 @@ export class SubgraphPoolProvider implements PoolDataProvider {
         };
     }
 
-    private async fetchDataFromSubgraph(options: ProviderSwapOptions): Promise<GetPoolsResponse> {
+    private async fetchDataFromSubgraph(
+        options: ProviderSwapOptions,
+    ): Promise<GetPoolsResponse> {
         let ampUpdates: PoolUpdate[] = [];
         let syncedToBlockNumber: bigint = 0n;
         let lastId: string = '';
@@ -149,19 +163,24 @@ export class SubgraphPoolProvider implements PoolDataProvider {
 
         // we apply the filter after querying if not set in the config
         if (!this.config.addFilterToPoolQuery) {
-            pools = pools.filter(pool => this.poolMatchesFilter(pool));
+            pools = pools.filter((pool) => this.poolMatchesFilter(pool));
         }
 
         return {
             pools,
-            poolsWithActiveAmpUpdates: ampUpdates.map(update => update.poolId.id),
+            poolsWithActiveAmpUpdates: ampUpdates.map(
+                (update) => update.poolId.id,
+            ),
             syncedToBlockNumber,
         };
     }
 
     private getPoolsQuery(isFirstQuery: boolean) {
-        const { loadActiveAmpUpdates, loadActiveWeightUpdates, gqlAdditionalPoolQueryFields } =
-            this.config;
+        const {
+            loadActiveAmpUpdates,
+            loadActiveWeightUpdates,
+            gqlAdditionalPoolQueryFields,
+        } = this.config;
 
         const blockNumberFragment = `
             _meta {
@@ -223,8 +242,16 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                     ${gqlAdditionalPoolQueryFields || ''}
                 }
                 ${isFirstQuery ? blockNumberFragment : ''}
-                ${isFirstQuery && loadActiveAmpUpdates ? ampUpdatesFragment : ''}
-                ${isFirstQuery && loadActiveWeightUpdates ? weightUpdatesFragment : ''}
+                ${
+                    isFirstQuery && loadActiveAmpUpdates
+                        ? ampUpdatesFragment
+                        : ''
+                }
+                ${
+                    isFirstQuery && loadActiveWeightUpdates
+                        ? weightUpdatesFragment
+                        : ''
+                }
             }
         `;
     }
@@ -238,7 +265,10 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             return false;
         }
 
-        if (this.config.poolTypeIn && !this.config.poolTypeIn.includes(pool.poolType)) {
+        if (
+            this.config.poolTypeIn &&
+            !this.config.poolTypeIn.includes(pool.poolType)
+        ) {
             return false;
         }
 

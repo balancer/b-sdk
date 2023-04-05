@@ -3,7 +3,11 @@ import { PoolType, SwapKind } from '../../../types';
 import { Token, TokenAmount } from '../..';
 import { BasePool } from '..';
 import { getPoolAddress, MathSol, WAD } from '../../../utils';
-import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../stable/stableMath';
+import {
+    _calcInGivenOut,
+    _calcOutGivenIn,
+    _calculateInvariant,
+} from '../stable/stableMath';
 import { StablePoolToken } from '../stable/stablePool';
 import { RawMetaStablePool } from '../../../data/types';
 
@@ -19,27 +23,56 @@ export class MetaStablePool implements BasePool {
     private readonly tokenMap: Map<string, StablePoolToken>;
     private readonly tokenIndexMap: Map<string, number>;
 
-    static fromRawPool(chainId: number, pool: RawMetaStablePool): MetaStablePool {
+    static fromRawPool(
+        chainId: number,
+        pool: RawMetaStablePool,
+    ): MetaStablePool {
         const poolTokens: StablePoolToken[] = [];
 
         for (const t of pool.tokens) {
-            if (!t.priceRate) throw new Error('Meta Stable pool token does not have a price rate');
-            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
+            if (!t.priceRate)
+                throw new Error(
+                    'Meta Stable pool token does not have a price rate',
+                );
+            const token = new Token(
+                chainId,
+                t.address,
+                t.decimals,
+                t.symbol,
+                t.name,
+            );
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
 
-            const tokenIndex = t.index ?? pool.tokensList.findIndex(t => t === token.address);
+            const tokenIndex =
+                t.index ??
+                pool.tokensList.findIndex((t) => t === token.address);
 
             poolTokens.push(
-                new StablePoolToken(token, tokenAmount.amount, parseEther(t.priceRate), tokenIndex),
+                new StablePoolToken(
+                    token,
+                    tokenAmount.amount,
+                    parseEther(t.priceRate),
+                    tokenIndex,
+                ),
             );
         }
 
         const amp = BigInt(pool.amp) * 1000n;
 
-        return new MetaStablePool(pool.id, amp, parseEther(pool.swapFee), poolTokens);
+        return new MetaStablePool(
+            pool.id,
+            amp,
+            parseEther(pool.swapFee),
+            poolTokens,
+        );
     }
 
-    constructor(id: Hex, amp: bigint, swapFee: bigint, tokens: StablePoolToken[]) {
+    constructor(
+        id: Hex,
+        amp: bigint,
+        swapFee: bigint,
+        tokens: StablePoolToken[],
+    ) {
         this.chainId = tokens[0].token.chainId;
         this.id = id;
         this.address = getPoolAddress(id);
@@ -47,15 +80,20 @@ export class MetaStablePool implements BasePool {
         this.swapFee = swapFee;
 
         this.tokens = tokens.sort((a, b) => a.index - b.index);
-        this.tokenMap = new Map(this.tokens.map(token => [token.token.address, token]));
-        this.tokenIndexMap = new Map(this.tokens.map(token => [token.token.address, token.index]));
+        this.tokenMap = new Map(
+            this.tokens.map((token) => [token.token.address, token]),
+        );
+        this.tokenIndexMap = new Map(
+            this.tokens.map((token) => [token.token.address, token.index]),
+        );
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        if (!tIn || !tOut)
+            throw new Error('Pool does not contain the tokens provided');
         // TODO: Fix stable normalized liquidity calc
         return tOut.amount * this.amp;
     }
@@ -78,8 +116,10 @@ export class MetaStablePool implements BasePool {
         }
 
         const amountInWithFee = this.subtractSwapFeeAmount(swapAmount);
-        const amountInWithRate = amountInWithFee.mulDownFixed(this.tokens[tInIndex].rate);
-        const balances = this.tokens.map(t => t.scale18);
+        const amountInWithRate = amountInWithFee.mulDownFixed(
+            this.tokens[tInIndex].rate,
+        );
+        const balances = this.tokens.map((t) => t.scale18);
 
         const invariant = _calculateInvariant(this.amp, [...balances], true);
 
@@ -92,10 +132,16 @@ export class MetaStablePool implements BasePool {
             invariant,
         );
 
-        const amountOut = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
-        const amountOutWithRate = amountOut.divDownFixed(this.tokens[tOutIndex].rate);
+        const amountOut = TokenAmount.fromScale18Amount(
+            tokenOut,
+            tokenOutScale18,
+        );
+        const amountOutWithRate = amountOut.divDownFixed(
+            this.tokens[tOutIndex].rate,
+        );
 
-        if (amountOutWithRate.amount < 0n) throw new Error('Swap output negative');
+        if (amountOutWithRate.amount < 0n)
+            throw new Error('Swap output negative');
 
         if (mutateBalances) {
             this.tokens[tInIndex].increase(swapAmount.amount);
@@ -122,9 +168,11 @@ export class MetaStablePool implements BasePool {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
-        const amountOutWithRate = swapAmount.mulDownFixed(this.tokens[tOutIndex].rate);
+        const amountOutWithRate = swapAmount.mulDownFixed(
+            this.tokens[tOutIndex].rate,
+        );
 
-        const balances = this.tokens.map(t => t.scale18);
+        const balances = this.tokens.map((t) => t.scale18);
 
         const invariant = _calculateInvariant(this.amp, balances, true);
 
@@ -137,11 +185,18 @@ export class MetaStablePool implements BasePool {
             invariant,
         );
 
-        const amountIn = TokenAmount.fromScale18Amount(tokenIn, tokenInScale18, true);
+        const amountIn = TokenAmount.fromScale18Amount(
+            tokenIn,
+            tokenInScale18,
+            true,
+        );
         const amountInWithFee = this.addSwapFeeAmount(amountIn);
-        const amountInWithRate = amountInWithFee.divDownFixed(this.tokens[tInIndex].rate);
+        const amountInWithRate = amountInWithFee.divDownFixed(
+            this.tokens[tInIndex].rate,
+        );
 
-        if (amountInWithRate.amount < 0n) throw new Error('Swap output negative');
+        if (amountInWithRate.amount < 0n)
+            throw new Error('Swap output negative');
 
         if (mutateBalances) {
             this.tokens[tInIndex].increase(amountInWithRate.amount);
@@ -160,11 +215,16 @@ export class MetaStablePool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapKind: SwapKind,
+    ): bigint {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 
-        if (!tIn || !tOut) throw new Error('Pool does not contain the tokens provided');
+        if (!tIn || !tOut)
+            throw new Error('Pool does not contain the tokens provided');
 
         if (swapKind === SwapKind.GivenIn) {
             // Return max valid amount of tokenIn

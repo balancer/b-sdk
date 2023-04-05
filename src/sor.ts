@@ -1,6 +1,11 @@
 import { Router } from './router';
 import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
-import { BALANCER_SOR_QUERIES_ADDRESS, ChainId, checkInputs, SUBGRAPH_URLS } from './utils';
+import {
+    BALANCER_SOR_QUERIES_ADDRESS,
+    ChainId,
+    checkInputs,
+    SUBGRAPH_URLS,
+} from './utils';
 import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
 import { OnChainPoolDataEnricher, SubgraphPoolProvider } from './data';
@@ -27,20 +32,25 @@ export class SmartOrderRouter {
         this.router = new Router();
         this.poolParser = new PoolParser(chainId, customPoolFactories);
         poolDataProviders =
-            poolDataProviders || new SubgraphPoolProvider(chainId, SUBGRAPH_URLS[chainId]);
+            poolDataProviders ||
+            new SubgraphPoolProvider(chainId, SUBGRAPH_URLS[chainId]);
         poolDataEnrichers =
-            poolDataEnrichers || new OnChainPoolDataEnricher(rpcUrl, BALANCER_SOR_QUERIES_ADDRESS);
+            poolDataEnrichers ||
+            new OnChainPoolDataEnricher(rpcUrl, BALANCER_SOR_QUERIES_ADDRESS);
         this.poolDataService = new PoolDataService(
-            Array.isArray(poolDataProviders) ? poolDataProviders : [poolDataProviders],
-            Array.isArray(poolDataEnrichers) ? poolDataEnrichers : [poolDataEnrichers],
+            Array.isArray(poolDataProviders)
+                ? poolDataProviders
+                : [poolDataProviders],
+            Array.isArray(poolDataEnrichers)
+                ? poolDataEnrichers
+                : [poolDataEnrichers],
             rpcUrl,
         );
     }
 
     public async fetchAndCachePools(blockNumber?: bigint): Promise<BasePool[]> {
-        const { rawPools, providerData } = await this.poolDataService.fetchEnrichedPools(
-            blockNumber,
-        );
+        const { rawPools, providerData } =
+            await this.poolDataService.fetchEnrichedPools(blockNumber);
         this.pools = this.poolParser.parseRawPools(rawPools);
         this.blockNumber = typeof blockNumber === 'bigint' ? blockNumber : null;
         this.poolsProviderData = providerData;
@@ -57,7 +67,9 @@ export class SmartOrderRouter {
 
         const providerOptions = {
             block: blockNumber,
-            timestamp: await this.poolDataService.getTimestampForBlockNumber(blockNumber),
+            timestamp: await this.poolDataService.getTimestampForBlockNumber(
+                blockNumber,
+            ),
         };
 
         const enriched = await this.poolDataService.enrichPools(
@@ -85,7 +97,11 @@ export class SmartOrderRouter {
             swapOptions,
         );
 
-        const bestPaths = this.router.getBestPaths(candidatePaths, swapKind, swapAmount);
+        const bestPaths = this.router.getBestPaths(
+            candidatePaths,
+            swapKind,
+            swapAmount,
+        );
 
         if (!bestPaths) return null;
 
@@ -98,7 +114,10 @@ export class SmartOrderRouter {
         options?: Pick<SwapOptions, 'block' | 'graphTraversalConfig'>,
     ): Promise<Path[]> {
         // fetch pools if we haven't yet, or if a block number is provided that doesn't match the existing.
-        if (!this.isInitialized || (options?.block && options.block !== this.blockNumber)) {
+        if (
+            !this.isInitialized ||
+            (options?.block && options.block !== this.blockNumber)
+        ) {
             await this.fetchAndCachePools(options?.block);
         }
 

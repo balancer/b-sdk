@@ -10,7 +10,12 @@ class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
     public readonly index: number;
 
-    public constructor(token: Token, amount: BigintIsh, weight: BigintIsh, index: number) {
+    public constructor(
+        token: Token,
+        amount: BigintIsh,
+        weight: BigintIsh,
+        index: number,
+    ) {
         super(token, amount);
         this.weight = BigInt(weight);
         this.index = index;
@@ -50,11 +55,22 @@ export class WeightedPool implements BasePool {
                 throw new Error('Weighted pool token does not have a weight');
             }
 
-            const token = new Token(chainId, t.address, t.decimals, t.symbol, t.name);
+            const token = new Token(
+                chainId,
+                t.address,
+                t.decimals,
+                t.symbol,
+                t.name,
+            );
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
 
             poolTokens.push(
-                new WeightedPoolToken(token, tokenAmount.amount, parseEther(t.weight), t.index),
+                new WeightedPoolToken(
+                    token,
+                    tokenAmount.amount,
+                    parseEther(t.weight),
+                    t.index,
+                ),
             );
         }
 
@@ -66,14 +82,21 @@ export class WeightedPool implements BasePool {
         );
     }
 
-    constructor(id: Hex, poolTypeVersion: number, swapFee: bigint, tokens: WeightedPoolToken[]) {
+    constructor(
+        id: Hex,
+        poolTypeVersion: number,
+        swapFee: bigint,
+        tokens: WeightedPoolToken[],
+    ) {
         this.chainId = tokens[0].token.chainId;
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;
         this.address = getPoolAddress(id);
         this.swapFee = swapFee;
         this.tokens = tokens;
-        this.tokenMap = new Map(tokens.map(token => [token.token.address, token]));
+        this.tokenMap = new Map(
+            tokens.map((token) => [token.token.address, token]),
+        );
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -82,7 +105,11 @@ export class WeightedPool implements BasePool {
         return (tIn.amount * tOut.weight) / (tIn.weight + tOut.weight);
     }
 
-    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapKind: SwapKind,
+    ): bigint {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
         if (swapKind === SwapKind.GivenIn) {
@@ -100,7 +127,10 @@ export class WeightedPool implements BasePool {
     ): TokenAmount {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenIn)) {
+        if (
+            swapAmount.amount >
+            this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenIn)
+        ) {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
@@ -115,7 +145,10 @@ export class WeightedPool implements BasePool {
             this.poolTypeVersion,
         );
 
-        const tokenOutAmount = TokenAmount.fromScale18Amount(tokenOut, tokenOutScale18);
+        const tokenOutAmount = TokenAmount.fromScale18Amount(
+            tokenOut,
+            tokenOutScale18,
+        );
 
         if (mutateBalances) {
             tIn.increase(swapAmount.amount);
@@ -133,7 +166,10 @@ export class WeightedPool implements BasePool {
     ): TokenAmount {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenOut)) {
+        if (
+            swapAmount.amount >
+            this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenOut)
+        ) {
             throw new Error('Swap amount exceeds the pool limit');
         }
 
