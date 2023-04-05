@@ -123,14 +123,18 @@ export class SmartOrderRouter {
     }
 
     private getRequiredToken(token: Token | string): Token {
-        const tokenAddress = typeof token === 'string' ? token.toLowerCase() : token.address;
-        const tokenObj = this.tokenMap.get(tokenAddress);
+        if (typeof token === 'string') {
+            const tokenAddress = token.toLowerCase();
+            const tokenObj = this.tokenMap.get(tokenAddress);
 
-        if (!tokenObj) {
-            throw new Error(`Unknown token address: ${tokenAddress}`);
+            if (!tokenObj) {
+                throw new Error(`Unknown token address: ${tokenAddress}`);
+            }
+
+            return tokenObj;
+        }else {
+            return token;
         }
-
-        return tokenObj;
     }
 
 }
