@@ -1,16 +1,21 @@
 {
     "name": "@balancer/sdk",
+    "description": "SDK for interacting with the Balancer protocol",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/balancer/b-sdk"
+    },
     "publishConfig": {
         "access": "public"
     },
     "version": "0.0.1",
-    "description": "",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsup",
+        "format": "rome format .",
         "lint": "rome check .",
         "test": "jest"
     },

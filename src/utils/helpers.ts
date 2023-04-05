@@ -13,7 +13,10 @@ export function checkInputs(
             swapAmount,
         );
     }
-    if (tokenIn.chainId !== tokenOut.chainId || tokenIn.chainId !== swapAmount.token.chainId) {
+    if (
+        tokenIn.chainId !== tokenOut.chainId ||
+        tokenIn.chainId !== swapAmount.token.chainId
+    ) {
         throw new Error('ChainId mismatch for inputs');
     }
 

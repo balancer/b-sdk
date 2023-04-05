@@ -71,7 +71,8 @@ export class MathSol {
             return this.mulUpFixed(square, square);
         } else {
             const raw = LogExpMath.pow(x, y);
-            const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
+            const maxError =
+                this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
             return raw + maxError;
         }
     }
@@ -87,7 +88,8 @@ export class MathSol {
             return this.mulUpFixed(square, square);
         } else {
             const raw = LogExpMath.pow(x, y);
-            const maxError = this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
+            const maxError =
+                this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR) + 1n;
             if (raw < maxError) {
                 return 0n;
             } else {
@@ -125,16 +127,22 @@ class LogExpMath {
 
     // Bounds for ln_36's argument. Both ln(0.9) and ln(1.1) can be represented with 36 decimal places in a fixed point
     // 256 bit integer.
-    static LN_36_LOWER_BOUND: bigint = BigInt(LogExpMath.ONE_18) - BigInt('100000000000000000');
-    static LN_36_UPPER_BOUND: bigint = BigInt(LogExpMath.ONE_18) + BigInt('100000000000000000');
+    static LN_36_LOWER_BOUND: bigint =
+        BigInt(LogExpMath.ONE_18) - BigInt('100000000000000000');
+    static LN_36_UPPER_BOUND: bigint =
+        BigInt(LogExpMath.ONE_18) + BigInt('100000000000000000');
 
     // static MILD_EXPONENT_BOUND: bigint = BigInt(2) ** BigInt(254) / LogExpMath.ONE_20;
     // Precomputed value of the above expression
-    static MILD_EXPONENT_BOUND: bigint = BigInt('289480223093290488558927462521719769633174961664101410098');
+    static MILD_EXPONENT_BOUND: bigint = BigInt(
+        '289480223093290488558927462521719769633174961664101410098',
+    );
 
     // 18 decimal constants
     static x0 = BigInt('128000000000000000000'); // 2ˆ7
-    static a0 = BigInt('38877084059945950922200000000000000000000000000000000000'); // eˆ(x0) (no decimals)
+    static a0 = BigInt(
+        '38877084059945950922200000000000000000000000000000000000',
+    ); // eˆ(x0) (no decimals)
     static x1 = BigInt('64000000000000000000'); // 2ˆ6
     static a1 = BigInt('6235149080811616882910000000'); // eˆ(x1) (no decimals)
 
@@ -193,7 +201,10 @@ class LogExpMath {
         const y_int256 = y;
 
         let logx_times_y;
-        if (this.LN_36_LOWER_BOUND < x_int256 && x_int256 < this.LN_36_UPPER_BOUND) {
+        if (
+            this.LN_36_LOWER_BOUND < x_int256 &&
+            x_int256 < this.LN_36_UPPER_BOUND
+        ) {
             const ln_36_x = this._ln_36(x_int256);
 
             // ln_36_x has 36 decimal places, so multiplying by y_int256 isn't as straightforward, since we can't just
@@ -210,7 +221,8 @@ class LogExpMath {
 
         // Finally, we compute exp(y * ln(x)) to arrive at x^y
         _require(
-            this.MIN_NATURAL_EXPONENT <= logx_times_y && logx_times_y <= this.MAX_NATURAL_EXPONENT,
+            this.MIN_NATURAL_EXPONENT <= logx_times_y &&
+                logx_times_y <= this.MAX_NATURAL_EXPONENT,
             'Errors.PRODUCT_OUT_OF_BOUNDS',
         );
 

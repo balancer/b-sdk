@@ -92,7 +92,14 @@ export class PathGraph {
                     tokenPairIndex: idx,
                 });
 
-                if (this.isValidPath({ path, seenPoolAddresses: [], selectedPathIds, config })) {
+                if (
+                    this.isValidPath({
+                        path,
+                        seenPoolAddresses: [],
+                        selectedPathIds,
+                        config,
+                    })
+                ) {
                     selectedPathIds.push(this.getIdForPath(path));
                     paths.push(path);
                 }
@@ -104,22 +111,29 @@ export class PathGraph {
             }
         }
 
-        return this.sortAndFilterPaths(paths).map(path => {
-            const pathTokens: Token[] = [...path.map(segment => segment.tokenOut)];
+        return this.sortAndFilterPaths(paths).map((path) => {
+            const pathTokens: Token[] = [
+                ...path.map((segment) => segment.tokenOut),
+            ];
             pathTokens.unshift(tokenIn);
             pathTokens[pathTokens.length - 1] = tokenOut;
 
             return {
                 tokens: pathTokens,
-                pools: path.map(segment => segment.pool),
+                pools: path.map((segment) => segment.pool),
             };
         });
     }
 
-    private sortAndFilterPaths(paths: PathGraphEdgeData[][]): PathGraphEdgeData[][] {
+    private sortAndFilterPaths(
+        paths: PathGraphEdgeData[][],
+    ): PathGraphEdgeData[][] {
         const pathsWithLimits = paths
-            .map(path => {
-                const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
+            .map((path) => {
+                const limit = this.getLimitAmountSwapForPath(
+                    path,
+                    SwapKind.GivenIn,
+                );
                 return { path, limit };
             })
             .sort((a, b) => (a.limit < b.limit ? 1 : -1));
@@ -141,7 +155,10 @@ export class PathGraph {
 
             if (isValid) {
                 filtered.push(path);
-                seenPools = [...seenPools, ...path.map(segment => segment.pool.id)];
+                seenPools = [
+                    ...seenPools,
+                    ...path.map((segment) => segment.pool.id),
+                ];
             }
         }
 
@@ -184,7 +201,10 @@ export class PathGraph {
                             pool,
                             tokenIn: tokenI,
                             tokenOut: tokenJ,
-                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenI, tokenJ),
+                            normalizedLiquidity: pool.getNormalizedLiquidity(
+                                tokenI,
+                                tokenJ,
+                            ),
                         },
                         maxPathsPerTokenPair,
                     });
@@ -194,7 +214,10 @@ export class PathGraph {
                             pool,
                             tokenIn: tokenJ,
                             tokenOut: tokenI,
-                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenJ, tokenI),
+                            normalizedLiquidity: pool.getNormalizedLiquidity(
+                                tokenJ,
+                                tokenI,
+                            ),
                         },
                         maxPathsPerTokenPair,
                     });
@@ -245,7 +268,8 @@ export class PathGraph {
             throw new Error('Attempting to add invalid edge');
         }
 
-        const hasPhantomBpt = tokenInVertex.isPhantomBpt || tokenOutVertex.isPhantomBpt;
+        const hasPhantomBpt =
+            tokenInVertex.isPhantomBpt || tokenOutVertex.isPhantomBpt;
         const existingEdges = tokenInNode.get(edgeProps.tokenOut.wrapped) || [];
 
         //TODO: ideally we don't call sort every time, this isn't performant
@@ -255,7 +279,9 @@ export class PathGraph {
 
         tokenInNode.set(
             edgeProps.tokenOut.wrapped,
-            sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, 2) : sorted,
+            sorted.length > maxPathsPerTokenPair && !hasPhantomBpt
+                ? sorted.slice(0, 2)
+                : sorted,
         );
     }
 
@@ -270,7 +296,7 @@ export class PathGraph {
 
         this.traverseBfs({
             ...args,
-            callback: tokenPath => {
+            callback: (tokenPath) => {
                 tokenPaths.push(tokenPath);
             },
         });
@@ -291,7 +317,11 @@ export class PathGraph {
             const edge = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
 
             if (!edge || edge.length === 0) {
-                throw new Error(`Missing edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
+                throw new Error(
+                    `Missing edge for pair ${tokenPath[i]} -> ${
+                        tokenPath[i + 1]
+                    }`,
+                );
             }
 
             segments.push(edge[tokenPairIndex] || edge[0]);
@@ -352,17 +382,24 @@ export class PathGraph {
         tokenOut: string;
     }) {
         const isCompletePath = tokenPath[tokenPath.length - 1] === tokenOut;
-        const hopTokens = tokenPath.filter(token => token !== tokenIn && token !== tokenOut);
+        const hopTokens = tokenPath.filter(
+            (token) => token !== tokenIn && token !== tokenOut,
+        );
         const numStandardHopTokens = hopTokens.filter(
-            token => !this.poolAddressMap.has(token),
+            (token) => !this.poolAddressMap.has(token),
         ).length;
-        const isBoostedPath = tokenPath.filter(token => this.poolAddressMap.has(token)).length > 0;
+        const isBoostedPath =
+            tokenPath.filter((token) => this.poolAddressMap.has(token)).length >
+            0;
 
         if (tokenPath.length > config.maxDepth) {
             return false;
         }
 
-        if (isBoostedPath && numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath) {
+        if (
+            isBoostedPath &&
+            numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
+        ) {
             return false;
         }
 
@@ -375,7 +412,11 @@ export class PathGraph {
             return false;
         }
 
-        if (isCompletePath && !isBoostedPath && tokenPath.length > config.maxNonBoostedPathDepth) {
+        if (
+            isCompletePath &&
+            !isBoostedPath &&
+            tokenPath.length > config.maxNonBoostedPathDepth
+        ) {
             return false;
         }
 
@@ -393,7 +434,7 @@ export class PathGraph {
         selectedPathIds: string[];
         config: PathGraphTraversalConfig;
     }) {
-        const poolIdsInPath = path.map(segment => segment.pool.id);
+        const poolIdsInPath = path.map((segment) => segment.pool.id);
         const uniquePools = [...new Set(poolIdsInPath)];
 
         if (config.poolIdsToInclude) {
@@ -443,7 +484,10 @@ export class PathGraph {
         const filtered: string[] = [];
 
         for (const poolAddress of poolAddresses) {
-            if (this.poolAddressMap.get(poolAddress)?.poolType === PoolType.Weighted) {
+            if (
+                this.poolAddressMap.get(poolAddress)?.poolType ===
+                PoolType.Weighted
+            ) {
                 filtered.push(poolAddress);
             }
         }
@@ -451,7 +495,10 @@ export class PathGraph {
         return filtered;
     }
 
-    private getLimitAmountSwapForPath(path: PathGraphEdgeData[], swapKind: SwapKind): bigint {
+    private getLimitAmountSwapForPath(
+        path: PathGraphEdgeData[],
+        swapKind: SwapKind,
+    ): bigint {
         let limit = path[path.length - 1].pool.getLimitAmountSwap(
             path[path.length - 1].tokenIn,
             path[path.length - 1].tokenOut,
@@ -479,7 +526,10 @@ export class PathGraph {
                     TokenAmount.fromRawAmount(path[i].tokenOut, limit),
                 ).amount;
 
-                limit = pulledLimit > poolLimitExactIn ? poolLimitExactIn : pulledLimit;
+                limit =
+                    pulledLimit > poolLimitExactIn
+                        ? poolLimitExactIn
+                        : pulledLimit;
             }
         }
 

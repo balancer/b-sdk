@@ -110,7 +110,10 @@ export interface PoolDataEnricher {
         options: ProviderSwapOptions,
     ): Promise<AdditionalPoolData[]>;
 
-    enrichPoolsWithData(pools: RawPool[], additionalPoolData: AdditionalPoolData[]): RawPool[];
+    enrichPoolsWithData(
+        pools: RawPool[],
+        additionalPoolData: AdditionalPoolData[],
+    ): RawPool[];
 }
 
 export interface AdditionalPoolData {

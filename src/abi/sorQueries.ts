@@ -1,20 +1,40 @@
 export const sorQueriesAbi = [
     {
-        inputs: [{ internalType: 'contract IVault', name: '_vault', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'contract IVault',
+                name: '_vault',
+                type: 'address',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
     {
-        inputs: [{ internalType: 'address[]', name: 'poolAddresses', type: 'address[]' }],
+        inputs: [
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+        ],
         name: 'getAmpForPools',
         outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'address[]', name: 'poolAddresses', type: 'address[]' }],
+        inputs: [
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+        ],
         name: 'getNormalizedWeightsForPools',
-        outputs: [{ internalType: 'uint256[][]', name: '', type: 'uint256[][]' }],
+        outputs: [
+            { internalType: 'uint256[][]', name: '', type: 'uint256[][]' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -28,17 +48,37 @@ export const sorQueriesAbi = [
                         name: 'loadTokenBalanceUpdatesAfterBlock',
                         type: 'bool',
                     },
-                    { internalType: 'bool', name: 'loadTotalSupply', type: 'bool' },
-                    { internalType: 'bool', name: 'loadSwapFees', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'loadTotalSupply',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'loadSwapFees',
+                        type: 'bool',
+                    },
                     {
                         internalType: 'bool',
                         name: 'loadLinearWrappedTokenRates',
                         type: 'bool',
                     },
-                    { internalType: 'bool', name: 'loadNormalizedWeights', type: 'bool' },
-                    { internalType: 'bool', name: 'loadScalingFactors', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'loadNormalizedWeights',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'loadScalingFactors',
+                        type: 'bool',
+                    },
                     { internalType: 'bool', name: 'loadAmps', type: 'bool' },
-                    { internalType: 'uint256', name: 'blockNumber', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'blockNumber',
+                        type: 'uint256',
+                    },
                     {
                         internalType: 'enum TotalSupplyType[]',
                         name: 'totalSupplyTypes',
@@ -49,7 +89,11 @@ export const sorQueriesAbi = [
                         name: 'swapFeeTypes',
                         type: 'uint8[]',
                     },
-                    { internalType: 'uint256[]', name: 'linearPoolIdxs', type: 'uint256[]' },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'linearPoolIdxs',
+                        type: 'uint256[]',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'weightedPoolIdxs',
@@ -60,7 +104,11 @@ export const sorQueriesAbi = [
                         name: 'scalingFactorPoolIdxs',
                         type: 'uint256[]',
                     },
-                    { internalType: 'uint256[]', name: 'ampPoolIdxs', type: 'uint256[]' },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'ampPoolIdxs',
+                        type: 'uint256[]',
+                    },
                 ],
                 internalType: 'struct SorPoolDataQueryConfig',
                 name: 'config',
@@ -69,12 +117,32 @@ export const sorQueriesAbi = [
         ],
         name: 'getPoolData',
         outputs: [
-            { internalType: 'uint256[][]', name: 'balances', type: 'uint256[][]' },
-            { internalType: 'uint256[]', name: 'totalSupplies', type: 'uint256[]' },
+            {
+                internalType: 'uint256[][]',
+                name: 'balances',
+                type: 'uint256[][]',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'totalSupplies',
+                type: 'uint256[]',
+            },
             { internalType: 'uint256[]', name: 'swapFees', type: 'uint256[]' },
-            { internalType: 'uint256[]', name: 'linearWrappedTokenRates', type: 'uint256[]' },
-            { internalType: 'uint256[][]', name: 'weights', type: 'uint256[][]' },
-            { internalType: 'uint256[][]', name: 'scalingFactors', type: 'uint256[][]' },
+            {
+                internalType: 'uint256[]',
+                name: 'linearWrappedTokenRates',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256[][]',
+                name: 'weights',
+                type: 'uint256[][]',
+            },
+            {
+                internalType: 'uint256[][]',
+                name: 'scalingFactors',
+                type: 'uint256[][]',
+            },
             { internalType: 'uint256[]', name: 'amps', type: 'uint256[]' },
         ],
         stateMutability: 'view',
@@ -86,21 +154,39 @@ export const sorQueriesAbi = [
             { internalType: 'uint256', name: 'blockNumber', type: 'uint256' },
         ],
         name: 'getPoolTokenBalancesWithUpdatesAfterBlock',
-        outputs: [{ internalType: 'uint256[][]', name: '', type: 'uint256[][]' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [{ internalType: 'address[]', name: 'poolAddresses', type: 'address[]' }],
-        name: 'getScalingFactorsForPools',
-        outputs: [{ internalType: 'uint256[][]', name: '', type: 'uint256[][]' }],
+        outputs: [
+            { internalType: 'uint256[][]', name: '', type: 'uint256[][]' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address[]', name: 'poolAddresses', type: 'address[]' },
-            { internalType: 'enum SwapFeeType[]', name: 'swapFeeTypes', type: 'uint8[]' },
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+        ],
+        name: 'getScalingFactorsForPools',
+        outputs: [
+            { internalType: 'uint256[][]', name: '', type: 'uint256[][]' },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+            {
+                internalType: 'enum SwapFeeType[]',
+                name: 'swapFeeTypes',
+                type: 'uint8[]',
+            },
         ],
         name: 'getSwapFeePercentageForPools',
         outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
@@ -109,7 +195,11 @@ export const sorQueriesAbi = [
     },
     {
         inputs: [
-            { internalType: 'address[]', name: 'poolAddresses', type: 'address[]' },
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
             {
                 internalType: 'enum TotalSupplyType[]',
                 name: 'totalSupplyTypes',
@@ -122,7 +212,13 @@ export const sorQueriesAbi = [
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'address[]', name: 'poolAddresses', type: 'address[]' }],
+        inputs: [
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+        ],
         name: 'getWrappedTokenRateForLinearPools',
         outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
         stateMutability: 'view',
@@ -131,7 +227,9 @@ export const sorQueriesAbi = [
     {
         inputs: [],
         name: 'vault',
-        outputs: [{ internalType: 'contract IVault', name: '', type: 'address' }],
+        outputs: [
+            { internalType: 'contract IVault', name: '', type: 'address' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },

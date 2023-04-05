@@ -1,8 +1,10 @@
 import { Address } from 'viem';
 import { Token } from '../entities/token';
 
-export const ZERO_ADDRESS: Address = '0x0000000000000000000000000000000000000000';
-export const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+export const ZERO_ADDRESS: Address =
+    '0x0000000000000000000000000000000000000000';
+export const NATIVE_ADDRESS: Address =
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
 export const PREMINTED_STABLE_BPT = 2596148429267413814265248164610048n; // 2**111
@@ -27,7 +29,7 @@ export const DECIMAL_SCALES = {
     16: 10000000000000000n,
     17: 100000000000000000n,
     18: 1000000000000000000n,
-}
+};
 
 export const SECONDS_PER_YEAR = 31536000n;
 
@@ -47,18 +49,24 @@ export enum ChainId {
 }
 
 export const SUBGRAPH_URLS = {
-    [ChainId.MAINNET]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
-    [ChainId.GOERLI]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
+    [ChainId.MAINNET]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
+    [ChainId.GOERLI]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [ChainId.OPTIMISM]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-optimism-v2',
     [ChainId.GNOSIS_CHAIN]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2',
-    [ChainId.POLYGON]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
+    [ChainId.POLYGON]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [ChainId.ZKSYNC_TESTNET]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zktestnet-v2',
-    [ChainId.ZKSYNC]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zksync-v2',
-    [ChainId.ZKEVM]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zkevm-v2',
-    [ChainId.ARBITRUM_ONE]: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
+    [ChainId.ZKSYNC]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zksync-v2',
+    [ChainId.ZKEVM]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zkevm-v2',
+    [ChainId.ARBITRUM_ONE]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
     [ChainId.AVALANCHE]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2',
     [ChainId.BASE_GOERLI]:
@@ -68,13 +76,15 @@ export const SUBGRAPH_URLS = {
 export const STELLATE_URLS = {
     [ChainId.MAINNET]: 'https://balancer-v2.stellate.balancer.fi',
     [ChainId.GOERLI]: 'https://balancer-goerli-v2.stellate.balancer.fi',
-    [ChainId.GNOSIS_CHAIN]: 'https://balancer-gnosis-chain-v2.stellate.balancer.fi',
+    [ChainId.GNOSIS_CHAIN]:
+        'https://balancer-gnosis-chain-v2.stellate.balancer.fi',
     [ChainId.POLYGON]: 'https://balancer-polygon-v2.stellate.balancer.fi',
     [ChainId.ARBITRUM_ONE]: 'https://balancer-arbitrum-v2.stellate.balancer.fi',
 };
 
 export const BALANCER_QUERIES = '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5';
-export const BALANCER_SOR_QUERIES_ADDRESS = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
+export const BALANCER_SOR_QUERIES_ADDRESS =
+    '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(

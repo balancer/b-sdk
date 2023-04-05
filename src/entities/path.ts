@@ -8,9 +8,13 @@ export class Path {
 
     public constructor(tokens: Token[], pools: BasePool[]) {
         if (pools.length === 0 || tokens.length < 2) {
-            throw new Error('Invalid path: must contain at least 1 pool and 2 tokens.');
+            throw new Error(
+                'Invalid path: must contain at least 1 pool and 2 tokens.',
+            );
         } else if (tokens.length !== pools.length + 1) {
-            throw new Error('Invalid path: tokens length must equal pools length + 1');
+            throw new Error(
+                'Invalid path: tokens length must equal pools length + 1',
+            );
         }
 
         this.pools = pools;
@@ -58,8 +62,12 @@ export class PathWithAmount extends Path {
                     amounts[i + 1] = outputAmount;
                     this.printPath.push({
                         pool: pool.id,
-                        input: `${amounts[i].amount.toString()} ${this.tokens[i].symbol}`,
-                        output: `${outputAmount.amount.toString()} ${this.tokens[i + 1].symbol}`,
+                        input: `${amounts[i].amount.toString()} ${
+                            this.tokens[i].symbol
+                        }`,
+                        output: `${outputAmount.amount.toString()} ${
+                            this.tokens[i + 1].symbol
+                        }`,
                     });
                 }
                 this.outputAmount = amounts[amounts.length - 1];
@@ -78,8 +86,12 @@ export class PathWithAmount extends Path {
                     amounts[i - 1] = inputAmount;
                     this.printPath.push({
                         pool: pool.id,
-                        input: `${inputAmount.amount.toString()} ${this.tokens[i - 1].symbol}`,
-                        output: `${amounts[i].amount.toString()} ${this.tokens[i].symbol}`,
+                        input: `${inputAmount.amount.toString()} ${
+                            this.tokens[i - 1].symbol
+                        }`,
+                        output: `${amounts[i].amount.toString()} ${
+                            this.tokens[i].symbol
+                        }`,
                     });
                 }
                 this.printPath = this.printPath.reverse();
@@ -87,7 +99,9 @@ export class PathWithAmount extends Path {
                 this.outputAmount = this.swapAmount;
             }
         } catch {
-            throw new Error('Invalid path, swap amount exceeds maximum for pool');
+            throw new Error(
+                'Invalid path, swap amount exceeds maximum for pool',
+            );
         }
     }
 

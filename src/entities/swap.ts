@@ -9,44 +9,60 @@ import {
     ZERO_ADDRESS,
     NATIVE_ADDRESS,
 } from '../utils';
-import { Address, createPublicClient, encodeFunctionData, getContract, http } from 'viem';
+import {
+    Address,
+    createPublicClient,
+    encodeFunctionData,
+    getContract,
+    http,
+} from 'viem';
 import { balancerQueriesAbi } from '../abi/';
 
 // A Swap can be a single or multiple paths
 export class Swap {
-    public constructor({ paths, swapKind }: { paths: PathWithAmount[]; swapKind: SwapKind }) {
-        if (paths.length === 0) throw new Error('Invalid swap: must contain at least 1 path.');
+    public constructor({
+        paths,
+        swapKind,
+    }: { paths: PathWithAmount[]; swapKind: SwapKind }) {
+        if (paths.length === 0)
+            throw new Error('Invalid swap: must contain at least 1 path.');
         // Recalculate paths while mutating pool balances
         this.paths = paths.map(
-            path => new PathWithAmount(path.tokens, path.pools, path.swapAmount, true),
+            (path) =>
+                new PathWithAmount(
+                    path.tokens,
+                    path.pools,
+                    path.swapAmount,
+                    true,
+                ),
         );
         this.chainId = paths[0].tokens[0].chainId;
         this.swapKind = swapKind;
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
         this.assets = [
-            ...new Set(
-                paths
-                    .flatMap(p => p.tokens)
-                    .map(t => t.address),
-            ),
+            ...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address)),
         ];
         let swaps: BatchSwapStep[] | SingleSwap;
         if (this.isBatchSwap) {
             swaps = [] as BatchSwapStep[];
             if (this.swapKind === SwapKind.GivenIn) {
-                this.paths.map(p => {
+                this.paths.map((p) => {
                     p.pools.map((pool, i) => {
                         (swaps as BatchSwapStep[]).push({
                             poolId: pool.id,
-                            assetInIndex: BigInt(this.assets.indexOf(p.tokens[i].address)),
-                            assetOutIndex: BigInt(this.assets.indexOf(p.tokens[i + 1].address)),
+                            assetInIndex: BigInt(
+                                this.assets.indexOf(p.tokens[i].address),
+                            ),
+                            assetOutIndex: BigInt(
+                                this.assets.indexOf(p.tokens[i + 1].address),
+                            ),
                             amount: i === 0 ? p.inputAmount.amount : 0n,
                             userData: DEFAULT_USERDATA,
                         });
                     });
                 });
             } else {
-                this.paths.map(p => {
+                this.paths.map((p) => {
                     // Vault expects given out swaps to be in reverse order
                     const reversedPools = [...p.pools].reverse();
                     const reversedTokens = [...p.tokens].reverse();
@@ -54,9 +70,13 @@ export class Swap {
                         (swaps as BatchSwapStep[]).push({
                             poolId: pool.id,
                             assetInIndex: BigInt(
-                                this.assets.indexOf(reversedTokens[i + 1].address),
+                                this.assets.indexOf(
+                                    reversedTokens[i + 1].address,
+                                ),
                             ),
-                            assetOutIndex: BigInt(this.assets.indexOf(reversedTokens[i].address)),
+                            assetOutIndex: BigInt(
+                                this.assets.indexOf(reversedTokens[i].address),
+                            ),
                             amount: i === 0 ? p.outputAmount.amount : 0n,
                             userData: DEFAULT_USERDATA,
                         });
@@ -66,8 +86,12 @@ export class Swap {
         } else {
             const path = this.paths[0];
             const pool = path.pools[0];
-            const assetIn = this.convertNativeAddressToZero(path.tokens[0].address);
-            const assetOut = this.convertNativeAddressToZero(path.tokens[1].address);
+            const assetIn = this.convertNativeAddressToZero(
+                path.tokens[0].address,
+            );
+            const assetOut = this.convertNativeAddressToZero(
+                path.tokens[1].address,
+            );
             swaps = {
                 poolId: pool.id,
                 kind: this.swapKind,
@@ -78,7 +102,7 @@ export class Swap {
             } as SingleSwap;
         }
 
-        this.assets = this.assets.map(a => {
+        this.assets = this.assets.map((a) => {
             return this.convertNativeAddressToZero(a);
         });
 
@@ -93,28 +117,36 @@ export class Swap {
     public swaps: BatchSwapStep[] | SingleSwap;
 
     public get quote(): TokenAmount {
-        return this.swapKind === SwapKind.GivenIn ? this.outputAmount : this.inputAmount;
+        return this.swapKind === SwapKind.GivenIn
+            ? this.outputAmount
+            : this.inputAmount;
     }
 
     public get inputAmount(): TokenAmount {
-        if (!this.paths.every(p => p.inputAmount.token.isEqual(this.paths[0].inputAmount.token))) {
+        if (
+            !this.paths.every((p) =>
+                p.inputAmount.token.isEqual(this.paths[0].inputAmount.token),
+            )
+        ) {
             throw new Error(
                 'Input amount can only be calculated if all paths have the same input token',
             );
         }
-        const amounts = this.paths.map(path => path.inputAmount);
+        const amounts = this.paths.map((path) => path.inputAmount);
         return amounts.reduce((a, b) => a.add(b));
     }
 
     public get outputAmount(): TokenAmount {
         if (
-            !this.paths.every(p => p.outputAmount.token.isEqual(this.paths[0].outputAmount.token))
+            !this.paths.every((p) =>
+                p.outputAmount.token.isEqual(this.paths[0].outputAmount.token),
+            )
         ) {
             throw new Error(
                 'Output amount can only be calculated if all paths have the same output token',
             );
         }
-        const amounts = this.paths.map(path => path.outputAmount);
+        const amounts = this.paths.map((path) => path.outputAmount);
         return amounts.reduce((a, b) => a.add(b));
     }
 
@@ -133,7 +165,12 @@ export class Swap {
         let amount: TokenAmount;
         if (this.isBatchSwap) {
             const { result } = await queriesContract.simulate.queryBatchSwap(
-                [this.swapKind, this.swaps as BatchSwapStep[], this.assets, DEFAULT_FUND_MANAGMENT],
+                [
+                    this.swapKind,
+                    this.swaps as BatchSwapStep[],
+                    this.assets,
+                    DEFAULT_FUND_MANAGMENT,
+                ],
                 {
                     blockNumber: block,
                 },

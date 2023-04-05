@@ -22,7 +22,11 @@ export interface BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount;
-    getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint;
+    getLimitAmountSwap(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapKind: SwapKind,
+    ): bigint;
 }
 
 export interface BasePoolFactory {

@@ -1,0 +1,29 @@
+name: 'Setup'
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+    - uses: pnpm/action-setup@v2.2.2
+      with:
+        version: ${{ matrix.pnpm-version }}
+    - name: Set up Node ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        cache: 'pnpm'
+        node-version: ${{ matrix.node-version }}
+    - name: Cache pnpm
+      uses: actions/cache@v3
+      with:
+        path: ~/.pnpm-store
+        key: ${{ matrix.node-version }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: ${{ matrix.node-version }}-pnpm-
+    - name: Cache node_modules
+      uses: actions/cache@v3
+      id: cache-node-modules
+      with:
+        path: node_modules
+        key: ${{ matrix.node-version }}-modules-${{ hashFiles('pnpm-lock.yaml') }}
+    - name: Install Dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: pnpm i
+      shell: bash

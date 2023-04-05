@@ -1,31 +1,77 @@
 export const balancerQueriesAbi = [
     {
-        inputs: [{ internalType: 'contract IVault', name: '_vault', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'contract IVault',
+                name: '_vault',
+                type: 'address',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
     {
         inputs: [
-            { internalType: 'enum IVault.SwapKind', name: 'kind', type: 'uint8' },
+            {
+                internalType: 'enum IVault.SwapKind',
+                name: 'kind',
+                type: 'uint8',
+            },
             {
                 components: [
-                    { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
-                    { internalType: 'uint256', name: 'assetInIndex', type: 'uint256' },
-                    { internalType: 'uint256', name: 'assetOutIndex', type: 'uint256' },
-                    { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                    {
+                        internalType: 'bytes32',
+                        name: 'poolId',
+                        type: 'bytes32',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'assetInIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'assetOutIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct IVault.BatchSwapStep[]',
                 name: 'swaps',
                 type: 'tuple[]',
             },
-            { internalType: 'contract IAsset[]', name: 'assets', type: 'address[]' },
+            {
+                internalType: 'contract IAsset[]',
+                name: 'assets',
+                type: 'address[]',
+            },
             {
                 components: [
-                    { internalType: 'address', name: 'sender', type: 'address' },
-                    { internalType: 'bool', name: 'fromInternalBalance', type: 'bool' },
-                    { internalType: 'address payable', name: 'recipient', type: 'address' },
-                    { internalType: 'bool', name: 'toInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'fromInternalBalance',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'address payable',
+                        name: 'recipient',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'toInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.FundManagement',
                 name: 'funds',
@@ -33,7 +79,9 @@ export const balancerQueriesAbi = [
             },
         ],
         name: 'queryBatchSwap',
-        outputs: [{ internalType: 'int256[]', name: 'assetDeltas', type: 'int256[]' }],
+        outputs: [
+            { internalType: 'int256[]', name: 'assetDeltas', type: 'int256[]' },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -44,10 +92,22 @@ export const balancerQueriesAbi = [
             { internalType: 'address', name: 'recipient', type: 'address' },
             {
                 components: [
-                    { internalType: 'contract IAsset[]', name: 'assets', type: 'address[]' },
-                    { internalType: 'uint256[]', name: 'minAmountsOut', type: 'uint256[]' },
+                    {
+                        internalType: 'contract IAsset[]',
+                        name: 'assets',
+                        type: 'address[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'minAmountsOut',
+                        type: 'uint256[]',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
-                    { internalType: 'bool', name: 'toInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'toInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.ExitPoolRequest',
                 name: 'request',
@@ -57,7 +117,11 @@ export const balancerQueriesAbi = [
         name: 'queryExit',
         outputs: [
             { internalType: 'uint256', name: 'bptIn', type: 'uint256' },
-            { internalType: 'uint256[]', name: 'amountsOut', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsOut',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -69,10 +133,22 @@ export const balancerQueriesAbi = [
             { internalType: 'address', name: 'recipient', type: 'address' },
             {
                 components: [
-                    { internalType: 'contract IAsset[]', name: 'assets', type: 'address[]' },
-                    { internalType: 'uint256[]', name: 'maxAmountsIn', type: 'uint256[]' },
+                    {
+                        internalType: 'contract IAsset[]',
+                        name: 'assets',
+                        type: 'address[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'maxAmountsIn',
+                        type: 'uint256[]',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
-                    { internalType: 'bool', name: 'fromInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'fromInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.JoinPoolRequest',
                 name: 'request',
@@ -91,11 +167,31 @@ export const balancerQueriesAbi = [
         inputs: [
             {
                 components: [
-                    { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
-                    { internalType: 'enum IVault.SwapKind', name: 'kind', type: 'uint8' },
-                    { internalType: 'contract IAsset', name: 'assetIn', type: 'address' },
-                    { internalType: 'contract IAsset', name: 'assetOut', type: 'address' },
-                    { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                    {
+                        internalType: 'bytes32',
+                        name: 'poolId',
+                        type: 'bytes32',
+                    },
+                    {
+                        internalType: 'enum IVault.SwapKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'contract IAsset',
+                        name: 'assetIn',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'contract IAsset',
+                        name: 'assetOut',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct IVault.SingleSwap',
@@ -104,10 +200,26 @@ export const balancerQueriesAbi = [
             },
             {
                 components: [
-                    { internalType: 'address', name: 'sender', type: 'address' },
-                    { internalType: 'bool', name: 'fromInternalBalance', type: 'bool' },
-                    { internalType: 'address payable', name: 'recipient', type: 'address' },
-                    { internalType: 'bool', name: 'toInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'fromInternalBalance',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'address payable',
+                        name: 'recipient',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'toInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.FundManagement',
                 name: 'funds',
@@ -122,7 +234,9 @@ export const balancerQueriesAbi = [
     {
         inputs: [],
         name: 'vault',
-        outputs: [{ internalType: 'contract IVault', name: '', type: 'address' }],
+        outputs: [
+            { internalType: 'contract IVault', name: '', type: 'address' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },

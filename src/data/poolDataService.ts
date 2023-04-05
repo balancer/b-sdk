@@ -24,19 +24,23 @@ export class PoolDataService {
 
         //TODO: might be necessary to remove duplicates, decide which take precendence
         const responses = await Promise.all(
-            this.providers.map(provider => provider.getPools(providerOptions)),
+            this.providers.map((provider) =>
+                provider.getPools(providerOptions),
+            ),
         );
 
         const providerData: GetPoolsResponse = {
-            pools: responses.flatMap(response => response.pools),
+            pools: responses.flatMap((response) => response.pools),
             //we take the smallest block number from the set
             syncedToBlockNumber: responses
-                .map(response => response.syncedToBlockNumber || 0n)
+                .map((response) => response.syncedToBlockNumber || 0n)
                 .sort()[0],
-            poolsWithActiveWeightUpdates: responses
-                .flatMap(response => response.poolsWithActiveWeightUpdates || []),
-            poolsWithActiveAmpUpdates: responses
-                .flatMap(response => response.poolsWithActiveAmpUpdates || []),
+            poolsWithActiveWeightUpdates: responses.flatMap(
+                (response) => response.poolsWithActiveWeightUpdates || [],
+            ),
+            poolsWithActiveAmpUpdates: responses.flatMap(
+                (response) => response.poolsWithActiveAmpUpdates || [],
+            ),
         };
 
         return {
@@ -45,16 +49,24 @@ export class PoolDataService {
         };
     }
 
-    public async enrichPools(data: GetPoolsResponse, providerOptions: ProviderSwapOptions) {
+    public async enrichPools(
+        data: GetPoolsResponse,
+        providerOptions: ProviderSwapOptions,
+    ) {
         let pools = data.pools;
 
         const additionalPoolData = await Promise.all(
-            this.enrichers.map(provider => provider.fetchAdditionalPoolData(data, providerOptions)),
+            this.enrichers.map((provider) =>
+                provider.fetchAdditionalPoolData(data, providerOptions),
+            ),
         );
 
         // We enrich the pools in order of the enrichers array
         for (let i = 0; i < this.enrichers.length; i++) {
-            pools = this.enrichers[i].enrichPoolsWithData(pools, additionalPoolData[i]);
+            pools = this.enrichers[i].enrichPoolsWithData(
+                pools,
+                additionalPoolData[i],
+            );
         }
 
         return pools;

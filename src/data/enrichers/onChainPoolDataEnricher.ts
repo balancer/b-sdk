@@ -119,10 +119,12 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             args: [
                 poolIds,
                 {
-                    loadTokenBalanceUpdatesAfterBlock: this.config.loadTokenBalances !== 'none',
+                    loadTokenBalanceUpdatesAfterBlock:
+                        this.config.loadTokenBalances !== 'none',
                     loadTotalSupply: this.config.loadTotalSupply,
                     loadSwapFees: this.config.loadSwapFees,
-                    loadLinearWrappedTokenRates: this.config.loadLinearWrappedTokenRates,
+                    loadLinearWrappedTokenRates:
+                        this.config.loadLinearWrappedTokenRates,
                     loadNormalizedWeights: weightedPoolIdxs.length > 0,
                     loadScalingFactors: scalingFactorPoolIdxs.length > 0,
                     loadAmps: ampPoolIdxs.length > 0,
@@ -149,7 +151,9 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             weights: weightedPoolIdxs.includes(BigInt(i))
                 ? weights[weightedPoolIdxs.indexOf(BigInt(i))]
                 : undefined,
-            amp: ampPoolIdxs.includes(BigInt(i)) ? amps[ampPoolIdxs.indexOf(BigInt(i))] : undefined,
+            amp: ampPoolIdxs.includes(BigInt(i))
+                ? amps[ampPoolIdxs.indexOf(BigInt(i))]
+                : undefined,
             wrappedTokenRate: linearPoolIdxs.includes(BigInt(i))
                 ? linearWrappedTokenRates[linearPoolIdxs.indexOf(BigInt(i))]
                 : undefined,
@@ -158,15 +162,18 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         }));
     }
 
-    public enrichPoolsWithData(pools: RawPool[], additionalPoolData: OnChainPoolData[]): RawPool[] {
-        return pools.map(pool => {
-            const data = additionalPoolData.find(item => item.id === pool.id);
+    public enrichPoolsWithData(
+        pools: RawPool[],
+        additionalPoolData: OnChainPoolData[],
+    ): RawPool[] {
+        return pools.map((pool) => {
+            const data = additionalPoolData.find((item) => item.id === pool.id);
 
             return {
                 ...pool,
                 tokens: pool.tokens
                     .sort((a, b) => a.index - b.index)
-                    .map(token => {
+                    .map((token) => {
                         return {
                             ...token,
                             balance:
@@ -237,11 +244,17 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 linearPoolIdxs.push(BigInt(i));
             }
 
-            if (loadWeightsForPoolTypes.has(pool.poolType) || loadWeightsForPoolIds.has(pool.id)) {
+            if (
+                loadWeightsForPoolTypes.has(pool.poolType) ||
+                loadWeightsForPoolIds.has(pool.id)
+            ) {
                 weightedPoolIdxs.push(BigInt(i));
             }
 
-            if (loadAmpForPoolTypes.has(pool.poolType) || loadAmpForPoolIds.has(pool.id)) {
+            if (
+                loadAmpForPoolTypes.has(pool.poolType) ||
+                loadAmpForPoolIds.has(pool.id)
+            ) {
                 ampPoolIdxs.push(BigInt(i));
             }
 
@@ -279,7 +292,11 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         poolsWithActiveWeightUpdates?: string[];
         poolsWithActiveAmpUpdates?: string[];
     }) {
-        const { loadWeightsForPools, loadScalingFactorForPools, loadAmpForPools } = this.config;
+        const {
+            loadWeightsForPools,
+            loadScalingFactorForPools,
+            loadAmpForPools,
+        } = this.config;
 
         const loadWeightsForPoolIds = new Set([
             ...poolsWithActiveWeightUpdates,
@@ -289,10 +306,16 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             ...poolsWithActiveAmpUpdates,
             ...(loadAmpForPools.poolIds || []),
         ]);
-        const loadScalingFactorForPoolIds = new Set(loadScalingFactorForPools.poolIds || []);
-        const loadWeightsForPoolTypes = new Set(loadWeightsForPools.poolTypes || []);
+        const loadScalingFactorForPoolIds = new Set(
+            loadScalingFactorForPools.poolIds || [],
+        );
+        const loadWeightsForPoolTypes = new Set(
+            loadWeightsForPools.poolTypes || [],
+        );
         const loadAmpForPoolTypes = new Set(loadAmpForPools.poolTypes || []);
-        const loadScalingFactorForPoolTypes = new Set(loadScalingFactorForPools.poolTypes || []);
+        const loadScalingFactorForPoolTypes = new Set(
+            loadScalingFactorForPools.poolTypes || [],
+        );
 
         return {
             loadWeightsForPoolIds,
@@ -315,7 +338,11 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         data?: OnChainPoolData;
         index: number;
     }): string {
-        if (data?.wrappedTokenRate && 'wrappedIndex' in pool && pool.wrappedIndex === index) {
+        if (
+            data?.wrappedTokenRate &&
+            'wrappedIndex' in pool &&
+            pool.wrappedIndex === index
+        ) {
             return formatUnits(data.wrappedTokenRate, 18);
         }
 

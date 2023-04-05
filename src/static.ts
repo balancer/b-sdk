@@ -1,5 +1,11 @@
 import { RawPool } from './data';
-import { BasePool, BasePoolFactory, Swap, Token, TokenAmount } from './entities';
+import {
+    BasePool,
+    BasePoolFactory,
+    Swap,
+    Token,
+    TokenAmount,
+} from './entities';
 import { PoolParser } from './entities/pools/parser';
 import { SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { ChainId, checkInputs } from './utils';

@@ -1,10 +1,22 @@
 export const vaultAbi = [
     {
         inputs: [
-            { internalType: 'contract IAuthorizer', name: 'authorizer', type: 'address' },
+            {
+                internalType: 'contract IAuthorizer',
+                name: 'authorizer',
+                type: 'address',
+            },
             { internalType: 'contract IWETH', name: 'weth', type: 'address' },
-            { internalType: 'uint256', name: 'pauseWindowDuration', type: 'uint256' },
-            { internalType: 'uint256', name: 'bufferPeriodDuration', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'pauseWindowDuration',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'bufferPeriodDuration',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -31,9 +43,24 @@ export const vaultAbi = [
                 name: 'token',
                 type: 'address',
             },
-            { indexed: true, internalType: 'address', name: 'sender', type: 'address' },
-            { indexed: false, internalType: 'address', name: 'recipient', type: 'address' },
-            { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'address',
+                name: 'recipient',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'ExternalBalanceTransfer',
         type: 'event',
@@ -53,8 +80,18 @@ export const vaultAbi = [
                 name: 'token',
                 type: 'address',
             },
-            { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { indexed: false, internalType: 'uint256', name: 'feeAmount', type: 'uint256' },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'feeAmount',
+                type: 'uint256',
+            },
         ],
         name: 'FlashLoan',
         type: 'event',
@@ -62,28 +99,50 @@ export const vaultAbi = [
     {
         anonymous: false,
         inputs: [
-            { indexed: true, internalType: 'address', name: 'user', type: 'address' },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'user',
+                type: 'address',
+            },
             {
                 indexed: true,
                 internalType: 'contract IERC20',
                 name: 'token',
                 type: 'address',
             },
-            { indexed: false, internalType: 'int256', name: 'delta', type: 'int256' },
+            {
+                indexed: false,
+                internalType: 'int256',
+                name: 'delta',
+                type: 'int256',
+            },
         ],
         name: 'InternalBalanceChanged',
         type: 'event',
     },
     {
         anonymous: false,
-        inputs: [{ indexed: false, internalType: 'bool', name: 'paused', type: 'bool' }],
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'bool',
+                name: 'paused',
+                type: 'bool',
+            },
+        ],
         name: 'PausedStateChanged',
         type: 'event',
     },
     {
         anonymous: false,
         inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
+            {
+                indexed: true,
+                internalType: 'bytes32',
+                name: 'poolId',
+                type: 'bytes32',
+            },
             {
                 indexed: true,
                 internalType: 'address',
@@ -96,7 +155,12 @@ export const vaultAbi = [
                 name: 'tokens',
                 type: 'address[]',
             },
-            { indexed: false, internalType: 'int256[]', name: 'deltas', type: 'int256[]' },
+            {
+                indexed: false,
+                internalType: 'int256[]',
+                name: 'deltas',
+                type: 'int256[]',
+            },
             {
                 indexed: false,
                 internalType: 'uint256[]',
@@ -110,7 +174,12 @@ export const vaultAbi = [
     {
         anonymous: false,
         inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
+            {
+                indexed: true,
+                internalType: 'bytes32',
+                name: 'poolId',
+                type: 'bytes32',
+            },
             {
                 indexed: true,
                 internalType: 'address',
@@ -123,8 +192,18 @@ export const vaultAbi = [
                 name: 'token',
                 type: 'address',
             },
-            { indexed: false, internalType: 'int256', name: 'cashDelta', type: 'int256' },
-            { indexed: false, internalType: 'int256', name: 'managedDelta', type: 'int256' },
+            {
+                indexed: false,
+                internalType: 'int256',
+                name: 'cashDelta',
+                type: 'int256',
+            },
+            {
+                indexed: false,
+                internalType: 'int256',
+                name: 'managedDelta',
+                type: 'int256',
+            },
         ],
         name: 'PoolBalanceManaged',
         type: 'event',
@@ -132,7 +211,12 @@ export const vaultAbi = [
     {
         anonymous: false,
         inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
+            {
+                indexed: true,
+                internalType: 'bytes32',
+                name: 'poolId',
+                type: 'bytes32',
+            },
             {
                 indexed: true,
                 internalType: 'address',
@@ -152,9 +236,24 @@ export const vaultAbi = [
     {
         anonymous: false,
         inputs: [
-            { indexed: true, internalType: 'address', name: 'relayer', type: 'address' },
-            { indexed: true, internalType: 'address', name: 'sender', type: 'address' },
-            { indexed: false, internalType: 'bool', name: 'approved', type: 'bool' },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'relayer',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'bool',
+                name: 'approved',
+                type: 'bool',
+            },
         ],
         name: 'RelayerApprovalChanged',
         type: 'event',
@@ -162,7 +261,12 @@ export const vaultAbi = [
     {
         anonymous: false,
         inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
+            {
+                indexed: true,
+                internalType: 'bytes32',
+                name: 'poolId',
+                type: 'bytes32',
+            },
             {
                 indexed: true,
                 internalType: 'contract IERC20',
@@ -175,8 +279,18 @@ export const vaultAbi = [
                 name: 'tokenOut',
                 type: 'address',
             },
-            { indexed: false, internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-            { indexed: false, internalType: 'uint256', name: 'amountOut', type: 'uint256' },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountIn',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountOut',
+                type: 'uint256',
+            },
         ],
         name: 'Swap',
         type: 'event',
@@ -184,7 +298,12 @@ export const vaultAbi = [
     {
         anonymous: false,
         inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
+            {
+                indexed: true,
+                internalType: 'bytes32',
+                name: 'poolId',
+                type: 'bytes32',
+            },
             {
                 indexed: false,
                 internalType: 'contract IERC20[]',
@@ -198,7 +317,12 @@ export const vaultAbi = [
     {
         anonymous: false,
         inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
+            {
+                indexed: true,
+                internalType: 'bytes32',
+                name: 'poolId',
+                type: 'bytes32',
+            },
             {
                 indexed: false,
                 internalType: 'contract IERC20[]',
@@ -218,32 +342,74 @@ export const vaultAbi = [
     {
         inputs: [],
         name: 'WETH',
-        outputs: [{ internalType: 'contract IWETH', name: '', type: 'address' }],
+        outputs: [
+            { internalType: 'contract IWETH', name: '', type: 'address' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'enum IVault.SwapKind', name: 'kind', type: 'uint8' },
+            {
+                internalType: 'enum IVault.SwapKind',
+                name: 'kind',
+                type: 'uint8',
+            },
             {
                 components: [
-                    { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
-                    { internalType: 'uint256', name: 'assetInIndex', type: 'uint256' },
-                    { internalType: 'uint256', name: 'assetOutIndex', type: 'uint256' },
-                    { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                    {
+                        internalType: 'bytes32',
+                        name: 'poolId',
+                        type: 'bytes32',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'assetInIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'assetOutIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct IVault.BatchSwapStep[]',
                 name: 'swaps',
                 type: 'tuple[]',
             },
-            { internalType: 'contract IAsset[]', name: 'assets', type: 'address[]' },
+            {
+                internalType: 'contract IAsset[]',
+                name: 'assets',
+                type: 'address[]',
+            },
             {
                 components: [
-                    { internalType: 'address', name: 'sender', type: 'address' },
-                    { internalType: 'bool', name: 'fromInternalBalance', type: 'bool' },
-                    { internalType: 'address payable', name: 'recipient', type: 'address' },
-                    { internalType: 'bool', name: 'toInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'fromInternalBalance',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'address payable',
+                        name: 'recipient',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'toInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.FundManagement',
                 name: 'funds',
@@ -253,14 +419,20 @@ export const vaultAbi = [
             { internalType: 'uint256', name: 'deadline', type: 'uint256' },
         ],
         name: 'batchSwap',
-        outputs: [{ internalType: 'int256[]', name: 'assetDeltas', type: 'int256[]' }],
+        outputs: [
+            { internalType: 'int256[]', name: 'assetDeltas', type: 'int256[]' },
+        ],
         stateMutability: 'payable',
         type: 'function',
     },
     {
         inputs: [
             { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
-            { internalType: 'contract IERC20[]', name: 'tokens', type: 'address[]' },
+            {
+                internalType: 'contract IERC20[]',
+                name: 'tokens',
+                type: 'address[]',
+            },
         ],
         name: 'deregisterTokens',
         outputs: [],
@@ -271,13 +443,29 @@ export const vaultAbi = [
         inputs: [
             { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
-            { internalType: 'address payable', name: 'recipient', type: 'address' },
+            {
+                internalType: 'address payable',
+                name: 'recipient',
+                type: 'address',
+            },
             {
                 components: [
-                    { internalType: 'contract IAsset[]', name: 'assets', type: 'address[]' },
-                    { internalType: 'uint256[]', name: 'minAmountsOut', type: 'uint256[]' },
+                    {
+                        internalType: 'contract IAsset[]',
+                        name: 'assets',
+                        type: 'address[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'minAmountsOut',
+                        type: 'uint256[]',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
-                    { internalType: 'bool', name: 'toInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'toInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.ExitPoolRequest',
                 name: 'request',
@@ -296,7 +484,11 @@ export const vaultAbi = [
                 name: 'recipient',
                 type: 'address',
             },
-            { internalType: 'contract IERC20[]', name: 'tokens', type: 'address[]' },
+            {
+                internalType: 'contract IERC20[]',
+                name: 'tokens',
+                type: 'address[]',
+            },
             { internalType: 'uint256[]', name: 'amounts', type: 'uint256[]' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
@@ -315,7 +507,9 @@ export const vaultAbi = [
     {
         inputs: [],
         name: 'getAuthorizer',
-        outputs: [{ internalType: 'contract IAuthorizer', name: '', type: 'address' }],
+        outputs: [
+            { internalType: 'contract IAuthorizer', name: '', type: 'address' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -329,10 +523,16 @@ export const vaultAbi = [
     {
         inputs: [
             { internalType: 'address', name: 'user', type: 'address' },
-            { internalType: 'contract IERC20[]', name: 'tokens', type: 'address[]' },
+            {
+                internalType: 'contract IERC20[]',
+                name: 'tokens',
+                type: 'address[]',
+            },
         ],
         name: 'getInternalBalance',
-        outputs: [{ internalType: 'uint256[]', name: 'balances', type: 'uint256[]' }],
+        outputs: [
+            { internalType: 'uint256[]', name: 'balances', type: 'uint256[]' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -348,8 +548,16 @@ export const vaultAbi = [
         name: 'getPausedState',
         outputs: [
             { internalType: 'bool', name: 'paused', type: 'bool' },
-            { internalType: 'uint256', name: 'pauseWindowEndTime', type: 'uint256' },
-            { internalType: 'uint256', name: 'bufferPeriodEndTime', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'pauseWindowEndTime',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'bufferPeriodEndTime',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -359,7 +567,11 @@ export const vaultAbi = [
         name: 'getPool',
         outputs: [
             { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'enum IVault.PoolSpecialization', name: '', type: 'uint8' },
+            {
+                internalType: 'enum IVault.PoolSpecialization',
+                name: '',
+                type: 'uint8',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -373,7 +585,11 @@ export const vaultAbi = [
         outputs: [
             { internalType: 'uint256', name: 'cash', type: 'uint256' },
             { internalType: 'uint256', name: 'managed', type: 'uint256' },
-            { internalType: 'uint256', name: 'lastChangeBlock', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'lastChangeBlock',
+                type: 'uint256',
+            },
             { internalType: 'address', name: 'assetManager', type: 'address' },
         ],
         stateMutability: 'view',
@@ -383,9 +599,17 @@ export const vaultAbi = [
         inputs: [{ internalType: 'bytes32', name: 'poolId', type: 'bytes32' }],
         name: 'getPoolTokens',
         outputs: [
-            { internalType: 'contract IERC20[]', name: 'tokens', type: 'address[]' },
+            {
+                internalType: 'contract IERC20[]',
+                name: 'tokens',
+                type: 'address[]',
+            },
             { internalType: 'uint256[]', name: 'balances', type: 'uint256[]' },
-            { internalType: 'uint256', name: 'lastChangeBlock', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'lastChangeBlock',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -393,7 +617,13 @@ export const vaultAbi = [
     {
         inputs: [],
         name: 'getProtocolFeesCollector',
-        outputs: [{ internalType: 'contract ProtocolFeesCollector', name: '', type: 'address' }],
+        outputs: [
+            {
+                internalType: 'contract ProtocolFeesCollector',
+                name: '',
+                type: 'address',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -414,10 +644,22 @@ export const vaultAbi = [
             { internalType: 'address', name: 'recipient', type: 'address' },
             {
                 components: [
-                    { internalType: 'contract IAsset[]', name: 'assets', type: 'address[]' },
-                    { internalType: 'uint256[]', name: 'maxAmountsIn', type: 'uint256[]' },
+                    {
+                        internalType: 'contract IAsset[]',
+                        name: 'assets',
+                        type: 'address[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'maxAmountsIn',
+                        type: 'uint256[]',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
-                    { internalType: 'bool', name: 'fromInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'fromInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.JoinPoolRequest',
                 name: 'request',
@@ -438,9 +680,21 @@ export const vaultAbi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
-                    { internalType: 'contract IERC20', name: 'token', type: 'address' },
-                    { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                    {
+                        internalType: 'bytes32',
+                        name: 'poolId',
+                        type: 'bytes32',
+                    },
+                    {
+                        internalType: 'contract IERC20',
+                        name: 'token',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
                 ],
                 internalType: 'struct IVault.PoolBalanceOp[]',
                 name: 'ops',
@@ -461,10 +715,26 @@ export const vaultAbi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'contract IAsset', name: 'asset', type: 'address' },
-                    { internalType: 'uint256', name: 'amount', type: 'uint256' },
-                    { internalType: 'address', name: 'sender', type: 'address' },
-                    { internalType: 'address payable', name: 'recipient', type: 'address' },
+                    {
+                        internalType: 'contract IAsset',
+                        name: 'asset',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address payable',
+                        name: 'recipient',
+                        type: 'address',
+                    },
                 ],
                 internalType: 'struct IVault.UserBalanceOp[]',
                 name: 'ops',
@@ -478,26 +748,66 @@ export const vaultAbi = [
     },
     {
         inputs: [
-            { internalType: 'enum IVault.SwapKind', name: 'kind', type: 'uint8' },
+            {
+                internalType: 'enum IVault.SwapKind',
+                name: 'kind',
+                type: 'uint8',
+            },
             {
                 components: [
-                    { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
-                    { internalType: 'uint256', name: 'assetInIndex', type: 'uint256' },
-                    { internalType: 'uint256', name: 'assetOutIndex', type: 'uint256' },
-                    { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                    {
+                        internalType: 'bytes32',
+                        name: 'poolId',
+                        type: 'bytes32',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'assetInIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'assetOutIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct IVault.BatchSwapStep[]',
                 name: 'swaps',
                 type: 'tuple[]',
             },
-            { internalType: 'contract IAsset[]', name: 'assets', type: 'address[]' },
+            {
+                internalType: 'contract IAsset[]',
+                name: 'assets',
+                type: 'address[]',
+            },
             {
                 components: [
-                    { internalType: 'address', name: 'sender', type: 'address' },
-                    { internalType: 'bool', name: 'fromInternalBalance', type: 'bool' },
-                    { internalType: 'address payable', name: 'recipient', type: 'address' },
-                    { internalType: 'bool', name: 'toInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'fromInternalBalance',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'address payable',
+                        name: 'recipient',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'toInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.FundManagement',
                 name: 'funds',
@@ -525,8 +835,16 @@ export const vaultAbi = [
     {
         inputs: [
             { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
-            { internalType: 'contract IERC20[]', name: 'tokens', type: 'address[]' },
-            { internalType: 'address[]', name: 'assetManagers', type: 'address[]' },
+            {
+                internalType: 'contract IERC20[]',
+                name: 'tokens',
+                type: 'address[]',
+            },
+            {
+                internalType: 'address[]',
+                name: 'assetManagers',
+                type: 'address[]',
+            },
         ],
         name: 'registerTokens',
         outputs: [],
@@ -534,7 +852,13 @@ export const vaultAbi = [
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'contract IAuthorizer', name: 'newAuthorizer', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'contract IAuthorizer',
+                name: 'newAuthorizer',
+                type: 'address',
+            },
+        ],
         name: 'setAuthorizer',
         outputs: [],
         stateMutability: 'nonpayable',
@@ -562,11 +886,31 @@ export const vaultAbi = [
         inputs: [
             {
                 components: [
-                    { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
-                    { internalType: 'enum IVault.SwapKind', name: 'kind', type: 'uint8' },
-                    { internalType: 'contract IAsset', name: 'assetIn', type: 'address' },
-                    { internalType: 'contract IAsset', name: 'assetOut', type: 'address' },
-                    { internalType: 'uint256', name: 'amount', type: 'uint256' },
+                    {
+                        internalType: 'bytes32',
+                        name: 'poolId',
+                        type: 'bytes32',
+                    },
+                    {
+                        internalType: 'enum IVault.SwapKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'contract IAsset',
+                        name: 'assetIn',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'contract IAsset',
+                        name: 'assetOut',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct IVault.SingleSwap',
@@ -575,10 +919,26 @@ export const vaultAbi = [
             },
             {
                 components: [
-                    { internalType: 'address', name: 'sender', type: 'address' },
-                    { internalType: 'bool', name: 'fromInternalBalance', type: 'bool' },
-                    { internalType: 'address payable', name: 'recipient', type: 'address' },
-                    { internalType: 'bool', name: 'toInternalBalance', type: 'bool' },
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'fromInternalBalance',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'address payable',
+                        name: 'recipient',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'toInternalBalance',
+                        type: 'bool',
+                    },
                 ],
                 internalType: 'struct IVault.FundManagement',
                 name: 'funds',
@@ -588,7 +948,13 @@ export const vaultAbi = [
             { internalType: 'uint256', name: 'deadline', type: 'uint256' },
         ],
         name: 'swap',
-        outputs: [{ internalType: 'uint256', name: 'amountCalculated', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: 'amountCalculated',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'payable',
         type: 'function',
     },

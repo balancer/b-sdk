@@ -93,7 +93,8 @@ export function _calcWrappedOutPerBptIn(
     const nominalMain = _toNominal(mainBalance, params);
     const previousInvariant = _calcInvariant(nominalMain, wrappedBalance);
     const newBptBalance = bptSupply - bptIn;
-    const newWrappedBalance = (newBptBalance * previousInvariant) / bptSupply - nominalMain;
+    const newWrappedBalance =
+        (newBptBalance * previousInvariant) / bptSupply - nominalMain;
 
     return wrappedBalance - newWrappedBalance;
 }
@@ -154,7 +155,8 @@ export function _calcWrappedInPerBptOut(
     const nominalMain = _toNominal(mainBalance, params);
     const previousInvariant = _calcInvariant(nominalMain, wrappedBalance);
     const newBptBalance = bptSupply + bptOut;
-    const newWrappedBalance = (newBptBalance * previousInvariant) / bptSupply - nominalMain;
+    const newWrappedBalance =
+        (newBptBalance * previousInvariant) / bptSupply - nominalMain;
 
     return newWrappedBalance - wrappedBalance;
 }
@@ -190,7 +192,10 @@ export function _calcBptInPerMainOut(
     return (bptSupply * deltaNominalMain) / invariant;
 }
 
-function _calcInvariant(nominalMainBalance: bigint, wrappedBalance: bigint): bigint {
+function _calcInvariant(
+    nominalMainBalance: bigint,
+    wrappedBalance: bigint,
+): bigint {
     return nominalMainBalance + wrappedBalance;
 }
 
@@ -198,12 +203,18 @@ function _toNominal(real: bigint, params: Params): bigint {
     // Fees are always rounded down: either direction would work but we need to be consistent, and rounding down
     // uses less gas.
     if (real < params.lowerTarget) {
-        const fees = MathSol.mulDownFixed(params.lowerTarget - real, params.fee);
+        const fees = MathSol.mulDownFixed(
+            params.lowerTarget - real,
+            params.fee,
+        );
         return real - fees;
     } else if (real <= params.upperTarget) {
         return real;
     } else {
-        const fees = MathSol.mulDownFixed(real - params.upperTarget, params.fee);
+        const fees = MathSol.mulDownFixed(
+            real - params.upperTarget,
+            params.fee,
+        );
         return real - fees;
     }
 }

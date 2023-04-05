@@ -22,7 +22,9 @@ export class Token {
         this.symbol = symbol;
         this.name = name;
 
-        wrapped ? (this.wrapped = wrapped.toLowerCase()) : (this.wrapped = address.toLowerCase());
+        wrapped
+            ? (this.wrapped = wrapped.toLowerCase())
+            : (this.wrapped = address.toLowerCase());
     }
 
     public isEqual(token: Token) {
