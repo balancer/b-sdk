@@ -3,6 +3,8 @@ import { PoolDataEnricher, PoolDataProvider } from './data/types';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { Address, Hex } from 'viem';
 
+export { Address, Hex };
+
 export type SwapInputRawAmount = BigintIsh;
 
 export enum PoolType {
