@@ -4,7 +4,7 @@ import { StablePoolFactory } from './stable';
 import { MetaStablePoolFactory } from './metastable';
 import { LinearPoolFactory } from './linear';
 import { RawPool } from '../../data/types';
-import { Token } from "../token";
+import { Token } from '../token';
 
 export class PoolParser {
     private readonly poolFactories: BasePoolFactory[];
