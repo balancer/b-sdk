@@ -84,6 +84,8 @@ export class SmartOrderRouter {
         swapAmount: SwapInputRawAmount | TokenAmount,
         swapOptions?: SwapOptions,
     ): Promise<Swap | null> {
+        await this.fetchPoolsIfNotCached(swapOptions?.block);
+        
         tokenIn = this.getRequiredToken(tokenIn);
         tokenOut = this.getRequiredToken(tokenOut);
 
@@ -106,13 +108,10 @@ export class SmartOrderRouter {
         tokenOut: Token | string,
         options?: Pick<SwapOptions, 'block' | 'graphTraversalConfig'>,
     ): Promise<Path[]> {
+        await this.fetchPoolsIfNotCached(options?.block);
+
         tokenIn = this.getRequiredToken(tokenIn);
         tokenOut = this.getRequiredToken(tokenOut);
-
-        // fetch pools if we haven't yet, or if a block number is provided that doesn't match the existing.
-        if (!this.isInitialized || (options?.block && options.block !== this.blockNumber)) {
-            await this.fetchAndCachePools(options?.block);
-        }
 
         return this.router.getCandidatePaths(
             tokenIn,
@@ -120,6 +119,13 @@ export class SmartOrderRouter {
             this.pools,
             options?.graphTraversalConfig,
         );
+    }
+
+    private async fetchPoolsIfNotCached(blockNumber?: bigint) {
+        // fetch pools if we haven't yet, or if a block number is provided that doesn't match the existing.
+        if (!this.isInitialized || (typeof  blockNumber === 'bigint' && blockNumber !== this.blockNumber)) {
+            await this.fetchAndCachePools(blockNumber);
+        }
     }
 
     private getRequiredToken(token: Token | string): Token {
