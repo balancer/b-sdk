@@ -166,6 +166,16 @@ export class SubgraphPoolProvider implements PoolDataProvider {
             pools = pools.filter((pool) => this.poolMatchesFilter(pool));
         }
 
+        // Until a full graft finishes on polygon/arbitrum, there are instances where the index is not
+        // present. For these instances, we default to the index of the token in the array.
+        pools = pools.map(pool => ({
+            ...pool,
+            tokens: pool.tokens.map((token, index) => ({
+                ...token,
+                index: typeof token.index === 'number' ? token.index : index,
+            }))
+        }))
+
         return {
             pools,
             poolsWithActiveAmpUpdates: ampUpdates.map(
