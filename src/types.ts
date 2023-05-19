@@ -1,9 +1,9 @@
 import { BigintIsh, Token, BasePool, BasePoolFactory } from './entities';
 import { PoolDataEnricher, PoolDataProvider } from './data/types';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
-import { Address, Hex } from 'viem';
 
-export { Address, Hex };
+export type Address = `0x${string}`;
+export type Hex = `0x${string}`;
 
 export type SwapInputRawAmount = BigintIsh;
 
