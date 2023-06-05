@@ -32,13 +32,13 @@ enum BalancerPoolOwnerType {
 enum BalancerPoolJoinType {
   PROPORTIONAL = "PROPORTIONAL",
   SINGLE_ASSET = "SINGLE_ASSET",
-  ANY_TOKENS = "ANY_TOKENS",
+  ANY_TOKENS = "ANY_TOKENS", // TODO needs a better name
 }
 
-enum BalancerWithdrawType {
+enum BalancerPoolExitType {
   PROPORTIONAL = "PROPORTIONAL",
   SINGLE_ASSET = "SINGLE_ASSET",
-  ANY_TOKENS = "ANY_TOKENS",
+  ANY_TOKENS = "ANY_TOKENS", // TODO needs a better name
 }
 
 enum BalancerPoolTokenType {
@@ -65,8 +65,9 @@ interface BalancerPool {
   ownerAddress: Address;
   factory?: Address;
   createTime: number;
+  // TODO: can we model to facilitate price impact calculations?
   joinConfig: BalancerPoolJoinConfig;
-  exitConfig: any; //TODO: similar to join, but for exit
+  exitConfig: BalancerPoolTokenExitConfig;
 
   totalShares: BigInt;
   holdersCount: BigInt;
@@ -149,10 +150,10 @@ interface BalancerPoolTokenJoinConfig {
   // - Linear pool main token (the pool token is a nested linear bpt)
   // - Stable BPT (the pool token is a nested stable bpt)
   // - Leaf tokens of a nested stable BPT (the pool token is a nested stable bpt)
-  options: BalancerPoolTokenJoinConfigOptions[];
+  options: BalancerPoolTokenJoinExitConfigOptions[];
 }
 
-type BalancerPoolTokenJoinConfigOptions =
+type BalancerPoolTokenJoinExitConfigOptions =
   | BalancerPoolTokenConfigStandardToken
   | BalancerPoolTokenConfigLinearMainToken
   | BalancerPoolTokenConfigStableBpt
@@ -198,13 +199,21 @@ interface BalancerPoolTokenConfigStableBptLeafTokens
 }
 
 export type BalancerPoolJoinStep =
-  | BalancerPoolJoinBatchSwapStep
+  | BalancerPoolJoinExitBatchSwapStep
   | BalancerPoolJoinMintBptStep;
+
+export type BalancerPoolExitStep =
+  | BalancerPoolJoinExitBatchSwapStep
+  | BalancerPoolExitBurnBptStep;
+
+export type BalancerPoolSingleAssetExitStep =
+  | BalancerPoolSingleAssetExitBatchSwapStep
+  | BalancerPoolExitBurnBptStep;
 
 // Currently, there should only ever be one batchSwap step that swaps any linear main tokens for the
 // corresponding linear phantom BPT
-export interface BalancerPoolJoinBatchSwapStep {
-  __typename: "BalancerPoolJoinBatchSwapStep";
+export interface BalancerPoolJoinExitBatchSwapStep {
+  __typename: "BalancerPoolJoinExitBatchSwapStep";
   swaps: {
     poolId: ID;
     tokenIn: Address;
@@ -220,6 +229,50 @@ export interface BalancerPoolJoinMintBptStep {
   __typename: "BalancerPoolJoinMintBptStep";
   poolId: ID;
   tokensIn: Address[];
+}
+
+export interface BalancerPoolExitBurnBptStep {
+  __typename: "BalancerPoolExitBurnBptStep";
+  poolId: ID;
+  tokensOut: Address[];
+}
+
+export interface BalancerPoolSingleAssetExitBatchSwapStep {
+  __typename: "BalancerPoolSingleAssetExitBatchSwapStep";
+  swaps: {
+    poolId: ID;
+    tokenIn: Address;
+    tokenOut: Address;
+  }[];
+  tokenIn: Address;
+  tokenOut: Address;
+}
+
+interface BalancerPoolExitConfig {
+  supportedTypes: BalancerPoolExitType[];
+
+  // configs for each pool token
+  poolTokenConfigs: BalancerPoolTokenJoinConfig[];
+
+  proportionalSteps: BalancerPoolExitStep[];
+
+  // Leaf tokens are tokens that represent the last node in the tree. These are most often the
+  // "normal" tokens that users hold in their wallet ie: USDC/USDT/DAI instead of bbausd
+  // We consider the main token of a linear pool the leaf token.
+  leafTokens: Address[];
+}
+
+interface BalancerPoolTokenExitConfig {
+  poolTokenIndex: number;
+  poolTokenAddress: Address;
+  // To scope this, we support the following options:
+  // - Standard token (the pool token is not a nested bpt)
+  // - Linear pool main token (the pool token is a nested linear bpt)
+  // - Stable BPT (the pool token is a nested stable bpt)
+  // - Leaf tokens of a nested stable BPT (the pool token is a nested stable bpt)
+  options: BalancerPoolTokenJoinExitConfigOptions[];
+  // When performing a single asset exit, this is the most optimal path out.
+  exitSteps: BalancerPoolSingleAssetExitStep[];
 }
 
 interface BalancerPoolApr {
