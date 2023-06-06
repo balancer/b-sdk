@@ -67,7 +67,7 @@ interface BalancerPool {
   createTime: number;
   // TODO: can we model to facilitate price impact calculations?
   joinConfig: BalancerPoolJoinConfig;
-  exitConfig: BalancerPoolTokenExitConfig;
+  exitConfig: BalancerPoolExitConfig;
 
   totalShares: BigInt;
   holdersCount: BigInt;
@@ -252,7 +252,7 @@ interface BalancerPoolExitConfig {
   supportedTypes: BalancerPoolExitType[];
 
   // configs for each pool token
-  poolTokenConfigs: BalancerPoolTokenJoinConfig[];
+  poolTokenConfigs: BalancerPoolTokenExitConfig[];
 
   proportionalSteps: BalancerPoolExitStep[];
 
