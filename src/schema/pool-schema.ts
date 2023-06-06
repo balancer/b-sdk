@@ -13,6 +13,8 @@ enum BalancerNetwork {
 }
 
 enum BalancerPoolType {
+  StablePool = "StablePool",
+  MetaStablePool = "MetaStablePool",
   ComposableStablePool = "ComposableStablePool",
   WeightedPool = "WeightedPool",
   LinearPool = "LinearPool",
@@ -45,18 +47,19 @@ enum BalancerPoolTokenType {
   // this type would need to be built in a way that there is no overlaps,
   // ie: a token cannot have more than one type. Could be a better name than "type"
   STABLE_BPT = "STABLE_BPT",
+  PHANTOM_BPT = "LINEAR_BPT",
   LINEAR_BPT = "LINEAR_BPT",
   WETH = "WETH",
   STANDARD = "STANDARD", // could be a better name here, a token that is not a nested bpt
 }
 
-interface BalancerPool {
-  id: ID; // ID will become address in v2.1/3, but still needed for backwards compatability
+interface BalancerBasePool {
+  id: ID;
   address: Address;
   chain: BalancerNetwork;
   vault: Address;
   vaultVersion: BalancerVaultVersion;
-  poolType: BalancerPoolType;
+  poolType: BalancerPoolType; // may be better to use __typename to align with graphql
   poolTypeVersion: number;
   name: string;
   symbol: string;
@@ -65,6 +68,8 @@ interface BalancerPool {
   ownerAddress: Address;
   factory?: Address;
   createTime: number;
+  empty: boolean; // BPT balance is 0 or the minimum amount (ie: 0.000000000001)
+  initialized: boolean; // Whether an init join has been performed on the pool
   // TODO: can we model to facilitate price impact calculations?
   joinConfig: BalancerPoolJoinConfig;
   exitConfig: BalancerPoolExitConfig;
@@ -83,6 +88,55 @@ interface BalancerPool {
   tokens: BalancerPoolToken[];
 }
 
+export interface BalancerWeightedPool extends BalancerBasePool {
+  poolType: BalancerPoolType.WeightedPool;
+  tokens: BalancerPoolTokenWithWeight[];
+}
+
+export interface BalancerStablePool extends BalancerBasePool {
+  poolType: BalancerPoolType.StablePool;
+  amp: BigInt;
+}
+
+export interface BalancerMetaStablePool extends BalancerBasePool {
+  poolType: BalancerPoolType.MetaStablePool;
+  tokens: BalancerPoolTokenWithRate[];
+  amp: BigInt;
+}
+
+export interface BalancerComposableStablePool extends BalancerBasePool {
+  poolType: BalancerPoolType.ComposableStablePool;
+  tokens: BalancerPoolTokenWithRate[];
+  amp: BigInt;
+}
+
+export interface BalancerLiquidityBootstrappingPool extends BalancerBasePool {
+  poolType: BalancerPoolType.LiquidityBootstrappingPool;
+  tokens: BalancerPoolTokenWithWeight[];
+  gradualWeightUpdates: BalancerPoolGradualWeightUpdate[];
+}
+
+interface BalancerLinearPool extends BalancerBasePool {
+  poolType: BalancerPoolType.LinearPool;
+  tokens: BalancerPoolTokenWithRate[];
+  mainToken: BalancerPoolToken;
+  wrappedToken: BalancerPoolTokenWithRate;
+  bpt: BalancerPoolTokenWithRate;
+}
+
+interface BalancerPoolGradualWeightUpdate {
+  startTimestamp: Integer;
+  endTimestamp: Integer;
+  weightChanges: BalancerPoolTokenWeightChange[];
+}
+
+interface BalancerPoolTokenWeightChange {
+  poolTokenAddress: Address;
+  poolTokenIndex: Integer;
+  startWeight: BigInt;
+  endWeight: BigInt;
+}
+
 interface BalancerPoolToken {
   address: String;
   balance: BigInt;
@@ -96,11 +150,11 @@ interface BalancerPoolToken {
   type: BalancerPoolTokenType;
 }
 
-interface BalancerWeightedPoolToken extends BalancerPoolToken {
+interface BalancerPoolTokenWithWeight extends BalancerPoolToken {
   weight: BigInt;
 }
 
-interface BalancerStablePoolToken extends BalancerPoolToken {
+interface BalancerPoolTokenWithRate extends BalancerPoolToken {
   priceRate: BigInt;
 }
 
