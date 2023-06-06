@@ -85,12 +85,16 @@ interface BalancerBasePool {
   apr: BalancerPoolApr;
 
   // tokens
-  tokens: BalancerPoolToken[];
+  tokens: BalancerPoolBaseToken[];
 }
 
 export interface BalancerWeightedPool extends BalancerBasePool {
   poolType: BalancerPoolType.WeightedPool;
-  tokens: BalancerPoolTokenWithWeight[];
+  tokens: (
+    | BalancerPoolToken
+    | BalancerPoolStableBptToken
+    | BalancerPoolLinearBptToken
+  )[];
 }
 
 export interface BalancerStablePool extends BalancerBasePool {
@@ -100,14 +104,17 @@ export interface BalancerStablePool extends BalancerBasePool {
 
 export interface BalancerMetaStablePool extends BalancerBasePool {
   poolType: BalancerPoolType.MetaStablePool;
-  tokens: BalancerPoolTokenWithRate[];
   amp: BigInt;
 }
 
 export interface BalancerComposableStablePool extends BalancerBasePool {
   poolType: BalancerPoolType.ComposableStablePool;
-  tokens: BalancerPoolTokenWithRate[];
   amp: BigInt;
+  tokens: (
+    | BalancerPoolToken
+    | BalancerPoolStableBptToken
+    | BalancerPoolLinearBptToken
+  )[];
 }
 
 export interface BalancerLiquidityBootstrappingPool extends BalancerBasePool {
@@ -118,10 +125,9 @@ export interface BalancerLiquidityBootstrappingPool extends BalancerBasePool {
 
 interface BalancerLinearPool extends BalancerBasePool {
   poolType: BalancerPoolType.LinearPool;
-  tokens: BalancerPoolTokenWithRate[];
-  mainToken: BalancerPoolToken;
-  wrappedToken: BalancerPoolTokenWithRate;
-  bpt: BalancerPoolTokenWithRate;
+  mainToken: BalancerPoolBaseToken;
+  wrappedToken: BalancerPoolBaseToken;
+  bpt: BalancerPoolBaseToken;
 }
 
 interface BalancerPoolGradualWeightUpdate {
@@ -137,25 +143,50 @@ interface BalancerPoolTokenWeightChange {
   endWeight: BigInt;
 }
 
-interface BalancerPoolToken {
+interface BalancerPoolBaseToken {
   address: String;
   balance: BigInt;
   decimals: Integer;
   name: string;
   symbol: string;
   index: Integer;
-  totalBalance: BigInt; //the total balance in the pool, regardless of nesting
+  totalBalance: BigInt; // the total balance in the pool, regardless of nesting
+  priceRate: BigInt; // we include the priceRate on all tokens. Default to 1.0
 
   // identifies the token as WETH, nested stable BPT, nested linear BPT or "standard"
   type: BalancerPoolTokenType;
 }
 
-interface BalancerPoolTokenWithWeight extends BalancerPoolToken {
+interface BalancerPoolToken extends BalancerPoolBaseToken {
+  __typename: "BalancerPoolToken";
+}
+
+interface BalancerPoolTokenWithWeight extends BalancerPoolBaseToken {
+  __typename: "BalancerPoolTokenWithWeight";
   weight: BigInt;
 }
 
-interface BalancerPoolTokenWithRate extends BalancerPoolToken {
-  priceRate: BigInt;
+interface BalancerPoolStableBptToken extends BalancerPoolBaseToken {
+  __typename: "BalancerPoolStableBptToken";
+  poolId: ID;
+  pool: BalancerComposableStablePoolNested;
+}
+
+interface BalancerPoolLinearBptToken extends BalancerPoolBaseToken {
+  __typename: "BalancerPoolLinearBptToken";
+  poolId: ID;
+  pool: BalancerLinearPool;
+}
+
+interface BalancerPoolStableBptToken extends BalancerPoolBaseToken {
+  __typename: "BalancerPoolStableBptToken";
+}
+
+// A stable pool that is nested inside another pool cannot have another stable pool nested
+export interface BalancerComposableStablePoolNested extends BalancerBasePool {
+  poolType: BalancerPoolType.ComposableStablePool;
+  amp: BigInt;
+  tokens: (BalancerPoolToken | BalancerPoolLinearBptToken)[];
 }
 
 // USD data is data that changes at a high frequency and needs to be refetched often
