@@ -1,10 +1,10 @@
 // Typescript typing is more flexible than graphql, some models are more verbose than needed
 // to ensure compatability with graphql schema limitations
 
-type ID = string;
-type Address = string;
-type Integer = number;
-type Decimal = string;
+export type ID = string;
+export type Address = string;
+export type Integer = number;
+export type Decimal = string;
 
 enum BalancerNetwork {
   MAINNET = "1",
@@ -12,7 +12,7 @@ enum BalancerNetwork {
   POLYGON = "137",
 }
 
-enum BalancerPoolType {
+export enum BalancerPoolType {
   StablePool = "StablePool",
   MetaStablePool = "MetaStablePool",
   ComposableStablePool = "ComposableStablePool",
@@ -53,7 +53,7 @@ enum BalancerPoolTokenType {
   STANDARD = "STANDARD", // could be a better name here, a token that is not a nested bpt
 }
 
-interface BalancerBasePool {
+export interface BalancerBasePool {
   id: ID;
   address: Address;
   chain: BalancerNetwork;
