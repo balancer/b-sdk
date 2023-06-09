@@ -12,7 +12,8 @@ export type SupportedRawPoolTypes =
     | 'MetaStable'
     | 'ComposableStable'
     | 'StablePhantom'
-    | 'Element';
+    | 'Element'
+    | 'Gyro2';
 type LinearPoolType = `${string}Linear`;
 
 export type RawPool =
@@ -21,7 +22,8 @@ export type RawPool =
     | RawWeightedPool
     | RawStablePool
     | RawComposableStablePool
-    | RawMetaStablePool;
+    | RawMetaStablePool
+    | RawGyro2Pool;
 
 export interface RawBasePool {
     id: Hex;
@@ -67,6 +69,13 @@ export interface RawWeightedPool extends RawBasePool {
     poolType: 'Weighted' | 'Investment' | 'LiquidityBootstrapping';
     tokens: RawWeightedPoolToken[];
     hasActiveWeightUpdate?: boolean;
+}
+
+export interface RawGyro2Pool extends RawBasePool {
+    poolType: 'Gyro2';
+    tokens: RawPoolToken[];
+    sqrtAlpha: HumanAmount;
+    sqrtBeta: HumanAmount;
 }
 
 export interface RawPoolToken {
