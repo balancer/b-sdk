@@ -284,21 +284,20 @@ interface BalancerPoolTokenConfigStableBptLeafTokens
 }
 
 export type BalancerPoolJoinStep =
-  | BalancerPoolJoinExitBatchSwapStep
-  | BalancerPoolJoinMintBptStep;
+  | BalancerPoolJoinBatchSwapStep
+  | BalancerPoolJoinPoolStep;
 
 export type BalancerPoolExitStep =
-  | BalancerPoolJoinExitBatchSwapStep
-  | BalancerPoolExitBurnBptStep;
+  | BalancerPoolExitBatchSwapStep
+  | BalancerPoolExitPoolStep
+  | BalancerPoolExitOptionalUnwrapStep;
 
 export type BalancerPoolSingleAssetExitStep =
   | BalancerPoolSingleAssetExitBatchSwapStep
-  | BalancerPoolExitBurnBptStep;
+  | BalancerPoolExitPoolStep;
 
-// Currently, there should only ever be one batchSwap step that swaps any linear main tokens for the
-// corresponding linear phantom BPT
-export interface BalancerPoolJoinExitBatchSwapStep {
-  __typename: "BalancerPoolJoinExitBatchSwapStep";
+export interface BalancerPoolJoinBatchSwapStep {
+  __typename: "BalancerPoolJoinBatchSwapStep";
   swaps: {
     poolId: ID;
     tokenIn: Address;
@@ -308,16 +307,65 @@ export interface BalancerPoolJoinExitBatchSwapStep {
   tokensOut: Address[];
 }
 
+export interface BalancerPoolExitBatchSwapStep {
+  __typename: "BalancerPoolExitBatchSwapStep";
+  swaps: (
+    | BalancerPoolExitBatchSwapStepSwap
+    | BalancerPoolExitBatchSwapStepLinearPoolSwap
+  )[];
+  tokensIn: Address[];
+  tokensOut: Address[];
+}
+
+export interface BalancerPoolExitBatchSwapStepSwap {
+  __typename: "BalancerPoolExitBatchSwapStepSwap";
+  poolId: ID;
+  tokenIn: Address;
+  tokenOut: Address;
+}
+
+export interface BalancerPoolExitBatchSwapStepLinearPoolSwap {
+  __typename: "BalancerPoolExitBatchSwapStepLinearPoolSwap";
+  poolId: ID;
+  // tokenIn here is the phantom bpt (pool token)
+  tokenIn: Address;
+
+  // The tokenOut is determined by the amount of BPT in. If there are enough main tokens in
+  // the pool, we swap directly to main tokens. If the BPT in represents more main tokens than
+  // are available, we swap to wrapped tokens. There is an edge case where the exit cannot
+  // be facilitated by either main or wrapped tokens alone, at which point we need to split across both
+  // TODO: should we add additional metadata here or is it safe to assume you can get
+  // TODO this data from the pool structure?
+  // Possible additional metadata:
+  // mainToken
+  // wrappedToken
+  // mainTokenBalance
+  // wrappedTokenBalance
+}
+
+// The model itself cannot anticipate whether an individual exit will require an unwrap or not,
+// it does not and should not have access to the user's balance. We add the unwrap step here and
+// recognize that it is an optional step when we end up with wrapped tokens from a previous step
+export interface BalancerPoolExitOptionalUnwrapStep {
+  __typename: "BalancerPoolExitOptionalUnwrapStep";
+  unwraps: {
+    tokenIn: Address;
+    // TODO: we provide only the pool id here and expect the implementor to determine what type of unwrap is
+    // TODO: needed based on the pool data. This could be amended if there is an alternative desirable path
+    poolId: ID;
+  }[];
+}
+
 // The mint BPT step is a standard join step. At least one mint step will always occur on the pool itself.
 // Additionally, a second mint step will be present if there is a nested stable BPT in the pool.
-export interface BalancerPoolJoinMintBptStep {
-  __typename: "BalancerPoolJoinMintBptStep";
+export interface BalancerPoolJoinPoolStep {
+  __typename: "BalancerPoolJoinPoolStep";
   poolId: ID;
   tokensIn: Address[];
 }
 
-export interface BalancerPoolExitBurnBptStep {
-  __typename: "BalancerPoolExitBurnBptStep";
+export interface BalancerPoolExitPoolStep {
+  __typename: "BalancerPoolExitPoolStep";
   poolId: ID;
   tokensOut: Address[];
 }
