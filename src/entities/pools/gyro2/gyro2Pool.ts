@@ -41,10 +41,10 @@ export class Gyro2Pool implements BasePool {
     public readonly poolType: PoolType = PoolType.Gyro2;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    private readonly sqrtAlpha: bigint;
-    private readonly sqrtBeta: bigint;
     public readonly tokens: Gyro2PoolToken[];
 
+    private readonly sqrtAlpha: bigint;
+    private readonly sqrtBeta: bigint;
     private readonly tokenMap: Map<string, Gyro2PoolToken>;
 
     static fromRawPool(chainId: number, pool: RawGyro2Pool): Gyro2Pool {
@@ -225,6 +225,42 @@ export class Gyro2Pool implements BasePool {
         } else {
             return MathSol.mulDownFixed(tOut.amount, SWAP_LIMIT_FACTOR);
         }
+    }
+
+    spotPriceAfterSwapGivenIn(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+    ): bigint {
+        console.log(tokenIn, tokenOut, swapAmount);
+        throw new Error('Not implemented');
+    }
+
+    spotPriceAfterSwapGivenOut(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+    ): bigint {
+        console.log(tokenIn, tokenOut, swapAmount);
+        throw new Error('Not implemented');
+    }
+
+    derivativeSpotPriceAfterSwapGivenIn(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+    ): bigint {
+        console.log(tokenIn, tokenOut, swapAmount);
+        throw new Error('Not implemented');
+    }
+
+    derivativeSpotPriceAfterSwapGivenOut(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+    ): bigint {
+        console.log(tokenIn, tokenOut, swapAmount);
+        throw new Error('Not implemented');
     }
 
     getPoolPairData(

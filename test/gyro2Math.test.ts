@@ -11,11 +11,11 @@ import { _addFee, _reduceFee } from '../src/utils/gyroHelpers/math';
 import { RawGyro2Pool } from '../src/data';
 import { formatEther, formatUnits, parseEther } from 'viem';
 import { Token, TokenAmount } from '../src/entities';
-import { WAD } from '../src/utils';
+import { ChainId, WAD } from '../src/utils';
 
 describe('gyro2Math tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;
-    const chainId = 1;
+    const chainId = ChainId.MAINNET;
     const pool = Gyro2Pool.fromRawPool(chainId, testPool);
     const tokenIn = new Token(
         chainId,
