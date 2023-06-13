@@ -1,4 +1,3 @@
-import { MathSol, WAD } from '../math';
 import {
     SQRT_1E_NEG_1,
     SQRT_1E_NEG_3,
@@ -10,6 +9,7 @@ import {
     SQRT_1E_NEG_15,
     SQRT_1E_NEG_17,
 } from './constants';
+import { MathSol, WAD } from '../math';
 
 /////////
 /// Fee calculations

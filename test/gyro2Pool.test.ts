@@ -2,23 +2,22 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { formatEther, parseEther } from 'viem';
+
 import testPools from './lib/testData/gyro2TestPool.json';
+import { MockPoolDataEnricher } from './lib/utils/mockPoolEnricher';
+import { MockPoolProvider } from './lib/utils/mockPoolProvider';
 import {
-    RawGyro2Pool,
-    SwapKind,
-    TokenAmount,
     ChainId,
+    RawGyro2Pool,
+    SingleSwap,
     SmartOrderRouter,
     Swap,
+    SwapKind,
+    TokenAmount,
     Token,
-    SingleSwap,
-    OnChainPoolDataEnricher,
 } from '../src';
-
 import { Gyro2Pool } from '../src/entities/pools/gyro2';
-import { formatEther, parseEther } from 'viem';
-import { MockPoolProvider } from './lib/utils/mockPoolProvider';
-import { MockPoolDataEnricher } from './lib/utils/mockPoolEnricher';
 
 describe('Gyro2Pool tests USDC > DAI', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;

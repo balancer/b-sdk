@@ -1,17 +1,23 @@
 import { Hex, parseEther } from 'viem';
-import { PoolType, SwapKind } from '../../../types';
-import { BigintIsh, Token, TokenAmount } from '../..';
-import { BasePool } from '..';
-import { MathSol, WAD, getPoolAddress } from '../../../utils';
+
 import {
     _calcInGivenOut,
     _calcOutGivenIn,
     _calculateInvariant,
     _findVirtualParams,
 } from './gyro2Math';
+import { BasePool } from '..';
+import { BigintIsh, Token, TokenAmount } from '../..';
 import { RawGyro2Pool } from '../../../data/types';
-import { SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/constants';
-import { _addFee, _reduceFee } from '../../../utils/gyroHelpers/math';
+import { PoolType, SwapKind } from '../../../types';
+import {
+    _addFee,
+    _reduceFee,
+    getPoolAddress,
+    MathSol,
+    SWAP_LIMIT_FACTOR,
+    WAD,
+} from '../../../utils';
 
 export class Gyro2PoolToken extends TokenAmount {
     public readonly index: number;

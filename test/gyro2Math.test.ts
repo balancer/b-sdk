@@ -1,17 +1,22 @@
 // pnpm test -- gyro2Math.test.ts
+import { formatEther, formatUnits, parseEther } from 'viem';
 
-import { Gyro2Pool } from '../src/entities/pools/gyro2/gyro2Pool';
 import testPools from './lib/testData/gyro2TestPool.json';
+import {
+    _addFee,
+    _reduceFee,
+    ChainId,
+    RawGyro2Pool,
+    Token,
+    TokenAmount,
+    WAD,
+} from '../src';
 import {
     _calculateQuadratic,
     _calculateQuadraticTerms,
     _findVirtualParams,
 } from '../src/entities/pools/gyro2/gyro2Math';
-import { _addFee, _reduceFee } from '../src/utils/gyroHelpers/math';
-import { RawGyro2Pool } from '../src/data';
-import { formatEther, formatUnits, parseEther } from 'viem';
-import { Token, TokenAmount } from '../src/entities';
-import { ChainId, WAD } from '../src/utils';
+import { Gyro2Pool } from '../src/entities/pools/gyro2/gyro2Pool';
 
 describe('gyro2Math tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;
