@@ -46,6 +46,7 @@ export enum ChainId {
     ARBITRUM_ONE = 42161,
     AVALANCHE = 43114,
     BASE_GOERLI = 84531,
+    FANTOM = 250,
 }
 
 export const SUBGRAPH_URLS = {
@@ -71,6 +72,8 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2',
     [ChainId.BASE_GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-base-goerli-v2',
+    [ChainId.FANTOM]:
+        'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
 };
 
 export const STELLATE_URLS = {
@@ -126,6 +129,14 @@ export const NATIVE_ASSETS = {
         'ETH',
         'Ether',
         '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+    ),
+    [ChainId.FANTOM]: new Token(
+        ChainId.FANTOM,
+        NATIVE_ADDRESS,
+        18,
+        'FANTOM',
+        'Fantom',
+        '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
     ),
 };
 
