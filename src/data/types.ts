@@ -73,7 +73,6 @@ export interface RawWeightedPool extends RawBasePool {
 
 export interface RawGyro2Pool extends RawBasePool {
     poolType: 'Gyro2';
-    tokens: RawPoolToken[];
     sqrtAlpha: HumanAmount;
     sqrtBeta: HumanAmount;
 }
