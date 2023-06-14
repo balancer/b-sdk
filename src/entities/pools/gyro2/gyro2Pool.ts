@@ -118,47 +118,38 @@ export class Gyro2Pool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        // TODO: try/catch is being used on previous SOR - should we keep the same bevaiour or should we throw an error?
-        try {
-            const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(
-                tokenIn,
-                tokenOut,
-            );
-            const invariant = _calculateInvariant(
-                [tIn.scale18, tOut.scale18],
-                sqrtAlpha,
-                sqrtBeta,
-            );
-            const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-                invariant,
-                sqrtAlpha,
-                sqrtBeta,
-            );
-            const inAmountLessFee = _reduceFee(
-                swapAmount.scale18,
-                this.swapFee,
-            );
+        const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(
+            tokenIn,
+            tokenOut,
+        );
+        const invariant = _calculateInvariant(
+            [tIn.scale18, tOut.scale18],
+            sqrtAlpha,
+            sqrtBeta,
+        );
+        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+            invariant,
+            sqrtAlpha,
+            sqrtBeta,
+        );
+        const inAmountLessFee = _reduceFee(swapAmount.scale18, this.swapFee);
 
-            const outAmount = _calcOutGivenIn(
-                tIn.scale18,
-                tOut.scale18,
-                inAmountLessFee,
-                virtualParamIn,
-                virtualParamOut,
-            );
+        const outAmount = _calcOutGivenIn(
+            tIn.scale18,
+            tOut.scale18,
+            inAmountLessFee,
+            virtualParamIn,
+            virtualParamOut,
+        );
 
-            if (outAmount > tOut.scale18)
-                throw new Error('ASSET_BOUNDS_EXCEEDED');
+        if (outAmount > tOut.scale18) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
-            if (mutateBalances) {
-                tIn.increase(swapAmount.amount);
-                tOut.decrease(outAmount);
-            }
-
-            return TokenAmount.fromScale18Amount(tokenOut, outAmount);
-        } catch (_) {
-            return TokenAmount.fromScale18Amount(tokenOut, 0n);
+        if (mutateBalances) {
+            tIn.increase(swapAmount.amount);
+            tOut.decrease(outAmount);
         }
+
+        return TokenAmount.fromScale18Amount(tokenOut, outAmount);
     }
 
     public swapGivenOut(
@@ -167,43 +158,39 @@ export class Gyro2Pool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        try {
-            const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(
-                tokenIn,
-                tokenOut,
-            );
+        const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(
+            tokenIn,
+            tokenOut,
+        );
 
-            if (swapAmount.scale18 > tOut.scale18)
-                throw new Error('ASSET_BOUNDS_EXCEEDED');
+        if (swapAmount.scale18 > tOut.scale18)
+            throw new Error('ASSET_BOUNDS_EXCEEDED');
 
-            const invariant = _calculateInvariant(
-                [tIn.scale18, tOut.scale18],
-                sqrtAlpha,
-                sqrtBeta,
-            );
-            const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-                invariant,
-                sqrtAlpha,
-                sqrtBeta,
-            );
-            const inAmountLessFee = _calcInGivenOut(
-                tIn.scale18,
-                tOut.scale18,
-                swapAmount.scale18,
-                virtualParamIn,
-                virtualParamOut,
-            );
-            const inAmount = _addFee(inAmountLessFee, this.swapFee);
+        const invariant = _calculateInvariant(
+            [tIn.scale18, tOut.scale18],
+            sqrtAlpha,
+            sqrtBeta,
+        );
+        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+            invariant,
+            sqrtAlpha,
+            sqrtBeta,
+        );
+        const inAmountLessFee = _calcInGivenOut(
+            tIn.scale18,
+            tOut.scale18,
+            swapAmount.scale18,
+            virtualParamIn,
+            virtualParamOut,
+        );
+        const inAmount = _addFee(inAmountLessFee, this.swapFee);
 
-            if (mutateBalances) {
-                tIn.decrease(inAmount);
-                tOut.increase(swapAmount.amount);
-            }
-
-            return TokenAmount.fromScale18Amount(tokenIn, inAmount);
-        } catch (_) {
-            return TokenAmount.fromScale18Amount(tokenIn, 0n);
+        if (mutateBalances) {
+            tIn.decrease(inAmount);
+            tOut.increase(swapAmount.amount);
         }
+
+        return TokenAmount.fromScale18Amount(tokenIn, inAmount);
     }
 
     public getLimitAmountSwap(
