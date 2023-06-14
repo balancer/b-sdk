@@ -32,8 +32,6 @@ export function _calcOutGivenIn(
         virtInOver + amountIn,
     );
 
-    if (amountOut > balanceOut) throw new Error('ASSET_BOUNDS_EXCEEDED');
-
     return amountOut;
 }
 
@@ -56,8 +54,6 @@ export function _calcInGivenOut(
       // y' = virtOut                                                                              //
       // Note that dy < 0 < dx.                                                                    //
       **********************************************************************************************/
-
-    if (amountOut > balanceOut) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18.

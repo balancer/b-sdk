@@ -147,6 +147,9 @@ export class Gyro2Pool implements BasePool {
                 virtualParamOut,
             );
 
+            if (outAmount > tOut.scale18)
+                throw new Error('ASSET_BOUNDS_EXCEEDED');
+
             if (mutateBalances) {
                 tIn.increase(swapAmount.amount);
                 tOut.decrease(outAmount);
@@ -169,6 +172,10 @@ export class Gyro2Pool implements BasePool {
                 tokenIn,
                 tokenOut,
             );
+
+            if (swapAmount.scale18 > tOut.scale18)
+                throw new Error('ASSET_BOUNDS_EXCEEDED');
+
             const invariant = _calculateInvariant(
                 [tIn.scale18, tOut.scale18],
                 sqrtAlpha,
