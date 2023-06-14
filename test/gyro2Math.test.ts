@@ -1,5 +1,5 @@
 // pnpm test -- gyro2Math.test.ts
-import { formatEther, formatUnits, parseEther } from 'viem';
+import { formatEther, parseEther } from 'viem';
 
 import testPools from './lib/testData/gyro2TestPool.json';
 import { ChainId, RawGyro2Pool, Token, TokenAmount, WAD } from '../src';
@@ -34,24 +34,15 @@ describe('gyro2Math tests', () => {
     describe('add and remove swap fee', () => {
         const amountIn = TokenAmount.fromHumanAmount(tokenIn, '28492.48453');
         test('should correctly add swap fee', async () => {
-            expect(
-                Number(
-                    formatUnits(
-                        pool.addSwapFeeAmount(amountIn).amount,
-                        tokenIn.decimals,
-                    ),
-                ),
-            ).toBeCloseTo(28751.24575, 0.00001);
+            expect(pool.addSwapFeeAmount(amountIn).amount).toBeCloseToDelta(
+                28751245750n,
+                10n,
+            );
         });
         test('should correctly reduce by swap fee', async () => {
             expect(
-                Number(
-                    formatUnits(
-                        pool.subtractSwapFeeAmount(amountIn).amount,
-                        tokenIn.decimals,
-                    ),
-                ),
-            ).toBeCloseTo(28236.05217, 0.00001);
+                pool.subtractSwapFeeAmount(amountIn).amount,
+            ).toBeCloseToDelta(28236052170n, 10n);
         });
     });
 

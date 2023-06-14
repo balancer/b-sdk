@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { formatEther, parseEther } from 'viem';
+import { parseEther } from 'viem';
 
 import testPools from './lib/testData/gyro2TestPool.json';
 import { MockPoolDataEnricher } from './lib/utils/mockPoolEnricher';
@@ -52,26 +52,26 @@ describe('Gyro2Pool tests USDC > DAI', () => {
 
     describe('parsePoolPairData', () => {
         test('should correctly calculate price bounds USDC > DAI', async () => {
-            expect(Number(formatEther(poolPairData.sqrtAlpha))).toBeCloseTo(
-                0.9995003747,
-                0.00000001,
+            expect(poolPairData.sqrtAlpha).toBeCloseToDelta(
+                999500374700000000n,
+                10000000000n,
             );
 
-            expect(Number(formatEther(poolPairData.sqrtBeta))).toBeCloseTo(
-                1.000500375,
-                0.00000001,
+            expect(poolPairData.sqrtBeta).toBeCloseToDelta(
+                1000500375000000000n,
+                10000000000n,
             );
         });
 
         test('should correctly calculate price bounds DAI > USDC', async () => {
-            expect(Number(formatEther(poolPairData2.sqrtAlpha))).toBeCloseTo(
-                0.9994998749,
-                0.00000001,
+            expect(poolPairData2.sqrtAlpha).toBeCloseToDelta(
+                999499874900000000n,
+                10000000000n,
             );
 
-            expect(Number(formatEther(poolPairData2.sqrtBeta))).toBeCloseTo(
-                1.000499875,
-                0.00000001,
+            expect(poolPairData2.sqrtBeta).toBeCloseToDelta(
+                1000499875000000000n,
+                10000000000n,
             );
         });
     });
@@ -92,18 +92,18 @@ describe('Gyro2Pool tests USDC > DAI', () => {
         test('should correctly calculate normalized liquidity, USDC > DAI', async () => {
             const normalizedLiquidity = pool.getNormalizedLiquidity(USDC, DAI);
 
-            expect(Number(formatEther(normalizedLiquidity))).toBeCloseTo(
-                1116333.916257166990921337,
-                0.00001,
+            expect(normalizedLiquidity).toBeCloseToDelta(
+                1116333916257166990921337n,
+                10000000000000n,
             );
         });
 
         test('should correctly calculate normalized liquidity, DAI > USDC', async () => {
             const normalizedLiquidity = pool.getNormalizedLiquidity(DAI, USDC);
 
-            expect(Number(formatEther(normalizedLiquidity))).toBeCloseTo(
-                1116217.358286598731855228,
-                0.00001,
+            expect(normalizedLiquidity).toBeCloseToDelta(
+                1116217358286598731855228n,
+                10000000000000n,
             );
         });
     });
