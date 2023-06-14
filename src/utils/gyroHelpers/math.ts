@@ -12,19 +12,6 @@ import {
 import { MathSol, WAD } from '../math';
 
 /////////
-/// Fee calculations
-/////////
-
-export function _reduceFee(amountIn: bigint, swapFee: bigint): bigint {
-    const feeAmount = (amountIn * swapFee) / WAD;
-    return amountIn - feeAmount;
-}
-
-export function _addFee(amountIn: bigint, swapFee: bigint): bigint {
-    return (amountIn * WAD) / (WAD - swapFee);
-}
-
-/////////
 /// SQUARE ROOT
 /////////
 

@@ -2,15 +2,7 @@
 import { formatEther, formatUnits, parseEther } from 'viem';
 
 import testPools from './lib/testData/gyro2TestPool.json';
-import {
-    _addFee,
-    _reduceFee,
-    ChainId,
-    RawGyro2Pool,
-    Token,
-    TokenAmount,
-    WAD,
-} from '../src';
+import { ChainId, RawGyro2Pool, Token, TokenAmount, WAD } from '../src';
 import {
     _calculateQuadratic,
     _calculateQuadraticTerms,
@@ -45,7 +37,7 @@ describe('gyro2Math tests', () => {
             expect(
                 Number(
                     formatUnits(
-                        _addFee(amountIn.amount, pool.swapFee),
+                        pool.subtractSwapFeeAmount(amountIn).amount,
                         tokenIn.decimals,
                     ),
                 ),
@@ -55,7 +47,7 @@ describe('gyro2Math tests', () => {
             expect(
                 Number(
                     formatUnits(
-                        _reduceFee(amountIn.amount, pool.swapFee),
+                        pool.subtractSwapFeeAmount(amountIn).amount,
                         tokenIn.decimals,
                     ),
                 ),

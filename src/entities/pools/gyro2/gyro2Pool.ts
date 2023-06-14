@@ -11,8 +11,6 @@ import { BigintIsh, Token, TokenAmount } from '../..';
 import { RawGyro2Pool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
 import {
-    _addFee,
-    _reduceFee,
     getPoolAddress,
     MathSol,
     SWAP_LIMIT_FACTOR,
@@ -132,24 +130,30 @@ export class Gyro2Pool implements BasePool {
             sqrtAlpha,
             sqrtBeta,
         );
-        const inAmountLessFee = _reduceFee(swapAmount.scale18, this.swapFee);
+        const inAmountLessFee = this.subtractSwapFeeAmount(swapAmount);
 
-        const outAmount = _calcOutGivenIn(
+        const outAmountScale18 = _calcOutGivenIn(
             tIn.scale18,
             tOut.scale18,
-            inAmountLessFee,
+            inAmountLessFee.scale18,
             virtualParamIn,
             virtualParamOut,
         );
 
-        if (outAmount > tOut.scale18) throw new Error('ASSET_BOUNDS_EXCEEDED');
+        if (outAmountScale18 > tOut.scale18)
+            throw new Error('ASSET_BOUNDS_EXCEEDED');
+
+        const outAmount = TokenAmount.fromScale18Amount(
+            tokenOut,
+            outAmountScale18,
+        );
 
         if (mutateBalances) {
             tIn.increase(swapAmount.amount);
-            tOut.decrease(outAmount);
+            tOut.decrease(outAmount.amount);
         }
 
-        return TokenAmount.fromScale18Amount(tokenOut, outAmount);
+        return outAmount;
     }
 
     public swapGivenOut(
@@ -183,14 +187,16 @@ export class Gyro2Pool implements BasePool {
             virtualParamIn,
             virtualParamOut,
         );
-        const inAmount = _addFee(inAmountLessFee, this.swapFee);
+        const inAmount = this.addSwapFeeAmount(
+            TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee, true),
+        );
 
         if (mutateBalances) {
-            tIn.decrease(inAmount);
+            tIn.decrease(inAmount.amount);
             tOut.increase(swapAmount.amount);
         }
 
-        return TokenAmount.fromScale18Amount(tokenIn, inAmount);
+        return inAmount;
     }
 
     public getLimitAmountSwap(
@@ -227,7 +233,16 @@ export class Gyro2Pool implements BasePool {
         }
     }
 
-    getPoolPairData(
+    public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {
+        const feeAmount = amount.mulUpFixed(this.swapFee);
+        return amount.sub(feeAmount);
+    }
+
+    public addSwapFeeAmount(amount: TokenAmount): TokenAmount {
+        return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
+    }
+
+    public getPoolPairData(
         tokenIn: Token,
         tokenOut: Token,
     ): {
