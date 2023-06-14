@@ -7,20 +7,6 @@ export function _calcOutGivenIn(
     virtualParamIn: bigint,
     virtualParamOut: bigint,
 ): bigint {
-    /**********************************************************************************************
-        // Described for X = `in' asset and Y = `out' asset, but equivalent for the other case       //
-        // dX = incrX  = amountIn  > 0                                                               //
-        // dY = incrY = amountOut < 0                                                                //
-        // x = balanceIn             x' = x +  virtualParamX                                         //
-        // y = balanceOut            y' = y +  virtualParamY                                         //
-        // L  = inv.Liq                   /              L^2            \                            //
-        //                   - dy = y' - |   --------------------------  |                           //
-        //  x' = virtIn                   \          ( x' + dX)         /                            //
-        //  y' = virtOut                                                                             //
-        // Note that -dy > 0 is what the trader receives.                                            //
-        // We exploit the fact that this formula is symmetric up to virtualParam{X,Y}.               //
-        **********************************************************************************************/
-
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18.
     const virtInOver = balanceIn + MathSol.mulUpFixed(virtualParamIn, WAD + 2n);
@@ -42,19 +28,6 @@ export function _calcInGivenOut(
     virtualParamIn: bigint,
     virtualParamOut: bigint,
 ): bigint {
-    /**********************************************************************************************
-      // dX = incrX  = amountIn  > 0                                                               //
-      // dY = incrY  = amountOut < 0                                                               //
-      // x = balanceIn             x' = x +  virtualParamX                                         //
-      // y = balanceOut            y' = y +  virtualParamY                                         //
-      // x = balanceIn                                                                             //
-      // L  = inv.Liq                /              L^2             \                              //
-      //                     dx =   |   --------------------------  |  -  x'                       //
-      // x' = virtIn                \         ( y' + dy)           /                               //
-      // y' = virtOut                                                                              //
-      // Note that dy < 0 < dx.                                                                    //
-      **********************************************************************************************/
-
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18.
     const virtInOver = balanceIn + MathSol.mulUpFixed(virtualParamIn, WAD + 2n);
@@ -69,10 +42,6 @@ export function _calcInGivenOut(
     return amountIn;
 }
 
-/////////
-/// Virtual Parameter calculations
-/////////
-
 export function _findVirtualParams(
     invariant: bigint,
     sqrtAlpha: bigint,
@@ -84,26 +53,11 @@ export function _findVirtualParams(
     ];
 }
 
-/////////
-/// Invariant Calculation
-/////////
-
 export function _calculateInvariant(
     balances: bigint[], // balances
     sqrtAlpha: bigint,
     sqrtBeta: bigint,
 ): bigint {
-    /**********************************************************************************************
-      // Calculate with quadratic formula
-      // 0 = (1-sqrt(alpha/beta)*L^2 - (y/sqrt(beta)+x*sqrt(alpha))*L - x*y)
-      // 0 = a*L^2 + b*L + c
-      // here a > 0, b < 0, and c < 0, which is a special case that works well w/o negative numbers
-      // taking mb = -b and mc = -c:                            (1/2)
-      //                                  mb + (mb^2 + 4 * a * mc)^                   //
-      //                   L =    ------------------------------------------          //
-      //                                          2 * a                               //
-      //                                                                              //
-      **********************************************************************************************/
     const [a, mb, bSquare, mc] = _calculateQuadraticTerms(
         balances,
         sqrtAlpha,
@@ -114,8 +68,6 @@ export function _calculateInvariant(
 
     return invariant;
 }
-
-// Helper functions
 
 export function _calculateQuadraticTerms(
     balances: bigint[],
