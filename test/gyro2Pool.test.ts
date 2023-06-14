@@ -116,22 +116,6 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 const amountOut = pool.swapGivenIn(USDC, DAI, amountIn);
                 expect(amountOut.amount).toEqual(13379816831223414577n);
             });
-            test.skip('should correctly calculate newSpotPrice', async () => {
-                const newSpotPrice = pool.spotPriceAfterSwapGivenIn(
-                    USDC,
-                    DAI,
-                    amountIn,
-                );
-                expect(newSpotPrice.toString()).toEqual(1008988469190824523n);
-            });
-            test.skip('should correctly calculate derivative of spot price function at newSpotPrice', async () => {
-                const derivative = pool.derivativeSpotPriceAfterSwapGivenIn(
-                    USDC,
-                    DAI,
-                    amountIn,
-                );
-                expect(derivative.toString()).toEqual(895794688507n);
-            });
         });
 
         describe('SwapExactOut', () => {
@@ -140,22 +124,6 @@ describe('Gyro2Pool tests USDC > DAI', () => {
             test('should correctly calculate amountIn given amountOut', async () => {
                 const amountIn = pool.swapGivenOut(USDC, DAI, amountOut);
                 expect(amountIn.amount).toEqual(45977973n);
-            });
-            test.skip('should correctly calculate newSpotPrice', async () => {
-                const newSpotPrice = pool.spotPriceAfterSwapGivenOut(
-                    USDC,
-                    DAI,
-                    amountOut,
-                );
-                expect(newSpotPrice).toEqual(100901756299705875n);
-            });
-            test.skip('should correctly calculate derivative of spot price function at newSpotPrice', async () => {
-                const derivative = pool.derivativeSpotPriceAfterSwapGivenOut(
-                    USDC,
-                    DAI,
-                    amountOut,
-                );
-                expect(derivative.toString()).toEqual(903885604863n);
             });
         });
 

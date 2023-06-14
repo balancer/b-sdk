@@ -227,42 +227,6 @@ export class Gyro2Pool implements BasePool {
         }
     }
 
-    spotPriceAfterSwapGivenIn(
-        tokenIn: Token,
-        tokenOut: Token,
-        swapAmount: TokenAmount,
-    ): bigint {
-        console.log(tokenIn, tokenOut, swapAmount);
-        throw new Error('Not implemented');
-    }
-
-    spotPriceAfterSwapGivenOut(
-        tokenIn: Token,
-        tokenOut: Token,
-        swapAmount: TokenAmount,
-    ): bigint {
-        console.log(tokenIn, tokenOut, swapAmount);
-        throw new Error('Not implemented');
-    }
-
-    derivativeSpotPriceAfterSwapGivenIn(
-        tokenIn: Token,
-        tokenOut: Token,
-        swapAmount: TokenAmount,
-    ): bigint {
-        console.log(tokenIn, tokenOut, swapAmount);
-        throw new Error('Not implemented');
-    }
-
-    derivativeSpotPriceAfterSwapGivenOut(
-        tokenIn: Token,
-        tokenOut: Token,
-        swapAmount: TokenAmount,
-    ): bigint {
-        console.log(tokenIn, tokenOut, swapAmount);
-        throw new Error('Not implemented');
-    }
-
     getPoolPairData(
         tokenIn: Token,
         tokenOut: Token,
