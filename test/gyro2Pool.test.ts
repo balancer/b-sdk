@@ -123,7 +123,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
 
             test('should correctly calculate amountIn given amountOut', async () => {
                 const amountIn = pool.swapGivenOut(USDC, DAI, amountOut);
-                expect(amountIn.amount).toEqual(45977973n);
+                expect(amountIn.amount).toEqual(45977974n);
             });
         });
 

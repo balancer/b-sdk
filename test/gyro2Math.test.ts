@@ -37,7 +37,7 @@ describe('gyro2Math tests', () => {
             expect(
                 Number(
                     formatUnits(
-                        pool.subtractSwapFeeAmount(amountIn).amount,
+                        pool.addSwapFeeAmount(amountIn).amount,
                         tokenIn.decimals,
                     ),
                 ),

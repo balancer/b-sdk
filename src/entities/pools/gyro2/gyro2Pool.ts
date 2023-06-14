@@ -188,7 +188,7 @@ export class Gyro2Pool implements BasePool {
             virtualParamOut,
         );
         const inAmount = this.addSwapFeeAmount(
-            TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee, true),
+            TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee),
         );
 
         if (mutateBalances) {
