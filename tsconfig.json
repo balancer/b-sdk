@@ -1,5 +1,5 @@
 {
-    "include": ["src", "jest.d.ts"],
+    "include": ["src"],
     "compilerOptions": {
         "target": "ESNext",
         "module": "ESNext",
