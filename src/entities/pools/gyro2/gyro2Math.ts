@@ -1,4 +1,5 @@
-import { FOUR_WAD, MathSol, sqrt, TWO_WAD, WAD } from '../../../utils';
+import { FOUR_WAD, MathSol, TWO_WAD, WAD } from '../../../utils';
+import { MathGyro } from '../../../utils/gyroHelpers/math';
 
 export function _calcOutGivenIn(
     balanceIn: bigint,
@@ -121,7 +122,7 @@ export function _calculateQuadratic(
     const addTerm = MathSol.mulDownFixed(MathSol.mulDownFixed(mc, FOUR_WAD), a);
     // The minus sign in the radicand cancels out in this special case, so we add
     const radicand = bSquare + addTerm;
-    const sqrResult = sqrt(radicand, 5n);
+    const sqrResult = MathGyro.sqrt(radicand, 5n);
     // The minus sign in the numerator cancels out in this special case
     const numerator = mb + sqrResult;
     const invariant = MathSol.divDownFixed(numerator, denominator);

@@ -10,12 +10,8 @@ import { BasePool } from '..';
 import { BigintIsh, Token, TokenAmount } from '../..';
 import { RawGyro2Pool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
-import {
-    getPoolAddress,
-    MathSol,
-    SWAP_LIMIT_FACTOR,
-    WAD,
-} from '../../../utils';
+import { getPoolAddress, MathSol, WAD } from '../../../utils';
+import { SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
 
 export class Gyro2PoolToken extends TokenAmount {
     public readonly index: number;
