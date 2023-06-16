@@ -3,6 +3,7 @@ import { WeightedPoolFactory } from './weighted';
 import { StablePoolFactory } from './stable';
 import { MetaStablePoolFactory } from './metastable';
 import { LinearPoolFactory } from './linear';
+import { Gyro2PoolFactory } from './gyro2';
 import { RawPool } from '../../data/types';
 
 export class PoolParser {
@@ -17,6 +18,7 @@ export class PoolParser {
             new StablePoolFactory(),
             new MetaStablePoolFactory(),
             new LinearPoolFactory(),
+            new Gyro2PoolFactory(),
         ];
     }
 

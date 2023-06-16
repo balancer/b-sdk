@@ -12,6 +12,7 @@ export enum PoolType {
     ComposableStable = 'ComposableStable',
     MetaStable = 'MetaStable',
     AaveLinear = 'AaveLinear',
+    Gyro2 = 'Gyro2',
 }
 
 export enum SwapKind {
