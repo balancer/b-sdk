@@ -31,7 +31,7 @@ describe('gyroEPool tests', () => {
 
             expect(Number(normalizedLiquidity)).toBeCloseTo(
                 8521784.473067058,
-                0.00001,
+                12,
             );
         });
     });
@@ -46,7 +46,7 @@ describe('gyroEPool tests', () => {
 
             expect(Number(formatEther(limitAmount))).toBeCloseTo(
                 354.48480273457726733583,
-                0.00001,
+                8,
             );
         });
 
@@ -57,10 +57,7 @@ describe('gyroEPool tests', () => {
                 SwapKind.GivenOut,
             );
 
-            expect(Number(formatEther(limitAmount))).toBeCloseTo(
-                99.9999,
-                0.00001,
-            );
+            expect(Number(formatEther(limitAmount))).toBeCloseTo(99.9999, 6);
         });
     });
 
@@ -74,7 +71,7 @@ describe('gyroEPool tests', () => {
 
             expect(Number(formatEther(swapAmount.amount))).toBeCloseTo(
                 2.821007799187925949,
-                0.00001,
+                5,
             );
         });
 
@@ -89,7 +86,7 @@ describe('gyroEPool tests', () => {
                 pool.subtractSwapFeeAmount(swapAmount).amount,
             );
 
-            expect(Number(reduced)).toBeCloseTo(32.257987339909373037, 0.00001);
+            expect(Number(reduced)).toBeCloseTo(32.25798733990937, 5);
         });
     });
 });
