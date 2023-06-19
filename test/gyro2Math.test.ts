@@ -9,6 +9,7 @@ import {
     _findVirtualParams,
 } from '../src/entities/pools/gyro2/gyro2Math';
 import { Gyro2Pool } from '../src/entities/pools/gyro2/gyro2Pool';
+import { expectToBeCloseToDelta } from './lib/utils/helpers';
 
 describe('gyro2Math tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;
@@ -34,15 +35,12 @@ describe('gyro2Math tests', () => {
     describe('add and remove swap fee', () => {
         const amountIn = TokenAmount.fromHumanAmount(tokenIn, '28492.48453');
         test('should correctly add swap fee', async () => {
-            expect(pool.addSwapFeeAmount(amountIn).amount).toBeCloseToDelta(
-                28751245750n,
-                10n,
-            );
+            const amountInWithFee = pool.addSwapFeeAmount(amountIn).amount;
+            expectToBeCloseToDelta(amountInWithFee, 28751245750n, 10);
         });
         test('should correctly reduce by swap fee', async () => {
-            expect(
-                pool.subtractSwapFeeAmount(amountIn).amount,
-            ).toBeCloseToDelta(28236052170n, 10n);
+            const amountInLessFee = pool.subtractSwapFeeAmount(amountIn).amount;
+            expectToBeCloseToDelta(amountInLessFee, 28236052170n, 10);
         });
     });
 

@@ -1,10 +1,10 @@
 // pnpm test -- test/gyroEPool.test.ts
 
-import { formatEther } from 'viem';
+import testPools from './lib/testData/gyroETestPool.json';
+import { expectToBeCloseToDelta } from './lib/utils/helpers';
 import { ChainId, SwapKind, Token, TokenAmount } from '../src';
 import { RawGyroEPool } from '../src/data/types';
 import { GyroEPool } from '../src/entities/pools/gyroE';
-import testPools from './lib/testData/gyroETestPool.json';
 
 describe('gyroEPool tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyroEPool;
@@ -28,10 +28,10 @@ describe('gyroEPool tests', () => {
                 tokenIn,
                 tokenOut,
             );
-
-            expect(Number(normalizedLiquidity)).toBeCloseTo(
-                8521784.473067058,
-                12,
+            expectToBeCloseToDelta(
+                normalizedLiquidity,
+                8521784473067058000000000n,
+                1000000,
             );
         });
     });
@@ -43,10 +43,10 @@ describe('gyroEPool tests', () => {
                 tokenOut,
                 SwapKind.GivenIn,
             );
-
-            expect(Number(formatEther(limitAmount))).toBeCloseTo(
-                354.48480273457726733583,
-                8,
+            expectToBeCloseToDelta(
+                limitAmount,
+                354484802734577267335n,
+                10000000000,
             );
         });
 
@@ -56,8 +56,11 @@ describe('gyroEPool tests', () => {
                 tokenOut,
                 SwapKind.GivenOut,
             );
-
-            expect(Number(formatEther(limitAmount))).toBeCloseTo(99.9999, 6);
+            expectToBeCloseToDelta(
+                limitAmount,
+                99999900000000000000n,
+                1000000000000,
+            );
         });
     });
 
@@ -69,9 +72,10 @@ describe('gyroEPool tests', () => {
                 TokenAmount.fromHumanAmount(tokenIn, '10'),
             );
 
-            expect(Number(formatEther(swapAmount.amount))).toBeCloseTo(
-                2.821007799187925949,
-                5,
+            expectToBeCloseToDelta(
+                swapAmount.amount,
+                2821007799187925949n,
+                10000000000000,
             );
         });
 
@@ -82,11 +86,14 @@ describe('gyroEPool tests', () => {
                 TokenAmount.fromHumanAmount(tokenOut, '10'),
             );
 
-            const reduced = formatEther(
-                pool.subtractSwapFeeAmount(swapAmount).amount,
-            );
+            const amountInLessFee =
+                pool.subtractSwapFeeAmount(swapAmount).amount;
 
-            expect(Number(reduced)).toBeCloseTo(32.25798733990937, 5);
+            expectToBeCloseToDelta(
+                amountInLessFee,
+                32257987339909370000n,
+                10000000000000,
+            );
         });
     });
 });

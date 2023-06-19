@@ -1,8 +1,10 @@
 // pnpm test -- gyroEMath.test.ts
-import { formatEther, parseEther } from 'viem';
+import { parseEther } from 'viem';
+
+import testPools from './lib/testData/gyroETestPool.json';
+import { expectToBeCloseToDelta } from './lib/utils/helpers';
 import { calculateDerivedValues } from '../src/entities/pools/gyroE/testingHelpers';
 import { RawGyroEPool } from '../src/data/types';
-import testPools from './lib/testData/gyroETestPool.json';
 import { ChainId } from '../src/utils';
 import { GyroEPool, Vector2 } from '../src/entities/pools/gyroE/gyroEPool';
 import { Token, TokenAmount } from '../src/entities';
@@ -44,16 +46,18 @@ describe('gyroEMath tests', () => {
         const amountIn = TokenAmount.fromHumanAmount(tokenIn, '28492.48453');
         test('should correctly add swap fee', async () => {
             const amountInWithFee = pool.addSwapFeeAmount(amountIn).amount;
-            expect(Number(formatEther(amountInWithFee))).toBeCloseTo(
-                31310.4225604,
-                5,
+            expectToBeCloseToDelta(
+                amountInWithFee,
+                31310422560400000000000n,
+                10000000000000,
             );
         });
         test('should correctly reduce by swap fee', async () => {
             const amountInLessFee = pool.subtractSwapFeeAmount(amountIn).amount;
-            expect(Number(formatEther(amountInLessFee))).toBeCloseTo(
-                25928.1609223,
-                5,
+            expectToBeCloseToDelta(
+                amountInLessFee,
+                25928160922300000000000n,
+                10000000000000,
             );
         });
     });
@@ -89,7 +93,7 @@ describe('gyroEMath tests', () => {
                 DERIVED_GYRO_E_PARAMS,
                 invariant,
             );
-            expect(Number(formatEther(a))).toBeCloseTo(211.2907465218162, 5);
+            expectToBeCloseToDelta(a, 211290746521816200000n, 10000000000000);
         });
     });
 
@@ -111,7 +115,7 @@ describe('gyroEMath tests', () => {
                 DERIVED_GYRO_E_PARAMS,
                 invariant,
             );
-            expect(Number(formatEther(b))).toBeCloseTo(65.50013143153841, 5);
+            expectToBeCloseToDelta(b, 65500131431538410000n, 10000000000000);
         });
     });
 });
