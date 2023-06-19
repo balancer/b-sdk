@@ -1,3 +1,4 @@
+// pnpm test -- test/sor.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 

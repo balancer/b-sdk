@@ -96,6 +96,7 @@ export interface RawGyroEPool extends RawBasePool {
     w: HumanAmount;
     z: HumanAmount;
     dSq: HumanAmount;
+    tokenRates?: HumanAmount[]; // available on GyroEV2 and up
 }
 
 export interface RawPoolToken {

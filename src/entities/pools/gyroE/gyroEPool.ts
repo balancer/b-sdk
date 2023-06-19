@@ -4,7 +4,7 @@ import { BasePool } from '..';
 import { BigintIsh, Token, TokenAmount } from '../..';
 import { RawGyroEPool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
-import { MathSol, getPoolAddress } from '../../../utils';
+import { MathSol, WAD, getPoolAddress } from '../../../utils';
 import {
     balancesFromTokenInOut,
     virtualOffset0,
@@ -22,22 +22,30 @@ import {
 } from '../../../utils/gyroHelpers/math';
 
 export class GyroEPoolToken extends TokenAmount {
+    public readonly rate: bigint;
     public readonly index: number;
 
-    public constructor(token: Token, amount: BigintIsh, index: number) {
+    public constructor(
+        token: Token,
+        amount: BigintIsh,
+        rate: BigintIsh,
+        index: number,
+    ) {
         super(token, amount);
+        this.rate = BigInt(rate);
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         this.index = index;
     }
 
     public increase(amount: bigint): TokenAmount {
         this.amount = this.amount + amount;
-        this.scale18 = this.amount * this.scalar;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         return this;
     }
 
     public decrease(amount: bigint): TokenAmount {
         this.amount = this.amount - amount;
-        this.scale18 = this.amount * this.scalar;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         return this;
     }
 }
@@ -90,9 +98,17 @@ export class GyroEPool implements BasePool {
                 t.name,
             );
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
+            const tokenRate = pool.tokenRates
+                ? parseEther(pool.tokenRates[t.index])
+                : WAD;
 
             poolTokens.push(
-                new GyroEPoolToken(token, tokenAmount.amount, t.index),
+                new GyroEPoolToken(
+                    token,
+                    tokenAmount.amount,
+                    tokenRate,
+                    t.index,
+                ),
             );
         }
 
@@ -183,20 +199,27 @@ export class GyroEPool implements BasePool {
             x: currentInvariant + invErr * 2n,
             y: currentInvariant,
         };
-        const inAmountLessFee = this.subtractSwapFeeAmount(swapAmount);
+        const inAmount = GyroEPoolToken.fromRawAmount(
+            tokenIn,
+            swapAmount.amount,
+        );
+        const inAmountLessFee = this.subtractSwapFeeAmount(inAmount);
+        const inAmountWithRate = inAmountLessFee.mulDownFixed(tIn.rate);
         const outAmountScale18 = calcOutGivenIn(
             orderedNormalizedBalances,
-            inAmountLessFee.scale18,
+            inAmountWithRate.scale18,
             tIn.index === 0,
             this.gyroEParams,
             this.derivedGyroEParams,
             invariant,
         );
 
-        const outAmount = TokenAmount.fromScale18Amount(
-            tOut.token,
+        const outAmountWithRate = TokenAmount.fromScale18Amount(
+            tokenOut,
             outAmountScale18,
         );
+
+        const outAmount = outAmountWithRate.divDownFixed(tOut.rate);
 
         if (mutateBalances) {
             tIn.increase(swapAmount.amount);
@@ -238,15 +261,17 @@ export class GyroEPool implements BasePool {
         );
 
         const inAmount = this.addSwapFeeAmount(
-            TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee),
+            GyroEPoolToken.fromScale18Amount(tokenIn, inAmountLessFee),
         );
 
+        const inAmountWithRate = inAmount.divDownFixed(tIn.rate);
+
         if (mutateBalances) {
-            tIn.decrease(inAmount.amount);
+            tIn.decrease(inAmountWithRate.amount);
             tOut.increase(swapAmount.amount);
         }
 
-        return inAmount;
+        return inAmountWithRate;
     }
 
     public getLimitAmountSwap(
@@ -284,7 +309,10 @@ export class GyroEPool implements BasePool {
                     invariant,
                     true,
                 );
-            const limitAmountIn = maxAmountInAssetInPool - tIn.scale18;
+            const limitAmountIn = MathGyro.divDown(
+                maxAmountInAssetInPool - tIn.scale18,
+                tIn.rate,
+            );
             const limitAmountInPlusSwapFee = MathGyro.divDown(
                 limitAmountIn,
                 ONE - this.swapFee,
