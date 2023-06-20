@@ -1,7 +1,6 @@
-import { parseUnits } from 'viem';
 import { MAX_BALANCES } from './constants';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './gyroEPool';
-import { MathGyro, ONE, ONE_XP } from '../../../utils/gyroHelpers/math';
+import { MathGyro, ONE_XP } from '../../../utils/gyroHelpers/math';
 
 /////////
 /// TYPES
@@ -18,13 +17,6 @@ export type QParams = {
 ////////
 /// BALANCE CALCULATION
 ////////
-export function normalizeBalances(
-    balances: bigint[],
-    decimals: number[],
-): bigint[] {
-    const scalingFactors = decimals.map((d) => parseUnits('1', d));
-    return balances.map((bal, index) => (bal * ONE) / scalingFactors[index]);
-}
 
 export function balancesFromTokenInOut(
     balanceTokenIn: bigint,
@@ -543,31 +535,4 @@ export function calcXpXpDivLambdaLambda(
         MathGyro.divXpU(MathGyro.mulXpU(tauBeta.x, tauBeta.x), sqVars.x) + 7n;
     const val = MathGyro.mulUpMagU(MathGyro.mulUpMagU(sqVars.y, c), c);
     return MathGyro.mulUpXpToNpU(val, termXp) + q.a;
-}
-
-/////////
-/// LINEAR ALGEBRA OPERATIONS
-/////////
-
-export function mulA(params: GyroEParams, tp: Vector2): Vector2 {
-    return {
-        x:
-            MathGyro.divDownMagU(
-                MathGyro.mulDownMagU(params.c, tp.x),
-                params.lambda,
-            ) -
-            MathGyro.divDownMagU(
-                MathGyro.mulDownMagU(params.s, tp.y),
-                params.lambda,
-            ),
-        y:
-            MathGyro.mulDownMagU(params.s, tp.x) +
-            MathGyro.mulDownMagU(params.c, tp.y),
-    };
-}
-
-export function scalarProd(t1: Vector2, t2: Vector2): bigint {
-    const ret =
-        MathGyro.mulDownMagU(t1.x, t2.x) + MathGyro.mulDownMagU(t1.y, t2.y);
-    return ret;
 }
