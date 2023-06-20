@@ -32,7 +32,7 @@ export interface SwapOptions {
 export interface FundManagement {
     sender: string;
     fromInternalBalance: boolean;
-    recipient: boolean;
+    recipient: string;
     toInternalBalance: boolean;
 }
 
