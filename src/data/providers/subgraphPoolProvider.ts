@@ -229,6 +229,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                     address
                     poolType
                     poolTypeVersion
+                    name
                     tokens {
                         address
                         balance
