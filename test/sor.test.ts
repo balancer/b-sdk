@@ -4,13 +4,15 @@ dotenv.config();
 import { SmartOrderRouter } from '../src/sor';
 import { sorGetSwapsWithPools } from '../src/static';
 import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import { ChainId, ETH } from '../src/utils';
+import {
+    BALANCER_POOL_DATA_QUERIES_ADDRESSES,
+    ChainId,
+    ETH,
+} from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapKind, SwapOptions } from '../src/types';
 import { BasePool } from '../src/entities/pools';
-
-const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 describe('SmartOrderRouter', () => {
     describe('Mainnet', () => {
@@ -19,7 +21,7 @@ describe('SmartOrderRouter', () => {
         const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             rpcUrl,
-            SOR_QUERIES,
+            BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
         );
 
         const sor = new SmartOrderRouter({
