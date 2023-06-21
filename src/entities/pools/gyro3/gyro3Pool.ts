@@ -222,12 +222,12 @@ export class Gyro3Pool implements BasePool {
         tOut: Gyro3PoolToken;
         tertiary: Gyro3PoolToken;
     } {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
 
         const tertiaryAddress = this.tokens
-            .map((t) => t.token.address)
-            .find((a) => a !== tokenIn.address && a !== tokenOut.address);
+            .map((t) => t.token.wrapped)
+            .find((a) => a !== tokenIn.wrapped && a !== tokenOut.wrapped);
         const tertiary = this.tokenMap.get(tertiaryAddress as string);
 
         if (!tIn || !tOut || !tertiary) {
