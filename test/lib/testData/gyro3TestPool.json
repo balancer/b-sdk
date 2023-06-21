@@ -1,0 +1,112 @@
+{
+    "tradeInfo": {
+        "SwapType": "n/a",
+        "TokenIn": "n/a",
+        "TokenOut": "n/a",
+        "NoPools": 1,
+        "SwapAmount": "n/a",
+        "GasPrice": "n/a",
+        "SwapAmountDecimals": "n/a",
+        "ReturnAmountDecimals": "n/a"
+    },
+    "pools": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e0000000000000000000000ff",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.003",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "82934",
+                    "decimals": 18,
+                    "symbol": "DAI",
+                    "weight": null,
+                    "priceRate": "1",
+                    "index": 0,
+                    "name": "Dai"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "81485",
+                    "decimals": 6,
+                    "weight": null,
+                    "priceRate": "1",
+                    "symbol": "USDC",
+                    "index": 1,
+                    "name": "USDC"
+                },
+                {
+                    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                    "balance": "83119",
+                    "decimals": 18,
+                    "weight": "5",
+                    "priceRate": "1",
+                    "symbol": "USDT",
+                    "index": 2,
+                    "name": "USDT"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xdac17f958d2ee523a2206206994597c13d831ec7"
+            ],
+            "totalWeight": "15",
+            "totalShares": "100",
+            "poolType": "Gyro3",
+            "poolTypeVersion": 1,
+            "liquidity": "1",
+            "swapEnabled": true,
+            "root3Alpha": "0.995647752"
+        },
+        {
+            "id": "0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799",
+            "address": "0x17f1ef81707811ea15d9ee7c741179bbe2a63887",
+            "name": "Gyroscope 3CLP BUSD/USDC/USDT",
+            "symbol": "3CLP-BUSD-USDC-USDT",
+            "poolType": "Gyro3",
+            "poolTypeVersion": null,
+            "baseToken": null,
+            "principalToken": null,
+            "swapFee": "0.0003",
+            "swapEnabled": true,
+            "isInRecoveryMode": null,
+            "isPaused": false,
+            "totalShares": "100464954.911215282135041596",
+            "wrappedIndex": null,
+            "mainIndex": null,
+            "tokensList": [
+                "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+                "0x9c9e5fd8bbc25984b178fdce6117defa39d2db39",
+                "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"
+            ],
+            "tokens": [
+                {
+                    "symbol": "USDC",
+                    "address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+                    "balance": "4051.734995",
+                    "decimals": 6,
+                    "name": "USD Coin (PoS)",
+                    "index": 0
+                },
+                {
+                    "symbol": "BUSD",
+                    "address": "0x9c9e5fd8bbc25984b178fdce6117defa39d2db39",
+                    "balance": "30483.767853147714881902",
+                    "decimals": 18,
+                    "name": "BUSD Token",
+                    "index": 1
+                },
+                {
+                    "symbol": "USDT",
+                    "address": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+                    "balance": "16719.886804",
+                    "decimals": 6,
+                    "name": "(PoS) Tether USD",
+                    "index": 2
+                }
+            ],
+            "root3Alpha": "0.9995"
+        }
+    ]
+}

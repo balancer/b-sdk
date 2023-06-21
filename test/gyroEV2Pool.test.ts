@@ -1,4 +1,4 @@
-// pnpm test -- gyroEV2Pool.spec.ts
+// pnpm test -- gyroEV2Pool.test.ts
 
 import { ChainId, RawGyroEPool, SwapKind, Token, TokenAmount } from '../src';
 import { GyroEPool } from '../src/entities/pools/gyroE';
