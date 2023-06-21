@@ -25,6 +25,7 @@ export type RawPool =
     | RawComposableStablePool
     | RawMetaStablePool
     | RawGyro2Pool
+    | RawGyro3Pool
     | RawGyroEPool;
 
 export interface RawBasePool {
@@ -77,6 +78,11 @@ export interface RawGyro2Pool extends RawBasePool {
     poolType: 'Gyro2';
     sqrtAlpha: HumanAmount;
     sqrtBeta: HumanAmount;
+}
+
+export interface RawGyro3Pool extends RawBasePool {
+    poolType: 'Gyro3';
+    root3Alpha: HumanAmount;
 }
 
 export interface RawGyroEPool extends RawBasePool {
