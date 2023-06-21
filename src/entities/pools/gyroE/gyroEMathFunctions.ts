@@ -1,4 +1,5 @@
-import { MathGyro, ONE } from '../../../utils/gyroHelpers/math';
+import { WAD } from '../../../utils';
+import { MathGyro } from '../../../utils/gyroHelpers/math';
 import { virtualOffset0, virtualOffset1 } from './gyroEMathHelpers';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './gyroEPool';
 
@@ -19,15 +20,15 @@ function setup(
     const [x0, y0] = balances;
     const a = virtualOffset0(params, derived, rVec);
     const b = virtualOffset1(params, derived, rVec);
-    const ls = ONE - MathGyro.divDown(ONE, MathGyro.mulDown(lambda, lambda));
-    const f = ONE - fee;
+    const ls = WAD - MathGyro.divDown(WAD, MathGyro.mulDown(lambda, lambda));
+    const f = WAD - fee;
 
     let R: bigint;
     if (ixVar === 0) {
         R = MathGyro.sqrt(
             MathGyro.mulDown(
                 MathGyro.mulDown(r, r),
-                ONE - MathGyro.mulDown(ls, MathGyro.mulDown(s, s)),
+                WAD - MathGyro.mulDown(ls, MathGyro.mulDown(s, s)),
             ) -
                 MathGyro.divDown(
                     MathGyro.mulDown(x0 - a, x0 - a),
@@ -39,7 +40,7 @@ function setup(
         R = MathGyro.sqrt(
             MathGyro.mulDown(
                 MathGyro.mulDown(r, r),
-                ONE - MathGyro.mulDown(ls, MathGyro.mulDown(c, c)),
+                WAD - MathGyro.mulDown(ls, MathGyro.mulDown(c, c)),
             ) -
                 MathGyro.divDown(
                     MathGyro.mulDown(y0 - b, y0 - b),
@@ -71,8 +72,8 @@ export function normalizedLiquidityYIn(
     const returnValue = MathGyro.divDown(
         MathGyro.mulDown(
             MathGyro.divDown(
-                ONE,
-                ONE - MathGyro.mulDown(ls, MathGyro.mulDown(c, c)),
+                WAD,
+                WAD - MathGyro.mulDown(ls, MathGyro.mulDown(c, c)),
             ),
             MathGyro.mulDown(
                 R,
@@ -124,8 +125,8 @@ export function normalizedLiquidityXIn(
     const returnValue = MathGyro.divDown(
         MathGyro.mulDown(
             MathGyro.divDown(
-                ONE,
-                ONE - MathGyro.mulDown(ls, MathGyro.mulDown(s, s)),
+                WAD,
+                WAD - MathGyro.mulDown(ls, MathGyro.mulDown(s, s)),
             ),
             MathGyro.mulDown(
                 R,

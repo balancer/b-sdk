@@ -1,3 +1,5 @@
+import { WAD } from '../math';
+
 // SQRT constants
 export const SQRT_1E_NEG_1 = 316227766016837933n;
 export const SQRT_1E_NEG_3 = 31622776601683793n;
@@ -8,9 +10,6 @@ export const SQRT_1E_NEG_11 = 3162277660168n;
 export const SQRT_1E_NEG_13 = 316227766016n;
 export const SQRT_1E_NEG_15 = 31622776601n;
 export const SQRT_1E_NEG_17 = 3162277660n;
-
-// Standard precision
-export const ONE = 10n ** 18n; // 18 decimal places
 
 // High precision
 export const ONE_XP = 10n ** 38n; // 38 decimal places
@@ -27,21 +26,21 @@ export const SWAP_LIMIT_FACTOR = 999999000000000000n;
 export class MathGyro {
     static mulUp(a: bigint, b: bigint): bigint {
         const product = a * b;
-        return (product - 1n) / ONE + 1n;
+        return (product - 1n) / WAD + 1n;
     }
 
     static divUp(a: bigint, b: bigint): bigint {
-        const aInflated = a * ONE;
+        const aInflated = a * WAD;
         return (aInflated - 1n) / b + 1n;
     }
 
     static mulDown(a: bigint, b: bigint): bigint {
         const product = a * b;
-        return product / ONE;
+        return product / WAD;
     }
 
     static divDown(a: bigint, b: bigint): bigint {
-        const aInflated = a * ONE;
+        const aInflated = a * WAD;
         return aInflated / b;
     }
 
@@ -55,18 +54,18 @@ export class MathGyro {
     }
 
     static mulDownMagU(a: bigint, b: bigint): bigint {
-        return (a * b) / ONE;
+        return (a * b) / WAD;
     }
 
     static divDownMagU(a: bigint, b: bigint): bigint {
         if (b === 0n) throw new Error('ZERO DIVISION');
-        return (a * ONE) / b;
+        return (a * WAD) / b;
     }
 
     static mulUpMagU(a: bigint, b: bigint): bigint {
         const product = a * b;
-        if (product > 0n) return (product - 1n) / ONE + 1n;
-        else if (product < 0n) return (product + 1n) / ONE - 1n;
+        if (product > 0n) return (product - 1n) / WAD + 1n;
+        else if (product < 0n) return (product + 1n) / WAD - 1n;
         else return 0n;
     }
 
@@ -79,8 +78,8 @@ export class MathGyro {
         if (a === 0n) {
             return 0n;
         } else {
-            if (a > 0n) return (a * ONE - 1n) / b + 1n;
-            else return (a * ONE + 1n) / (b - 1n);
+            if (a > 0n) return (a * WAD - 1n) / b + 1n;
+            else return (a * WAD + 1n) / (b - 1n);
         }
     }
 
@@ -118,11 +117,11 @@ export class MathGyro {
 
         // 7 iterations
         for (let i = 0; i < 7; i++) {
-            guess = (guess + (input * ONE) / guess) / 2n;
+            guess = (guess + (input * WAD) / guess) / 2n;
         }
 
         // Check square is more or less correct (in some epsilon range)
-        const guessSquared = (guess * guess) / ONE;
+        const guessSquared = (guess * guess) / WAD;
         if (
             !(
                 guessSquared <= input + this.mulUp(guess, tolerance) &&
@@ -135,8 +134,8 @@ export class MathGyro {
     }
 
     static makeInitialGuess(input: bigint) {
-        if (input > ONE) {
-            return 2n ** this.intLog2Halved(input / ONE) * ONE;
+        if (input > WAD) {
+            return 2n ** this.intLog2Halved(input / WAD) * WAD;
         } else {
             if (input <= 10n) {
                 return SQRT_1E_NEG_17;

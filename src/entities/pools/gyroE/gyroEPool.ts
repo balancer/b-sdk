@@ -15,11 +15,7 @@ import {
     calcOutGivenIn,
     calculateInvariantWithError,
 } from './gyroEMath';
-import {
-    MathGyro,
-    ONE,
-    SWAP_LIMIT_FACTOR,
-} from '../../../utils/gyroHelpers/math';
+import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
 
 export class GyroEPoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -315,7 +311,7 @@ export class GyroEPool implements BasePool {
             );
             const limitAmountInPlusSwapFee = MathGyro.divDown(
                 limitAmountIn,
-                ONE - this.swapFee,
+                WAD - this.swapFee,
             );
             return MathGyro.mulDown(
                 limitAmountInPlusSwapFee,

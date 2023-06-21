@@ -1,4 +1,4 @@
-import { ONE } from '../../../utils/gyroHelpers/math';
+import { WAD } from '../../../utils';
 import { _SAFE_LARGE_POW3_THRESHOLD, MIDDECIMAL } from './constants';
 
 // Helpers
@@ -10,20 +10,20 @@ export function _safeLargePow3ADown(
     let ret = 0n;
     if (l <= _SAFE_LARGE_POW3_THRESHOLD) {
         // Simple case where there is no overflow
-        ret = (((l * l) / ONE) * l) / ONE;
+        ret = (((l * l) / WAD) * l) / WAD;
         ret =
             ret -
-            (((((ret * root3Alpha) / ONE) * root3Alpha) / ONE) * root3Alpha) /
-                ONE;
-        ret = (ret * ONE) / d;
+            (((((ret * root3Alpha) / WAD) * root3Alpha) / WAD) * root3Alpha) /
+                WAD;
+        ret = (ret * WAD) / d;
     } else {
-        ret = (l * l) / ONE;
+        ret = (l * l) / WAD;
 
         // Compute l^2 * l * (1 - root3Alpha^3)
         // The following products split up the factors into different groups of decimal places to reduce temorary
         // blowup and prevent overflow.
         // No precision is lost.
-        ret = ret * (l / ONE) + ((ret * l) % ONE) / ONE;
+        ret = ret * (l / WAD) + ((ret * l) % WAD) / WAD;
 
         let x = ret;
 

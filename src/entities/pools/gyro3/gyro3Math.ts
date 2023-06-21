@@ -3,7 +3,8 @@ import {
     _INVARIANT_SHRINKING_FACTOR_PER_STEP,
 } from './constants';
 import { _safeLargePow3ADown } from './helpers';
-import { MathGyro, ONE } from '../../../utils/gyroHelpers/math';
+import { MathGyro } from '../../../utils/gyroHelpers/math';
+import { WAD } from '../../../utils';
 
 // Invariant Calculation
 
@@ -35,7 +36,7 @@ export function _calculateCubicTerms(
 ): [bigint, bigint, bigint, bigint] {
     const alpha23 = MathGyro.mulDown(root3Alpha, root3Alpha); // alpha to the power of (2/3)
     const alpha = MathGyro.mulDown(alpha23, root3Alpha);
-    const a = ONE - alpha;
+    const a = WAD - alpha;
     const bterm = balances[0] + balances[1] + balances[2];
     const mb = MathGyro.mulDown(
         MathGyro.mulDown(bterm, root3Alpha),
@@ -81,14 +82,14 @@ export function _calculateCubicStartingPoint(
 ): bigint {
     const radic =
         MathGyro.mulUp(mb, mb) +
-        MathGyro.mulUp(MathGyro.mulUp(a, mc), ONE * 3n);
+        MathGyro.mulUp(MathGyro.mulUp(a, mc), WAD * 3n);
     const lmin =
         MathGyro.divUp(mb, a * 3n) +
         MathGyro.divUp(MathGyro.sqrt(radic, 5n), a * 3n);
     // This formula has been found experimentally. It is exact for alpha -> 1, where the factor is 1.5. All
     // factors > 1 are safe. For small alpha values, it is more efficient to fallback to a larger factor.
-    const alpha = ONE - a; // We know that a is in [0, 1].
-    const factor = alpha >= ONE / 2n ? (ONE * 3n) / 2n : ONE * 2n;
+    const alpha = WAD - a; // We know that a is in [0, 1].
+    const factor = alpha >= WAD / 2n ? (WAD * 3n) / 2n : WAD * 2n;
     const l0 = MathGyro.mulUp(lmin, factor);
     return l0;
 }
@@ -208,8 +209,8 @@ export function _calcOutGivenIn(
     // very slightly larger than 3e-18, compensating for the maximum multiplicative error in the invariant
     // computation.
 
-    const virtInOver = balanceIn + MathGyro.mulUp(virtualOffset, ONE + 2n);
-    const virtOutUnder = balanceOut + MathGyro.mulDown(virtualOffset, ONE - 1n);
+    const virtInOver = balanceIn + MathGyro.mulUp(virtualOffset, WAD + 2n);
+    const virtOutUnder = balanceOut + MathGyro.mulDown(virtualOffset, WAD - 1n);
     const amountOut = (virtOutUnder * amountIn) / (virtInOver + amountIn);
 
     return amountOut;
@@ -229,8 +230,8 @@ export function _calcInGivenOut(
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18, compensating for the maximum multiplicative error in the invariant
     // computation.
-    const virtInOver = balanceIn + MathGyro.mulUp(virtualOffset, ONE + 2n);
-    const virtOutUnder = balanceOut + MathGyro.mulDown(virtualOffset, ONE - 1n);
+    const virtInOver = balanceIn + MathGyro.mulUp(virtualOffset, WAD + 2n);
+    const virtOutUnder = balanceOut + MathGyro.mulDown(virtualOffset, WAD - 1n);
 
     const amountIn = MathGyro.divUp(
         MathGyro.mulUp(virtInOver, amountOut),

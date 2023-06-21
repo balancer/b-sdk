@@ -9,12 +9,8 @@ import { BasePool } from '..';
 import { BigintIsh, Token, TokenAmount } from '../..';
 import { RawGyro3Pool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
-import { getPoolAddress, MathSol } from '../../../utils';
-import {
-    MathGyro,
-    ONE,
-    SWAP_LIMIT_FACTOR,
-} from '../../../utils/gyroHelpers/math';
+import { getPoolAddress, MathSol, WAD } from '../../../utils';
+import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
 
 export class Gyro3PoolToken extends TokenAmount {
     public readonly index: number;
@@ -198,7 +194,7 @@ export class Gyro3Pool implements BasePool {
             const limitAmountIn = maxAmountInAssetInPool - tIn.scale18;
             const limitAmountInPlusSwapFee = MathGyro.divDown(
                 limitAmountIn,
-                ONE - this.swapFee,
+                WAD - this.swapFee,
             );
             return MathGyro.mulDown(
                 limitAmountInPlusSwapFee,
