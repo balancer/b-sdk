@@ -147,7 +147,7 @@ export function _runNewtonIteration(
 
 // -f(l)/f'(l), represented as an absolute value and a sign. Require that l is sufficiently large so that f is strictly increasing.
 export function _calcNewtonDelta(
-    a: bigint,
+    _: bigint,
     mb: bigint,
     mc: bigint,
     md: bigint,
