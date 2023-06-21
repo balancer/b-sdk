@@ -28,6 +28,7 @@ export type RawPool =
 export interface RawBasePool {
     id: Hex;
     address: Address;
+    name: string;
     poolType: SupportedRawPoolTypes | string;
     poolTypeVersion: number;
     swapFee: HumanAmount;
