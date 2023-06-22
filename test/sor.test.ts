@@ -58,7 +58,7 @@ describe('SmartOrderRouter', () => {
         );
 
         const swapOptions: SwapOptions = {
-            block: 16900000n,
+            block: 17473810n,
         };
 
         let pools: BasePool[];

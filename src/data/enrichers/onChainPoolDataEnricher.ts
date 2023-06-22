@@ -146,9 +146,8 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                         this.config.loadTokenBalances !== 'none',
                     loadTotalSupply: this.config.loadTotalSupply,
                     loadSwapFees: this.config.loadSwapFees,
-                    loadLinearWrappedTokenRates:
-                        this.config.loadLinearWrappedTokenRates,
-                    loadLinearTargets: this.config.loadLinearTargets,
+                    loadLinearWrappedTokenRates: linearPoolIdxs.length > 0,
+                    loadLinearTargets: linearPoolIdxs.length > 0,
                     loadNormalizedWeights: weightedPoolIdxs.length > 0,
                     loadScalingFactors: scalingFactorPoolIdxs.length > 0,
                     loadAmps: ampPoolIdxs.length > 0,
