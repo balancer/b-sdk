@@ -17,7 +17,8 @@ import { BasePool } from '../src/entities/pools';
 describe('SmartOrderRouter', () => {
     describe('Mainnet', () => {
         const chainId = ChainId.MAINNET;
-        const rpcUrl = process.env['ETHEREUM_RPC_URL'] || '';
+        const rpcUrl =
+            process.env['ETHEREUM_RPC_URL'] || 'https://eth.llamarpc.com';
         const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             rpcUrl,
