@@ -1,6 +1,4 @@
 // pnpm test -- gyro2Math.test.ts
-import { formatEther, parseEther } from 'viem';
-
 import testPools from './lib/testData/gyro2TestPool.json';
 import { ChainId, RawGyro2Pool, Token, TokenAmount, WAD } from '../src';
 import {
@@ -9,7 +7,6 @@ import {
     _findVirtualParams,
 } from '../src/entities/pools/gyro2/gyro2Math';
 import { Gyro2Pool } from '../src/entities/pools/gyro2/gyro2Pool';
-import { expectToBeCloseToDelta } from './lib/utils/helpers';
 
 describe('gyro2Math tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;
@@ -36,11 +33,11 @@ describe('gyro2Math tests', () => {
         const amountIn = TokenAmount.fromHumanAmount(tokenIn, '28492.48453');
         test('should correctly add swap fee', async () => {
             const amountInWithFee = pool.addSwapFeeAmount(amountIn).amount;
-            expectToBeCloseToDelta(amountInWithFee, 28751245750n, 10);
+            expect(amountInWithFee).toEqual(28751245742n);
         });
         test('should correctly reduce by swap fee', async () => {
             const amountInLessFee = pool.subtractSwapFeeAmount(amountIn).amount;
-            expectToBeCloseToDelta(amountInLessFee, 28236052170n, 10);
+            expect(amountInLessFee).toEqual(28236052169n);
         });
     });
 
@@ -52,25 +49,25 @@ describe('gyro2Math tests', () => {
                 sqrtBeta,
             );
 
-            expect(formatEther(a)).toEqual('0.00099950047470021');
-            expect(formatEther(mb)).toEqual('2230.884220626971757449');
-            expect(formatEther(bSquare)).toEqual('4976844.405842411200429555');
-            expect(formatEther(mc)).toEqual('1232000');
+            expect(a).toEqual(999500474700210n);
+            expect(mb).toEqual(2230884220626971757449n);
+            expect(bSquare).toEqual(4976844405842411200429555n);
+            expect(mc).toEqual(1232000000000000000000000n);
 
             const L = _calculateQuadratic(a, mb, (mb * mb) / WAD, mc);
 
-            expect(formatEther(L)).toEqual('2232551.271501112084098627');
+            expect(L).toEqual(2232551271501112084098627n);
         });
 
         test('should correctly calculate virtual parameters', async () => {
             const [a, b] = _findVirtualParams(
-                parseEther('2232551.215824107930236259'),
+                2232551215824107930236259n,
                 sqrtAlpha,
                 sqrtBeta,
             );
 
-            expect(formatEther(a)).toEqual('2231434.660924038777489798');
-            expect(formatEther(b)).toEqual('2231435.776865147462654764');
+            expect(a).toEqual(2231434660924038777489798n);
+            expect(b).toEqual(2231435776865147462654764n);
         });
     });
 });

@@ -1,9 +1,7 @@
 // pnpm test -- gyroEV2Pool.test.ts
-
 import { ChainId, RawGyroEPool, SwapKind, Token, TokenAmount } from '../src';
 import { GyroEPool } from '../src/entities/pools/gyroE';
 import testPools from './lib/testData/gyroETestPool.json';
-import { expectToBeCloseToDelta } from './lib/utils/helpers';
 
 describe('gyroEPool tests', () => {
     const testPool = { ...testPools }.pools[1] as RawGyroEPool;
@@ -27,12 +25,7 @@ describe('gyroEPool tests', () => {
                 tokenIn,
                 tokenOut,
             );
-
-            expectToBeCloseToDelta(
-                normalizedLiquidity,
-                8521784473067058000000000n,
-                10000000000000,
-            );
+            expect(normalizedLiquidity).toEqual(8521784473067058000000000n);
         });
     });
 
@@ -43,12 +36,7 @@ describe('gyroEPool tests', () => {
                 tokenOut,
                 SwapKind.GivenIn,
             );
-
-            expectToBeCloseToDelta(
-                limitAmount,
-                236323201823051507893n,
-                10000000000000,
-            );
+            expect(limitAmount).toEqual(236323201823053601880n);
         });
 
         test('should correctly calculate limit amount for swap exact out', async () => {
@@ -57,12 +45,7 @@ describe('gyroEPool tests', () => {
                 tokenOut,
                 SwapKind.GivenOut,
             );
-
-            expectToBeCloseToDelta(
-                limitAmount,
-                99999900000000000000n,
-                10000000000000,
-            );
+            expect(limitAmount).toEqual(99999900000000000000n);
         });
     });
 
@@ -73,12 +56,7 @@ describe('gyroEPool tests', () => {
                 tokenOut,
                 TokenAmount.fromHumanAmount(tokenIn, '10'),
             );
-
-            expectToBeCloseToDelta(
-                swapAmount.amount,
-                4231511373250766852n,
-                10000000000000,
-            );
+            expect(swapAmount.amount).toEqual(4231511373250767841n);
         });
 
         test('should correctly calculate swap amount for swap exact out', async () => {
@@ -87,14 +65,9 @@ describe('gyroEPool tests', () => {
                 tokenOut,
                 TokenAmount.fromHumanAmount(tokenOut, '10'),
             );
-
             const amountInLessFee =
                 pool.subtractSwapFeeAmount(swapAmount).amount;
-            expectToBeCloseToDelta(
-                amountInLessFee,
-                21505324893272912024n,
-                100000000000000,
-            );
+            expect(amountInLessFee).toEqual(21505324893272909896n);
         });
     });
 });
