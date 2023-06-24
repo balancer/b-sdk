@@ -90,7 +90,12 @@ export class SmartOrderRouter {
         swapAmount: SwapInputRawAmount | TokenAmount,
         swapOptions?: SwapOptions,
     ): Promise<Swap | null> {
-        swapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmount);
+        const checkedSwapAmount = checkInputs(
+            tokenIn,
+            tokenOut,
+            swapKind,
+            swapAmount,
+        );
         const candidatePaths = await this.getCandidatePaths(
             tokenIn,
             tokenOut,
@@ -100,7 +105,7 @@ export class SmartOrderRouter {
         const bestPaths = this.router.getBestPaths(
             candidatePaths,
             swapKind,
-            swapAmount,
+            checkedSwapAmount,
         );
 
         if (!bestPaths) return null;
