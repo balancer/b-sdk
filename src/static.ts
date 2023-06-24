@@ -29,7 +29,12 @@ export async function sorGetSwapsWithPools(
     pools: BasePool[],
     swapOptions?: Omit<SwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
 ): Promise<Swap | null> {
-    swapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmount);
+    const checkedSwapAmount = checkInputs(
+        tokenIn,
+        tokenOut,
+        swapKind,
+        swapAmount,
+    );
     const router = new Router();
 
     const candidatePaths = router.getCandidatePaths(
@@ -38,7 +43,11 @@ export async function sorGetSwapsWithPools(
         pools,
         swapOptions?.graphTraversalConfig,
     );
-    const bestPaths = router.getBestPaths(candidatePaths, swapKind, swapAmount);
+    const bestPaths = router.getBestPaths(
+        candidatePaths,
+        swapKind,
+        checkedSwapAmount,
+    );
 
     if (!bestPaths) return null;
 

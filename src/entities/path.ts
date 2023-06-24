@@ -30,6 +30,7 @@ export class PathWithAmount extends Path {
     private readonly mutateBalances: boolean;
     private readonly printPath: any = [];
 
+    // rome-ignore lint/correctness/noUnreachableSuper: bug in rome
     public constructor(
         tokens: Token[],
         pools: BasePool[],
