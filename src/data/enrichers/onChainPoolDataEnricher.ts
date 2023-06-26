@@ -169,6 +169,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                     address: a,
                     ...call,
                 })),
+                blockNumber: options.block,
             });
             tokenRates = results.map((r) => r.result);
         }
