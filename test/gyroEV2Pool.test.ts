@@ -67,7 +67,7 @@ describe('gyroEPool tests', () => {
             );
             const amountInLessFee =
                 pool.subtractSwapFeeAmount(swapAmount).amount;
-            expect(amountInLessFee).toEqual(21505324893272909896n);
+            expect(amountInLessFee).toEqual(21505324893272909897n);
         });
     });
 });

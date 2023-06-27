@@ -123,6 +123,8 @@
             "name": "Gyroscope ECLP WMATIC/stMATIC",
             "symbol": "ECLP-WMATIC-stMATIC",
             "poolType": "GyroE",
+            "poolTypeVersion": 2,
+            "liquidity": "1",
             "baseToken": null,
             "principalToken": null,
             "swapFee": "0.0002",
