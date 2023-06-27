@@ -1,8 +1,5 @@
 // pnpm test -- gyroEMath.test.ts
-import { parseEther } from 'viem';
-
 import testPools from './lib/testData/gyroETestPool.json';
-import { expectToBeCloseToDelta } from './lib/utils/helpers';
 import { calculateDerivedValues } from '../src/entities/pools/gyroE/testingHelpers';
 import { RawGyroEPool } from '../src/data/types';
 import { ChainId } from '../src/utils';
@@ -15,11 +12,11 @@ import {
 } from '../src/entities/pools/gyroE/gyroEMathHelpers';
 
 const GYRO_E_PARAMS = {
-    alpha: parseEther('0.050000000000020290'),
-    beta: parseEther('0.397316269897841178'),
-    c: parseEther('0.9551573261744535'),
-    s: parseEther('0.29609877111408056'),
-    lambda: parseEther('748956.475000000000000000'),
+    alpha: 50000000000020290n,
+    beta: 397316269897841178n,
+    c: 955157326174453500n,
+    s: 296098771114080560n,
+    lambda: 748956475000000000000000n,
 };
 
 const DERIVED_GYRO_E_PARAMS = calculateDerivedValues(GYRO_E_PARAMS);
@@ -46,19 +43,11 @@ describe('gyroEMath tests', () => {
         const amountIn = TokenAmount.fromHumanAmount(tokenIn, '28492.48453');
         test('should correctly add swap fee', async () => {
             const amountInWithFee = pool.addSwapFeeAmount(amountIn).amount;
-            expectToBeCloseToDelta(
-                amountInWithFee,
-                31310422560400000000000n,
-                10000000000000,
-            );
+            expect(amountInWithFee).toEqual(31310422560439560439561n);
         });
         test('should correctly reduce by swap fee', async () => {
             const amountInLessFee = pool.subtractSwapFeeAmount(amountIn).amount;
-            expectToBeCloseToDelta(
-                amountInLessFee,
-                25928160922300000000000n,
-                10000000000000,
-            );
+            expect(amountInLessFee).toEqual(25928160922300000000000n);
         });
     });
 
@@ -93,7 +82,7 @@ describe('gyroEMath tests', () => {
                 DERIVED_GYRO_E_PARAMS,
                 invariant,
             );
-            expectToBeCloseToDelta(a, 211290746521816200000n, 10000000000000);
+            expect(a).toEqual(211290746521816255142n);
         });
     });
 
@@ -115,7 +104,7 @@ describe('gyroEMath tests', () => {
                 DERIVED_GYRO_E_PARAMS,
                 invariant,
             );
-            expectToBeCloseToDelta(b, 65500131431538410000n, 10000000000000);
+            expect(b).toEqual(65500131431538418723n);
         });
     });
 });

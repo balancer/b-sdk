@@ -10,15 +10,9 @@ import {
 import {
     normalizedLiquidityXIn,
     normalizedLiquidityYIn,
-    calcSpotPriceXGivenY,
-    calcSpotPriceYGivenX,
-    dPxDXOut,
-    dPxDYIn,
-    dPyDXIn,
-    dPyDYOut,
 } from './gyroEMathFunctions';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './gyroEPool';
-import { MathGyro, ONE, ONE_XP, SMALL } from '../../../utils/gyroHelpers/math';
+import { MathGyro, ONE_XP, SMALL } from '../../../utils/gyroHelpers/math';
 
 export function calculateNormalizedLiquidity(
     balances: bigint[],
@@ -135,90 +129,4 @@ export function calcInGivenOut(
         // Should never happen; check anyways to catch a numerical bug.
         throw new Error('ASSET BOUNDS EXCEEDED 3');
     return amountIn;
-}
-
-export function calcSpotPriceAfterSwapOutGivenIn(
-    balances: bigint[],
-    amountIn: bigint,
-    tokenInIsToken0: boolean,
-    params: GyroEParams,
-    derived: DerivedGyroEParams,
-    invariant: Vector2,
-    swapFee: bigint,
-): bigint {
-    const ixIn = Number(!tokenInIsToken0);
-    const f = ONE - swapFee;
-
-    const calcSpotPriceGiven = tokenInIsToken0
-        ? calcSpotPriceYGivenX
-        : calcSpotPriceXGivenY;
-
-    const balInNew = balances[ixIn] + amountIn;
-    const newSpotPriceFactor = calcSpotPriceGiven(
-        balInNew,
-        params,
-        derived,
-        invariant,
-    );
-    return MathGyro.divDown(ONE, MathGyro.mulDown(newSpotPriceFactor, f));
-}
-
-export function calcSpotPriceAfterSwapInGivenOut(
-    balances: bigint[],
-    amountOut: bigint,
-    tokenInIsToken0: boolean,
-    params: GyroEParams,
-    derived: DerivedGyroEParams,
-    invariant: Vector2,
-    swapFee: bigint,
-): bigint {
-    const ixOut = Number(tokenInIsToken0);
-    const f = ONE - swapFee;
-
-    const calcSpotPriceGiven = tokenInIsToken0
-        ? calcSpotPriceXGivenY
-        : calcSpotPriceYGivenX;
-
-    const balOutNew = balances[ixOut] - amountOut;
-    const newSpotPriceFactor = calcSpotPriceGiven(
-        balOutNew,
-        params,
-        derived,
-        invariant,
-    );
-    return MathGyro.divDown(newSpotPriceFactor, f);
-}
-
-export function calcDerivativePriceAfterSwapOutGivenIn(
-    balances: bigint[],
-    tokenInIsToken0: boolean,
-    params: GyroEParams,
-    derived: DerivedGyroEParams,
-    invariant: Vector2,
-    swapFee: bigint,
-): bigint {
-    const ixIn = Number(!tokenInIsToken0);
-
-    const newDerivativeSpotPriceFactor = ixIn
-        ? dPxDYIn(balances, params, derived, swapFee, invariant)
-        : dPyDXIn(balances, params, derived, swapFee, invariant);
-
-    return newDerivativeSpotPriceFactor;
-}
-
-export function calcDerivativeSpotPriceAfterSwapInGivenOut(
-    balances: bigint[],
-    tokenInIsToken0: boolean,
-    params: GyroEParams,
-    derived: DerivedGyroEParams,
-    invariant: Vector2,
-    swapFee: bigint,
-): bigint {
-    const ixIn = Number(!tokenInIsToken0);
-
-    const newDerivativeSpotPriceFactor = ixIn
-        ? dPxDXOut(balances, params, derived, swapFee, invariant)
-        : dPyDYOut(balances, params, derived, swapFee, invariant);
-
-    return newDerivativeSpotPriceFactor;
 }

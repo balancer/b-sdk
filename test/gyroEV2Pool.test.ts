@@ -1,11 +1,10 @@
-// pnpm test -- test/gyroEPool.test.ts
-import testPools from './lib/testData/gyroETestPool.json';
-import { ChainId, SwapKind, Token, TokenAmount } from '../src';
-import { RawGyroEPool } from '../src/data/types';
+// pnpm test -- gyroEV2Pool.test.ts
+import { ChainId, RawGyroEPool, SwapKind, Token, TokenAmount } from '../src';
 import { GyroEPool } from '../src/entities/pools/gyroE';
+import testPools from './lib/testData/gyroETestPool.json';
 
 describe('gyroEPool tests', () => {
-    const testPool = { ...testPools }.pools[0] as RawGyroEPool;
+    const testPool = { ...testPools }.pools[1] as RawGyroEPool;
     const chainId = ChainId.GOERLI;
     const pool = GyroEPool.fromRawPool(chainId, testPool);
     const tokenIn = new Token(
@@ -37,7 +36,7 @@ describe('gyroEPool tests', () => {
                 tokenOut,
                 SwapKind.GivenIn,
             );
-            expect(limitAmount).toEqual(354484802734580411823n);
+            expect(limitAmount).toEqual(236323201823053601880n);
         });
 
         test('should correctly calculate limit amount for swap exact out', async () => {
@@ -57,7 +56,7 @@ describe('gyroEPool tests', () => {
                 tokenOut,
                 TokenAmount.fromHumanAmount(tokenIn, '10'),
             );
-            expect(swapAmount.amount).toEqual(2821007799187925949n);
+            expect(swapAmount.amount).toEqual(4231511373250767841n);
         });
 
         test('should correctly calculate swap amount for swap exact out', async () => {
@@ -68,7 +67,7 @@ describe('gyroEPool tests', () => {
             );
             const amountInLessFee =
                 pool.subtractSwapFeeAmount(swapAmount).amount;
-            expect(amountInLessFee).toEqual(32257987339909373037n);
+            expect(amountInLessFee).toEqual(21505324893272909896n);
         });
     });
 });

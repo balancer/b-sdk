@@ -25,6 +25,7 @@ export type RawPool =
     | RawComposableStablePool
     | RawMetaStablePool
     | RawGyro2Pool
+    | RawGyro3Pool
     | RawGyroEPool;
 
 export interface RawBasePool {
@@ -79,6 +80,11 @@ export interface RawGyro2Pool extends RawBasePool {
     sqrtBeta: HumanAmount;
 }
 
+export interface RawGyro3Pool extends RawBasePool {
+    poolType: 'Gyro3';
+    root3Alpha: HumanAmount;
+}
+
 export interface RawGyroEPool extends RawBasePool {
     poolType: 'GyroE';
     tokens: RawPoolToken[];
@@ -96,6 +102,7 @@ export interface RawGyroEPool extends RawBasePool {
     w: HumanAmount;
     z: HumanAmount;
     dSq: HumanAmount;
+    tokenRates?: HumanAmount[]; // available on GyroEV2 and up
 }
 
 export interface RawPoolToken {
