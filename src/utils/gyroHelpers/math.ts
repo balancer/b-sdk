@@ -71,16 +71,16 @@ export class MathGyro {
 
     static divUpMagU(a: bigint, b: bigint): bigint {
         if (b === 0n) throw new Error('ZERO DIVISION');
+        if (a === 0n) return 0n;
+        let _b = b;
+        let _a = a;
         if (b < 0n) {
-            b = b * -1n;
-            a = a * -1n;
+            _b = b * -1n;
+            _a = a * -1n;
         }
-        if (a === 0n) {
-            return 0n;
-        } else {
-            if (a > 0n) return (a * WAD - 1n) / b + 1n;
-            else return (a * WAD + 1n) / (b - 1n);
-        }
+        return _a > 0n
+            ? (_a * WAD - 1n) / _b + 1n
+            : (_a * WAD + 1n) / (_b - 1n);
     }
 
     static mulUpXpToNpU(a: bigint, b: bigint): bigint {

@@ -110,6 +110,7 @@ export function _runNewtonIteration(
     rootEst: bigint,
 ): bigint {
     let deltaAbsPrev = 0n;
+    let _rootEst = rootEst;
     for (let iteration = 0; iteration < 255; ++iteration) {
         // The delta to the next step can be positive or negative, so we represent a positive and a negative part
         // separately. The signed delta is delta_plus - delta_minus, but we only ever consider its absolute value.
@@ -119,7 +120,7 @@ export function _runNewtonIteration(
             mc,
             md,
             root3Alpha,
-            rootEst,
+            _rootEst,
         );
 
         // ^ Note: If we ever set _INVARIANT_MIN_ITERATIONS=0, the following should include `iteration >= 1`.
@@ -128,17 +129,17 @@ export function _runNewtonIteration(
             (iteration >= _INVARIANT_MIN_ITERATIONS && deltaIsPos)
         )
             // This should mathematically never happen. Thus, the numerical error dominates at this point.
-            return rootEst;
+            return _rootEst;
         if (
             iteration >= _INVARIANT_MIN_ITERATIONS &&
             deltaAbs >= deltaAbsPrev / _INVARIANT_SHRINKING_FACTOR_PER_STEP
         ) {
             // The iteration has stalled and isn't making significant progress anymore.
-            return rootEst;
+            return _rootEst;
         }
         deltaAbsPrev = deltaAbs;
-        if (deltaIsPos) rootEst = rootEst + deltaAbs;
-        else rootEst = rootEst - deltaAbs;
+        if (deltaIsPos) _rootEst = _rootEst + deltaAbs;
+        else _rootEst = _rootEst - deltaAbs;
     }
 
     throw new Error(
