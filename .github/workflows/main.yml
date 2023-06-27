@@ -1,67 +1,36 @@
 name: Main
 
 on:
-  pull_request:
   push:
     branches: [main]
 
 jobs:
-  install:
-    name: Install
+  checks:
+    name: Checks
+    uses: ./.github/workflows/checks.yml
+    secrets: inherit
+
+  release:
+    name: Release
+    needs: checks
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [18]
         pnpm-version: [7]
+    timeout-minutes: 5
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Clone repository
+        uses: actions/checkout@v3
+
       - name: Setup
         uses: ./.github/actions/setup
 
-  lint:
-    name: Lint
-    needs: install
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
-        pnpm-version: [7]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/actions/setup
-      - name: Lint & format code
-        run: pnpm format & pnpm lint
-
-  test:
-    name: Test
-    needs: install
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
-        pnpm-version: [7]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/actions/setup
-      - name: Test
-        run: pnpm test
+      - name: Publish to NPM
+        uses: changesets/action@v1
+        with:
+          publish: pnpm changeset:release
         env:
-          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
-          POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
-
-  build:
-    name: Build
-    needs: install
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
-        pnpm-version: [7]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/actions/setup
-      - name: Build
-        run: pnpm build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

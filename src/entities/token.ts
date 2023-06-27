@@ -21,10 +21,7 @@ export class Token {
         this.decimals = decimals;
         this.symbol = symbol;
         this.name = name;
-
-        wrapped
-            ? (this.wrapped = wrapped.toLowerCase())
-            : (this.wrapped = address.toLowerCase());
+        this.wrapped = wrapped ? wrapped.toLowerCase() : address.toLowerCase();
     }
 
     public isEqual(token: Token) {
