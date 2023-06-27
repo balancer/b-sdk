@@ -2,25 +2,25 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import testPools from './lib/testData/gyroETestPool.json';
-import { expectToBeCloseToDelta } from './lib/utils/helpers';
 import { ChainId } from '../src/utils';
-import { RawGyroEPool } from '../src/data/types';
 import {
     BasePool,
+    OnChainPoolDataEnricher,
+    SmartOrderRouter,
+    SubgraphPoolProvider,
     SwapKind,
     SwapOptions,
     Token,
     sorGetSwapsWithPools,
-    sorParseRawPools,
 } from '../src';
 import { parseEther } from 'viem';
 import { GyroEPool, GyroEPoolToken } from '../src/entities/pools/gyroE';
 
+const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
+
 describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     const chainId = ChainId.POLYGON;
     const rpcUrl = process.env['POLYGON_RPC_URL'] || '';
-    const rawPool = { ...testPools }.pools[2] as RawGyroEPool;
     const WMATIC = new Token(
         chainId,
         '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
@@ -34,12 +34,59 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         'stMATIC',
     );
     const swapOptions: SwapOptions = {
-        block: 42173266n,
+        block: 44215395n,
     };
+    let sor: SmartOrderRouter;
+
+    beforeAll(() => {
+        const subgraphPoolDataService = new SubgraphPoolProvider(
+            chainId,
+            undefined,
+            {
+                poolIdIn: [
+                    '0xf0ad209e2e969eaaa8c882aac71f02d8a047d5c2000200000000000000000b49',
+                ],
+                gqlAdditionalPoolQueryFields: `
+                alpha
+                beta
+                c
+                s
+                lambda
+                tauAlphaX
+                tauAlphaY
+                tauBetaX
+                tauBetaY
+                u
+                v
+                w
+                z
+                dSq
+                `,
+            },
+        );
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
+            rpcUrl,
+            SOR_QUERIES,
+            {
+                loadTokenRatesForPools: {
+                    poolTypes: ['GyroE'],
+                    poolTypeVersions: [2],
+                },
+            },
+        );
+
+        sor = new SmartOrderRouter({
+            chainId,
+            poolDataProviders: subgraphPoolDataService,
+            poolDataEnrichers: onChainPoolDataEnricher,
+            rpcUrl: rpcUrl,
+        });
+    });
 
     let pools: BasePool[];
-    beforeEach(() => {
-        pools = sorParseRawPools(chainId, [rawPool]);
+    beforeEach(async () => {
+        pools = await sor.fetchAndCachePools(swapOptions.block);
     });
 
     describe('ExactIn', () => {
@@ -47,7 +94,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         test('should return no swaps when above limit', async () => {
             const tokenIn = WMATIC;
             const tokenOut = stMATIC;
-            const swapAmount = parseEther('33.33333333333333');
+            const swapAmount = parseEther('11206540');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -62,7 +109,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         test('token > LSD, getSwaps result should match queryBatchSwap', async () => {
             const tokenIn = WMATIC;
             const tokenOut = stMATIC;
-            const gyroPool = GyroEPool.fromRawPool(chainId, rawPool);
+            const gyroPool = pools[0] as GyroEPool;
             const { tIn } = gyroPool.getRequiredTokenPair(tokenIn, tokenOut);
             const swapAmount = new GyroEPoolToken(
                 tokenIn,
@@ -86,7 +133,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         test('LSD > token, getSwaps result should match queryBatchSwap', async () => {
             const tokenIn = stMATIC;
             const tokenOut = WMATIC;
-            const gyroPool = GyroEPool.fromRawPool(chainId, rawPool);
+            const gyroPool = pools[0] as GyroEPool;
             const { tIn } = gyroPool.getRequiredTokenPair(tokenIn, tokenOut);
             const swapAmount = new GyroEPoolToken(
                 tokenIn,
@@ -130,7 +177,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         test('token > LSD, getSwaps result should match queryBatchSwap', async () => {
             const tokenIn = WMATIC;
             const tokenOut = stMATIC;
-            const gyroPool = GyroEPool.fromRawPool(chainId, rawPool);
+            const gyroPool = pools[0] as GyroEPool;
             const { tOut } = gyroPool.getRequiredTokenPair(tokenIn, tokenOut);
             const swapAmount = new GyroEPoolToken(
                 tokenOut,
@@ -154,7 +201,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         test('LSD > token, getSwaps result should match queryBatchSwap', async () => {
             const tokenIn = stMATIC;
             const tokenOut = WMATIC;
-            const gyroPool = GyroEPool.fromRawPool(chainId, rawPool);
+            const gyroPool = pools[0] as GyroEPool;
             const { tOut } = gyroPool.getRequiredTokenPair(tokenIn, tokenOut);
             const swapAmount = new GyroEPoolToken(
                 tokenOut,
@@ -173,11 +220,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
 
             const onchain = await swapInfo?.query(rpcUrl, swapOptions.block);
             expect(swapAmount.amount).toEqual(swapInfo?.outputAmount.amount);
-            expectToBeCloseToDelta(
-                onchain?.amount as bigint,
-                swapInfo?.inputAmount.amount as bigint,
-                1,
-            );
+            expect(onchain).toEqual(swapInfo?.inputAmount);
         });
     });
 });

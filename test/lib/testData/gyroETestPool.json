@@ -123,26 +123,24 @@
             "name": "Gyroscope ECLP WMATIC/stMATIC",
             "symbol": "ECLP-WMATIC-stMATIC",
             "poolType": "GyroE",
-            "poolTypeVersion": 2,
             "baseToken": null,
             "principalToken": null,
             "swapFee": "0.0002",
             "swapEnabled": true,
             "isInRecoveryMode": null,
             "isPaused": false,
-            "totalShares": "5.366644050391084161",
+            "totalShares": "1502367.123408841174649829",
             "wrappedIndex": null,
             "mainIndex": null,
             "tokensList": [
                 "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
                 "0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4"
             ],
-            "tokenRates": ["1.000000000000000000", "1.068845920992504905"],
             "tokens": [
                 {
                     "symbol": "WMATIC",
                     "address": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
-                    "balance": "1.123393517620917161",
+                    "balance": "303205.800416722356931284",
                     "decimals": 18,
                     "name": "Wrapped Matic",
                     "index": 0
@@ -150,7 +148,7 @@
                 {
                     "symbol": "stMATIC",
                     "address": "0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4",
-                    "balance": "3.973745355066743187",
+                    "balance": "1120036.78624505376428293",
                     "decimals": 18,
                     "name": "Staked MATIC (PoS)",
                     "index": 1
