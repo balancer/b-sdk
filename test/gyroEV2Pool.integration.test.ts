@@ -115,7 +115,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         test('should return no swaps when above limit', async () => {
             const tokenIn = WMATIC;
             const tokenOut = stMATIC;
-            const swapAmount = parseEther('100');
+            const swapAmount = parseEther('30310600');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
