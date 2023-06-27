@@ -1,5 +1,4 @@
 import { Address, createPublicClient, formatUnits, Hex, http } from 'viem';
-import { polygon } from 'viem/chains';
 import { sorQueriesAbi, tokenRatesFragmentAbi } from '../../abi/';
 import {
     GetPoolsResponse,
@@ -10,6 +9,7 @@ import {
 } from '../types';
 
 import {
+    CHAINS,
     getPoolAddress,
     poolHasActualSupply,
     poolHasPercentFee,
@@ -71,6 +71,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
     private readonly config: OnChainPoolDataQueryConfig;
 
     constructor(
+        private readonly chainId: number,
         private readonly rpcUrl: string,
         private readonly sorQueriesAddress: Address,
         config?: Partial<OnChainPoolDataQueryConfig>,
@@ -111,8 +112,8 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         } = this.getPoolDataQueryParams(data);
 
         const client = createPublicClient({
-            chain: polygon, // TODO: get chain by id
             transport: http(this.rpcUrl),
+            chain: CHAINS[this.chainId],
         });
 
         const [

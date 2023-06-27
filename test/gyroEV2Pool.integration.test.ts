@@ -65,6 +65,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             },
         );
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
             rpcUrl,
             SOR_QUERIES,
             {
