@@ -260,7 +260,7 @@ export class GyroEPool implements BasePool {
             GyroEPoolToken.fromScale18Amount(tokenIn, inAmountLessFee),
         );
 
-        const inAmountWithRate = inAmount.divDownFixed(tIn.rate);
+        const inAmountWithRate = inAmount.divUpFixed(tIn.rate);
 
         if (mutateBalances) {
             tIn.decrease(inAmountWithRate.amount);
