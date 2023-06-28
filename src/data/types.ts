@@ -88,7 +88,6 @@ export interface RawGyro3Pool extends RawBasePool {
 
 export interface RawGyroEPool extends RawBasePool {
     poolType: 'GyroE';
-    tokens: RawPoolToken[];
     alpha: HumanAmount;
     beta: HumanAmount;
     c: HumanAmount;
