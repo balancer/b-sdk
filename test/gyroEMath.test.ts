@@ -1,6 +1,5 @@
 // pnpm test -- gyroEMath.test.ts
 import testPools from './lib/testData/gyroETestPool.json';
-import { calculateDerivedValues } from '../src/entities/pools/gyroE/testingHelpers';
 import { RawGyroEPool } from '../src/data/types';
 import { ChainId } from '../src/utils';
 import { GyroEPool, Vector2 } from '../src/entities/pools/gyroE/gyroEPool';
@@ -10,16 +9,6 @@ import {
     virtualOffset0,
     virtualOffset1,
 } from '../src/entities/pools/gyroE/gyroEMathHelpers';
-
-const GYRO_E_PARAMS = {
-    alpha: 50000000000020290n,
-    beta: 397316269897841178n,
-    c: 955157326174453500n,
-    s: 296098771114080560n,
-    lambda: 748956475000000000000000n,
-};
-
-const DERIVED_GYRO_E_PARAMS = calculateDerivedValues(GYRO_E_PARAMS);
 
 describe('gyroEMath tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyroEPool;
@@ -55,8 +44,8 @@ describe('gyroEMath tests', () => {
         test('should correctly calculate invariant', async () => {
             const [currentInvariant, invErr] = calculateInvariantWithError(
                 [tIn.scale18, tOut.scale18],
-                GYRO_E_PARAMS,
-                DERIVED_GYRO_E_PARAMS,
+                pool.gyroEParams,
+                pool.derivedGyroEParams,
             );
 
             expect(currentInvariant).toEqual(295358168772127n);
@@ -68,8 +57,8 @@ describe('gyroEMath tests', () => {
         test('should correctly calculate virtual offset 0 (a)', async () => {
             const [currentInvariant, invErr] = calculateInvariantWithError(
                 [tIn.scale18, tOut.scale18],
-                GYRO_E_PARAMS,
-                DERIVED_GYRO_E_PARAMS,
+                pool.gyroEParams,
+                pool.derivedGyroEParams,
             );
 
             const invariant: Vector2 = {
@@ -78,8 +67,8 @@ describe('gyroEMath tests', () => {
             };
 
             const a = virtualOffset0(
-                GYRO_E_PARAMS,
-                DERIVED_GYRO_E_PARAMS,
+                pool.gyroEParams,
+                pool.derivedGyroEParams,
                 invariant,
             );
             expect(a).toEqual(211290746521816255142n);
@@ -90,8 +79,8 @@ describe('gyroEMath tests', () => {
         test('should correctly calculate virtual offset 1 (b)', async () => {
             const [currentInvariant, invErr] = calculateInvariantWithError(
                 [tIn.scale18, tOut.scale18],
-                GYRO_E_PARAMS,
-                DERIVED_GYRO_E_PARAMS,
+                pool.gyroEParams,
+                pool.derivedGyroEParams,
             );
 
             const invariant: Vector2 = {
@@ -100,8 +89,8 @@ describe('gyroEMath tests', () => {
             };
 
             const b = virtualOffset1(
-                GYRO_E_PARAMS,
-                DERIVED_GYRO_E_PARAMS,
+                pool.gyroEParams,
+                pool.derivedGyroEParams,
                 invariant,
             );
             expect(b).toEqual(65500131431538418723n);
