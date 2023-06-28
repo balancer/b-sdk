@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import testPools from './lib/testData/gyro3TestPool.json';
-import { expectToBeCloseToDelta } from './lib/utils/helpers';
 import { ChainId } from '../src/utils';
 import { RawGyro3Pool } from '../src/data/types';
 import {
@@ -126,11 +125,7 @@ describe('gyro3 integration tests', () => {
             );
 
             const onchain = await swapInfo?.query(rpcUrl, swapOptions.block);
-            expectToBeCloseToDelta(
-                onchain?.amount as bigint,
-                swapInfo?.inputAmount.amount as bigint,
-                1,
-            );
+            expect(onchain).toEqual(swapInfo?.inputAmount);
         });
         test('USDT > USDC, getSwaps result should match query', async () => {
             const tokenIn = USDT;
@@ -147,11 +142,7 @@ describe('gyro3 integration tests', () => {
 
             const onchain = await swapInfo?.query(rpcUrl, swapOptions.block);
             expect(swapAmount.amount).toEqual(swapInfo?.outputAmount.amount);
-            expectToBeCloseToDelta(
-                onchain?.amount as bigint,
-                swapInfo?.inputAmount.amount as bigint,
-                1,
-            );
+            expect(onchain).toEqual(swapInfo?.inputAmount);
         });
     });
 });

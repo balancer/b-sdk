@@ -163,7 +163,7 @@ export class Gyro3Pool implements BasePool {
             virtualOffsetInOut,
         );
         const inAmount = this.addSwapFeeAmount(
-            TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee),
+            TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee, true),
         );
 
         if (mutateBalances) {
