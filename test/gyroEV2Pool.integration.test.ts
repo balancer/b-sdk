@@ -2,12 +2,13 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import testPools from './lib/testData/gyroETestPool.json';
 import { ChainId } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
+    RawGyroEPool,
     SmartOrderRouter,
-    SubgraphPoolProvider,
     SwapKind,
     SwapOptions,
     Token,
@@ -15,6 +16,7 @@ import {
 } from '../src';
 import { parseEther } from 'viem';
 import { GyroEPool, GyroEPoolToken } from '../src/entities/pools/gyroE';
+import { MockPoolProvider } from './lib/utils/mockPoolProvider';
 
 const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
@@ -39,31 +41,8 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     let sor: SmartOrderRouter;
 
     beforeAll(() => {
-        const subgraphPoolDataService = new SubgraphPoolProvider(
-            chainId,
-            undefined,
-            {
-                poolIdIn: [
-                    '0xf0ad209e2e969eaaa8c882aac71f02d8a047d5c2000200000000000000000b49',
-                ],
-                gqlAdditionalPoolQueryFields: `
-                alpha
-                beta
-                c
-                s
-                lambda
-                tauAlphaX
-                tauAlphaY
-                tauBetaX
-                tauBetaY
-                u
-                v
-                w
-                z
-                dSq
-                `,
-            },
-        );
+        const pools = [{ ...testPools }.pools[2]] as RawGyroEPool[];
+        const mockPoolProvider = new MockPoolProvider(pools);
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
@@ -78,7 +57,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
 
         sor = new SmartOrderRouter({
             chainId,
-            poolDataProviders: subgraphPoolDataService,
+            poolDataProviders: mockPoolProvider,
             poolDataEnrichers: onChainPoolDataEnricher,
             rpcUrl: rpcUrl,
         });
