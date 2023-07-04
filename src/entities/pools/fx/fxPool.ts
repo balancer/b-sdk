@@ -47,9 +47,11 @@ export class FxPoolToken extends TokenAmount {
         super(token, amount);
         this.latestFXPrice = latestFXPrice;
         this.fxOracleDecimals = fxOracleDecimals;
-        const truncatedNumeraire =
-            (parseUnits(latestFXPrice, fxOracleDecimals) * this.amount) /
-            10n ** BigInt(fxOracleDecimals);
+        const truncatedNumeraire = MathFx.mulDownFixed(
+            this.amount,
+            parseUnits(this.latestFXPrice, this.fxOracleDecimals),
+            this.fxOracleDecimals,
+        );
         this.numeraire = truncatedNumeraire * this.scalar36;
         this.index = index;
     }
@@ -57,10 +59,11 @@ export class FxPoolToken extends TokenAmount {
     public increase(amount: bigint): TokenAmount {
         this.amount = this.amount + amount;
         this.scale18 = this.amount * this.scalar;
-        const truncatedNumeraire =
-            (parseUnits(this.latestFXPrice, this.fxOracleDecimals) *
-                this.amount) /
-            10n ** BigInt(this.fxOracleDecimals);
+        const truncatedNumeraire = MathFx.mulDownFixed(
+            this.amount,
+            parseUnits(this.latestFXPrice, this.fxOracleDecimals),
+            this.fxOracleDecimals,
+        );
         this.numeraire = truncatedNumeraire * this.scalar36;
         return this;
     }
@@ -81,7 +84,7 @@ export class FxPoolToken extends TokenAmount {
         poolToken: FxPoolToken,
         numeraire: BigintIsh,
         divUp?: boolean,
-    ) {
+    ): FxPoolToken {
         const truncatedNumeraire = BigInt(numeraire) / poolToken.scalar36; // loss of precision required to match SC implementation
         const amount = divUp
             ? MathFx.divUpFixed(
