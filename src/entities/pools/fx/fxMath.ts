@@ -1,6 +1,7 @@
 import { parseUnits } from 'viem';
 import { RAY } from '../../../utils';
 import { FxPoolPairData } from './fxPool';
+import { SwapKind } from '../../../types';
 
 export const CURVEMATH_MAX_DIFF = parseUnits('-0.000001000000000000024', 36);
 export const ONE_TO_THE_THIRTEEN_NUM = parseUnits('10000000000000', 36);
@@ -112,13 +113,17 @@ export const calculateTrade = (
         _oBals,
         _nBals,
         givenToken,
+        swapKind,
     } = poolPairData;
 
     const weights_: bigint[] = [RAY / 2n, RAY / 2n]; // const for now since all weights are 0.5
     const omega = calculateFee(_oGLiq, _oBals, beta, delta, weights_);
 
     const _outputIndex = givenToken.index === 0 ? 1 : 0;
-    const _inputAmt = givenToken.numeraire;
+    const _inputAmt =
+        swapKind === SwapKind.GivenIn
+            ? givenToken.numeraire
+            : givenToken.numeraire * -1n;
 
     let outputAmt_ = _inputAmt * -1n;
     let _nGLiq_ = _nGLiq;
@@ -142,9 +147,9 @@ export const calculateTrade = (
 
             _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
             // throws error already, removed if statement
-            enforceHalts(_oGLiq, _nGLiq, _oBals, _nBals, weights_, alpha);
-            enforceSwapInvariant(_oGLiq, omega, _nGLiq, psi);
-            return [outputAmt_, _nGLiq];
+            enforceHalts(_oGLiq, _nGLiq_, _oBals, _nBals, weights_, alpha);
+            enforceSwapInvariant(_oGLiq, omega, _nGLiq_, psi);
+            return [outputAmt_, _nGLiq_];
         } else {
             _nGLiq_ = _oGLiq + _inputAmt + outputAmt_;
             _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;

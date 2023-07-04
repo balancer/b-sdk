@@ -5,7 +5,7 @@ import { BasePool } from '../../pools';
 import { RAY, WAD, getPoolAddress } from '../../../utils';
 import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
 import { RawFxPool } from '../../../data/types';
-import { MathFx } from './helpers';
+import { MathFx, parseFixedCurveParam } from './helpers';
 
 const isUSDC = (address: string): boolean => {
     return (
@@ -27,6 +27,7 @@ export type FxPoolPairData = {
     _oBals: bigint[];
     _nBals: bigint[];
     givenToken: FxPoolToken;
+    swapKind: SwapKind;
 };
 
 export class FxPoolToken extends TokenAmount {
@@ -157,11 +158,11 @@ export class FxPool implements BasePool {
             pool.id,
             pool.poolTypeVersion,
             parseEther(pool.swapFee),
-            parseUnits(pool.alpha, 36),
-            parseUnits(pool.beta, 36),
-            parseUnits(pool.lambda, 36),
+            parseFixedCurveParam(pool.alpha),
+            parseFixedCurveParam(pool.beta),
+            parseFixedCurveParam(pool.lambda),
             parseUnits(pool.delta, 36),
-            parseUnits(pool.epsilon, 36),
+            parseFixedCurveParam(pool.epsilon),
             poolTokens,
         );
     }
@@ -359,6 +360,7 @@ export class FxPool implements BasePool {
                       baseToken.numeraire + givenToken.numeraire,
                   ],
             givenToken,
+            swapKind,
         };
     }
 }
