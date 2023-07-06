@@ -198,7 +198,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                     ? (formatUnits(data.totalSupply, 18) as HumanAmount)
                     : pool.totalShares,
                 amp: data?.amp
-                    ? formatUnits(data.amp, 3).split('.')[0]
+                    ? formatUnits(data.amp, 3)
                     : 'amp' in pool
                     ? pool.amp
                     : undefined,
