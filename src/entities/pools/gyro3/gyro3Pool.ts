@@ -4,16 +4,15 @@ import {
     _calcInGivenOut,
     _calcOutGivenIn,
     _calculateInvariant,
-    _findVirtualParams,
-} from './gyro2Math';
+} from './gyro3Math';
 import { BasePool } from '..';
 import { BigintIsh, Token, TokenAmount } from '../..';
-import { RawGyro2Pool } from '../../../data/types';
+import { RawGyro3Pool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
 import { getPoolAddress, MathSol, WAD } from '../../../utils';
-import { SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
+import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
 
-export class Gyro2PoolToken extends TokenAmount {
+export class Gyro3PoolToken extends TokenAmount {
     public readonly index: number;
 
     public constructor(token: Token, amount: BigintIsh, index: number) {
@@ -34,21 +33,20 @@ export class Gyro2PoolToken extends TokenAmount {
     }
 }
 
-export class Gyro2Pool implements BasePool {
+export class Gyro3Pool implements BasePool {
     public readonly chainId: number;
     public readonly id: Hex;
     public readonly address: string;
     public readonly poolType: PoolType = PoolType.Gyro2;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    public readonly tokens: Gyro2PoolToken[];
+    public readonly tokens: Gyro3PoolToken[];
 
-    private readonly sqrtAlpha: bigint;
-    private readonly sqrtBeta: bigint;
-    private readonly tokenMap: Map<string, Gyro2PoolToken>;
+    private readonly root3Alpha: bigint;
+    private readonly tokenMap: Map<string, Gyro3PoolToken>;
 
-    static fromRawPool(chainId: number, pool: RawGyro2Pool): Gyro2Pool {
-        const poolTokens: Gyro2PoolToken[] = [];
+    static fromRawPool(chainId: number, pool: RawGyro3Pool): Gyro3Pool {
+        const poolTokens: Gyro3PoolToken[] = [];
 
         for (const t of pool.tokens) {
             const token = new Token(
@@ -61,16 +59,15 @@ export class Gyro2Pool implements BasePool {
             const tokenAmount = TokenAmount.fromHumanAmount(token, t.balance);
 
             poolTokens.push(
-                new Gyro2PoolToken(token, tokenAmount.amount, t.index),
+                new Gyro3PoolToken(token, tokenAmount.amount, t.index),
             );
         }
 
-        return new Gyro2Pool(
+        return new Gyro3Pool(
             pool.id,
             pool.poolTypeVersion,
             parseEther(pool.swapFee),
-            parseEther(pool.sqrtAlpha),
-            parseEther(pool.sqrtBeta),
+            parseEther(pool.root3Alpha),
             poolTokens,
         );
     }
@@ -79,16 +76,14 @@ export class Gyro2Pool implements BasePool {
         id: Hex,
         poolTypeVersion: number,
         swapFee: bigint,
-        sqrtAlpha: bigint,
-        sqrtBeta: bigint,
-        tokens: Gyro2PoolToken[],
+        root3Alpha: bigint,
+        tokens: Gyro3PoolToken[],
     ) {
         this.chainId = tokens[0].token.chainId;
         this.id = id;
         this.poolTypeVersion = poolTypeVersion;
         this.swapFee = swapFee;
-        this.sqrtAlpha = sqrtAlpha;
-        this.sqrtBeta = sqrtBeta;
+        this.root3Alpha = root3Alpha;
         this.address = getPoolAddress(id);
         this.tokens = tokens;
         this.tokenMap = new Map(
@@ -112,28 +107,19 @@ export class Gyro2Pool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(
-            tokenIn,
-            tokenOut,
-        );
+        const { tIn, tOut, tertiary } = this.getPoolPairData(tokenIn, tokenOut);
         const invariant = _calculateInvariant(
-            [tIn.scale18, tOut.scale18],
-            sqrtAlpha,
-            sqrtBeta,
+            [tIn.scale18, tOut.scale18, tertiary.scale18],
+            this.root3Alpha,
         );
-        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-            invariant,
-            sqrtAlpha,
-            sqrtBeta,
-        );
+        const virtualOffsetInOut = MathGyro.mulDown(invariant, this.root3Alpha);
         const inAmountLessFee = this.subtractSwapFeeAmount(swapAmount);
 
         const outAmountScale18 = _calcOutGivenIn(
             tIn.scale18,
             tOut.scale18,
             inAmountLessFee.scale18,
-            virtualParamIn,
-            virtualParamOut,
+            virtualOffsetInOut,
         );
 
         if (outAmountScale18 > tOut.scale18)
@@ -158,33 +144,26 @@ export class Gyro2Pool implements BasePool {
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
-        const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(
-            tokenIn,
-            tokenOut,
-        );
+        const { tIn, tOut, tertiary } = this.getPoolPairData(tokenIn, tokenOut);
 
         if (swapAmount.scale18 > tOut.scale18)
             throw new Error('ASSET_BOUNDS_EXCEEDED');
 
         const invariant = _calculateInvariant(
-            [tIn.scale18, tOut.scale18],
-            sqrtAlpha,
-            sqrtBeta,
+            [tIn.scale18, tOut.scale18, tertiary.scale18],
+            this.root3Alpha,
         );
-        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-            invariant,
-            sqrtAlpha,
-            sqrtBeta,
-        );
+
+        const virtualOffsetInOut = MathGyro.mulDown(invariant, this.root3Alpha);
+
         const inAmountLessFee = _calcInGivenOut(
             tIn.scale18,
             tOut.scale18,
             swapAmount.scale18,
-            virtualParamIn,
-            virtualParamOut,
+            virtualOffsetInOut,
         );
         const inAmount = this.addSwapFeeAmount(
-            TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee),
+            TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee, true),
         );
 
         if (mutateBalances) {
@@ -200,32 +179,29 @@ export class Gyro2Pool implements BasePool {
         tokenOut: Token,
         swapKind: SwapKind,
     ): bigint {
-        const { tIn, tOut, sqrtAlpha, sqrtBeta } = this.getPoolPairData(
-            tokenIn,
-            tokenOut,
-        );
+        const { tIn, tOut, tertiary } = this.getPoolPairData(tokenIn, tokenOut);
         if (swapKind === SwapKind.GivenIn) {
             const invariant = _calculateInvariant(
-                [tIn.scale18, tOut.scale18],
-                sqrtAlpha,
-                sqrtBeta,
+                [tIn.scale18, tOut.scale18, tertiary.scale18],
+                this.root3Alpha,
             );
-            const maxAmountInAssetInPool = MathSol.mulUpFixed(
-                invariant,
-                MathSol.divDownFixed(WAD, sqrtAlpha) -
-                    MathSol.divDownFixed(WAD, sqrtBeta),
-            ); // x+ = L * (1/sqrtAlpha - 1/sqrtBeta)
+            const a = MathGyro.mulDown(invariant, this.root3Alpha);
+            const maxAmountInAssetInPool =
+                MathGyro.divDown(
+                    MathGyro.mulDown(tIn.scale18 + a, tOut.scale18 + a),
+                    a,
+                ) - a; // (x + a)(y + a) / a - a
             const limitAmountIn = maxAmountInAssetInPool - tIn.scale18;
-            const limitAmountInPlusSwapFee = MathSol.divDownFixed(
+            const limitAmountInPlusSwapFee = MathGyro.divDown(
                 limitAmountIn,
                 WAD - this.swapFee,
             );
-            return MathSol.mulDownFixed(
+            return MathGyro.mulDown(
                 limitAmountInPlusSwapFee,
                 SWAP_LIMIT_FACTOR,
             );
         } else {
-            return MathSol.mulDownFixed(tOut.amount, SWAP_LIMIT_FACTOR);
+            return MathGyro.mulDown(tOut.amount, SWAP_LIMIT_FACTOR);
         }
     }
 
@@ -242,27 +218,22 @@ export class Gyro2Pool implements BasePool {
         tokenIn: Token,
         tokenOut: Token,
     ): {
-        tIn: Gyro2PoolToken;
-        tOut: Gyro2PoolToken;
-        sqrtAlpha: bigint;
-        sqrtBeta: bigint;
+        tIn: Gyro3PoolToken;
+        tOut: Gyro3PoolToken;
+        tertiary: Gyro3PoolToken;
     } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
-        if (!tIn || !tOut) {
+        const tertiaryAddress = this.tokens
+            .map((t) => t.token.wrapped)
+            .find((a) => a !== tokenIn.wrapped && a !== tokenOut.wrapped);
+        const tertiary = this.tokenMap.get(tertiaryAddress as string);
+
+        if (!tIn || !tOut || !tertiary) {
             throw new Error('Pool does not contain the tokens provided');
         }
 
-        const sqrtAlpha =
-            tIn.index === 0
-                ? this.sqrtAlpha
-                : MathSol.divDownFixed(WAD, this.sqrtBeta);
-        const sqrtBeta =
-            tIn.index === 0
-                ? this.sqrtBeta
-                : MathSol.divDownFixed(WAD, this.sqrtAlpha);
-
-        return { tIn, tOut, sqrtAlpha, sqrtBeta };
+        return { tIn, tOut, tertiary };
     }
 }

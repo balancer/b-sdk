@@ -36,7 +36,7 @@ export class SmartOrderRouter {
             new SubgraphPoolProvider(chainId, SUBGRAPH_URLS[chainId]);
         poolDataEnrichers =
             poolDataEnrichers ||
-            new OnChainPoolDataEnricher(rpcUrl, BALANCER_SOR_QUERIES_ADDRESS);
+            new OnChainPoolDataEnricher(chainId, rpcUrl, BALANCER_SOR_QUERIES_ADDRESS);
         this.poolDataService = new PoolDataService(
             Array.isArray(poolDataProviders)
                 ? poolDataProviders

@@ -1,5 +1,5 @@
 import { Address, createPublicClient, formatUnits, Hex, http } from 'viem';
-import { sorQueriesAbi } from '../../abi/';
+import { sorQueriesAbi, tokenRatesFragmentAbi } from '../../abi/';
 import {
     GetPoolsResponse,
     PoolDataEnricher,
@@ -9,6 +9,8 @@ import {
 } from '../types';
 
 import {
+    CHAINS,
+    getPoolAddress,
     poolHasActualSupply,
     poolHasPercentFee,
     poolHasVirtualSupply,
@@ -26,6 +28,7 @@ interface OnChainPoolData {
     weights?: readonly bigint[];
     wrappedTokenRate?: bigint;
     scalingFactors?: readonly bigint[];
+    tokenRates?: readonly bigint[];
 }
 
 enum TotalSupplyType {
@@ -57,12 +60,18 @@ interface OnChainPoolDataQueryConfig {
         poolIds?: string[];
         poolTypes?: string[];
     };
+    loadTokenRatesForPools: {
+        poolIds?: string[];
+        poolTypes?: string[];
+        poolTypeVersions?: number[];
+    };
 }
 
 export class OnChainPoolDataEnricher implements PoolDataEnricher {
     private readonly config: OnChainPoolDataQueryConfig;
 
     constructor(
+        private readonly chainId: number,
         private readonly rpcUrl: string,
         private readonly sorQueriesAddress: Address,
         config?: Partial<OnChainPoolDataQueryConfig>,
@@ -76,6 +85,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             loadAmpForPools: {},
             loadScalingFactorForPools: {},
             loadWeightsForPools: {},
+            loadTokenRatesForPools: {},
             ...config,
         };
     }
@@ -98,10 +108,12 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             totalSupplyTypes,
             scalingFactorPoolIdxs,
             swapFeeTypes,
+            tokenRatesPoolIdxs,
         } = this.getPoolDataQueryParams(data);
 
         const client = createPublicClient({
             transport: http(this.rpcUrl),
+            chain: CHAINS[this.chainId],
         });
 
         const [
@@ -144,6 +156,25 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             blockNumber: options.block,
         });
 
+        let tokenRates: (readonly [bigint, bigint] | undefined)[] = [];
+        if (tokenRatesPoolIdxs.length > 0) {
+            const call = {
+                abi: tokenRatesFragmentAbi,
+                functionName: 'getTokenRates',
+            } as const;
+            const poolAddressesWithTokenRates: readonly Address[] = poolIds
+                .filter((_, i) => tokenRatesPoolIdxs.includes(BigInt(i)))
+                .map((id) => getPoolAddress(id) as Address);
+            const results = await client.multicall({
+                contracts: poolAddressesWithTokenRates.map((a) => ({
+                    address: a,
+                    ...call,
+                })),
+                blockNumber: options.block,
+            });
+            tokenRates = results.map((r) => r.result);
+        }
+
         return poolIds.map((_poolId, i) => ({
             id: poolIds[i],
             balances: balances[i],
@@ -159,6 +190,9 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 : undefined,
             scalingFactors: scalingFactors[i],
             swapFee: swapFees[i],
+            tokenRates: tokenRatesPoolIdxs.includes(BigInt(i))
+                ? tokenRates[tokenRatesPoolIdxs.indexOf(BigInt(i))]
+                : undefined,
         }));
     }
 
@@ -205,6 +239,12 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 swapFee: data?.swapFee
                     ? (formatUnits(data.swapFee, 18) as HumanAmount)
                     : pool.swapFee,
+                tokenRates: data?.tokenRates
+                    ? data.tokenRates.map(
+                          (tokenRate) =>
+                              formatUnits(tokenRate, 18) as HumanAmount,
+                      )
+                    : undefined,
             };
         });
     }
@@ -217,6 +257,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         const ampPoolIdxs: bigint[] = [];
         const scalingFactorPoolIdxs: bigint[] = [];
         const swapFeeTypes: SwapFeeType[] = [];
+        const tokenRatesPoolIdxs: bigint[] = [];
 
         const {
             loadScalingFactorForPoolTypes,
@@ -225,6 +266,9 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             loadAmpForPoolTypes,
             loadAmpForPoolIds,
             loadWeightsForPoolIds,
+            loadTokenRatesForPoolIds,
+            loadTokenRatesForPoolTypes,
+            loadTokenRatesForPoolTypeVersions,
         } = this.getMergedFilterConfig(data);
 
         for (let i = 0; i < data.pools.length; i++) {
@@ -265,6 +309,14 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 scalingFactorPoolIdxs.push(BigInt(i));
             }
 
+            if (
+                loadTokenRatesForPoolIds.has(pool.id) ||
+                (loadTokenRatesForPoolTypes.has(pool.poolType) &&
+                    loadTokenRatesForPoolTypeVersions.has(pool.poolTypeVersion))
+            ) {
+                tokenRatesPoolIdxs.push(BigInt(i));
+            }
+
             if (this.config.loadSwapFees) {
                 swapFeeTypes.push(
                     poolHasPercentFee(pool.poolType)
@@ -282,6 +334,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             ampPoolIdxs,
             scalingFactorPoolIdxs,
             swapFeeTypes,
+            tokenRatesPoolIdxs,
         };
     }
 
@@ -296,6 +349,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             loadWeightsForPools,
             loadScalingFactorForPools,
             loadAmpForPools,
+            loadTokenRatesForPools,
         } = this.config;
 
         const loadWeightsForPoolIds = new Set([
@@ -316,6 +370,15 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         const loadScalingFactorForPoolTypes = new Set(
             loadScalingFactorForPools.poolTypes || [],
         );
+        const loadTokenRatesForPoolIds = new Set(
+            loadTokenRatesForPools.poolIds || [],
+        );
+        const loadTokenRatesForPoolTypes = new Set(
+            loadTokenRatesForPools.poolTypes || [],
+        );
+        const loadTokenRatesForPoolTypeVersions = new Set(
+            loadTokenRatesForPools.poolTypeVersions || [],
+        );
 
         return {
             loadWeightsForPoolIds,
@@ -324,6 +387,9 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             loadWeightsForPoolTypes,
             loadAmpForPoolTypes,
             loadScalingFactorForPoolTypes,
+            loadTokenRatesForPoolIds,
+            loadTokenRatesForPoolTypes,
+            loadTokenRatesForPoolTypeVersions,
         };
     }
 

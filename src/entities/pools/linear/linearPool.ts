@@ -20,7 +20,6 @@ import {
 import { StablePoolToken } from '../stable/stablePool';
 import { RawLinearPool } from '../../../data/types';
 
-const ONE = parseEther('1');
 const MAX_RATIO = parseEther('10');
 const MAX_TOKEN_BALANCE = MAX_UINT112 - 1n;
 
@@ -309,7 +308,7 @@ export class LinearPool implements BasePool {
             }
         } else {
             if (tokenOut.isEqual(this.bptToken.token)) {
-                return (tOut.amount * MAX_RATIO) / ONE;
+                return (tOut.amount * MAX_RATIO) / WAD;
             } else {
                 return tOut.amount;
             }

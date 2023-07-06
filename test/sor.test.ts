@@ -1,3 +1,4 @@
+// pnpm test -- test/sor.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -18,6 +19,7 @@ describe('SmartOrderRouter', () => {
         const rpcUrl = process.env['ETHEREUM_RPC_URL'] || '';
         const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
             rpcUrl,
             SOR_QUERIES,
             {

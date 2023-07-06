@@ -13,7 +13,8 @@ export type SupportedRawPoolTypes =
     | 'ComposableStable'
     | 'StablePhantom'
     | 'Element'
-    | 'Gyro2';
+    | 'Gyro2'
+    | 'GyroE';
 type LinearPoolType = `${string}Linear`;
 
 export type RawPool =
@@ -23,7 +24,9 @@ export type RawPool =
     | RawStablePool
     | RawComposableStablePool
     | RawMetaStablePool
-    | RawGyro2Pool;
+    | RawGyro2Pool
+    | RawGyro3Pool
+    | RawGyroEPool;
 
 export interface RawBasePool {
     id: Hex;
@@ -76,6 +79,30 @@ export interface RawGyro2Pool extends RawBasePool {
     poolType: 'Gyro2';
     sqrtAlpha: HumanAmount;
     sqrtBeta: HumanAmount;
+}
+
+export interface RawGyro3Pool extends RawBasePool {
+    poolType: 'Gyro3';
+    root3Alpha: HumanAmount;
+}
+
+export interface RawGyroEPool extends RawBasePool {
+    poolType: 'GyroE';
+    alpha: HumanAmount;
+    beta: HumanAmount;
+    c: HumanAmount;
+    s: HumanAmount;
+    lambda: HumanAmount;
+    tauAlphaX: HumanAmount;
+    tauAlphaY: HumanAmount;
+    tauBetaX: HumanAmount;
+    tauBetaY: HumanAmount;
+    u: HumanAmount;
+    v: HumanAmount;
+    w: HumanAmount;
+    z: HumanAmount;
+    dSq: HumanAmount;
+    tokenRates?: HumanAmount[]; // available on GyroEV2 and up
 }
 
 export interface RawPoolToken {
