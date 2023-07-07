@@ -2,23 +2,43 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import testPools from './lib/testData/fxPool_43667355.json';
 import { ChainId } from '../src/utils';
-import { RawFxPool } from '../src/data/types';
 import {
     BasePool,
+    OnChainPoolDataEnricher,
+    SmartOrderRouter,
+    SubgraphPoolProvider,
     SwapKind,
     SwapOptions,
     Token,
     TokenAmount,
     sorGetSwapsWithPools,
-    sorParseRawPools,
 } from '../src';
+
+const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 describe('fx integration tests', () => {
     const chainId = ChainId.POLYGON;
     const rpcUrl = process.env['POLYGON_RPC_URL'] || '';
-    const rawPool = { ...testPools }.pools[0] as RawFxPool;
+    const subgraphPoolDataService = new SubgraphPoolProvider(
+        chainId,
+        undefined,
+        {
+            poolTypeIn: ['FX'],
+        },
+    );
+    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+        chainId,
+        rpcUrl,
+        SOR_QUERIES,
+    );
+
+    const sor = new SmartOrderRouter({
+        chainId,
+        poolDataProviders: subgraphPoolDataService,
+        poolDataEnrichers: onChainPoolDataEnricher,
+        rpcUrl: rpcUrl,
+    });
     const USDC = new Token(
         chainId,
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -36,8 +56,8 @@ describe('fx integration tests', () => {
     };
 
     let pools: BasePool[];
-    beforeEach(() => {
-        pools = sorParseRawPools(chainId, [rawPool]);
+    beforeEach(async () => {
+        pools = await sor.fetchAndCachePools(swapOptions.block);
     });
 
     describe('ExactIn', () => {
