@@ -239,6 +239,9 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                         name
                         index
                         symbol
+                        token {
+                            latestFXPrice
+                          }
                     }
                     tokensList
                     swapEnabled
@@ -250,6 +253,25 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                     wrappedIndex
                     lowerTarget
                     upperTarget
+                    alpha
+                    beta
+                    c
+                    delta
+                    dSq
+                    epsilon
+                    lambda
+                    root3Alpha
+                    s
+                    sqrtAlpha
+                    sqrtBeta
+                    tauAlphaX
+                    tauAlphaY
+                    tauBetaX
+                    tauBetaY
+                    u
+                    v
+                    w
+                    z
                     ${gqlAdditionalPoolQueryFields || ''}
                 }
                 ${isFirstQuery ? blockNumberFragment : ''}
