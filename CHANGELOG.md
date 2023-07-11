@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 0.0.5
+
+### Patch Changes
+
+- 6a49fbc: Gyro pool support
+- 99f0982: FX pool support
+
 ## 0.0.4
 
 ### Patch Changes
