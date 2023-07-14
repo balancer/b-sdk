@@ -17,7 +17,12 @@ export class TokenAmount {
     }
 
     public static fromHumanAmount(token: Token, humanAmount: `${number}`) {
-        const rawAmount = parseUnits(humanAmount, token.decimals);
+        let rawAmount: bigint;
+        if (token.decimals === 0) {
+            rawAmount = BigInt(humanAmount);
+        } else {
+            rawAmount = parseUnits(humanAmount, token.decimals);
+        }
         return new TokenAmount(token, rawAmount);
     }
 
