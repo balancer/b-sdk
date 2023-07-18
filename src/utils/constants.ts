@@ -1,5 +1,19 @@
-import { Address } from 'viem';
+import { Address, Chain } from 'viem';
 import { Token } from '../entities/token';
+import {
+    arbitrum,
+    avalanche,
+    baseGoerli,
+    bsc,
+    gnosis,
+    goerli,
+    mainnet,
+    optimism,
+    polygon,
+    polygonZkEvm,
+    zkSync,
+    zkSyncTestnet,
+} from 'viem/chains';
 
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
@@ -47,6 +61,21 @@ export enum ChainId {
     AVALANCHE = 43114,
     BASE_GOERLI = 84531,
 }
+
+export const CHAINS: Record<number, Chain> = {
+    [ChainId.MAINNET]: mainnet,
+    [ChainId.GOERLI]: goerli,
+    [ChainId.OPTIMISM]: optimism,
+    [ChainId.BSC]: bsc,
+    [ChainId.GNOSIS_CHAIN]: gnosis,
+    [ChainId.POLYGON]: polygon,
+    [ChainId.ZKSYNC_TESTNET]: zkSyncTestnet,
+    [ChainId.ZKSYNC]: zkSync,
+    [ChainId.ZKEVM]: polygonZkEvm,
+    [ChainId.ARBITRUM_ONE]: arbitrum,
+    [ChainId.AVALANCHE]: avalanche,
+    [ChainId.BASE_GOERLI]: baseGoerli,
+};
 
 export const SUBGRAPH_URLS = {
     [ChainId.MAINNET]:

@@ -52,38 +52,22 @@ describe('Gyro2Pool tests USDC > DAI', () => {
 
     describe('parsePoolPairData', () => {
         test('should correctly calculate price bounds USDC > DAI', async () => {
-            expect(poolPairData.sqrtAlpha).toBeCloseToDelta(
-                999500374700000000n,
-                10000000000n,
-            );
-
-            expect(poolPairData.sqrtBeta).toBeCloseToDelta(
-                1000500375000000000n,
-                10000000000n,
-            );
+            expect(poolPairData.sqrtAlpha).toEqual(999500374750171757n);
+            expect(poolPairData.sqrtBeta).toEqual(1000500375350272092n);
         });
 
         test('should correctly calculate price bounds DAI > USDC', async () => {
-            expect(poolPairData2.sqrtAlpha).toBeCloseToDelta(
-                999499874900000000n,
-                10000000000n,
-            );
-
-            expect(poolPairData2.sqrtBeta).toBeCloseToDelta(
-                1000499875000000000n,
-                10000000000n,
-            );
+            expect(poolPairData2.sqrtAlpha).toEqual(999499874900000000n);
+            expect(poolPairData2.sqrtBeta).toEqual(1000499875000000000n);
         });
     });
 
     describe('limit amounts', () => {
         test('should correctly calculate limit amounts, USDC > DAI', async () => {
             let amount = pool.getLimitAmountSwap(USDC, DAI, SwapKind.GivenIn);
-
             expect(amount).toEqual(1243743957825171017111n);
 
             amount = pool.getLimitAmountSwap(USDC, DAI, SwapKind.GivenOut);
-
             expect(amount).toEqual(1231998768000000000000n);
         });
     });
@@ -91,20 +75,12 @@ describe('Gyro2Pool tests USDC > DAI', () => {
     describe.skip('normalized liquidity', () => {
         test('should correctly calculate normalized liquidity, USDC > DAI', async () => {
             const normalizedLiquidity = pool.getNormalizedLiquidity(USDC, DAI);
-
-            expect(normalizedLiquidity).toBeCloseToDelta(
-                1116333916257166990921337n,
-                10000000000000n,
-            );
+            expect(normalizedLiquidity).toEqual(1116333916257166990921337n);
         });
 
         test('should correctly calculate normalized liquidity, DAI > USDC', async () => {
             const normalizedLiquidity = pool.getNormalizedLiquidity(DAI, USDC);
-
-            expect(normalizedLiquidity).toBeCloseToDelta(
-                1116217358286598731855228n,
-                10000000000000n,
-            );
+            expect(normalizedLiquidity).toEqual(1116217358286598731855228n);
         });
     });
 

@@ -1,7 +1,7 @@
 import { Router } from './router';
 import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
 import {
-    BALANCER_POOL_DATA_QUERIES_ADDRESSES,
+    BALANCER_SOR_QUERIES_ADDRESS,
     ChainId,
     checkInputs,
     SUBGRAPH_URLS,
@@ -37,8 +37,9 @@ export class SmartOrderRouter {
         poolDataEnrichers =
             poolDataEnrichers ||
             new OnChainPoolDataEnricher(
+                chainId,
                 rpcUrl,
-                BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
+                BALANCER_SOR_QUERIES_ADDRESS,
             );
         this.poolDataService = new PoolDataService(
             Array.isArray(poolDataProviders)
@@ -93,7 +94,12 @@ export class SmartOrderRouter {
         swapAmount: SwapInputRawAmount | TokenAmount,
         swapOptions?: SwapOptions,
     ): Promise<Swap | null> {
-        swapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmount);
+        const checkedSwapAmount = checkInputs(
+            tokenIn,
+            tokenOut,
+            swapKind,
+            swapAmount,
+        );
         const candidatePaths = await this.getCandidatePaths(
             tokenIn,
             tokenOut,
@@ -103,7 +109,7 @@ export class SmartOrderRouter {
         const bestPaths = this.router.getBestPaths(
             candidatePaths,
             swapKind,
-            swapAmount,
+            checkedSwapAmount,
         );
 
         if (!bestPaths) return null;

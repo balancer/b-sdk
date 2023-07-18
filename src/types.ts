@@ -12,7 +12,9 @@ export enum PoolType {
     ComposableStable = 'ComposableStable',
     MetaStable = 'MetaStable',
     AaveLinear = 'AaveLinear',
+    Fx = 'FX',
     Gyro2 = 'Gyro2',
+    GyroE = 'GyroE',
 }
 
 export enum SwapKind {
@@ -31,7 +33,7 @@ export interface SwapOptions {
 export interface FundManagement {
     sender: string;
     fromInternalBalance: boolean;
-    recipient: boolean;
+    recipient: string;
     toInternalBalance: boolean;
 }
 
