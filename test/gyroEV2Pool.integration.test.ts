@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import testPools from './lib/testData/gyroETestPool.json';
-import { ChainId } from '../src/utils';
+import { BALANCER_POOL_DATA_QUERIES_ADDRESSES, ChainId } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
@@ -17,8 +17,6 @@ import {
 import { parseEther } from 'viem';
 import { GyroEPool, GyroEPoolToken } from '../src/entities/pools/gyroE';
 import { MockPoolProvider } from './lib/utils/mockPoolProvider';
-
-const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     const chainId = ChainId.POLYGON;
@@ -46,7 +44,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
-            SOR_QUERIES,
+            BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
             {
                 loadTokenRatesForPools: {
                     poolTypes: ['GyroE'],

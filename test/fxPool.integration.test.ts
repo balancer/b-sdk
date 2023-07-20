@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { ChainId } from '../src/utils';
+import { BALANCER_POOL_DATA_QUERIES_ADDRESSES, ChainId } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
@@ -14,8 +14,6 @@ import {
     TokenAmount,
     sorGetSwapsWithPools,
 } from '../src';
-
-const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 describe('fx integration tests', () => {
     const chainId = ChainId.POLYGON;
@@ -30,7 +28,7 @@ describe('fx integration tests', () => {
     const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
         chainId,
         rpcUrl,
-        SOR_QUERIES,
+        BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
     );
 
     const sor = new SmartOrderRouter({
