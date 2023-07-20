@@ -29,6 +29,9 @@ describe('fx integration tests', () => {
         chainId,
         rpcUrl,
         BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
+        {
+            loadSwapFees: false,
+        },
     );
 
     const sor = new SmartOrderRouter({
