@@ -18,28 +18,7 @@ import {
 describe('fx integration tests', () => {
     const chainId = ChainId.POLYGON;
     const rpcUrl = process.env['POLYGON_RPC_URL'] || 'https://polygon-rpc.com';
-    const subgraphPoolDataService = new SubgraphPoolProvider(
-        chainId,
-        undefined,
-        {
-            poolTypeIn: ['FX'],
-        },
-    );
-    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-        chainId,
-        rpcUrl,
-        BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
-        {
-            loadSwapFees: false,
-        },
-    );
 
-    const sor = new SmartOrderRouter({
-        chainId,
-        poolDataProviders: subgraphPoolDataService,
-        poolDataEnrichers: onChainPoolDataEnricher,
-        rpcUrl: rpcUrl,
-    });
     const USDC = new Token(
         chainId,
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -55,6 +34,33 @@ describe('fx integration tests', () => {
     const swapOptions: SwapOptions = {
         block: 43667355n,
     };
+
+    let sor: SmartOrderRouter;
+
+    beforeAll(() => {
+        const subgraphPoolDataService = new SubgraphPoolProvider(
+            chainId,
+            undefined,
+            {
+                poolTypeIn: ['FX'],
+            },
+        );
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
+            rpcUrl,
+            BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
+            {
+                loadSwapFees: false,
+            },
+        );
+
+        sor = new SmartOrderRouter({
+            chainId,
+            poolDataProviders: subgraphPoolDataService,
+            poolDataEnrichers: onChainPoolDataEnricher,
+            rpcUrl: rpcUrl,
+        });
+    });
 
     let pools: BasePool[];
     beforeEach(async () => {
