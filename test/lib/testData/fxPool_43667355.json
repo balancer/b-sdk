@@ -48,7 +48,9 @@
             "beta": "0.48",
             "lambda": "0.3",
             "delta": "0.2734375",
-            "epsilon": "0.0005"
+            "epsilon": "0.0005",
+            "inRecoveryMode": false,
+            "isPaused": false
         }
     ]
 }

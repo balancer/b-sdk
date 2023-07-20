@@ -48,7 +48,9 @@
             "swapEnabled": true,
             "sqrtAlpha": "0.9994998749",
             "sqrtBeta": "1.000499875",
-            "liquidity": "100"
+            "liquidity": "100",
+            "inRecoveryMode": false,
+            "isPaused": false
         }
     ]
 }
