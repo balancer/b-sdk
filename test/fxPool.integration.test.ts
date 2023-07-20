@@ -19,7 +19,7 @@ const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 describe('fx integration tests', () => {
     const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env['POLYGON_RPC_URL'] || '';
+    const rpcUrl = process.env['POLYGON_RPC_URL'] || 'https://polygon-rpc.com';
     const subgraphPoolDataService = new SubgraphPoolProvider(
         chainId,
         undefined,

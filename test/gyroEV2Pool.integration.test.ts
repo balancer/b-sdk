@@ -22,7 +22,7 @@ const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
 
 describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env['POLYGON_RPC_URL'] || '';
+    const rpcUrl = process.env['POLYGON_RPC_URL'] || 'https://polygon-rpc.com';
     const WMATIC = new Token(
         chainId,
         '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
