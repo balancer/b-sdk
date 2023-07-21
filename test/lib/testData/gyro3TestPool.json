@@ -57,7 +57,8 @@
             "poolTypeVersion": 1,
             "liquidity": "1",
             "swapEnabled": true,
-            "root3Alpha": "0.995647752"
+            "root3Alpha": "0.995647752",
+            "inRecoveryMode": false
         },
         {
             "id": "0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799",
@@ -107,7 +108,8 @@
                     "index": 2
                 }
             ],
-            "root3Alpha": "0.9995"
+            "root3Alpha": "0.9995",
+            "inRecoveryMode": false
         }
     ]
 }

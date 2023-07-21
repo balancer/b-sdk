@@ -37,6 +37,8 @@ export interface RawBasePool {
     poolTypeVersion: number;
     swapFee: HumanAmount;
     swapEnabled: boolean;
+    isPaused: boolean;
+    inRecoveryMode: boolean;
     tokens: RawPoolToken[];
     tokensList: Address[];
     liquidity: HumanAmount;
