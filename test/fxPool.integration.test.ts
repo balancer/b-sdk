@@ -32,7 +32,7 @@ describe('fx integration tests', () => {
         'XSGD',
     );
     const swapOptions: SwapOptions = {
-        block: 43667355n,
+        block: 43878700n,
     };
 
     let sor: SmartOrderRouter;
