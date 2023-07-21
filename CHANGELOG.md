@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.1.0
+
+### Minor Changes
+
+- f04362c: The onChainPoolDataEnricher now also queries the pool rate, linearTargets as well as status of inRecoveryMode and isPaused
+
 ## 0.0.5
 
 ### Patch Changes
