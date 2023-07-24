@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- ec6fda0: Switched to vitest. Updated viem to fix parseUnits issue
+
 ## 0.1.0
 
 ### Minor Changes
