@@ -1,4 +1,5 @@
 // pnpm test -- test/gyroEPool.test.ts
+import { describe, expect, test } from 'vitest';
 import testPools from './lib/testData/gyroETestPool.json';
 import { ChainId, SwapKind, Token, TokenAmount } from '../src';
 import { RawGyroEPool } from '../src/data/types';

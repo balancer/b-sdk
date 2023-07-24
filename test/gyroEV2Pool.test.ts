@@ -1,4 +1,5 @@
 // pnpm test -- gyroEV2Pool.test.ts
+import { describe, expect, test } from 'vitest';
 import { ChainId, RawGyroEPool, SwapKind, Token, TokenAmount } from '../src';
 import { GyroEPool } from '../src/entities/pools/gyroE';
 import testPools from './lib/testData/gyroETestPool.json';

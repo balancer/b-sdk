@@ -1,4 +1,5 @@
 // pnpm test -- test/gyro2Pool.test.ts
+import { describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
