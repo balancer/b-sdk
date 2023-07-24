@@ -43,7 +43,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Test
-        run: pnpm test
+        run: pnpm test:ci
         env:
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
