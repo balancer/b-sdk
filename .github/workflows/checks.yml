@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        pnpm-version: [7]
+        pnpm-version: [8]
     steps:
       - uses: actions/checkout@v3
       - name: Setup
@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        pnpm-version: [7]
+        pnpm-version: [8]
     steps:
       - uses: actions/checkout@v3
       - name: Setup
@@ -37,13 +37,13 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        pnpm-version: [7]
+        pnpm-version: [8]
     steps:
       - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/actions/setup
       - name: Test
-        run: pnpm test
+        run: pnpm test:ci
         env:
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
@@ -55,7 +55,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        pnpm-version: [7]
+        pnpm-version: [8]
     steps:
       - uses: actions/checkout@v3
       - name: Setup

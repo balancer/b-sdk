@@ -1,4 +1,5 @@
 // pnpm test -- test/fxPool.integration.test.ts
+import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
