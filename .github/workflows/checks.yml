@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        pnpm-version: [7]
+        pnpm-version: [8]
     steps:
       - uses: actions/checkout@v3
       - name: Setup
@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        pnpm-version: [7]
+        pnpm-version: [8]
     steps:
       - uses: actions/checkout@v3
       - name: Setup
@@ -37,7 +37,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        pnpm-version: [7]
+        pnpm-version: [8]
     steps:
       - uses: actions/checkout@v3
       - name: Setup
@@ -55,7 +55,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-        pnpm-version: [7]
+        pnpm-version: [8]
     steps:
       - uses: actions/checkout@v3
       - name: Setup
