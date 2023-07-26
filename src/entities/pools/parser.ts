@@ -3,6 +3,10 @@ import { WeightedPoolFactory } from './weighted';
 import { StablePoolFactory } from './stable';
 import { MetaStablePoolFactory } from './metastable';
 import { LinearPoolFactory } from './linear';
+import { FxPoolFactory } from './fx';
+import { Gyro2PoolFactory } from './gyro2';
+import { Gyro3PoolFactory } from './gyro3/gyro3Factory';
+import { GyroEPoolFactory } from './gyroE';
 import { RawPool } from '../../data/types';
 
 export class PoolParser {
@@ -17,6 +21,10 @@ export class PoolParser {
             new StablePoolFactory(),
             new MetaStablePoolFactory(),
             new LinearPoolFactory(),
+            new FxPoolFactory(),
+            new Gyro2PoolFactory(),
+            new Gyro3PoolFactory(),
+            new GyroEPoolFactory(),
         ];
     }
 

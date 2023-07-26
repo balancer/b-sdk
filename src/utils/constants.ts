@@ -1,5 +1,19 @@
-import { Address } from 'viem';
+import { Address, Chain } from 'viem';
 import { Token } from '../entities/token';
+import {
+    arbitrum,
+    avalanche,
+    baseGoerli,
+    bsc,
+    gnosis,
+    goerli,
+    mainnet,
+    optimism,
+    polygon,
+    polygonZkEvm,
+    zkSync,
+    zkSyncTestnet,
+} from 'viem/chains';
 
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
@@ -49,6 +63,21 @@ export enum ChainId {
     FANTOM = 250,
 }
 
+export const CHAINS: Record<number, Chain> = {
+    [ChainId.MAINNET]: mainnet,
+    [ChainId.GOERLI]: goerli,
+    [ChainId.OPTIMISM]: optimism,
+    [ChainId.BSC]: bsc,
+    [ChainId.GNOSIS_CHAIN]: gnosis,
+    [ChainId.POLYGON]: polygon,
+    [ChainId.ZKSYNC_TESTNET]: zkSyncTestnet,
+    [ChainId.ZKSYNC]: zkSync,
+    [ChainId.ZKEVM]: polygonZkEvm,
+    [ChainId.ARBITRUM_ONE]: arbitrum,
+    [ChainId.AVALANCHE]: avalanche,
+    [ChainId.BASE_GOERLI]: baseGoerli,
+};
+
 export const SUBGRAPH_URLS = {
     [ChainId.MAINNET]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
@@ -86,8 +115,16 @@ export const STELLATE_URLS = {
 };
 
 export const BALANCER_QUERIES = '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5';
-export const BALANCER_SOR_QUERIES_ADDRESS =
-    '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
+export const BALANCER_POOL_DATA_QUERIES_ADDRESSES: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0x7Ba29fE8E83dd6097A7298075C4AFfdBda3121cC',
+    [ChainId.AVALANCHE]: '0x67af5D428d38C5176a286a2371Df691cDD914Fb8',
+    [ChainId.GNOSIS_CHAIN]: '0x3f170631ed9821Ca51A59D996aB095162438DC10',
+    [ChainId.MAINNET]: '0xf5CDdF6feD9C589f1Be04899F48f9738531daD59',
+    [ChainId.OPTIMISM]: '0x6B5dA774890Db7B7b96C6f44e6a4b0F657399E2e',
+    [ChainId.POLYGON]: '0x84813aA3e079A665C0B80F944427eE83cBA63617',
+    [ChainId.ZKEVM]: '0xF24917fB88261a37Cc57F686eBC831a5c0B9fD39',
+    [ChainId.FANTOM]: '0x9642Dbba0753B1518022d7617Be079f0d7EFD165',
+};
 
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(

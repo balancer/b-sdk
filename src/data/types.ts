@@ -12,7 +12,10 @@ export type SupportedRawPoolTypes =
     | 'MetaStable'
     | 'ComposableStable'
     | 'StablePhantom'
-    | 'Element';
+    | 'Element'
+    | 'FX'
+    | 'Gyro2'
+    | 'GyroE';
 type LinearPoolType = `${string}Linear`;
 
 export type RawPool =
@@ -21,15 +24,21 @@ export type RawPool =
     | RawWeightedPool
     | RawStablePool
     | RawComposableStablePool
-    | RawMetaStablePool;
+    | RawMetaStablePool
+    | RawGyro2Pool
+    | RawGyro3Pool
+    | RawGyroEPool;
 
 export interface RawBasePool {
     id: Hex;
     address: Address;
+    name: string;
     poolType: SupportedRawPoolTypes | string;
     poolTypeVersion: number;
     swapFee: HumanAmount;
     swapEnabled: boolean;
+    isPaused: boolean;
+    inRecoveryMode: boolean;
     tokens: RawPoolToken[];
     tokensList: Address[];
     liquidity: HumanAmount;
@@ -69,6 +78,46 @@ export interface RawWeightedPool extends RawBasePool {
     hasActiveWeightUpdate?: boolean;
 }
 
+export interface RawGyro2Pool extends RawBasePool {
+    poolType: 'Gyro2';
+    sqrtAlpha: HumanAmount;
+    sqrtBeta: HumanAmount;
+}
+
+export interface RawGyro3Pool extends RawBasePool {
+    poolType: 'Gyro3';
+    root3Alpha: HumanAmount;
+}
+
+export interface RawGyroEPool extends RawBasePool {
+    poolType: 'GyroE';
+    alpha: HumanAmount;
+    beta: HumanAmount;
+    c: HumanAmount;
+    s: HumanAmount;
+    lambda: HumanAmount;
+    tauAlphaX: HumanAmount;
+    tauAlphaY: HumanAmount;
+    tauBetaX: HumanAmount;
+    tauBetaY: HumanAmount;
+    u: HumanAmount;
+    v: HumanAmount;
+    w: HumanAmount;
+    z: HumanAmount;
+    dSq: HumanAmount;
+    tokenRates?: HumanAmount[]; // available on GyroEV2 and up
+}
+
+export interface RawFxPool extends RawBasePool {
+    poolType: 'FX';
+    tokens: RawFxPoolToken[];
+    alpha: HumanAmount;
+    beta: HumanAmount;
+    lambda: HumanAmount;
+    delta: HumanAmount;
+    epsilon: HumanAmount;
+}
+
 export interface RawPoolToken {
     address: Address;
     index: number;
@@ -84,6 +133,13 @@ export interface RawWeightedPoolToken extends RawPoolToken {
 
 export interface RawPoolTokenWithRate extends RawPoolToken {
     priceRate: HumanAmount;
+}
+
+export interface RawFxPoolToken extends RawPoolToken {
+    token: {
+        latestFXPrice: HumanAmount;
+        fxOracleDecimals?: number;
+    };
 }
 
 export interface GetPoolsResponse {

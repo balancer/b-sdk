@@ -1,26 +1,38 @@
+// pnpm test -- test/sor.test.ts
+import { beforeEach, describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
 import { SmartOrderRouter } from '../src/sor';
 import { sorGetSwapsWithPools } from '../src/static';
 import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import { ChainId, ETH, NATIVE_ASSETS } from '../src/utils';
+import {
+    BALANCER_POOL_DATA_QUERIES_ADDRESSES,
+    ChainId,
+    ETH,
+    NATIVE_ASSETS,
+} from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapKind, SwapOptions } from '../src/types';
 import { BasePool } from '../src/entities/pools';
 
-const SOR_QUERIES = '0x1814a3b3e4362caf4eb54cd85b82d39bd7b34e41';
-
 // npx jest --testPathPattern=test/sor.test.ts
 describe('SmartOrderRouter', () => {
     describe('Mainnet', () => {
         const chainId = ChainId.MAINNET;
-        const rpcUrl = process.env['ETHEREUM_RPC_URL'] || '';
+        const rpcUrl =
+            process.env['ETHEREUM_RPC_URL'] || 'https://eth.llamarpc.com';
         const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
             rpcUrl,
-            SOR_QUERIES,
+            BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
+            {
+                loadAmpForPools: {
+                    poolTypes: ['ComposableStable'],
+                },
+            },
         );
 
         const sor = new SmartOrderRouter({
@@ -56,7 +68,7 @@ describe('SmartOrderRouter', () => {
         );
 
         const swapOptions: SwapOptions = {
-            block: 16900000n,
+            block: 17473810n,
         };
 
         let pools: BasePool[];
@@ -129,9 +141,9 @@ describe('SmartOrderRouter', () => {
         describe('Stable Pools', () => {
             // DAI -> bb-a-DAI -> bb-a-USDT -> USDT swapGivenIn boosted
             // Aave Linear + Boosted Pool
-            // 0xae37d54ae477268b9997d4161b96b8200755935c000000000000000000000337
-            // 0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d
-            // 0x2f4eb100552ef93840d5adc30560e5513dfffacb000000000000000000000334
+            // 0x6667c6fa9f2b3fc1cc8d85320b62703d938e43850000000000000000000004fb
+            // 0xfebb0bbf162e64fb9d0dfe186e517d84c395f016000000000000000000000502
+            // 0xa1697f9af0875b63ddc472d6eebada8c1fab85680000000000000000000004f9
             test('DAI -> USDT givenIn boosted', async () => {
                 const inputAmount = TokenAmount.fromHumanAmount(DAI, '100000');
 
@@ -156,9 +168,9 @@ describe('SmartOrderRouter', () => {
 
             // DAI -> bb-a-DAI -> bb-a-USDT -> USDT swapGivenOut boosted
             // Aave Linear + Boosted Pool
-            // 0xae37d54ae477268b9997d4161b96b8200755935c000000000000000000000337
-            // 0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d
-            // 0x2f4eb100552ef93840d5adc30560e5513dfffacb000000000000000000000334
+            // 0x6667c6fa9f2b3fc1cc8d85320b62703d938e43850000000000000000000004fb
+            // 0xfebb0bbf162e64fb9d0dfe186e517d84c395f016000000000000000000000502
+            // 0xa1697f9af0875b63ddc472d6eebada8c1fab85680000000000000000000004f9
             test('USDC -> DAI givenOut boosted', async () => {
                 const outputAmount = TokenAmount.fromHumanAmount(
                     DAI,
@@ -187,8 +199,14 @@ describe('SmartOrderRouter', () => {
         const rpcUrl = process.env['FANTOM_RPC_URL'] || '';
         const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
             rpcUrl,
-            SOR_QUERIES,
+            BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
+            {
+                loadAmpForPools: {
+                    poolTypes: ['ComposableStable'],
+                },
+            },
         );
 
         const sor = new SmartOrderRouter({

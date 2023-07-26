@@ -1,4 +1,4 @@
-import { Hex, parseEther } from 'viem';
+import { Hex, parseEther, parseUnits } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
 import { BigintIsh, Token, TokenAmount } from '../../';
 import { BasePool } from '../';
@@ -92,7 +92,7 @@ export class StablePool implements BasePool {
         }
 
         const totalShares = parseEther(pool.totalShares);
-        const amp = BigInt(pool.amp) * 1000n;
+        const amp = parseUnits(pool.amp, 3);
 
         return new StablePool(
             pool.id,

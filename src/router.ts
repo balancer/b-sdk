@@ -64,21 +64,21 @@ export class Router {
         let valueArr: { item: PathWithAmount; value: number }[];
 
         if (swapKind === SwapKind.GivenIn) {
-            (valueArr = quotePaths.map((item) => {
+            valueArr = quotePaths.map((item) => {
                 return {
                     item,
                     value: Number(item.outputAmount.amount),
                 };
-            })),
-                valueArr.sort((a, b) => b.value - a.value);
+            });
+            valueArr.sort((a, b) => b.value - a.value);
         } else {
-            (valueArr = quotePaths.map((item) => {
+            valueArr = quotePaths.map((item) => {
                 return {
                     item,
                     value: Number(item.inputAmount.amount),
                 };
-            })),
-                valueArr.sort((a, b) => a.value - b.value);
+            });
+            valueArr.sort((a, b) => a.value - b.value);
         }
 
         const orderedQuotePaths = valueArr.map((item) => item.item);

@@ -1,4 +1,4 @@
-export const sorQueriesAbi = [
+export const balancerPoolDataQueriesAbi = [
     {
         inputs: [
             {
@@ -19,7 +19,70 @@ export const sorQueriesAbi = [
             },
         ],
         name: 'getAmpForPools',
-        outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+        ],
+        name: 'getInRecoveryModeForPools',
+        outputs: [
+            {
+                internalType: 'bool[]',
+                name: '',
+                type: 'bool[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+        ],
+        name: 'getIsPausedForPools',
+        outputs: [
+            {
+                internalType: 'bool[]',
+                name: '',
+                type: 'bool[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+        ],
+        name: 'getLinearTargetsForPools',
+        outputs: [
+            {
+                internalType: 'uint256[][]',
+                name: '',
+                type: 'uint256[][]',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -65,6 +128,11 @@ export const sorQueriesAbi = [
                     },
                     {
                         internalType: 'bool',
+                        name: 'loadLinearTargets',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
                         name: 'loadNormalizedWeights',
                         type: 'bool',
                     },
@@ -73,7 +141,16 @@ export const sorQueriesAbi = [
                         name: 'loadScalingFactors',
                         type: 'bool',
                     },
-                    { internalType: 'bool', name: 'loadAmps', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'loadAmps',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'loadRates',
+                        type: 'bool',
+                    },
                     {
                         internalType: 'uint256',
                         name: 'blockNumber',
@@ -109,8 +186,13 @@ export const sorQueriesAbi = [
                         name: 'ampPoolIdxs',
                         type: 'uint256[]',
                     },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'ratePoolIdxs',
+                        type: 'uint256[]',
+                    },
                 ],
-                internalType: 'struct SorPoolDataQueryConfig',
+                internalType: 'struct PoolDataQueryConfig',
                 name: 'config',
                 type: 'tuple',
             },
@@ -127,11 +209,20 @@ export const sorQueriesAbi = [
                 name: 'totalSupplies',
                 type: 'uint256[]',
             },
-            { internalType: 'uint256[]', name: 'swapFees', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'swapFees',
+                type: 'uint256[]',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'linearWrappedTokenRates',
                 type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256[][]',
+                name: 'linearTargets',
+                type: 'uint256[][]',
             },
             {
                 internalType: 'uint256[][]',
@@ -143,19 +234,105 @@ export const sorQueriesAbi = [
                 name: 'scalingFactors',
                 type: 'uint256[][]',
             },
-            { internalType: 'uint256[]', name: 'amps', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'amps',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'rates',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'ignoreIdxs',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'bytes32[]', name: 'poolIds', type: 'bytes32[]' },
-            { internalType: 'uint256', name: 'blockNumber', type: 'uint256' },
+            {
+                internalType: 'bytes32[]',
+                name: 'poolIds',
+                type: 'bytes32[]',
+            },
+            {
+                components: [
+                    {
+                        internalType: 'bool',
+                        name: 'loadInRecoveryMode',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'loadIsPaused',
+                        type: 'bool',
+                    },
+                ],
+                internalType: 'struct PoolStatusQueryConfig',
+                name: 'config',
+                type: 'tuple',
+            },
+        ],
+        name: 'getPoolStatus',
+        outputs: [
+            {
+                internalType: 'bool[]',
+                name: 'isPaused',
+                type: 'bool[]',
+            },
+            {
+                internalType: 'bool[]',
+                name: 'inRecoveryMode',
+                type: 'bool[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'bytes32[]',
+                name: 'poolIds',
+                type: 'bytes32[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'blockNumber',
+                type: 'uint256',
+            },
         ],
         name: 'getPoolTokenBalancesWithUpdatesAfterBlock',
         outputs: [
-            { internalType: 'uint256[][]', name: '', type: 'uint256[][]' },
+            {
+                internalType: 'uint256[][]',
+                name: '',
+                type: 'uint256[][]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address[]',
+                name: 'poolAddresses',
+                type: 'address[]',
+            },
+        ],
+        name: 'getRateForPools',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
