@@ -1,4 +1,5 @@
 import {
+    AdditionalPoolData,
     GetPoolsResponse,
     PoolDataEnricher,
     PoolDataProvider,
@@ -55,10 +56,27 @@ export class PoolDataService {
     ) {
         let pools = data.pools;
 
-        const additionalPoolData = await Promise.all(
-            this.enrichers.map((provider) =>
-                provider.fetchAdditionalPoolData(data, providerOptions),
-            ),
+        const pageSize = 100;
+        let pageSkip = 0;
+        const additionalPoolDataPromises: Promise<AdditionalPoolData[]>[] = [];
+        do {
+            const start = pageSize * pageSkip;
+            const end = Math.min(pools.length, pageSize * (pageSkip + 1));
+            const _data = {
+                ...data,
+                pools: data.pools.slice(start, end),
+                poolsWithActiveAmpUpdates: data.poolsWithActiveAmpUpdates?.slice(start, end),
+                poolsWithActiveWeightUpdates: data.poolsWithActiveWeightUpdates?.slice(start, end),
+            };
+            const _additionalPoolDataPromises = this.enrichers.map((provider) =>
+                provider.fetchAdditionalPoolData(_data, providerOptions),
+            );
+            additionalPoolDataPromises.push(..._additionalPoolDataPromises);
+            pageSkip++;
+        } while (pageSize * pageSkip < pools.length);
+        
+        const additionalPoolData = (
+            await Promise.all(additionalPoolDataPromises)
         );
 
         // We enrich the pools in order of the enrichers array
