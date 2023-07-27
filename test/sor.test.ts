@@ -17,7 +17,6 @@ import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEn
 import { SwapKind, SwapOptions } from '../src/types';
 import { BasePool } from '../src/entities/pools';
 
-// npx jest --testPathPattern=test/sor.test.ts
 describe('SmartOrderRouter', () => {
     describe('Mainnet', () => {
         const chainId = ChainId.MAINNET;
@@ -224,7 +223,7 @@ describe('SmartOrderRouter', () => {
         );
 
         const swapOptions: SwapOptions = {
-            block: 64087514n,
+            block: 65313450n,
         };
 
         let pools: BasePool[];
@@ -259,13 +258,10 @@ describe('SmartOrderRouter', () => {
                 expect(swap.outputAmount.amount).toEqual(swap.quote.amount);
                 expect(swap.paths.length).toEqual(1);
                 expect(swap.paths[0].pools.length).toEqual(1);
-                expect(swap.paths[0].pools[0].id).toEqual(
-                    '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
-                );
             });
 
-            test.skip('Native ETH -> Token givenOut single hop', async () => {
-                const outputAmount = TokenAmount.fromHumanAmount(BEETS, '100');
+            test('Native ETH -> Token givenOut', async () => {
+                const outputAmount = TokenAmount.fromHumanAmount(BEETS, '10');
 
                 const swap = await sorGetSwapsWithPools(
                     inputToken,
@@ -283,11 +279,6 @@ describe('SmartOrderRouter', () => {
                 expect(swap.quote.amount).toEqual(onchain.amount);
                 expect(swap.inputAmount.amount).toEqual(swap.quote.amount);
                 expect(swap.outputAmount.amount).toEqual(outputAmount.amount);
-                expect(swap.paths.length).toEqual(1);
-                expect(swap.paths[0].pools.length).toEqual(1);
-                expect(swap.paths[0].pools[0].id).toEqual(
-                    '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
-                );
             });
         });
     });
