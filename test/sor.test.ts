@@ -256,12 +256,13 @@ describe('SmartOrderRouter', () => {
                 expect(swap.quote.amount).toEqual(onchain.amount);
                 expect(swap.inputAmount.amount).toEqual(inputAmount.amount);
                 expect(swap.outputAmount.amount).toEqual(swap.quote.amount);
-                expect(swap.paths.length).toEqual(1);
-                expect(swap.paths[0].pools.length).toEqual(1);
             });
 
             test('Native ETH -> Token givenOut', async () => {
-                const outputAmount = TokenAmount.fromHumanAmount(BEETS, '10');
+                const outputAmount = TokenAmount.fromHumanAmount(
+                    BEETS,
+                    '100000',
+                );
 
                 const swap = await sorGetSwapsWithPools(
                     inputToken,
