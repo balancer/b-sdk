@@ -1,5 +1,5 @@
 import { Address, createPublicClient, formatUnits, Hex, http } from 'viem';
-import { balancerPoolDataQueriesAbi, tokenRatesFragmentAbi } from '../../abi/';
+import { balancerPoolDataQueriesAbi, tokenRatesFragmentAbi } from '../../abi';
 import {
     GetPoolsResponse,
     PoolDataEnricher,
@@ -80,6 +80,7 @@ interface OnChainPoolDataQueryConfig {
 
     loadInRecoveryMode: boolean;
     loadIsPaused: boolean;
+    chunkSize: number;
 }
 
 export class OnChainPoolDataEnricher implements PoolDataEnricher {
@@ -105,11 +106,38 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             loadTokenRatesForPools: {},
             loadInRecoveryMode: true,
             loadIsPaused: true,
+            chunkSize: 1000,
             ...config,
         };
     }
 
     public async fetchAdditionalPoolData(
+        data: GetPoolsResponse,
+        options: SwapOptions,
+    ): Promise<OnChainPoolData[]> {
+        const onChainPoolDataPromises: Promise<OnChainPoolData[]>[] = [];
+        const pageCount = Math.ceil(data.pools.length / this.config.chunkSize);
+        for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+            const startIndex = pageIndex * this.config.chunkSize;
+            const endIndex = startIndex + this.config.chunkSize;
+            const _data = {
+                ...data,
+                pools: data.pools.slice(startIndex, endIndex),
+                poolsWithActiveAmpUpdates:
+                    data.poolsWithActiveAmpUpdates?.slice(startIndex, endIndex),
+                poolsWithActiveWeightUpdates:
+                    data.poolsWithActiveWeightUpdates?.slice(
+                        startIndex,
+                        endIndex,
+                    ),
+            };
+            onChainPoolDataPromises.push(this.fetchPoolData(_data, options));
+        }
+        const resolvedData = await Promise.all(onChainPoolDataPromises);
+        return resolvedData.flat();
+    }
+
+    private async fetchPoolData(
         data: GetPoolsResponse,
         options: SwapOptions,
     ): Promise<OnChainPoolData[]> {

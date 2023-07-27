@@ -205,6 +205,7 @@ describe('SmartOrderRouter', () => {
                 loadAmpForPools: {
                     poolTypes: ['ComposableStable'],
                 },
+                chunkSize: 300,
             },
         );
 
