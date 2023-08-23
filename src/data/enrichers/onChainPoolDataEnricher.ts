@@ -18,7 +18,7 @@ import {
 } from '../../utils';
 import { HumanAmount, SwapOptions } from '../../types';
 
-interface OnChainPoolData {
+export interface OnChainPoolData {
     id: string;
     balances: readonly bigint[];
     totalSupply: bigint;
