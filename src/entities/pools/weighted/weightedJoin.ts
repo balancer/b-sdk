@@ -12,7 +12,6 @@ import {
     BALANCER_VAULT,
     CHAINS,
     ZERO_ADDRESS,
-    getPoolAddress,
 } from '../../../utils';
 import { WeightedPoolEncoder } from '../../encoders/weighted';
 import { TokenAmount } from '../../tokenAmount';

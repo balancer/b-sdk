@@ -7,7 +7,8 @@ import {
     Token,
     TokenAmount,
 } from '../src/entities';
-import { ChainId } from '../src/utils';
+import { ChainId, getPoolAddress } from '../src/utils';
+import { Address } from '../src/types';
 
 describe('weighted join test', () => {
     let api: MockApi;
@@ -41,9 +42,10 @@ describe('weighted join test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: string): Promise<PoolState> {
+    public async getPool(id: Address): Promise<PoolState> {
         return {
             id,
+            address: getPoolAddress(id) as Address,
             type: 'Weighted',
             assets: ['0xtoken1Addr', '0xtoken2Addr'],
         };
