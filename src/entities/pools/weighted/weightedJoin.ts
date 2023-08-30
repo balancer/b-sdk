@@ -35,8 +35,7 @@ export class WeightedJoin implements BaseJoin {
         this.checkInputs(input, poolState);
 
         // infer join kind by input tokens
-        const poolAddress = getPoolAddress(poolState.id) as Address;
-        const joinKind = this.getJoinKind(input, poolAddress);
+        const joinKind = this.getJoinKind(input, poolState.address);
 
         // Initialize join parameters
         let maxAmountsIn = Array(poolState.assets.length).fill(0n);
@@ -67,8 +66,8 @@ export class WeightedJoin implements BaseJoin {
         }
 
         const queryArgs = this.getJoinParameters({
-            poolId: poolState.id as Address,
-            assets: poolState.assets as Address[],
+            poolId: poolState.id,
+            assets: poolState.assets,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             maxAmountsIn,
@@ -89,11 +88,11 @@ export class WeightedJoin implements BaseJoin {
 
         const [queryBptOut, queryAmountsIn] = result;
 
-        const bpt = new Token(input.chainId, poolAddress, 18);
+        const bpt = new Token(input.chainId, poolState.address, 18);
         const bptOut = TokenAmount.fromRawAmount(bpt, queryBptOut);
 
         const poolTokens = poolState.assets.map(
-            (a) => new Token(input.chainId, a as Address, 18),
+            (a) => new Token(input.chainId, a, 18),
         ); // TODO: get pool token decimals from API
         const amountsIn = queryAmountsIn.map((a, i) =>
             TokenAmount.fromRawAmount(poolTokens[i], a),
@@ -101,8 +100,8 @@ export class WeightedJoin implements BaseJoin {
 
         return {
             joinKind,
-            id: poolState.id as Address,
-            assets: poolState.assets as Address[],
+            id: poolState.id,
+            assets: poolState.assets,
             bptOut,
             amountsIn,
         };
@@ -196,7 +195,7 @@ export class WeightedJoin implements BaseJoin {
             throw new Error('Must specify at least one input');
         } else if (tokensIn.some((t) => !poolState.assets.includes(t))) {
             throw new Error('Input token not in pool');
-        } else if (tokensIn.includes(getPoolAddress(poolState.id) as Address)) {
+        } else if (tokensIn.includes(poolState.address)) {
             if (tokensIn.length > 1) {
                 throw new Error('Cannot join with BPT and other tokens');
             } else if (input.isInit) {

@@ -36,9 +36,10 @@ export interface BasePoolFactory {
 
 // Returned from API and used as input
 export type PoolState = {
-    id: string;
+    id: Address;
+    address: Address;
     type: string;
-    assets: string[]; // already properly sorted in case different versions sort them differently
+    assets: Address[]; // already properly sorted in case different versions sort them differently
     // TODO - Possibly add encoding info here?
 };
 
