@@ -27,7 +27,12 @@ describe('weighted join test', () => {
             rpcUrl: '',
         };
         const queryResult = await weightedJoin.query(queryInput, poolFromApi);
-        const call = weightedJoin.buildCall({ ...queryResult, slippage: '10' });
+        const call = weightedJoin.buildCall({
+            ...queryResult,
+            slippage: '10',
+            sender: '0xsenderAddr',
+            recipient: '0xrecipientAddr',
+        });
         console.log(call); // Make call
         expect(true).toEqual(true);
     });

@@ -1,0 +1,125 @@
+import { encodeAbiParameters } from 'viem';
+import { Address } from '../../types';
+
+export enum WeightedPoolJoinKind {
+    INIT = 0,
+    EXACT_TOKENS_IN_FOR_BPT_OUT = 1,
+    TOKEN_IN_FOR_EXACT_BPT_OUT = 2,
+    ALL_TOKENS_IN_FOR_EXACT_BPT_OUT = 3,
+}
+
+export enum WeightedPoolExitKind {
+    EXACT_BPT_IN_FOR_ONE_TOKEN_OUT = 0,
+    EXACT_BPT_IN_FOR_TOKENS_OUT = 1,
+    BPT_IN_FOR_EXACT_TOKENS_OUT = 2,
+    MANAGEMENT_FEE_TOKENS_OUT = 3,
+}
+
+export class WeightedPoolEncoder {
+    /**
+     * Cannot be constructed.
+     */
+    private constructor() {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+    }
+
+    /**
+     * Encodes the userData parameter for providing the initial liquidity to a WeightedPool
+     * @param initialBalances - the amounts of tokens to send to the pool to form the initial balances
+     */
+    static joinInit = (amountsIn: bigint[]): Address =>
+        encodeAbiParameters(
+            [{ type: 'uint256' }, { type: 'uint256[]' }],
+            [WeightedPoolJoinKind.INIT, amountsIn],
+        );
+
+    /**
+     * Encodes the userData parameter for joining a WeightedPool with exact token inputs
+     * @param amountsIn - the amounts each of token to deposit in the pool as liquidity
+     * @param minimumBPT - the minimum acceptable BPT to receive in return for deposited tokens
+     */
+    static joinGivenIn = (amountsIn: bigint[], minimumBPT: bigint): Address =>
+        encodeAbiParameters(
+            [{ type: 'uint256' }, { type: 'uint256[]' }, { type: 'uint256' }],
+            [
+                WeightedPoolJoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT,
+                amountsIn,
+                minimumBPT,
+            ],
+        );
+
+    /**
+     * Encodes the userData parameter for joining a WeightedPool with a single token to receive an exact amount of BPT
+     * @param bptAmountOut - the amount of BPT to be minted
+     * @param enterTokenIndex - the index of the token to be provided as liquidity
+     */
+    static joinGivenOut = (
+        bptAmountOut: bigint,
+        enterTokenIndex?: number,
+    ): Address => {
+        if (enterTokenIndex === undefined) {
+            // if enterTokenIndex is not provided, it's assumed to be an allTokensIn
+            return encodeAbiParameters(
+                [{ type: 'uint256' }, { type: 'uint256' }],
+                [
+                    WeightedPoolJoinKind.ALL_TOKENS_IN_FOR_EXACT_BPT_OUT,
+                    bptAmountOut,
+                ],
+            );
+        } else {
+            // if enterTokenIndex is provided, it's assumed to be an allTokensIn
+            return encodeAbiParameters(
+                [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
+                [
+                    WeightedPoolJoinKind.TOKEN_IN_FOR_EXACT_BPT_OUT,
+                    bptAmountOut,
+                    enterTokenIndex,
+                ],
+            );
+        }
+    };
+
+    /**
+     * Encodes the userData parameter for exiting a WeightedPool by removing tokens in return for an exact amount of BPT
+     * @param bptAmountIn - the amount of BPT to be burned
+     * @param enterTokenIndex - the index of the token to removed from the pool
+     */
+    static exitGivenIn = (
+        bptAmountIn: bigint,
+        exitTokenIndex?: number,
+    ): Address => {
+        if (exitTokenIndex === undefined) {
+            return encodeAbiParameters(
+                [{ type: 'uint256' }, { type: 'uint256' }],
+                [WeightedPoolExitKind.EXACT_BPT_IN_FOR_TOKENS_OUT, bptAmountIn],
+            );
+        } else {
+            return encodeAbiParameters(
+                [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
+                [
+                    WeightedPoolExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
+                    bptAmountIn,
+                    exitTokenIndex,
+                ],
+            );
+        }
+    };
+
+    /**
+     * Encodes the userData parameter for exiting a WeightedPool by removing exact amounts of tokens
+     * @param amountsOut - the amounts of each token to be withdrawn from the pool
+     * @param maxBPTAmountIn - the minimum acceptable BPT to burn in return for withdrawn tokens
+     */
+    static exitGivenOut = (
+        amountsOut: bigint[],
+        maxBPTAmountIn: bigint,
+    ): Address =>
+        encodeAbiParameters(
+            [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
+            [
+                WeightedPoolExitKind.BPT_IN_FOR_EXACT_TOKENS_OUT,
+                amountsOut,
+                maxBPTAmountIn,
+            ],
+        );
+}
