@@ -3,10 +3,10 @@ import { Address } from '../../../types';
 import { ZERO_ADDRESS, getPoolAddress } from '../../../utils';
 import { TokenAmount } from '../../tokenAmount';
 
-export class JoinWeighted implements BaseJoin {
+export class WeightedJoin implements BaseJoin {
     // TODO - Probably not needed
-    getInstance(): JoinWeighted {
-        return new JoinWeighted();
+    getInstance(): WeightedJoin {
+        return new WeightedJoin();
     }
 
     public async query(
@@ -67,7 +67,7 @@ export class JoinWeighted implements BaseJoin {
         };
     }
 
-    public getCall(
+    public buildCall(
         input: JoinQueryResult & {
             slippage: string;
             sender: string;

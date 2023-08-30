@@ -1,25 +1,25 @@
 import { BaseJoin } from './pools';
-import { JoinWeighted } from './pools/weighted';
+import { WeightedJoin } from './pools/weighted';
 
 /*********************** Basic Helper to get join class from pool type *************/
 export type JoinConfig = {
-    customPoolFactories: Record<string, BaseJoin>;
+    customPoolJoins: Record<string, BaseJoin>;
 };
 
-export class JoinHelper {
-    private readonly poolFactories: Record<string, BaseJoin> = {};
+export class JoinParser {
+    private readonly poolJoins: Record<string, BaseJoin> = {};
 
     constructor(config?: JoinConfig) {
-        const { customPoolFactories } = config || {};
-        this.poolFactories = {
-            weighted: new JoinWeighted(),
-            // custom pool factories take precedence over base factories
-            ...customPoolFactories,
+        const { customPoolJoins } = config || {};
+        this.poolJoins = {
+            weighted: new WeightedJoin(),
+            // custom pool Joins take precedence over base Joins
+            ...customPoolJoins,
         };
     }
 
     public getJoin(poolType: string): BaseJoin {
         // TODO - Need to parse
-        return this.poolFactories[poolType];
+        return this.poolJoins[poolType];
     }
 }
