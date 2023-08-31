@@ -1,12 +1,12 @@
 import { SupportedRawPoolTypes } from '../../data/types';
-import { WeightedPoolEncoder } from './weighted';
+import { WeightedEncoder } from './weighted';
 
 export const getEncoder = (
     poolType: SupportedRawPoolTypes | string,
-): typeof WeightedPoolEncoder | undefined => {
+): typeof WeightedEncoder | undefined => {
     switch (poolType) {
         case 'Weighted':
-            return WeightedPoolEncoder;
+            return WeightedEncoder;
         default:
             return undefined;
     }

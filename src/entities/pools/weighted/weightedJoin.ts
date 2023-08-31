@@ -13,7 +13,7 @@ import {
     CHAINS,
     ZERO_ADDRESS,
 } from '../../../utils';
-import { WeightedPoolEncoder } from '../../encoders/weighted';
+import { WeightedEncoder } from '../../encoders/weighted';
 import { TokenAmount } from '../../tokenAmount';
 import { balancerHelpersAbi } from '../../../abi/balancerHelpers';
 import { Token } from '../../token';
@@ -43,21 +43,18 @@ export class WeightedJoin implements BaseJoin {
         switch (joinKind) {
             case 'Init': {
                 maxAmountsIn = this.getAmountsIn(input, poolState.assets);
-                userData = WeightedPoolEncoder.joinInit(maxAmountsIn);
+                userData = WeightedEncoder.joinInit(maxAmountsIn);
                 break;
             }
             case 'GivenIn': {
                 maxAmountsIn = this.getAmountsIn(input, poolState.assets);
                 const bptOut = 0n;
-                userData = WeightedPoolEncoder.joinGivenIn(
-                    maxAmountsIn,
-                    bptOut,
-                );
+                userData = WeightedEncoder.joinGivenIn(maxAmountsIn, bptOut);
                 break;
             }
             case 'GivenOut': {
                 const bptOut = input.tokenAmounts[0].amount;
-                userData = WeightedPoolEncoder.joinGivenOut(bptOut);
+                userData = WeightedEncoder.joinGivenOut(bptOut);
                 break;
             }
             default:
@@ -117,23 +114,18 @@ export class WeightedJoin implements BaseJoin {
         switch (input.joinKind) {
             case 'Init': {
                 maxAmountsIn = input.amountsIn.map((a) => a.amount);
-                userData = WeightedPoolEncoder.joinInit(maxAmountsIn);
+                userData = WeightedEncoder.joinInit(maxAmountsIn);
                 break;
             }
             case 'GivenIn': {
                 maxAmountsIn = input.amountsIn.map((a) => a.amount);
                 const minBptOut = input.bptOut.amount; // TODO sub slippage here
-                userData = WeightedPoolEncoder.joinGivenIn(
-                    maxAmountsIn,
-                    minBptOut,
-                );
+                userData = WeightedEncoder.joinGivenIn(maxAmountsIn, minBptOut);
                 break;
             }
             case 'GivenOut': {
                 maxAmountsIn = input.amountsIn.map((a) => a.amount); // TODO add slippage here
-                userData = WeightedPoolEncoder.joinGivenOut(
-                    input.bptOut.amount,
-                );
+                userData = WeightedEncoder.joinGivenOut(input.bptOut.amount);
                 break;
             }
             default:

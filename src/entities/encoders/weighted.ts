@@ -15,7 +15,7 @@ export enum WeightedPoolExitKind {
     MANAGEMENT_FEE_TOKENS_OUT = 3,
 }
 
-export class WeightedPoolEncoder {
+export class WeightedEncoder {
     /**
      * Cannot be constructed.
      */
