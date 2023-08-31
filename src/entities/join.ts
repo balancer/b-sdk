@@ -12,7 +12,7 @@ export class JoinParser {
     constructor(config?: JoinConfig) {
         const { customPoolJoins } = config || {};
         this.poolJoins = {
-            weighted: new WeightedJoin(),
+            Weighted: new WeightedJoin(),
             // custom pool Joins take precedence over base Joins
             ...customPoolJoins,
         };

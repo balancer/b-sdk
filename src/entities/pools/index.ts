@@ -75,8 +75,8 @@ export interface BaseJoin {
     query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
     // TODO - Best way to represent slippage?
     buildCall(input: JoinCallInput): {
-        call: string;
-        to: string;
+        call: Address;
+        to: Address;
         value: string;
     };
 }

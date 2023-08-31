@@ -105,7 +105,7 @@ export class WeightedJoin implements BaseJoin {
     }
 
     public buildCall(input: JoinCallInput): {
-        call: string;
+        call: Address;
         to: Address;
         value: string;
     } {
