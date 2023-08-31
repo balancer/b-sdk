@@ -10,9 +10,12 @@ import {
     Token,
     TokenAmount,
 } from '../src/entities';
-import { BALANCER_VAULT, CHAINS, ChainId, getPoolAddress } from '../src/utils';
+import { BALANCER_VAULT, ChainId, getPoolAddress } from '../src/utils';
 import { Address } from '../src/types';
-import { TestClient, createTestClient, http } from 'viem';
+import { createTestClient, http, walletActions } from 'viem';
+import { mainnet } from 'viem/chains';
+import { writeContract } from 'viem/dist/types/actions/wallet/writeContract';
+import { erc20Abi } from '../src/abi';
 
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 
@@ -20,17 +23,11 @@ describe('weighted join test', () => {
     let api: MockApi;
     let chainId: ChainId;
     let rpcUrl: string;
-    let client: TestClient;
 
     beforeAll(() => {
         api = new MockApi();
         chainId = ChainId.MAINNET;
-        rpcUrl = process.env.ETHEREUM_RPC_URL || 'https://eth.llamarpc.com';
-        client = createTestClient({
-            chain: CHAINS[chainId],
-            mode: 'anvil',
-            transport: http(rpcUrl),
-        });
+        rpcUrl = 'http://127.0.0.1:8545/';
     });
     test('should join', async () => {
         const poolId =
@@ -59,8 +56,24 @@ describe('weighted join test', () => {
             recipient: testAddress,
         });
 
-        const result = await client.sendUnsignedTransaction({
-            from: testAddress,
+        const client = createTestClient({
+            chain: mainnet,
+            mode: 'hardhat',
+            transport: http(rpcUrl),
+        }).extend(walletActions);
+
+        await client.impersonateAccount({ address: testAddress });
+
+        await client.writeContract({
+            account: testAddress,
+            address: tokenIn.address,
+            abi: erc20Abi,
+            functionName: 'approve',
+            args: [to, queryResult.amountsIn[0].amount],
+        });
+
+        const result = await client.sendTransaction({
+            account: testAddress,
             to,
             data: call,
         });
