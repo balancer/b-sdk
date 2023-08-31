@@ -47,7 +47,10 @@ export class MockApi {
             id,
             address: getPoolAddress(id) as Address,
             type: 'Weighted',
-            assets: ['0xtoken1Addr', '0xtoken2Addr'],
+            tokens: [
+                { address: '0xtoken1Addr', decimals: 18 },
+                { address: '0xtoken2Addr', decimals: 18 },
+            ],
         };
     }
 }

@@ -37,17 +37,18 @@ export class WeightedJoin implements BaseJoin {
         const joinKind = this.getJoinKind(input, poolState.address);
 
         // Initialize join parameters
-        let maxAmountsIn = Array(poolState.assets.length).fill(0n);
+        let maxAmountsIn = Array(poolState.tokens.length).fill(0n);
         let userData: Address;
+        const poolAssets = poolState.tokens.map((t) => t.address);
 
         switch (joinKind) {
             case 'Init': {
-                maxAmountsIn = this.getAmountsIn(input, poolState.assets);
+                maxAmountsIn = this.getAmountsIn(input, poolAssets);
                 userData = WeightedEncoder.joinInit(maxAmountsIn);
                 break;
             }
             case 'GivenIn': {
-                maxAmountsIn = this.getAmountsIn(input, poolState.assets);
+                maxAmountsIn = this.getAmountsIn(input, poolAssets);
                 const bptOut = 0n;
                 userData = WeightedEncoder.joinGivenIn(maxAmountsIn, bptOut);
                 break;
@@ -63,7 +64,7 @@ export class WeightedJoin implements BaseJoin {
 
         const queryArgs = this.getJoinParameters({
             poolId: poolState.id,
-            assets: poolState.assets,
+            assets: poolAssets,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             maxAmountsIn,
@@ -75,21 +76,21 @@ export class WeightedJoin implements BaseJoin {
             chain: CHAINS[input.chainId],
         });
 
-        const { result } = await client.simulateContract({
+        const {
+            result: [queryBptOut, queryAmountsIn],
+        } = await client.simulateContract({
             address: BALANCER_HELPERS[input.chainId],
             abi: balancerHelpersAbi,
             functionName: 'queryJoin',
             args: queryArgs,
         });
 
-        const [queryBptOut, queryAmountsIn] = result;
-
         const bpt = new Token(input.chainId, poolState.address, 18);
         const bptOut = TokenAmount.fromRawAmount(bpt, queryBptOut);
 
-        const poolTokens = poolState.assets.map(
-            (a) => new Token(input.chainId, a, 18),
-        ); // TODO: get pool token decimals from API
+        const poolTokens = poolState.tokens.map(
+            (token) => new Token(input.chainId, token.address, token.decimals),
+        );
         const amountsIn = queryAmountsIn.map((a, i) =>
             TokenAmount.fromRawAmount(poolTokens[i], a),
         );
@@ -97,7 +98,7 @@ export class WeightedJoin implements BaseJoin {
         return {
             joinKind,
             id: poolState.id,
-            assets: poolState.assets,
+            assets: poolAssets,
             bptOut,
             amountsIn,
         };
@@ -182,9 +183,10 @@ export class WeightedJoin implements BaseJoin {
 
     private checkInputs(input: JoinInput, poolState: PoolState) {
         const tokensIn = input.tokenAmounts.map((t) => t.token.address);
+        const poolAssets = poolState.tokens.map((t) => t.address);
         if (input.tokenAmounts.length === 0) {
             throw new Error('Must specify at least one input');
-        } else if (tokensIn.some((t) => !poolState.assets.includes(t))) {
+        } else if (tokensIn.some((t) => !poolAssets.includes(t))) {
             throw new Error('Input token not in pool');
         } else if (tokensIn.includes(poolState.address)) {
             if (tokensIn.length > 1) {

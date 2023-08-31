@@ -39,7 +39,11 @@ export type PoolState = {
     id: Address;
     address: Address;
     type: string;
-    assets: Address[]; // already properly sorted in case different versions sort them differently
+    // TODO: is it ok to replace by Token here? Or should we stick to basic types?
+    tokens: {
+        address: Address;
+        decimals: number;
+    }[]; // already properly sorted in case different versions sort them differently
     // TODO - Possibly add encoding info here?
 };
 
