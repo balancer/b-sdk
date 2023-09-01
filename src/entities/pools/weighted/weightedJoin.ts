@@ -107,7 +107,7 @@ export class WeightedJoin implements BaseJoin {
     public buildCall(input: JoinCallInput): {
         call: Address;
         to: Address;
-        value: string;
+        value: bigint;
     } {
         let maxAmountsIn: bigint[];
         let userData: Address;
@@ -152,7 +152,7 @@ export class WeightedJoin implements BaseJoin {
         return {
             call,
             to: BALANCER_VAULT,
-            value: '0', // TODO: ETH value when joining with ETH
+            value: 0n, // TODO: ETH value when joining with ETH
         };
     }
 

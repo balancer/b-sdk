@@ -77,6 +77,6 @@ export interface BaseJoin {
     buildCall(input: JoinCallInput): {
         call: Address;
         to: Address;
-        value: string;
+        value: bigint;
     };
 }

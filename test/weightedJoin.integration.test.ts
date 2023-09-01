@@ -10,12 +10,20 @@ import {
     Token,
     TokenAmount,
 } from '../src/entities';
-import { BALANCER_VAULT, ChainId, getPoolAddress } from '../src/utils';
+import { CHAINS, ChainId, MAX_UINT256, getPoolAddress } from '../src/utils';
 import { Address } from '../src/types';
-import { createTestClient, http, walletActions } from 'viem';
-import { mainnet } from 'viem/chains';
-import { writeContract } from 'viem/dist/types/actions/wallet/writeContract';
+import {
+    Client,
+    createTestClient,
+    http,
+    publicActions,
+    PublicActions,
+    TestActions,
+    WalletActions,
+    walletActions,
+} from 'viem';
 import { erc20Abi } from '../src/abi';
+import { sendTransactionGetBalances } from './lib/utils/helper';
 
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 
@@ -23,11 +31,29 @@ describe('weighted join test', () => {
     let api: MockApi;
     let chainId: ChainId;
     let rpcUrl: string;
+    let blockNumber: bigint;
+    let client: Client & PublicActions & TestActions & WalletActions;
 
-    beforeAll(() => {
+    beforeAll(async () => {
         api = new MockApi();
         chainId = ChainId.MAINNET;
         rpcUrl = 'http://127.0.0.1:8545/';
+        blockNumber = 18043296n;
+        client = createTestClient({
+            mode: 'hardhat',
+            chain: CHAINS[chainId],
+            transport: http(rpcUrl),
+        })
+            .extend(publicActions)
+            .extend(walletActions);
+
+        await client.reset({
+            blockNumber,
+            jsonRpcUrl:
+                process.env.ETHEREUM_RPC_URL || 'https://eth.llamarpc.com',
+        });
+
+        await client.impersonateAccount({ address: testAddress });
     });
     test('should join', async () => {
         const poolId =
@@ -49,38 +75,42 @@ describe('weighted join test', () => {
         };
         const queryResult = await weightedJoin.query(queryInput, poolFromApi);
 
-        const { call, to } = weightedJoin.buildCall({
+        const { call, to, value } = weightedJoin.buildCall({
             ...queryResult,
             slippage: '10',
             sender: testAddress,
             recipient: testAddress,
         });
 
-        const client = createTestClient({
-            chain: mainnet,
-            mode: 'hardhat',
-            transport: http(rpcUrl),
-        }).extend(walletActions);
-
-        await client.impersonateAccount({ address: testAddress });
-
+        // approve token on the vault
         await client.writeContract({
             account: testAddress,
+            chain: CHAINS[chainId],
             address: tokenIn.address,
             abi: erc20Abi,
             functionName: 'approve',
-            args: [to, queryResult.amountsIn[0].amount],
+            args: [to, MAX_UINT256],
         });
 
-        const result = await client.sendTransaction({
-            account: testAddress,
-            to,
-            data: call,
-        });
+        const { transactionReceipt, balanceDeltas } =
+            await sendTransactionGetBalances(
+                [...queryResult.assets, queryResult.bptOut.token.address],
+                client,
+                testAddress,
+                to,
+                call,
+                value,
+            );
 
-        console.log('result', result);
+        console.log('result', balanceDeltas);
 
-        expect(to).toEqual(BALANCER_VAULT);
+        expect(transactionReceipt.status).to.eq('success');
+        expect(queryResult.bptOut.amount > 0n).to.be.true;
+        const expectedDeltas = [
+            ...queryResult.amountsIn.map((a) => a.amount),
+            queryResult.bptOut.amount,
+        ];
+        expect(expectedDeltas).to.deep.eq(balanceDeltas);
     });
 });
 
