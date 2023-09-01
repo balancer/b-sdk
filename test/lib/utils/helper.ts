@@ -3,12 +3,33 @@ import {
     Client,
     PublicActions,
     TestActions,
-    TestClient,
     TransactionReceipt,
     WalletActions,
 } from 'viem';
 import { erc20Abi } from '../../../src/abi';
-import { ZERO_ADDRESS } from '../../../src/utils';
+import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
+
+export const approveToken = async (
+    client: Client & PublicActions & WalletActions,
+    account: Address,
+    token: Address,
+    amount = MAX_UINT256, // approve max by default
+): Promise<boolean> => {
+    // approve token on the vault
+    const hash = await client.writeContract({
+        account,
+        chain: client.chain,
+        address: token,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [BALANCER_VAULT, amount],
+    });
+
+    const txReceipt = await client.getTransactionReceipt({
+        hash,
+    });
+    return txReceipt.status === 'success';
+};
 
 export const getErc20Balance = (
     token: Address,

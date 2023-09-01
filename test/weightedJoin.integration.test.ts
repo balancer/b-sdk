@@ -1,16 +1,17 @@
 // pnpm test -- weightedJoin.integration.test.ts
-import { describe, expect, test, beforeAll } from 'vitest';
+import { describe, expect, test, beforeAll, beforeEach } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
 import {
+    BaseJoin,
     JoinInput,
     JoinParser,
     PoolState,
     Token,
     TokenAmount,
 } from '../src/entities';
-import { CHAINS, ChainId, MAX_UINT256, getPoolAddress } from '../src/utils';
+import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
 import { Address } from '../src/types';
 import {
     Client,
@@ -22,8 +23,7 @@ import {
     WalletActions,
     walletActions,
 } from 'viem';
-import { erc20Abi } from '../src/abi';
-import { sendTransactionGetBalances } from './lib/utils/helper';
+import { approveToken, sendTransactionGetBalances } from './lib/utils/helper';
 
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 
@@ -33,6 +33,10 @@ describe('weighted join test', () => {
     let rpcUrl: string;
     let blockNumber: bigint;
     let client: Client & PublicActions & TestActions & WalletActions;
+    let poolId: Address;
+    let poolFromApi: PoolState;
+    let tokenIn: Token;
+    let weightedJoin: BaseJoin;
 
     beforeAll(async () => {
         api = new MockApi();
@@ -46,71 +50,69 @@ describe('weighted join test', () => {
         })
             .extend(publicActions)
             .extend(walletActions);
+    });
 
+    beforeEach(async () => {
         await client.reset({
             blockNumber,
             jsonRpcUrl:
                 process.env.ETHEREUM_RPC_URL || 'https://eth.llamarpc.com',
         });
-
         await client.impersonateAccount({ address: testAddress });
-    });
-    test('should join', async () => {
-        const poolId =
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
-        // Calls API
-        const poolFromApi = await api.getPool(poolId);
+        await approveToken(client, testAddress, tokenIn.address);
+
+        poolFromApi = await api.getPool(poolId);
         const joinParser = new JoinParser();
-        const weightedJoin = joinParser.getJoin(poolFromApi.type);
-        const tokenInRaw = poolFromApi.tokens[0];
-        const tokenIn = new Token(
+        weightedJoin = joinParser.getJoin(poolFromApi.type);
+    });
+
+    describe('single token join', async () => {
+        poolId =
+            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
+        tokenIn = new Token(
             chainId,
-            tokenInRaw.address,
-            tokenInRaw.decimals,
+            '0xba100000625a3754423978a60c9317c58a424e3D',
+            18,
+            'BAL',
         );
-        const queryInput: JoinInput = {
-            tokenAmounts: [TokenAmount.fromHumanAmount(tokenIn, '1')],
-            chainId,
-            rpcUrl,
-        };
-        const queryResult = await weightedJoin.query(queryInput, poolFromApi);
+        const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
 
-        const { call, to, value } = weightedJoin.buildCall({
-            ...queryResult,
-            slippage: '10',
-            sender: testAddress,
-            recipient: testAddress,
-        });
-
-        // approve token on the vault
-        await client.writeContract({
-            account: testAddress,
-            chain: CHAINS[chainId],
-            address: tokenIn.address,
-            abi: erc20Abi,
-            functionName: 'approve',
-            args: [to, MAX_UINT256],
-        });
-
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [...queryResult.assets, queryResult.bptOut.token.address],
-                client,
-                testAddress,
-                to,
-                call,
-                value,
+        test('should join', async () => {
+            const joinInput: JoinInput = {
+                tokenAmounts: [amountIn],
+                chainId,
+                rpcUrl,
+            };
+            const queryResult = await weightedJoin.query(
+                joinInput,
+                poolFromApi,
             );
 
-        console.log('result', balanceDeltas);
+            const { call, to, value } = weightedJoin.buildCall({
+                ...queryResult,
+                slippage: '10',
+                sender: testAddress,
+                recipient: testAddress,
+            });
 
-        expect(transactionReceipt.status).to.eq('success');
-        expect(queryResult.bptOut.amount > 0n).to.be.true;
-        const expectedDeltas = [
-            ...queryResult.amountsIn.map((a) => a.amount),
-            queryResult.bptOut.amount,
-        ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
+            const { transactionReceipt, balanceDeltas } =
+                await sendTransactionGetBalances(
+                    [...queryResult.assets, queryResult.bptOut.token.address],
+                    client,
+                    testAddress,
+                    to,
+                    call,
+                    value,
+                );
+
+            expect(transactionReceipt.status).to.eq('success');
+            expect(queryResult.bptOut.amount > 0n).to.be.true;
+            const expectedDeltas = [
+                ...queryResult.amountsIn.map((a) => a.amount),
+                queryResult.bptOut.amount,
+            ];
+            expect(expectedDeltas).to.deep.eq(balanceDeltas);
+        });
     });
 });
 
