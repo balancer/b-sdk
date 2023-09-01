@@ -2,6 +2,7 @@ import { Hex } from 'viem';
 import { Address, PoolType, SwapKind } from '../../types';
 import { Token, TokenAmount } from '../';
 import { RawPool } from '../../data/types';
+import { Slippage } from '../slippage';
 
 export interface BasePool {
     readonly poolType: PoolType | string;
@@ -65,7 +66,7 @@ export type JoinQueryResult = {
 };
 
 export type JoinCallInput = JoinQueryResult & {
-    slippage: string;
+    slippage: Slippage;
     sender: Address;
     recipient: Address;
 };
@@ -73,10 +74,10 @@ export type JoinCallInput = JoinQueryResult & {
 export interface BaseJoin {
     getInstance(): BaseJoin;
     query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
-    // TODO - Best way to represent slippage?
     buildCall(input: JoinCallInput): {
         call: Address;
         to: Address;
         value: bigint;
+        minBptOut: bigint;
     };
 }

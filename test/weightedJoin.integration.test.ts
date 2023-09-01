@@ -24,6 +24,7 @@ import {
     walletActions,
 } from 'viem';
 import { approveToken, sendTransactionGetBalances } from './lib/utils/helper';
+import { Slippage } from '../src/entities/slippage';
 
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 
@@ -88,9 +89,10 @@ describe('weighted join test', () => {
                 poolFromApi,
             );
 
-            const { call, to, value } = weightedJoin.buildCall({
+            const slippage = Slippage.fromPercentage('1');
+            const { call, to, value, minBptOut } = weightedJoin.buildCall({
                 ...queryResult,
-                slippage: '10',
+                slippage,
                 sender: testAddress,
                 recipient: testAddress,
             });
@@ -112,6 +114,10 @@ describe('weighted join test', () => {
                 queryResult.bptOut.amount,
             ];
             expect(expectedDeltas).to.deep.eq(balanceDeltas);
+            const expectedMinBpt = slippage.removeFrom(
+                queryResult.bptOut.amount,
+            );
+            expect(expectedMinBpt).to.deep.eq(minBptOut);
         });
     });
 });

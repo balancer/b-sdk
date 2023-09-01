@@ -108,9 +108,11 @@ export class WeightedJoin implements BaseJoin {
         call: Address;
         to: Address;
         value: bigint;
+        minBptOut: bigint;
     } {
         let maxAmountsIn: bigint[];
         let userData: Address;
+        let minBptOut = input.bptOut.amount;
 
         switch (input.joinKind) {
             case 'Init': {
@@ -120,12 +122,14 @@ export class WeightedJoin implements BaseJoin {
             }
             case 'GivenIn': {
                 maxAmountsIn = input.amountsIn.map((a) => a.amount);
-                const minBptOut = input.bptOut.amount; // TODO sub slippage here
+                minBptOut = input.slippage.removeFrom(input.bptOut.amount);
                 userData = WeightedEncoder.joinGivenIn(maxAmountsIn, minBptOut);
                 break;
             }
             case 'GivenOut': {
-                maxAmountsIn = input.amountsIn.map((a) => a.amount); // TODO add slippage here
+                maxAmountsIn = input.amountsIn.map((a) =>
+                    input.slippage.applyTo(a.amount),
+                );
                 userData = WeightedEncoder.joinGivenOut(input.bptOut.amount);
                 break;
             }
@@ -153,6 +157,7 @@ export class WeightedJoin implements BaseJoin {
             call,
             to: BALANCER_VAULT,
             value: 0n, // TODO: ETH value when joining with ETH
+            minBptOut,
         };
     }
 
