@@ -40,7 +40,10 @@ describe('weighted join test', () => {
     let weightedJoin: BaseJoin;
 
     beforeAll(async () => {
+        // setup mock api
         api = new MockApi();
+
+        // setup chain and test client
         chainId = ChainId.MAINNET;
         rpcUrl = 'http://127.0.0.1:8545/';
         blockNumber = 18043296n;
@@ -54,20 +57,27 @@ describe('weighted join test', () => {
     });
 
     beforeEach(async () => {
+        // reset local fork
         await client.reset({
             blockNumber,
             jsonRpcUrl:
                 process.env.ETHEREUM_RPC_URL || 'https://eth.llamarpc.com',
         });
+
+        // prepare test client with balance and token approvals
         await client.impersonateAccount({ address: testAddress });
         await approveToken(client, testAddress, tokenIn.address);
 
+        // get pool state from api
         poolFromApi = await api.getPool(poolId);
+
+        // setup join helper
         const joinParser = new JoinParser();
         weightedJoin = joinParser.getJoin(poolFromApi.type);
     });
 
     describe('single token join', async () => {
+        // set initial test conditions
         poolId =
             '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
         tokenIn = new Token(
@@ -79,6 +89,7 @@ describe('weighted join test', () => {
         const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
 
         test('should join', async () => {
+            // perform join query to get expected bpt out
             const joinInput: JoinInput = {
                 tokenAmounts: [amountIn],
                 chainId,
@@ -89,7 +100,8 @@ describe('weighted join test', () => {
                 poolFromApi,
             );
 
-            const slippage = Slippage.fromPercentage('1');
+            // build join call with expected minBpOut based on slippage
+            const slippage = Slippage.fromPercentage('1'); // 1%
             const { call, to, value, minBptOut } = weightedJoin.buildCall({
                 ...queryResult,
                 slippage,
@@ -97,6 +109,7 @@ describe('weighted join test', () => {
                 recipient: testAddress,
             });
 
+            // send join transaction and check balance changes
             const { transactionReceipt, balanceDeltas } =
                 await sendTransactionGetBalances(
                     [...queryResult.assets, queryResult.bptOut.token.address],
