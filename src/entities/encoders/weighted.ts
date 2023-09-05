@@ -30,7 +30,7 @@ export class WeightedEncoder {
     static joinInit = (amountsIn: bigint[]): Address =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }],
-            [WeightedPoolJoinKind.INIT, amountsIn],
+            [BigInt(WeightedPoolJoinKind.INIT), amountsIn],
         );
 
     /**
@@ -42,7 +42,7 @@ export class WeightedEncoder {
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }, { type: 'uint256' }],
             [
-                WeightedPoolJoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT,
+                BigInt(WeightedPoolJoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT),
                 amountsIn,
                 minimumBPT,
             ],
@@ -62,7 +62,9 @@ export class WeightedEncoder {
             return encodeAbiParameters(
                 [{ type: 'uint256' }, { type: 'uint256' }],
                 [
-                    WeightedPoolJoinKind.ALL_TOKENS_IN_FOR_EXACT_BPT_OUT,
+                    BigInt(
+                        WeightedPoolJoinKind.ALL_TOKENS_IN_FOR_EXACT_BPT_OUT,
+                    ),
                     bptAmountOut,
                 ],
             );
@@ -71,9 +73,9 @@ export class WeightedEncoder {
             return encodeAbiParameters(
                 [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
                 [
-                    WeightedPoolJoinKind.TOKEN_IN_FOR_EXACT_BPT_OUT,
+                    BigInt(WeightedPoolJoinKind.TOKEN_IN_FOR_EXACT_BPT_OUT),
                     bptAmountOut,
-                    enterTokenIndex,
+                    BigInt(enterTokenIndex),
                 ],
             );
         }
@@ -91,15 +93,18 @@ export class WeightedEncoder {
         if (exitTokenIndex === undefined) {
             return encodeAbiParameters(
                 [{ type: 'uint256' }, { type: 'uint256' }],
-                [WeightedPoolExitKind.EXACT_BPT_IN_FOR_TOKENS_OUT, bptAmountIn],
+                [
+                    BigInt(WeightedPoolExitKind.EXACT_BPT_IN_FOR_TOKENS_OUT),
+                    bptAmountIn,
+                ],
             );
         } else {
             return encodeAbiParameters(
                 [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
                 [
-                    WeightedPoolExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
+                    BigInt(WeightedPoolExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT),
                     bptAmountIn,
-                    exitTokenIndex,
+                    BigInt(exitTokenIndex),
                 ],
             );
         }
@@ -115,9 +120,9 @@ export class WeightedEncoder {
         maxBPTAmountIn: bigint,
     ): Address =>
         encodeAbiParameters(
-            [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
+            [{ type: 'uint256' }, { type: 'uint256[]' }, { type: 'uint256' }],
             [
-                WeightedPoolExitKind.BPT_IN_FOR_EXACT_TOKENS_OUT,
+                BigInt(WeightedPoolExitKind.BPT_IN_FOR_EXACT_TOKENS_OUT),
                 amountsOut,
                 maxBPTAmountIn,
             ],
