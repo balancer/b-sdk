@@ -17,15 +17,15 @@ import {
 import {
     BaseJoin,
     JoinKind,
-    JoinParser,
     PoolState,
     SingleAssetJoinInput,
     Slippage,
     Token,
     TokenAmount,
 } from '../src/entities';
+import { JoinParser } from '../src/entities/join/parser';
 import { Address } from '../src/types';
-import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
+import { CHAINS, ChainId, ZERO_ADDRESS, getPoolAddress } from '../src/utils';
 
 import { approveToken, sendTransactionGetBalances } from './lib/utils/helper';
 
@@ -79,18 +79,20 @@ describe('weighted join test', () => {
     });
 
     describe('single asset join', async () => {
-        // set initial test conditions
-        poolId =
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
-        tokenIn = new Token(
-            chainId,
-            '0xba100000625a3754423978a60c9317c58a424e3D',
-            18,
-            'BAL',
-        );
-        const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
+        beforeAll(() => {
+            poolId =
+                '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
+            tokenIn = new Token(
+                chainId,
+                '0xba100000625a3754423978a60c9317c58a424e3D',
+                18,
+                'BAL',
+            );
+        });
 
         test('should join', async () => {
+            const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
+
             // perform join query to get expected bpt out
             const joinInput: SingleAssetJoinInput = {
                 amountIn,
@@ -115,7 +117,75 @@ describe('weighted join test', () => {
             // send join transaction and check balance changes
             const { transactionReceipt, balanceDeltas } =
                 await sendTransactionGetBalances(
-                    [...queryResult.assets, queryResult.bptOut.token.address],
+                    [
+                        ...queryResult.amountsIn.map((a) => a.token.address),
+                        queryResult.bptOut.token.address,
+                    ],
+                    client,
+                    testAddress,
+                    to,
+                    call,
+                    value,
+                );
+
+            expect(transactionReceipt.status).to.eq('success');
+            expect(queryResult.bptOut.amount > 0n).to.be.true;
+            const expectedDeltas = [
+                ...queryResult.amountsIn.map((a) => a.amount),
+                queryResult.bptOut.amount,
+            ];
+            expect(expectedDeltas).to.deep.eq(balanceDeltas);
+            const expectedMinBpt = slippage.removeFrom(
+                queryResult.bptOut.amount,
+            );
+            expect(expectedMinBpt).to.deep.eq(minBptOut);
+        });
+    });
+
+    describe('native asset join', async () => {
+        beforeAll(() => {
+            poolId =
+                '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
+            tokenIn = new Token(
+                chainId,
+                ZERO_ADDRESS,
+                18,
+                'ETH',
+                'Ether',
+                '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            );
+        });
+
+        test('should join', async () => {
+            const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
+            // perform join query to get expected bpt out
+            const joinInput: SingleAssetJoinInput = {
+                amountIn,
+                chainId,
+                rpcUrl,
+                kind: JoinKind.SingleAsset,
+            };
+            const queryResult = await weightedJoin.query(
+                joinInput,
+                poolFromApi,
+            );
+
+            // build join call with expected minBpOut based on slippage
+            const slippage = Slippage.fromPercentage('1'); // 1%
+            const { call, to, value, minBptOut } = weightedJoin.buildCall({
+                ...queryResult,
+                slippage,
+                sender: testAddress,
+                recipient: testAddress,
+            });
+
+            // send join transaction and check balance changes
+            const { transactionReceipt, balanceDeltas } =
+                await sendTransactionGetBalances(
+                    [
+                        ...queryResult.amountsIn.map((a) => a.token.address),
+                        queryResult.bptOut.token.address,
+                    ],
                     client,
                     testAddress,
                     to,

@@ -1,5 +1,5 @@
-import { WeightedJoin } from '../pools/weighted';
-import { BaseJoin } from './types';
+import { BaseJoin } from '.';
+import { WeightedJoin } from './weighted/weightedJoin';
 
 /*********************** Basic Helper to get join class from pool type *************/
 export type JoinConfig = {
