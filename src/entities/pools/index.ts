@@ -1,6 +1,6 @@
 import { Hex } from 'viem';
 import { Address, PoolType, SwapKind } from '../../types';
-import { Token, TokenAmount } from '../';
+import { JoinKind, Token, TokenAmount } from '../';
 import { RawPool } from '../../data/types';
 import { Slippage } from '../slippage';
 
@@ -45,7 +45,6 @@ export type PoolState = {
         address: Address;
         decimals: number;
     }[]; // already properly sorted in case different versions sort them differently
-    // TODO - Possibly add encoding info here?
 };
 
 // This will be extended for each pools specific input requirements
@@ -56,27 +55,27 @@ export type BaseJoinInput = {
 
 export type InitJoinInput = BaseJoinInput & {
     initAmountsIn: TokenAmount[];
-    kind: 'init';
+    kind: JoinKind.Init;
 };
 
 export type ProportionalJoinInput = BaseJoinInput & {
     refAmountIn: TokenAmount;
-    kind: 'proportional';
+    kind: JoinKind.Proportional;
 };
 
 export type UnbalancedJoinInput = BaseJoinInput & {
     amountsIn: TokenAmount[];
-    kind: 'unbalanced';
+    kind: JoinKind.Unbalanced;
 };
 
 export type SingleAssetJoinInput = BaseJoinInput & {
     amountIn: TokenAmount;
-    kind: 'singleAsset';
+    kind: JoinKind.SingleAsset;
 };
 
 export type ExactOutJoinInput = BaseJoinInput & {
     bptOut: TokenAmount;
-    kind: 'exactOut';
+    kind: JoinKind.ExactOut;
 };
 
 export type JoinInput =
@@ -90,7 +89,7 @@ export type JoinInput =
 export type JoinQueryResult = {
     id: Address;
     assets: Address[];
-    joinKind: string;
+    joinKind: JoinKind;
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
 };

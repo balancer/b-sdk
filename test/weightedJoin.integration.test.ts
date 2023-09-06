@@ -5,9 +5,10 @@ dotenv.config();
 
 import {
     BaseJoin,
-    JoinInput,
+    JoinKind,
     JoinParser,
     PoolState,
+    SingleAssetJoinInput,
     Token,
     TokenAmount,
 } from '../src/entities';
@@ -60,8 +61,7 @@ describe('weighted join test', () => {
         // reset local fork
         await client.reset({
             blockNumber,
-            jsonRpcUrl:
-                process.env.ETHEREUM_RPC_URL || 'https://eth.llamarpc.com',
+            jsonRpcUrl: process.env.ETHEREUM_RPC_URL,
         });
 
         // prepare test client with balance and token approvals
@@ -76,7 +76,7 @@ describe('weighted join test', () => {
         weightedJoin = joinParser.getJoin(poolFromApi.type);
     });
 
-    describe('single token join', async () => {
+    describe('single asset join', async () => {
         // set initial test conditions
         poolId =
             '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
@@ -90,10 +90,11 @@ describe('weighted join test', () => {
 
         test('should join', async () => {
             // perform join query to get expected bpt out
-            const joinInput: JoinInput = {
-                tokenAmounts: [amountIn],
+            const joinInput: SingleAssetJoinInput = {
+                amountIn,
                 chainId,
                 rpcUrl,
+                kind: JoinKind.SingleAsset,
             };
             const queryResult = await weightedJoin.query(
                 joinInput,

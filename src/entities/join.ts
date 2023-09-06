@@ -6,6 +6,14 @@ export type JoinConfig = {
     customPoolJoins: Record<string, BaseJoin>;
 };
 
+export enum JoinKind {
+    Init = 'Init',
+    Proportional = 'Proportional',
+    Unbalanced = 'Unbalanced',
+    SingleAsset = 'SingleAsset',
+    ExactOut = 'ExactOut',
+}
+
 export class JoinParser {
     private readonly poolJoins: Record<string, BaseJoin> = {};
 

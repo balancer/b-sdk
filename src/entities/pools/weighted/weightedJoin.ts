@@ -18,6 +18,7 @@ import { TokenAmount } from '../../tokenAmount';
 import { balancerHelpersAbi } from '../../../abi/balancerHelpers';
 import { Token } from '../../token';
 import { vaultAbi } from '../../../abi';
+import { JoinKind } from '../../join';
 
 export class WeightedJoin implements BaseJoin {
     // TODO - Probably not needed
@@ -39,20 +40,20 @@ export class WeightedJoin implements BaseJoin {
         const poolAssets = poolState.tokens.map((t) => t.address);
 
         switch (input.kind) {
-            case 'init': {
+            case JoinKind.Init: {
                 maxAmountsIn = this.getAmountsIn(input, poolAssets);
                 userData = WeightedEncoder.joinInit(maxAmountsIn);
                 break;
             }
-            case 'proportional':
-            case 'unbalanced':
-            case 'singleAsset': {
+            case JoinKind.Proportional:
+            case JoinKind.Unbalanced:
+            case JoinKind.SingleAsset: {
                 maxAmountsIn = this.getAmountsIn(input, poolAssets);
                 const bptOut = 0n;
                 userData = WeightedEncoder.joinGivenIn(maxAmountsIn, bptOut);
                 break;
             }
-            case 'exactOut': {
+            case JoinKind.ExactOut: {
                 userData = WeightedEncoder.joinGivenOut(input.bptOut.amount);
                 break;
             }
@@ -108,32 +109,34 @@ export class WeightedJoin implements BaseJoin {
         value: bigint;
         minBptOut: bigint;
     } {
-        const maxAmountsIn: bigint[] = [];
-        const userData: Address = ZERO_ADDRESS;
-        const minBptOut = input.bptOut.amount;
+        let maxAmountsIn: bigint[];
+        let userData: Address;
+        let minBptOut = input.bptOut.amount;
 
-        // switch (input.joinKind) {
-        //     case 'Init': {
-        //         maxAmountsIn = input.amountsIn.map((a) => a.amount);
-        //         userData = WeightedEncoder.joinInit(maxAmountsIn);
-        //         break;
-        //     }
-        //     case 'GivenIn': {
-        //         maxAmountsIn = input.amountsIn.map((a) => a.amount);
-        //         minBptOut = input.slippage.removeFrom(input.bptOut.amount);
-        //         userData = WeightedEncoder.joinGivenIn(maxAmountsIn, minBptOut);
-        //         break;
-        //     }
-        //     case 'GivenOut': {
-        //         maxAmountsIn = input.amountsIn.map((a) =>
-        //             input.slippage.applyTo(a.amount),
-        //         );
-        //         userData = WeightedEncoder.joinGivenOut(input.bptOut.amount);
-        //         break;
-        //     }
-        //     default:
-        //         throw new Error('Invalid join kind');
-        // }
+        switch (input.joinKind) {
+            case JoinKind.Init: {
+                maxAmountsIn = input.amountsIn.map((a) => a.amount);
+                userData = WeightedEncoder.joinInit(maxAmountsIn);
+                break;
+            }
+            case JoinKind.Proportional:
+            case JoinKind.Unbalanced:
+            case JoinKind.SingleAsset: {
+                maxAmountsIn = input.amountsIn.map((a) => a.amount);
+                minBptOut = input.slippage.removeFrom(input.bptOut.amount);
+                userData = WeightedEncoder.joinGivenIn(maxAmountsIn, minBptOut);
+                break;
+            }
+            case JoinKind.ExactOut: {
+                maxAmountsIn = input.amountsIn.map((a) =>
+                    input.slippage.applyTo(a.amount),
+                );
+                userData = WeightedEncoder.joinGivenOut(input.bptOut.amount);
+                break;
+            }
+            default:
+                throw new Error('Invalid join kind');
+        }
 
         const queryArgs = this.getJoinParameters({
             poolId: input.id,
@@ -187,7 +190,7 @@ export class WeightedJoin implements BaseJoin {
     private checkInputs(input: JoinInput, poolState: PoolState) {
         const poolAssets = poolState.tokens.map((t) => t.address);
         switch (input.kind) {
-            case 'proportional': {
+            case JoinKind.Proportional: {
                 if (!poolAssets.includes(input.refAmountIn.token.address)) {
                     throw new Error('Reference token not in pool');
                 }
@@ -203,22 +206,22 @@ export class WeightedJoin implements BaseJoin {
         return poolAssets.map((asset) => {
             let tokenIn: TokenAmount | undefined;
             switch (input.kind) {
-                case 'init':
+                case JoinKind.Init:
                     tokenIn = input.initAmountsIn.find(
                         (t) => t.token.address === asset,
                     );
                     break;
-                case 'proportional':
+                case JoinKind.Proportional:
                     if (input.refAmountIn.token.address === asset)
                         tokenIn = input.refAmountIn;
                     // TODO: calculate proportional amounts based on reference token
                     break;
-                case 'unbalanced':
+                case JoinKind.Unbalanced:
                     tokenIn = input.amountsIn.find(
                         (t) => t.token.address === asset,
                     );
                     break;
-                case 'singleAsset':
+                case JoinKind.SingleAsset:
                     if (input.amountIn.token.address === asset)
                         tokenIn = input.amountIn;
                     break;
