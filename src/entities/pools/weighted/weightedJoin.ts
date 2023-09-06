@@ -3,9 +3,13 @@ import {
     BaseJoin,
     JoinCallInput,
     JoinInput,
+    JoinKind,
     JoinQueryResult,
     PoolState,
-} from '..';
+    Token,
+    TokenAmount,
+    WeightedEncoder,
+} from '../../..';
 import { Address } from '../../../types';
 import {
     BALANCER_HELPERS,
@@ -13,12 +17,7 @@ import {
     CHAINS,
     ZERO_ADDRESS,
 } from '../../../utils';
-import { WeightedEncoder } from '../../encoders/weighted';
-import { TokenAmount } from '../../tokenAmount';
-import { balancerHelpersAbi } from '../../../abi/balancerHelpers';
-import { Token } from '../../token';
-import { vaultAbi } from '../../../abi';
-import { JoinKind } from '../../join';
+import { balancerHelpersAbi, vaultAbi } from '../../../abi';
 
 export class WeightedJoin implements BaseJoin {
     // TODO - Probably not needed

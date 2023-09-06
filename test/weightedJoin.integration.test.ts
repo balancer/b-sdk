@@ -4,17 +4,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
-    BaseJoin,
-    JoinKind,
-    JoinParser,
-    PoolState,
-    SingleAssetJoinInput,
-    Token,
-    TokenAmount,
-} from '../src/entities';
-import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
-import { Address } from '../src/types';
-import {
     Client,
     createTestClient,
     http,
@@ -24,8 +13,21 @@ import {
     WalletActions,
     walletActions,
 } from 'viem';
+
+import {
+    BaseJoin,
+    JoinKind,
+    JoinParser,
+    PoolState,
+    SingleAssetJoinInput,
+    Slippage,
+    Token,
+    TokenAmount,
+} from '../src/entities';
+import { Address } from '../src/types';
+import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
+
 import { approveToken, sendTransactionGetBalances } from './lib/utils/helper';
-import { Slippage } from '../src/entities/slippage';
 
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 

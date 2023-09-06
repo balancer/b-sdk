@@ -1,18 +1,10 @@
-import { BaseJoin } from './pools';
-import { WeightedJoin } from './pools/weighted';
+import { WeightedJoin } from '../pools/weighted';
+import { BaseJoin } from './types';
 
 /*********************** Basic Helper to get join class from pool type *************/
 export type JoinConfig = {
     customPoolJoins: Record<string, BaseJoin>;
 };
-
-export enum JoinKind {
-    Init = 'Init',
-    Proportional = 'Proportional',
-    Unbalanced = 'Unbalanced',
-    SingleAsset = 'SingleAsset',
-    ExactOut = 'ExactOut',
-}
 
 export class JoinParser {
     private readonly poolJoins: Record<string, BaseJoin> = {};

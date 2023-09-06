@@ -1,6 +1,8 @@
 import { SupportedRawPoolTypes } from '../../data/types';
 import { WeightedEncoder } from './weighted';
 
+export * from './weighted';
+
 export const getEncoder = (
     poolType: SupportedRawPoolTypes | string,
 ): typeof WeightedEncoder | undefined => {

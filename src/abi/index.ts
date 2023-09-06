@@ -1,4 +1,5 @@
 export * from './vault';
+export * from './balancerHelpers';
 export * from './balancerQueries';
 export * from './balancerPoolDataQueries';
 export * from './erc20';
