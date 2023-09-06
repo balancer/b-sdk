@@ -49,12 +49,42 @@ export type PoolState = {
 };
 
 // This will be extended for each pools specific input requirements
-export type JoinInput = {
-    tokenAmounts: TokenAmount[];
+export type BaseJoinInput = {
     chainId: number;
-    rpcUrl: string;
-    isInit?: boolean;
+    rpcUrl?: string;
 };
+
+export type InitJoinInput = BaseJoinInput & {
+    initAmountsIn: TokenAmount[];
+    kind: 'init';
+};
+
+export type ProportionalJoinInput = BaseJoinInput & {
+    refAmountIn: TokenAmount;
+    kind: 'proportional';
+};
+
+export type UnbalancedJoinInput = BaseJoinInput & {
+    amountsIn: TokenAmount[];
+    kind: 'unbalanced';
+};
+
+export type SingleAssetJoinInput = BaseJoinInput & {
+    amountIn: TokenAmount;
+    kind: 'singleAsset';
+};
+
+export type ExactOutJoinInput = BaseJoinInput & {
+    bptOut: TokenAmount;
+    kind: 'exactOut';
+};
+
+export type JoinInput =
+    | InitJoinInput
+    | ProportionalJoinInput
+    | UnbalancedJoinInput
+    | SingleAssetJoinInput
+    | ExactOutJoinInput;
 
 // Returned from a join query
 export type JoinQueryResult = {
