@@ -9,7 +9,7 @@ import {
     ZERO_ADDRESS,
 } from '../../../utils';
 import { balancerHelpersAbi, vaultAbi } from '../../../abi';
-import { getAmountsIn, getJoinParameters, getUserData } from './helpers';
+import { getJoinParameters } from './helpers';
 import {
     BaseJoin,
     JoinCallInput,
@@ -31,10 +31,40 @@ export class WeightedJoin implements BaseJoin {
     ): Promise<JoinQueryResult> {
         // TODO - This would need extended to work with relayer
 
-        // TODO: check inputs after refactoring switch/case into separate functions
+        let maxAmountsIn = Array(poolState.tokens.length).fill(0n);
+        let userData: Address;
 
-        const maxAmountsIn = getAmountsIn(input, poolState.tokens);
-        const userData = getUserData(input, maxAmountsIn);
+        switch (input.kind) {
+            case JoinKind.Init:
+                maxAmountsIn = poolState.tokens.map(
+                    (t) =>
+                        input.initAmountsIn.find((a) => a.token.isEqual(t))
+                            ?.amount ?? 0n,
+                );
+                userData = WeightedEncoder.joinInit(maxAmountsIn);
+                break;
+            case JoinKind.ExactIn:
+                maxAmountsIn = poolState.tokens.map(
+                    (t) =>
+                        input.amountsIn.find((a) => a.token.isEqual(t))
+                            ?.amount ?? 0n,
+                );
+                userData = WeightedEncoder.joinExactIn(maxAmountsIn, 0n);
+                break;
+            case JoinKind.ExactOutSingleAsset:
+                userData = WeightedEncoder.joinExactOutSingleAsset(
+                    input.bptOut.amount,
+                    poolState.tokens.findIndex(
+                        (t) => t.address === input.tokenIn,
+                    ),
+                );
+                break;
+            case JoinKind.ExactOutProportional:
+                userData = WeightedEncoder.joinExactOutProportional(
+                    input.bptOut.amount,
+                );
+                break;
+        }
 
         let tokensIn = poolState.tokens;
         // replace wrapped token with native asset if needed
@@ -112,23 +142,31 @@ export class WeightedJoin implements BaseJoin {
             case JoinKind.ExactIn: {
                 maxAmountsIn = input.amountsIn.map((a) => a.amount);
                 minBptOut = input.slippage.removeFrom(input.bptOut.amount);
-                userData = WeightedEncoder.joinGivenIn(maxAmountsIn, minBptOut);
+                userData = WeightedEncoder.joinExactIn(maxAmountsIn, minBptOut);
                 break;
             }
             case JoinKind.ExactOutSingleAsset:
-            case JoinKind.ExactOutProportional: {
-                // TODO: refactor this after splitting encoder into 2 methods
+                if (input.tokenInIndex === undefined) {
+                    throw new Error(
+                        'tokenInIndex must be defined for ExactOutSingleAsset joins',
+                    );
+                }
                 maxAmountsIn = input.amountsIn.map((a) =>
                     input.slippage.applyTo(a.amount),
                 );
-                userData = WeightedEncoder.joinGivenOut(
+                userData = WeightedEncoder.joinExactOutSingleAsset(
                     input.bptOut.amount,
                     input.tokenInIndex,
                 );
+            case JoinKind.ExactOutProportional: {
+                maxAmountsIn = input.amountsIn.map((a) =>
+                    input.slippage.applyTo(a.amount),
+                );
+                userData = WeightedEncoder.joinExactOutProportional(
+                    input.bptOut.amount,
+                );
                 break;
             }
-            default:
-                throw new Error('Invalid join kind');
         }
 
         const queryArgs = getJoinParameters({
