@@ -5,10 +5,9 @@ import { Token } from '../token';
 
 export enum JoinKind {
     Init = 'Init',
-    Proportional = 'Proportional',
-    Unbalanced = 'Unbalanced',
-    SingleAsset = 'SingleAsset',
-    ExactOut = 'ExactOut',
+    ExactIn = 'ExactIn',
+    ExactOutSingleAsset = 'ExactOutSingleAsset',
+    ExactOutProportional = 'ExactOutProportional',
 }
 
 // Returned from API and used as input
@@ -32,32 +31,27 @@ export type InitJoinInput = BaseJoinInput & {
     kind: JoinKind.Init;
 };
 
-export type ProportionalJoinInput = BaseJoinInput & {
-    refAmountIn: TokenAmount;
-    kind: JoinKind.Proportional;
-};
-
-export type UnbalancedJoinInput = BaseJoinInput & {
+export type ExactInJoinInput = BaseJoinInput & {
     amountsIn: TokenAmount[];
-    kind: JoinKind.Unbalanced;
+    kind: JoinKind.ExactIn;
 };
 
-export type SingleAssetJoinInput = BaseJoinInput & {
-    amountIn: TokenAmount;
-    kind: JoinKind.SingleAsset;
-};
-
-export type ExactOutJoinInput = BaseJoinInput & {
+export type ExactOutSingleAssetJoinInput = BaseJoinInput & {
     bptOut: TokenAmount;
-    kind: JoinKind.ExactOut;
+    tokenIn: Address;
+    kind: JoinKind.ExactOutSingleAsset;
+};
+
+export type ExactOutProportionalJoinInput = BaseJoinInput & {
+    bptOut: TokenAmount;
+    kind: JoinKind.ExactOutProportional;
 };
 
 export type JoinInput =
     | InitJoinInput
-    | ProportionalJoinInput
-    | UnbalancedJoinInput
-    | SingleAssetJoinInput
-    | ExactOutJoinInput;
+    | ExactInJoinInput
+    | ExactOutSingleAssetJoinInput
+    | ExactOutProportionalJoinInput;
 
 // Returned from a join query
 export type JoinQueryResult = {
@@ -65,6 +59,7 @@ export type JoinQueryResult = {
     joinKind: JoinKind;
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
+    tokenInIndex?: number;
 };
 
 export type JoinCallInput = JoinQueryResult & {

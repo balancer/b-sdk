@@ -53,6 +53,7 @@ export class WeightedEncoder {
      * @param bptAmountOut - the amount of BPT to be minted
      * @param enterTokenIndex - the index of the token to be provided as liquidity
      */
+    // TODO: refactor this into 2 separate functions
     static joinGivenOut = (
         bptAmountOut: bigint,
         enterTokenIndex?: number,
@@ -86,6 +87,7 @@ export class WeightedEncoder {
      * @param bptAmountIn - the amount of BPT to be burned
      * @param enterTokenIndex - the index of the token to removed from the pool
      */
+    // TODO: refactor this into 2 separate functions
     static exitGivenIn = (
         bptAmountIn: bigint,
         exitTokenIndex?: number,
