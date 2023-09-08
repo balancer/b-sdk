@@ -148,11 +148,9 @@ describe('weighted join test', () => {
                 '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
             tokenIn = new Token(
                 chainId,
-                ZERO_ADDRESS,
+                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                 18,
-                'ETH',
-                'Ether',
-                '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                'WETH',
             );
         });
 
@@ -164,6 +162,7 @@ describe('weighted join test', () => {
                 chainId,
                 rpcUrl,
                 kind: JoinKind.SingleAsset,
+                joinWithNativeAsset: true,
             };
             const queryResult = await weightedJoin.query(
                 joinInput,
@@ -212,20 +211,25 @@ describe('weighted join test', () => {
 
 export class MockApi {
     public async getPool(id: Address): Promise<PoolState> {
+        const tokens = [
+            new Token(
+                ChainId.MAINNET,
+                '0xba100000625a3754423978a60c9317c58a424e3d',
+                18,
+                'BAL',
+            ),
+            new Token(
+                ChainId.MAINNET,
+                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                18,
+                'WETH',
+            ),
+        ];
         return {
             id,
             address: getPoolAddress(id) as Address,
             type: 'Weighted',
-            tokens: [
-                {
-                    address: '0xba100000625a3754423978a60c9317c58a424e3d', // BAL
-                    decimals: 18,
-                },
-                {
-                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-                    decimals: 18,
-                },
-            ],
+            tokens,
         };
     }
 }

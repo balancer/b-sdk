@@ -3,6 +3,7 @@ import { ZERO_ADDRESS } from '../../../utils';
 import { WeightedEncoder } from '../../encoders';
 import { TokenAmount } from '../../tokenAmount';
 import { JoinInput, JoinKind, PoolState } from '..';
+import { Token } from '../../token';
 
 export function getJoinParameters({
     poolId,
@@ -45,27 +46,25 @@ export function checkInputs(input: JoinInput, poolState: PoolState) {
 }
 
 // TODO: amounts for native asset join relies on the fact that the user provided wrapped address for input tokens - is that a fair assumption?
-export function getAmountsIn(input: JoinInput, poolAssets: string[]): bigint[] {
-    return poolAssets.map((asset) => {
+export function getAmountsIn(input: JoinInput, poolTokens: Token[]): bigint[] {
+    return poolTokens.map((token) => {
         let tokenIn: TokenAmount | undefined;
         switch (input.kind) {
             case JoinKind.Init:
-                tokenIn = input.initAmountsIn.find(
-                    (t) => t.token.wrapped === asset,
+                tokenIn = input.initAmountsIn.find((t) =>
+                    t.token.isEqual(token),
                 );
                 break;
             case JoinKind.Proportional:
-                if (input.refAmountIn.token.wrapped === asset)
+                if (input.refAmountIn.token.isEqual(token))
                     tokenIn = input.refAmountIn;
                 // TODO: calculate proportional amounts based on reference token
                 break;
             case JoinKind.Unbalanced:
-                tokenIn = input.amountsIn.find(
-                    (t) => t.token.wrapped === asset,
-                );
+                tokenIn = input.amountsIn.find((t) => t.token.isEqual(token));
                 break;
             case JoinKind.SingleAsset:
-                if (input.amountIn.token.wrapped === asset)
+                if (input.amountIn.token.isEqual(token))
                     tokenIn = input.amountIn;
                 break;
         }
@@ -94,42 +93,4 @@ export function getUserData(input: JoinInput, amountsIn: bigint[]): Address {
             throw new Error('Invalid join kind');
     }
     return userData;
-}
-
-export function getAssets(input: JoinInput, poolAssets: Address[]): Address[] {
-    let nativeTokenIn: TokenAmount | undefined;
-    switch (input.kind) {
-        case JoinKind.Init:
-            nativeTokenIn = input.initAmountsIn.find(
-                (t) => t.token.address === ZERO_ADDRESS,
-            );
-            break;
-        case JoinKind.Proportional:
-            if (input.refAmountIn.token.address === ZERO_ADDRESS)
-                nativeTokenIn = input.refAmountIn;
-            break;
-        case JoinKind.Unbalanced:
-            nativeTokenIn = input.amountsIn.find(
-                (t) => t.token.address === ZERO_ADDRESS,
-            );
-            break;
-        case JoinKind.SingleAsset:
-            if (input.amountIn.token.address === ZERO_ADDRESS)
-                nativeTokenIn = input.amountIn;
-            break;
-    }
-    let assets = [...poolAssets];
-
-    if (nativeTokenIn !== undefined) {
-        const wrappedAssetIndex = poolAssets.findIndex(
-            // TODO: this assumes that the user provided wrapped address for input tokens - is that a fair assumption?
-            (a) => a === (nativeTokenIn as TokenAmount).token.wrapped,
-        );
-        assets = [
-            ...poolAssets.slice(0, wrappedAssetIndex),
-            ZERO_ADDRESS,
-            ...poolAssets.slice(wrappedAssetIndex + 1, poolAssets.length),
-        ];
-    }
-    return assets;
 }

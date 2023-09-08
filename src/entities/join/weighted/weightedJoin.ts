@@ -5,13 +5,13 @@ import {
     BALANCER_HELPERS,
     BALANCER_VAULT,
     CHAINS,
+    NATIVE_ASSETS,
     ZERO_ADDRESS,
 } from '../../../utils';
 import { balancerHelpersAbi, vaultAbi } from '../../../abi';
 import {
     checkInputs,
     getAmountsIn,
-    getAssets,
     getJoinParameters,
     getUserData,
 } from './helpers';
@@ -38,14 +38,24 @@ export class WeightedJoin implements BaseJoin {
 
         checkInputs(input, poolState);
 
-        const poolAssets = poolState.tokens.map((t) => t.address);
-        const assets = getAssets(input, poolAssets);
-        const maxAmountsIn = getAmountsIn(input, poolAssets);
+        const maxAmountsIn = getAmountsIn(input, poolState.tokens);
         const userData = getUserData(input, maxAmountsIn);
+
+        // replace wrapped token with native asset if needed
+        const tokensIn = poolState.tokens.map((token) => {
+            if (
+                input.joinWithNativeAsset &&
+                token.isUnderlyingEqual(NATIVE_ASSETS[input.chainId])
+            ) {
+                return new Token(input.chainId, ZERO_ADDRESS, 18);
+            } else {
+                return token;
+            }
+        });
 
         const queryArgs = getJoinParameters({
             poolId: poolState.id,
-            assets,
+            assets: tokensIn.map((t) => t.address),
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             maxAmountsIn,
@@ -69,9 +79,6 @@ export class WeightedJoin implements BaseJoin {
         const bpt = new Token(input.chainId, poolState.address, 18);
         const bptOut = TokenAmount.fromRawAmount(bpt, queryBptOut);
 
-        const tokensIn = poolState.tokens.map(
-            (token, i) => new Token(input.chainId, assets[i], token.decimals),
-        );
         const amountsIn = queryAmountsIn.map((a, i) =>
             TokenAmount.fromRawAmount(tokensIn[i], a),
         );
