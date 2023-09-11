@@ -1,7 +1,6 @@
-import { Address } from 'viem';
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
-import { Token } from '../token';
+import { Address } from '../../types';
 
 export enum JoinKind {
     Init = 'Init',
@@ -15,8 +14,10 @@ export type PoolState = {
     id: Address;
     address: Address;
     type: string;
-    // TODO: is it ok to replace by Token here? Or should we stick to basic types?
-    tokens: Token[]; // already properly sorted in case different versions sort them differently
+    tokens: {
+        address: Address;
+        decimals: number;
+    }[]; // already properly sorted in case different versions sort them differently
 };
 
 // This will be extended for each pools specific input requirements

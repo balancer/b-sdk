@@ -31,12 +31,15 @@ export class WeightedJoin implements BaseJoin {
     ): Promise<JoinQueryResult> {
         // TODO - This would need extended to work with relayer
 
-        let maxAmountsIn = Array(poolState.tokens.length).fill(0n);
+        const poolTokens = poolState.tokens.map(
+            (t) => new Token(input.chainId, t.address, t.decimals),
+        );
+        let maxAmountsIn = Array(poolTokens.length).fill(0n);
         let userData: Address;
 
         switch (input.kind) {
             case JoinKind.Init:
-                maxAmountsIn = poolState.tokens.map(
+                maxAmountsIn = poolTokens.map(
                     (t) =>
                         input.initAmountsIn.find((a) => a.token.isEqual(t))
                             ?.amount ?? 0n,
@@ -44,7 +47,7 @@ export class WeightedJoin implements BaseJoin {
                 userData = WeightedEncoder.joinInit(maxAmountsIn);
                 break;
             case JoinKind.ExactIn:
-                maxAmountsIn = poolState.tokens.map(
+                maxAmountsIn = poolTokens.map(
                     (t) =>
                         input.amountsIn.find((a) => a.token.isEqual(t))
                             ?.amount ?? 0n,
@@ -54,9 +57,7 @@ export class WeightedJoin implements BaseJoin {
             case JoinKind.ExactOutSingleAsset:
                 userData = WeightedEncoder.joinExactOutSingleAsset(
                     input.bptOut.amount,
-                    poolState.tokens.findIndex(
-                        (t) => t.address === input.tokenIn,
-                    ),
+                    poolTokens.findIndex((t) => t.address === input.tokenIn),
                 );
                 break;
             case JoinKind.ExactOutProportional:
@@ -66,10 +67,10 @@ export class WeightedJoin implements BaseJoin {
                 break;
         }
 
-        let tokensIn = poolState.tokens;
+        let tokensIn = [...poolTokens];
         // replace wrapped token with native asset if needed
         if (input.joinWithNativeAsset) {
-            tokensIn = poolState.tokens.map((token) => {
+            tokensIn = poolTokens.map((token) => {
                 if (token.isUnderlyingEqual(NATIVE_ASSETS[input.chainId])) {
                     return new Token(input.chainId, ZERO_ADDRESS, 18);
                 } else {
@@ -110,7 +111,7 @@ export class WeightedJoin implements BaseJoin {
 
         const tokenInIndex =
             input.kind === JoinKind.ExactOutSingleAsset
-                ? poolState.tokens.findIndex((t) => t.address === input.tokenIn)
+                ? poolTokens.findIndex((t) => t.address === input.tokenIn)
                 : undefined;
 
         return {

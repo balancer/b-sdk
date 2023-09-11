@@ -203,19 +203,15 @@ describe('weighted join test', () => {
 
 export class MockApi {
     public async getPool(id: Address): Promise<PoolState> {
-        const tokens = [
-            new Token(
-                ChainId.MAINNET,
-                '0xba100000625a3754423978a60c9317c58a424e3d',
-                18,
-                'BAL',
-            ),
-            new Token(
-                ChainId.MAINNET,
-                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-                18,
-                'WETH',
-            ),
+        const tokens: { address: Address; decimals: number }[] = [
+            {
+                address: '0xba100000625a3754423978a60c9317c58a424e3d',
+                decimals: 18,
+            },
+            {
+                address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                decimals: 18,
+            },
         ];
         return {
             id,
