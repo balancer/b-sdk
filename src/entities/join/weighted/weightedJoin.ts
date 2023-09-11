@@ -20,11 +20,6 @@ import {
 } from '..';
 
 export class WeightedJoin implements BaseJoin {
-    // TODO - Probably not needed
-    getInstance(): WeightedJoin {
-        return new WeightedJoin();
-    }
-
     public async query(
         input: JoinInput,
         poolState: PoolState,

@@ -70,7 +70,6 @@ export type JoinCallInput = JoinQueryResult & {
 };
 
 export interface BaseJoin {
-    getInstance(): BaseJoin;
     query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
     buildCall(input: JoinCallInput): {
         call: Address;
