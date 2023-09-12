@@ -5,6 +5,7 @@ import {
     BALANCER_HELPERS,
     BALANCER_VAULT,
     CHAINS,
+    MAX_UINT256,
     NATIVE_ASSETS,
     ZERO_ADDRESS,
 } from '../../../utils';
@@ -26,10 +27,13 @@ export class WeightedJoin implements BaseJoin {
     ): Promise<JoinQueryResult> {
         // TODO - This would need extended to work with relayer
 
+        // TODO: check inputs
+        // joinExactOutProportional only works for Weighted v2+ -> should we handle at the SDK level or should we just let the query fail?
+
         const poolTokens = poolState.tokens.map(
             (t) => new Token(input.chainId, t.address, t.decimals),
         );
-        let maxAmountsIn = Array(poolTokens.length).fill(0n);
+        let maxAmountsIn = Array(poolTokens.length).fill(MAX_UINT256);
         let userData: Address;
 
         switch (input.kind) {
@@ -52,7 +56,9 @@ export class WeightedJoin implements BaseJoin {
             case JoinKind.ExactOutSingleAsset:
                 userData = WeightedEncoder.joinExactOutSingleAsset(
                     input.bptOut.amount,
-                    poolTokens.findIndex((t) => t.address === input.tokenIn),
+                    poolTokens.findIndex(
+                        (t) => t.address === input.tokenIn.toLowerCase(),
+                    ),
                 );
                 break;
             case JoinKind.ExactOutProportional:
@@ -106,7 +112,9 @@ export class WeightedJoin implements BaseJoin {
 
         const tokenInIndex =
             input.kind === JoinKind.ExactOutSingleAsset
-                ? poolTokens.findIndex((t) => t.address === input.tokenIn)
+                ? poolTokens.findIndex(
+                      (t) => t.address === input.tokenIn.toLowerCase(),
+                  )
                 : undefined;
 
         return {
@@ -123,11 +131,11 @@ export class WeightedJoin implements BaseJoin {
         to: Address;
         value: bigint | undefined;
         minBptOut: bigint;
-        // TODO: add maxAmountsIn after creating test scenario for ExactOut joins
+        maxAmountsIn: bigint[];
     } {
-        let maxAmountsIn: bigint[];
-        let userData: Address;
+        let maxAmountsIn = input.amountsIn.map((a) => a.amount);
         let minBptOut = input.bptOut.amount;
+        let userData: Address;
 
         switch (input.joinKind) {
             case JoinKind.Init: {
@@ -154,6 +162,7 @@ export class WeightedJoin implements BaseJoin {
                     input.bptOut.amount,
                     input.tokenInIndex,
                 );
+                break;
             case JoinKind.ExactOutProportional: {
                 maxAmountsIn = input.amountsIn.map((a) =>
                     input.slippage.applyTo(a.amount),
@@ -190,6 +199,7 @@ export class WeightedJoin implements BaseJoin {
             to: BALANCER_VAULT,
             value,
             minBptOut,
+            maxAmountsIn,
         };
     }
 }

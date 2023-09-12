@@ -76,5 +76,6 @@ export interface BaseJoin {
         to: Address;
         value: bigint | undefined;
         minBptOut: bigint;
+        maxAmountsIn: bigint[];
     };
 }
