@@ -5,6 +5,11 @@ import {
     TestActions,
     TransactionReceipt,
     WalletActions,
+    concat,
+    keccak256,
+    pad,
+    toBytes,
+    toHex,
 } from 'viem';
 import { erc20Abi } from '../../../src/abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
@@ -115,3 +120,41 @@ export async function sendTransactionGetBalances(
         gasUsed,
     };
 }
+
+/**
+ * Set local ERC20 token balance for a given account address (used for testing)
+ *
+ * @param client client that will perform the setStorageAt call
+ * @param accountAddress Account address that will have token balance set
+ * @param token Token address which balance will be set
+ * @param slot Slot memory that stores balance - use npm package `slot20` to identify which slot to provide
+ * @param balance Balance in EVM amount
+ * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
+ */
+export const setTokenBalance = async (
+    client: Client & TestActions,
+    accountAddress: Address,
+    token: Address,
+    slot: number,
+    balance: bigint,
+    isVyperMapping = false,
+): Promise<void> => {
+    // Get storage slot index
+
+    const slotBytes = pad(toBytes(slot));
+    const accountAddressBytes = pad(toBytes(accountAddress));
+
+    let index;
+    if (isVyperMapping) {
+        index = keccak256(concat([slotBytes, accountAddressBytes])); // slot, key
+    } else {
+        index = keccak256(concat([accountAddressBytes, slotBytes])); // key, slot
+    }
+
+    // Manipulate local balance (needs to be bytes32 string)
+    await client.setStorageAt({
+        address: token,
+        index,
+        value: toHex(balance, { size: 32 }),
+    });
+};
