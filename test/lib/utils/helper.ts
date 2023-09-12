@@ -1,15 +1,19 @@
 import {
     Address,
     Client,
+    Hex,
     PublicActions,
     TestActions,
     TransactionReceipt,
     WalletActions,
     concat,
+    encodeAbiParameters,
+    hexToBigInt,
     keccak256,
     pad,
     toBytes,
     toHex,
+    trim,
 } from 'viem';
 import { erc20Abi } from '../../../src/abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
@@ -158,3 +162,57 @@ export const setTokenBalance = async (
         value: toHex(balance, { size: 32 }),
     });
 };
+
+export async function findTokenBalanceSlot(
+    client: Client & PublicActions & TestActions,
+    accountAddress: Address,
+    tokenAddress: Address,
+    isVyperMapping = false,
+): Promise<number> {
+    const probeA = encodeAbiParameters(
+        [{ name: 'probeA', type: 'uint256' }],
+        [BigInt((Math.random() * 10000).toFixed())],
+    );
+    const probeB = encodeAbiParameters(
+        [{ name: 'probeA', type: 'uint256' }],
+        [BigInt((Math.random() * 10000).toFixed())],
+    );
+    for (let i = 0; i < 999; i++) {
+        const slotBytes = pad(toBytes(i));
+        const accountAddressBytes = pad(toBytes(accountAddress));
+        let probedSlot: Address;
+        if (isVyperMapping) {
+            probedSlot = keccak256(concat([slotBytes, accountAddressBytes])); // slot, key
+        } else {
+            probedSlot = keccak256(concat([accountAddressBytes, slotBytes])); // key, slot
+        }
+        // remove padding for JSON RPC
+        probedSlot = trim(probedSlot);
+        const prev = (await client.getStorageAt({
+            address: tokenAddress,
+            slot: probedSlot,
+        })) as Hex;
+        // make sure the probe will change the slot value
+        const probe = prev === probeA ? probeB : probeA;
+
+        await client.setStorageAt({
+            address: tokenAddress,
+            index: probedSlot,
+            value: probe,
+        });
+
+        const balance = await getErc20Balance(
+            tokenAddress,
+            client,
+            accountAddress,
+        );
+        // reset to previous value
+        await client.setStorageAt({
+            address: tokenAddress,
+            index: probedSlot,
+            value: prev,
+        });
+        if (balance === hexToBigInt(probe)) return i;
+    }
+    throw new Error('Balance slot not found!');
+}
