@@ -163,6 +163,14 @@ export const setTokenBalance = async (
     });
 };
 
+/**
+ * Find ERC20 token balance storage slot (to be used on setTokenBalance)
+ *
+ * @param client client that will perform contract calls
+ * @param accountAddress Account address to probe storage slot changes
+ * @param tokenAddress Token address which we're looking for the balance slot
+ * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
+ */
 export async function findTokenBalanceSlot(
     client: Client & PublicActions & TestActions,
     accountAddress: Address,
@@ -216,3 +224,65 @@ export async function findTokenBalanceSlot(
     }
     throw new Error('Balance slot not found!');
 }
+
+/**
+ * Setup local fork with approved token balance for a given account address
+ *
+ * @param client Client that will perform transactions
+ * @param accountAddress Account address that will have token balance set and approved
+ * @param tokens Token addresses which balance will be set and approved
+ * @param slots Slot that stores token balance in memory - use npm package `slot20` to identify which slot to provide
+ * @param balances Balances in EVM amounts
+ * @param jsonRpcUrl Url with remote node to be forked locally
+ * @param blockNumber Number of the block that the fork will happen
+ * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
+ */
+export const forkSetup = async (
+    client: Client & PublicActions & TestActions & WalletActions,
+    accountAddress: Address,
+    tokens: Address[],
+    slots: number[] | undefined,
+    balances: bigint[],
+    jsonRpcUrl: string,
+    blockNumber?: bigint,
+    isVyperMapping: boolean[] = Array(tokens.length).fill(false),
+): Promise<void> => {
+    await client.reset({
+        blockNumber,
+        jsonRpcUrl,
+    });
+
+    await client.impersonateAccount({ address: accountAddress });
+
+    let _slots: number[];
+    if (slots) {
+        _slots = slots;
+    } else {
+        _slots = await Promise.all(
+            tokens.map(async (token, i) =>
+                findTokenBalanceSlot(
+                    client,
+                    accountAddress,
+                    token,
+                    isVyperMapping[i],
+                ),
+            ),
+        );
+        console.log(`slots: ${_slots}`);
+    }
+
+    for (let i = 0; i < tokens.length; i++) {
+        // Set initial account balance for each token that will be used to join pool
+        await setTokenBalance(
+            client,
+            accountAddress,
+            tokens[i],
+            _slots[i],
+            balances[i],
+            isVyperMapping[i],
+        );
+
+        // Approve appropriate allowances so that vault contract can move tokens
+        await approveToken(client, accountAddress, tokens[i]);
+    }
+};

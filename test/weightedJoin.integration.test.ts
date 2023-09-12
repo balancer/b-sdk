@@ -30,11 +30,7 @@ import { JoinParser } from '../src/entities/join/parser';
 import { Address } from '../src/types';
 import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
 
-import {
-    approveToken,
-    sendTransactionGetBalances,
-    setTokenBalance,
-} from './lib/utils/helper';
+import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
 
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 
@@ -66,17 +62,18 @@ describe('weighted join test', () => {
     });
 
     beforeEach(async () => {
-        // reset local fork
-        await client.reset({
-            blockNumber,
-            jsonRpcUrl: process.env.ETHEREUM_RPC_URL,
-        });
-
-        // prepare test client with balance and token approvals
-        await client.impersonateAccount({ address: testAddress });
-
         // get pool state from api
         poolFromApi = await api.getPool(poolId);
+
+        await forkSetup(
+            client,
+            testAddress,
+            poolFromApi.tokens.map((t) => t.address),
+            undefined, // TODO: hardcode these values to improve test performance
+            poolFromApi.tokens.map((t) => parseUnits('100', t.decimals)),
+            process.env.ETHEREUM_RPC_URL as string,
+            blockNumber,
+        );
 
         // setup join helper
         const joinParser = new JoinParser();
@@ -99,8 +96,6 @@ describe('weighted join test', () => {
                 'BAL',
             );
             const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
-
-            await approveToken(client, testAddress, tokenIn.address);
 
             // perform join query to get expected bpt out
             const joinInput: ExactInJoinInput = {
@@ -158,8 +153,6 @@ describe('weighted join test', () => {
                 'WETH',
             );
             const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
-
-            await approveToken(client, testAddress, tokenIn.address);
 
             // perform join query to get expected bpt out
             const joinInput: ExactInJoinInput = {
@@ -229,15 +222,6 @@ describe('weighted join test', () => {
             const amountOut = TokenAmount.fromHumanAmount(tokenOut, '1');
             const tokenIn = '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0';
 
-            await approveToken(client, testAddress, tokenIn);
-            await setTokenBalance(
-                client,
-                testAddress,
-                tokenIn,
-                0,
-                parseUnits('100', 18),
-            );
-
             // perform join query to get expected bpt out
             const joinInput: ExactOutSingleAssetJoinInput = {
                 bptOut: amountOut,
@@ -289,19 +273,6 @@ describe('weighted join test', () => {
 
         test('proportional join', async () => {
             const amountOut = TokenAmount.fromHumanAmount(tokenOut, '1');
-            const slots = [0, 1];
-
-            for (let i = 0; i < poolFromApi.tokens.length; i++) {
-                const token = poolFromApi.tokens[i];
-                await approveToken(client, testAddress, token.address);
-                await setTokenBalance(
-                    client,
-                    testAddress,
-                    token.address,
-                    slots[i],
-                    parseUnits('100', token.decimals),
-                );
-            }
 
             // perform join query to get expected bpt out
             const joinInput: ExactOutProportionalJoinInput = {
