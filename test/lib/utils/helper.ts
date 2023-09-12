@@ -70,6 +70,17 @@ export const getBalances = async (
     return Promise.all(balances);
 };
 
+/**
+ * Helper function that sends a transaction and check for balance deltas
+ *
+ * @param tokensForBalanceCheck Token addresses to check balance deltas
+ * @param client Client that will perform transactions
+ * @param clientAddress Account address that will have token balance checked
+ * @param to Contract Address that will be called
+ * @param data Transaction encoded data
+ * @param value ETH value in case of ETH transfer
+ * @returns Transaction recepit, balance deltas and gas used
+ */
 export async function sendTransactionGetBalances(
     tokensForBalanceCheck: Address[],
     client: Client & PublicActions & TestActions & WalletActions,
@@ -148,7 +159,7 @@ export const setTokenBalance = async (
     const slotBytes = pad(toBytes(slot));
     const accountAddressBytes = pad(toBytes(accountAddress));
 
-    let index;
+    let index: Address;
     if (isVyperMapping) {
         index = keccak256(concat([slotBytes, accountAddressBytes])); // slot, key
     } else {
@@ -186,6 +197,7 @@ export async function findTokenBalanceSlot(
         [BigInt((Math.random() * 10000).toFixed())],
     );
     for (let i = 0; i < 999; i++) {
+        // encode probed slot
         const slotBytes = pad(toBytes(i));
         const accountAddressBytes = pad(toBytes(accountAddress));
         let probedSlot: Address;
@@ -194,32 +206,39 @@ export async function findTokenBalanceSlot(
         } else {
             probedSlot = keccak256(concat([accountAddressBytes, slotBytes])); // key, slot
         }
+
         // remove padding for JSON RPC
         probedSlot = trim(probedSlot);
+
+        // get storage value
         const prev = (await client.getStorageAt({
             address: tokenAddress,
             slot: probedSlot,
         })) as Hex;
-        // make sure the probe will change the slot value
-        const probe = prev === probeA ? probeB : probeA;
 
+        // set storage slot to new probe
+        const probe = prev === probeA ? probeB : probeA;
         await client.setStorageAt({
             address: tokenAddress,
             index: probedSlot,
             value: probe,
         });
 
+        // check if balance changed
         const balance = await getErc20Balance(
             tokenAddress,
             client,
             accountAddress,
         );
+
         // reset to previous value
         await client.setStorageAt({
             address: tokenAddress,
             index: probedSlot,
             value: prev,
         });
+
+        // return slot if balance changed
         if (balance === hexToBigInt(probe)) return i;
     }
     throw new Error('Balance slot not found!');
