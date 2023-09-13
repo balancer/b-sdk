@@ -6,7 +6,6 @@ import {
     BALANCER_VAULT,
     CHAINS,
     MAX_UINT256,
-    NATIVE_ASSETS,
     ZERO_ADDRESS,
 } from '../../../utils';
 import { balancerHelpersAbi, vaultAbi } from '../../../abi';
@@ -17,8 +16,8 @@ import {
     JoinInput,
     JoinKind,
     JoinQueryResult,
-    PoolState,
 } from '..';
+import { PoolState, replaceWrapped } from '../../common';
 
 export class WeightedJoin implements BaseJoin {
     public async query(
@@ -70,15 +69,8 @@ export class WeightedJoin implements BaseJoin {
 
         let tokensIn = [...poolTokens];
         // replace wrapped token with native asset if needed
-        if (input.joinWithNativeAsset) {
-            tokensIn = poolTokens.map((token) => {
-                if (token.isUnderlyingEqual(NATIVE_ASSETS[input.chainId])) {
-                    return new Token(input.chainId, ZERO_ADDRESS, 18);
-                } else {
-                    return token;
-                }
-            });
-        }
+        if (input.joinWithNativeAsset)
+            tokensIn = replaceWrapped(poolTokens, input.chainId);
 
         const queryArgs = getJoinParameters({
             poolId: poolState.id,

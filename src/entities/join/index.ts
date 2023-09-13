@@ -1,6 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address } from '../../types';
+import { PoolState } from '../common';
 
 export enum JoinKind {
     Init = 'Init',
@@ -8,17 +9,6 @@ export enum JoinKind {
     ExactOutSingleAsset = 'ExactOutSingleAsset',
     ExactOutProportional = 'ExactOutProportional',
 }
-
-// Returned from API and used as input
-export type PoolState = {
-    id: Address;
-    address: Address;
-    type: string;
-    tokens: {
-        address: Address;
-        decimals: number;
-    }[]; // already properly sorted in case different versions sort them differently
-};
 
 // This will be extended for each pools specific input requirements
 export type BaseJoinInput = {
