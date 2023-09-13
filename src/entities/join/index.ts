@@ -17,7 +17,8 @@ export type PoolState = {
     tokens: {
         address: Address;
         decimals: number;
-    }[]; // already properly sorted in case different versions sort them differently
+        index: number;
+    }[];
 };
 
 // This will be extended for each pools specific input requirements

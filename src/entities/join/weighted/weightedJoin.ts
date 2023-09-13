@@ -30,9 +30,9 @@ export class WeightedJoin implements BaseJoin {
         // TODO: Extend input validation for cases we'd like to check
         checkInputs(input, poolState);
 
-        const poolTokens = poolState.tokens.map(
-            (t) => new Token(input.chainId, t.address, t.decimals),
-        );
+        const poolTokens = poolState.tokens
+            .sort((a, b) => a.index - b.index)
+            .map((t) => new Token(input.chainId, t.address, t.decimals));
         let maxAmountsIn = Array(poolTokens.length).fill(MAX_UINT256);
         let userData: Address;
 
