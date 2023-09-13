@@ -82,7 +82,7 @@ const defaultCalls = {
         },
     ],
     parse: (results: any, shift: number) => ({
-        balances: results[shift].result[0],
+        balances: results[shift].result[1],
         totalSupply: results[shift + 1].result,
         swapFee: results[shift + 2].result,
         isPaused: results[shift + 3].result,
@@ -158,7 +158,13 @@ const gyroECalls = {
     }),
 };
 
-const poolTypeCalls = (poolType: string) => {
+const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
+    const do_nothing = {
+        count: 0,
+        build: () => [],
+        parse: () => ({}),
+    };
+
     switch (poolType) {
         case 'Weighted':
         case 'LiquidityBootstrapping':
@@ -170,17 +176,19 @@ const poolTypeCalls = (poolType: string) => {
         case 'ComposableStable':
             return stableCalls;
         case 'GyroE':
-            return gyroECalls;
-        default:
-            if (poolType.includes('Linear')) {
+            if (poolTypeVersion === 2) {
+                return gyroECalls;
+            } else {
+                return do_nothing;
+            }
+        case 'AaveLinear':
+            if (poolTypeVersion === 1) {
                 return linearCalls;
             } else {
-                return {
-                    count: 0,
-                    build: () => [],
-                    parse: () => ({}),
-                };
+                return do_nothing;
             }
+        default:
+            return do_nothing;
     }
 };
 
@@ -188,6 +196,7 @@ export const fetchAdditionalPoolData = async (
     pools: {
         id: string;
         poolType: string;
+        poolTypeVersion: number;
     }[],
     client: PublicClient,
 ) => {
@@ -195,14 +204,14 @@ export const fetchAdditionalPoolData = async (
         return [];
     }
 
-    const contracts = pools.flatMap(({ id, poolType }) => [
+    const contracts = pools.flatMap(({ id, poolType, poolTypeVersion }) => [
         ...defaultCalls.build(id, poolType),
-        ...poolTypeCalls(poolType).build(id),
+        ...poolTypeCalls(poolType, poolTypeVersion).build(id),
     ]);
 
     const results = await client.multicall({
         contracts,
-        batchSize: 2_048,
+        batchSize: 128, // 128 is the max batch size for zkEVM RPCs
     });
 
     let shift = 0;

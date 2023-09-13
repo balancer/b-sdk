@@ -80,13 +80,16 @@ export class OnChainPoolDataViaMulticallEnricher implements PoolDataEnricher {
                               formatUnits(tokenRate, 18) as HumanAmount,
                       )
                     : undefined,
-                balances: data?.balances,
-                totalSupply: data?.totalSupply,
-                weights: data?.weights,
-                wrappedTokenRate: data?.wrappedTokenRate,
-                linearTargets: data?.linearTargets,
-                scalingFactors: data?.scalingFactors,
-                rate: data?.poolRate,
+                lowerTarget: data?.linearTargets
+                    ? data.linearTargets[0]
+                    : 'lowerTarget' in pool
+                    ? pool.lowerTarget
+                    : undefined,
+                upperTarget: data?.linearTargets
+                    ? data.linearTargets[0]
+                    : 'upperTarget' in pool
+                    ? pool.upperTarget
+                    : undefined,
                 inRecoveryMode: data?.inRecoveryMode || false,
                 isPaused: data?.isPaused || false,
                 queryFailed: data?.queryFailed,
