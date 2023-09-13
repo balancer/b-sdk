@@ -10,7 +10,7 @@ import {
     ZERO_ADDRESS,
 } from '../../../utils';
 import { balancerHelpersAbi, vaultAbi } from '../../../abi';
-import { getJoinParameters } from './helpers';
+import { checkInputs, getJoinParameters } from './helpers';
 import {
     BaseJoin,
     JoinCallInput,
@@ -27,8 +27,8 @@ export class WeightedJoin implements BaseJoin {
     ): Promise<JoinQueryResult> {
         // TODO - This would need extended to work with relayer
 
-        // TODO: check inputs
-        // joinProportional only works for Weighted v2+ -> should we handle at the SDK level or should we just let the query fail?
+        // TODO: Extend input validation for cases we'd like to check
+        checkInputs(input, poolState);
 
         const poolTokens = poolState.tokens.map(
             (t) => new Token(input.chainId, t.address, t.decimals),
