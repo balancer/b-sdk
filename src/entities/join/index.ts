@@ -4,9 +4,9 @@ import { Address } from '../../types';
 
 export enum JoinKind {
     Init = 'Init',
-    ExactIn = 'ExactIn',
-    ExactOutSingleAsset = 'ExactOutSingleAsset',
-    ExactOutProportional = 'ExactOutProportional',
+    Unbalanced = 'Unbalanced',
+    SingleAsset = 'SingleAsset',
+    Proportional = 'Proportional',
 }
 
 // Returned from API and used as input
@@ -32,27 +32,27 @@ export type InitJoinInput = BaseJoinInput & {
     kind: JoinKind.Init;
 };
 
-export type ExactInJoinInput = BaseJoinInput & {
+export type UnbalancedJoinInput = BaseJoinInput & {
     amountsIn: TokenAmount[];
-    kind: JoinKind.ExactIn;
+    kind: JoinKind.Unbalanced;
 };
 
-export type ExactOutSingleAssetJoinInput = BaseJoinInput & {
+export type SingleAssetJoinInput = BaseJoinInput & {
     bptOut: TokenAmount;
     tokenIn: Address;
-    kind: JoinKind.ExactOutSingleAsset;
+    kind: JoinKind.SingleAsset;
 };
 
-export type ExactOutProportionalJoinInput = BaseJoinInput & {
+export type ProportionalJoinInput = BaseJoinInput & {
     bptOut: TokenAmount;
-    kind: JoinKind.ExactOutProportional;
+    kind: JoinKind.Proportional;
 };
 
 export type JoinInput =
     | InitJoinInput
-    | ExactInJoinInput
-    | ExactOutSingleAssetJoinInput
-    | ExactOutProportionalJoinInput;
+    | UnbalancedJoinInput
+    | SingleAssetJoinInput
+    | ProportionalJoinInput;
 
 // Returned from a join query
 export type JoinQueryResult = {

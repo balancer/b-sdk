@@ -28,7 +28,7 @@ export class WeightedJoin implements BaseJoin {
         // TODO - This would need extended to work with relayer
 
         // TODO: check inputs
-        // joinExactOutProportional only works for Weighted v2+ -> should we handle at the SDK level or should we just let the query fail?
+        // joinProportional only works for Weighted v2+ -> should we handle at the SDK level or should we just let the query fail?
 
         const poolTokens = poolState.tokens.map(
             (t) => new Token(input.chainId, t.address, t.decimals),
@@ -45,24 +45,24 @@ export class WeightedJoin implements BaseJoin {
                 );
                 userData = WeightedEncoder.joinInit(maxAmountsIn);
                 break;
-            case JoinKind.ExactIn:
+            case JoinKind.Unbalanced:
                 maxAmountsIn = poolTokens.map(
                     (t) =>
                         input.amountsIn.find((a) => a.token.isEqual(t))
                             ?.amount ?? 0n,
                 );
-                userData = WeightedEncoder.joinExactIn(maxAmountsIn, 0n);
+                userData = WeightedEncoder.joinUnbalanced(maxAmountsIn, 0n);
                 break;
-            case JoinKind.ExactOutSingleAsset:
-                userData = WeightedEncoder.joinExactOutSingleAsset(
+            case JoinKind.SingleAsset:
+                userData = WeightedEncoder.joinSingleAsset(
                     input.bptOut.amount,
                     poolTokens.findIndex(
                         (t) => t.address === input.tokenIn.toLowerCase(),
                     ),
                 );
                 break;
-            case JoinKind.ExactOutProportional:
-                userData = WeightedEncoder.joinExactOutProportional(
+            case JoinKind.Proportional:
+                userData = WeightedEncoder.joinProportional(
                     input.bptOut.amount,
                 );
                 break;
@@ -111,7 +111,7 @@ export class WeightedJoin implements BaseJoin {
         );
 
         const tokenInIndex =
-            input.kind === JoinKind.ExactOutSingleAsset
+            input.kind === JoinKind.SingleAsset
                 ? poolTokens.findIndex(
                       (t) => t.address === input.tokenIn.toLowerCase(),
                   )
@@ -143,31 +143,34 @@ export class WeightedJoin implements BaseJoin {
                 userData = WeightedEncoder.joinInit(maxAmountsIn);
                 break;
             }
-            case JoinKind.ExactIn: {
+            case JoinKind.Unbalanced: {
                 maxAmountsIn = input.amountsIn.map((a) => a.amount);
                 minBptOut = input.slippage.removeFrom(input.bptOut.amount);
-                userData = WeightedEncoder.joinExactIn(maxAmountsIn, minBptOut);
+                userData = WeightedEncoder.joinUnbalanced(
+                    maxAmountsIn,
+                    minBptOut,
+                );
                 break;
             }
-            case JoinKind.ExactOutSingleAsset:
+            case JoinKind.SingleAsset:
                 if (input.tokenInIndex === undefined) {
                     throw new Error(
-                        'tokenInIndex must be defined for ExactOutSingleAsset joins',
+                        'tokenInIndex must be defined for SingleAsset joins',
                     );
                 }
                 maxAmountsIn = input.amountsIn.map((a) =>
                     input.slippage.applyTo(a.amount),
                 );
-                userData = WeightedEncoder.joinExactOutSingleAsset(
+                userData = WeightedEncoder.joinSingleAsset(
                     input.bptOut.amount,
                     input.tokenInIndex,
                 );
                 break;
-            case JoinKind.ExactOutProportional: {
+            case JoinKind.Proportional: {
                 maxAmountsIn = input.amountsIn.map((a) =>
                     input.slippage.applyTo(a.amount),
                 );
-                userData = WeightedEncoder.joinExactOutProportional(
+                userData = WeightedEncoder.joinProportional(
                     input.bptOut.amount,
                 );
                 break;
