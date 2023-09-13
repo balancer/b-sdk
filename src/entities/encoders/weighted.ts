@@ -88,7 +88,7 @@ export class WeightedEncoder {
      * @param bptAmountIn - the amount of BPT to be burned
      * @param enterTokenIndex - the index of the token to removed from the pool
      */
-    static exitExacInSingleAsset = (
+    static exitExactInSingleAsset = (
         bptAmountIn: bigint,
         exitTokenIndex: number,
     ): Address => {
@@ -106,7 +106,7 @@ export class WeightedEncoder {
      * Encodes the userData parameter for exiting a WeightedPool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
      */
-    static exitExacInProportional = (bptAmountIn: bigint): Address => {
+    static exitExactInProportional = (bptAmountIn: bigint): Address => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [
