@@ -17,9 +17,9 @@ import {
 
 import {
     BaseJoin,
-    ExactInJoinInput,
-    ExactOutProportionalJoinInput,
-    ExactOutSingleAssetJoinInput,
+    UnbalancedJoinInput,
+    ProportionalJoinInput,
+    SingleAssetJoinInput,
     JoinKind,
     PoolState,
     Slippage,
@@ -98,11 +98,11 @@ describe('weighted join test', () => {
             const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
 
             // perform join query to get expected bpt out
-            const joinInput: ExactInJoinInput = {
+            const joinInput: UnbalancedJoinInput = {
                 amountsIn: [amountIn],
                 chainId,
                 rpcUrl,
-                kind: JoinKind.ExactIn,
+                kind: JoinKind.Unbalanced,
             };
             const queryResult = await weightedJoin.query(
                 joinInput,
@@ -155,11 +155,11 @@ describe('weighted join test', () => {
             const amountIn = TokenAmount.fromHumanAmount(tokenIn, '1');
 
             // perform join query to get expected bpt out
-            const joinInput: ExactInJoinInput = {
+            const joinInput: UnbalancedJoinInput = {
                 amountsIn: [amountIn],
                 chainId,
                 rpcUrl,
-                kind: JoinKind.ExactIn,
+                kind: JoinKind.Unbalanced,
                 joinWithNativeAsset: true,
             };
             const queryResult = await weightedJoin.query(
@@ -223,12 +223,12 @@ describe('weighted join test', () => {
             const tokenIn = '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0';
 
             // perform join query to get expected bpt out
-            const joinInput: ExactOutSingleAssetJoinInput = {
+            const joinInput: SingleAssetJoinInput = {
                 bptOut: amountOut,
                 tokenIn,
                 chainId,
                 rpcUrl,
-                kind: JoinKind.ExactOutSingleAsset,
+                kind: JoinKind.SingleAsset,
             };
             const queryResult = await weightedJoin.query(
                 joinInput,
@@ -275,11 +275,11 @@ describe('weighted join test', () => {
             const amountOut = TokenAmount.fromHumanAmount(tokenOut, '1');
 
             // perform join query to get expected bpt out
-            const joinInput: ExactOutProportionalJoinInput = {
+            const joinInput: ProportionalJoinInput = {
                 bptOut: amountOut,
                 chainId,
                 rpcUrl,
-                kind: JoinKind.ExactOutProportional,
+                kind: JoinKind.Proportional,
             };
             const queryResult = await weightedJoin.query(
                 joinInput,
@@ -328,7 +328,8 @@ describe('weighted join test', () => {
 
 export class MockApi {
     public async getPool(id: Address): Promise<PoolState> {
-        let tokens: { address: Address; decimals: number }[] = [];
+        let tokens: { address: Address; decimals: number; index: number }[] =
+            [];
         if (
             id ===
             '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'
@@ -337,10 +338,12 @@ export class MockApi {
                 {
                     address: '0xba100000625a3754423978a60c9317c58a424e3d', // BAL
                     decimals: 18,
+                    index: 0,
                 },
                 {
                     address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // wETH
                     decimals: 18,
+                    index: 1,
                 },
             ];
         } else if (
@@ -351,10 +354,12 @@ export class MockApi {
                 {
                     address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', // wstETH slot 0
                     decimals: 18,
+                    index: 0,
                 },
                 {
                     address: '0xc00e94cb662c3520282e6f5717214004a7f26888', // COMP slot 1
                     decimals: 18,
+                    index: 1,
                 },
             ];
         }

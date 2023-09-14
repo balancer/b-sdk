@@ -18,15 +18,13 @@ import {
     ExitKind,
     ExitQueryResult,
 } from '../types';
-import { PoolState, replaceWrapped } from '../../common';
+import { PoolState, replaceWrapped } from '../../utils';
 
 export class WeightedExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
-        // TODO - This would need extended to work with relayer
-
         const poolTokens = poolState.tokens.map(
             (t) => new Token(input.chainId, t.address, t.decimals),
         );
@@ -40,13 +38,13 @@ export class WeightedExit implements BaseExit {
                         input.amountsOut.find((a) => a.token.isEqual(t))
                             ?.amount ?? 0n,
                 );
-                userData = WeightedEncoder.exitExactOut(
+                userData = WeightedEncoder.exitUnbalanced(
                     minAmountsOut,
                     MAX_UINT256,
                 );
                 break;
             case ExitKind.SINGLE_ASSET:
-                userData = WeightedEncoder.exitExactInSingleAsset(
+                userData = WeightedEncoder.exitSingleAsset(
                     input.bptIn.amount,
                     poolTokens.findIndex(
                         (t) => t.address === input.tokenOut.toLowerCase(),
@@ -54,9 +52,7 @@ export class WeightedExit implements BaseExit {
                 );
                 break;
             case ExitKind.PROPORTIONAL:
-                userData = WeightedEncoder.exitExactInProportional(
-                    input.bptIn.amount,
-                );
+                userData = WeightedEncoder.exitProportional(input.bptIn.amount);
                 break;
         }
 
@@ -121,7 +117,7 @@ export class WeightedExit implements BaseExit {
             case ExitKind.UNBALANCED:
                 minAmountsOut = input.amountsOut.map((a) => a.amount);
                 maxBptIn = input.slippage.applyTo(input.bptIn.amount);
-                userData = WeightedEncoder.exitExactOut(
+                userData = WeightedEncoder.exitUnbalanced(
                     minAmountsOut,
                     maxBptIn,
                 );
@@ -136,7 +132,7 @@ export class WeightedExit implements BaseExit {
                     input.slippage.removeFrom(a.amount),
                 );
                 maxBptIn = input.bptIn.amount;
-                userData = WeightedEncoder.exitExactInSingleAsset(
+                userData = WeightedEncoder.exitSingleAsset(
                     maxBptIn,
                     input.tokenOutIndex,
                 );
@@ -146,9 +142,7 @@ export class WeightedExit implements BaseExit {
                     input.slippage.removeFrom(a.amount),
                 );
                 maxBptIn = input.bptIn.amount;
-                userData = WeightedEncoder.exitExactInProportional(
-                    input.bptIn.amount,
-                );
+                userData = WeightedEncoder.exitProportional(input.bptIn.amount);
                 break;
         }
 

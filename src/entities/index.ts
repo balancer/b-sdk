@@ -7,4 +7,4 @@ export * from './slippage';
 export * from './token';
 export * from './tokenAmount';
 export * from './pools/';
-export * from './common';
+export * from './utils';

@@ -39,7 +39,10 @@ export class WeightedEncoder {
      * @param amountsIn - the amounts each of token to deposit in the pool as liquidity
      * @param minimumBPT - the minimum acceptable BPT to receive in return for deposited tokens
      */
-    static joinExactIn = (amountsIn: bigint[], minimumBPT: bigint): Address =>
+    static joinUnbalanced = (
+        amountsIn: bigint[],
+        minimumBPT: bigint,
+    ): Address =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }, { type: 'uint256' }],
             [
@@ -54,7 +57,7 @@ export class WeightedEncoder {
      * @param bptAmountOut - the amount of BPT to be minted
      * @param enterTokenIndex - the index of the token to be provided as liquidity
      */
-    static joinExactOutSingleAsset = (
+    static joinSingleAsset = (
         bptAmountOut: bigint,
         enterTokenIndex: number,
     ): Address => {
@@ -73,7 +76,7 @@ export class WeightedEncoder {
      * Encodes the userData parameter for joining a WeightedPool proportionally to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
      */
-    static joinExactOutProportional = (bptAmountOut: bigint): Address => {
+    static joinProportional = (bptAmountOut: bigint): Address => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [
@@ -88,7 +91,7 @@ export class WeightedEncoder {
      * @param bptAmountIn - the amount of BPT to be burned
      * @param enterTokenIndex - the index of the token to removed from the pool
      */
-    static exitExactInSingleAsset = (
+    static exitSingleAsset = (
         bptAmountIn: bigint,
         exitTokenIndex: number,
     ): Address => {
@@ -106,7 +109,7 @@ export class WeightedEncoder {
      * Encodes the userData parameter for exiting a WeightedPool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
      */
-    static exitExactInProportional = (bptAmountIn: bigint): Address => {
+    static exitProportional = (bptAmountIn: bigint): Address => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [
@@ -121,7 +124,7 @@ export class WeightedEncoder {
      * @param amountsOut - the amounts of each token to be withdrawn from the pool
      * @param maxBPTAmountIn - the minimum acceptable BPT to burn in return for withdrawn tokens
      */
-    static exitExactOut = (
+    static exitUnbalanced = (
         amountsOut: bigint[],
         maxBPTAmountIn: bigint,
     ): Address =>

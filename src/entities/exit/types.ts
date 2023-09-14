@@ -1,7 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address } from '../../types';
-import { PoolState } from '../common';
+import { PoolState } from '../utils';
 
 export enum ExitKind {
     UNBALANCED = 'UNBALANCED', // exitExactOut
