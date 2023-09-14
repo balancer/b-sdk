@@ -1,6 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address } from '../../types';
+import { PoolState } from '../types';
 
 export enum JoinKind {
     Init = 'Init',
@@ -9,27 +10,15 @@ export enum JoinKind {
     Proportional = 'Proportional',
 }
 
-// Returned from API and used as input
-export type PoolState = {
-    id: Address;
-    address: Address;
-    type: string;
-    tokens: {
-        address: Address;
-        decimals: number;
-        index: number;
-    }[];
-};
-
 // This will be extended for each pools specific input requirements
 export type BaseJoinInput = {
     chainId: number;
-    rpcUrl?: string;
+    rpcUrl: string;
     joinWithNativeAsset?: boolean;
 };
 
 export type InitJoinInput = BaseJoinInput & {
-    initAmountsIn: TokenAmount[];
+    amountsIn: TokenAmount[];
     kind: JoinKind.Init;
 };
 
@@ -57,7 +46,7 @@ export type JoinInput =
 
 // Returned from a join query
 export type JoinQueryResult = {
-    id: Address;
+    poolId: Address;
     joinKind: JoinKind;
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
