@@ -26,7 +26,7 @@ import {
     TokenAmount,
 } from '../src/entities';
 import { JoinParser } from '../src/entities/join/parser';
-import { Address } from '../src/types';
+import { Address, Hex } from '../src/types';
 import { PoolState } from '../src/entities/types';
 import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
 
@@ -40,7 +40,7 @@ describe('weighted join test', () => {
     let rpcUrl: string;
     let blockNumber: bigint;
     let client: Client & PublicActions & TestActions & WalletActions;
-    let poolId: Address;
+    let poolId: Hex;
     let poolFromApi: PoolState;
     let weightedJoin: BaseJoin;
 
@@ -327,7 +327,7 @@ describe('weighted join test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Address): Promise<PoolState> {
+    public async getPool(id: Hex): Promise<PoolState> {
         let tokens: { address: Address; decimals: number; index: number }[] =
             [];
         if (

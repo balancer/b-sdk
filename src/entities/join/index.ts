@@ -1,7 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
-import { Address } from '../../types';
 import { PoolState } from '../types';
+import { Address, Hex } from '../../types';
 
 export enum JoinKind {
     Init = 'Init',
@@ -15,6 +15,7 @@ export type BaseJoinInput = {
     chainId: number;
     rpcUrl: string;
     joinWithNativeAsset?: boolean;
+    fromInternalBalance?: boolean;
 };
 
 export type InitJoinInput = BaseJoinInput & {
@@ -50,6 +51,7 @@ export type JoinQueryResult = {
     joinKind: JoinKind;
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
+    fromInternalBalance: boolean;
     tokenInIndex?: number;
 };
 
@@ -62,7 +64,7 @@ export type JoinCallInput = JoinQueryResult & {
 export interface BaseJoin {
     query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
     buildCall(input: JoinCallInput): {
-        call: Address;
+        call: Hex;
         to: Address;
         value: bigint | undefined;
         minBptOut: bigint;

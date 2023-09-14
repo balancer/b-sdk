@@ -1,9 +1,9 @@
 import { encodeFunctionData } from 'viem';
 import { Token, TokenAmount, WeightedEncoder } from '../../..';
-import { Address } from '../../../types';
+import { Address, Hex } from '../../../types';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
-import { checkInputs } from './helpers';
+import { validateInputs } from './helpers';
 import {
     BaseJoin,
     JoinCallInput,
@@ -24,7 +24,7 @@ export class WeightedJoin implements BaseJoin {
         input: JoinInput,
         poolState: PoolState,
     ): Promise<JoinQueryResult> {
-        checkInputs(input, poolState);
+        validateInputs(input, poolState);
 
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
 
@@ -41,6 +41,7 @@ export class WeightedJoin implements BaseJoin {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
+            fromInternalBalance: input.fromInternalBalance ?? false,
         });
 
         const queryResult = await doQueryJoin(
@@ -62,11 +63,12 @@ export class WeightedJoin implements BaseJoin {
             bptOut,
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
+            fromInternalBalance: !!input.fromInternalBalance,
         };
     }
 
     public buildCall(input: JoinCallInput): {
-        call: Address;
+        call: Hex;
         to: Address;
         value: bigint | undefined;
         minBptOut: bigint;
@@ -81,6 +83,7 @@ export class WeightedJoin implements BaseJoin {
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
+            fromInternalBalance: input.fromInternalBalance,
         });
 
         const call = encodeFunctionData({

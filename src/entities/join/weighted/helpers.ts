@@ -2,7 +2,7 @@ import { JoinInput, JoinKind } from '..';
 import { PoolState } from '../../types';
 import { Address } from '../../../types';
 
-export function checkInputs(input: JoinInput, poolState: PoolState) {
+export function validateInputs(input: JoinInput, poolState: PoolState) {
     switch (input.kind) {
         case JoinKind.Init:
         case JoinKind.Unbalanced:

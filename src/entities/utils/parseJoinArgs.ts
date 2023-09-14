@@ -1,4 +1,4 @@
-import { Address } from '../../types';
+import { Address, Hex } from '../../types';
 import { Token } from '../token';
 import { replaceWrapped } from './replaceWrapped';
 
@@ -11,15 +11,17 @@ export function parseJoinArgs({
     recipient,
     maxAmountsIn,
     userData,
+    fromInternalBalance,
 }: {
     chainId?: number;
     joinWithNativeAsset?: boolean;
     sortedTokens: Token[];
-    poolId: Address;
+    poolId: Hex;
     sender: Address;
     recipient: Address;
     maxAmountsIn: readonly bigint[];
-    userData: Address;
+    userData: Hex;
+    fromInternalBalance: boolean;
 }) {
     // replace wrapped token with native asset if needed
     const tokensIn =
@@ -31,7 +33,7 @@ export function parseJoinArgs({
         assets: tokensIn.map((t) => t.address), // with BPT
         maxAmountsIn, // with BPT
         userData, // wihtout BPT
-        fromInternalBalance: false, // TODO
+        fromInternalBalance,
     };
 
     return [poolId, sender, recipient, joinPoolRequest] as const;

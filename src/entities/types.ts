@@ -1,8 +1,8 @@
-import { Address } from '../types';
+import { Address, Hex } from '../types';
 
 // Returned from API and used as input
 export type PoolState = {
-    id: Address;
+    id: Hex;
     address: Address;
     type: string;
     tokens: TokenApi[];
