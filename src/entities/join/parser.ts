@@ -19,7 +19,6 @@ export class JoinParser {
     }
 
     public getJoin(poolType: string): BaseJoin {
-        // TODO - Need to parse
         return this.poolJoins[poolType];
     }
 }
