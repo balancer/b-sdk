@@ -1,6 +1,6 @@
 import { createPublicClient, encodeFunctionData, http } from 'viem';
 import { Token, TokenAmount, WeightedEncoder } from '../../..';
-import { Address } from '../../../types';
+import { Address, Hex } from '../../../types';
 import {
     BALANCER_HELPERS,
     BALANCER_VAULT,
@@ -10,7 +10,7 @@ import {
     ZERO_ADDRESS,
 } from '../../../utils';
 import { balancerHelpersAbi, vaultAbi } from '../../../abi';
-import { checkInputs, getJoinParameters } from './helpers';
+import { validateInputs, getJoinParameters } from './helpers';
 import {
     BaseJoin,
     JoinCallInput,
@@ -27,14 +27,13 @@ export class WeightedJoin implements BaseJoin {
     ): Promise<JoinQueryResult> {
         // TODO - This would need extended to work with relayer
 
-        // TODO: Extend input validation for cases we'd like to check
-        checkInputs(input, poolState);
+        validateInputs(input, poolState);
 
         const poolTokens = poolState.tokens
             .sort((a, b) => a.index - b.index)
             .map((t) => new Token(input.chainId, t.address, t.decimals));
         let maxAmountsIn = Array(poolTokens.length).fill(MAX_UINT256);
-        let userData: Address;
+        let userData: Hex;
 
         switch (input.kind) {
             case JoinKind.Init:
@@ -87,6 +86,7 @@ export class WeightedJoin implements BaseJoin {
             recipient: ZERO_ADDRESS,
             maxAmountsIn,
             userData,
+            fromInternalBalance: input.fromInternalBalance ?? false,
         });
 
         const client = createPublicClient({
@@ -122,24 +122,26 @@ export class WeightedJoin implements BaseJoin {
             id: poolState.id,
             bptOut,
             amountsIn,
+            fromInternalBalance: input.fromInternalBalance ?? false,
             tokenInIndex,
         };
     }
 
     public buildCall(input: JoinCallInput): {
-        call: Address;
+        call: Hex;
         to: Address;
         value: bigint | undefined;
         minBptOut: bigint;
         maxAmountsIn: bigint[];
     } {
-        let maxAmountsIn = input.amountsIn.map((a) => a.amount);
-        let minBptOut = input.bptOut.amount;
-        let userData: Address;
+        let maxAmountsIn: bigint[];
+        let minBptOut: bigint;
+        let userData: Hex;
 
         switch (input.joinKind) {
             case JoinKind.Init: {
                 maxAmountsIn = input.amountsIn.map((a) => a.amount);
+                minBptOut = input.bptOut.amount;
                 userData = WeightedEncoder.joinInit(maxAmountsIn);
                 break;
             }
@@ -161,8 +163,9 @@ export class WeightedJoin implements BaseJoin {
                 maxAmountsIn = input.amountsIn.map((a) =>
                     input.slippage.applyTo(a.amount),
                 );
+                minBptOut = input.bptOut.amount;
                 userData = WeightedEncoder.joinSingleAsset(
-                    input.bptOut.amount,
+                    minBptOut,
                     input.tokenInIndex,
                 );
                 break;
@@ -170,6 +173,7 @@ export class WeightedJoin implements BaseJoin {
                 maxAmountsIn = input.amountsIn.map((a) =>
                     input.slippage.applyTo(a.amount),
                 );
+                minBptOut = input.bptOut.amount;
                 userData = WeightedEncoder.joinProportional(
                     input.bptOut.amount,
                 );
@@ -184,6 +188,7 @@ export class WeightedJoin implements BaseJoin {
             recipient: input.recipient,
             maxAmountsIn,
             userData,
+            fromInternalBalance: input.fromInternalBalance,
         });
 
         const call = encodeFunctionData({

@@ -1,3 +1,4 @@
+import { Hex } from 'viem';
 import { JoinInput, JoinKind, PoolState } from '..';
 import { Address } from '../../../types';
 
@@ -8,25 +9,27 @@ export function getJoinParameters({
     recipient,
     maxAmountsIn,
     userData,
+    fromInternalBalance,
 }: {
-    poolId: Address;
+    poolId: Hex;
     assets: readonly Address[];
     sender: Address;
     recipient: Address;
     maxAmountsIn: readonly bigint[];
-    userData: Address;
+    userData: Hex;
+    fromInternalBalance: boolean;
 }) {
     const joinPoolRequest = {
         assets, // with BPT
         maxAmountsIn, // with BPT
         userData, // wihtout BPT
-        fromInternalBalance: false,
+        fromInternalBalance,
     };
 
     return [poolId, sender, recipient, joinPoolRequest] as const;
 }
 
-export function checkInputs(input: JoinInput, poolState: PoolState) {
+export function validateInputs(input: JoinInput, poolState: PoolState) {
     switch (input.kind) {
         case JoinKind.Init:
             checkTokenMismatch(
