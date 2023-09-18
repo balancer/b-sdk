@@ -25,7 +25,7 @@ export type PoolState = {
 export type BaseJoinInput = {
     chainId: number;
     rpcUrl?: string;
-    joinWithNativeAsset?: boolean;
+    useNativeAssetAsWrappedAmountIn?: boolean;
     fromInternalBalance?: boolean;
 };
 

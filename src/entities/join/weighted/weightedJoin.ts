@@ -69,7 +69,7 @@ export class WeightedJoin implements BaseJoin {
 
         let tokensIn = [...poolTokens];
         // replace wrapped token with native asset if needed
-        if (input.joinWithNativeAsset) {
+        if (input.useNativeAssetAsWrappedAmountIn) {
             tokensIn = poolTokens.map((token) => {
                 if (token.isUnderlyingEqual(NATIVE_ASSETS[input.chainId])) {
                     return new Token(input.chainId, ZERO_ADDRESS, 18);
