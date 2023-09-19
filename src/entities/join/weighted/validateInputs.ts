@@ -18,7 +18,7 @@ export function validateInputs(input: JoinInput, poolState: PoolState) {
             );
         case JoinKind.Proportional:
             checkTokenMismatch(
-                [input.bptOut.token.address.toLowerCase() as Address],
+                [input.bptOut.token.address],
                 [poolState.address],
             );
         default:
@@ -27,8 +27,10 @@ export function validateInputs(input: JoinInput, poolState: PoolState) {
 }
 
 function checkTokenMismatch(tokensIn: Address[], poolTokens: Address[]) {
-    for (const tokenIn of tokensIn) {
-        if (!poolTokens.includes(tokenIn.toLowerCase() as Address)) {
+    const sanitisedTokensIn = tokensIn.map((t) => t.toLowerCase() as Address);
+    const sanitisedPoolTokens = poolTokens.map((t) => t.toLowerCase());
+    for (const tokenIn of sanitisedTokensIn) {
+        if (!sanitisedPoolTokens.includes(tokenIn)) {
             throw new Error(`Token ${tokenIn} not found in pool`);
         }
     }
