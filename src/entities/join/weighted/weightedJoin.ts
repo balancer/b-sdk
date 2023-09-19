@@ -3,7 +3,7 @@ import { Token, TokenAmount, WeightedEncoder } from '../../..';
 import { Address, Hex } from '../../../types';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
-import { validateInputs } from './helpers';
+import { validateInputs } from './validateInputs';
 import {
     BaseJoin,
     JoinCallInput,

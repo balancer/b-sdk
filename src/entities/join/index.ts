@@ -47,7 +47,7 @@ export type JoinInput =
 
 // Returned from a join query
 export type JoinQueryResult = {
-    poolId: Address;
+    poolId: Hex;
     joinKind: JoinKind;
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
