@@ -18,7 +18,8 @@ import {
     ExitKind,
     ExitQueryResult,
 } from '../types';
-import { PoolState, replaceWrapped } from '../../utils';
+import { replaceWrapped } from '../../utils';
+import { PoolState } from '../../types';
 
 export class WeightedExit implements BaseExit {
     public async query(
