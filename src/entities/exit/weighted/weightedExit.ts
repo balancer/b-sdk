@@ -1,15 +1,9 @@
-import { createPublicClient, encodeFunctionData, http } from 'viem';
+import { encodeFunctionData } from 'viem';
 import { Token, TokenAmount, WeightedEncoder } from '../../..';
 import { Address } from '../../../types';
-import {
-    BALANCER_HELPERS,
-    BALANCER_VAULT,
-    CHAINS,
-    MAX_UINT256,
-    ZERO_ADDRESS,
-} from '../../../utils';
-import { balancerHelpersAbi, vaultAbi } from '../../../abi';
-import { getExitParameters } from './helpers';
+import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
+import { vaultAbi } from '../../../abi';
+import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
     BaseExit,
     BuildOutput,
@@ -18,143 +12,98 @@ import {
     ExitKind,
     ExitQueryResult,
 } from '../types';
-import { replaceWrapped } from '../../utils';
-import { PoolState } from '../../types';
+import { getSortedTokens } from '../../utils';
+import { PoolState, AmountsExit } from '../../types';
+import { doQueryExit } from '../../utils/doQueryExit';
 
 export class WeightedExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
-        const poolTokens = poolState.tokens.map(
-            (t) => new Token(input.chainId, t.address, t.decimals),
-        );
-        let minAmountsOut = Array(poolTokens.length).fill(0n);
-        let userData: Address;
+        // TODO - Validate inputs
 
-        switch (input.kind) {
-            case ExitKind.UNBALANCED:
-                minAmountsOut = poolTokens.map(
-                    (t) =>
-                        input.amountsOut.find((a) => a.token.isEqual(t))
-                            ?.amount ?? 0n,
-                );
-                userData = WeightedEncoder.exitUnbalanced(
-                    minAmountsOut,
-                    MAX_UINT256,
-                );
-                break;
-            case ExitKind.SINGLE_ASSET:
-                userData = WeightedEncoder.exitSingleAsset(
-                    input.bptIn.amount,
-                    poolTokens.findIndex(
-                        (t) => t.address === input.tokenOut.toLowerCase(),
-                    ),
-                );
-                break;
-            case ExitKind.PROPORTIONAL:
-                userData = WeightedEncoder.exitProportional(input.bptIn.amount);
-                break;
-        }
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
 
-        let tokensOut = [...poolTokens];
-        // replace wrapped token with native asset if needed
-        if (input.exitWithNativeAsset)
-            tokensOut = replaceWrapped(poolTokens, input.chainId);
+        const amounts = this.getAmountsQuery(sortedTokens, input);
 
-        const queryArgs = getExitParameters({
+        const userData = this.encodeUserData(input.kind, amounts);
+
+        const queryArgs = parseExitArgs({
+            // TODO - Wrapped native exit?
             poolId: poolState.id,
-            assets: tokensOut.map((t) => t.address),
+            sortedTokens,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
-            minAmountsOut,
+            minAmountsOut: amounts.minAmountsOut,
             userData,
-            toInternalBalance: false, // TODO - Should we make this part of input?
+            toInternalBalance: !!input.toInternalBalance,
         });
 
-        const client = createPublicClient({
-            transport: http(input.rpcUrl),
-            chain: CHAINS[input.chainId],
-        });
-
-        const {
-            result: [queryBptIn, queryAmountsOut],
-        } = await client.simulateContract({
-            address: BALANCER_HELPERS[input.chainId],
-            abi: balancerHelpersAbi,
-            functionName: 'queryExit',
-            args: queryArgs,
-        });
-
-        const bpt = new Token(input.chainId, poolState.address, 18);
-        const bptIn = TokenAmount.fromRawAmount(bpt, queryBptIn);
-
-        const amountsOut = queryAmountsOut.map((a, i) =>
-            TokenAmount.fromRawAmount(tokensOut[i], a),
+        const queryResult = await doQueryExit(
+            input.rpcUrl,
+            input.chainId,
+            queryArgs,
         );
 
-        const tokenOutIndex =
-            input.kind === ExitKind.SINGLE_ASSET
-                ? poolTokens.findIndex(
-                      (t) => t.address === input.tokenOut.toLowerCase(),
-                  )
-                : undefined;
+        const bpt = new Token(input.chainId, poolState.address, 18);
+        const bptIn = TokenAmount.fromRawAmount(bpt, queryResult.bptIn);
+
+        const amountsOut = queryResult.amountsOut.map((a, i) =>
+            TokenAmount.fromRawAmount(sortedTokens[i], a),
+        );
 
         return {
             exitKind: input.kind,
             id: poolState.id,
             bptIn,
             amountsOut,
-            tokenOutIndex,
+            tokenOutIndex: amounts.tokenOutIndex,
         };
     }
 
-    public buildCall(input: ExitCallInput): BuildOutput {
-        let minAmountsOut: bigint[];
-        let maxBptIn: bigint;
-        let userData: Address;
-
-        switch (input.exitKind) {
+    private getAmountsQuery(tokens: Token[], input: ExitInput): AmountsExit {
+        switch (input.kind) {
             case ExitKind.UNBALANCED:
-                minAmountsOut = input.amountsOut.map((a) => a.amount);
-                maxBptIn = input.slippage.applyTo(input.bptIn.amount);
-                userData = WeightedEncoder.exitUnbalanced(
-                    minAmountsOut,
-                    maxBptIn,
-                );
-                break;
+                return {
+                    minAmountsOut: tokens.map(
+                        (t) =>
+                            input.amountsOut.find((a) => a.token.isEqual(t))
+                                ?.amount ?? 0n,
+                    ),
+                    tokenOutIndex: undefined,
+                    maxBptAmountIn: MAX_UINT256,
+                };
             case ExitKind.SINGLE_ASSET:
-                if (input.tokenOutIndex === undefined) {
-                    throw new Error(
-                        'tokenOutIndex must be defined for SINGLE_ASSET exit',
-                    );
-                }
-                minAmountsOut = input.amountsOut.map((a) =>
-                    input.slippage.removeFrom(a.amount),
-                );
-                maxBptIn = input.bptIn.amount;
-                userData = WeightedEncoder.exitSingleAsset(
-                    maxBptIn,
-                    input.tokenOutIndex,
-                );
-                break;
+                return {
+                    minAmountsOut: Array(tokens.length).fill(0n),
+                    tokenOutIndex: tokens.findIndex(
+                        (t) => t.address === input.tokenOut.toLowerCase(),
+                    ),
+                    maxBptAmountIn: input.bptIn.amount,
+                };
             case ExitKind.PROPORTIONAL:
-                minAmountsOut = input.amountsOut.map((a) =>
-                    input.slippage.removeFrom(a.amount),
-                );
-                maxBptIn = input.bptIn.amount;
-                userData = WeightedEncoder.exitProportional(input.bptIn.amount);
-                break;
+                return {
+                    minAmountsOut: Array(tokens.length).fill(0n),
+                    tokenOutIndex: undefined,
+                    maxBptAmountIn: input.bptIn.amount,
+                };
         }
+    }
 
-        const queryArgs = getExitParameters({
+    public buildCall(input: ExitCallInput): BuildOutput {
+        const amounts = this.getAmountsCall(input);
+
+        const userData = this.encodeUserData(input.exitKind, amounts);
+
+        const queryArgs = parseExitArgs({
             poolId: input.id,
-            assets: input.amountsOut.map((a) => a.token.address),
+            sortedTokens: input.amountsOut.map((a) => a.token),
             sender: input.sender,
             recipient: input.recipient,
-            minAmountsOut,
+            minAmountsOut: amounts.minAmountsOut,
             userData,
-            toInternalBalance: false, // TODO - Should we make this part of input?
+            toInternalBalance: !!input.toInternalBalance,
         });
 
         const call = encodeFunctionData({
@@ -163,13 +112,68 @@ export class WeightedExit implements BaseExit {
             args: queryArgs,
         });
 
-        // Encode data
         return {
             call,
             to: BALANCER_VAULT,
             value: 0n,
-            maxBptIn,
-            minAmountsOut,
+            maxBptIn: amounts.maxBptAmountIn,
+            minAmountsOut: amounts.minAmountsOut,
         };
+    }
+
+    private getAmountsCall(input: ExitCallInput): AmountsExit {
+        switch (input.exitKind) {
+            case ExitKind.UNBALANCED:
+                return {
+                    minAmountsOut: input.amountsOut.map((a) => a.amount),
+                    tokenOutIndex: input.tokenOutIndex,
+                    maxBptAmountIn: input.slippage.applyTo(input.bptIn.amount),
+                };
+            case ExitKind.SINGLE_ASSET:
+                if (input.tokenOutIndex === undefined) {
+                    throw new Error(
+                        'tokenOutIndex must be defined for SINGLE_ASSET exit',
+                    );
+                }
+                return {
+                    minAmountsOut: input.amountsOut.map((a) =>
+                        input.slippage.removeFrom(a.amount),
+                    ),
+                    tokenOutIndex: input.tokenOutIndex,
+                    maxBptAmountIn: input.bptIn.amount,
+                };
+            case ExitKind.PROPORTIONAL:
+                return {
+                    minAmountsOut: input.amountsOut.map((a) =>
+                        input.slippage.removeFrom(a.amount),
+                    ),
+                    tokenOutIndex: input.tokenOutIndex,
+                    maxBptAmountIn: input.bptIn.amount,
+                };
+            default:
+                throw Error('Unsupported Exit Type');
+        }
+    }
+
+    private encodeUserData(kind: ExitKind, amounts: AmountsExit): Address {
+        switch (kind) {
+            case ExitKind.UNBALANCED:
+                return WeightedEncoder.exitUnbalanced(
+                    amounts.minAmountsOut,
+                    amounts.maxBptAmountIn,
+                );
+            case ExitKind.SINGLE_ASSET:
+                if (amounts.tokenOutIndex === undefined)
+                    throw Error('No Index');
+
+                return WeightedEncoder.exitSingleAsset(
+                    amounts.maxBptAmountIn,
+                    amounts.tokenOutIndex,
+                );
+            case ExitKind.PROPORTIONAL:
+                return WeightedEncoder.exitProportional(amounts.maxBptAmountIn);
+            default:
+                throw Error('Unsupported Exit Type');
+        }
     }
 }

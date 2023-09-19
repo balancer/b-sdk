@@ -1,40 +1,41 @@
-import { Address, Hex } from '../../types';
+import { Address } from '../../types';
 import { Token } from '../token';
+import { ExitPoolRequest } from '../exit/types';
 import { replaceWrapped } from './replaceWrapped';
 
-export function parseJoinArgs({
-    useNativeAssetAsWrappedAmountIn,
+export function parseExitArgs({
     chainId,
+    useNativeAssetAsWrappedAmountIn,
     sortedTokens,
     poolId,
     sender,
     recipient,
-    maxAmountsIn,
+    minAmountsOut,
     userData,
-    fromInternalBalance,
+    toInternalBalance,
 }: {
     chainId?: number;
     useNativeAssetAsWrappedAmountIn?: boolean;
     sortedTokens: Token[];
-    poolId: Hex;
+    poolId: Address;
     sender: Address;
     recipient: Address;
-    maxAmountsIn: readonly bigint[];
-    userData: Hex;
-    fromInternalBalance: boolean;
+    minAmountsOut: bigint[];
+    userData: Address;
+    toInternalBalance: boolean;
 }) {
     // replace wrapped token with native asset if needed
-    const tokensIn =
+    const tokensOut =
         chainId && useNativeAssetAsWrappedAmountIn
             ? replaceWrapped([...sortedTokens], chainId)
             : [...sortedTokens];
 
-    const joinPoolRequest = {
-        assets: tokensIn.map((t) => t.address), // with BPT
-        maxAmountsIn, // with BPT
+    const exitPoolRequest: ExitPoolRequest = {
+        assets: tokensOut.map((t) => t.address), // with BPT
+        minAmountsOut, // with BPT
         userData, // wihtout BPT
-        fromInternalBalance,
+        toInternalBalance,
     };
 
-    return [poolId, sender, recipient, joinPoolRequest] as const;
+    return [poolId, sender, recipient, exitPoolRequest] as const;
 }

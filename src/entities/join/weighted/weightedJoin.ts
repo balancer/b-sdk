@@ -11,7 +11,7 @@ import {
     JoinKind,
     JoinQueryResult,
 } from '..';
-import { PoolState, Amounts } from '../../types';
+import { PoolState, AmountsJoin } from '../../types';
 import {
     doQueryJoin,
     getAmounts,
@@ -106,7 +106,10 @@ export class WeightedJoin implements BaseJoin {
         };
     }
 
-    private getAmountsQuery(poolTokens: Token[], input: JoinInput): Amounts {
+    private getAmountsQuery(
+        poolTokens: Token[],
+        input: JoinInput,
+    ): AmountsJoin {
         switch (input.kind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
@@ -142,7 +145,7 @@ export class WeightedJoin implements BaseJoin {
         }
     }
 
-    private getAmountsCall(input: JoinCallInput): Amounts {
+    private getAmountsCall(input: JoinCallInput): AmountsJoin {
         switch (input.joinKind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
@@ -170,7 +173,7 @@ export class WeightedJoin implements BaseJoin {
         }
     }
 
-    private encodeUserData(kind: JoinKind, amounts: Amounts): Address {
+    private encodeUserData(kind: JoinKind, amounts: AmountsJoin): Address {
         switch (kind) {
             case JoinKind.Init:
                 return WeightedEncoder.joinInit(amounts.maxAmountsIn);

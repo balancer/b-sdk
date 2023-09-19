@@ -1,7 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address } from '../../types';
-import { PoolState } from '../utils';
+import { PoolState } from '../types';
 
 export enum ExitKind {
     UNBALANCED = 'UNBALANCED', // exitExactOut
@@ -12,8 +12,9 @@ export enum ExitKind {
 // This will be extended for each pools specific output requirements
 export type BaseExitInput = {
     chainId: number;
-    rpcUrl?: string;
+    rpcUrl: string;
     exitWithNativeAsset?: boolean;
+    toInternalBalance?: boolean;
 };
 
 export type UnbalancedExitInput = BaseExitInput & {
@@ -44,6 +45,7 @@ export type ExitQueryResult = {
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
     tokenOutIndex?: number;
+    toInternalBalance?: boolean;
 };
 
 export type ExitCallInput = ExitQueryResult & {

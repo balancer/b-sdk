@@ -15,7 +15,6 @@ export enum WeightedPoolExitKind {
     MANAGEMENT_FEE_TOKENS_OUT = 3,
 }
 
-// TODO: rename functions after deciding on the naming convention
 export class WeightedEncoder {
     /**
      * Cannot be constructed.

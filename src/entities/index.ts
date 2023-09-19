@@ -8,3 +8,4 @@ export * from './token';
 export * from './tokenAmount';
 export * from './pools/';
 export * from './utils';
+export * from './types';
