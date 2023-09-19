@@ -24,6 +24,7 @@ import {
     Slippage,
     Token,
     TokenAmount,
+    replaceWrapped,
 } from '../src/entities';
 import { ExitParser } from '../src/entities/exit/parser';
 import { Address, Hex } from '../src/types';
@@ -287,11 +288,17 @@ describe('weighted exit test', () => {
                 recipient: testAddress,
             });
 
+        const poolTokens = poolFromApi.tokens.map(
+            (t) => new Token(chainId, t.address, t.decimals),
+        );
+
         // send transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
             await sendTransactionGetBalances(
                 [
-                    ...queryResult.amountsOut.map((a) => a.token.address),
+                    ...replaceWrapped(poolTokens, chainId).map(
+                        (a) => a.address,
+                    ),
                     queryResult.bptIn.token.address,
                 ],
                 client,

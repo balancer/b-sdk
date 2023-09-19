@@ -5,7 +5,7 @@ import { replaceWrapped } from './replaceWrapped';
 
 export function parseExitArgs({
     chainId,
-    useNativeAssetAsWrappedAmountIn,
+    exitWithNativeAsset,
     sortedTokens,
     poolId,
     sender,
@@ -15,7 +15,7 @@ export function parseExitArgs({
     toInternalBalance,
 }: {
     chainId?: number;
-    useNativeAssetAsWrappedAmountIn?: boolean;
+    exitWithNativeAsset?: boolean;
     sortedTokens: Token[];
     poolId: Address;
     sender: Address;
@@ -26,7 +26,7 @@ export function parseExitArgs({
 }) {
     // replace wrapped token with native asset if needed
     const tokensOut =
-        chainId && useNativeAssetAsWrappedAmountIn
+        chainId && exitWithNativeAsset
             ? replaceWrapped([...sortedTokens], chainId)
             : [...sortedTokens];
 
@@ -37,5 +37,8 @@ export function parseExitArgs({
         toInternalBalance,
     };
 
-    return [poolId, sender, recipient, exitPoolRequest] as const;
+    return {
+        args: [poolId, sender, recipient, exitPoolRequest] as const,
+        tokensOut,
+    };
 }

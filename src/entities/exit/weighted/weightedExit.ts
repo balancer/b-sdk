@@ -29,8 +29,10 @@ export class WeightedExit implements BaseExit {
 
         const userData = this.encodeUserData(input.kind, amounts);
 
-        const queryArgs = parseExitArgs({
-            // TODO - Wrapped native exit?
+        // tokensOut will have zero address if exit with native asset
+        const { args, tokensOut } = parseExitArgs({
+            chainId: input.chainId,
+            exitWithNativeAsset: !!input.exitWithNativeAsset,
             poolId: poolState.id,
             sortedTokens,
             sender: ZERO_ADDRESS,
@@ -43,14 +45,14 @@ export class WeightedExit implements BaseExit {
         const queryResult = await doQueryExit(
             input.rpcUrl,
             input.chainId,
-            queryArgs,
+            args,
         );
 
         const bpt = new Token(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(bpt, queryResult.bptIn);
 
         const amountsOut = queryResult.amountsOut.map((a, i) =>
-            TokenAmount.fromRawAmount(sortedTokens[i], a),
+            TokenAmount.fromRawAmount(tokensOut[i], a),
         );
 
         return {
@@ -96,7 +98,7 @@ export class WeightedExit implements BaseExit {
 
         const userData = this.encodeUserData(input.exitKind, amounts);
 
-        const queryArgs = parseExitArgs({
+        const { args } = parseExitArgs({
             poolId: input.id,
             sortedTokens: input.amountsOut.map((a) => a.token),
             sender: input.sender,
@@ -109,7 +111,7 @@ export class WeightedExit implements BaseExit {
         const call = encodeFunctionData({
             abi: vaultAbi,
             functionName: 'exitPool',
-            args: queryArgs,
+            args,
         });
 
         return {
