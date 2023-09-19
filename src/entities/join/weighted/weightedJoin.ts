@@ -33,7 +33,8 @@ export class WeightedJoin implements BaseJoin {
         const userData = this.encodeUserData(input.kind, amounts);
 
         const queryArgs = parseJoinArgs({
-            joinWithNativeAsset: !!input.joinWithNativeAsset,
+            useNativeAssetAsWrappedAmountIn:
+                !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
             sortedTokens,
             poolId: poolState.id,

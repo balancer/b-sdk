@@ -3,7 +3,7 @@ import { Token } from '../token';
 import { replaceWrapped } from './replaceWrapped';
 
 export function parseJoinArgs({
-    joinWithNativeAsset,
+    useNativeAssetAsWrappedAmountIn,
     chainId,
     sortedTokens: poolTokens,
     poolId,
@@ -14,7 +14,7 @@ export function parseJoinArgs({
     fromInternalBalance,
 }: {
     chainId?: number;
-    joinWithNativeAsset?: boolean;
+    useNativeAssetAsWrappedAmountIn?: boolean;
     sortedTokens: Token[];
     poolId: Hex;
     sender: Address;
@@ -25,7 +25,7 @@ export function parseJoinArgs({
 }) {
     // replace wrapped token with native asset if needed
     const tokensIn =
-        joinWithNativeAsset && chainId
+        chainId && useNativeAssetAsWrappedAmountIn
             ? replaceWrapped([...poolTokens], chainId)
             : [...poolTokens];
 

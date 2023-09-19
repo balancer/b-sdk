@@ -160,7 +160,7 @@ describe('weighted join test', () => {
                 chainId,
                 rpcUrl,
                 kind: JoinKind.Unbalanced,
-                joinWithNativeAsset: true,
+                useNativeAssetAsWrappedAmountIn: true,
             };
             const queryResult = await weightedJoin.query(
                 joinInput,

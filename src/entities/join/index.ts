@@ -14,7 +14,7 @@ export enum JoinKind {
 export type BaseJoinInput = {
     chainId: number;
     rpcUrl: string;
-    joinWithNativeAsset?: boolean;
+    useNativeAssetAsWrappedAmountIn?: boolean;
     fromInternalBalance?: boolean;
 };
 
