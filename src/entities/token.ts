@@ -33,4 +33,8 @@ export class Token {
     public isUnderlyingEqual(token: Token) {
         return this.chainId === token.chainId && this.wrapped === token.wrapped;
     }
+
+    public isSameAddress(address: Address) {
+        return this.address === address.toLowerCase();
+    }
 }

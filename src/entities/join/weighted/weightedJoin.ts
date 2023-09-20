@@ -120,8 +120,8 @@ export class WeightedJoin implements BaseJoin {
                 };
             }
             case JoinKind.SingleAsset: {
-                const tokenInIndex = poolTokens.findIndex(
-                    (t) => t.address === input.tokenIn.toLowerCase(),
+                const tokenInIndex = poolTokens.findIndex((t) =>
+                    t.isSameAddress(input.tokenIn),
                 );
                 if (tokenInIndex === -1)
                     throw Error("Can't find index of SingleAsset");

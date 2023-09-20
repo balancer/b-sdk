@@ -79,8 +79,8 @@ export class WeightedExit implements BaseExit {
             case ExitKind.SINGLE_ASSET:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
-                    tokenOutIndex: tokens.findIndex(
-                        (t) => t.address === input.tokenOut.toLowerCase(),
+                    tokenOutIndex: tokens.findIndex((t) =>
+                        t.isSameAddress(input.tokenOut),
                     ),
                     maxBptAmountIn: input.bptIn.amount,
                 };
