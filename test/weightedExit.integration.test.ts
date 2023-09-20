@@ -31,27 +31,31 @@ import { Address, Hex } from '../src/types';
 import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
 
+const chainId = ChainId.MAINNET;
+const rpcUrl = 'http://127.0.0.1:8545/';
+const blockNumber = 18043296n;
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
+const poolId =
+    '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
 
 describe('weighted exit test', () => {
     let api: MockApi;
-    let chainId: ChainId;
-    let rpcUrl: string;
-    let blockNumber: bigint;
     let client: Client & PublicActions & TestActions & WalletActions;
-    let poolId: Address;
     let poolFromApi: PoolState;
     let weightedExit: BaseExit;
-    let tokenBpt: Token;
+    let bpt: Token;
 
     beforeAll(async () => {
         // setup mock api
         api = new MockApi();
 
-        // setup chain and test client
-        chainId = ChainId.MAINNET;
-        rpcUrl = 'http://127.0.0.1:8545/';
-        blockNumber = 18043296n;
+        // get pool state from api
+        poolFromApi = await api.getPool(poolId);
+
+        // setup exit helper
+        const exitParser = new ExitParser();
+        weightedExit = exitParser.getExit(poolFromApi.type);
+
         client = createTestClient({
             mode: 'hardhat',
             chain: CHAINS[chainId],
@@ -60,14 +64,11 @@ describe('weighted exit test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
-        poolId =
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
+        // setup BPT token
+        bpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
-        // get pool state from api
-        poolFromApi = await api.getPool(poolId);
-
         await forkSetup(
             client,
             testAddress,
@@ -77,18 +78,13 @@ describe('weighted exit test', () => {
             process.env.ETHEREUM_RPC_URL as string,
             blockNumber,
         );
-
-        // setup join helper
-        const exitParser = new ExitParser();
-        weightedExit = exitParser.getExit(poolFromApi.type);
     });
 
     test('single asset exit', async () => {
-        tokenBpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
-        const bptIn = TokenAmount.fromHumanAmount(tokenBpt, '1');
+        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3D'; // BAL
 
-        // perform join query to get expected bpt out
+        // perform exit query to get expected bpt out
         const exitInput: SingleAssetExitInput = {
             chainId,
             rpcUrl,
@@ -143,10 +139,9 @@ describe('weighted exit test', () => {
     });
 
     test('proportional exit', async () => {
-        tokenBpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
-        const bptIn = TokenAmount.fromHumanAmount(tokenBpt, '1');
+        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
 
-        // perform join query to get expected bpt out
+        // perform exit query to get expected bpt out
         const exitInput: ProportionalExitInput = {
             chainId,
             rpcUrl,
@@ -205,7 +200,7 @@ describe('weighted exit test', () => {
         const amountsOut = poolTokens.map((t) =>
             TokenAmount.fromHumanAmount(t, '0.001'),
         );
-        // perform join query to get expected bpt out
+        // perform exit query to get expected bpt out
         const exitInput: UnbalancedExitInput = {
             chainId,
             rpcUrl,
@@ -258,11 +253,9 @@ describe('weighted exit test', () => {
     });
 
     test('exit with native asset', async () => {
-        // TODO - This should be failing??
-        tokenBpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
-        const bptIn = TokenAmount.fromHumanAmount(tokenBpt, '1');
+        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
 
-        // perform join query to get expected bpt out
+        // perform exit query to get expected bpt out
         const exitInput: ProportionalExitInput = {
             chainId,
             rpcUrl,
