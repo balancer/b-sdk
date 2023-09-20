@@ -21,13 +21,13 @@ import {
     ProportionalJoinInput,
     SingleAssetJoinInput,
     JoinKind,
-    PoolState,
     Slippage,
     Token,
     TokenAmount,
 } from '../src/entities';
 import { JoinParser } from '../src/entities/join/parser';
 import { Address, Hex } from '../src/types';
+import { PoolState } from '../src/entities/types';
 import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
 
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';

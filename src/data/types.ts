@@ -118,12 +118,15 @@ export interface RawFxPool extends RawBasePool {
     epsilon: HumanAmount;
 }
 
-export interface RawPoolToken {
+export interface MinimalToken {
     address: Address;
+    decimals: number;
     index: number;
+}
+
+export interface RawPoolToken extends MinimalToken {
     symbol: string;
     name: string;
-    decimals: number;
     balance: HumanAmount;
 }
 
