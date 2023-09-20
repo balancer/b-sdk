@@ -102,16 +102,20 @@ describe('weighted join test', () => {
             kind: JoinKind.Unbalanced,
         };
 
-        const { queryResult, maxAmountsIn, minBptOut } = await doTransaction(
-            joinInput,
-            poolFromApi.tokens.map((t) => t.address),
-            bpt.address,
-            slippage,
-        );
+        const { queryResult, maxAmountsIn, minBptOut, value } =
+            await doTransaction(
+                joinInput,
+                poolFromApi.tokens.map((t) => t.address),
+                bpt.address,
+                slippage,
+            );
 
         // Query should use same amountsIn as user sets
         expect(queryResult.amountsIn).to.deep.eq(amountsIn);
         expect(queryResult.tokenInIndex).to.be.undefined;
+
+        // Should be no native value
+        expect(value).toBeUndefined;
 
         // Expect some bpt amount
         expect(queryResult.bptOut.amount > 0n).to.be.true;
@@ -141,16 +145,21 @@ describe('weighted join test', () => {
         };
 
         // We have to use zero address for balanceDeltas
-        const { queryResult, maxAmountsIn, minBptOut } = await doTransaction(
-            joinInput,
-            replaceWrapped(poolTokens, chainId).map((a) => a.address),
-            bpt.address,
-            slippage,
-        );
+        const { queryResult, maxAmountsIn, minBptOut, value } =
+            await doTransaction(
+                joinInput,
+                replaceWrapped(poolTokens, chainId).map((a) => a.address),
+                bpt.address,
+                slippage,
+            );
 
         // Query should use same amountsIn as user sets
-        expect(queryResult.amountsIn).to.deep.eq(amountsIn);
+        expect(queryResult.amountsIn.map((a) => a.amount)).to.deep.eq(
+            amountsIn.map((a) => a.amount),
+        );
         expect(queryResult.tokenInIndex).to.be.undefined;
+        // Should have native value equal to input amount
+        expect(value).eq(amountsIn[0].amount);
 
         // Expect some bpt amount
         expect(queryResult.bptOut.amount > 0n).to.be.true;
@@ -175,12 +184,13 @@ describe('weighted join test', () => {
             kind: JoinKind.SingleAsset,
         };
 
-        const { queryResult, maxAmountsIn, minBptOut } = await doTransaction(
-            joinInput,
-            poolFromApi.tokens.map((t) => t.address),
-            bpt.address,
-            slippage,
-        );
+        const { queryResult, maxAmountsIn, minBptOut, value } =
+            await doTransaction(
+                joinInput,
+                poolFromApi.tokens.map((t) => t.address),
+                bpt.address,
+                slippage,
+            );
 
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
@@ -192,6 +202,9 @@ describe('weighted join test', () => {
                 expect(a.amount > 0n).to.be.true;
             else expect(a.amount === 0n).to.be.true;
         });
+
+        // Should be no native value
+        expect(value).toBeUndefined;
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
@@ -212,12 +225,13 @@ describe('weighted join test', () => {
             kind: JoinKind.Proportional,
         };
 
-        const { queryResult, maxAmountsIn, minBptOut } = await doTransaction(
-            joinInput,
-            poolFromApi.tokens.map((t) => t.address),
-            bpt.address,
-            slippage,
-        );
+        const { queryResult, maxAmountsIn, minBptOut, value } =
+            await doTransaction(
+                joinInput,
+                poolFromApi.tokens.map((t) => t.address),
+                bpt.address,
+                slippage,
+            );
 
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
@@ -228,6 +242,9 @@ describe('weighted join test', () => {
             expect(a.amount > 0n).to.be.true;
         });
         expect(queryResult.tokenInIndex).toBeUndefined;
+
+        // Should be no native value
+        expect(value).toBeUndefined;
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
@@ -279,6 +296,7 @@ describe('weighted join test', () => {
             queryResult,
             maxAmountsIn,
             minBptOut,
+            value,
         };
     }
 });
