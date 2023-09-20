@@ -15,13 +15,14 @@ import {
 import { getSortedTokens } from '../../utils';
 import { PoolState, AmountsExit } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
+import { validateInputs } from './validateInputs';
 
 export class WeightedExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
-        // TODO - Validate inputs
+        validateInputs(input, poolState);
 
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
 
