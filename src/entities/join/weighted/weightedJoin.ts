@@ -11,7 +11,7 @@ import {
     JoinKind,
     JoinQueryResult,
 } from '..';
-import { PoolState, AmountsJoin } from '../../types';
+import { AmountsJoin, PoolStateInput } from '../../types';
 import {
     doQueryJoin,
     getAmounts,
@@ -22,7 +22,7 @@ import {
 export class WeightedJoin implements BaseJoin {
     public async query(
         input: JoinInput,
-        poolState: PoolState,
+        poolState: PoolStateInput,
     ): Promise<JoinQueryResult> {
         validateInputs(input, poolState);
 

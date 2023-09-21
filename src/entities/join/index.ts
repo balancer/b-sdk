@@ -1,6 +1,6 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
-import { PoolState } from '../types';
+import { PoolStateInput } from '../types';
 import { Address, Hex } from '../../types';
 
 export enum JoinKind {
@@ -62,7 +62,10 @@ export type JoinCallInput = JoinQueryResult & {
 };
 
 export interface BaseJoin {
-    query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
+    query(
+        input: JoinInput,
+        poolState: PoolStateInput,
+    ): Promise<JoinQueryResult>;
     buildCall(input: JoinCallInput): {
         call: Hex;
         to: Address;

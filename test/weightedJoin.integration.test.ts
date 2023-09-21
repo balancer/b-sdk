@@ -28,7 +28,7 @@ import {
 } from '../src/entities';
 import { JoinParser } from '../src/entities/join/parser';
 import { Address, Hex } from '../src/types';
-import { PoolState } from '../src/entities/types';
+import { PoolStateInput } from '../src/entities/types';
 import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
 
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
@@ -44,7 +44,7 @@ const poolId =
 describe('weighted join test', () => {
     let api: MockApi;
     let client: Client & PublicActions & TestActions & WalletActions;
-    let poolFromApi: PoolState;
+    let poolFromApi: PoolStateInput;
     let weightedJoin: BaseJoin;
     let bpt: Token;
 
@@ -304,7 +304,7 @@ describe('weighted join test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolState> {
+    public async getPool(id: Hex): Promise<PoolStateInput> {
         const tokens = [
             {
                 address:
