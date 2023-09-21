@@ -255,7 +255,7 @@ describe('weighted join test', () => {
     });
 
     async function doTransaction(
-        exitInput:
+        joinInput:
             | UnbalancedJoinInput
             | ProportionalJoinInput
             | SingleAssetJoinInput,
@@ -263,7 +263,7 @@ describe('weighted join test', () => {
         bptToken: Address,
         slippage: Slippage,
     ) {
-        const queryResult = await weightedJoin.query(exitInput, poolFromApi);
+        const queryResult = await weightedJoin.query(joinInput, poolFromApi);
 
         const { call, to, value, maxAmountsIn, minBptOut } =
             weightedJoin.buildCall({
