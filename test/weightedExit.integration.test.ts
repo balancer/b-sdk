@@ -37,10 +37,7 @@ import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
 type TxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
     poolExit: PoolExit;
-    exitInput:
-        | SingleAssetExitInput
-        | ProportionalExitInput
-        | UnbalancedExitInput;
+    exitInput: ExitInput;
     slippage: Slippage;
     poolInput: PoolStateInput;
     testAddress: Address;
@@ -71,7 +68,6 @@ describe('weighted exit test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
-        // setup BPT token
         txInput = {
             client,
             poolExit: new PoolExit(),
