@@ -1,7 +1,13 @@
 import { encodeFunctionData } from 'viem';
-import { Token, TokenAmount, WeightedEncoder } from '../../..';
+import { Token } from '../../token';
+import { TokenAmount } from '../../tokenAmount';
+import { WeightedEncoder } from '../../encoders/weighted';
 import { Address } from '../../../types';
-import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
+import {
+    BALANCER_VAULT,
+    MAX_UINT256,
+    ZERO_ADDRESS,
+} from '../../../utils/constants';
 import { vaultAbi } from '../../../abi';
 import { parseExitArgs } from '../../utils/parseExitArgs';
 import {

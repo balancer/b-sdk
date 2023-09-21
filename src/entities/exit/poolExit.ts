@@ -9,7 +9,7 @@ import {
 import { WeightedExit } from './weighted/weightedExit';
 import { PoolStateInput } from '../types';
 import { validateInputs } from './weighted/validateInputs';
-import { getSortedTokens } from '../utils';
+import { getSortedTokens } from '../utils/getSortedTokens';
 
 export class PoolExit {
     private readonly poolExits: Record<string, BaseExit> = {};
