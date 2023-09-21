@@ -31,27 +31,32 @@ import { Address, Hex } from '../src/types';
 import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
 
+const chainId = ChainId.MAINNET;
+const rpcUrl = 'http://127.0.0.1:8545/';
+const blockNumber = 18043296n;
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
+const poolId =
+    '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
+const slippage = Slippage.fromPercentage('1'); // 1%
 
 describe('weighted exit test', () => {
     let api: MockApi;
-    let chainId: ChainId;
-    let rpcUrl: string;
-    let blockNumber: bigint;
     let client: Client & PublicActions & TestActions & WalletActions;
-    let poolId: Address;
     let poolFromApi: PoolState;
     let weightedExit: BaseExit;
-    let tokenBpt: Token;
+    let bpt: Token;
 
     beforeAll(async () => {
         // setup mock api
         api = new MockApi();
 
-        // setup chain and test client
-        chainId = ChainId.MAINNET;
-        rpcUrl = 'http://127.0.0.1:8545/';
-        blockNumber = 18043296n;
+        // get pool state from api
+        poolFromApi = await api.getPool(poolId);
+
+        // setup exit helper
+        const exitParser = new ExitParser();
+        weightedExit = exitParser.getExit(poolFromApi.type);
+
         client = createTestClient({
             mode: 'hardhat',
             chain: CHAINS[chainId],
@@ -60,14 +65,11 @@ describe('weighted exit test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
-        poolId =
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
+        // setup BPT token
+        bpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
-        // get pool state from api
-        poolFromApi = await api.getPool(poolId);
-
         await forkSetup(
             client,
             testAddress,
@@ -77,18 +79,13 @@ describe('weighted exit test', () => {
             process.env.ETHEREUM_RPC_URL as string,
             blockNumber,
         );
-
-        // setup join helper
-        const exitParser = new ExitParser();
-        weightedExit = exitParser.getExit(poolFromApi.type);
     });
 
     test('single asset exit', async () => {
-        tokenBpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
-        const bptIn = TokenAmount.fromHumanAmount(tokenBpt, '1');
+        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3D'; // BAL
 
-        // perform join query to get expected bpt out
+        // perform exit query to get expected bpt out
         const exitInput: SingleAssetExitInput = {
             chainId,
             rpcUrl,
@@ -96,106 +93,64 @@ describe('weighted exit test', () => {
             tokenOut,
             kind: ExitKind.SINGLE_ASSET,
         };
-        const queryResult = await weightedExit.query(exitInput, poolFromApi);
+        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
+            exitInput,
+            poolFromApi.tokens.map((t) => t.address),
+            bpt.address,
+            slippage,
+        );
 
+        // Query should use correct BPT amount
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
+
+        // We only expect single asset to have a value for exit
+        expect(queryResult.tokenOutIndex).to.be.toBeDefined;
         queryResult.amountsOut.forEach((a, i) => {
             if (i === queryResult.tokenOutIndex)
                 expect(a.amount > 0n).to.be.true;
             else expect(a.amount === 0n).to.be.true;
         });
 
-        // build call with slippage applied
-        const slippage = Slippage.fromPercentage('1'); // 1%
-        const { call, to, value, maxBptIn, minAmountsOut } =
-            weightedExit.buildCall({
-                ...queryResult,
-                slippage,
-                sender: testAddress,
-                recipient: testAddress,
-            });
-
-        // send transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [
-                    ...queryResult.amountsOut.map((a) => a.token.address),
-                    queryResult.bptIn.token.address,
-                ],
-                client,
-                testAddress,
-                to,
-                call,
-                value,
-            );
-
-        expect(transactionReceipt.status).to.eq('success');
-        expect(maxBptIn).to.eq(bptIn.amount);
-        const expectedDeltas = [
-            ...queryResult.amountsOut.map((a) => a.amount),
-            queryResult.bptIn.amount,
-        ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
+        // Confirm slippage - only to amounts out not bpt in
         const expectedMinAmountsOut = queryResult.amountsOut.map((a) =>
             slippage.removeFrom(a.amount),
         );
         expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
+        expect(maxBptIn).to.eq(bptIn.amount);
     });
 
     test('proportional exit', async () => {
-        tokenBpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
-        const bptIn = TokenAmount.fromHumanAmount(tokenBpt, '1');
+        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
 
-        // perform join query to get expected bpt out
+        // perform exit query to get expected bpt out
         const exitInput: ProportionalExitInput = {
             chainId,
             rpcUrl,
             bptIn,
             kind: ExitKind.PROPORTIONAL,
         };
-        const queryResult = await weightedExit.query(exitInput, poolFromApi);
+        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
+            exitInput,
+            poolFromApi.tokens.map((t) => t.address),
+            bpt.address,
+            slippage,
+        );
 
+        // Query should use correct BPT amount
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
 
+        // We expect all assets to have a value for exit
+        expect(queryResult.tokenOutIndex).to.be.undefined;
         queryResult.amountsOut.forEach((a) => {
             expect(a.amount > 0n).to.be.true;
         });
 
-        // build call with slippage applied
-        const slippage = Slippage.fromPercentage('1'); // 1%
-        const { call, to, value, maxBptIn, minAmountsOut } =
-            weightedExit.buildCall({
-                ...queryResult,
-                slippage,
-                sender: testAddress,
-                recipient: testAddress,
-            });
-
-        // send transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [
-                    ...queryResult.amountsOut.map((a) => a.token.address),
-                    queryResult.bptIn.token.address,
-                ],
-                client,
-                testAddress,
-                to,
-                call,
-                value,
-            );
-
-        expect(transactionReceipt.status).to.eq('success');
-        expect(maxBptIn).to.eq(bptIn.amount);
-        const expectedDeltas = [
-            ...queryResult.amountsOut.map((a) => a.amount),
-            queryResult.bptIn.amount,
-        ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
+        // Confirm slippage - only to amounts out not bpt in
         const expectedMinAmountsOut = queryResult.amountsOut.map((a) =>
             slippage.removeFrom(a.amount),
         );
         expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
+        expect(maxBptIn).to.eq(bptIn.amount);
     });
 
     test('unbalanced exit', async () => {
@@ -205,64 +160,40 @@ describe('weighted exit test', () => {
         const amountsOut = poolTokens.map((t) =>
             TokenAmount.fromHumanAmount(t, '0.001'),
         );
-        // perform join query to get expected bpt out
+        // perform exit query to get expected bpt out
         const exitInput: UnbalancedExitInput = {
             chainId,
             rpcUrl,
             amountsOut,
             kind: ExitKind.UNBALANCED,
         };
-        const queryResult = await weightedExit.query(exitInput, poolFromApi);
+        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
+            exitInput,
+            poolFromApi.tokens.map((t) => t.address),
+            bpt.address,
+            slippage,
+        );
 
+        // We expect a BPT input amount > 0
         expect(queryResult.bptIn.amount > 0n).to.be.true;
 
+        // We expect assets to have same amount out as user defined
+        expect(queryResult.tokenOutIndex).to.be.undefined;
         queryResult.amountsOut.forEach((a, i) => {
             expect(a.amount).to.eq(amountsOut[i].amount);
         });
 
-        // build call with slippage applied
-        const slippage = Slippage.fromPercentage('1'); // 1%
-        const { call, to, value, maxBptIn, minAmountsOut } =
-            weightedExit.buildCall({
-                ...queryResult,
-                slippage,
-                sender: testAddress,
-                recipient: testAddress,
-            });
-
-        // send transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [
-                    ...queryResult.amountsOut.map((a) => a.token.address),
-                    queryResult.bptIn.token.address,
-                ],
-                client,
-                testAddress,
-                to,
-                call,
-                value,
-            );
-
-        expect(transactionReceipt.status).to.eq('success');
-        minAmountsOut.forEach((a, i) => {
-            expect(a).to.eq(amountsOut[i].amount);
-        });
-        const expectedDeltas = [
-            ...queryResult.amountsOut.map((a) => a.amount),
-            queryResult.bptIn.amount,
-        ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
+        // Confirm slippage - only to bpt in, not amounts out
+        const expectedMinAmountsOut = amountsOut.map((a) => a.amount);
+        expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
         const expectedMaxBptIn = slippage.applyTo(queryResult.bptIn.amount);
         expect(expectedMaxBptIn).to.deep.eq(maxBptIn);
     });
 
     test('exit with native asset', async () => {
-        // TODO - This should be failing??
-        tokenBpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
-        const bptIn = TokenAmount.fromHumanAmount(tokenBpt, '1');
+        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
 
-        // perform join query to get expected bpt out
+        // perform exit query to get expected bpt out
         const exitInput: ProportionalExitInput = {
             chainId,
             rpcUrl,
@@ -270,16 +201,45 @@ describe('weighted exit test', () => {
             kind: ExitKind.PROPORTIONAL,
             exitWithNativeAsset: true,
         };
-        const queryResult = await weightedExit.query(exitInput, poolFromApi);
 
+        // We have to use zero address for balanceDeltas
+        const poolTokens = poolFromApi.tokens.map(
+            (t) => new Token(chainId, t.address, t.decimals),
+        );
+        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
+            exitInput,
+            replaceWrapped(poolTokens, chainId).map((a) => a.address),
+            bpt.address,
+            slippage,
+        );
+        // Query should use correct BPT amount
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
 
+        // We expect all assets to have a value for exit
+        expect(queryResult.tokenOutIndex).to.be.undefined;
         queryResult.amountsOut.forEach((a) => {
             expect(a.amount > 0n).to.be.true;
         });
 
-        // build call with slippage applied
-        const slippage = Slippage.fromPercentage('1'); // 1%
+        // Confirm slippage - only to amounts out not bpt in
+        const expectedMinAmountsOut = queryResult.amountsOut.map((a) =>
+            slippage.removeFrom(a.amount),
+        );
+        expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
+        expect(maxBptIn).to.eq(bptIn.amount);
+    });
+
+    async function doTransaction(
+        exitInput:
+            | SingleAssetExitInput
+            | ProportionalExitInput
+            | UnbalancedExitInput,
+        poolTokens: Address[],
+        bptToken: Address,
+        slippage: Slippage,
+    ) {
+        const queryResult = await weightedExit.query(exitInput, poolFromApi);
+
         const { call, to, value, maxBptIn, minAmountsOut } =
             weightedExit.buildCall({
                 ...queryResult,
@@ -288,38 +248,31 @@ describe('weighted exit test', () => {
                 recipient: testAddress,
             });
 
-        const poolTokens = poolFromApi.tokens.map(
-            (t) => new Token(chainId, t.address, t.decimals),
-        );
-
         // send transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
             await sendTransactionGetBalances(
-                [
-                    ...replaceWrapped(poolTokens, chainId).map(
-                        (a) => a.address,
-                    ),
-                    queryResult.bptIn.token.address,
-                ],
+                [...poolTokens, bptToken],
                 client,
                 testAddress,
                 to,
                 call,
                 value,
             );
-
         expect(transactionReceipt.status).to.eq('success');
-        expect(maxBptIn).to.eq(bptIn.amount);
+
+        // Confirm final balance changes match query result
         const expectedDeltas = [
             ...queryResult.amountsOut.map((a) => a.amount),
             queryResult.bptIn.amount,
         ];
         expect(expectedDeltas).to.deep.eq(balanceDeltas);
-        const expectedMinAmountsOut = queryResult.amountsOut.map((a) =>
-            slippage.removeFrom(a.amount),
-        );
-        expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
-    });
+
+        return {
+            queryResult,
+            maxBptIn,
+            minAmountsOut,
+        };
+    }
 });
 
 /*********************** Mock To Represent API Requirements **********************/

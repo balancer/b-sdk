@@ -36,5 +36,8 @@ export function parseJoinArgs({
         fromInternalBalance,
     };
 
-    return [poolId, sender, recipient, joinPoolRequest] as const;
+    return {
+        args: [poolId, sender, recipient, joinPoolRequest] as const,
+        tokensIn,
+    };
 }
