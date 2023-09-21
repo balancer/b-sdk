@@ -1,5 +1,5 @@
 import { ExitInput, ExitKind } from '..';
-import { PoolState, PoolStateInput } from '../../types';
+import { PoolStateInput } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
 export function validateInputs(input: ExitInput, poolState: PoolStateInput) {
