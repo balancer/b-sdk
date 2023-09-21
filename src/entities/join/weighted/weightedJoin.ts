@@ -32,7 +32,7 @@ export class WeightedJoin implements BaseJoin {
 
         const userData = this.encodeUserData(input.kind, amounts);
 
-        const queryArgs = parseJoinArgs({
+        const { args, tokensIn } = parseJoinArgs({
             useNativeAssetAsWrappedAmountIn:
                 !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
@@ -48,14 +48,14 @@ export class WeightedJoin implements BaseJoin {
         const queryResult = await doQueryJoin(
             input.rpcUrl,
             input.chainId,
-            queryArgs,
+            args,
         );
 
         const bpt = new Token(input.chainId, poolState.address, 18);
         const bptOut = TokenAmount.fromRawAmount(bpt, queryResult.bptOut);
 
         const amountsIn = queryResult.amountsIn.map((a, i) =>
-            TokenAmount.fromRawAmount(sortedTokens[i], a),
+            TokenAmount.fromRawAmount(tokensIn[i], a),
         );
 
         return {
@@ -79,7 +79,7 @@ export class WeightedJoin implements BaseJoin {
 
         const userData = this.encodeUserData(input.joinKind, amounts);
 
-        const args = parseJoinArgs({
+        const { args } = parseJoinArgs({
             ...input,
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
