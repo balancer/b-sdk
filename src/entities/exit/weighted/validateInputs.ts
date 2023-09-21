@@ -1,8 +1,8 @@
 import { ExitInput, ExitKind } from '..';
-import { PoolState } from '../../types';
+import { PoolState, PoolStateInput } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
-export function validateInputs(input: ExitInput, poolState: PoolState) {
+export function validateInputs(input: ExitInput, poolState: PoolStateInput) {
     switch (input.kind) {
         case ExitKind.UNBALANCED:
             areTokensInArray(

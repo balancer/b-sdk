@@ -12,21 +12,15 @@ import {
     ExitKind,
     ExitQueryResult,
 } from '../types';
-import { getSortedTokens } from '../../utils';
-import { PoolState, AmountsExit } from '../../types';
+import { AmountsExit, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
-import { validateInputs } from './validateInputs';
 
 export class WeightedExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
-        validateInputs(input, poolState);
-
-        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-
-        const amounts = this.getAmountsQuery(sortedTokens, input);
+        const amounts = this.getAmountsQuery(poolState.tokens, input);
 
         const userData = this.encodeUserData(input.kind, amounts);
 
@@ -35,7 +29,7 @@ export class WeightedExit implements BaseExit {
             chainId: input.chainId,
             exitWithNativeAsset: !!input.exitWithNativeAsset,
             poolId: poolState.id,
-            sortedTokens,
+            sortedTokens: poolState.tokens,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,
