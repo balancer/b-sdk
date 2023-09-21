@@ -5,7 +5,7 @@ import { replaceWrapped } from './replaceWrapped';
 export function parseJoinArgs({
     useNativeAssetAsWrappedAmountIn,
     chainId,
-    sortedTokens: poolTokens,
+    sortedTokens,
     poolId,
     sender,
     recipient,
@@ -26,8 +26,8 @@ export function parseJoinArgs({
     // replace wrapped token with native asset if needed
     const tokensIn =
         chainId && useNativeAssetAsWrappedAmountIn
-            ? replaceWrapped([...poolTokens], chainId)
-            : [...poolTokens];
+            ? replaceWrapped([...sortedTokens], chainId)
+            : [...sortedTokens];
 
     const joinPoolRequest = {
         assets: tokensIn.map((t) => t.address), // with BPT
@@ -36,5 +36,8 @@ export function parseJoinArgs({
         fromInternalBalance,
     };
 
-    return [poolId, sender, recipient, joinPoolRequest] as const;
+    return {
+        args: [poolId, sender, recipient, joinPoolRequest] as const,
+        tokensIn,
+    };
 }

@@ -9,8 +9,14 @@ export type PoolState = {
     tokens: MinimalToken[];
 };
 
-export type Amounts = {
+export type AmountsJoin = {
     maxAmountsIn: bigint[];
     tokenInIndex: number | undefined;
     minimumBpt: bigint;
+};
+
+export type AmountsExit = {
+    minAmountsOut: bigint[];
+    tokenOutIndex: number | undefined;
+    maxBptAmountIn: bigint;
 };

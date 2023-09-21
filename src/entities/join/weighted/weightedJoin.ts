@@ -11,7 +11,7 @@ import {
     JoinKind,
     JoinQueryResult,
 } from '..';
-import { PoolState, Amounts } from '../../types';
+import { PoolState, AmountsJoin } from '../../types';
 import {
     doQueryJoin,
     getAmounts,
@@ -32,7 +32,7 @@ export class WeightedJoin implements BaseJoin {
 
         const userData = this.encodeUserData(input.kind, amounts);
 
-        const queryArgs = parseJoinArgs({
+        const { args, tokensIn } = parseJoinArgs({
             useNativeAssetAsWrappedAmountIn:
                 !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
@@ -48,14 +48,14 @@ export class WeightedJoin implements BaseJoin {
         const queryResult = await doQueryJoin(
             input.rpcUrl,
             input.chainId,
-            queryArgs,
+            args,
         );
 
         const bpt = new Token(input.chainId, poolState.address, 18);
         const bptOut = TokenAmount.fromRawAmount(bpt, queryResult.bptOut);
 
         const amountsIn = queryResult.amountsIn.map((a, i) =>
-            TokenAmount.fromRawAmount(sortedTokens[i], a),
+            TokenAmount.fromRawAmount(tokensIn[i], a),
         );
 
         return {
@@ -79,7 +79,7 @@ export class WeightedJoin implements BaseJoin {
 
         const userData = this.encodeUserData(input.joinKind, amounts);
 
-        const args = parseJoinArgs({
+        const { args } = parseJoinArgs({
             ...input,
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
@@ -106,7 +106,10 @@ export class WeightedJoin implements BaseJoin {
         };
     }
 
-    private getAmountsQuery(poolTokens: Token[], input: JoinInput): Amounts {
+    private getAmountsQuery(
+        poolTokens: Token[],
+        input: JoinInput,
+    ): AmountsJoin {
         switch (input.kind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
@@ -117,8 +120,8 @@ export class WeightedJoin implements BaseJoin {
                 };
             }
             case JoinKind.SingleAsset: {
-                const tokenInIndex = poolTokens.findIndex(
-                    (t) => t.address === input.tokenIn.toLowerCase(),
+                const tokenInIndex = poolTokens.findIndex((t) =>
+                    t.isSameAddress(input.tokenIn),
                 );
                 if (tokenInIndex === -1)
                     throw Error("Can't find index of SingleAsset");
@@ -142,7 +145,7 @@ export class WeightedJoin implements BaseJoin {
         }
     }
 
-    private getAmountsCall(input: JoinCallInput): Amounts {
+    private getAmountsCall(input: JoinCallInput): AmountsJoin {
         switch (input.joinKind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
@@ -170,7 +173,7 @@ export class WeightedJoin implements BaseJoin {
         }
     }
 
-    private encodeUserData(kind: JoinKind, amounts: Amounts): Address {
+    private encodeUserData(kind: JoinKind, amounts: AmountsJoin): Address {
         switch (kind) {
             case JoinKind.Init:
                 return WeightedEncoder.joinInit(amounts.maxAmountsIn);
