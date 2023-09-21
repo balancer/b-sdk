@@ -40,6 +40,7 @@ export type ExitInput =
 
 // Returned from a exit query
 export type ExitQueryResult = {
+    poolType: string;
     id: Address;
     exitKind: ExitKind;
     bptIn: TokenAmount;

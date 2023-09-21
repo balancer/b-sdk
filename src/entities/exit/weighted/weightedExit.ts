@@ -57,6 +57,7 @@ export class WeightedExit implements BaseExit {
         );
 
         return {
+            poolType: poolState.type,
             exitKind: input.kind,
             id: poolState.id,
             bptIn,

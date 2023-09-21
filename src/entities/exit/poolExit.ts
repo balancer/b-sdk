@@ -32,7 +32,6 @@ export class PoolExit {
     }
 
     public async query(
-        poolType: string,
         input: ExitInput,
         poolState: PoolStateInput,
     ): Promise<ExitQueryResult> {
@@ -44,10 +43,10 @@ export class PoolExit {
             tokens: sortedTokens,
         };
 
-        return this.getExit(poolType).query(input, mappedPoolState);
+        return this.getExit(poolState.type).query(input, mappedPoolState);
     }
 
-    public buildCall(poolType: string, input: ExitCallInput): BuildOutput {
-        return this.getExit(poolType).buildCall(input);
+    public buildCall(input: ExitCallInput): BuildOutput {
+        return this.getExit(input.poolType).buildCall(input);
     }
 }

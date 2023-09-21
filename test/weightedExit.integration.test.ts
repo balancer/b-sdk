@@ -247,14 +247,9 @@ describe('weighted exit test', () => {
             slippage,
             checkNativeBalance,
         } = txIp;
-        const queryResult = await poolExit.query(
-            poolInput.type,
-            exitInput,
-            poolInput,
-        );
+        const queryResult = await poolExit.query(exitInput, poolInput);
 
         const { call, to, value, maxBptIn, minAmountsOut } = poolExit.buildCall(
-            poolInput.type,
             {
                 ...queryResult,
                 slippage,
