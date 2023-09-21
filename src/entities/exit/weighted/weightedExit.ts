@@ -12,7 +12,7 @@ import { vaultAbi } from '../../../abi';
 import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
     BaseExit,
-    BuildOutput,
+    ExitBuildOutput,
     ExitCallInput,
     ExitInput,
     ExitKind,
@@ -95,7 +95,7 @@ export class WeightedExit implements BaseExit {
         }
     }
 
-    public buildCall(input: ExitCallInput): BuildOutput {
+    public buildCall(input: ExitCallInput): ExitBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.exitKind, amounts);

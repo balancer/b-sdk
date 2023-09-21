@@ -73,7 +73,7 @@ export interface BaseJoin {
     };
 }
 
-export type BuildOutput = {
+export type JoinBuildOutput = {
     call: Hex;
     to: Address;
     value: bigint | undefined;

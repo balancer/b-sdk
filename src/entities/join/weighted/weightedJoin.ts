@@ -5,7 +5,7 @@ import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
 import {
     BaseJoin,
-    BuildOutput,
+    JoinBuildOutput,
     JoinCallInput,
     JoinInput,
     JoinKind,
@@ -60,7 +60,7 @@ export class WeightedJoin implements BaseJoin {
         };
     }
 
-    public buildCall(input: JoinCallInput): BuildOutput {
+    public buildCall(input: JoinCallInput): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.joinKind, amounts);

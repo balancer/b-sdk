@@ -1,6 +1,6 @@
 import {
     BaseJoin,
-    BuildOutput,
+    JoinBuildOutput,
     JoinConfig,
     JoinInput,
     JoinQueryResult,
@@ -46,7 +46,7 @@ export class PoolJoin {
         return this.getJoin(poolState.type).query(input, mappedPoolState);
     }
 
-    public buildCall(input: JoinCallInput): BuildOutput {
+    public buildCall(input: JoinCallInput): JoinBuildOutput {
         return this.getJoin(input.poolType).buildCall(input);
     }
 }

@@ -1,6 +1,6 @@
 import {
     BaseExit,
-    BuildOutput,
+    ExitBuildOutput,
     ExitCallInput,
     ExitConfig,
     ExitInput,
@@ -46,7 +46,7 @@ export class PoolExit {
         return this.getExit(poolState.type).query(input, mappedPoolState);
     }
 
-    public buildCall(input: ExitCallInput): BuildOutput {
+    public buildCall(input: ExitCallInput): ExitBuildOutput {
         return this.getExit(input.poolType).buildCall(input);
     }
 }
