@@ -1,7 +1,7 @@
 import { BaseJoin } from '.';
 import { WeightedJoin } from './weighted/weightedJoin';
 
-/*********************** Basic Helper to get pool-state class from pool type *************/
+/*********************** Basic Helper to get join class from pool type *************/
 export type JoinConfig = {
     customPoolJoins: Record<string, BaseJoin>;
 };

@@ -45,7 +45,7 @@ export type JoinInput =
     | SingleAssetJoinInput
     | ProportionalJoinInput;
 
-// Returned from a pool-state query
+// Returned from a join query
 export type JoinQueryResult = {
     poolId: Hex;
     joinKind: JoinKind;
