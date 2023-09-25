@@ -139,7 +139,13 @@ export class NestedJoin {
         const encodedCalls = [encodedCall];
 
         if (input.relayerApprovalSignature !== undefined) {
-            encodedCalls.unshift(input.relayerApprovalSignature);
+            encodedCalls.unshift(
+                Relayer.encodeSetRelayerApproval(
+                    BALANCER_RELAYER,
+                    true,
+                    input.relayerApprovalSignature,
+                ),
+            );
         }
 
         const call = encodeFunctionData({

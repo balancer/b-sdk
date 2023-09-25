@@ -82,25 +82,22 @@ describe('nested join test', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        // Fork setup - done only once per test suite
+        // Fork setup - done only once per fork reset
         // Governance grant roles to the relayer
-        await grantRoles(client);
-
-        // User approve relayer on the vault
-        await approveRelayer(client, testAddress);
+        // await grantRoles(client);
 
         // User approve vault to spend their tokens
-        const dai = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address;
-        await approveToken(client, testAddress, dai, parseUnits('1000', 18));
+        // const dai = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address;
+        // await approveToken(client, testAddress, dai, parseUnits('1000', 18));
 
         // Update user balance
-        await setTokenBalance(
-            client,
-            testAddress,
-            dai,
-            2,
-            parseUnits('1000', 18),
-        );
+        // await setTokenBalance(
+        //     client,
+        //     testAddress,
+        //     dai,
+        //     2,
+        //     parseUnits('1000', 18),
+        // );
 
         poolId =
             '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4'; // GHO-3POOL-BPT
@@ -137,19 +134,18 @@ describe('nested join test', () => {
         // build join call with expected minBpOut based on slippage
         const slippage = Slippage.fromPercentage('1'); // 1%
 
-        // const signature = await Relayer.signRelayerApproval(
-        //     BALANCER_RELAYER,
-        //     testAddress,
-        //     client,
-        // );
-        // console.log('signature', signature);
+        const signature = await Relayer.signRelayerApproval(
+            BALANCER_RELAYER,
+            testAddress,
+            client,
+        );
 
         const { call, to, value, minBptOut } = nestedJoin.buildCall({
             ...queryResult,
             slippage,
             sender: testAddress,
             recipient: testAddress,
-            // relayerApprovalSignature: signature,
+            relayerApprovalSignature: signature,
         });
 
         // send join transaction and check balance changes
@@ -269,17 +265,30 @@ export const grantRoles = async (
 ) => {
     const balancerDaoAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f';
     const authorizerAddress = '0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6';
+
+    // Check for available roles on balancer-deployments repo:
+    // https://github.com/balancer/balancer-deployments/blob/master/action-ids/mainnet/action-ids.json
     const exitRole =
         '0xc149e88b59429ded7f601ab52ecd62331cac006ae07c16543439ed138dcb8d34';
     const joinRole =
         '0x78ad1b68d148c070372f8643c4648efbb63c6a8a338f3c24714868e791367653';
     const swapRole =
         '0x7b8a1d293670124924a0f532213753b89db10bde737249d4540e9a03657d1aff';
+    const batchSwapRole =
+        '0x1282ab709b2b70070f829c46bc36f76b32ad4989fecb2fcb09a1b3ce00bbfc30';
+    const setRelayerApprovalRole =
+        '0x0014a06d322ff07fcc02b12f93eb77bb76e28cdee4fc0670b9dec98d24bbfec8';
 
     await client.impersonateAccount({
         address: balancerDaoAddress,
     });
-    const roles: Address[] = [exitRole, joinRole, swapRole];
+    const roles: Address[] = [
+        exitRole,
+        joinRole,
+        swapRole,
+        batchSwapRole,
+        setRelayerApprovalRole,
+    ];
     for (const role of roles) {
         await client.writeContract({
             account: balancerDaoAddress,

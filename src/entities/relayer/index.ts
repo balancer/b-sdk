@@ -42,6 +42,18 @@ export class Relayer {
         });
     }
 
+    static encodeSetRelayerApproval(
+        relayerAddress: Address,
+        approved: boolean,
+        signature: Hex,
+    ): Hex {
+        return encodeFunctionData({
+            abi: bathcRelayerLibraryAbi,
+            functionName: 'setRelayerApproval',
+            args: [relayerAddress, approved, signature],
+        });
+    }
+
     static signRelayerApproval = async (
         relayerAddress: Address,
         signerAddress: Address,
