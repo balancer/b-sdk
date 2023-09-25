@@ -1,7 +1,7 @@
 import { Pools } from "./modules/pool-state";
 import { BalancerApiClient } from "./client";
 
-export default class BalancerApi {
+export class BalancerApi {
   
   balancerApiClient: BalancerApiClient;
   pools: Pools;
