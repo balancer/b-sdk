@@ -41,7 +41,7 @@ const slippage = Slippage.fromPercentage('1'); // 1%
 const poolId =
     '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512'; // Balancer 50COMP-50wstETH
 
-describe('weighted join test', () => {
+describe('weighted pool-state test', () => {
     let api: MockApi;
     let client: Client & PublicActions & TestActions & WalletActions;
     let poolFromApi: PoolState;
@@ -63,7 +63,7 @@ describe('weighted join test', () => {
         // get pool state from api
         poolFromApi = await api.getPool(poolId);
 
-        // setup join helper
+        // setup pool-state helper
         const joinParser = new JoinParser();
         weightedJoin = joinParser.getJoin(poolFromApi.type);
 
@@ -86,7 +86,7 @@ describe('weighted join test', () => {
         );
     });
 
-    test('unbalanced join', async () => {
+    test('unbalanced pool-state', async () => {
         const poolTokens = poolFromApi.tokens.map(
             (t) => new Token(chainId, t.address, t.decimals),
         );
@@ -94,7 +94,7 @@ describe('weighted join test', () => {
             TokenAmount.fromHumanAmount(t, '1'),
         );
 
-        // perform join query to get expected bpt out
+        // perform pool-state query to get expected bpt out
         const joinInput: UnbalancedJoinInput = {
             amountsIn,
             chainId,
@@ -127,7 +127,7 @@ describe('weighted join test', () => {
         expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
     });
 
-    test('native asset join', async () => {
+    test('native asset pool-state', async () => {
         const poolTokens = poolFromApi.tokens.map(
             (t) => new Token(chainId, t.address, t.decimals),
         );
@@ -135,7 +135,7 @@ describe('weighted join test', () => {
             TokenAmount.fromHumanAmount(t, '1'),
         );
 
-        // perform join query to get expected bpt out
+        // perform pool-state query to get expected bpt out
         const joinInput: UnbalancedJoinInput = {
             amountsIn,
             chainId,
@@ -171,11 +171,11 @@ describe('weighted join test', () => {
         expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
     });
 
-    test('single asset join', async () => {
+    test('single asset pool-state', async () => {
         const bptOut = TokenAmount.fromHumanAmount(bpt, '1');
         const tokenIn = '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f';
 
-        // perform join query to get expected bpt out
+        // perform pool-state query to get expected bpt out
         const joinInput: SingleAssetJoinInput = {
             bptOut,
             tokenIn,
@@ -214,10 +214,10 @@ describe('weighted join test', () => {
         expect(minBptOut).to.eq(bptOut.amount);
     });
 
-    test('proportional join', async () => {
+    test('proportional pool-state', async () => {
         const bptOut = TokenAmount.fromHumanAmount(bpt, '1');
 
-        // perform join query to get expected bpt out
+        // perform pool-state query to get expected bpt out
         const joinInput: ProportionalJoinInput = {
             bptOut,
             chainId,

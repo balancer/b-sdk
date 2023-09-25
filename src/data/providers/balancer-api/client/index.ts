@@ -1,8 +1,8 @@
 export class BalancerApiClient {
-  subgraphUrl: string;
+  apiUrl: string;
   chainId: number;
-  constructor(subgraphUrl: string, chainId: number) {
-    this.subgraphUrl = subgraphUrl;
+  constructor(apiUrl: string, chainId: number) {
+    this.apiUrl = apiUrl;
     this.chainId = chainId;
   }
 
@@ -12,7 +12,7 @@ export class BalancerApiClient {
       query,
       variables,
     };
-    const response = await fetch(this.subgraphUrl, {
+    const response = await fetch(this.apiUrl, {
       method: 'post',
       body: JSON.stringify(requestQuery),
       headers: { 'Content-Type': 'application/json', ChainId: this.chainId.toString() },

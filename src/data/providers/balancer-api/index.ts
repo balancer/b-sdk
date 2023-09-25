@@ -1,15 +1,15 @@
-import { JoinData } from "./modules/join";
+import { Pools } from "./modules/pool-state";
 import { BalancerApiClient } from "./client";
 
 export default class BalancerApi {
   
   balancerApiClient: BalancerApiClient;
-  joinData: JoinData;
+  pools: Pools;
   
   
   constructor(balancerApiUrl: string, chainId: number){
     this.balancerApiClient = new BalancerApiClient(balancerApiUrl, chainId);
-    this.joinData = new JoinData(this.balancerApiClient);
+    this.pools = new Pools(this.balancerApiClient);
   }
   
   

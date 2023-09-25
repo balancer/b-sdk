@@ -1,7 +1,7 @@
 import { BalancerApiClient } from '../../client';
 import { PoolState } from './types';
 
-export class JoinData {
+export class Pools {
   readonly poolStateQuery = `query GetPool($id: String!){
     poolGetPool(id:$id) {
       id
@@ -77,7 +77,7 @@ export class JoinData {
 
   constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
-  async fetchPoolState(id: string): Promise<PoolState> {
+  async fetchSimplePoolState(id: string): Promise<Pools> {
     const {
       data: { poolGetPool },
     } = await this.balancerApiClient.fetch('GetPool', this.poolStateQuery, {
