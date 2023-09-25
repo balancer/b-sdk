@@ -40,6 +40,7 @@ export type ExitInput =
 
 // Returned from a exit query
 export type ExitQueryResult = {
+    poolType: string;
     id: Address;
     exitKind: ExitKind;
     bptIn: TokenAmount;
@@ -54,7 +55,7 @@ export type ExitCallInput = ExitQueryResult & {
     recipient: Address;
 };
 
-export type BuildOutput = {
+export type ExitBuildOutput = {
     call: Address;
     to: Address;
     value: bigint | undefined;
@@ -64,7 +65,7 @@ export type BuildOutput = {
 
 export interface BaseExit {
     query(input: ExitInput, poolState: PoolState): Promise<ExitQueryResult>;
-    buildCall(input: ExitCallInput): BuildOutput;
+    buildCall(input: ExitCallInput): ExitBuildOutput;
 }
 
 export type ExitConfig = {
