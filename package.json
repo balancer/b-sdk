@@ -25,7 +25,8 @@
         "test:ci": "vitest run",
         "changeset": "changeset",
         "changeset:release": "pnpm build && changeset publish",
-        "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(. ./.env && echo $ETHEREUM_RPC_URL)"
+        "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(. ./.env && echo $ETHEREUM_RPC_URL)",
+        "example": "npx ts-node -P tsconfig.testing.json -r tsconfig-paths/register"
     },
     "dependencies": {
         "async-retry": "^1.3.3",
