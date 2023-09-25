@@ -38,6 +38,7 @@ import {
     setTokenBalance,
 } from './lib/utils/helper';
 import { authorizerAbi, vaultAbi } from '../src/abi';
+import { Relayer } from '../src/entities/relayer';
 
 /**
  * Deploy the new relayer contract with the new helper address:
@@ -53,10 +54,6 @@ import { authorizerAbi, vaultAbi } from '../src/abi';
  * update `BALANCER_RELAYER` on constants.ts
  *
  */
-
-const setApprovalRole =
-    '0x7b8a1d293670124924a0f532213753b89db10bde737249d4540e9a03657d1aff';
-const authorizerAddress = '0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6';
 
 describe('nested join test', () => {
     let api: MockApi;
@@ -85,50 +82,25 @@ describe('nested join test', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        // Relayer needs to be approved by governance - needed just once after deployment
-        const balancerDaoAddress =
-            '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f' as Address;
-        await client.impersonateAccount({
-            address: balancerDaoAddress,
-        });
-        await client.writeContract({
-            account: balancerDaoAddress,
-            address: authorizerAddress,
-            chain: client.chain,
-            abi: authorizerAbi,
-            functionName: 'grantRole',
-            args: [setApprovalRole, BALANCER_RELAYER],
-        });
-        await client.stopImpersonatingAccount({
-            address: balancerDaoAddress,
-        });
+        // Fork setup - done only once per test suite
+        // Governance grant roles to the relayer
+        await grantRoles(client);
 
-        const hasRole = await client.readContract({
-            account: testAddress,
-            address: authorizerAddress,
-            abi: authorizerAbi,
-            functionName: 'hasRole',
-            args: [setApprovalRole, BALANCER_RELAYER],
-        });
-        console.log('hasRole', hasRole);
+        // User approve relayer on the vault
+        await approveRelayer(client, testAddress);
 
-        await client.writeContract({
-            account: testAddress,
-            address: BALANCER_VAULT,
-            chain: client.chain,
-            abi: vaultAbi,
-            functionName: 'setRelayerApproval',
-            args: [testAddress, BALANCER_RELAYER, true],
-        });
+        // User approve vault to spend their tokens
+        const dai = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address;
+        await approveToken(client, testAddress, dai, parseUnits('1000', 18));
 
-        const hasApproved = await client.readContract({
-            account: testAddress,
-            address: BALANCER_VAULT,
-            abi: vaultAbi,
-            functionName: 'hasApprovedRelayer',
-            args: [testAddress, BALANCER_RELAYER],
-        });
-        console.log('hasApproved', hasApproved);
+        // Update user balance
+        await setTokenBalance(
+            client,
+            testAddress,
+            dai,
+            2,
+            parseUnits('1000', 18),
+        );
 
         poolId =
             '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4'; // GHO-3POOL-BPT
@@ -137,17 +109,6 @@ describe('nested join test', () => {
     beforeEach(async () => {
         // get pool state from api
         nestedPoolFromApi = await api.getNestedPool(poolId);
-
-        // can't reset fork on this test because it depends on previous
-        const dai = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address;
-        await approveToken(client, testAddress, dai, parseUnits('1000', 18));
-        await setTokenBalance(
-            client,
-            testAddress,
-            dai,
-            2,
-            parseUnits('1000', 18),
-        );
 
         // setup join helper
         nestedJoin = new NestedJoin();
@@ -177,7 +138,7 @@ describe('nested join test', () => {
         const slippage = Slippage.fromPercentage('1'); // 1%
 
         // const signature = await Relayer.signRelayerApproval(
-        //     relayerAddress,
+        //     BALANCER_RELAYER,
         //     testAddress,
         //     client,
         // );
@@ -188,15 +149,13 @@ describe('nested join test', () => {
             slippage,
             sender: testAddress,
             recipient: testAddress,
+            // relayerApprovalSignature: signature,
         });
 
         // send join transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
             await sendTransactionGetBalances(
-                [
-                    ...queryResult.amountsIn.map((a) => a.token.address),
-                    queryResult.bptOut.token.address,
-                ],
+                [amountIn.address, queryResult.bptOut.token.address],
                 client,
                 testAddress,
                 to,
@@ -206,10 +165,8 @@ describe('nested join test', () => {
 
         expect(transactionReceipt.status).to.eq('success');
         expect(queryResult.bptOut.amount > 0n).to.be.true;
-        const expectedDeltas = [
-            ...queryResult.amountsIn.map((a) => a.amount),
-            queryResult.bptOut.amount,
-        ];
+        const expectedDeltas = [amountIn.rawAmount, queryResult.bptOut.amount];
+
         expect(expectedDeltas).to.deep.eq(balanceDeltas);
         const expectedMinBpt = slippage.removeFrom(queryResult.bptOut.amount);
         expect(expectedMinBpt).to.deep.eq(minBptOut);
@@ -306,5 +263,50 @@ export class MockApi {
         };
     }
 }
+
+export const grantRoles = async (
+    client: Client & TestActions & WalletActions,
+) => {
+    const balancerDaoAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f';
+    const authorizerAddress = '0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6';
+    const exitRole =
+        '0xc149e88b59429ded7f601ab52ecd62331cac006ae07c16543439ed138dcb8d34';
+    const joinRole =
+        '0x78ad1b68d148c070372f8643c4648efbb63c6a8a338f3c24714868e791367653';
+    const swapRole =
+        '0x7b8a1d293670124924a0f532213753b89db10bde737249d4540e9a03657d1aff';
+
+    await client.impersonateAccount({
+        address: balancerDaoAddress,
+    });
+    const roles: Address[] = [exitRole, joinRole, swapRole];
+    for (const role of roles) {
+        await client.writeContract({
+            account: balancerDaoAddress,
+            address: authorizerAddress,
+            chain: client.chain,
+            abi: authorizerAbi,
+            functionName: 'grantRole',
+            args: [role, BALANCER_RELAYER],
+        });
+    }
+    await client.stopImpersonatingAccount({
+        address: balancerDaoAddress,
+    });
+};
+
+export const approveRelayer = async (
+    client: Client & WalletActions,
+    account: Address,
+) => {
+    await client.writeContract({
+        account,
+        address: BALANCER_VAULT,
+        chain: client.chain,
+        abi: vaultAbi,
+        functionName: 'setRelayerApproval',
+        args: [account, BALANCER_RELAYER, true],
+    });
+};
 
 /******************************************************************************/

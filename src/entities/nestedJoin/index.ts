@@ -112,7 +112,11 @@ export class NestedJoin {
         )[0];
         console.log('peekedValue', peekedValue);
 
-        const bptToken = new Token(input.chainId, nestedPoolState.address, 18);
+        const bptToken = new Token(
+            input.chainId,
+            '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
+            18,
+        );
         const bptOut = TokenAmount.fromRawAmount(bptToken, peekedValue);
         const placeholder: NestedJoinQueryResult = {
             poolId: '0x123',
@@ -212,6 +216,7 @@ export class NestedJoin {
 
     private encodeJoinPoolForCall = (input: NestedJoinCallInput) => {
         const minBptOut = input.slippage.removeFrom(input.bptOut.amount);
+        console.log('minBptOut', minBptOut);
 
         const poolId =
             '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7' as Address; // 3POOL
