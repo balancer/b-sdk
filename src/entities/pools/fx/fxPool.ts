@@ -1,11 +1,14 @@
 import { Hex, parseEther, parseUnits } from 'viem';
-import { HumanAmount, PoolType, SwapKind } from '../../../types';
-import { BigintIsh, Token, TokenAmount } from '../../';
+import { PoolType, SwapKind } from '../../../types';
+import { Token } from '../../token';
+import { TokenAmount } from '../../tokenAmount';
 import { BasePool } from '../../pools';
-import { RAY, WAD, getPoolAddress } from '../../../utils';
+import { RAY, getPoolAddress } from '../../../utils';
 import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
 import { RawFxPool } from '../../../data/types';
 import { MathFx, parseFixedCurveParam } from './helpers';
+import { FxPoolPairData } from './types';
+import { FxPoolToken } from './fxPoolToken';
 
 const isUSDC = (address: string): boolean => {
     return (
@@ -14,104 +17,6 @@ const isUSDC = (address: string): boolean => {
         address.toLowerCase() === '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
     );
 };
-
-export type FxPoolPairData = {
-    tIn: FxPoolToken;
-    tOut: FxPoolToken;
-    alpha: bigint;
-    beta: bigint;
-    delta: bigint;
-    lambda: bigint;
-    _oGLiq: bigint;
-    _nGLiq: bigint;
-    _oBals: bigint[];
-    _nBals: bigint[];
-    givenToken: FxPoolToken;
-    swapKind: SwapKind;
-};
-
-export class FxPoolToken extends TokenAmount {
-    public readonly index: number;
-    public readonly latestFXPrice: HumanAmount;
-    public readonly fxOracleDecimals: number;
-    public numeraire: bigint; // in 36 decimals
-    private readonly scalar36 = this.scalar * WAD;
-
-    public constructor(
-        token: Token,
-        amount: BigintIsh,
-        latestFXPrice: HumanAmount,
-        fxOracleDecimals: number,
-        index: number,
-    ) {
-        super(token, amount);
-        this.latestFXPrice = latestFXPrice;
-        this.fxOracleDecimals = fxOracleDecimals;
-        const truncatedNumeraire = MathFx.mulDownFixed(
-            this.amount,
-            parseUnits(this.latestFXPrice, this.fxOracleDecimals),
-            this.fxOracleDecimals,
-        );
-        this.numeraire = truncatedNumeraire * this.scalar36;
-        this.index = index;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = this.amount * this.scalar;
-        const truncatedNumeraire = MathFx.mulDownFixed(
-            this.amount,
-            parseUnits(this.latestFXPrice, this.fxOracleDecimals),
-            this.fxOracleDecimals,
-        );
-        this.numeraire = truncatedNumeraire * this.scalar36;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = this.amount * this.scalar;
-        const truncatedNumeraire = MathFx.mulDownFixed(
-            this.amount,
-            parseUnits(this.latestFXPrice, this.fxOracleDecimals),
-            this.fxOracleDecimals,
-        );
-        this.numeraire = truncatedNumeraire * this.scalar36;
-        return this;
-    }
-
-    public static fromNumeraire(
-        poolToken: FxPoolToken,
-        numeraire: BigintIsh,
-        divUp?: boolean,
-    ): FxPoolToken {
-        const truncatedNumeraire = BigInt(numeraire) / poolToken.scalar36; // loss of precision required to match SC implementation
-        const amount = divUp
-            ? MathFx.divUpFixed(
-                  BigInt(truncatedNumeraire),
-                  parseUnits(
-                      poolToken.latestFXPrice,
-                      poolToken.fxOracleDecimals,
-                  ),
-                  poolToken.fxOracleDecimals,
-              )
-            : MathFx.divDownFixed(
-                  BigInt(truncatedNumeraire),
-                  parseUnits(
-                      poolToken.latestFXPrice,
-                      poolToken.fxOracleDecimals,
-                  ),
-                  poolToken.fxOracleDecimals,
-              );
-        return new FxPoolToken(
-            poolToken.token,
-            amount,
-            poolToken.latestFXPrice,
-            poolToken.fxOracleDecimals,
-            poolToken.index,
-        );
-    }
-}
 
 export class FxPool implements BasePool {
     public readonly chainId: number;

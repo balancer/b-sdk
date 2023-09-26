@@ -1,7 +1,8 @@
 import { Hex, parseEther, parseUnits } from 'viem';
 
-import { BasePool } from '..';
-import { BigintIsh, Token, TokenAmount } from '../..';
+import { BasePool } from '../index';
+import { Token } from '../../token';
+import { TokenAmount, BigintIsh } from '../../tokenAmount';
 import { RawGyroEPool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
 import { MathSol, WAD, getPoolAddress } from '../../../utils';
@@ -16,6 +17,7 @@ import {
     calculateInvariantWithError,
 } from './gyroEMath';
 import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
+import { GyroEParams, Vector2, DerivedGyroEParams } from './types';
 
 export class GyroEPoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -45,29 +47,6 @@ export class GyroEPoolToken extends TokenAmount {
         return this;
     }
 }
-
-export type GyroEParams = {
-    alpha: bigint;
-    beta: bigint;
-    c: bigint;
-    s: bigint;
-    lambda: bigint;
-};
-
-export type Vector2 = {
-    x: bigint;
-    y: bigint;
-};
-
-export type DerivedGyroEParams = {
-    tauAlpha: Vector2;
-    tauBeta: Vector2;
-    u: bigint;
-    v: bigint;
-    w: bigint;
-    z: bigint;
-    dSq: bigint;
-};
 
 export class GyroEPool implements BasePool {
     public readonly chainId: number;

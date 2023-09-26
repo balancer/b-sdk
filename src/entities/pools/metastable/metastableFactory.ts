@@ -1,5 +1,5 @@
-import { BasePool, BasePoolFactory } from '..';
-import { MetaStablePool } from '.';
+import { BasePool, BasePoolFactory } from '../index';
+import { MetaStablePool } from './metastablePool';
 import { RawMetaStablePool, RawPool } from '../../../data/types';
 
 export class MetaStablePoolFactory implements BasePoolFactory {

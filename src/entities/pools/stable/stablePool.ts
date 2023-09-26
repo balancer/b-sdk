@@ -1,6 +1,7 @@
 import { Hex, parseEther, parseUnits } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
-import { BigintIsh, Token, TokenAmount } from '../../';
+import { Token } from '../../token';
+import { TokenAmount, BigintIsh } from '../../tokenAmount';
 import { BasePool } from '../';
 import { getPoolAddress, MathSol, WAD } from '../../../utils';
 import {
