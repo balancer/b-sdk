@@ -93,6 +93,7 @@ describe('weighted exit test', () => {
             tokenOut,
             kind: ExitKind.SINGLE_ASSET,
         };
+        
         const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
             exitInput,
             poolFromApi.tokens.map((t) => t.address),
@@ -317,7 +318,7 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'Weighted',
+            type: 'WEIGHTED',
             tokens,
         };
     }

@@ -9,6 +9,6 @@ export type PoolState = {
     address: Address;
     decimals: number;
     index: number;
-  };
-}[];
+  }[];
+};
 

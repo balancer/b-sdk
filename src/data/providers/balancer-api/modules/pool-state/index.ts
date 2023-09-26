@@ -77,7 +77,7 @@ export class Pools {
 
   constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
-  async fetchPoolState(id: string): Promise<Pools> {
+  async fetchPoolState(id: string): Promise<PoolState> {
     const {
       data: { poolGetPool },
     } = await this.balancerApiClient.fetch('GetPool', this.poolStateQuery, {
