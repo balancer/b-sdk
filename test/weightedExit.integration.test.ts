@@ -15,49 +15,52 @@ import {
     walletActions,
 } from 'viem';
 import {
-    BaseExit,
     SingleAssetExitInput,
     ProportionalExitInput,
     UnbalancedExitInput,
     ExitKind,
-    PoolState,
     Slippage,
     Token,
     TokenAmount,
     replaceWrapped,
-} from '../src/entities';
-import { ExitParser } from '../src/entities/exit/parser';
-import { Address, Hex } from '../src/types';
-import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
+    PoolStateInput,
+    PoolExit,
+    Address,
+    Hex,
+    CHAINS,
+    ChainId,
+    getPoolAddress,
+    ExitInput,
+} from '../src';
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
+
+type TxInput = {
+    client: Client & PublicActions & TestActions & WalletActions;
+    poolExit: PoolExit;
+    exitInput: ExitInput;
+    slippage: Slippage;
+    poolInput: PoolStateInput;
+    testAddress: Address;
+    checkNativeBalance: boolean;
+};
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
 const blockNumber = 18043296n;
-const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 const poolId =
     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
-const slippage = Slippage.fromPercentage('1'); // 1%
 
 describe('weighted exit test', () => {
-    let api: MockApi;
-    let client: Client & PublicActions & TestActions & WalletActions;
-    let poolFromApi: PoolState;
-    let weightedExit: BaseExit;
-    let bpt: Token;
-
+    let txInput: TxInput;
+    let bptToken: Token;
     beforeAll(async () => {
         // setup mock api
-        api = new MockApi();
+        const api = new MockApi();
 
         // get pool state from api
-        poolFromApi = await api.getPool(poolId);
+        const poolInput = await api.getPool(poolId);
 
-        // setup exit helper
-        const exitParser = new ExitParser();
-        weightedExit = exitParser.getExit(poolFromApi.type);
-
-        client = createTestClient({
+        const client = createTestClient({
             mode: 'hardhat',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
@@ -65,15 +68,23 @@ describe('weighted exit test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
-        // setup BPT token
-        bpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
+        txInput = {
+            client,
+            poolExit: new PoolExit(),
+            slippage: Slippage.fromPercentage('1'), // 1%
+            poolInput,
+            testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
+            exitInput: {} as ExitInput,
+            checkNativeBalance: false,
+        };
+        bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
         await forkSetup(
-            client,
-            testAddress,
-            [poolFromApi.address],
+            txInput.client,
+            txInput.testAddress,
+            [txInput.poolInput.address],
             undefined, // TODO: hardcode these values to improve test performance
             [parseUnits('1', 18)],
             process.env.ETHEREUM_RPC_URL as string,
@@ -82,10 +93,10 @@ describe('weighted exit test', () => {
     });
 
     test('single asset exit', async () => {
-        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
+        const { slippage } = txInput;
+        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3D'; // BAL
 
-        // perform exit query to get expected bpt out
         const exitInput: SingleAssetExitInput = {
             chainId,
             rpcUrl,
@@ -93,13 +104,10 @@ describe('weighted exit test', () => {
             tokenOut,
             kind: ExitKind.SINGLE_ASSET,
         };
-        
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
+        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+            ...txInput,
             exitInput,
-            poolFromApi.tokens.map((t) => t.address),
-            bpt.address,
-            slippage,
-        );
+        });
 
         // Query should use correct BPT amount
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
@@ -121,21 +129,19 @@ describe('weighted exit test', () => {
     });
 
     test('proportional exit', async () => {
-        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
+        const { slippage } = txInput;
+        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
 
-        // perform exit query to get expected bpt out
         const exitInput: ProportionalExitInput = {
             chainId,
             rpcUrl,
             bptIn,
             kind: ExitKind.PROPORTIONAL,
         };
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
+        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+            ...txInput,
             exitInput,
-            poolFromApi.tokens.map((t) => t.address),
-            bpt.address,
-            slippage,
-        );
+        });
 
         // Query should use correct BPT amount
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
@@ -155,25 +161,25 @@ describe('weighted exit test', () => {
     });
 
     test('unbalanced exit', async () => {
-        const poolTokens = poolFromApi.tokens.map(
+        const { poolInput, slippage } = txInput;
+
+        const poolTokens = poolInput.tokens.map(
             (t) => new Token(chainId, t.address, t.decimals),
         );
         const amountsOut = poolTokens.map((t) =>
             TokenAmount.fromHumanAmount(t, '0.001'),
         );
-        // perform exit query to get expected bpt out
+
         const exitInput: UnbalancedExitInput = {
             chainId,
             rpcUrl,
             amountsOut,
             kind: ExitKind.UNBALANCED,
         };
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
+        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+            ...txInput,
             exitInput,
-            poolFromApi.tokens.map((t) => t.address),
-            bpt.address,
-            slippage,
-        );
+        });
 
         // We expect a BPT input amount > 0
         expect(queryResult.bptIn.amount > 0n).to.be.true;
@@ -192,9 +198,9 @@ describe('weighted exit test', () => {
     });
 
     test('exit with native asset', async () => {
-        const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
+        const { slippage } = txInput;
+        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
 
-        // perform exit query to get expected bpt out
         const exitInput: ProportionalExitInput = {
             chainId,
             rpcUrl,
@@ -203,16 +209,13 @@ describe('weighted exit test', () => {
             exitWithNativeAsset: true,
         };
 
-        // We have to use zero address for balanceDeltas
-        const poolTokens = poolFromApi.tokens.map(
-            (t) => new Token(chainId, t.address, t.decimals),
-        );
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction(
+        // Note - checking native balance
+        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+            ...txInput,
             exitInput,
-            replaceWrapped(poolTokens, chainId).map((a) => a.address),
-            bpt.address,
-            slippage,
-        );
+            checkNativeBalance: true,
+        });
+
         // Query should use correct BPT amount
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
 
@@ -230,29 +233,40 @@ describe('weighted exit test', () => {
         expect(maxBptIn).to.eq(bptIn.amount);
     });
 
-    async function doTransaction(
-        exitInput:
-            | SingleAssetExitInput
-            | ProportionalExitInput
-            | UnbalancedExitInput,
-        poolTokens: Address[],
-        bptToken: Address,
-        slippage: Slippage,
-    ) {
-        const queryResult = await weightedExit.query(exitInput, poolFromApi);
+    async function doTransaction(txIp: TxInput) {
+        const {
+            poolExit,
+            poolInput,
+            exitInput,
+            testAddress,
+            client,
+            slippage,
+            checkNativeBalance,
+        } = txIp;
+        const queryResult = await poolExit.query(exitInput, poolInput);
 
-        const { call, to, value, maxBptIn, minAmountsOut } =
-            weightedExit.buildCall({
+        const { call, to, value, maxBptIn, minAmountsOut } = poolExit.buildCall(
+            {
                 ...queryResult,
                 slippage,
                 sender: testAddress,
                 recipient: testAddress,
-            });
+            },
+        );
+
+        const poolTokens = poolInput.tokens.map(
+            (t) => new Token(chainId, t.address, t.decimals),
+        );
+
+        // Replace with native asset if required
+        const poolTokensAddr = checkNativeBalance
+            ? replaceWrapped(poolTokens, chainId).map((t) => t.address)
+            : poolTokens.map((t) => t.address);
 
         // send transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
             await sendTransactionGetBalances(
-                [...poolTokens, bptToken],
+                [...poolTokensAddr, poolInput.address],
                 client,
                 testAddress,
                 to,
@@ -279,7 +293,7 @@ describe('weighted exit test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolState> {
+    public async getPool(id: Hex): Promise<PoolStateInput> {
         let tokens: { address: Address; decimals: number; index: number }[] =
             [];
         if (

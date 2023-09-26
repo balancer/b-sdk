@@ -4,7 +4,7 @@ dotenv.config();
 import { BalancerApi } from "../../src/data/providers/balancer-api";
 import {
   ChainId,
-  CHAINS, ExitKind,
+  CHAINS, ExitKind, PoolExit,
   SingleAssetExitInput,
   Slippage,
   Token,
@@ -22,7 +22,6 @@ import {
 } from "viem";
 import { PoolState } from "../../src/data/providers/balancer-api/modules/pool-state/types";
 import { forkSetup, sendTransactionGetBalances } from "../../test/lib/utils/helper";
-import { ExitParser } from "../../src/entities/exit/parser";
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
 const poolId = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
@@ -59,12 +58,10 @@ const exit = async () => {
     blockNumber,
   );
 
-
-  const exitParser = new ExitParser();
-  const weightedExit = exitParser.getExit(poolState.type);
-
   const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
   const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3D'; // BAL
+  
+  const poolExit = new PoolExit();
   
   const exitInput: SingleAssetExitInput = {
     chainId,
@@ -74,10 +71,10 @@ const exit = async () => {
     kind: ExitKind.SINGLE_ASSET,
   };
 
-  const queryResult = await weightedExit.query(exitInput, poolState);
+  const queryResult = await poolExit.query(exitInput, poolState);
 
   const { call, to, value, maxBptIn, minAmountsOut } =
-    weightedExit.buildCall({
+    poolExit.buildCall({
       ...queryResult,
       slippage,
       sender: testAddress,

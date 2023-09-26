@@ -1,8 +1,8 @@
 import { JoinInput, JoinKind } from '..';
-import { PoolState } from '../../types';
+import { PoolStateInput } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
-export function validateInputs(input: JoinInput, poolState: PoolState) {
+export function validateInputs(input: JoinInput, poolState: PoolStateInput) {
     switch (input.kind) {
         case JoinKind.Init:
         case JoinKind.Unbalanced:

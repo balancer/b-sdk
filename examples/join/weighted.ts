@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { BalancerApi } from "../../src/data/providers/balancer-api";
-import { ChainId, CHAINS, JoinKind, Slippage, Token, TokenAmount, UnbalancedJoinInput } from "../../src";
+import { ChainId, CHAINS, JoinKind, PoolJoin, Slippage, Token, TokenAmount, UnbalancedJoinInput } from "../../src";
 import {
   Client,
   createTestClient,
@@ -15,7 +15,6 @@ import {
 } from "viem";
 import { PoolState } from "../../src/data/providers/balancer-api/modules/pool-state/types";
 import { forkSetup, sendTransactionGetBalances } from "../../test/lib/utils/helper";
-import { JoinParser } from "../../src/entities/join/parser";
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
 const poolId = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
@@ -51,9 +50,7 @@ const join = async () => {
   );
 
 
-  const joinParser = new JoinParser();
-  const weightedJoin = joinParser.getJoin(poolState.type);
-
+  const poolJoin = new PoolJoin();
   const poolTokens = poolState.tokens.map(
     (t) => new Token(chainId, t.address, t.decimals),
   );
@@ -69,10 +66,10 @@ const join = async () => {
     kind: JoinKind.Unbalanced,
   };
 
-  const queryResult = await weightedJoin.query(joinInput, poolState);
+  const queryResult = await poolJoin.query(joinInput, poolState);
 
   const { call, to, value, maxAmountsIn, minBptOut } =
-    weightedJoin.buildCall({
+    poolJoin.buildCall({
       ...queryResult,
       slippage,
       sender: testAddress,
