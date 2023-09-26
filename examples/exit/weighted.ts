@@ -2,7 +2,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { BalancerApi } from "../../src/data/providers/balancer-api";
-import { ChainId, CHAINS, JoinKind, Slippage, Token, TokenAmount, UnbalancedJoinInput } from "../../src";
+import {
+  ChainId,
+  CHAINS, ExitKind,
+  SingleAssetExitInput,
+  Slippage,
+  Token,
+  TokenAmount,
+} from "../../src";
 import {
   Client,
   createTestClient,
@@ -15,7 +22,7 @@ import {
 } from "viem";
 import { PoolState } from "../../src/data/providers/balancer-api/modules/pool-state/types";
 import { forkSetup, sendTransactionGetBalances } from "../../test/lib/utils/helper";
-import { JoinParser } from "../../src/entities/join/parser";
+import { ExitParser } from "../../src/entities/exit/parser";
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
 const poolId = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
@@ -25,10 +32,13 @@ const blockNumber = BigInt(18043296);
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 const slippage = Slippage.fromPercentage('1'); // 1%
 
-const join = async () => {
+const exit = async () => {
   const balancerApi = new BalancerApi(balancerApiUrl, 1);
   const poolState: PoolState = await balancerApi.pools.fetchPoolState(poolId);
   let client: Client & PublicActions & TestActions & WalletActions;
+  let bpt: Token;
+  // setup BPT token
+  bpt = new Token(chainId, poolState.address, 18, 'BPT');
   client  = createTestClient({
     mode: 'hardhat',
     chain: CHAINS[chainId],
@@ -40,10 +50,9 @@ const join = async () => {
   await forkSetup(
     client,
     testAddress,
-    [...poolState.tokens.map((t) => t.address), poolState.address],
-    [1,3,0],
+    [poolState.address],
+    [0], 
     [
-      ...poolState.tokens.map((t) => parseUnits('100', t.decimals)),
       parseUnits('100', 18),
     ],
     process.env.ETHEREUM_RPC_URL as string,
@@ -51,28 +60,24 @@ const join = async () => {
   );
 
 
-  const joinParser = new JoinParser();
-  const weightedJoin = joinParser.getJoin(poolState.type);
+  const exitParser = new ExitParser();
+  const weightedExit = exitParser.getExit(poolState.type);
 
-  const poolTokens = poolState.tokens.map(
-    (t) => new Token(chainId, t.address, t.decimals),
-  );
-  const amountsIn = poolTokens.map((t) =>
-    TokenAmount.fromHumanAmount(t, '1'),
-  );
-
-  // perform join query to get expected bpt out
-  const joinInput: UnbalancedJoinInput = {
-    amountsIn,
+  const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
+  const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3D'; // BAL
+  
+  const exitInput: SingleAssetExitInput = {
     chainId,
     rpcUrl,
-    kind: JoinKind.Unbalanced,
+    bptIn,
+    tokenOut,
+    kind: ExitKind.SINGLE_ASSET,
   };
 
-  const queryResult = await weightedJoin.query(joinInput, poolState);
+  const queryResult = await weightedExit.query(exitInput, poolState);
 
-  const { call, to, value, maxAmountsIn, minBptOut } =
-    weightedJoin.buildCall({
+  const { call, to, value, maxBptIn, minAmountsOut } =
+    weightedExit.buildCall({
       ...queryResult,
       slippage,
       sender: testAddress,
@@ -80,7 +85,7 @@ const join = async () => {
     });
   const { transactionReceipt, balanceDeltas } =
     await sendTransactionGetBalances(
-      [...poolState.tokens.map(({address})=>address), poolState.address /*BPT*/],
+      [...poolState.tokens.map(({address})=>address), bpt.address],
       client,
       testAddress,
       to,
@@ -91,4 +96,4 @@ const join = async () => {
   console.log("token amounts deltas per token: " + balanceDeltas);
 }
 
-join();
+exit();
