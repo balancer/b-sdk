@@ -6,6 +6,7 @@ import {
     RawPool,
     RawPoolTokenWithRate,
     RawWeightedPoolToken,
+    HumanAmount,
 } from '../types';
 
 import {
@@ -16,7 +17,7 @@ import {
     poolHasVirtualSupply,
     poolIsLinearPool,
 } from '../../utils';
-import { HumanAmount, SwapOptions } from '../../types';
+import { SwapOptions } from '../../types';
 
 interface OnChainPoolData {
     id: string;

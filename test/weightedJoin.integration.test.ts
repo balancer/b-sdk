@@ -16,7 +16,6 @@ import {
 } from 'viem';
 
 import {
-    BaseJoin,
     UnbalancedJoinInput,
     ProportionalJoinInput,
     SingleAssetJoinInput,
@@ -25,34 +24,45 @@ import {
     Token,
     TokenAmount,
     replaceWrapped,
-} from '../src/entities';
-import { JoinParser } from '../src/entities/join/parser';
-import { Address, Hex } from '../src/types';
-import { PoolState } from '../src/entities/types';
-import { CHAINS, ChainId, getPoolAddress } from '../src/utils';
-
+    Address,
+    Hex,
+    PoolStateInput,
+    CHAINS,
+    ChainId,
+    getPoolAddress,
+    PoolJoin,
+    JoinInput,
+} from '../src';
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
+
+type TxInput = {
+    client: Client & PublicActions & TestActions & WalletActions;
+    poolJoin: PoolJoin;
+    joinInput: JoinInput;
+    slippage: Slippage;
+    poolInput: PoolStateInput;
+    testAddress: Address;
+    checkNativeBalance: boolean;
+};
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
 const blockNumber = 18043296n;
-const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
-const slippage = Slippage.fromPercentage('1'); // 1%
 const poolId =
     '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512'; // Balancer 50COMP-50wstETH
 
 describe('weighted join test', () => {
-    let api: MockApi;
-    let client: Client & PublicActions & TestActions & WalletActions;
-    let poolFromApi: PoolState;
-    let weightedJoin: BaseJoin;
-    let bpt: Token;
+    let txInput: TxInput;
+    let bptToken: Token;
 
     beforeAll(async () => {
         // setup mock api
-        api = new MockApi();
+        const api = new MockApi();
 
-        client = createTestClient({
+        // get pool state from api
+        const poolInput = await api.getPool(poolId);
+
+        const client = createTestClient({
             mode: 'hardhat',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
@@ -60,25 +70,33 @@ describe('weighted join test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
-        // get pool state from api
-        poolFromApi = await api.getPool(poolId);
-
-        // setup join helper
-        const joinParser = new JoinParser();
-        weightedJoin = joinParser.getJoin(poolFromApi.type);
+        txInput = {
+            client,
+            poolJoin: new PoolJoin(),
+            slippage: Slippage.fromPercentage('1'), // 1%
+            poolInput,
+            testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
+            joinInput: {} as JoinInput,
+            checkNativeBalance: false,
+        };
 
         // setup BPT token
-        bpt = new Token(chainId, poolFromApi.address, 18, 'BPT');
+        bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
         await forkSetup(
-            client,
-            testAddress,
-            [...poolFromApi.tokens.map((t) => t.address), poolFromApi.address],
+            txInput.client,
+            txInput.testAddress,
+            [
+                ...txInput.poolInput.tokens.map((t) => t.address),
+                txInput.poolInput.address,
+            ],
             undefined, // TODO: hardcode these values to improve test performance
             [
-                ...poolFromApi.tokens.map((t) => parseUnits('100', t.decimals)),
+                ...txInput.poolInput.tokens.map((t) =>
+                    parseUnits('100', t.decimals),
+                ),
                 parseUnits('100', 18),
             ],
             process.env.ETHEREUM_RPC_URL as string,
@@ -87,7 +105,7 @@ describe('weighted join test', () => {
     });
 
     test('unbalanced join', async () => {
-        const poolTokens = poolFromApi.tokens.map(
+        const poolTokens = txInput.poolInput.tokens.map(
             (t) => new Token(chainId, t.address, t.decimals),
         );
         const amountsIn = poolTokens.map((t) =>
@@ -103,12 +121,10 @@ describe('weighted join test', () => {
         };
 
         const { queryResult, maxAmountsIn, minBptOut, value } =
-            await doTransaction(
+            await doTransaction({
+                ...txInput,
                 joinInput,
-                poolFromApi.tokens.map((t) => t.address),
-                bpt.address,
-                slippage,
-            );
+            });
 
         // Query should use same amountsIn as user sets
         expect(queryResult.amountsIn).to.deep.eq(amountsIn);
@@ -121,14 +137,16 @@ describe('weighted join test', () => {
         expect(queryResult.bptOut.amount > 0n).to.be.true;
 
         // Confirm slippage - only bpt out
-        const expectedMinBpt = slippage.removeFrom(queryResult.bptOut.amount);
+        const expectedMinBpt = txInput.slippage.removeFrom(
+            queryResult.bptOut.amount,
+        );
         expect(expectedMinBpt).to.deep.eq(minBptOut);
         const expectedMaxAmountsIn = amountsIn.map((a) => a.amount);
         expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
     });
 
     test('native asset join', async () => {
-        const poolTokens = poolFromApi.tokens.map(
+        const poolTokens = txInput.poolInput.tokens.map(
             (t) => new Token(chainId, t.address, t.decimals),
         );
         const amountsIn = poolTokens.map((t) =>
@@ -146,12 +164,11 @@ describe('weighted join test', () => {
 
         // We have to use zero address for balanceDeltas
         const { queryResult, maxAmountsIn, minBptOut, value } =
-            await doTransaction(
+            await doTransaction({
+                ...txInput,
                 joinInput,
-                replaceWrapped(poolTokens, chainId).map((a) => a.address),
-                bpt.address,
-                slippage,
-            );
+                checkNativeBalance: true,
+            });
 
         // Query should use same amountsIn as user sets
         expect(queryResult.amountsIn.map((a) => a.amount)).to.deep.eq(
@@ -165,14 +182,16 @@ describe('weighted join test', () => {
         expect(queryResult.bptOut.amount > 0n).to.be.true;
 
         // Confirm slippage - only bpt out
-        const expectedMinBpt = slippage.removeFrom(queryResult.bptOut.amount);
+        const expectedMinBpt = txInput.slippage.removeFrom(
+            queryResult.bptOut.amount,
+        );
         expect(expectedMinBpt).to.deep.eq(minBptOut);
         const expectedMaxAmountsIn = amountsIn.map((a) => a.amount);
         expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
     });
 
     test('single asset join', async () => {
-        const bptOut = TokenAmount.fromHumanAmount(bpt, '1');
+        const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
         const tokenIn = '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f';
 
         // perform join query to get expected bpt out
@@ -185,12 +204,10 @@ describe('weighted join test', () => {
         };
 
         const { queryResult, maxAmountsIn, minBptOut, value } =
-            await doTransaction(
+            await doTransaction({
+                ...txInput,
                 joinInput,
-                poolFromApi.tokens.map((t) => t.address),
-                bpt.address,
-                slippage,
-            );
+            });
 
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
@@ -208,14 +225,14 @@ describe('weighted join test', () => {
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
-            slippage.applyTo(a.amount),
+            txInput.slippage.applyTo(a.amount),
         );
         expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
         expect(minBptOut).to.eq(bptOut.amount);
     });
 
     test('proportional join', async () => {
-        const bptOut = TokenAmount.fromHumanAmount(bpt, '1');
+        const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
 
         // perform join query to get expected bpt out
         const joinInput: ProportionalJoinInput = {
@@ -226,12 +243,10 @@ describe('weighted join test', () => {
         };
 
         const { queryResult, maxAmountsIn, minBptOut, value } =
-            await doTransaction(
+            await doTransaction({
+                ...txInput,
                 joinInput,
-                poolFromApi.tokens.map((t) => t.address),
-                bpt.address,
-                slippage,
-            );
+            });
 
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
@@ -248,35 +263,46 @@ describe('weighted join test', () => {
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
-            slippage.applyTo(a.amount),
+            txInput.slippage.applyTo(a.amount),
         );
         expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
         expect(minBptOut).to.eq(bptOut.amount);
     });
 
-    async function doTransaction(
-        joinInput:
-            | UnbalancedJoinInput
-            | ProportionalJoinInput
-            | SingleAssetJoinInput,
-        poolTokens: Address[],
-        bptToken: Address,
-        slippage: Slippage,
-    ) {
-        const queryResult = await weightedJoin.query(joinInput, poolFromApi);
+    async function doTransaction(txIp: TxInput) {
+        const {
+            poolJoin,
+            poolInput,
+            joinInput,
+            testAddress,
+            client,
+            slippage,
+            checkNativeBalance,
+        } = txIp;
+        const queryResult = await poolJoin.query(joinInput, poolInput);
 
-        const { call, to, value, maxAmountsIn, minBptOut } =
-            weightedJoin.buildCall({
+        const { call, to, value, maxAmountsIn, minBptOut } = poolJoin.buildCall(
+            {
                 ...queryResult,
                 slippage,
                 sender: testAddress,
                 recipient: testAddress,
-            });
+            },
+        );
+
+        const poolTokens = poolInput.tokens.map(
+            (t) => new Token(chainId, t.address, t.decimals),
+        );
+
+        // Replace with native asset if required
+        const poolTokensAddr = checkNativeBalance
+            ? replaceWrapped(poolTokens, chainId).map((t) => t.address)
+            : poolTokens.map((t) => t.address);
 
         // send transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
             await sendTransactionGetBalances(
-                [...poolTokens, bptToken],
+                [...poolTokensAddr, poolInput.address],
                 client,
                 testAddress,
                 to,
@@ -304,7 +330,7 @@ describe('weighted join test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolState> {
+    public async getPool(id: Hex): Promise<PoolStateInput> {
         const tokens = [
             {
                 address:

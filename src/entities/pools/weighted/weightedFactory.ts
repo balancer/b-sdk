@@ -1,5 +1,5 @@
-import { BasePool, BasePoolFactory } from '../';
-import { WeightedPool } from './';
+import { BasePool, BasePoolFactory } from '../index';
+import { WeightedPool } from './weightedPool';
 import { RawPool, RawWeightedPool } from '../../../data/types';
 
 export class WeightedPoolFactory implements BasePoolFactory {

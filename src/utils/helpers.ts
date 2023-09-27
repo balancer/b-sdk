@@ -1,4 +1,5 @@
-import { BigintIsh, Token, TokenAmount } from '../entities';
+import { Token } from '../entities/token';
+import { TokenAmount, BigintIsh } from '../entities/tokenAmount';
 import { SwapKind } from '../types';
 
 export function checkInputs(

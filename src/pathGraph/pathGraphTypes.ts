@@ -1,5 +1,12 @@
-import { PoolTokenPair } from '../types';
-import { BasePool, Token } from '../entities';
+import { Token } from '../entities/token';
+import { BasePool } from '../entities/pools/index';
+
+export interface PoolTokenPair {
+    id: string;
+    pool: BasePool;
+    tokenIn: Token;
+    tokenOut: Token;
+}
 
 export type PoolAddressDictionary = {
     [address: string]: BasePool;

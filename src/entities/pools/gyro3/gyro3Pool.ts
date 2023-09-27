@@ -6,7 +6,8 @@ import {
     _calculateInvariant,
 } from './gyro3Math';
 import { BasePool } from '..';
-import { BigintIsh, Token, TokenAmount } from '../..';
+import { Token } from '../../token';
+import { TokenAmount, BigintIsh } from '../../tokenAmount';
 import { RawGyro3Pool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
 import { getPoolAddress, MathSol, WAD } from '../../../utils';

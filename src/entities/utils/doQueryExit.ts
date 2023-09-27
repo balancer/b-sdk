@@ -1,8 +1,8 @@
 import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
-import { BALANCER_HELPERS, CHAINS } from '../../utils';
+import { BALANCER_HELPERS, CHAINS } from '../../utils/constants';
 import { balancerHelpersAbi } from '../../abi';
-import { ExitPoolRequest } from '../exit';
+import { ExitPoolRequest } from '../exit/types';
 
 export async function doQueryExit(
     rpcUrl: string,

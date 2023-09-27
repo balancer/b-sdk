@@ -1,32 +1,32 @@
 import { encodeFunctionData } from 'viem';
-import { Token, TokenAmount, WeightedEncoder } from '../../..';
+import { Token } from '../../token';
+import { TokenAmount } from '../../tokenAmount';
+import { WeightedEncoder } from '../../encoders/weighted';
 import { Address } from '../../../types';
-import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
+import {
+    BALANCER_VAULT,
+    MAX_UINT256,
+    ZERO_ADDRESS,
+} from '../../../utils/constants';
 import { vaultAbi } from '../../../abi';
 import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
     BaseExit,
-    BuildOutput,
+    ExitBuildOutput,
     ExitCallInput,
     ExitInput,
     ExitKind,
     ExitQueryResult,
 } from '../types';
-import { getSortedTokens } from '../../utils';
-import { PoolState, AmountsExit } from '../../types';
+import { AmountsExit, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
-import { validateInputs } from './validateInputs';
 
 export class WeightedExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
-        validateInputs(input, poolState);
-
-        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-
-        const amounts = this.getAmountsQuery(sortedTokens, input);
+        const amounts = this.getAmountsQuery(poolState.tokens, input);
 
         const userData = this.encodeUserData(input.kind, amounts);
 
@@ -35,7 +35,7 @@ export class WeightedExit implements BaseExit {
             chainId: input.chainId,
             exitWithNativeAsset: !!input.exitWithNativeAsset,
             poolId: poolState.id,
-            sortedTokens,
+            sortedTokens: poolState.tokens,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,
@@ -57,6 +57,7 @@ export class WeightedExit implements BaseExit {
         );
 
         return {
+            poolType: poolState.type,
             exitKind: input.kind,
             id: poolState.id,
             bptIn,
@@ -94,7 +95,7 @@ export class WeightedExit implements BaseExit {
         }
     }
 
-    public buildCall(input: ExitCallInput): BuildOutput {
+    public buildCall(input: ExitCallInput): ExitBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.exitKind, amounts);

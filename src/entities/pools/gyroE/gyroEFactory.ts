@@ -1,5 +1,5 @@
-import { GyroEPool } from '.';
-import { BasePool, BasePoolFactory } from '..';
+import { GyroEPool } from './gyroEPool';
+import { BasePool, BasePoolFactory } from '../index';
 import { RawGyroEPool, RawPool } from '../../../data/types';
 
 export class GyroEPoolFactory implements BasePoolFactory {

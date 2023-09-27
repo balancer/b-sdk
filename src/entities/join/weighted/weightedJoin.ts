@@ -1,34 +1,27 @@
 import { encodeFunctionData } from 'viem';
-import { Token, TokenAmount, WeightedEncoder } from '../../..';
-import { Address, Hex } from '../../../types';
+import { Token } from '../../../entities/token';
+import { TokenAmount } from '../../../entities/tokenAmount';
+import { WeightedEncoder } from '../../../entities/encoders/weighted';
+import { Address } from '../../../types';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
-import { validateInputs } from './validateInputs';
 import {
     BaseJoin,
+    JoinBuildOutput,
     JoinCallInput,
     JoinInput,
     JoinKind,
     JoinQueryResult,
-} from '..';
-import { PoolState, AmountsJoin } from '../../types';
-import {
-    doQueryJoin,
-    getAmounts,
-    parseJoinArgs,
-    getSortedTokens,
-} from '../../utils';
+} from '../types';
+import { AmountsJoin, PoolState } from '../../types';
+import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
 
 export class WeightedJoin implements BaseJoin {
     public async query(
         input: JoinInput,
         poolState: PoolState,
     ): Promise<JoinQueryResult> {
-        validateInputs(input, poolState);
-
-        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-
-        const amounts = this.getAmountsQuery(sortedTokens, input);
+        const amounts = this.getAmountsQuery(poolState.tokens, input);
 
         const userData = this.encodeUserData(input.kind, amounts);
 
@@ -36,7 +29,7 @@ export class WeightedJoin implements BaseJoin {
             useNativeAssetAsWrappedAmountIn:
                 !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
-            sortedTokens,
+            sortedTokens: poolState.tokens,
             poolId: poolState.id,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
@@ -59,6 +52,7 @@ export class WeightedJoin implements BaseJoin {
         );
 
         return {
+            poolType: poolState.type,
             joinKind: input.kind,
             poolId: poolState.id,
             bptOut,
@@ -68,13 +62,7 @@ export class WeightedJoin implements BaseJoin {
         };
     }
 
-    public buildCall(input: JoinCallInput): {
-        call: Hex;
-        to: Address;
-        value: bigint | undefined;
-        minBptOut: bigint;
-        maxAmountsIn: bigint[];
-    } {
+    public buildCall(input: JoinCallInput): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.joinKind, amounts);
