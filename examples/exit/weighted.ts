@@ -4,7 +4,7 @@ dotenv.config();
 import { BalancerApi } from "../../src/data/providers/balancer-api";
 import {
   ChainId,
-  CHAINS, ExitKind, PoolExit,
+  CHAINS, ExitKind, PoolExit, PoolStateInput,
   SingleAssetExitInput,
   Slippage,
   Token,
@@ -20,7 +20,6 @@ import {
   TestActions, WalletActions,
   walletActions
 } from "viem";
-import { PoolState } from "../../src/data/providers/balancer-api/modules/pool-state/types";
 import { forkSetup, sendTransactionGetBalances } from "../../test/lib/utils/helper";
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
@@ -33,7 +32,7 @@ const slippage = Slippage.fromPercentage('1'); // 1%
 
 const exit = async () => {
   const balancerApi = new BalancerApi(balancerApiUrl, 1);
-  const poolState: PoolState = await balancerApi.pools.fetchPoolState(poolId);
+  const poolState: PoolStateInput = await balancerApi.pools.fetchPoolState(poolId);
   let client: Client & PublicActions & TestActions & WalletActions;
   let bpt: Token;
   // setup BPT token

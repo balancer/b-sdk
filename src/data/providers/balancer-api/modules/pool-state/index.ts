@@ -1,5 +1,5 @@
 import { BalancerApiClient } from '../../client';
-import { PoolState } from './types';
+import { PoolStateInput } from "../../../../../entities";
 
 export class Pools {
   readonly poolStateQuery = `query GetPool($id: String!){
@@ -77,7 +77,7 @@ export class Pools {
 
   constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
-  async fetchPoolState(id: string): Promise<PoolState> {
+  async fetchPoolState(id: string): Promise<PoolStateInput> {
     const {
       data: { poolGetPool },
     } = await this.balancerApiClient.fetch('GetPool', this.poolStateQuery, {

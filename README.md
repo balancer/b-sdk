@@ -22,13 +22,18 @@ Testing requires access to an archive node for onchain quote comparisons. This c
 
 `pnpm test`
 
-## Examples
+## Balancer Api Provider
 
-### Balancer Api Provider
+The Balancer API Provider is a provider that facilitates 
+data fetching from the Balancer API,
+it can be used for:
+- Fetch Pool State for Joins;
+- Fetch Pool State for Exits.
 
-Joining with pool state:
+### Usage for Joining Pool
+
 ```ts
-  import BalancerApi from "@balancer/sdk/data/providers/balancer-api";
+  import { BalancerApi, PoolJoin } from "@balancer/sdk";
     ...
     const joinInput: ProportionalJoinInput = {
       bptOut,
@@ -37,47 +42,64 @@ Joining with pool state:
       kind: JoinKind.Proportional,
     };
 
-    const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', 1);
-    const poolState = await balancerApi.pools.fetchSimplePoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
-    const joinParser = new JoinParser();
-    const poolJoin = joinParser.getJoin(poolState.type);
-    const queryResult = await weightedJoin.query(joinInput, poolState);
-
+    const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
+    const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
+    const poolJoin = new PoolJoin();
+    const queryResult = await poolJoin.query(joinInput, poolState);
+    const { call, to, value, maxAmountsIn, minBptOut } =
+        poolJoin.buildCall({
+            ...queryResult,
+            slippage,
+            sender: signerAddress,
+            recipient: signerAddress,
+        });
+    const client = createClient({
+      ...
+    })
+    
+    await client.sendTransaction({
+      account: signerAddress,
+      chain: client.chain,
+      data: call,
+      to,
+      value,
+    });
 ```
+Full working join example: [examples/join/weighted.ts](./examples/join/weighted.ts)
 
-Exiting with pool state:
+### Usage for Exiting Pool
 ```ts
-import BalancerApi from "@balancer/sdk/data/providers/balancer-api";
+import { BalancerApi, PoolExit } from "@balancer/sdk";
 ...
-const joinInput: ProportionalJoinInput = {
-  bptOut,
+const exitInput: SingleAssetExitInput = {
   chainId,
   rpcUrl,
-  kind: JoinKind.Proportional,
+  bptIn,
+  tokenOut,
+  kind: ExitKind.SINGLE_ASSET,
 };
 
-const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', 1);
-const poolState = await balancerApi.pools.fetchSimplePoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
-const joinParser = new JoinParser();
-const poolJoin = joinParser.getJoin(poolState.type);
-const queryResult = await weightedJoin.query(joinInput, poolState);
-const slippage = Slippage.fromPercentage('1'); // 1%
+const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
+const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
+const poolExit = new PoolExit();
+const queryResult = await poolExit.query(exitInput, poolState);
 const { call, to, value, maxAmountsIn, minBptOut } =
-  weightedJoin.buildCall({
+  poolExit.buildCall({
     ...queryResult,
     slippage,
-    sender,
-    recipient,
+    sender: signerAddress,
+    recipient: signerAddress,
   });
 const client = createClient({
   ...
 })
 
 await client.sendTransaction({
-  account,
+  account: signerAddress,
   chain: client.chain,
-  data,
+  data: call,
   to,
   value,
 });
 ```
+Full working exit example: [examples/exit/weighted.ts](./examples/exit/weighted.ts)
