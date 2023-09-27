@@ -8,12 +8,11 @@ import {
 import { Address, Hex } from '../../types';
 import { Slippage } from '../slippage';
 import { Token } from '../token';
-import { balancerRelayerAbi } from '../../abi/balancerRelayer';
 import { BALANCER_RELAYER, CHAINS, getPoolAddress } from '../../utils';
 import { Relayer } from '../relayer';
 import { parseNestedJoinArgs } from '../utils/parseNestedJoinArgs';
 import { TokenAmount } from '../tokenAmount';
-import { bathcRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
+import { balancerRelayerAbi, bathcRelayerLibraryAbi } from '../../abi';
 
 export type NestedJoinInput = {
     amountsIn: {
