@@ -34,6 +34,18 @@ export class Relayer {
         return hexToBigInt(chainedReferenceWithoutPrefix);
     }
 
+    /**
+     * Returns true if `amount` is not actually an amount, but rather a chained reference.
+     */
+    static isChainedReference(amount: bigint): boolean {
+        const mask: Hex =
+            '0xfff0000000000000000000000000000000000000000000000000000000000000';
+        const readonly: Hex =
+            '0xba10000000000000000000000000000000000000000000000000000000000000';
+        const check = amount & hexToBigInt(mask);
+        return readonly === toHex(check);
+    }
+
     static encodePeekChainedReferenceValue(reference: bigint): Hex {
         return encodeFunctionData({
             abi: bathcRelayerLibraryAbi,

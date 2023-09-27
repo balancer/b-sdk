@@ -84,20 +84,20 @@ describe('nested join test', () => {
 
         // Fork setup - done only once per fork reset
         // Governance grant roles to the relayer
-        // await grantRoles(client);
+        await grantRoles(client);
 
         // User approve vault to spend their tokens
-        // const dai = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address;
-        // await approveToken(client, testAddress, dai, parseUnits('1000', 18));
+        const dai = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address;
+        await approveToken(client, testAddress, dai, parseUnits('1000', 18));
 
         // Update user balance
-        // await setTokenBalance(
-        //     client,
-        //     testAddress,
-        //     dai,
-        //     2,
-        //     parseUnits('1000', 18),
-        // );
+        await setTokenBalance(
+            client,
+            testAddress,
+            dai,
+            2,
+            parseUnits('1000', 18),
+        );
 
         poolId =
             '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4'; // GHO-3POOL-BPT
@@ -105,7 +105,7 @@ describe('nested join test', () => {
 
     beforeEach(async () => {
         // get pool state from api
-        nestedPoolFromApi = await api.getNestedPool(poolId);
+        nestedPoolFromApi = await api.getNestedPool(getPoolAddress(poolId));
 
         // setup join helper
         nestedJoin = new NestedJoin();
@@ -148,10 +148,12 @@ describe('nested join test', () => {
             relayerApprovalSignature: signature,
         });
 
+        const tokensIn = joinInput.amountsIn.map((a) => a.address);
+
         // send join transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
             await sendTransactionGetBalances(
-                [amountIn.address, queryResult.bptOut.token.address],
+                [...tokensIn, queryResult.bptOut.token.address],
                 client,
                 testAddress,
                 to,
@@ -161,8 +163,10 @@ describe('nested join test', () => {
 
         expect(transactionReceipt.status).to.eq('success');
         expect(queryResult.bptOut.amount > 0n).to.be.true;
-        const expectedDeltas = [amountIn.rawAmount, queryResult.bptOut.amount];
-
+        const expectedDeltas = [
+            ...joinInput.amountsIn.map((a) => a.rawAmount),
+            queryResult.bptOut.amount,
+        ];
         expect(expectedDeltas).to.deep.eq(balanceDeltas);
         const expectedMinBpt = slippage.removeFrom(queryResult.bptOut.amount);
         expect(expectedMinBpt).to.deep.eq(minBptOut);
@@ -172,90 +176,103 @@ describe('nested join test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getNestedPool(id: Hex): Promise<NestedPoolState> {
-        let tokens: {
-            address: Address;
-            decimals: number;
-            index: number;
-            joinSteps: JoinStep[];
-        }[] = [];
-        if (
-            id ===
-            '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4' // GHO-3POOL-BPT
-        ) {
-            tokens = [
-                {
-                    address: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', // GHO
-                    decimals: 18,
-                    index: 0,
-                    joinSteps: [
-                        {
-                            action: 'join',
-                            level: 1,
-                            poolId: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
-                            isTop: true,
-                        },
-                    ],
-                },
-                {
-                    address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc', // 3POOL-BPT
-                    decimals: 18,
-                    index: 1,
-                    joinSteps: [
-                        {
-                            action: 'join',
-                            level: 1,
-                            poolId: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
-                            isTop: true,
-                        },
-                    ],
-                },
-                {
+    public async getNestedPool(address: Address): Promise<NestedPoolState> {
+        if (address !== '0xbe19d87ea6cd5b05bbc34b564291c371dae96747')
+            throw Error();
+        const pools: { id: Hex; address: Address; type: string }[] = [
+            {
+                id: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
+                address: '0xbe19d87ea6cd5b05bbc34b564291c371dae96747',
+                type: 'ComposableStable',
+            },
+            {
+                id: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
+                address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
+                type: 'ComposableStable',
+            },
+        ];
+        const joinSteps: JoinStep[] = [
+            {
+                action: 'join',
+                input: {
                     address: '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
                     decimals: 18,
                     index: 0,
-                    joinSteps: [
-                        {
-                            action: 'join',
-                            level: 0,
-                            poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-                            isTop: false,
-                        },
-                    ],
                 },
-                {
+                level: 0,
+                poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
+                isTop: false,
+            },
+            {
+                action: 'join',
+                input: {
+                    address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc', // 3POOL-BPT
+                    decimals: 18,
+                    index: 1,
+                },
+                level: 0,
+                poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
+                isTop: false,
+            },
+            {
+                action: 'join',
+                input: {
                     address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
                     decimals: 6,
                     index: 2,
-                    joinSteps: [
-                        {
-                            action: 'join',
-                            level: 0,
-                            poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-                            isTop: false,
-                        },
-                    ],
                 },
-                {
+                level: 0,
+                poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
+                isTop: false,
+            },
+            {
+                action: 'join',
+                input: {
                     address: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
                     decimals: 6,
                     index: 3,
-                    joinSteps: [
-                        {
-                            action: 'join',
-                            level: 0,
-                            poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-                            isTop: false,
-                        },
-                    ],
                 },
-            ];
-        }
+                level: 0,
+                poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
+                isTop: false,
+            },
+            {
+                action: 'join',
+                input: {
+                    address: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', // GHO
+                    decimals: 18,
+                    index: 0,
+                },
+                level: 1,
+                poolId: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
+                isTop: true,
+            },
+            {
+                action: 'join',
+                input: {
+                    address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc', // 3POOL-BPT
+                    decimals: 18,
+                    index: 1,
+                },
+                level: 1,
+                poolId: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
+                isTop: true,
+            },
+            {
+                action: 'join',
+                input: {
+                    address: '0xbe19d87ea6cd5b05bbc34b564291c371dae96747', // GHO-3POOL-BPT
+                    decimals: 18,
+                    index: 2,
+                },
+                level: 1,
+                poolId: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
+                isTop: true,
+            },
+        ];
         return {
-            id,
-            address: getPoolAddress(id) as Address,
-            type: 'ComposableStable',
-            tokens,
+            pools,
+            joinSteps,
         };
     }
 }

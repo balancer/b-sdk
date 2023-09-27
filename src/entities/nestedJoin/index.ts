@@ -4,17 +4,16 @@ import {
     decodeFunctionResult,
     encodeFunctionData,
     http,
-    parseUnits,
 } from 'viem';
-import { Address, Hex, HumanAmount } from '../../types';
+import { Address, Hex } from '../../types';
 import { Slippage } from '../slippage';
 import { Token } from '../token';
-import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi } from '../../abi/balancerRelayer';
-import { bathcRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
-import { BALANCER_RELAYER, CHAINS } from '../../utils';
-import { StableEncoder } from '../encoders/stable';
+import { BALANCER_RELAYER, CHAINS, getPoolAddress } from '../../utils';
 import { Relayer } from '../relayer';
+import { parseNestedJoinArgs } from '../utils/parseNestedJoinArgs';
+import { TokenAmount } from '../tokenAmount';
+import { bathcRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
 
 export type NestedJoinInput = {
     amountsIn: {
@@ -29,31 +28,49 @@ export type NestedJoinInput = {
 };
 
 export type JoinStep = {
-    action: 'join'; // TODO: check the need for other actions
+    action: 'join'; // TODO: are we supporting other actions, such as swaps?
     level: number; // 0 is the bottom and the highest level is the top
+    input: NestedToken;
     poolId: Address; // output poolId
     isTop: boolean;
 };
 
 export type NestedPoolState = {
-    id: Hex;
-    address: Address;
-    type: string;
-    tokens: NestedToken[];
+    pools: {
+        id: Hex;
+        address: Address;
+        type: string;
+    }[];
+    joinSteps: JoinStep[]; // each token should have at least one
 };
 
 type NestedToken = {
     address: Address;
     decimals: number;
     index: number;
-    joinSteps: JoinStep[]; // each token should have at least one
+};
+
+export type NestedJoinArgs = {
+    chainId: number;
+    useNativeAssetAsWrappedAmountIn?: boolean;
+    sortedTokens: Token[];
+    poolId: Address;
+    poolType: string;
+    kind: number;
+    sender: Address;
+    recipient: Address;
+    maxAmountsIn: {
+        amount: bigint;
+        isRef: boolean;
+    }[];
+    minBptOut: bigint;
+    fromInternalBalance: boolean;
+    outputReferenceKey: bigint;
 };
 
 type NestedJoinQueryResult = {
-    poolId: Address;
+    calls: NestedJoinArgs[];
     bptOut: TokenAmount;
-    amountsIn: TokenAmount[];
-    fromInternalBalance: boolean;
 };
 
 type NestedJoinCallInput = NestedJoinQueryResult & {
@@ -63,27 +80,104 @@ type NestedJoinCallInput = NestedJoinQueryResult & {
     relayerApprovalSignature?: Hex;
 };
 
-const joinPathOutputRefIndex = 100n;
+const outputRefOffset = 100n;
 
 export class NestedJoin {
     async query(
         input: NestedJoinInput,
         nestedPoolState: NestedPoolState,
-        // TODO: should we have a separate pool state for nested joins or should we have a global pool state?
     ): Promise<NestedJoinQueryResult> {
         const client = createPublicClient({
             transport: http(input.rpcUrl),
             chain: CHAINS[input.chainId],
         });
 
-        // encode call with hardcoded amounts for initial testing
-        const encodedCall = this.encodeJoinPoolForQuery(input, nestedPoolState);
+        // sort pools by ascending level
+        // then go from bottom pool to up filling out input and output amounts from joinSteps
+        // input at level 0 are either amountsIn provided or 0n
+        // input at following levels can be amountsIn provided, output of the previous level or 0n
+        // output at max level is the bptOut
 
-        const encodedCalls = [encodedCall];
+        const stepsSortedByLevel = nestedPoolState.joinSteps.sort(
+            (a, b) => a.level - b.level,
+        );
+        const poolIdsSortedByLevel = [
+            ...new Set(stepsSortedByLevel.map((s) => s.poolId)),
+        ];
+        const poolsSortedByLevel = poolIdsSortedByLevel.map(
+            (poolId) => nestedPoolState.pools.find((p) => p.id === poolId)!,
+        );
+
+        const calls: NestedJoinArgs[] = [];
+        for (const pool of poolsSortedByLevel) {
+            const joinStepsForPool = nestedPoolState.joinSteps
+                .filter((j) => j.poolId === pool.id)
+                .sort((a, b) => a.input.index - b.input.index);
+            calls.push({
+                chainId: input.chainId,
+                useNativeAssetAsWrappedAmountIn:
+                    input.useNativeAssetAsWrappedAmountIn,
+                sortedTokens: joinStepsForPool.map((joinStep) => {
+                    return new Token(
+                        input.chainId,
+                        joinStep.input.address,
+                        joinStep.input.decimals,
+                    );
+                }),
+                poolId: pool.id,
+                poolType: pool.type,
+                kind: 0,
+                sender: input.testAddress,
+                recipient: input.testAddress,
+                maxAmountsIn: joinStepsForPool.map((joinStep) => {
+                    const amountIn = input.amountsIn.find(
+                        (a) => a.address === joinStep.input.address,
+                    );
+                    const lowerLevelCall = calls.find(
+                        (call) =>
+                            getPoolAddress(call.poolId) ===
+                            joinStep.input.address,
+                    );
+                    if (amountIn) {
+                        return {
+                            amount: amountIn.rawAmount, // TODO: add proportions for duplicate tokens
+                            isRef: false,
+                        };
+                    } else if (lowerLevelCall !== undefined) {
+                        return {
+                            amount: lowerLevelCall.outputReferenceKey,
+                            isRef: true,
+                        };
+                    } else {
+                        return {
+                            amount: 0n,
+                            isRef: false,
+                        };
+                    }
+                }),
+                minBptOut: 0n,
+                fromInternalBalance: input.fromInternalBalance ?? false,
+                outputReferenceKey:
+                    BigInt(poolsSortedByLevel.indexOf(pool)) + outputRefOffset,
+            });
+        }
+
+        const parsedCalls = calls.map((call) => parseNestedJoinArgs(call));
+
+        const encodedCalls = parsedCalls.map((parsedCall) =>
+            encodeFunctionData({
+                abi: bathcRelayerLibraryAbi,
+                functionName: 'joinPool',
+                args: parsedCall.args,
+            }),
+        );
 
         // peek join output
         const peekCall = Relayer.encodePeekChainedReferenceValue(
-            Relayer.toChainedReference(joinPathOutputRefIndex, false),
+            Relayer.toChainedReference(
+                calls[calls.length - 1].outputReferenceKey,
+                false,
+            ),
         );
         encodedCalls.push(peekCall);
 
@@ -105,26 +199,23 @@ export class NestedJoin {
             data: data as Hex,
         });
 
-        const peekCallIndex = 1; // TODO: replace hardcoded 1 by peek call indexes
+        // TODO: extend logic for multiple peek calls in the context of non-leaf joins
+        const peekCallIndex = encodedCalls.length - 1;
         const peekedValue = decodeAbiParameters(
             [{ type: 'uint256' }],
             result[peekCallIndex],
         )[0];
-        console.log('peekedValue', peekedValue);
+        console.log('query bpt out', peekedValue);
 
-        const bptToken = new Token(
+        const tokenOut = new Token(
             input.chainId,
-            '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
+            getPoolAddress(calls[calls.length - 1].poolId),
             18,
         );
-        const bptOut = TokenAmount.fromRawAmount(bptToken, peekedValue);
-        const placeholder: NestedJoinQueryResult = {
-            poolId: '0x123',
-            bptOut,
-            amountsIn: [bptOut], // ignore these values for now
-            fromInternalBalance: false,
-        };
-        return new Promise((resolve) => resolve(placeholder));
+
+        const bptOut = TokenAmount.fromRawAmount(tokenOut, peekedValue);
+
+        return { calls, bptOut };
     }
 
     buildCall(input: NestedJoinCallInput): {
@@ -132,11 +223,27 @@ export class NestedJoin {
         to: Address;
         value: bigint | undefined;
         minBptOut: bigint;
-        maxAmountsIn: bigint[];
     } {
-        const { encodedCall, minBptOut } = this.encodeJoinPoolForCall(input);
+        // apply slippage to bptOut
+        const minBptOut = input.slippage.removeFrom(input.bptOut.amount);
 
-        const encodedCalls = [encodedCall];
+        // update last call with minBptOut limit in place
+        input.calls[input.calls.length - 1] = {
+            ...input.calls[input.calls.length - 1],
+            minBptOut,
+        };
+
+        const parsedCalls = input.calls.map((call) =>
+            parseNestedJoinArgs(call),
+        );
+
+        const encodedCalls = parsedCalls.map((parsedCall) =>
+            encodeFunctionData({
+                abi: bathcRelayerLibraryAbi,
+                functionName: 'joinPool',
+                args: parsedCall.args,
+            }),
+        );
 
         if (input.relayerApprovalSignature !== undefined) {
             encodedCalls.unshift(
@@ -159,109 +266,6 @@ export class NestedJoin {
             to: BALANCER_RELAYER,
             value: undefined, // TODO: update value for native asset joins
             minBptOut,
-            maxAmountsIn: input.amountsIn.map((a) => a.amount),
         };
     }
-
-    private encodeJoinPoolForQuery = (
-        input: NestedJoinInput,
-        nestedPoolState: NestedPoolState,
-    ) => {
-        const amountsIn = ['1', '0', '0', '0'].map((a, i) =>
-            TokenAmount.fromHumanAmount(
-                new Token(
-                    input.chainId,
-                    nestedPoolState.tokens[i].address,
-                    nestedPoolState.tokens[i].decimals,
-                ),
-                a as HumanAmount,
-            ),
-        );
-
-        const poolId =
-            '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7' as Address; // 3POOL
-        const kind = 0;
-        const sender = input.testAddress;
-        const recipient = input.testAddress;
-        const joinPoolRequest = {
-            assets: [
-                '0x6b175474e89094c44da98b954eedeac495271d0f',
-                '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
-                '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-                '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            ] as Address[],
-            maxAmountsIn: amountsIn.map((a) => a.amount),
-            // TODO: replace by ComposableStableEncoder (this works because it's the same enum value by coincidence)
-            userData: StableEncoder.joinUnbalanced(
-                [parseUnits('1', 18), 0n, 0n],
-                0n,
-            ),
-            fromInternalBalance: false,
-        };
-        const value = 0n;
-        const outputReference = Relayer.toChainedReference(
-            joinPathOutputRefIndex,
-            false,
-        );
-
-        const encodedCall = encodeFunctionData({
-            abi: bathcRelayerLibraryAbi,
-            functionName: 'joinPool',
-            args: [
-                poolId,
-                kind,
-                sender,
-                recipient,
-                joinPoolRequest,
-                value,
-                outputReference,
-            ],
-        });
-        return encodedCall;
-    };
-
-    private encodeJoinPoolForCall = (input: NestedJoinCallInput) => {
-        const minBptOut = input.slippage.removeFrom(input.bptOut.amount);
-        console.log('minBptOut', minBptOut);
-
-        const poolId =
-            '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7' as Address; // 3POOL
-        const kind = 0;
-        const joinPoolRequest = {
-            assets: [
-                '0x6b175474e89094c44da98b954eedeac495271d0f',
-                '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
-                '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-                '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            ] as Address[],
-            maxAmountsIn: [parseUnits('1', 18), 0n, 0n, 0n],
-            // TODO: replace by ComposableStableEncoder (this works because it's the same enum value by coincidence)
-            userData: StableEncoder.joinUnbalanced(
-                [parseUnits('1', 18), 0n, 0n],
-                minBptOut,
-            ),
-            fromInternalBalance: false,
-        };
-        const value = 0n;
-        const joinPathOutputRefIndex = 100n; // must be the same used on peek
-        const outputReference = Relayer.toChainedReference(
-            joinPathOutputRefIndex,
-        );
-
-        const encodedCall = encodeFunctionData({
-            abi: bathcRelayerLibraryAbi,
-            functionName: 'joinPool',
-            args: [
-                poolId,
-                kind,
-                input.sender,
-                input.recipient,
-                joinPoolRequest,
-                value,
-                outputReference,
-            ],
-        });
-
-        return { encodedCall, minBptOut };
-    };
 }
