@@ -1,5 +1,6 @@
 import { Address, Hex } from 'viem';
-import { HumanAmount } from '../types';
+
+export type HumanAmount = `${number}`;
 
 // These are only the known pool types, additional pool types can be added via
 // extension through custom PoolFactories and PoolDataProviders

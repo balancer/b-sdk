@@ -11,7 +11,7 @@ import {
     normalizedLiquidityXIn,
     normalizedLiquidityYIn,
 } from './gyroEMathFunctions';
-import { DerivedGyroEParams, GyroEParams, Vector2 } from './gyroEPool';
+import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
 import { MathGyro, ONE_XP, SMALL } from '../../../utils/gyroHelpers/math';
 
 export function calculateNormalizedLiquidity(

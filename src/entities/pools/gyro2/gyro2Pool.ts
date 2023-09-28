@@ -7,7 +7,8 @@ import {
     _findVirtualParams,
 } from './gyro2Math';
 import { BasePool } from '..';
-import { BigintIsh, Token, TokenAmount } from '../..';
+import { Token } from '../../token';
+import { TokenAmount, BigintIsh } from '../../tokenAmount';
 import { RawGyro2Pool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
 import { getPoolAddress, MathSol, WAD } from '../../../utils';

@@ -1,5 +1,5 @@
-import { BasePool, BasePoolFactory } from '../';
-import { StablePool } from './';
+import { BasePool, BasePoolFactory } from '../index';
+import { StablePool } from './stablePool';
 import { RawComposableStablePool, RawPool } from '../../../data/types';
 
 export class StablePoolFactory implements BasePoolFactory {
