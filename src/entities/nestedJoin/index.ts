@@ -73,6 +73,7 @@ type NestedJoinQueryResult = {
 };
 
 type NestedJoinCallInput = NestedJoinQueryResult & {
+    chainId: number;
     slippage: Slippage;
     sender: Address;
     recipient: Address;
@@ -190,7 +191,7 @@ export class NestedJoin {
 
         const { data } = await client.call({
             account: input.testAddress,
-            to: BALANCER_RELAYER,
+            to: BALANCER_RELAYER[input.chainId],
             data: encodedMulticall,
         });
 
@@ -249,7 +250,7 @@ export class NestedJoin {
         if (input.relayerApprovalSignature !== undefined) {
             encodedCalls.unshift(
                 Relayer.encodeSetRelayerApproval(
-                    BALANCER_RELAYER,
+                    BALANCER_RELAYER[input.chainId],
                     true,
                     input.relayerApprovalSignature,
                 ),
@@ -264,7 +265,7 @@ export class NestedJoin {
 
         return {
             call,
-            to: BALANCER_RELAYER,
+            to: BALANCER_RELAYER[input.chainId],
             value: undefined, // TODO: update value for native asset joins
             minBptOut,
         };

@@ -127,8 +127,9 @@ export const BALANCER_POOL_DATA_QUERIES_ADDRESSES: Record<number, Address> = {
 export const BALANCER_VAULT: Address =
     '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 
-export const BALANCER_RELAYER =
-    '0x38c76A767d45Fc390160449948aF80569E2C4217' as Address;
+export const BALANCER_RELAYER: Record<number, Address> = {
+    [ChainId.MAINNET]: '0x38c76A767d45Fc390160449948aF80569E2C4217',
+};
 
 export const BALANCER_HELPERS: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0x77d46184d22ca6a3726a2f500c776767b6a3d6ab',

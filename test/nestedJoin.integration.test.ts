@@ -135,13 +135,14 @@ describe('nested join test', () => {
         const slippage = Slippage.fromPercentage('1'); // 1%
 
         const signature = await Relayer.signRelayerApproval(
-            BALANCER_RELAYER,
+            BALANCER_RELAYER[chainId],
             testAddress,
             client,
         );
 
         const { call, to, value, minBptOut } = nestedJoin.buildCall({
             ...queryResult,
+            chainId,
             slippage,
             sender: testAddress,
             recipient: testAddress,
@@ -306,6 +307,7 @@ export const grantRoles = async (
         batchSwapRole,
         setRelayerApprovalRole,
     ];
+    const chainId = await client.getChainId();
     for (const role of roles) {
         await client.writeContract({
             account: balancerDaoAddress,
@@ -313,7 +315,7 @@ export const grantRoles = async (
             chain: client.chain,
             abi: authorizerAbi,
             functionName: 'grantRole',
-            args: [role, BALANCER_RELAYER],
+            args: [role, BALANCER_RELAYER[chainId]],
         });
     }
     await client.stopImpersonatingAccount({
@@ -325,13 +327,14 @@ export const approveRelayer = async (
     client: Client & WalletActions,
     account: Address,
 ) => {
+    const chainId = await client.getChainId();
     await client.writeContract({
         account,
         address: BALANCER_VAULT,
         chain: client.chain,
         abi: vaultAbi,
         functionName: 'setRelayerApproval',
-        args: [account, BALANCER_RELAYER, true],
+        args: [account, BALANCER_RELAYER[chainId], true],
     });
 };
 
