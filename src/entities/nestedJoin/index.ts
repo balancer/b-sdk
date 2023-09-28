@@ -26,22 +26,17 @@ export type NestedJoinInput = {
     fromInternalBalance?: boolean;
 };
 
-export type JoinStep = {
-    input: NestedToken;
-    poolId: Address; // output poolId
-};
-
 export type NestedPoolState = {
     pools: {
         id: Hex;
         address: Address;
         type: string;
         level: number; // 0 is the bottom and the highest level is the top
+        tokens: NestedToken[]; // each token should have at least one
     }[];
-    joinSteps: JoinStep[]; // each token should have at least one
 };
 
-type NestedToken = {
+export type NestedToken = {
     address: Address;
     decimals: number;
     index: number;
@@ -104,33 +99,25 @@ export class NestedJoin {
 
         const calls: NestedJoinArgs[] = [];
         for (const pool of poolsSortedByLevel) {
-            const joinStepsForPool = nestedPoolState.joinSteps
-                .filter((j) => j.poolId === pool.id)
-                .sort((a, b) => a.input.index - b.input.index);
+            const sortedTokens = pool.tokens
+                .sort((a, b) => a.index - b.index)
+                .map((t) => new Token(input.chainId, t.address, t.decimals));
             calls.push({
                 chainId: input.chainId,
                 useNativeAssetAsWrappedAmountIn:
                     input.useNativeAssetAsWrappedAmountIn,
-                sortedTokens: joinStepsForPool.map((joinStep) => {
-                    return new Token(
-                        input.chainId,
-                        joinStep.input.address,
-                        joinStep.input.decimals,
-                    );
-                }),
+                sortedTokens,
                 poolId: pool.id,
                 poolType: pool.type,
                 kind: 0,
                 sender: input.testAddress,
                 recipient: input.testAddress,
-                maxAmountsIn: joinStepsForPool.map((joinStep) => {
-                    const amountIn = input.amountsIn.find(
-                        (a) => a.address === joinStep.input.address,
+                maxAmountsIn: sortedTokens.map((token) => {
+                    const amountIn = input.amountsIn.find((a) =>
+                        token.isSameAddress(a.address),
                     );
                     const lowerLevelCall = calls.find(
-                        (call) =>
-                            getPoolAddress(call.poolId) ===
-                            joinStep.input.address,
+                        (call) => getPoolAddress(call.poolId) === token.address,
                     );
                     if (amountIn) {
                         return {
