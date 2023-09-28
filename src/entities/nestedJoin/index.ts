@@ -27,11 +27,8 @@ export type NestedJoinInput = {
 };
 
 export type JoinStep = {
-    action: 'join'; // TODO: are we supporting other actions, such as swaps?
-    level: number; // 0 is the bottom and the highest level is the top
     input: NestedToken;
     poolId: Address; // output poolId
-    isTop: boolean;
 };
 
 export type NestedPoolState = {
@@ -39,6 +36,7 @@ export type NestedPoolState = {
         id: Hex;
         address: Address;
         type: string;
+        level: number; // 0 is the bottom and the highest level is the top
     }[];
     joinSteps: JoinStep[]; // each token should have at least one
 };
@@ -100,14 +98,8 @@ export class NestedJoin {
         // input at following levels can be amountsIn provided, output of the previous level or 0n
         // output at max level is the bptOut
 
-        const stepsSortedByLevel = nestedPoolState.joinSteps.sort(
+        const poolsSortedByLevel = nestedPoolState.pools.sort(
             (a, b) => a.level - b.level,
-        );
-        const poolIdsSortedByLevel = [
-            ...new Set(stepsSortedByLevel.map((s) => s.poolId)),
-        ];
-        const poolsSortedByLevel = poolIdsSortedByLevel.map(
-            (poolId) => nestedPoolState.pools.find((p) => p.id === poolId)!,
         );
 
         const calls: NestedJoinArgs[] = [];

@@ -180,95 +180,81 @@ export class MockApi {
     public async getNestedPool(address: Address): Promise<NestedPoolState> {
         if (address !== '0xbe19d87ea6cd5b05bbc34b564291c371dae96747')
             throw Error();
-        const pools: { id: Hex; address: Address; type: string }[] = [
+        const pools: {
+            id: Hex;
+            address: Address;
+            type: string;
+            level: number;
+        }[] = [
             {
                 id: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
                 address: '0xbe19d87ea6cd5b05bbc34b564291c371dae96747',
                 type: 'ComposableStable',
+                level: 1,
             },
             {
                 id: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
                 address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
                 type: 'ComposableStable',
+                level: 0,
             },
         ];
         const joinSteps: JoinStep[] = [
             {
-                action: 'join',
                 input: {
                     address: '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
                     decimals: 18,
                     index: 0,
                 },
-                level: 0,
                 poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-                isTop: false,
             },
             {
-                action: 'join',
                 input: {
                     address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc', // 3POOL-BPT
                     decimals: 18,
                     index: 1,
                 },
-                level: 0,
                 poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-                isTop: false,
             },
             {
-                action: 'join',
                 input: {
                     address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
                     decimals: 6,
                     index: 2,
                 },
-                level: 0,
                 poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-                isTop: false,
             },
             {
-                action: 'join',
                 input: {
                     address: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
                     decimals: 6,
                     index: 3,
                 },
-                level: 0,
                 poolId: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-                isTop: false,
             },
             {
-                action: 'join',
                 input: {
                     address: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', // GHO
                     decimals: 18,
                     index: 0,
                 },
-                level: 1,
                 poolId: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
-                isTop: true,
             },
             {
-                action: 'join',
                 input: {
                     address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc', // 3POOL-BPT
                     decimals: 18,
                     index: 1,
                 },
-                level: 1,
                 poolId: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
-                isTop: true,
             },
             {
-                action: 'join',
                 input: {
                     address: '0xbe19d87ea6cd5b05bbc34b564291c371dae96747', // GHO-3POOL-BPT
                     decimals: 18,
                     index: 2,
                 },
-                level: 1,
                 poolId: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
-                isTop: true,
             },
         ];
         return {
