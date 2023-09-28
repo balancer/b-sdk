@@ -20,15 +20,16 @@ import {
     NestedPoolState,
     NestedJoin,
     NestedJoinInput,
+    Token,
+    replaceWrapped,
 } from '../src/entities';
-import { Address, Hex } from '../src/types';
+import { Address } from '../src/types';
 
 import {
     BALANCER_RELAYER,
     BALANCER_VAULT,
     CHAINS,
     ChainId,
-    getPoolAddress,
 } from '../src/utils';
 
 import {
@@ -59,6 +60,7 @@ type TxInput = {
     amountsIn: {
         address: Address; // DAI
         rawAmount: bigint;
+        decimals: number;
     }[];
     chainId: ChainId;
     rpcUrl: string;
@@ -66,6 +68,7 @@ type TxInput = {
     nestedJoin: NestedJoin;
     nestedPoolFromApi: NestedPoolState;
     client: Client & PublicActions & TestActions & WalletActions;
+    useNativeAssetAsWrappedAmountIn?: boolean;
 };
 
 describe('nested join test', () => {
@@ -73,7 +76,7 @@ describe('nested join test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
-    let poolId: Hex;
+    let poolAddress: Address;
     let nestedPoolFromApi: NestedPoolState;
     let nestedJoin: NestedJoin;
     let testAddress: Address;
@@ -95,52 +98,52 @@ describe('nested join test', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        poolId =
-            '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4'; // GHO-3POOL-BPT
+        poolAddress = '0x08775ccb6674d6bdceb0797c364c2653ed84f384'; // WETH-3POOL-BPT
 
         // get pool state from api
-        nestedPoolFromApi = await api.getNestedPool(getPoolAddress(poolId));
+        nestedPoolFromApi = await api.getNestedPool(poolAddress);
 
         // setup join helper
         nestedJoin = new NestedJoin();
 
-        // // Fork setup - done only once per fork reset
-        // // Governance grant roles to the relayer
-        // await grantRoles(client);
+        // Fork setup - done only once per fork reset
+        // Governance grant roles to the relayer
+        await grantRoles(client);
 
-        // // User approve vault to spend their tokens and update user balance
-        // const tokens = [
-        //     ...new Set(
-        //         nestedPoolFromApi.pools.flatMap((p) =>
-        //             p.tokens.map((t) => {
-        //                 return { address: t.address, decimals: t.decimals };
-        //             }),
-        //         ),
-        //     ),
-        // ];
-        // for (const token of tokens) {
-        //     await approveToken(client, testAddress, token.address);
+        // User approve vault to spend their tokens and update user balance
+        const tokens = [
+            ...new Set(
+                nestedPoolFromApi.pools.flatMap((p) =>
+                    p.tokens.map((t) => {
+                        return { address: t.address, decimals: t.decimals };
+                    }),
+                ),
+            ),
+        ];
+        for (const token of tokens) {
+            await approveToken(client, testAddress, token.address);
 
-        //     const slot = (await findTokenBalanceSlot(
-        //         client,
-        //         testAddress,
-        //         token.address,
-        //     )) as number;
+            const slot = (await findTokenBalanceSlot(
+                client,
+                testAddress,
+                token.address,
+            )) as number;
 
-        //     await setTokenBalance(
-        //         client,
-        //         testAddress,
-        //         token.address,
-        //         slot,
-        //         parseUnits('1000', token.decimals),
-        //     );
-        // }
+            await setTokenBalance(
+                client,
+                testAddress,
+                token.address,
+                slot,
+                parseUnits('1000', token.decimals),
+            );
+        }
     });
 
     test('leaf join - single token', async () => {
         const amountIn = {
             address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
             rawAmount: parseUnits('1', 18),
+            decimals: 18,
         };
         await doTransaction({
             amountsIn: [amountIn],
@@ -157,23 +160,27 @@ describe('nested join test', () => {
         const amountsIn = [
             {
                 address:
-                    '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f' as Address, // GHO
+                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
                 rawAmount: parseUnits('1', 18),
+                decimals: 18,
             },
             {
                 address:
                     '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
                 rawAmount: parseUnits('1', 18),
+                decimals: 18,
             },
             {
                 address:
                     '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
                 rawAmount: parseUnits('1', 6),
+                decimals: 6,
             },
             {
                 address:
                     '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
                 rawAmount: parseUnits('1', 6),
+                decimals: 6,
             },
         ];
 
@@ -187,6 +194,46 @@ describe('nested join test', () => {
             client,
         });
     });
+
+    test.only('native asset join', async () => {
+        const amountsIn = [
+            {
+                address:
+                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
+                rawAmount: parseUnits('1', 18),
+                decimals: 18,
+            },
+            {
+                address:
+                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+                rawAmount: parseUnits('1', 18),
+                decimals: 18,
+            },
+            {
+                address:
+                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+                rawAmount: parseUnits('1', 6),
+                decimals: 6,
+            },
+            {
+                address:
+                    '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
+                rawAmount: parseUnits('1', 6),
+                decimals: 6,
+            },
+        ];
+
+        await doTransaction({
+            amountsIn,
+            chainId,
+            rpcUrl,
+            testAddress,
+            nestedJoin,
+            nestedPoolFromApi,
+            client,
+            useNativeAssetAsWrappedAmountIn: true,
+        });
+    });
 });
 
 export const doTransaction = async ({
@@ -197,12 +244,14 @@ export const doTransaction = async ({
     nestedJoin,
     nestedPoolFromApi,
     client,
+    useNativeAssetAsWrappedAmountIn = false,
 }: TxInput) => {
     const joinInput: NestedJoinInput = {
         amountsIn,
         chainId,
         rpcUrl,
         testAddress,
+        useNativeAssetAsWrappedAmountIn,
     };
     const queryResult = await nestedJoin.query(joinInput, nestedPoolFromApi);
 
@@ -224,12 +273,20 @@ export const doTransaction = async ({
         relayerApprovalSignature: signature,
     });
 
-    const tokensIn = joinInput.amountsIn.map((a) => a.address);
+    let tokensIn = joinInput.amountsIn.map(
+        (a) => new Token(chainId, a.address, a.decimals),
+    );
+    if (useNativeAssetAsWrappedAmountIn) {
+        tokensIn = replaceWrapped(tokensIn, chainId);
+    }
 
     // send join transaction and check balance changes
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
-            [...tokensIn, queryResult.bptOut.token.address],
+            [
+                ...tokensIn.map((t) => t.address),
+                queryResult.bptOut.token.address,
+            ],
             client,
             testAddress,
             to,
@@ -252,33 +309,27 @@ export const doTransaction = async ({
 
 export class MockApi {
     public async getNestedPool(address: Address): Promise<NestedPoolState> {
-        if (address !== '0xbe19d87ea6cd5b05bbc34b564291c371dae96747')
+        if (address !== '0x08775ccb6674d6bdceb0797c364c2653ed84f384')
             throw Error();
         return {
             pools: [
                 {
-                    id: '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4',
-                    address: '0xbe19d87ea6cd5b05bbc34b564291c371dae96747',
-                    type: 'ComposableStable',
+                    id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',
+                    address: '0x08775ccb6674d6bdceb0797c364c2653ed84f384',
+                    type: 'Weighted',
                     level: 1,
                     tokens: [
                         {
                             address:
-                                '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', // GHO
+                                '0x79c58f70905f734641735bc61e45c19dd9ad60bc', // 3POOL-BPT
                             decimals: 18,
                             index: 0,
                         },
                         {
                             address:
-                                '0x79c58f70905f734641735bc61e45c19dd9ad60bc', // 3POOL-BPT
+                                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
                             decimals: 18,
                             index: 1,
-                        },
-                        {
-                            address:
-                                '0xbe19d87ea6cd5b05bbc34b564291c371dae96747', // GHO-3POOL-BPT
-                            decimals: 18,
-                            index: 2,
                         },
                     ],
                 },

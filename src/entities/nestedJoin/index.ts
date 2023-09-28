@@ -17,6 +17,7 @@ import { balancerRelayerAbi, bathcRelayerLibraryAbi } from '../../abi';
 export type NestedJoinInput = {
     amountsIn: {
         address: Address;
+        decimals: number;
         rawAmount: bigint;
     }[];
     chainId: number;
@@ -84,8 +85,6 @@ export class NestedJoin {
             transport: http(input.rpcUrl),
             chain: CHAINS[input.chainId],
         });
-
-        // TODO: sanitize input and poolState tokens with Token and TokenAmount
 
         // sort pools by ascending level
         // then go from bottom pool to up filling out input and output amounts from joinSteps
@@ -218,6 +217,10 @@ export class NestedJoin {
             parseNestedJoinArgs(call),
         );
 
+        const value = parsedCalls.reduce((acc, parsedCall) => {
+            return acc + parsedCall.value;
+        }, 0n);
+
         const encodedCalls = parsedCalls.map((parsedCall) =>
             encodeFunctionData({
                 abi: bathcRelayerLibraryAbi,
@@ -245,7 +248,7 @@ export class NestedJoin {
         return {
             call,
             to: BALANCER_RELAYER[input.chainId],
-            value: undefined, // TODO: update value for native asset joins
+            value,
             minBptOut,
         };
     }

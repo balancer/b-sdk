@@ -1,5 +1,5 @@
 import { Hex } from '../../types';
-import { getPoolAddress } from '../../utils';
+import { ZERO_ADDRESS, getPoolAddress } from '../../utils';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
 import { NestedJoinArgs } from '../nestedJoin';
@@ -21,10 +21,17 @@ export function parseNestedJoinArgs({
     outputReferenceKey,
 }: NestedJoinArgs) {
     // replace wrapped token with native asset if needed
-    const tokensIn =
-        chainId && useNativeAssetAsWrappedAmountIn
-            ? replaceWrapped([...sortedTokens], chainId)
-            : [...sortedTokens];
+    let tokensIn = [...sortedTokens];
+    let value = 0n;
+    if (chainId && useNativeAssetAsWrappedAmountIn) {
+        tokensIn = replaceWrapped([...sortedTokens], chainId);
+        const nativeAssetIndex = tokensIn.findIndex(
+            (t) => t.address === ZERO_ADDRESS,
+        );
+        if (nativeAssetIndex > -1) {
+            value = maxAmountsIn[nativeAssetIndex].amount;
+        }
+    }
 
     const poolAddress = getPoolAddress(poolId);
     const _maxAmountsIn = maxAmountsIn.map((a) =>
@@ -60,8 +67,6 @@ export function parseNestedJoinArgs({
         fromInternalBalance,
     };
 
-    const value = 0n; // TODO: get from native asset amount
-
     return {
         args: [
             poolId,
@@ -72,6 +77,6 @@ export function parseNestedJoinArgs({
             value,
             outputReference,
         ] as const,
-        tokensIn,
+        value,
     };
 }
