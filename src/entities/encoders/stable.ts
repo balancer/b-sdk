@@ -13,7 +13,6 @@ export enum StablePoolExitKind {
     BPT_IN_FOR_EXACT_TOKENS_OUT = 2,
 }
 
-// TODO: rename functions after deciding on the naming convention
 export class StableEncoder {
     /**
      * Cannot be constructed.
