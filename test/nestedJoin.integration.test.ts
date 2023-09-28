@@ -1,5 +1,5 @@
 // pnpm test -- nestedJoin.integration.test.ts
-import { describe, expect, test, beforeAll, beforeEach } from 'vitest';
+import { describe, expect, test, beforeAll } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -33,6 +33,7 @@ import {
 
 import {
     approveToken,
+    findTokenBalanceSlot,
     sendTransactionGetBalances,
     setTokenBalance,
 } from './lib/utils/helper';
@@ -53,6 +54,19 @@ import { Relayer } from '../src/entities/relayer';
  * update `BALANCER_RELAYER` on constants.ts
  *
  */
+
+type TxInput = {
+    amountsIn: {
+        address: Address; // DAI
+        rawAmount: bigint;
+    }[];
+    chainId: ChainId;
+    rpcUrl: string;
+    testAddress: Address;
+    nestedJoin: NestedJoin;
+    nestedPoolFromApi: NestedPoolState;
+    client: Client & PublicActions & TestActions & WalletActions;
+};
 
 describe('nested join test', () => {
     let api: MockApi;
@@ -81,97 +95,158 @@ describe('nested join test', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        // Fork setup - done only once per fork reset
-        // Governance grant roles to the relayer
-        await grantRoles(client);
-
-        // User approve vault to spend their tokens
-        const dai = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address;
-        await approveToken(client, testAddress, dai, parseUnits('1000', 18));
-
-        // Update user balance
-        await setTokenBalance(
-            client,
-            testAddress,
-            dai,
-            2,
-            parseUnits('1000', 18),
-        );
-
         poolId =
             '0xbe19d87ea6cd5b05bbc34b564291c371dae967470000000000000000000005c4'; // GHO-3POOL-BPT
-    });
 
-    beforeEach(async () => {
         // get pool state from api
         nestedPoolFromApi = await api.getNestedPool(getPoolAddress(poolId));
 
         // setup join helper
         nestedJoin = new NestedJoin();
+
+        // // Fork setup - done only once per fork reset
+        // // Governance grant roles to the relayer
+        // await grantRoles(client);
+
+        // // User approve vault to spend their tokens and update user balance
+        // const tokens = [
+        //     ...new Set(
+        //         nestedPoolFromApi.pools.flatMap((p) =>
+        //             p.tokens.map((t) => {
+        //                 return { address: t.address, decimals: t.decimals };
+        //             }),
+        //         ),
+        //     ),
+        // ];
+        // for (const token of tokens) {
+        //     await approveToken(client, testAddress, token.address);
+
+        //     const slot = (await findTokenBalanceSlot(
+        //         client,
+        //         testAddress,
+        //         token.address,
+        //     )) as number;
+
+        //     await setTokenBalance(
+        //         client,
+        //         testAddress,
+        //         token.address,
+        //         slot,
+        //         parseUnits('1000', token.decimals),
+        //     );
+        // }
     });
 
-    test('single asset join', async () => {
+    test('leaf join - single token', async () => {
         const amountIn = {
             address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
             rawAmount: parseUnits('1', 18),
         };
-
-        // perform join query to get expected bpt out
-        const joinInput: NestedJoinInput = {
+        await doTransaction({
             amountsIn: [amountIn],
             chainId,
             rpcUrl,
-            useNativeAssetAsWrappedAmountIn: false,
-            fromInternalBalance: false,
             testAddress,
-        };
-        const queryResult = await nestedJoin.query(
-            joinInput,
+            nestedJoin,
             nestedPoolFromApi,
-        );
-
-        // build join call with expected minBpOut based on slippage
-        const slippage = Slippage.fromPercentage('1'); // 1%
-
-        const signature = await Relayer.signRelayerApproval(
-            BALANCER_RELAYER[chainId],
-            testAddress,
             client,
-        );
-
-        const { call, to, value, minBptOut } = nestedJoin.buildCall({
-            ...queryResult,
-            chainId,
-            slippage,
-            sender: testAddress,
-            recipient: testAddress,
-            relayerApprovalSignature: signature,
         });
+    });
 
-        const tokensIn = joinInput.amountsIn.map((a) => a.address);
-
-        // send join transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [...tokensIn, queryResult.bptOut.token.address],
-                client,
-                testAddress,
-                to,
-                call,
-                value,
-            );
-
-        expect(transactionReceipt.status).to.eq('success');
-        expect(queryResult.bptOut.amount > 0n).to.be.true;
-        const expectedDeltas = [
-            ...joinInput.amountsIn.map((a) => a.rawAmount),
-            queryResult.bptOut.amount,
+    test('leaf join - all tokens', async () => {
+        const amountsIn = [
+            {
+                address:
+                    '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f' as Address, // GHO
+                rawAmount: parseUnits('1', 18),
+            },
+            {
+                address:
+                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+                rawAmount: parseUnits('1', 18),
+            },
+            {
+                address:
+                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+                rawAmount: parseUnits('1', 6),
+            },
+            {
+                address:
+                    '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
+                rawAmount: parseUnits('1', 6),
+            },
         ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
-        const expectedMinBpt = slippage.removeFrom(queryResult.bptOut.amount);
-        expect(expectedMinBpt).to.deep.eq(minBptOut);
+
+        await doTransaction({
+            amountsIn,
+            chainId,
+            rpcUrl,
+            testAddress,
+            nestedJoin,
+            nestedPoolFromApi,
+            client,
+        });
     });
 });
+
+export const doTransaction = async ({
+    amountsIn,
+    chainId,
+    rpcUrl,
+    testAddress,
+    nestedJoin,
+    nestedPoolFromApi,
+    client,
+}: TxInput) => {
+    const joinInput: NestedJoinInput = {
+        amountsIn,
+        chainId,
+        rpcUrl,
+        testAddress,
+    };
+    const queryResult = await nestedJoin.query(joinInput, nestedPoolFromApi);
+
+    // build join call with expected minBpOut based on slippage
+    const slippage = Slippage.fromPercentage('1'); // 1%
+
+    const signature = await Relayer.signRelayerApproval(
+        BALANCER_RELAYER[chainId],
+        testAddress,
+        client,
+    );
+
+    const { call, to, value, minBptOut } = nestedJoin.buildCall({
+        ...queryResult,
+        chainId,
+        slippage,
+        sender: testAddress,
+        recipient: testAddress,
+        relayerApprovalSignature: signature,
+    });
+
+    const tokensIn = joinInput.amountsIn.map((a) => a.address);
+
+    // send join transaction and check balance changes
+    const { transactionReceipt, balanceDeltas } =
+        await sendTransactionGetBalances(
+            [...tokensIn, queryResult.bptOut.token.address],
+            client,
+            testAddress,
+            to,
+            call,
+            value,
+        );
+
+    expect(transactionReceipt.status).to.eq('success');
+    expect(queryResult.bptOut.amount > 0n).to.be.true;
+    const expectedDeltas = [
+        ...joinInput.amountsIn.map((a) => a.rawAmount),
+        queryResult.bptOut.amount,
+    ];
+    expect(expectedDeltas).to.deep.eq(balanceDeltas);
+    const expectedMinBpt = slippage.removeFrom(queryResult.bptOut.amount);
+    expect(expectedMinBpt).to.deep.eq(minBptOut);
+};
 
 /*********************** Mock To Represent API Requirements **********************/
 
@@ -303,5 +378,4 @@ export const approveRelayer = async (
         args: [account, BALANCER_RELAYER[chainId], true],
     });
 };
-
 /******************************************************************************/

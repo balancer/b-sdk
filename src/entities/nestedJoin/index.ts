@@ -105,7 +105,7 @@ export class NestedJoin {
             calls.push({
                 chainId: input.chainId,
                 useNativeAssetAsWrappedAmountIn:
-                    input.useNativeAssetAsWrappedAmountIn,
+                    input.useNativeAssetAsWrappedAmountIn ?? false,
                 sortedTokens,
                 poolId: pool.id,
                 poolType: pool.type,
