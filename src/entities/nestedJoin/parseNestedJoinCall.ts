@@ -2,11 +2,11 @@ import { Hex } from '../../types';
 import { ZERO_ADDRESS, getPoolAddress } from '../../utils';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
-import { NestedJoinArgs } from '../nestedJoin';
+import { NestedJoinCall } from './types';
 import { Relayer } from '../relayer';
-import { replaceWrapped } from './replaceWrapped';
+import { replaceWrapped } from '../utils/replaceWrapped';
 
-export function parseNestedJoinArgs({
+export function parseNestedJoinCall({
     useNativeAssetAsWrappedAmountIn,
     chainId,
     sortedTokens,
@@ -19,7 +19,7 @@ export function parseNestedJoinArgs({
     minBptOut,
     fromInternalBalance,
     outputReferenceKey,
-}: NestedJoinArgs) {
+}: NestedJoinCall) {
     // replace wrapped token with native asset if needed
     let tokensIn = [...sortedTokens];
     let value = 0n;

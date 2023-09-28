@@ -15,14 +15,7 @@ import {
     walletActions,
 } from 'viem';
 
-import {
-    Slippage,
-    NestedPoolState,
-    NestedJoin,
-    NestedJoinInput,
-    Token,
-    replaceWrapped,
-} from '../src/entities';
+import { Slippage, NestedJoin, Token, replaceWrapped } from '../src/entities';
 import { Address } from '../src/types';
 
 import {
@@ -40,6 +33,10 @@ import {
 } from './lib/utils/helper';
 import { authorizerAbi, vaultAbi } from '../src/abi';
 import { Relayer } from '../src/entities/relayer';
+import {
+    NestedJoinInput,
+    NestedPoolState,
+} from '../src/entities/nestedJoin/types';
 
 /**
  * Deploy the new relayer contract with the new helper address:
@@ -195,7 +192,7 @@ describe('nested join test', () => {
         });
     });
 
-    test.only('native asset join', async () => {
+    test('native asset join', async () => {
         const amountsIn = [
             {
                 address:
