@@ -1,7 +1,7 @@
 import { Hex } from '../../types';
 import { getPoolAddress } from '../../utils';
 import { WeightedEncoder } from '../encoders';
-import { StableEncoder } from '../encoders/stable';
+import { ComposableStableEncoder } from '../encoders/composableStable';
 import { NestedJoinArgs } from '../nestedJoin';
 import { Relayer } from '../relayer';
 import { replaceWrapped } from './replaceWrapped';
@@ -42,8 +42,7 @@ export function parseNestedJoinArgs({
             );
             break;
         case 'ComposableStable':
-            // TODO: fix encoder type
-            userData = StableEncoder.joinUnbalanced(
+            userData = ComposableStableEncoder.joinUnbalanced(
                 amountsInWithoutBpt,
                 minBptOut,
             );

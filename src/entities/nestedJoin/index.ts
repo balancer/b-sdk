@@ -91,6 +91,8 @@ export class NestedJoin {
             chain: CHAINS[input.chainId],
         });
 
+        // TODO: sanitize input and poolState tokens with Token and TokenAmount
+
         // sort pools by ascending level
         // then go from bottom pool to up filling out input and output amounts from joinSteps
         // input at level 0 are either amountsIn provided or 0n
