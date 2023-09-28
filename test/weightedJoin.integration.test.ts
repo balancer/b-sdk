@@ -349,7 +349,7 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'Weighted',
+            type: 'WEIGHTED',
             tokens,
         };
     }
