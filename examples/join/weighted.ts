@@ -35,8 +35,7 @@ const slippage = Slippage.fromPercentage('1'); // 1%
 const join = async () => {
   const balancerApi = new BalancerApi(balancerApiUrl, 1);
   const poolState: PoolStateInput = await balancerApi.pools.fetchPoolState(poolId);
-  let client: Client & PublicActions & TestActions & WalletActions;
-  client  = createTestClient({
+  const client: Client & PublicActions & TestActions & WalletActions = createTestClient({
     mode: 'hardhat',
     chain: CHAINS[chainId],
     transport: http(rpcUrl),
@@ -76,7 +75,7 @@ const join = async () => {
 
   const queryResult = await poolJoin.query(joinInput, poolState);
 
-  const { call, to, value, maxAmountsIn, minBptOut } =
+  const { call, to, value } =
     poolJoin.buildCall({
       ...queryResult,
       slippage,
@@ -92,8 +91,8 @@ const join = async () => {
       call,
       value,
     );
-  console.log("transaction status: " + transactionReceipt.status);
-  console.log("token amounts deltas per token: " + balanceDeltas);
+  console.log(`transaction status: ${transactionReceipt.status}`);
+  console.log(`token amounts deltas per token: ${balanceDeltas}`);
 }
 
 join();

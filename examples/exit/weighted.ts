@@ -33,17 +33,14 @@ const slippage = Slippage.fromPercentage('1'); // 1%
 const exit = async () => {
   const balancerApi = new BalancerApi(balancerApiUrl, 1);
   const poolState: PoolStateInput = await balancerApi.pools.fetchPoolState(poolId);
-  let client: Client & PublicActions & TestActions & WalletActions;
-  let bpt: Token;
-  // setup BPT token
-  bpt = new Token(chainId, poolState.address, 18, 'BPT');
-  client  = createTestClient({
+  const client: Client & PublicActions & TestActions & WalletActions = createTestClient({
     mode: 'hardhat',
     chain: CHAINS[chainId],
     transport: http(rpcUrl),
   })
     .extend(publicActions)
     .extend(walletActions);
+  const bpt = new Token(chainId, poolState.address, 18, 'BPT');
 
   await forkSetup(
     client,
@@ -72,7 +69,7 @@ const exit = async () => {
 
   const queryResult = await poolExit.query(exitInput, poolState);
 
-  const { call, to, value, maxBptIn, minAmountsOut } =
+  const { call, to, value } =
     poolExit.buildCall({
       ...queryResult,
       slippage,
@@ -88,8 +85,8 @@ const exit = async () => {
       call,
       value,
     );
-  console.log("transaction status: " + transactionReceipt.status);
-  console.log("token amounts deltas per token: " + balanceDeltas);
+  console.log(`transaction status: ${transactionReceipt.status}`);
+  console.log(`token amounts deltas per token: ${balanceDeltas}`);
 }
 
 exit();
