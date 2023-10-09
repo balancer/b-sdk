@@ -25,8 +25,8 @@ export function parseNestedJoinCall({
     let value = 0n;
     if (chainId && useNativeAssetAsWrappedAmountIn) {
         tokensIn = replaceWrapped([...sortedTokens], chainId);
-        const nativeAssetIndex = tokensIn.findIndex(
-            (t) => t.address === ZERO_ADDRESS,
+        const nativeAssetIndex = tokensIn.findIndex((t) =>
+            t.isSameAddress(ZERO_ADDRESS),
         );
         if (nativeAssetIndex > -1) {
             value = maxAmountsIn[nativeAssetIndex].amount;
@@ -37,8 +37,8 @@ export function parseNestedJoinCall({
     const _maxAmountsIn = maxAmountsIn.map((a) =>
         a.isRef ? Relayer.toChainedReference(a.amount) : a.amount,
     );
-    const amountsInWithoutBpt = _maxAmountsIn.filter(
-        (_, i) => sortedTokens[i].address !== poolAddress, // TODO: lowercase?
+    const amountsInWithoutBpt = _maxAmountsIn.filter((_, i) =>
+        sortedTokens[i].isSameAddress(poolAddress),
     );
     let userData: Hex;
     switch (poolType) {

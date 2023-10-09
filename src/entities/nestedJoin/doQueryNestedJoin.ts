@@ -30,7 +30,6 @@ export async function doQueryNestedJoin(
         data: data as Hex,
     });
 
-    // TODO: extend logic for multiple peek calls in the context of non-leaf joins
     const peekedValue = decodeAbiParameters(
         [{ type: 'uint256' }],
         result[result.length - 1],

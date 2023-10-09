@@ -136,7 +136,7 @@ describe('nested join test', () => {
         }
     });
 
-    test('leaf join - single token', async () => {
+    test('single asset join', async () => {
         const amountIn = {
             address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
             rawAmount: parseUnits('1', 18),
@@ -153,7 +153,7 @@ describe('nested join test', () => {
         });
     });
 
-    test('leaf join - all tokens', async () => {
+    test('all assets join', async () => {
         const amountsIn = [
             {
                 address:
