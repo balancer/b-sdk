@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import testPools from './lib/testData/gyroETestPool.json';
-import { BALANCER_POOL_DATA_QUERIES_ADDRESSES, ChainId } from '../src/utils';
+import { ChainId, MULTICALL } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
@@ -21,7 +21,7 @@ import { MockPoolProvider } from './lib/utils/mockPoolProvider';
 
 describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env['POLYGON_RPC_URL'] || 'https://polygon-rpc.com';
+    const rpcUrl = process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com';
     const WMATIC = new Token(
         chainId,
         '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
@@ -45,13 +45,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
-            BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
-            {
-                loadTokenRatesForPools: {
-                    poolTypes: ['GyroE'],
-                    poolTypeVersions: [2],
-                },
-            },
+            MULTICALL[chainId],
         );
 
         sor = new SmartOrderRouter({

@@ -6,11 +6,7 @@ dotenv.config();
 import { SmartOrderRouter } from '../src/sor';
 import { sorGetSwapsWithPools } from '../src/static';
 import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import {
-    BALANCER_POOL_DATA_QUERIES_ADDRESSES,
-    ChainId,
-    ETH,
-} from '../src/utils';
+import { ChainId, ETH, MULTICALL } from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapKind, SwapOptions } from '../src/types';
@@ -20,17 +16,12 @@ describe('SmartOrderRouter', () => {
     describe('Mainnet', () => {
         const chainId = ChainId.MAINNET;
         const rpcUrl =
-            process.env['ETHEREUM_RPC_URL'] || 'https://eth.llamarpc.com';
+            process.env.ETHEREUM_RPC_URL || 'https://eth.llamarpc.com';
         const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
-            BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
-            {
-                loadAmpForPools: {
-                    poolTypes: ['ComposableStable'],
-                },
-            },
+            MULTICALL[chainId],
         );
 
         const sor = new SmartOrderRouter({
@@ -137,12 +128,7 @@ describe('SmartOrderRouter', () => {
         });
 
         describe('Stable Pools', () => {
-            // DAI -> bb-a-DAI -> bb-a-USDT -> USDT swapGivenIn boosted
-            // Aave Linear + Boosted Pool
-            // 0x6667c6fa9f2b3fc1cc8d85320b62703d938e43850000000000000000000004fb
-            // 0xfebb0bbf162e64fb9d0dfe186e517d84c395f016000000000000000000000502
-            // 0xa1697f9af0875b63ddc472d6eebada8c1fab85680000000000000000000004f9
-            test('DAI -> USDT givenIn boosted', async () => {
+            test('DAI -> USDT givenIn ComposableStable', async () => {
                 const inputAmount = TokenAmount.fromHumanAmount(DAI, '100000');
 
                 const swap = await sorGetSwapsWithPools(
@@ -161,15 +147,10 @@ describe('SmartOrderRouter', () => {
                 expect(swap.inputAmount.amount).toEqual(inputAmount.amount);
                 expect(swap.outputAmount.amount).toEqual(swap.quote.amount);
                 expect(swap.paths.length).toEqual(1);
-                expect(swap.paths[0].pools.length).toEqual(3);
+                expect(swap.paths[0].pools.length).toEqual(1);
             });
 
-            // DAI -> bb-a-DAI -> bb-a-USDT -> USDT swapGivenOut boosted
-            // Aave Linear + Boosted Pool
-            // 0x6667c6fa9f2b3fc1cc8d85320b62703d938e43850000000000000000000004fb
-            // 0xfebb0bbf162e64fb9d0dfe186e517d84c395f016000000000000000000000502
-            // 0xa1697f9af0875b63ddc472d6eebada8c1fab85680000000000000000000004f9
-            test('USDC -> DAI givenOut boosted', async () => {
+            test('USDC -> DAI givenOut ComposableStable', async () => {
                 const outputAmount = TokenAmount.fromHumanAmount(
                     DAI,
                     '1000000',
@@ -183,6 +164,8 @@ describe('SmartOrderRouter', () => {
                     pools,
                     swapOptions,
                 );
+
+                console.log(swap);
 
                 if (!swap) throw new Error('Swap is undefined');
 
