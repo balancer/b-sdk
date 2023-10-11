@@ -7,7 +7,6 @@ import {
 import { fetchWithRetry } from '../../utils/fetch';
 import { SUBGRAPH_URLS, brickedPools } from '../../utils';
 
-// rome-ignore lint/complexity/useLiteralKeys: <explanation>
 BigInt.prototype['toJSON'] = function () {
     return this.toString();
 };
