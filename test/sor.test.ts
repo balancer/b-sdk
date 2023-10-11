@@ -6,7 +6,7 @@ dotenv.config();
 import { SmartOrderRouter } from '../src/sor';
 import { sorGetSwapsWithPools } from '../src/static';
 import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import { ChainId, ETH, MULTICALL } from '../src/utils';
+import { ChainId, ETH, MULTICALL, BATCHSIZE } from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapKind, SwapOptions } from '../src/types';
@@ -22,6 +22,7 @@ describe('SmartOrderRouter', () => {
             chainId,
             rpcUrl,
             MULTICALL[chainId],
+            BATCHSIZE[chainId],
         );
 
         const sor = new SmartOrderRouter({

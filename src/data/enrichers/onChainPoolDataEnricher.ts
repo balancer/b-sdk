@@ -42,9 +42,10 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         private readonly chainId: number,
         private readonly rpcUrl: string,
         private readonly multicallAddress: Address,
+        private readonly batchSize: number,
     ) {
         this.client = createPublicClient({
-            transport: http(this.rpcUrl),
+            transport: http(this.rpcUrl, { timeout: 60_000 }),
             chain: CHAINS[this.chainId],
         });
     }
@@ -58,6 +59,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
             data.pools,
             this.client,
             options,
+            this.batchSize,
         );
     }
 

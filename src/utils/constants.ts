@@ -121,6 +121,15 @@ export const MULTICALL: Record<number, Address> = {
     [ChainId.POLYGON]: '0xca11bde05977b3631167028862be2a173976ca11',
     [ChainId.ZKEVM]: '0xca11bde05977b3631167028862be2a173976ca11',
 };
+export const BATCHSIZE: Record<number, number> = {
+    [ChainId.ARBITRUM_ONE]: 1000,
+    [ChainId.AVALANCHE]: 1000,
+    [ChainId.GNOSIS_CHAIN]: 1000,
+    [ChainId.MAINNET]: 1000,
+    [ChainId.OPTIMISM]: 1000,
+    [ChainId.POLYGON]: 1000,
+    [ChainId.ZKEVM]: 128,
+};
 
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(

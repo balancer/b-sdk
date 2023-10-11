@@ -363,6 +363,7 @@ export const fetchAdditionalPoolData = async (
     }[],
     client: PublicClient,
     options: SwapOptions,
+    batchSize: number,
 ): Promise<OnChainPoolData[]> => {
     if (pools.length === 0) {
         return [];
@@ -384,14 +385,32 @@ export const fetchAdditionalPoolData = async (
         };
     });
 
-    // TODO - Add batching 128 is the max batch size for zkEVM RPCs
-    const encodedResults = await client.readContract({
-        address: multicallAddress,
-        abi: multicall3Abi,
-        functionName: 'aggregate3',
-        blockNumber: options.block,
-        args: [batchedCalls],
-    });
+    const numBatches = Math.ceil(batchedCalls.length / batchSize);
+    const batchPromises: Promise<
+        readonly {
+            success: boolean;
+            returnData: `0x${string}`;
+        }[]
+    >[] = [];
+
+    for (let batchIndex = 0; batchIndex < numBatches; batchIndex++) {
+        const batchCalls = batchedCalls.slice(
+            batchIndex * batchSize,
+            (batchIndex + 1) * batchSize,
+        );
+
+        batchPromises.push(
+            client.readContract({
+                address: multicallAddress,
+                abi: multicall3Abi,
+                functionName: 'aggregate3',
+                blockNumber: options.block,
+                args: [batchCalls],
+            }),
+        );
+    }
+
+    const encodedResults = (await Promise.all(batchPromises)).flatMap((r) => r);
 
     const results = encodedResults.map((result, i) => {
         if (result.success) {

@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { ChainId, MULTICALL } from '../src/utils';
+import { BATCHSIZE, ChainId, MULTICALL } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
@@ -50,6 +50,7 @@ describe('fx integration tests', () => {
             chainId,
             rpcUrl,
             MULTICALL[chainId],
+            BATCHSIZE[chainId],
         );
 
         sor = new SmartOrderRouter({
