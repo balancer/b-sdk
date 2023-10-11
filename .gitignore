@@ -80,3 +80,6 @@ typechain-types
 cache
 artifacts
 
+#IDE
+.idea
+

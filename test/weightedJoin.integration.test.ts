@@ -63,7 +63,7 @@ describe('weighted join test', () => {
         const poolInput = await api.getPool(poolId);
 
         const client = createTestClient({
-            mode: 'hardhat',
+            mode: 'anvil',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
         })
