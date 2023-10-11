@@ -4,23 +4,24 @@ import {
     decodeFunctionResult,
     http,
 } from 'viem';
-import { Hex } from '../../types';
+import { Address, Hex } from '../../types';
 import { BALANCER_RELAYER, CHAINS } from '../../utils';
 import { balancerRelayerAbi } from '../../abi';
-import { NestedJoinInput } from './types';
 
-export async function doQueryNestedJoin(
-    input: NestedJoinInput,
+export const doQueryNestedJoin = async (
+    chainId: number,
+    rpcUrl: string,
+    accountAddress: Address,
     encodedMulticall: Hex,
-) {
+): Promise<bigint> => {
     const client = createPublicClient({
-        transport: http(input.rpcUrl),
-        chain: CHAINS[input.chainId],
+        transport: http(rpcUrl),
+        chain: CHAINS[chainId],
     });
 
     const { data } = await client.call({
-        account: input.testAddress,
-        to: BALANCER_RELAYER[input.chainId],
+        account: accountAddress,
+        to: BALANCER_RELAYER[chainId],
         data: encodedMulticall,
     });
 
@@ -36,4 +37,4 @@ export async function doQueryNestedJoin(
     )[0];
 
     return peekedValue;
-}
+};

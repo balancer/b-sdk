@@ -2,10 +2,16 @@ import { Token } from '../token';
 import { getPoolAddress } from '../../utils';
 import { NestedJoinInput, NestedPoolState, NestedJoinCall } from './types';
 
-export function getNestedJoinCalls(
-    input: NestedJoinInput,
-    nestedPoolState: NestedPoolState,
-) {
+export const getNestedJoinCalls = (
+    {
+        amountsIn,
+        chainId,
+        accountAddress,
+        useNativeAssetAsWrappedAmountIn,
+        fromInternalBalance,
+    }: NestedJoinInput,
+    { pools }: NestedPoolState,
+): NestedJoinCall[] => {
     /**
      * Overall logic to build sequence of join calls:
      * 1. Go from bottom pool to up filling out input amounts and output refs
@@ -13,27 +19,25 @@ export function getNestedJoinCalls(
      * 3. Output at max level is the bptOut
      */
 
-    const poolsSortedByLevel = nestedPoolState.pools.sort(
-        (a, b) => a.level - b.level,
-    );
+    const poolsSortedByLevel = pools.sort((a, b) => a.level - b.level);
 
     const calls: NestedJoinCall[] = [];
     for (const pool of poolsSortedByLevel) {
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
-            .map((t) => new Token(input.chainId, t.address, t.decimals));
+            .map((t) => new Token(chainId, t.address, t.decimals));
         calls.push({
-            chainId: input.chainId,
+            chainId: chainId,
             useNativeAssetAsWrappedAmountIn:
-                input.useNativeAssetAsWrappedAmountIn ?? false,
+                useNativeAssetAsWrappedAmountIn ?? false,
             sortedTokens,
             poolId: pool.id,
             poolType: pool.type,
             kind: 0,
-            sender: input.testAddress,
-            recipient: input.testAddress,
+            sender: accountAddress,
+            recipient: accountAddress,
             maxAmountsIn: sortedTokens.map((token) => {
-                const amountIn = input.amountsIn.find((a) =>
+                const amountIn = amountsIn.find((a) =>
                     token.isSameAddress(a.address),
                 );
                 const lowerLevelCall = calls.find(
@@ -57,9 +61,9 @@ export function getNestedJoinCalls(
                 }
             }),
             minBptOut: 0n,
-            fromInternalBalance: input.fromInternalBalance ?? false,
+            fromInternalBalance: fromInternalBalance ?? false,
             outputReferenceKey: BigInt(poolsSortedByLevel.indexOf(pool)) + 100n,
         });
     }
     return calls;
-}
+};

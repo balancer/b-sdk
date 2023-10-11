@@ -47,7 +47,12 @@ export class NestedJoin {
             args: [encodedCalls],
         });
 
-        const peekedValue = await doQueryNestedJoin(input, encodedMulticall);
+        const peekedValue = await doQueryNestedJoin(
+            input.chainId,
+            input.rpcUrl,
+            input.accountAddress,
+            encodedMulticall,
+        );
 
         const tokenOut = new Token(
             input.chainId,

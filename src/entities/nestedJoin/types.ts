@@ -12,7 +12,7 @@ export type NestedJoinInput = {
     }[];
     chainId: number;
     rpcUrl: string;
-    testAddress: Address;
+    accountAddress: Address;
     useNativeAssetAsWrappedAmountIn?: boolean;
     fromInternalBalance?: boolean;
 };
@@ -31,7 +31,7 @@ export type NestedPoolState = {
 
 export type NestedJoinCall = {
     chainId: number;
-    useNativeAssetAsWrappedAmountIn?: boolean;
+    useNativeAssetAsWrappedAmountIn: boolean;
     sortedTokens: Token[];
     poolId: Address;
     poolType: string;

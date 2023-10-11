@@ -6,7 +6,7 @@ import { NestedJoinCall } from './types';
 import { Relayer } from '../relayer';
 import { replaceWrapped } from '../utils/replaceWrapped';
 
-export function parseNestedJoinCall({
+export const parseNestedJoinCall = ({
     useNativeAssetAsWrappedAmountIn,
     chainId,
     sortedTokens,
@@ -19,7 +19,7 @@ export function parseNestedJoinCall({
     minBptOut,
     fromInternalBalance,
     outputReferenceKey,
-}: NestedJoinCall) {
+}: NestedJoinCall) => {
     // replace wrapped token with native asset if needed
     let tokensIn = [...sortedTokens];
     let value = 0n;
@@ -79,4 +79,4 @@ export function parseNestedJoinCall({
         ] as const,
         value,
     };
-}
+};
