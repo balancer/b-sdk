@@ -4,6 +4,7 @@ import {
     MULTICALL,
     BATCHSIZE,
     ProviderSwapOptions,
+    VAULT,
 } from '../src';
 // rome-ignore lint/correctness/noUnusedVariables: <this is a test file>
 import { mainnet, polygonZkEvm } from 'viem/chains';
@@ -44,6 +45,7 @@ const onChainEnricher = new OnChainPoolDataEnricher(
     rpc,
     MULTICALL[chain.id],
     BATCHSIZE[chain.id],
+    VAULT[chain.id],
 );
 // const blockNumber =
 const providerOptions: ProviderSwapOptions = {

@@ -60,6 +60,7 @@ export enum ChainId {
     ARBITRUM_ONE = 42161,
     AVALANCHE = 43114,
     BASE_GOERLI = 84531,
+    FANTOM = 250,
 }
 
 export const CHAINS: Record<number, Chain> = {
@@ -75,6 +76,17 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.ARBITRUM_ONE]: arbitrum,
     [ChainId.AVALANCHE]: avalanche,
     [ChainId.BASE_GOERLI]: baseGoerli,
+};
+
+export const VAULT: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.AVALANCHE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.GNOSIS_CHAIN]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.MAINNET]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.OPTIMISM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.POLYGON]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.ZKEVM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.FANTOM]: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
 };
 
 export const SUBGRAPH_URLS = {
@@ -100,6 +112,8 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2',
     [ChainId.BASE_GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-base-goerli-v2',
+    [ChainId.FANTOM]:
+        'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
 };
 
 export const STELLATE_URLS = {
@@ -111,7 +125,17 @@ export const STELLATE_URLS = {
     [ChainId.ARBITRUM_ONE]: 'https://balancer-arbitrum-v2.stellate.balancer.fi',
 };
 
-export const BALANCER_QUERIES = '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5';
+export const BALANCER_QUERIES: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.AVALANCHE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.GNOSIS_CHAIN]: '0x0f3e0c4218b7b0108a3643cfe9d3ec0d4f57c54e',
+    [ChainId.MAINNET]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.OPTIMISM]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
+    [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
+};
+
 export const MULTICALL: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xca11bde05977b3631167028862be2a173976ca11',
     [ChainId.AVALANCHE]: '0xca11bde05977b3631167028862be2a173976ca11',
@@ -120,6 +144,7 @@ export const MULTICALL: Record<number, Address> = {
     [ChainId.OPTIMISM]: '0xca11bde05977b3631167028862be2a173976ca11',
     [ChainId.POLYGON]: '0xca11bde05977b3631167028862be2a173976ca11',
     [ChainId.ZKEVM]: '0xca11bde05977b3631167028862be2a173976ca11',
+    [ChainId.FANTOM]: '0xca11bde05977b3631167028862be2a173976ca11',
 };
 export const BATCHSIZE: Record<number, number> = {
     [ChainId.ARBITRUM_ONE]: 1000,
@@ -129,6 +154,7 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.OPTIMISM]: 1000,
     [ChainId.POLYGON]: 1000,
     [ChainId.ZKEVM]: 128,
+    [ChainId.FANTOM]: 128,
 };
 
 export const NATIVE_ASSETS = {
@@ -171,6 +197,14 @@ export const NATIVE_ASSETS = {
         'ETH',
         'Ether',
         '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+    ),
+    [ChainId.FANTOM]: new Token(
+        ChainId.FANTOM,
+        NATIVE_ADDRESS,
+        18,
+        'FANTOM',
+        'Fantom',
+        '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
     ),
 };
 

@@ -6,7 +6,14 @@ dotenv.config();
 import { SmartOrderRouter } from '../src/sor';
 import { sorGetSwapsWithPools } from '../src/static';
 import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import { ChainId, ETH, MULTICALL, BATCHSIZE } from '../src/utils';
+import {
+    ChainId,
+    ETH,
+    NATIVE_ASSETS,
+    MULTICALL,
+    BATCHSIZE,
+    VAULT,
+} from '../src/utils';
 import { Token, TokenAmount } from '../src/entities';
 import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapKind, SwapOptions } from '../src/types';
@@ -23,6 +30,7 @@ describe('SmartOrderRouter', () => {
             rpcUrl,
             MULTICALL[chainId],
             BATCHSIZE[chainId],
+            VAULT[chainId],
         );
 
         const sor = new SmartOrderRouter({
@@ -170,6 +178,102 @@ describe('SmartOrderRouter', () => {
 
                 const onchain = await swap.query(rpcUrl, swapOptions.block);
                 expect(swap.quote.amount).toEqual(onchain.amount);
+            });
+        });
+    });
+    describe('Fantom', () => {
+        const chainId = ChainId.FANTOM;
+        const inputToken = NATIVE_ASSETS[chainId];
+        const rpcUrl = process.env.FANTOM_RPC_URL || '';
+        const subgraphPoolDataService = new SubgraphPoolProvider(
+            chainId,
+            undefined,
+            {
+                poolIdIn: [
+                    '0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec',
+                ],
+            },
+        );
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
+            rpcUrl,
+            MULTICALL[chainId],
+            BATCHSIZE[chainId],
+            VAULT[chainId],
+        );
+
+        const sor = new SmartOrderRouter({
+            chainId,
+            poolDataProviders: subgraphPoolDataService,
+            poolDataEnrichers: onChainPoolDataEnricher,
+            rpcUrl: rpcUrl,
+        });
+
+        const BEETS = new Token(
+            chainId,
+            '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e',
+            18,
+            'BEETS',
+        );
+
+        const swapOptions: SwapOptions = {
+            block: 65313450n,
+        };
+
+        let pools: BasePool[];
+        // Since constructing a Swap mutates the pool balances, we refetch for each test
+        // May be a better way to deep clone a BasePool[] class instead
+        beforeEach(async () => {
+            pools = await sor.fetchAndCachePools(swapOptions.block);
+        });
+
+        describe('Native Swaps', () => {
+            test('Native -> Token givenIn', async () => {
+                const inputAmount = TokenAmount.fromHumanAmount(
+                    inputToken,
+                    '100',
+                );
+
+                const swap = await sorGetSwapsWithPools(
+                    inputToken,
+                    BEETS,
+                    SwapKind.GivenIn,
+                    inputAmount,
+                    pools,
+                    swapOptions,
+                );
+
+                if (!swap) throw new Error('Swap is undefined');
+
+                const onchain = await swap.query(rpcUrl, swapOptions.block);
+
+                expect(swap.quote.amount).toEqual(onchain.amount);
+                expect(swap.inputAmount.amount).toEqual(inputAmount.amount);
+                expect(swap.outputAmount.amount).toEqual(swap.quote.amount);
+            });
+
+            test('Native ETH -> Token givenOut', async () => {
+                const outputAmount = TokenAmount.fromHumanAmount(
+                    BEETS,
+                    '100000',
+                );
+
+                const swap = await sorGetSwapsWithPools(
+                    inputToken,
+                    BEETS,
+                    SwapKind.GivenOut,
+                    outputAmount,
+                    pools,
+                    swapOptions,
+                );
+
+                if (!swap) throw new Error('Swap is undefined');
+
+                const onchain = await swap.query(rpcUrl, swapOptions.block);
+
+                expect(swap.quote.amount).toEqual(onchain.amount);
+                expect(swap.inputAmount.amount).toEqual(swap.quote.amount);
+                expect(swap.outputAmount.amount).toEqual(outputAmount.amount);
             });
         });
     });

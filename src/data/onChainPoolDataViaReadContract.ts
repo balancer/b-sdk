@@ -78,10 +78,9 @@ const getSwapFeeFn = (poolType: string) => {
 
 const defaultCalls = {
     count: 4,
-    build: (id: string, poolType: string): BuildReturn[] => [
+    build: (id: string, poolType: string, vault: Address): BuildReturn[] => [
         {
-            address:
-                '0xBA12222222228d8Ba445958a75a0704d566BF2C8' as `0x${string}`,
+            address: vault,
             abi,
             functionName: 'getPoolTokens',
             args: [id as Hex],
@@ -115,8 +114,8 @@ const defaultCalls = {
 // These don't exist on some earlier pool versions
 const defaultCallsAux = {
     count: 2 + defaultCalls.count,
-    build: (id: string, poolType: string): BuildReturn[] => [
-        ...defaultCalls.build(id, poolType),
+    build: (id: string, poolType: string, vault: Address): BuildReturn[] => [
+        ...defaultCalls.build(id, poolType, vault),
         {
             address: getPoolAddress(id) as `0x${string}`,
             abi,
@@ -207,7 +206,11 @@ const gyroECalls = {
     }),
 };
 
-const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
+const poolTypeCalls = (
+    poolType: string,
+    poolTypeVersion: number,
+    vault: Address,
+) => {
     const do_nothing = {
         count: 0,
         build: () => [],
@@ -222,7 +225,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
                 return {
                     count: defaultCalls.count + weightedCalls.count,
                     build: (id: string) => [
-                        ...defaultCalls.build(id, poolType),
+                        ...defaultCalls.build(id, poolType, vault),
                         ...weightedCalls.build(id),
                     ],
                     parse: (results: Results, shift: number) => ({
@@ -237,7 +240,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
                 return {
                     count: defaultCallsAux.count + weightedCalls.count,
                     build: (id: string) => [
-                        ...defaultCallsAux.build(id, poolType),
+                        ...defaultCallsAux.build(id, poolType, vault),
                         ...weightedCalls.build(id),
                     ],
                     parse: (results: Results, shift: number) => ({
@@ -254,7 +257,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
                 return {
                     count: defaultCalls.count + stableCalls.count,
                     build: (id: string) => [
-                        ...defaultCalls.build(id, poolType),
+                        ...defaultCalls.build(id, poolType, vault),
                         ...stableCalls.build(id),
                     ],
                     parse: (results: Results, shift: number) => ({
@@ -269,7 +272,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
                 return {
                     count: defaultCallsAux.count + stableCalls.count,
                     build: (id: string) => [
-                        ...defaultCallsAux.build(id, poolType),
+                        ...defaultCallsAux.build(id, poolType, vault),
                         ...stableCalls.build(id),
                     ],
                     parse: (results: Results, shift: number) => ({
@@ -287,7 +290,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
             return {
                 count: defaultCalls.count + stableCalls.count,
                 build: (id: string) => [
-                    ...defaultCalls.build(id, poolType),
+                    ...defaultCalls.build(id, poolType, vault),
                     ...stableCalls.build(id),
                 ],
                 parse: (results: Results, shift: number) => ({
@@ -299,7 +302,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
             return {
                 count: defaultCallsAux.count + stableCalls.count,
                 build: (id: string) => [
-                    ...defaultCallsAux.build(id, poolType),
+                    ...defaultCallsAux.build(id, poolType, vault),
                     ...stableCalls.build(id),
                 ],
                 parse: (results: Results, shift: number) => ({
@@ -316,7 +319,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
                 return {
                     count: defaultCalls.count + gyroECalls.count,
                     build: (id: string) => [
-                        ...defaultCalls.build(id, poolType),
+                        ...defaultCalls.build(id, poolType, vault),
                         ...gyroECalls.build(id),
                     ],
                     parse: (results: Results, shift: number) => ({
@@ -335,7 +338,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
                 return {
                     count: defaultCalls.count + linearCalls.count,
                     build: (id: string) => [
-                        ...defaultCalls.build(id, poolType),
+                        ...defaultCalls.build(id, poolType, vault),
                         ...linearCalls.build(id),
                     ],
                     parse: (results: Results, shift: number) => ({
@@ -355,6 +358,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
 };
 
 export const fetchAdditionalPoolData = async (
+    vault: Address,
     multicallAddress: Address,
     pools: {
         id: string;
@@ -370,7 +374,11 @@ export const fetchAdditionalPoolData = async (
     }
 
     const calls = pools.flatMap(({ id, poolType, poolTypeVersion }) =>
-        poolTypeCalls(poolType, poolTypeVersion).build(id, poolType),
+        poolTypeCalls(poolType, poolTypeVersion, vault).build(
+            id,
+            poolType,
+            vault,
+        ),
     );
 
     const batchedCalls = calls.map(({ address, functionName, args }) => {
@@ -443,9 +451,12 @@ export const fetchAdditionalPoolData = async (
     return pools.map(({ id, poolType, poolTypeVersion }) => {
         const result = {
             id,
-            ...poolTypeCalls(poolType, poolTypeVersion).parse(results, shift),
+            ...poolTypeCalls(poolType, poolTypeVersion, vault).parse(
+                results,
+                shift,
+            ),
         } as OnChainPoolData;
-        shift += poolTypeCalls(poolType, poolTypeVersion).count;
+        shift += poolTypeCalls(poolType, poolTypeVersion, vault).count;
         return result;
     });
 };

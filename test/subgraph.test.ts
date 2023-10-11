@@ -17,4 +17,17 @@ describe('SubgraphPoolProvider', () => {
         );
         expect(pools.length).toBeGreaterThan(0);
     });
+    test('getPools fantom', async () => {
+        const chainId = ChainId.FANTOM;
+        const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
+
+        const providerOptions: ProviderSwapOptions = {
+            timestamp: BigInt(Math.floor(new Date().getTime() / 1000)),
+        };
+
+        const { pools } = await subgraphPoolDataService.getPools(
+            providerOptions,
+        );
+        expect(pools.length).toBeGreaterThan(0);
+    });
 });
