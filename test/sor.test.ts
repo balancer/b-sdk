@@ -165,8 +165,6 @@ describe('SmartOrderRouter', () => {
                     swapOptions,
                 );
 
-                console.log(swap);
-
                 if (!swap) throw new Error('Swap is undefined');
 
                 const onchain = await swap.query(rpcUrl, swapOptions.block);

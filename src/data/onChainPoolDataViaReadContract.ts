@@ -328,7 +328,7 @@ const poolTypeCalls = (poolType: string, poolTypeVersion = 1) => {
                     }),
                 };
             } else {
-                return defaultCallsAux;
+                return defaultCalls;
             }
         case 'AaveLinear':
             if (poolTypeVersion === 1) {
