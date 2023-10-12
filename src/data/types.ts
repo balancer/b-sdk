@@ -15,6 +15,7 @@ export type SupportedRawPoolTypes =
     | 'Element'
     | 'FX'
     | 'Gyro2'
+    | 'Gyro3'
     | 'GyroE';
 type LinearPoolType = `${string}Linear`;
 
