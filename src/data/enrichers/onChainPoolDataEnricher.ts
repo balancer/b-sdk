@@ -43,6 +43,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         private readonly rpcUrl: string,
         private readonly multicallAddress: Address,
         private readonly batchSize: number,
+        private readonly vault: Address,
     ) {
         this.client = createPublicClient({
             transport: http(this.rpcUrl, { timeout: 60_000 }),
@@ -55,6 +56,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         options: SwapOptions,
     ): Promise<OnChainPoolData[]> {
         return fetchAdditionalPoolData(
+            this.vault,
             this.multicallAddress,
             data.pools,
             this.client,

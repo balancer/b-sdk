@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import testPools from './lib/testData/gyroETestPool.json';
-import { BATCHSIZE, ChainId, MULTICALL } from '../src/utils';
+import { BATCHSIZE, ChainId, MULTICALL, VAULT } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
@@ -47,6 +47,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             rpcUrl,
             MULTICALL[chainId],
             BATCHSIZE[chainId],
+            VAULT[chainId],
         );
 
         sor = new SmartOrderRouter({

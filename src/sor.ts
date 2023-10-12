@@ -6,6 +6,7 @@ import {
     SUBGRAPH_URLS,
     MULTICALL,
     BATCHSIZE,
+    VAULT,
 } from './utils';
 import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
@@ -41,7 +42,8 @@ export class SmartOrderRouter {
                 chainId,
                 rpcUrl,
                 MULTICALL[chainId],
-                BATCHSIZE[this.chainId],
+                BATCHSIZE[chainId],
+                VAULT[chainId],
             );
         this.poolDataService = new PoolDataService(
             Array.isArray(poolDataProviders)
