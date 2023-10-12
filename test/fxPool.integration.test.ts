@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { BATCHSIZE, ChainId, MULTICALL, VAULT } from '../src/utils';
+import { BATCHSIZE, ChainId, VAULT } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
@@ -49,7 +49,6 @@ describe('fx integration tests', () => {
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
-            MULTICALL[chainId],
             BATCHSIZE[chainId],
             VAULT[chainId],
         );

@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import testPools from './lib/testData/gyroETestPool.json';
-import { BATCHSIZE, ChainId, MULTICALL, VAULT } from '../src/utils';
+import { BATCHSIZE, ChainId, VAULT } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
@@ -45,7 +45,6 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
-            MULTICALL[chainId],
             BATCHSIZE[chainId],
             VAULT[chainId],
         );
