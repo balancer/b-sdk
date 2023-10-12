@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.1.2
+
+### Patch Changes
+
+- 7004561: Add missing gyro3 to SupportedRawPoolTypes.
+
 ## 0.1.1
 
 ### Patch Changes
