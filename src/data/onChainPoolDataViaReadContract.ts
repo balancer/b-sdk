@@ -1,13 +1,4 @@
-import {
-    PublicClient,
-    parseAbi,
-    multicall3Abi,
-    encodeFunctionData,
-    Address,
-    Abi,
-    Hex,
-    decodeFunctionResult,
-} from 'viem';
+import { PublicClient, parseAbi, Address, Abi, Hex } from 'viem';
 import { getPoolAddress } from '../utils';
 import { OnChainPoolData } from './enrichers/onChainPoolDataEnricher';
 import { SwapOptions } from '../types';
@@ -359,7 +350,6 @@ const poolTypeCalls = (
 
 export const fetchAdditionalPoolData = async (
     vault: Address,
-    multicallAddress: Address,
     pools: {
         id: string;
         poolType: string;
@@ -381,69 +371,20 @@ export const fetchAdditionalPoolData = async (
         ),
     );
 
-    const batchedCalls = calls.map(({ address, functionName, args }) => {
-        let callData;
-        if (args !== undefined)
-            callData = encodeFunctionData({ abi, functionName, args });
-        else callData = encodeFunctionData({ abi, functionName });
-        return {
-            target: address,
-            allowFailure: true,
-            callData,
-        };
+    const results = await client.multicall({
+        contracts: calls,
+        batchSize: batchSize,
+        blockNumber: options.block,
     });
 
-    const numBatches = Math.ceil(batchedCalls.length / batchSize);
-    const batchPromises: Promise<
-        readonly {
-            success: boolean;
-            returnData: `0x${string}`;
-        }[]
-    >[] = [];
-
-    for (let batchIndex = 0; batchIndex < numBatches; batchIndex++) {
-        const batchCalls = batchedCalls.slice(
-            batchIndex * batchSize,
-            (batchIndex + 1) * batchSize,
-        );
-
-        batchPromises.push(
-            client.readContract({
-                address: multicallAddress,
-                abi: multicall3Abi,
-                functionName: 'aggregate3',
-                blockNumber: options.block,
-                args: [batchCalls],
-            }),
-        );
-    }
-
-    const encodedResults = (await Promise.all(batchPromises)).flatMap((r) => r);
-
-    const results = encodedResults.map((result, i) => {
-        if (result.success) {
-            const decodedResult = decodeFunctionResult({
-                abi,
-                functionName: calls[i].functionName,
-                data: result.returnData,
-            });
-            return {
-                error: undefined,
-                result: decodedResult,
-                status: 'success',
-            } as Result;
-        } else {
+    results.forEach((r, i) => {
+        if (r.status === 'failure')
             console.error(
                 'Failed request in multicall',
                 calls[i].address,
                 calls[i].functionName,
+                r.error,
             );
-            return {
-                error: new Error('failed'),
-                result: undefined,
-                status: 'failure',
-            } as Result;
-        }
     });
 
     let shift = 0;

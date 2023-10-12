@@ -41,7 +41,6 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
     constructor(
         private readonly chainId: number,
         private readonly rpcUrl: string,
-        private readonly multicallAddress: Address,
         private readonly batchSize: number,
         private readonly vault: Address,
     ) {
@@ -57,7 +56,6 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
     ): Promise<OnChainPoolData[]> {
         return fetchAdditionalPoolData(
             this.vault,
-            this.multicallAddress,
             data.pools,
             this.client,
             options,

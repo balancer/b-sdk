@@ -1,7 +1,6 @@
 // bun run debug/multicall.ts
 import {
     OnChainPoolDataEnricher,
-    MULTICALL,
     BATCHSIZE,
     ProviderSwapOptions,
     VAULT,
@@ -43,7 +42,6 @@ const pools = await fetch(
 const onChainEnricher = new OnChainPoolDataEnricher(
     chain.id,
     rpc,
-    MULTICALL[chain.id],
     BATCHSIZE[chain.id],
     VAULT[chain.id],
 );

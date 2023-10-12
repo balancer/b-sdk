@@ -13,6 +13,7 @@ import {
     polygonZkEvm,
     zkSync,
     zkSyncTestnet,
+    fantom,
 } from 'viem/chains';
 
 export const ZERO_ADDRESS: Address =
@@ -76,6 +77,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.ARBITRUM_ONE]: arbitrum,
     [ChainId.AVALANCHE]: avalanche,
     [ChainId.BASE_GOERLI]: baseGoerli,
+    [ChainId.FANTOM]: fantom,
 };
 
 export const VAULT: Record<number, Address> = {
@@ -136,23 +138,13 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
 };
 
-export const MULTICALL: Record<number, Address> = {
-    [ChainId.ARBITRUM_ONE]: '0xca11bde05977b3631167028862be2a173976ca11',
-    [ChainId.AVALANCHE]: '0xca11bde05977b3631167028862be2a173976ca11',
-    [ChainId.GNOSIS_CHAIN]: '0xca11bde05977b3631167028862be2a173976ca11',
-    [ChainId.MAINNET]: '0xca11bde05977b3631167028862be2a173976ca11',
-    [ChainId.OPTIMISM]: '0xca11bde05977b3631167028862be2a173976ca11',
-    [ChainId.POLYGON]: '0xca11bde05977b3631167028862be2a173976ca11',
-    [ChainId.ZKEVM]: '0xca11bde05977b3631167028862be2a173976ca11',
-    [ChainId.FANTOM]: '0xca11bde05977b3631167028862be2a173976ca11',
-};
 export const BATCHSIZE: Record<number, number> = {
-    [ChainId.ARBITRUM_ONE]: 1000,
-    [ChainId.AVALANCHE]: 1000,
-    [ChainId.GNOSIS_CHAIN]: 1000,
-    [ChainId.MAINNET]: 1000,
-    [ChainId.OPTIMISM]: 1000,
-    [ChainId.POLYGON]: 1000,
+    [ChainId.ARBITRUM_ONE]: 800,
+    [ChainId.AVALANCHE]: 800,
+    [ChainId.GNOSIS_CHAIN]: 800,
+    [ChainId.MAINNET]: 800,
+    [ChainId.OPTIMISM]: 800,
+    [ChainId.POLYGON]: 800,
     [ChainId.ZKEVM]: 128,
     [ChainId.FANTOM]: 128,
 };

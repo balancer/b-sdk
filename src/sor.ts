@@ -1,13 +1,6 @@
 import { Router } from './router';
 import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
-import {
-    ChainId,
-    checkInputs,
-    SUBGRAPH_URLS,
-    MULTICALL,
-    BATCHSIZE,
-    VAULT,
-} from './utils';
+import { ChainId, checkInputs, SUBGRAPH_URLS, BATCHSIZE, VAULT } from './utils';
 import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
 import { OnChainPoolDataEnricher, SubgraphPoolProvider } from './data';
@@ -41,7 +34,6 @@ export class SmartOrderRouter {
             new OnChainPoolDataEnricher(
                 chainId,
                 rpcUrl,
-                MULTICALL[chainId],
                 BATCHSIZE[chainId],
                 VAULT[chainId],
             );
