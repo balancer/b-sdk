@@ -315,7 +315,9 @@ const poolTypeCalls = (
             };
         }
         case 'GyroE':
-            if (poolTypeVersion === 2) {
+            if (poolTypeVersion === 1) {
+                return defaultCalls;
+            } else {
                 return {
                     count: defaultCalls.count + gyroECalls.count,
                     build: (id: string) => [
@@ -330,8 +332,6 @@ const poolTypeCalls = (
                         ),
                     }),
                 };
-            } else {
-                return defaultCalls;
             }
         case 'AaveLinear':
             if (poolTypeVersion === 1) {
