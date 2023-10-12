@@ -1,5 +1,17 @@
 # @balancer/sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- f6d1051: Add Fantom config. Update to have network specific vault addr.
+- 67e4120: Replace dataQueries with multicall (using Viem):
+
+  - Add `BATCHSIZE` config per network
+  - Onchain calls correctly mapped to pool/version
+  - Filter bricked pools from vulnerability
+  - Fix scalingFactor scaling
+
 ## 0.1.2
 
 ### Patch Changes
