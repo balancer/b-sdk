@@ -12,7 +12,6 @@ export type SupportedRawPoolTypes =
     | 'MetaStable'
     | 'ComposableStable'
     | 'StablePhantom'
-    | 'Element'
     | 'FX'
     | 'Gyro2'
     | 'Gyro3'
