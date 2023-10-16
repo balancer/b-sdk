@@ -54,6 +54,7 @@ export type JoinQueryResult = {
     amountsIn: TokenAmount[];
     fromInternalBalance: boolean;
     tokenInIndex?: number;
+    bptIndex?:number;
 };
 
 export type JoinCallInput = JoinQueryResult & {

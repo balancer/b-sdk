@@ -10,6 +10,7 @@ import { WeightedJoin } from './weighted/weightedJoin';
 import { PoolStateInput } from '../types';
 import { validateInputs } from './weighted/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
+import { ComposableStableJoin } from "./composable-stable/composableStableJoin";
 
 export class PoolJoin {
     private readonly poolJoins: Record<string, BaseJoin> = {};
@@ -18,6 +19,7 @@ export class PoolJoin {
         const { customPoolJoins } = config || {};
         this.poolJoins = {
             Weighted: new WeightedJoin(),
+            PHANTOM_STABLE: new ComposableStableJoin(),
             // custom pool Joins take precedence over base Joins
             ...customPoolJoins,
         };
