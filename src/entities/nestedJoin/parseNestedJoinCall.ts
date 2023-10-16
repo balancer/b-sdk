@@ -37,8 +37,8 @@ export const parseNestedJoinCall = ({
     const _maxAmountsIn = maxAmountsIn.map((a) =>
         a.isRef ? Relayer.toChainedReference(a.amount) : a.amount,
     );
-    const amountsInWithoutBpt = _maxAmountsIn.filter((_, i) =>
-        sortedTokens[i].isSameAddress(poolAddress),
+    const amountsInWithoutBpt = _maxAmountsIn.filter(
+        (_, i) => !sortedTokens[i].isSameAddress(poolAddress),
     );
     let userData: Hex;
     switch (poolType) {
