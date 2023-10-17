@@ -36,15 +36,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
+          submodules: 
 
-      - name: Download Foundry
-        run:
-          curl -L https://foundry.paradigm.xyz | bash
-      - name: Refresh environment
-        run: source ~/.bashrc
       - name: Install Foundry
-        run: foundryup
+        run:
+          curl -L https://foundry.paradigm.xyz | bash ; source ~/.bashrc ; foundryup
     
   test:
     name: Test
