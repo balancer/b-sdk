@@ -33,11 +33,13 @@ jobs:
   foundry:
     name: Foundry
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -ieo pipefail {0}
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: 
-
+          submodules: recursive
       - name: Install Foundry
         run:
           curl -L https://foundry.paradigm.xyz | bash ; source ~/.bashrc ; foundryup
