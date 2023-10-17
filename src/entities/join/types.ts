@@ -46,7 +46,11 @@ export type JoinInput =
     | ProportionalJoinInput;
 
 // Returned from a join query
-export type JoinQueryResult = {
+export type JoinQueryResult =
+  BaseJoinQueryResult
+ | ComposableStableJoinQueryResult;
+
+export type BaseJoinQueryResult = {
     poolType: string;
     poolId: Hex;
     joinKind: JoinKind;
@@ -54,10 +58,15 @@ export type JoinQueryResult = {
     amountsIn: TokenAmount[];
     fromInternalBalance: boolean;
     tokenInIndex?: number;
-    bptIndex?:number;
-};
+}
 
-export type JoinCallInput = JoinQueryResult & {
+export type ComposableStableJoinQueryResult = BaseJoinQueryResult & {
+    bptIndex?:number;
+}
+
+export type JoinCallInput = JoinQueryResult 
+  & ComposableStableJoinQueryResult 
+  & {
     slippage: Slippage;
     sender: Address;
     recipient: Address;

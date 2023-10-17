@@ -8,7 +8,7 @@ import {
 } from './types';
 import { WeightedJoin } from './weighted/weightedJoin';
 import { PoolStateInput } from '../types';
-import { validateInputs } from './weighted/validateInputs';
+import { validateInputs } from './utils/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
 import { ComposableStableJoin } from "./composable-stable/composableStableJoin";
 
