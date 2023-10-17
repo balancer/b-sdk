@@ -27,3 +27,19 @@ runs:
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: pnpm i
       shell: bash
+    - name: Foundry
+      defaults:
+        run:
+          shell: bash -ieo pipefail {0}
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            submodules: recursive
+        - name: Install Foundry
+          run:
+            curl -L https://foundry.paradigm.xyz | bash ; source ~/.bashrc ; foundryup
+        - name: Run Anvil Client in background for integration tests
+          run: anvil --fork-url ${{ secrets.ETHEREUM_RPC_URL }} &
+          env:
+            ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
+            POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
