@@ -27,10 +27,3 @@ runs:
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: pnpm i
       shell: bash
-    - name: Install Foundry
-      uses: foundry-rs/foundry-toolchain@v1
-    - name: Run Anvil Node
-      run: anvil --fork-url ${{ secrets.ETHEREUM_RPC_URL }} &
-      env:
-        ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
-        POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
