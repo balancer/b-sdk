@@ -31,7 +31,7 @@ jobs:
         run: pnpm format & pnpm lint
   test:
     name: Test
-    needs: [install, foundry]
+    needs: install
     runs-on: ubuntu-latest
     strategy:
       matrix:
