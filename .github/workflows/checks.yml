@@ -46,10 +46,7 @@ jobs:
     
   test:
     name: Test
-    defaults:
-      run:
-        shell: bash -ieo pipefail {0}
-    needs: install
+    needs: [install, foundry]
     runs-on: ubuntu-latest
     strategy:
       matrix:
