@@ -1,6 +1,5 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
-import { Token } from '../token';
 import { BALANCER_RELAYER, getPoolAddress } from '../../utils';
 import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
@@ -14,6 +13,7 @@ import { NestedPoolState } from '../types';
 import { doQueryNestedExit } from './doQueryNestedExit';
 import { getNestedExitCalls } from './getNestedExitCalls';
 import { parseNestedExitCall } from './parseNestedExitCall';
+import { getPeekCalls } from './getPeekCalls';
 
 export class NestedExit {
     async query(
@@ -35,27 +35,7 @@ export class NestedExit {
             }),
         );
 
-        const tokensOut: Token[] = [];
-        const peekCalls: Hex[] = [];
-        calls.forEach((call) => {
-            call.outputReferenceKeys.forEach((opRefKey) => {
-                const tokenOut = call.sortedTokens[Number(opRefKey % 10n)];
-                const isTokenBeingUsedAsInput = calls.some(
-                    (_call) =>
-                        _call.bptAmountIn.isRef === true &&
-                        tokenOut.isSameAddress(getPoolAddress(_call.poolId)),
-                );
-
-                if (!isTokenBeingUsedAsInput) {
-                    tokensOut.push(tokenOut);
-                    peekCalls.push(
-                        Relayer.encodePeekChainedReferenceValue(
-                            Relayer.toChainedReference(opRefKey, false),
-                        ),
-                    );
-                }
-            });
-        });
+        const { peekCalls, tokensOut } = getPeekCalls(calls);
 
         // append peek calls to get amountsOut
         encodedCalls.push(...peekCalls);
