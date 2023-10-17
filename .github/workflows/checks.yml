@@ -43,14 +43,15 @@ jobs:
       - name: Install Foundry
         run:
           curl -L https://foundry.paradigm.xyz | bash ; source ~/.bashrc ; foundryup
-    
+      - name: Run Anvil Client in background for integration tests
+        run: anvil --fork-url ${{ secrets.ETHEREUM_RPC_URL }} &
+        env:
+          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
+          POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
   test:
     name: Test
     needs: [install, foundry]
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -ieo pipefail {0}
     strategy:
       matrix:
         node-version: [18]
@@ -59,14 +60,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/actions/setup
-      - name: Run local fork in background for integration tests
-        run: source ~/.bashrc ; anvil --fork-url ${{ secrets.ETHEREUM_RPC_URL }} &
       - name: Test
         run: pnpm test:ci
-        env:
-          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
-          POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
-
   build:
     name: Build
     needs: install
