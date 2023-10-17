@@ -8,12 +8,12 @@ import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi, bathcRelayerLibraryAbi } from '../../abi';
 import {
     NestedJoinInput,
-    NestedPoolState,
     NestedJoinQueryResult,
     NestedJoinCallInput,
 } from './types';
 import { getNestedJoinCalls } from './getNestedJoinCalls';
 import { doQueryNestedJoin } from './doQueryNestedJoin';
+import { NestedPoolState } from '../types';
 
 export class NestedJoin {
     async query(

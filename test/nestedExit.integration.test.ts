@@ -1,4 +1,4 @@
-// pnpm test -- nestedJoin.integration.test.ts
+// pnpm test -- nestedExit.integration.test.ts
 import { describe, expect, test, beforeAll } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -17,8 +17,7 @@ import {
 
 import {
     Slippage,
-    NestedJoin,
-    Token,
+    NestedExit,
     replaceWrapped,
     NestedPoolState,
 } from '../src/entities';
@@ -39,7 +38,7 @@ import {
 } from './lib/utils/helper';
 import { authorizerAbi, vaultAbi } from '../src/abi';
 import { Relayer } from '../src/entities/relayer';
-import { NestedJoinInput } from '../src/entities/nestedJoin/types';
+import { NestedExitInput } from '../src/entities/nestedExit/types';
 
 /**
  * Deploy the new relayer contract with the new helper address:
@@ -57,28 +56,24 @@ import { NestedJoinInput } from '../src/entities/nestedJoin/types';
  */
 
 type TxInput = {
-    amountsIn: {
-        address: Address; // DAI
-        rawAmount: bigint;
-        decimals: number;
-    }[];
+    bptAmountIn: bigint;
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
-    nestedJoin: NestedJoin;
+    nestedExit: NestedExit;
     nestedPoolFromApi: NestedPoolState;
     client: Client & PublicActions & TestActions & WalletActions;
-    useNativeAssetAsWrappedAmountIn?: boolean;
+    useNativeAssetAsWrappedAmountOut?: boolean;
 };
 
-describe('nested join test', () => {
+describe('nested exit test', () => {
     let api: MockApi;
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
     let poolAddress: Address;
     let nestedPoolFromApi: NestedPoolState;
-    let nestedJoin: NestedJoin;
+    let nestedExit: NestedExit;
     let testAddress: Address;
 
     beforeAll(async () => {
@@ -104,7 +99,7 @@ describe('nested join test', () => {
         nestedPoolFromApi = await api.getNestedPool(poolAddress);
 
         // setup join helper
-        nestedJoin = new NestedJoin();
+        nestedExit = new NestedExit();
 
         // Fork setup - done only once per fork reset
         // Governance grant roles to the relayer
@@ -113,11 +108,9 @@ describe('nested join test', () => {
         // User approve vault to spend their tokens and update user balance
         const tokens = [
             ...new Set(
-                nestedPoolFromApi.pools.flatMap((p) =>
-                    p.tokens.map((t) => {
-                        return { address: t.address, decimals: t.decimals };
-                    }),
-                ),
+                nestedPoolFromApi.pools.flatMap((p) => {
+                    return { address: p.address, decimals: 18 };
+                }),
             ),
         ];
         for (const token of tokens) {
@@ -139,121 +132,53 @@ describe('nested join test', () => {
         }
     });
 
-    test('single asset join', async () => {
-        const amountIn = {
-            address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
-            rawAmount: parseUnits('1', 18),
-            decimals: 18,
-        };
+    test('proportional exit', async () => {
+        const bptAmountIn = parseUnits('1', 18);
         await doTransaction({
-            amountsIn: [amountIn],
+            bptAmountIn,
             chainId,
             rpcUrl,
             testAddress,
-            nestedJoin,
+            nestedExit,
             nestedPoolFromApi,
             client,
         });
     });
 
-    test('all assets join', async () => {
-        const amountsIn = [
-            {
-                address:
-                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
-                rawAmount: parseUnits('1', 18),
-                decimals: 18,
-            },
-            {
-                address:
-                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
-                rawAmount: parseUnits('1', 18),
-                decimals: 18,
-            },
-            {
-                address:
-                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
-                rawAmount: parseUnits('1', 6),
-                decimals: 6,
-            },
-            {
-                address:
-                    '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
-                rawAmount: parseUnits('1', 6),
-                decimals: 6,
-            },
-        ];
+    test('native asset exit', async () => {
+        const bptAmountIn = parseUnits('1', 18);
 
         await doTransaction({
-            amountsIn,
+            bptAmountIn,
             chainId,
             rpcUrl,
             testAddress,
-            nestedJoin,
+            nestedExit,
             nestedPoolFromApi,
             client,
-        });
-    });
-
-    test('native asset join', async () => {
-        const amountsIn = [
-            {
-                address:
-                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
-                rawAmount: parseUnits('1', 18),
-                decimals: 18,
-            },
-            {
-                address:
-                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
-                rawAmount: parseUnits('1', 18),
-                decimals: 18,
-            },
-            {
-                address:
-                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
-                rawAmount: parseUnits('1', 6),
-                decimals: 6,
-            },
-            {
-                address:
-                    '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
-                rawAmount: parseUnits('1', 6),
-                decimals: 6,
-            },
-        ];
-
-        await doTransaction({
-            amountsIn,
-            chainId,
-            rpcUrl,
-            testAddress,
-            nestedJoin,
-            nestedPoolFromApi,
-            client,
-            useNativeAssetAsWrappedAmountIn: true,
+            useNativeAssetAsWrappedAmountOut: true,
         });
     });
 });
 
 export const doTransaction = async ({
-    amountsIn,
+    bptAmountIn,
     chainId,
     rpcUrl,
     testAddress,
-    nestedJoin,
+    nestedExit,
     nestedPoolFromApi,
     client,
-    useNativeAssetAsWrappedAmountIn = false,
+    useNativeAssetAsWrappedAmountOut = false,
 }: TxInput) => {
-    const joinInput: NestedJoinInput = {
-        amountsIn,
+    const exitInput: NestedExitInput = {
+        bptAmountIn,
         chainId,
         rpcUrl,
         accountAddress: testAddress,
-        useNativeAssetAsWrappedAmountIn,
+        useNativeAssetAsWrappedAmountOut,
     };
-    const queryResult = await nestedJoin.query(joinInput, nestedPoolFromApi);
+    const queryResult = await nestedExit.query(exitInput, nestedPoolFromApi);
 
     // build join call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
@@ -264,7 +189,7 @@ export const doTransaction = async ({
         client,
     );
 
-    const { call, to, value, minBptOut } = nestedJoin.buildCall({
+    const { call, to, minAmountsOut } = nestedExit.buildCall({
         ...queryResult,
         chainId,
         slippage,
@@ -273,36 +198,39 @@ export const doTransaction = async ({
         relayerApprovalSignature: signature,
     });
 
-    let tokensIn = joinInput.amountsIn.map(
-        (a) => new Token(chainId, a.address, a.decimals),
-    );
-    if (useNativeAssetAsWrappedAmountIn) {
-        tokensIn = replaceWrapped(tokensIn, chainId);
+    let tokensOut = minAmountsOut.map((a) => a.token);
+    if (useNativeAssetAsWrappedAmountOut) {
+        tokensOut = replaceWrapped(tokensOut, chainId);
     }
 
     // send join transaction and check balance changes
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
             [
-                ...tokensIn.map((t) => t.address),
-                queryResult.bptOut.token.address,
+                queryResult.bptAmountIn.token.address,
+                ...tokensOut.map((t) => t.address),
             ],
             client,
             testAddress,
             to,
             call,
-            value,
         );
 
     expect(transactionReceipt.status).to.eq('success');
-    expect(queryResult.bptOut.amount > 0n).to.be.true;
+    queryResult.amountsOut.map(
+        (amountOut) => expect(amountOut.amount > 0n).to.be.true,
+    );
     const expectedDeltas = [
-        ...joinInput.amountsIn.map((a) => a.rawAmount),
-        queryResult.bptOut.amount,
+        queryResult.bptAmountIn.amount,
+        ...queryResult.amountsOut.map((amountOut) => amountOut.amount),
     ];
     expect(expectedDeltas).to.deep.eq(balanceDeltas);
-    const expectedMinBpt = slippage.removeFrom(queryResult.bptOut.amount);
-    expect(expectedMinBpt).to.deep.eq(minBptOut);
+    const expectedMinAmountsOut = queryResult.amountsOut.map((amountOut) =>
+        slippage.removeFrom(amountOut.amount),
+    );
+    expect(expectedMinAmountsOut).to.deep.eq(
+        minAmountsOut.map((a) => a.amount),
+    );
 };
 
 /*********************** Mock To Represent API Requirements **********************/

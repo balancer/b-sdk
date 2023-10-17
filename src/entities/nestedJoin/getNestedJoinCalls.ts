@@ -1,6 +1,7 @@
 import { Token } from '../token';
 import { getPoolAddress } from '../../utils';
-import { NestedJoinInput, NestedPoolState, NestedJoinCall } from './types';
+import { NestedJoinInput, NestedJoinCall } from './types';
+import { NestedPoolState } from '../types';
 
 export const getNestedJoinCalls = (
     {
