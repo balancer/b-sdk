@@ -39,9 +39,8 @@ jobs:
           submodules: recursive
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-      - name: Foundry Up
-        run: foundryup
+        run:
+          curl -L https://foundry.paradigm.xyz | bash & source ~/.bashrc & foundryup
     
   test:
     name: Test
