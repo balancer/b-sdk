@@ -38,9 +38,13 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Foundry
+      - name: Download Foundry
         run:
-          curl -L https://foundry.paradigm.xyz | bash & source ~/.bashrc & foundryup
+          curl -L https://foundry.paradigm.xyz | bash
+      - name: Refresh environment
+        run: source ~/.bashrc
+      - name: Install Foundry
+        run: foundryup
     
   test:
     name: Test
