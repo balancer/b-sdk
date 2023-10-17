@@ -59,7 +59,7 @@ describe('weighted exit test', () => {
 
         // get pool state from api
         const poolInput = await api.getPool(poolId);
-
+        
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
