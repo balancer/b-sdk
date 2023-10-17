@@ -29,7 +29,20 @@ jobs:
         uses: ./.github/actions/setup
       - name: Lint & format code
         run: pnpm format & pnpm lint
+        
+  foundry:
+    name: Foundry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Foundry Up
+        run: foundryup
+    
   test:
     name: Test
     needs: install
@@ -43,7 +56,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Run local fork in background for integration tests
-        run: npx hardhat --tsconfig tsconfig.testing.json node --hostname 127.0.0.1 --fork ${{ secrets.ETHEREUM_RPC_URL }} &
+        run: anvil --fork-url $(. ./.env && echo $ETHEREUM_RPC_URL) &
       - name: Test
         run: pnpm test:ci
         env:
