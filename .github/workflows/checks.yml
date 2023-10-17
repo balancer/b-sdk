@@ -60,7 +60,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Run local fork in background for integration tests
-        run: anvil --fork-url $(. ./.env && echo $ETHEREUM_RPC_URL) &
+        run: source ~/.bashrc ; anvil --fork-url $(. ./.env && echo $ETHEREUM_RPC_URL) &
       - name: Test
         run: pnpm test:ci
         env:
