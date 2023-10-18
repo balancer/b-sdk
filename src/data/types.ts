@@ -13,9 +13,9 @@ export type SupportedRawPoolTypes =
     | 'MetaStable'
     | 'ComposableStable'
     | 'StablePhantom'
-    | 'Element'
     | 'FX'
     | 'Gyro2'
+    | 'Gyro3'
     | 'GyroE';
 type LinearPoolType = `${string}Linear`;
 
