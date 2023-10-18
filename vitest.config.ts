@@ -4,5 +4,6 @@ export default defineConfig({
     test: {
         testTimeout: 10_000,
         hookTimeout: 20_000,
+        globalSetup: ['./test/anvil/anvil-global-setup.ts'],
     },
 });

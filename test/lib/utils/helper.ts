@@ -266,10 +266,10 @@ export const forkSetup = async (
     blockNumber?: bigint,
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
 ): Promise<void> => {
-    await client.reset({
-        blockNumber,
-        jsonRpcUrl,
-    });
+    // await client.reset({
+    //     blockNumber,
+    //     jsonRpcUrl,
+    // });
 
     await client.impersonateAccount({ address: accountAddress });
 
