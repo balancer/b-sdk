@@ -1,13 +1,15 @@
+/// <reference types="vite/client" />
+
 import { CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { sleep } from '../lib/utils/promises';
 
 export let forkUrl: string;
-if (process.env.VITE_ANVIL_FORK_RPC_URL) {
-    forkUrl = process.env.VITE_ANVIL_FORK_RPC_URL;
+if (import.meta.env.VITE_ETHEREUM_RPC_URL) {
+    forkUrl = import.meta.env.VITE_ETHEREUM_RPC_URL;
 } else {
     forkUrl = 'https://cloudflare-eth.com';
     console.warn(
-        `\`VITE_ANVIL_FORK_RPC_URL\` not found. Falling back to \`${forkUrl}\`.`,
+        `\`VITE_ETHEREUM_RPC_URL\` not found. Falling back to \`${forkUrl}\`.`,
     );
 }
 
@@ -23,7 +25,7 @@ const anvilOptions: CreateAnvilOptions = {
 export const anvil = createAnvil(anvilOptions);
 
 export default async function startAnvil() {
-    if (process.env.VITE_SKIP_GLOBAL_SETUP === 'true') {
+    if (import.meta.env.VITE_SKIP_GLOBAL_SETUP === 'true') {
         console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
 anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8555 --fork-block-number=17878719
 `);
