@@ -262,15 +262,8 @@ export const forkSetup = async (
     tokens: Address[],
     slots: number[] | undefined,
     balances: bigint[],
-    jsonRpcUrl: string,
-    blockNumber?: bigint,
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
 ): Promise<void> => {
-    // await client.reset({
-    //     blockNumber,
-    //     jsonRpcUrl,
-    // });
-
     await client.impersonateAccount({ address: accountAddress });
 
     let _slots: number[];
