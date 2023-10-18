@@ -10,7 +10,7 @@ import { WeightedJoin } from './weighted/weightedJoin';
 import { PoolStateInput } from '../types';
 import { validateInputs } from './utils/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
-import { ComposableStableJoin } from "./composable-stable/composableStableJoin";
+import { ComposableStableJoin } from './composable-stable/composableStableJoin';
 
 export class PoolJoin {
     private readonly poolJoins: Record<string, BaseJoin> = {};

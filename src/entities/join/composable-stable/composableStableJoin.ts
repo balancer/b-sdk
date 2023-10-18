@@ -14,18 +14,23 @@ import {
 } from '../types';
 import { AmountsJoin, PoolState } from '../../types';
 import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
-import { ComposableStableEncoder } from "../../encoders/composableStable";
+import { ComposableStableEncoder } from '../../encoders/composableStable';
 
 export class ComposableStableJoin implements BaseJoin {
     public async query(
         input: JoinInput,
         poolState: PoolState,
     ): Promise<JoinQueryResult> {
-        const bptIndex = poolState.tokens.findIndex((t)=> t.address === poolState.address);
+        const bptIndex = poolState.tokens.findIndex(
+            (t) => t.address === poolState.address,
+        );
         const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
         const amountsWithoutBpt = {
-            ...amounts, 
-            maxAmountsIn: [...amounts.maxAmountsIn.slice(0, bptIndex), ...amounts.maxAmountsIn.slice(bptIndex+1)]
+            ...amounts,
+            maxAmountsIn: [
+                ...amounts.maxAmountsIn.slice(0, bptIndex),
+                ...amounts.maxAmountsIn.slice(bptIndex + 1),
+            ],
         };
 
         const userData = this.encodeUserData(input.kind, amountsWithoutBpt);
@@ -70,12 +75,15 @@ export class ComposableStableJoin implements BaseJoin {
 
     public buildCall(input: JoinCallInput): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
-        if(input.bptIndex === undefined){
-            throw new Error("bptIndex is necessary");
+        if (input.bptIndex === undefined) {
+            throw new Error('bptIndex is necessary');
         }
         const amountsWithoutBpt = {
             ...amounts,
-            maxAmountsIn: [...amounts.maxAmountsIn.slice(0, input.bptIndex), ...amounts.maxAmountsIn.slice(input.bptIndex+1)]
+            maxAmountsIn: [
+                ...amounts.maxAmountsIn.slice(0, input.bptIndex),
+                ...amounts.maxAmountsIn.slice(input.bptIndex + 1),
+            ],
         };
 
         const userData = this.encodeUserData(input.joinKind, amountsWithoutBpt);
@@ -110,26 +118,28 @@ export class ComposableStableJoin implements BaseJoin {
     private getAmountsQuery(
         poolTokens: Token[],
         input: JoinInput,
-        bptIndex?:number,
+        bptIndex?: number,
     ): AmountsJoin {
         switch (input.kind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
                 return {
                     minimumBpt: 0n,
-                    maxAmountsIn: getAmounts(poolTokens, input.amountsIn, BigInt(0)),
+                    maxAmountsIn: getAmounts(
+                        poolTokens,
+                        input.amountsIn,
+                        BigInt(0),
+                    ),
                     tokenInIndex: undefined,
                 };
             }
             case JoinKind.SingleAsset: {
-                if(bptIndex===undefined){
-                    throw new Error("bptIndex is necessary");
+                if (bptIndex === undefined) {
+                    throw new Error('bptIndex is necessary');
                 }
                 const tokenInIndex = poolTokens
-                  .filter((_, index)=> index!==bptIndex) // Need to remove Bpt
-                  .findIndex((t) =>
-                    t.isSameAddress(input.tokenIn)
-                );
+                    .filter((_, index) => index !== bptIndex) // Need to remove Bpt
+                    .findIndex((t) => t.isSameAddress(input.tokenIn));
                 if (tokenInIndex === -1)
                     throw Error("Can't find index of SingleAsset");
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
@@ -137,7 +147,7 @@ export class ComposableStableJoin implements BaseJoin {
                 return {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn,
-                    tokenInIndex
+                    tokenInIndex,
                 };
             }
             case JoinKind.Proportional: {
@@ -197,7 +207,9 @@ export class ComposableStableJoin implements BaseJoin {
                 );
             }
             case JoinKind.Proportional: {
-                return ComposableStableEncoder.joinProportional(amounts.minimumBpt);
+                return ComposableStableEncoder.joinProportional(
+                    amounts.minimumBpt,
+                );
             }
             default:
                 throw Error('Unsupported Join Type');

@@ -47,8 +47,8 @@ export type JoinInput =
 
 // Returned from a join query
 export type JoinQueryResult =
-  BaseJoinQueryResult
- | ComposableStableJoinQueryResult;
+    | BaseJoinQueryResult
+    | ComposableStableJoinQueryResult;
 
 export type BaseJoinQueryResult = {
     poolType: string;
@@ -58,19 +58,18 @@ export type BaseJoinQueryResult = {
     amountsIn: TokenAmount[];
     fromInternalBalance: boolean;
     tokenInIndex?: number;
-}
+};
 
 export type ComposableStableJoinQueryResult = BaseJoinQueryResult & {
-    bptIndex?:number;
-}
-
-export type JoinCallInput = JoinQueryResult 
-  & ComposableStableJoinQueryResult 
-  & {
-    slippage: Slippage;
-    sender: Address;
-    recipient: Address;
+    bptIndex?: number;
 };
+
+export type JoinCallInput = JoinQueryResult &
+    ComposableStableJoinQueryResult & {
+        slippage: Slippage;
+        sender: Address;
+        recipient: Address;
+    };
 
 export interface BaseJoin {
     query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
