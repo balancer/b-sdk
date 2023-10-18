@@ -58,7 +58,7 @@ type BaseJoinQueryResult = {
 export type WeightedJoinQueryResult = BaseJoinQueryResult;
 
 export type ComposableStableJoinQueryResult = BaseJoinQueryResult & {
-    bptIndex?: number;
+    bptIndex: number;
 };
 
 export type JoinQueryResult =

@@ -75,9 +75,6 @@ export class ComposableStableJoin implements BaseJoin {
 
     public buildCall(input: ComposableJoinCall): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
-        if (input.bptIndex === undefined) {
-            throw new Error('bptIndex is necessary');
-        }
         const amountsWithoutBpt = {
             ...amounts,
             maxAmountsIn: [
