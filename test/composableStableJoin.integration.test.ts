@@ -103,7 +103,7 @@ describe('composable stable join test', () => {
   });
 
   test('unbalanced join', async () => {
-    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address == txInput.poolInput.address);
+    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address === txInput.poolInput.address);
     const poolTokensWithoutBpt = txInput.poolInput.tokens.map(
       (t) => new Token(chainId, t.address, t.decimals),
     ).filter((_, index) => index !== bptIndex);
@@ -145,7 +145,7 @@ describe('composable stable join test', () => {
   });
 
   test('native asset join', async () => {
-    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address == txInput.poolInput.address);
+    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address === txInput.poolInput.address);
 
     const poolTokensWithoutBpt = txInput.poolInput.tokens.map(
       (t) => new Token(chainId, t.address, t.decimals),
@@ -195,7 +195,7 @@ describe('composable stable join test', () => {
   });
 
   test('single asset join', async () => {
-    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address == txInput.poolInput.address);
+    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address === txInput.poolInput.address);
     const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
     const tokenIn = '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f';
 
@@ -238,7 +238,7 @@ describe('composable stable join test', () => {
 
   test('proportional join', async () => {
     const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
-    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address == txInput.poolInput.address);
+    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address === txInput.poolInput.address);
 
     // perform join query to get expected bpt out
     const joinInput: ProportionalJoinInput = {
@@ -315,7 +315,7 @@ describe('composable stable join test', () => {
         call,
         value,
       );
-    const bptIndex = poolInput.tokens.findIndex((t) => t.address == poolInput.address);
+    const bptIndex = poolInput.tokens.findIndex((t) => t.address === poolInput.address);
     expect(transactionReceipt.status).to.eq('success');
     // Confirm final balance changes match query result
     const expectedDeltas = [

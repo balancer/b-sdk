@@ -21,7 +21,7 @@ export class ComposableStableJoin implements BaseJoin {
         input: JoinInput,
         poolState: PoolState,
     ): Promise<JoinQueryResult> {
-        const bptIndex = poolState.tokens.findIndex((t)=> t.address == poolState.address);
+        const bptIndex = poolState.tokens.findIndex((t)=> t.address === poolState.address);
         const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
         const amountsWithoutBpt = {
             ...amounts, 
