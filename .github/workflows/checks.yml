@@ -46,8 +46,8 @@ jobs:
       - name: Test
         run: pnpm test:ci
         env:
-          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
-          POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
+          VITE_ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
+          VITE_POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
   build:
     name: Build
     needs: install
