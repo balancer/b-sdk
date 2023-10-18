@@ -10,6 +10,7 @@ import { WeightedExit } from './weighted/weightedExit';
 import { PoolStateInput } from '../types';
 import { validateInputs } from './weighted/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
+import { ComposableStableExit } from "./composable-stable/composableStableExit";
 
 export class PoolExit {
     private readonly poolExits: Record<string, BaseExit> = {};
@@ -18,6 +19,7 @@ export class PoolExit {
         const { customPoolExits } = config || {};
         this.poolExits = {
             Weighted: new WeightedExit(),
+            PHANTOM_STABLE: new ComposableStableExit(),
             // custom pool Exits take precedence over base Exits
             ...customPoolExits,
         };

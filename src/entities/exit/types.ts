@@ -2,6 +2,7 @@ import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address } from '../../types';
 import { PoolState } from '../types';
+import { BaseJoinQueryResult, ComposableStableJoinQueryResult } from "../join";
 
 export enum ExitKind {
     UNBALANCED = 'UNBALANCED', // exitExactOut
@@ -38,8 +39,12 @@ export type ExitInput =
     | SingleAssetExitInput
     | ProportionalExitInput;
 
+export type ExitQueryResult =
+  BaseExitQueryResult
+  | ComposableStableExitQueryResult;
+
 // Returned from a exit query
-export type ExitQueryResult = {
+export type BaseExitQueryResult = {
     poolType: string;
     id: Address;
     exitKind: ExitKind;
@@ -49,7 +54,11 @@ export type ExitQueryResult = {
     toInternalBalance?: boolean;
 };
 
-export type ExitCallInput = ExitQueryResult & {
+export type ComposableStableExitQueryResult = BaseExitQueryResult & {
+    bptIndex?: number;
+}
+
+export type ExitCallInput = ExitQueryResult & ComposableStableExitQueryResult & {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
