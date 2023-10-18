@@ -93,7 +93,7 @@ describe('composable stable exit test', () => {
   });
 
   test('single asset exit', async () => {
-    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address == txInput.poolInput.address);
+    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address === txInput.poolInput.address);
     const { slippage } = txInput;
     const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
     const tokenOut = '0xf4edfad26ee0d23b69ca93112ecce52704e0006f'; // baoETH
@@ -130,7 +130,7 @@ describe('composable stable exit test', () => {
   });
 
   test('proportional exit', async () => {
-    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address == txInput.poolInput.address);
+    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address === txInput.poolInput.address);
     const { slippage } = txInput;
     const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
 
@@ -163,7 +163,7 @@ describe('composable stable exit test', () => {
   });
 
   test('unbalanced exit', async () => {
-    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address == txInput.poolInput.address);
+    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address === txInput.poolInput.address);
     const { poolInput, slippage } = txInput;
 
     const poolTokens = poolInput.tokens
@@ -203,7 +203,7 @@ describe('composable stable exit test', () => {
   });
 
   test('exit with native asset', async () => {
-    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address == txInput.poolInput.address);
+    const bptIndex = txInput.poolInput.tokens.findIndex((t) => t.address === txInput.poolInput.address);
 
     const { slippage } = txInput;
     const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
@@ -282,7 +282,7 @@ describe('composable stable exit test', () => {
         value,
       );
     expect(transactionReceipt.status).to.eq('success');
-    const bptIndex = poolInput.tokens.findIndex((t) => t.address == poolInput.address);
+    const bptIndex = poolInput.tokens.findIndex((t) => t.address === poolInput.address);
     // Confirm final balance changes match query result
     const expectedDeltas = [
       ...queryResult.amountsOut.slice(0, bptIndex).map((a) => a.amount),

@@ -1,7 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { WeightedEncoder } from '../../encoders/weighted';
 import { Address } from '../../../types';
 import {
     BALANCER_VAULT,
@@ -27,7 +26,7 @@ export class ComposableStableExit implements BaseExit {
         input: ExitInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
-        const bptIndex = poolState.tokens.findIndex((t)=> t.address == poolState.address);
+        const bptIndex = poolState.tokens.findIndex((t)=> t.address === poolState.address);
         const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
         const amountsWithoutBpt = {
             ...amounts,

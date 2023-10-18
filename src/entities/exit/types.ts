@@ -2,7 +2,6 @@ import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address } from '../../types';
 import { PoolState } from '../types';
-import { BaseJoinQueryResult, ComposableStableJoinQueryResult } from "../join";
 
 export enum ExitKind {
     UNBALANCED = 'UNBALANCED', // exitExactOut
