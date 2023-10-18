@@ -14,9 +14,7 @@
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
     "typings": "dist/index.d.ts",
-    "files": [
-        "dist/"
-    ],
+    "files": ["dist/"],
     "scripts": {
         "build": "tsup",
         "format": "rome format .",
@@ -44,5 +42,8 @@
         "vite": "^4.4.2",
         "vitest": "~0.30.1"
     },
-    "packageManager": "^pnpm@8.6.0"
+    "packageManager": "^pnpm@8.6.0",
+    "engines": {
+        "node": ">=18.x"
+    }
 }
