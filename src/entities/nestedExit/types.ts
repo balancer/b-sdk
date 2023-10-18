@@ -8,11 +8,10 @@ export type NestedExitInput = {
     chainId: number;
     rpcUrl: string;
     accountAddress: Address;
+    tokenOut?: Address;
     useNativeAssetAsWrappedAmountOut?: boolean;
     toInternalBalance?: boolean;
 };
-
-// TODO: add support to single asset exits
 
 export type NestedExitCall = {
     chainId: number;
@@ -30,6 +29,7 @@ export type NestedExitCall = {
     minAmountsOut: bigint[];
     toInternalBalance: boolean;
     outputReferenceKeys: bigint[];
+    tokenOutIndex?: number;
 };
 
 export type NestedExitQueryResult = {

@@ -63,6 +63,7 @@ type TxInput = {
     nestedExit: NestedExit;
     nestedPoolFromApi: NestedPoolState;
     client: Client & PublicActions & TestActions & WalletActions;
+    tokenOut?: Address;
     useNativeAssetAsWrappedAmountOut?: boolean;
 };
 
@@ -145,7 +146,7 @@ describe('nested exit test', () => {
         });
     });
 
-    test('native asset exit', async () => {
+    test('proportional exit - native asset', async () => {
         const bptAmountIn = parseUnits('1', 18);
 
         await doTransaction({
@@ -159,6 +160,21 @@ describe('nested exit test', () => {
             useNativeAssetAsWrappedAmountOut: true,
         });
     });
+
+    test.only('single token exit', async () => {
+        const bptAmountIn = parseUnits('1', 18);
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
+        await doTransaction({
+            bptAmountIn,
+            chainId,
+            rpcUrl,
+            testAddress,
+            nestedExit,
+            nestedPoolFromApi,
+            client,
+            tokenOut,
+        });
+    });
 });
 
 export const doTransaction = async ({
@@ -169,6 +185,7 @@ export const doTransaction = async ({
     nestedExit,
     nestedPoolFromApi,
     client,
+    tokenOut,
     useNativeAssetAsWrappedAmountOut = false,
 }: TxInput) => {
     const exitInput: NestedExitInput = {
@@ -177,6 +194,7 @@ export const doTransaction = async ({
         rpcUrl,
         accountAddress: testAddress,
         useNativeAssetAsWrappedAmountOut,
+        tokenOut,
     };
     const queryResult = await nestedExit.query(exitInput, nestedPoolFromApi);
 

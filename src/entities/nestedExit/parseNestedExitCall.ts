@@ -18,6 +18,7 @@ export const parseNestedExitCall = ({
     minAmountsOut,
     toInternalBalance,
     outputReferenceKeys,
+    tokenOutIndex,
 }: NestedExitCall) => {
     // replace wrapped token with native asset if needed
     let tokensOut = [...sortedTokens];
@@ -30,24 +31,54 @@ export const parseNestedExitCall = ({
         : bptAmountIn.amount;
 
     let userData: Hex;
-    switch (poolType) {
-        case 'Weighted':
-            userData = WeightedEncoder.exitProportional(_bptAmountIn);
-            break;
-        case 'ComposableStable':
-            userData = ComposableStableEncoder.exitProportional(_bptAmountIn);
-            break;
-        default:
-            throw new Error('Unsupported pool type');
-    }
+    let outputReferences: { index: bigint; key: bigint }[] = [];
 
-    const outputReferences = outputReferenceKeys.map((k) => {
-        const tokenIndex = k % 10n;
-        return {
-            index: tokenIndex,
-            key: Relayer.toChainedReference(k),
-        };
-    });
+    if (tokenOutIndex === undefined) {
+        // Proportional Exit
+        switch (poolType) {
+            case 'Weighted':
+                userData = WeightedEncoder.exitProportional(_bptAmountIn);
+                break;
+            case 'ComposableStable':
+                userData =
+                    ComposableStableEncoder.exitProportional(_bptAmountIn);
+                break;
+            default:
+                throw new Error('Unsupported pool type');
+        }
+
+        outputReferences = outputReferenceKeys.map((k) => {
+            const tokenIndex = k % 10n;
+            return {
+                index: tokenIndex,
+                key: Relayer.toChainedReference(k),
+            };
+        });
+    } else {
+        // Single Token Exit
+        switch (poolType) {
+            case 'Weighted':
+                userData = WeightedEncoder.exitSingleAsset(
+                    _bptAmountIn,
+                    tokenOutIndex,
+                );
+                break;
+            case 'ComposableStable':
+                userData = ComposableStableEncoder.exitSingleAsset(
+                    _bptAmountIn,
+                    tokenOutIndex,
+                );
+                break;
+            default:
+                throw new Error('Unsupported pool type');
+        }
+        outputReferences = [
+            {
+                index: BigInt(tokenOutIndex),
+                key: Relayer.toChainedReference(outputReferenceKeys[0]),
+            },
+        ];
+    }
 
     const exitPoolRequest = {
         assets: tokensOut.map((t) => t.address), // with BPT
