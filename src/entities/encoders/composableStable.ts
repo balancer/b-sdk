@@ -4,16 +4,16 @@ import { Address } from '../../types';
 
 
 export enum ComposableStablePoolJoinKind {
-  INIT,
-  EXACT_TOKENS_IN_FOR_BPT_OUT,
-  TOKEN_IN_FOR_EXACT_BPT_OUT,
-  ALL_TOKENS_IN_FOR_EXACT_BPT_OUT
+  INIT = 0,
+  EXACT_TOKENS_IN_FOR_BPT_OUT = 1,
+  TOKEN_IN_FOR_EXACT_BPT_OUT = 2,
+  ALL_TOKENS_IN_FOR_EXACT_BPT_OUT = 3
 }
 
 export enum ComposableStablePoolExitKind {
-  EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
-  BPT_IN_FOR_EXACT_TOKENS_OUT,
-  EXACT_BPT_IN_FOR_ALL_TOKENS_OUT
+  EXACT_BPT_IN_FOR_ONE_TOKEN_OUT = 0,
+  BPT_IN_FOR_EXACT_TOKENS_OUT = 1,
+  EXACT_BPT_IN_FOR_ALL_TOKENS_OUT = 2
 }
 
 export class ComposableStableEncoder {
