@@ -128,10 +128,10 @@ describe('weighted join test', () => {
 
         // Query should use same amountsIn as user sets
         expect(queryResult.amountsIn).to.deep.eq(amountsIn);
-        expect(queryResult.tokenInIndex).to.be.undefined;
+        expect(queryResult.tokenInIndex === undefined).toEqual(true);
 
         // Should be no native value
-        expect(value).toBeUndefined;
+        expect(value === undefined).toEqual(true);
 
         // Expect some bpt amount
         expect(queryResult.bptOut.amount > 0n).to.be.true;
@@ -174,7 +174,8 @@ describe('weighted join test', () => {
         expect(queryResult.amountsIn.map((a) => a.amount)).to.deep.eq(
             amountsIn.map((a) => a.amount),
         );
-        expect(queryResult.tokenInIndex).to.be.undefined;
+        expect(queryResult.tokenInIndex === undefined).toEqual(true);
+
         // Should have native value equal to input amount
         expect(value).eq(amountsIn[0].amount);
 
@@ -213,7 +214,7 @@ describe('weighted join test', () => {
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
 
         // We only expect single asset to have a value for amount in
-        expect(queryResult.tokenInIndex).toBeDefined;
+        expect(queryResult.tokenInIndex !== undefined).toEqual(true);
         queryResult.amountsIn.forEach((a, i) => {
             if (i === queryResult.tokenInIndex)
                 expect(a.amount > 0n).to.be.true;
@@ -221,7 +222,7 @@ describe('weighted join test', () => {
         });
 
         // Should be no native value
-        expect(value).toBeUndefined;
+        expect(value === undefined).toEqual(true);
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
@@ -251,15 +252,14 @@ describe('weighted join test', () => {
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
 
+        expect(queryResult.tokenInIndex === undefined).toEqual(true);
         // Expect all assets to have a value for amount in
-        expect(queryResult.tokenInIndex).toBeDefined;
         queryResult.amountsIn.forEach((a) => {
             expect(a.amount > 0n).to.be.true;
         });
-        expect(queryResult.tokenInIndex).toBeUndefined;
 
         // Should be no native value
-        expect(value).toBeUndefined;
+        expect(value === undefined).toEqual(true);
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
