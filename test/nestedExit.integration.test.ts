@@ -161,7 +161,7 @@ describe('nested exit test', () => {
         });
     });
 
-    test.only('single token exit', async () => {
+    test('single token exit', async () => {
         const bptAmountIn = parseUnits('1', 18);
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
         await doTransaction({
@@ -175,6 +175,23 @@ describe('nested exit test', () => {
             tokenOut,
         });
     });
+
+    // TODO: uncomment after SC team fixes relayer queries issue with output references
+    // test('single token exit - native asset', async () => {
+    //     const bptAmountIn = parseUnits('1', 18);
+    //     const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
+    //     await doTransaction({
+    //         bptAmountIn,
+    //         chainId,
+    //         rpcUrl,
+    //         testAddress,
+    //         nestedExit,
+    //         nestedPoolFromApi,
+    //         client,
+    //         tokenOut,
+    //         useNativeAssetAsWrappedAmountOut: true,
+    //     });
+    // });
 });
 
 export const doTransaction = async ({
