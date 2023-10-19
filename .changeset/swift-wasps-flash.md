@@ -2,4 +2,6 @@
 "@balancer/sdk": minor
 ---
 
-- Add nested joins
+- Add nested join
+- Add proportional nested exit
+- Add single token nested exit
