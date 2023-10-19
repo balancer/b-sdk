@@ -34,16 +34,8 @@ import {
     JoinInput,
 } from '../src';
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
-
-type TxInput = {
-    client: Client & PublicActions & TestActions & WalletActions;
-    poolJoin: PoolJoin;
-    joinInput: JoinInput;
-    slippage: Slippage;
-    poolInput: PoolStateInput;
-    testAddress: Address;
-    checkNativeBalance: boolean;
-};
+import { doJoin } from './lib/utils/joinHelper';
+import { JoinTxInput } from './lib/utils/types';
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
@@ -52,7 +44,7 @@ const poolId =
     '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512'; // Balancer 50COMP-50wstETH
 
 describe('weighted join test', () => {
-    let txInput: TxInput;
+    let txInput: JoinTxInput;
     let bptToken: Token;
 
     beforeAll(async () => {
@@ -78,6 +70,7 @@ describe('weighted join test', () => {
             testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
             joinInput: {} as JoinInput,
             checkNativeBalance: false,
+            chainId,
         };
 
         // setup BPT token
@@ -120,11 +113,10 @@ describe('weighted join test', () => {
             kind: JoinKind.Unbalanced,
         };
 
-        const { queryResult, maxAmountsIn, minBptOut, value } =
-            await doTransaction({
-                ...txInput,
-                joinInput,
-            });
+        const { queryResult, maxAmountsIn, minBptOut, value } = await doJoin({
+            ...txInput,
+            joinInput,
+        });
 
         // Query should use same amountsIn as user sets
         expect(queryResult.amountsIn).to.deep.eq(amountsIn);
@@ -163,12 +155,11 @@ describe('weighted join test', () => {
         };
 
         // We have to use zero address for balanceDeltas
-        const { queryResult, maxAmountsIn, minBptOut, value } =
-            await doTransaction({
-                ...txInput,
-                joinInput,
-                checkNativeBalance: true,
-            });
+        const { queryResult, maxAmountsIn, minBptOut, value } = await doJoin({
+            ...txInput,
+            joinInput,
+            checkNativeBalance: true,
+        });
 
         // Query should use same amountsIn as user sets
         expect(queryResult.amountsIn.map((a) => a.amount)).to.deep.eq(
@@ -203,11 +194,10 @@ describe('weighted join test', () => {
             kind: JoinKind.SingleAsset,
         };
 
-        const { queryResult, maxAmountsIn, minBptOut, value } =
-            await doTransaction({
-                ...txInput,
-                joinInput,
-            });
+        const { queryResult, maxAmountsIn, minBptOut, value } = await doJoin({
+            ...txInput,
+            joinInput,
+        });
 
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
@@ -242,11 +232,10 @@ describe('weighted join test', () => {
             kind: JoinKind.Proportional,
         };
 
-        const { queryResult, maxAmountsIn, minBptOut, value } =
-            await doTransaction({
-                ...txInput,
-                joinInput,
-            });
+        const { queryResult, maxAmountsIn, minBptOut, value } = await doJoin({
+            ...txInput,
+            joinInput,
+        });
 
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
@@ -268,63 +257,6 @@ describe('weighted join test', () => {
         expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
         expect(minBptOut).to.eq(bptOut.amount);
     });
-
-    async function doTransaction(txIp: TxInput) {
-        const {
-            poolJoin,
-            poolInput,
-            joinInput,
-            testAddress,
-            client,
-            slippage,
-            checkNativeBalance,
-        } = txIp;
-        const queryResult = await poolJoin.query(joinInput, poolInput);
-
-        const { call, to, value, maxAmountsIn, minBptOut } = poolJoin.buildCall(
-            {
-                ...queryResult,
-                slippage,
-                sender: testAddress,
-                recipient: testAddress,
-            },
-        );
-
-        const poolTokens = poolInput.tokens.map(
-            (t) => new Token(chainId, t.address, t.decimals),
-        );
-
-        // Replace with native asset if required
-        const poolTokensAddr = checkNativeBalance
-            ? replaceWrapped(poolTokens, chainId).map((t) => t.address)
-            : poolTokens.map((t) => t.address);
-
-        // send transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [...poolTokensAddr, poolInput.address],
-                client,
-                testAddress,
-                to,
-                call,
-                value,
-            );
-        expect(transactionReceipt.status).to.eq('success');
-
-        // Confirm final balance changes match query result
-        const expectedDeltas = [
-            ...queryResult.amountsIn.map((a) => a.amount),
-            queryResult.bptOut.amount,
-        ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
-
-        return {
-            queryResult,
-            maxAmountsIn,
-            minBptOut,
-            value,
-        };
-    }
 });
 
 /*********************** Mock To Represent API Requirements **********************/
