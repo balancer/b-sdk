@@ -94,9 +94,9 @@ export const getProportionalExitCalls = (
             .sort((a, b) => a.index - b.index)
             .map((t) => new Token(chainId, t.address, t.decimals));
 
-        // const sortedTokensWithoutBpt = sortedTokens.filter(
-        //     (t) => !t.isSameAddress(pool.address),
-        // );
+        const sortedTokensWithoutBpt = sortedTokens.filter(
+            (t) => !t.isSameAddress(pool.address),
+        );
         const upperLevelCall = calls.find((call) =>
             call.sortedTokens
                 .map((token) => token.address)
@@ -127,10 +127,7 @@ export const getProportionalExitCalls = (
                       },
             minAmountsOut: Array(sortedTokens.length).fill(0n),
             toInternalBalance,
-            // TODO: previous implementation of nested exit didn't add an outputReferenceKey for the BPT token,
-            // but if I remove it from here, peek logic fails. Need to investigate why.
-            // Once we figure this out, we should be able to replace sortedTokens by sortedTokensWithoutBpt
-            outputReferenceKeys: sortedTokens.map(
+            outputReferenceKeys: sortedTokensWithoutBpt.map(
                 (token) =>
                     100n +
                     BigInt(poolsSortedByLevel.indexOf(pool)) * 10n +

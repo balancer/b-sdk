@@ -176,22 +176,21 @@ describe('nested exit test', () => {
         });
     });
 
-    // TODO: uncomment after SC team fixes relayer queries issue with output references
-    // test('single token exit - native asset', async () => {
-    //     const bptAmountIn = parseUnits('1', 18);
-    //     const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
-    //     await doTransaction({
-    //         bptAmountIn,
-    //         chainId,
-    //         rpcUrl,
-    //         testAddress,
-    //         nestedExit,
-    //         nestedPoolFromApi,
-    //         client,
-    //         tokenOut,
-    //         useNativeAssetAsWrappedAmountOut: true,
-    //     });
-    // });
+    test('single token exit - native asset', async () => {
+        const bptAmountIn = parseUnits('1', 18);
+        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
+        await doTransaction({
+            bptAmountIn,
+            chainId,
+            rpcUrl,
+            testAddress,
+            nestedExit,
+            nestedPoolFromApi,
+            client,
+            tokenOut,
+            useNativeAssetAsWrappedAmountOut: true,
+        });
+    });
 });
 
 export const doTransaction = async ({

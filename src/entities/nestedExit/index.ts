@@ -87,18 +87,6 @@ export class NestedExit {
                         minAmountsOut[j].amount;
                 }
             });
-
-            // remove output reference key related to bpt token if present
-            // TODO: check why query/peek logic needs it
-            call.outputReferenceKeys = call.outputReferenceKeys.filter(
-                (_, i) => {
-                    const token = call.sortedTokens[i];
-                    const isBptToken = token.isSameAddress(
-                        getPoolAddress(call.poolId),
-                    );
-                    return !isBptToken;
-                },
-            );
         });
 
         const parsedCalls = input.calls.map((call) =>
