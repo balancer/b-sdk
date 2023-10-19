@@ -7,10 +7,10 @@ import { vaultAbi } from '../../../abi';
 import {
     BaseJoin,
     JoinBuildOutput,
-    JoinCallInput,
     JoinInput,
     JoinKind,
-    JoinQueryResult,
+    ComposableStableJoinQueryResult,
+    ComposableJoinCall,
 } from '../types';
 import { AmountsJoin, PoolState } from '../../types';
 import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
@@ -20,7 +20,7 @@ export class ComposableStableJoin implements BaseJoin {
     public async query(
         input: JoinInput,
         poolState: PoolState,
-    ): Promise<JoinQueryResult> {
+    ): Promise<ComposableStableJoinQueryResult> {
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
         );
@@ -73,11 +73,8 @@ export class ComposableStableJoin implements BaseJoin {
         };
     }
 
-    public buildCall(input: JoinCallInput): JoinBuildOutput {
+    public buildCall(input: ComposableJoinCall): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
-        if (input.bptIndex === undefined) {
-            throw new Error('bptIndex is necessary');
-        }
         const amountsWithoutBpt = {
             ...amounts,
             maxAmountsIn: [
@@ -162,7 +159,7 @@ export class ComposableStableJoin implements BaseJoin {
         }
     }
 
-    private getAmountsCall(input: JoinCallInput): AmountsJoin {
+    private getAmountsCall(input: ComposableJoinCall): AmountsJoin {
         switch (input.joinKind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {

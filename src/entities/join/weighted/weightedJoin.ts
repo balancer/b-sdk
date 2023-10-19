@@ -8,10 +8,10 @@ import { vaultAbi } from '../../../abi';
 import {
     BaseJoin,
     JoinBuildOutput,
-    JoinCallInput,
     JoinInput,
     JoinKind,
-    JoinQueryResult,
+    WeightedJoinQueryResult,
+    WeightedJoinCall,
 } from '../types';
 import { AmountsJoin, PoolState } from '../../types';
 import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
@@ -20,7 +20,7 @@ export class WeightedJoin implements BaseJoin {
     public async query(
         input: JoinInput,
         poolState: PoolState,
-    ): Promise<JoinQueryResult> {
+    ): Promise<WeightedJoinQueryResult> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
 
         const userData = this.encodeUserData(input.kind, amounts);
@@ -62,7 +62,7 @@ export class WeightedJoin implements BaseJoin {
         };
     }
 
-    public buildCall(input: JoinCallInput): JoinBuildOutput {
+    public buildCall(input: WeightedJoinCall): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.joinKind, amounts);
@@ -133,7 +133,7 @@ export class WeightedJoin implements BaseJoin {
         }
     }
 
-    private getAmountsCall(input: JoinCallInput): AmountsJoin {
+    private getAmountsCall(input: WeightedJoinCall): AmountsJoin {
         switch (input.joinKind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
