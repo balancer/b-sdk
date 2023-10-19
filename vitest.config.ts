@@ -20,7 +20,8 @@ export default defineConfig(({ mode }) => {
             hookTimeout: 30_000,
             globalSetup: ['./test/anvil/anvil-global-setup.ts'],
             // Uncomment to debug suite excluding some tests
-            exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
+            // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
+            // Avoid testing threads to avoid problems with shared fork data
             threads: false,
         },
     };
