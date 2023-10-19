@@ -33,16 +33,7 @@ import {
     ExitInput,
 } from '../src';
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
-
-type TxInput = {
-    client: Client & PublicActions & TestActions & WalletActions;
-    poolExit: PoolExit;
-    exitInput: ExitInput;
-    slippage: Slippage;
-    poolInput: PoolStateInput;
-    testAddress: Address;
-    checkNativeBalance: boolean;
-};
+import { ExitTxInput } from './lib/utils/types';
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
@@ -51,7 +42,7 @@ const poolId =
     '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d000000000000000000000051b'; // baoETH-ETH StablePool
 
 describe('composable stable exit test', () => {
-    let txInput: TxInput;
+    let txInput: ExitTxInput;
     let bptToken: Token;
     beforeAll(async () => {
         // setup mock api
@@ -60,13 +51,13 @@ describe('composable stable exit test', () => {
         // get pool state from api
         const poolInput = await api.getPool(poolId);
 
-        const client: Client = createTestClient({
+        const client = createTestClient({
             mode: 'hardhat',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
         })
             .extend(publicActions)
-            .extend(walletActions) as Client;
+            .extend(walletActions);
 
         txInput = {
             client,
@@ -76,6 +67,7 @@ describe('composable stable exit test', () => {
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             exitInput: {} as ExitInput,
             checkNativeBalance: false,
+            chainId,
         };
         bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });

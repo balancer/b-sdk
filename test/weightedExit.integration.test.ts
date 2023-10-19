@@ -4,14 +4,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
     publicActions,
-    PublicActions,
-    TestActions,
-    WalletActions,
     walletActions,
 } from 'viem';
 import {
@@ -22,7 +18,6 @@ import {
     Slippage,
     Token,
     TokenAmount,
-    replaceWrapped,
     PoolStateInput,
     PoolExit,
     Address,
@@ -32,17 +27,9 @@ import {
     getPoolAddress,
     ExitInput,
 } from '../src';
-import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
-
-type TxInput = {
-    client: Client & PublicActions & TestActions & WalletActions;
-    poolExit: PoolExit;
-    exitInput: ExitInput;
-    slippage: Slippage;
-    poolInput: PoolStateInput;
-    testAddress: Address;
-    checkNativeBalance: boolean;
-};
+import { forkSetup } from './lib/utils/helper';
+import { doExit } from './lib/utils/exitHelper';
+import { ExitTxInput } from './lib/utils/types';
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
@@ -51,7 +38,7 @@ const poolId =
     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
 
 describe('weighted exit test', () => {
-    let txInput: TxInput;
+    let txInput: ExitTxInput;
     let bptToken: Token;
     beforeAll(async () => {
         // setup mock api
@@ -76,6 +63,7 @@ describe('weighted exit test', () => {
             testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
             exitInput: {} as ExitInput,
             checkNativeBalance: false,
+            chainId,
         };
         bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
@@ -104,7 +92,7 @@ describe('weighted exit test', () => {
             tokenOut,
             kind: ExitKind.SINGLE_ASSET,
         };
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
             ...txInput,
             exitInput,
         });
@@ -138,7 +126,7 @@ describe('weighted exit test', () => {
             bptIn,
             kind: ExitKind.PROPORTIONAL,
         };
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
             ...txInput,
             exitInput,
         });
@@ -176,7 +164,7 @@ describe('weighted exit test', () => {
             amountsOut,
             kind: ExitKind.UNBALANCED,
         };
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
             ...txInput,
             exitInput,
         });
@@ -210,7 +198,7 @@ describe('weighted exit test', () => {
         };
 
         // Note - checking native balance
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
             ...txInput,
             exitInput,
             checkNativeBalance: true,
@@ -232,62 +220,6 @@ describe('weighted exit test', () => {
         expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
         expect(maxBptIn).to.eq(bptIn.amount);
     });
-
-    async function doTransaction(txIp: TxInput) {
-        const {
-            poolExit,
-            poolInput,
-            exitInput,
-            testAddress,
-            client,
-            slippage,
-            checkNativeBalance,
-        } = txIp;
-        const queryResult = await poolExit.query(exitInput, poolInput);
-
-        const { call, to, value, maxBptIn, minAmountsOut } = poolExit.buildCall(
-            {
-                ...queryResult,
-                slippage,
-                sender: testAddress,
-                recipient: testAddress,
-            },
-        );
-
-        const poolTokens = poolInput.tokens.map(
-            (t) => new Token(chainId, t.address, t.decimals),
-        );
-
-        // Replace with native asset if required
-        const poolTokensAddr = checkNativeBalance
-            ? replaceWrapped(poolTokens, chainId).map((t) => t.address)
-            : poolTokens.map((t) => t.address);
-
-        // send transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [...poolTokensAddr, poolInput.address],
-                client,
-                testAddress,
-                to,
-                call,
-                value,
-            );
-        expect(transactionReceipt.status).to.eq('success');
-
-        // Confirm final balance changes match query result
-        const expectedDeltas = [
-            ...queryResult.amountsOut.map((a) => a.amount),
-            queryResult.bptIn.amount,
-        ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
-
-        return {
-            queryResult,
-            maxBptIn,
-            minAmountsOut,
-        };
-    }
 });
 
 /*********************** Mock To Represent API Requirements **********************/
