@@ -8,6 +8,7 @@ export default defineConfig(() => {
             globalSetup: ['./test/anvil/anvil-global-setup.ts'],
             // Uncomment to debug suite excluding some tests
             exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
+            threads: false,
         },
     };
 });
