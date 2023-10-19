@@ -1,6 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
-import { BALANCER_RELAYER, getPoolAddress } from '../../utils';
+import { BALANCER_RELAYER } from '../../utils';
 import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi, bathcRelayerLibraryAbi } from '../../abi';

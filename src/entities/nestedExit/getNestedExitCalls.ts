@@ -129,7 +129,6 @@ export const getProportionalExitCalls = (
             toInternalBalance,
             outputReferenceKeys: sortedTokensWithoutBpt.map(
                 (token) =>
-                    100n +
                     BigInt(poolsSortedByLevel.indexOf(pool)) * 10n +
                     BigInt(sortedTokens.indexOf(token)),
             ),
@@ -182,9 +181,7 @@ export const getSingleTokenExitCalls = (
             minAmountsOut: Array(sortedTokens.length).fill(0n),
             toInternalBalance,
             outputReferenceKeys: [
-                100n +
-                    BigInt(exitPath.indexOf(pool)) * 10n +
-                    BigInt(tokenOutIndex),
+                BigInt(exitPath.indexOf(pool)) * 10n + BigInt(tokenOutIndex),
             ],
             tokenOutIndex,
         });

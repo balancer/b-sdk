@@ -63,7 +63,7 @@ export const getNestedJoinCalls = (
             }),
             minBptOut: 0n,
             fromInternalBalance: fromInternalBalance ?? false,
-            outputReferenceKey: BigInt(poolsSortedByLevel.indexOf(pool)) + 100n,
+            outputReferenceKey: BigInt(poolsSortedByLevel.indexOf(pool)),
         });
     }
     return calls;
