@@ -46,8 +46,9 @@ jobs:
       - name: Test
         run: pnpm test:ci
         env:
-          VITE_ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
-          VITE_POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
+          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
+          POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
+          # TODO: add FANTOM and ARBITRUM secrets
   build:
     name: Build
     needs: install
