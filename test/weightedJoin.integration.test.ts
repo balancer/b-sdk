@@ -47,7 +47,6 @@ type TxInput = {
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
-const blockNumber = 18043296n;
 const poolId =
     '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512'; // Balancer 50COMP-50wstETH
 
@@ -99,8 +98,6 @@ describe('weighted join test', () => {
                 ),
                 parseUnits('100', 18),
             ],
-            process.env.ETHEREUM_RPC_URL as string,
-            blockNumber,
         );
     });
 
