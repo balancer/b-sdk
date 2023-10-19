@@ -3,43 +3,42 @@ import { Slippage } from '../slippage';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 
-export type NestedJoinInput = {
-    amountsIn: {
-        address: Address;
-        decimals: number;
-        rawAmount: bigint;
-    }[];
+export type NestedExitInput = {
+    bptAmountIn: bigint;
     chainId: number;
     rpcUrl: string;
     accountAddress: Address;
-    useNativeAssetAsWrappedAmountIn?: boolean;
-    fromInternalBalance?: boolean;
+    tokenOut?: Address;
+    useNativeAssetAsWrappedAmountOut?: boolean;
+    toInternalBalance?: boolean;
 };
 
-export type NestedJoinCall = {
+export type NestedExitCall = {
     chainId: number;
-    useNativeAssetAsWrappedAmountIn: boolean;
+    useNativeAssetAsWrappedAmountOut: boolean;
     sortedTokens: Token[];
     poolId: Address;
     poolType: string;
     kind: number;
     sender: Address;
     recipient: Address;
-    maxAmountsIn: {
+    bptAmountIn: {
         amount: bigint;
         isRef: boolean;
-    }[];
-    minBptOut: bigint;
-    fromInternalBalance: boolean;
-    outputReferenceKey: bigint;
+    };
+    minAmountsOut: bigint[];
+    toInternalBalance: boolean;
+    outputReferenceKeys: bigint[];
+    tokenOutIndex?: number;
 };
 
-export type NestedJoinQueryResult = {
-    calls: NestedJoinCall[];
-    bptOut: TokenAmount;
+export type NestedExitQueryResult = {
+    calls: NestedExitCall[];
+    bptAmountIn: TokenAmount;
+    amountsOut: TokenAmount[];
 };
 
-export type NestedJoinCallInput = NestedJoinQueryResult & {
+export type NestedExitCallInput = NestedExitQueryResult & {
     chainId: number;
     slippage: Slippage;
     sender: Address;
