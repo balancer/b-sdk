@@ -4,7 +4,6 @@ import { config } from 'dotenv';
 config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
@@ -29,7 +28,7 @@ import {
     PoolJoin,
     JoinInput,
 } from '../src';
-import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
+import { forkSetup } from './lib/utils/helper';
 import { JoinTxInput } from './lib/utils/types';
 import { doJoin } from './lib/utils/joinHelper';
 

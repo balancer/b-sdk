@@ -4,14 +4,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
     publicActions,
-    PublicActions,
-    TestActions,
-    WalletActions,
     walletActions,
 } from 'viem';
 
@@ -23,7 +19,6 @@ import {
     Slippage,
     Token,
     TokenAmount,
-    replaceWrapped,
     Address,
     Hex,
     PoolStateInput,
@@ -33,7 +28,7 @@ import {
     PoolJoin,
     JoinInput,
 } from '../src';
-import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
+import { forkSetup } from './lib/utils/helper';
 import { doJoin } from './lib/utils/joinHelper';
 import { JoinTxInput } from './lib/utils/types';
 
