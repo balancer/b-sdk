@@ -4,14 +4,10 @@ import { config } from 'dotenv';
 config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
     publicActions,
-    PublicActions,
-    TestActions,
-    WalletActions,
     walletActions,
 } from 'viem';
 import {
@@ -22,7 +18,6 @@ import {
     Slippage,
     Token,
     TokenAmount,
-    replaceWrapped,
     PoolStateInput,
     PoolExit,
     Address,
@@ -32,8 +27,9 @@ import {
     getPoolAddress,
     ExitInput,
 } from '../src';
-import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
+import { forkSetup } from './lib/utils/helper';
 import { ExitTxInput } from './lib/utils/types';
+import { doExit } from './lib/utils/exitHelper';
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
@@ -99,7 +95,7 @@ describe('composable stable exit test', () => {
             tokenOut,
             kind: ExitKind.SINGLE_ASSET,
         };
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
             ...txInput,
             exitInput,
         });
@@ -138,7 +134,7 @@ describe('composable stable exit test', () => {
             bptIn,
             kind: ExitKind.PROPORTIONAL,
         };
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
             ...txInput,
             exitInput,
         });
@@ -181,7 +177,7 @@ describe('composable stable exit test', () => {
             amountsOut,
             kind: ExitKind.UNBALANCED,
         };
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
             ...txInput,
             exitInput,
         });
@@ -223,7 +219,7 @@ describe('composable stable exit test', () => {
         };
 
         // Note - checking native balance
-        const { queryResult, maxBptIn, minAmountsOut } = await doTransaction({
+        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
             ...txInput,
             exitInput,
             checkNativeBalance: true,
@@ -249,64 +245,6 @@ describe('composable stable exit test', () => {
         );
         expect(maxBptIn).to.eq(bptIn.amount);
     });
-
-    async function doTransaction(txIp: TxInput) {
-        const {
-            poolExit,
-            poolInput,
-            exitInput,
-            testAddress,
-            client,
-            slippage,
-            checkNativeBalance,
-        } = txIp;
-        const queryResult = await poolExit.query(exitInput, poolInput);
-        const { call, to, value, maxBptIn, minAmountsOut } = poolExit.buildCall(
-            {
-                ...queryResult,
-                slippage,
-                sender: testAddress,
-                recipient: testAddress,
-            },
-        );
-
-        const poolTokens = poolInput.tokens.map(
-            (t) => new Token(chainId, t.address, t.decimals),
-        );
-
-        // Replace with native asset if required
-        const poolTokensAddr = checkNativeBalance
-            ? replaceWrapped(poolTokens, chainId).map((t) => t.address)
-            : poolTokens.map((t) => t.address);
-
-        // send transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [...poolTokensAddr],
-                client,
-                testAddress,
-                to,
-                call,
-                value,
-            );
-        expect(transactionReceipt.status).to.eq('success');
-        const bptIndex = poolInput.tokens.findIndex(
-            (t) => t.address === poolInput.address,
-        );
-        // Confirm final balance changes match query result
-        const expectedDeltas = [
-            ...queryResult.amountsOut.slice(0, bptIndex).map((a) => a.amount),
-            queryResult.bptIn.amount,
-            ...queryResult.amountsOut.slice(bptIndex + 1).map((a) => a.amount),
-        ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
-
-        return {
-            queryResult,
-            maxBptIn,
-            minAmountsOut,
-        };
-    }
 });
 
 /*********************** Mock To Represent API Requirements **********************/
