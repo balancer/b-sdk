@@ -1,7 +1,7 @@
 import { Hex } from '../../types';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
-import { NestedExitCall } from './types';
+import { NestedExitCallAttributes } from './types';
 import { Relayer } from '../relayer';
 import { replaceWrapped } from '../utils/replaceWrapped';
 
@@ -19,7 +19,7 @@ export const parseNestedExitCall = ({
     toInternalBalance,
     outputReferenceKeys,
     tokenOutIndex,
-}: NestedExitCall) => {
+}: NestedExitCallAttributes) => {
     // replace wrapped token with native asset if needed
     let tokensOut = [...sortedTokens];
     if (useNativeAssetAsWrappedAmountOut) {

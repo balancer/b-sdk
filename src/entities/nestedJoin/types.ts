@@ -16,7 +16,7 @@ export type NestedJoinInput = {
     fromInternalBalance?: boolean;
 };
 
-export type NestedJoinCall = {
+export type NestedJoinCallAttributes = {
     chainId: number;
     useNativeAssetAsWrappedAmountIn: boolean;
     sortedTokens: Token[];
@@ -36,7 +36,7 @@ export type NestedJoinCall = {
 };
 
 export type NestedJoinQueryResult = {
-    calls: NestedJoinCall[];
+    callsAttributes: NestedJoinCallAttributes[];
     bptOut: TokenAmount;
 };
 

@@ -1,8 +1,8 @@
 import { Hex } from '../../types';
-import { ZERO_ADDRESS, getPoolAddress } from '../../utils';
+import { ZERO_ADDRESS } from '../../utils';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
-import { NestedJoinCall } from './types';
+import { NestedJoinCallAttributes } from './types';
 import { Relayer } from '../relayer';
 import { replaceWrapped } from '../utils/replaceWrapped';
 
@@ -11,6 +11,7 @@ export const parseNestedJoinCall = ({
     chainId,
     sortedTokens,
     poolId,
+    poolAddress,
     poolType,
     kind,
     sender,
@@ -19,7 +20,7 @@ export const parseNestedJoinCall = ({
     minBptOut,
     fromInternalBalance,
     outputReferenceKey,
-}: NestedJoinCall) => {
+}: NestedJoinCallAttributes) => {
     // replace wrapped token with native asset if needed
     let tokensIn = [...sortedTokens];
     let value = 0n;
@@ -33,7 +34,6 @@ export const parseNestedJoinCall = ({
         }
     }
 
-    const poolAddress = getPoolAddress(poolId);
     const _maxAmountsIn = maxAmountsIn.map((a) =>
         a.isRef ? Relayer.toChainedReference(a.amount) : a.amount,
     );

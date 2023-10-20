@@ -13,7 +13,7 @@ export type NestedExitInput = {
     toInternalBalance?: boolean;
 };
 
-export type NestedExitCall = {
+export type NestedExitCallAttributes = {
     chainId: number;
     useNativeAssetAsWrappedAmountOut: boolean;
     sortedTokens: Token[];
@@ -33,7 +33,7 @@ export type NestedExitCall = {
 };
 
 export type NestedExitQueryResult = {
-    calls: NestedExitCall[];
+    callsAttributes: NestedExitCallAttributes[];
     bptAmountIn: TokenAmount;
     amountsOut: TokenAmount[];
 };

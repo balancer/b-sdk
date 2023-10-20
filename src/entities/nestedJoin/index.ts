@@ -11,7 +11,7 @@ import {
     NestedJoinQueryResult,
     NestedJoinCallInput,
 } from './types';
-import { getNestedJoinCalls } from './getNestedJoinCalls';
+import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { doQueryNestedJoin } from './doQueryNestedJoin';
 import { NestedPoolState } from '../types';
 
@@ -20,9 +20,11 @@ export class NestedJoin {
         input: NestedJoinInput,
         nestedPoolState: NestedPoolState,
     ): Promise<NestedJoinQueryResult> {
-        const calls = getNestedJoinCalls(input, nestedPoolState);
+        const callsAttributes = getQueryCallsAttributes(input, nestedPoolState);
 
-        const parsedCalls = calls.map((call) => parseNestedJoinCall(call));
+        const parsedCalls = callsAttributes.map((call) =>
+            parseNestedJoinCall(call),
+        );
 
         const encodedCalls = parsedCalls.map((parsedCall) =>
             encodeFunctionData({
@@ -35,7 +37,7 @@ export class NestedJoin {
         // append peek call to get bptOut
         const peekCall = Relayer.encodePeekChainedReferenceValue(
             Relayer.toChainedReference(
-                calls[calls.length - 1].outputReferenceKey,
+                callsAttributes[callsAttributes.length - 1].outputReferenceKey,
                 false,
             ),
         );
@@ -56,12 +58,12 @@ export class NestedJoin {
 
         const tokenOut = new Token(
             input.chainId,
-            getPoolAddress(calls[calls.length - 1].poolId),
+            getPoolAddress(callsAttributes[callsAttributes.length - 1].poolId),
             18,
         );
         const bptOut = TokenAmount.fromRawAmount(tokenOut, peekedValue);
 
-        return { calls, bptOut };
+        return { callsAttributes, bptOut };
     }
 
     buildCall(input: NestedJoinCallInput): {
@@ -74,12 +76,12 @@ export class NestedJoin {
         const minBptOut = input.slippage.removeFrom(input.bptOut.amount);
 
         // update last call with minBptOut limit in place
-        input.calls[input.calls.length - 1] = {
-            ...input.calls[input.calls.length - 1],
+        input.callsAttributes[input.callsAttributes.length - 1] = {
+            ...input.callsAttributes[input.callsAttributes.length - 1],
             minBptOut,
         };
 
-        const parsedCalls = input.calls.map((call) =>
+        const parsedCalls = input.callsAttributes.map((call) =>
             parseNestedJoinCall(call),
         );
 
@@ -95,7 +97,7 @@ export class NestedJoin {
         if (input.relayerApprovalSignature !== undefined) {
             encodedCalls.unshift(
                 Relayer.encodeSetRelayerApproval(
-                    BALANCER_RELAYER[input.calls[0].chainId],
+                    BALANCER_RELAYER[input.callsAttributes[0].chainId],
                     true,
                     input.relayerApprovalSignature,
                 ),
@@ -115,7 +117,7 @@ export class NestedJoin {
 
         return {
             call,
-            to: BALANCER_RELAYER[input.calls[0].chainId],
+            to: BALANCER_RELAYER[input.callsAttributes[0].chainId],
             value: accumulatedValue,
             minBptOut,
         };

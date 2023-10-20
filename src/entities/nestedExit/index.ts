@@ -11,7 +11,7 @@ import {
 } from './types';
 import { NestedPoolState } from '../types';
 import { doQueryNestedExit } from './doQueryNestedExit';
-import { getNestedExitCalls } from './getNestedExitCalls';
+import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { parseNestedExitCall } from './parseNestedExitCall';
 import { getPeekCalls } from './getPeekCalls';
 
@@ -20,12 +20,14 @@ export class NestedExit {
         input: NestedExitInput,
         nestedPoolState: NestedPoolState,
     ): Promise<NestedExitQueryResult> {
-        const { calls, bptAmountIn } = getNestedExitCalls(
+        const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
             input,
             nestedPoolState,
         );
 
-        const parsedCalls = calls.map((call) => parseNestedExitCall(call));
+        const parsedCalls = callsAttributes.map((call) =>
+            parseNestedExitCall(call),
+        );
 
         const encodedCalls = parsedCalls.map((parsedCall) =>
             encodeFunctionData({
@@ -35,7 +37,7 @@ export class NestedExit {
             }),
         );
 
-        const { peekCalls, tokensOut } = getPeekCalls(calls);
+        const { peekCalls, tokensOut } = getPeekCalls(callsAttributes);
 
         // append peek calls to get amountsOut
         encodedCalls.push(...peekCalls);
@@ -60,7 +62,7 @@ export class NestedExit {
             TokenAmount.fromRawAmount(tokenOut, peekedValues[i]),
         );
 
-        return { calls, bptAmountIn, amountsOut };
+        return { callsAttributes, bptAmountIn, amountsOut };
     }
 
     buildCall(input: NestedExitCallInput): {
@@ -76,7 +78,7 @@ export class NestedExit {
             ),
         );
 
-        input.calls.forEach((call) => {
+        input.callsAttributes.forEach((call) => {
             // update relevant calls with minAmountOut limits in place
             minAmountsOut.forEach((minAmountOut, j) => {
                 const minAmountOutIndex = call.sortedTokens.findIndex((t) =>
@@ -89,7 +91,7 @@ export class NestedExit {
             });
         });
 
-        const parsedCalls = input.calls.map((call) =>
+        const parsedCalls = input.callsAttributes.map((call) =>
             parseNestedExitCall(call),
         );
 
@@ -105,7 +107,7 @@ export class NestedExit {
         if (input.relayerApprovalSignature !== undefined) {
             encodedCalls.unshift(
                 Relayer.encodeSetRelayerApproval(
-                    BALANCER_RELAYER[input.calls[0].chainId],
+                    BALANCER_RELAYER[input.callsAttributes[0].chainId],
                     true,
                     input.relayerApprovalSignature,
                 ),
@@ -120,7 +122,7 @@ export class NestedExit {
 
         return {
             call,
-            to: BALANCER_RELAYER[input.calls[0].chainId],
+            to: BALANCER_RELAYER[input.callsAttributes[0].chainId],
             minAmountsOut,
         };
     }

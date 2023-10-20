@@ -1,10 +1,10 @@
 import { Token } from '../token';
-import { NestedExitInput, NestedExitCall } from './types';
+import { NestedExitInput, NestedExitCallAttributes } from './types';
 import { NestedPool, NestedPoolState } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address } from '../../types';
 
-export const getNestedExitCalls = (
+export const getQueryCallsAttributes = (
     {
         bptAmountIn,
         chainId,
@@ -14,10 +14,13 @@ export const getNestedExitCalls = (
         toInternalBalance = false,
     }: NestedExitInput,
     { pools }: NestedPoolState,
-): { bptAmountIn: TokenAmount; calls: NestedExitCall[] } => {
+): {
+    bptAmountIn: TokenAmount;
+    callsAttributes: NestedExitCallAttributes[];
+} => {
     const isProportional = tokenOut === undefined;
     let poolsTopDown: NestedPool[];
-    let calls: NestedExitCall[];
+    let callsAttributes: NestedExitCallAttributes[];
 
     if (isProportional) {
         /**
@@ -30,7 +33,7 @@ export const getNestedExitCalls = (
         // sort pools by descending level
         poolsTopDown = pools.sort((a, b) => b.level - a.level);
 
-        calls = getProportionalExitCalls(
+        callsAttributes = getProportionalExitCallsAttributes(
             poolsTopDown,
             chainId,
             useNativeAssetAsWrappedAmountOut,
@@ -64,7 +67,7 @@ export const getNestedExitCalls = (
             tokenOutByLevel = currentPool.address;
         }
 
-        calls = getSingleTokenExitCalls(
+        callsAttributes = getSingleTokenExitCallsAttributes(
             exitPath,
             chainId,
             useNativeAssetAsWrappedAmountOut,
@@ -77,10 +80,10 @@ export const getNestedExitCalls = (
 
     const bptIn = new Token(chainId, poolsTopDown[0].address, 18);
     const _bptAmountIn = TokenAmount.fromRawAmount(bptIn, bptAmountIn);
-    return { calls, bptAmountIn: _bptAmountIn };
+    return { callsAttributes, bptAmountIn: _bptAmountIn };
 };
 
-export const getProportionalExitCalls = (
+export const getProportionalExitCallsAttributes = (
     poolsSortedByLevel: NestedPool[],
     chainId: number,
     useNativeAssetAsWrappedAmountOut: boolean,
@@ -88,7 +91,7 @@ export const getProportionalExitCalls = (
     bptAmountIn: bigint,
     toInternalBalance: boolean,
 ) => {
-    const calls: NestedExitCall[] = [];
+    const calls: NestedExitCallAttributes[] = [];
     for (const pool of poolsSortedByLevel) {
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
@@ -125,7 +128,7 @@ export const getProportionalExitCalls = (
                           ],
                           isRef: true,
                       },
-            minAmountsOut: Array(sortedTokens.length).fill(0n),
+            minAmountsOut: Array(sortedTokens.length).fill(0n), // limits set to zero for query calls
             toInternalBalance,
             outputReferenceKeys: sortedTokensWithoutBpt.map(
                 (token) =>
@@ -137,7 +140,7 @@ export const getProportionalExitCalls = (
     return calls;
 };
 
-export const getSingleTokenExitCalls = (
+export const getSingleTokenExitCallsAttributes = (
     exitPath: NestedPool[],
     chainId: number,
     useNativeAssetAsWrappedAmountOut: boolean,
@@ -146,7 +149,7 @@ export const getSingleTokenExitCalls = (
     toInternalBalance: boolean,
     tokenOut: Address,
 ) => {
-    const calls: NestedExitCall[] = [];
+    const calls: NestedExitCallAttributes[] = [];
 
     for (let i = 0; i < exitPath.length; i++) {
         const pool = exitPath[i];
@@ -178,7 +181,7 @@ export const getSingleTokenExitCalls = (
                           amount: upperLevelCall.outputReferenceKeys[0],
                           isRef: true,
                       },
-            minAmountsOut: Array(sortedTokens.length).fill(0n),
+            minAmountsOut: Array(sortedTokens.length).fill(0n), // limits set to zero for query calls
             toInternalBalance,
             outputReferenceKeys: [
                 BigInt(exitPath.indexOf(pool)) * 10n + BigInt(tokenOutIndex),
