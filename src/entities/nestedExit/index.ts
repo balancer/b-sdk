@@ -105,7 +105,7 @@ export class NestedExit {
         if (input.relayerApprovalSignature !== undefined) {
             encodedCalls.unshift(
                 Relayer.encodeSetRelayerApproval(
-                    BALANCER_RELAYER[input.chainId],
+                    BALANCER_RELAYER[input.calls[0].chainId],
                     true,
                     input.relayerApprovalSignature,
                 ),
@@ -120,7 +120,7 @@ export class NestedExit {
 
         return {
             call,
-            to: BALANCER_RELAYER[input.chainId],
+            to: BALANCER_RELAYER[input.calls[0].chainId],
             minAmountsOut,
         };
     }

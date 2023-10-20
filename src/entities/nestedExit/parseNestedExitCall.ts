@@ -22,7 +22,7 @@ export const parseNestedExitCall = ({
 }: NestedExitCall) => {
     // replace wrapped token with native asset if needed
     let tokensOut = [...sortedTokens];
-    if (chainId && useNativeAssetAsWrappedAmountOut) {
+    if (useNativeAssetAsWrappedAmountOut) {
         tokensOut = replaceWrapped([...sortedTokens], chainId);
     }
 

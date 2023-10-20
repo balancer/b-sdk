@@ -39,7 +39,6 @@ export type NestedExitQueryResult = {
 };
 
 export type NestedExitCallInput = NestedExitQueryResult & {
-    chainId: number;
     slippage: Slippage;
     sender: Address;
     recipient: Address;

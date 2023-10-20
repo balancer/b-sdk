@@ -20,7 +20,8 @@ export type NestedJoinCall = {
     chainId: number;
     useNativeAssetAsWrappedAmountIn: boolean;
     sortedTokens: Token[];
-    poolId: Address;
+    poolId: Hex;
+    poolAddress: Address;
     poolType: string;
     kind: number;
     sender: Address;
@@ -40,7 +41,6 @@ export type NestedJoinQueryResult = {
 };
 
 export type NestedJoinCallInput = NestedJoinQueryResult & {
-    chainId: number;
     slippage: Slippage;
     sender: Address;
     recipient: Address;

@@ -23,7 +23,7 @@ export const parseNestedJoinCall = ({
     // replace wrapped token with native asset if needed
     let tokensIn = [...sortedTokens];
     let value = 0n;
-    if (chainId && useNativeAssetAsWrappedAmountIn) {
+    if (useNativeAssetAsWrappedAmountIn) {
         tokensIn = replaceWrapped([...sortedTokens], chainId);
         const nativeAssetIndex = tokensIn.findIndex((t) =>
             t.isSameAddress(ZERO_ADDRESS),

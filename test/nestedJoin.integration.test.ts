@@ -266,7 +266,6 @@ export const doTransaction = async ({
 
     const { call, to, value, minBptOut } = nestedJoin.buildCall({
         ...queryResult,
-        chainId,
         slippage,
         sender: testAddress,
         recipient: testAddress,
