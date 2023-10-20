@@ -39,28 +39,40 @@ export const getQueryCallsAttributes = (
             sender: accountAddress,
             recipient: accountAddress,
             maxAmountsIn: sortedTokens.map((token) => {
+                /**
+                 * There are 3 possible scenarios:
+                 * 1. token has amountIn provided by the user -> return amount
+                 * 2. token is the output of a previous join call -> return outputRef
+                 * 3. otherwise -> return zero
+                 */
+
+                // 1. token has amountIn provided by the user -> return amount
                 const amountIn = amountsIn.find((a) =>
                     token.isSameAddress(a.address),
                 );
-                const lowerLevelCall = calls.find(
-                    (call) => getPoolAddress(call.poolId) === token.address,
-                );
-                if (amountIn) {
+                if (amountIn !== undefined) {
                     return {
                         amount: amountIn.rawAmount,
                         isRef: false,
                     };
-                } else if (lowerLevelCall !== undefined) {
+                }
+
+                // 2. token is the output of a previous join call -> return outputRef
+                const previousJoinCall = calls.find(
+                    (call) => getPoolAddress(call.poolId) === token.address,
+                );
+                if (previousJoinCall !== undefined) {
                     return {
-                        amount: lowerLevelCall.outputReferenceKey,
+                        amount: previousJoinCall.outputReferenceKey,
                         isRef: true,
                     };
-                } else {
-                    return {
-                        amount: 0n,
-                        isRef: false,
-                    };
                 }
+
+                // 3. otherwise -> return zero
+                return {
+                    amount: 0n,
+                    isRef: false,
+                };
             }),
             minBptOut: 0n, // limits set to zero for query calls
             fromInternalBalance: fromInternalBalance ?? false,
