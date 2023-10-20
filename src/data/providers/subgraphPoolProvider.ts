@@ -5,7 +5,7 @@ import {
     RawPool,
 } from '../types';
 import { fetchWithRetry } from '../../utils/fetch';
-import { SUBGRAPH_URLS } from '../../utils';
+import { SUBGRAPH_URLS, brickedPools } from '../../utils';
 
 BigInt.prototype['toJSON'] = function () {
     return this.toString();
@@ -72,6 +72,7 @@ export class SubgraphPoolProvider implements PoolDataProvider {
                 ? ['Investment', 'LiquidityBootstrapping']
                 : undefined,
             ...config,
+            poolIdNotIn: [...(config?.poolIdNotIn ?? []), ...brickedPools],
         };
     }
 
