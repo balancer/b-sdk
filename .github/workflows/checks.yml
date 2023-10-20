@@ -43,13 +43,12 @@ jobs:
         uses: ./.github/actions/setup
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-      - name: Run Anvil Node
-        run: anvil --fork-url ${{ secrets.ETHEREUM_RPC_URL }} &
       - name: Test
         run: pnpm test:ci
         env:
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
+          # TODO: add FANTOM and ARBITRUM secrets
   build:
     name: Build
     needs: install
