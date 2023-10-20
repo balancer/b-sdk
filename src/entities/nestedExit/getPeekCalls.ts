@@ -1,10 +1,10 @@
 import { Hex } from 'viem';
 import { Token } from '../token';
-import { NestedExitCall } from './types';
+import { NestedExitCallAttributes } from './types';
 import { Relayer } from '../relayer';
 import { getPoolAddress } from '../../utils';
 
-export const getPeekCalls = (calls: NestedExitCall[]) => {
+export const getPeekCalls = (calls: NestedExitCallAttributes[]) => {
     const tokensOut: Token[] = [];
     const peekCalls: Hex[] = [];
 

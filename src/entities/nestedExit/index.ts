@@ -3,7 +3,7 @@ import { Address, Hex } from '../../types';
 import { BALANCER_RELAYER } from '../../utils';
 import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
-import { balancerRelayerAbi, bathcRelayerLibraryAbi } from '../../abi';
+import { balancerRelayerAbi } from '../../abi';
 import {
     NestedExitInput,
     NestedExitQueryResult,
@@ -12,7 +12,7 @@ import {
 import { NestedPoolState } from '../types';
 import { doQueryNestedExit } from './doQueryNestedExit';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
-import { parseNestedExitCall } from './parseNestedExitCall';
+import { encodeCalls } from './encodeCalls';
 import { getPeekCalls } from './getPeekCalls';
 
 export class NestedExit {
@@ -25,17 +25,7 @@ export class NestedExit {
             nestedPoolState,
         );
 
-        const parsedCalls = callsAttributes.map((call) =>
-            parseNestedExitCall(call),
-        );
-
-        const encodedCalls = parsedCalls.map((parsedCall) =>
-            encodeFunctionData({
-                abi: bathcRelayerLibraryAbi,
-                functionName: 'exitPool',
-                args: parsedCall.args,
-            }),
-        );
+        const encodedCalls = encodeCalls(callsAttributes);
 
         const { peekCalls, tokensOut } = getPeekCalls(callsAttributes);
 
@@ -91,17 +81,7 @@ export class NestedExit {
             });
         });
 
-        const parsedCalls = input.callsAttributes.map((call) =>
-            parseNestedExitCall(call),
-        );
-
-        const encodedCalls = parsedCalls.map((parsedCall) =>
-            encodeFunctionData({
-                abi: bathcRelayerLibraryAbi,
-                functionName: 'exitPool',
-                args: parsedCall.args,
-            }),
-        );
+        const encodedCalls = encodeCalls(input.callsAttributes);
 
         // prepend relayer approval if provided
         if (input.relayerApprovalSignature !== undefined) {

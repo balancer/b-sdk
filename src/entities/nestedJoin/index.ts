@@ -3,9 +3,9 @@ import { Address, Hex } from '../../types';
 import { Token } from '../token';
 import { BALANCER_RELAYER, getPoolAddress } from '../../utils';
 import { Relayer } from '../relayer';
-import { parseNestedJoinCall } from './parseNestedJoinCall';
+import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../tokenAmount';
-import { balancerRelayerAbi, bathcRelayerLibraryAbi } from '../../abi';
+import { balancerRelayerAbi } from '../../abi';
 import {
     NestedJoinInput,
     NestedJoinQueryResult,
@@ -22,17 +22,7 @@ export class NestedJoin {
     ): Promise<NestedJoinQueryResult> {
         const callsAttributes = getQueryCallsAttributes(input, nestedPoolState);
 
-        const parsedCalls = callsAttributes.map((call) =>
-            parseNestedJoinCall(call),
-        );
-
-        const encodedCalls = parsedCalls.map((parsedCall) =>
-            encodeFunctionData({
-                abi: bathcRelayerLibraryAbi,
-                functionName: 'joinPool',
-                args: parsedCall.args,
-            }),
-        );
+        const { encodedCalls } = encodeCalls(callsAttributes);
 
         // append peek call to get bptOut
         const peekCall = Relayer.encodePeekChainedReferenceValue(
@@ -81,17 +71,7 @@ export class NestedJoin {
             minBptOut,
         };
 
-        const parsedCalls = input.callsAttributes.map((call) =>
-            parseNestedJoinCall(call),
-        );
-
-        const encodedCalls = parsedCalls.map((parsedCall) =>
-            encodeFunctionData({
-                abi: bathcRelayerLibraryAbi,
-                functionName: 'joinPool',
-                args: parsedCall.args,
-            }),
-        );
+        const { encodedCalls, values } = encodeCalls(input.callsAttributes);
 
         // prepend relayer approval if provided
         if (input.relayerApprovalSignature !== undefined) {
@@ -110,9 +90,9 @@ export class NestedJoin {
             args: [encodedCalls],
         });
 
-        // get aggregated value from parsedCalls
-        const accumulatedValue = parsedCalls.reduce((acc, parsedCall) => {
-            return acc + parsedCall.value;
+        // aggregate values from all calls
+        const accumulatedValue = values.reduce((acc, value) => {
+            return acc + value;
         }, 0n);
 
         return {
