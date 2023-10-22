@@ -1,6 +1,7 @@
 import { Hex } from 'viem';
 import { PoolType, SwapKind } from '../../types';
-import { Token, TokenAmount } from '../';
+import { Token } from '../token';
+import { TokenAmount } from '../tokenAmount';
 import { RawPool } from '../../data/types';
 
 export interface BasePool {

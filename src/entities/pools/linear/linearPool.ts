@@ -1,6 +1,7 @@
 import { Hex, parseEther } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
-import { BigintIsh, Token, TokenAmount } from '../../';
+import { Token } from '../../token';
+import { TokenAmount, BigintIsh } from '../../tokenAmount';
 import { BasePool } from '../../pools';
 import { getPoolAddress, MAX_UINT112, WAD } from '../../../utils';
 import {
@@ -19,6 +20,7 @@ import {
 } from './linearMath';
 import { StablePoolToken } from '../stable/stablePool';
 import { RawLinearPool } from '../../../data/types';
+import { Params } from './types';
 
 const MAX_RATIO = parseEther('10');
 const MAX_TOKEN_BALANCE = MAX_UINT112 - 1n;
@@ -51,13 +53,6 @@ class BPT extends TokenAmount {
         return this;
     }
 }
-
-export type Params = {
-    fee: bigint;
-    rate: bigint;
-    lowerTarget: bigint;
-    upperTarget: bigint;
-};
 
 export class LinearPool implements BasePool {
     public readonly chainId: number;

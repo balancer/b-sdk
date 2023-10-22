@@ -1,5 +1,7 @@
 import { encodeFunctionData } from 'viem';
-import { Token, TokenAmount, WeightedEncoder } from '../../..';
+import { Token } from '../../../entities/token';
+import { TokenAmount } from '../../../entities/tokenAmount';
+import { WeightedEncoder } from '../../../entities/encoders/weighted';
 import { Address } from '../../../types';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
@@ -10,7 +12,7 @@ import {
     JoinInput,
     JoinKind,
     JoinQueryResult,
-} from '..';
+} from '../types';
 import { AmountsJoin, PoolState } from '../../types';
 import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
 

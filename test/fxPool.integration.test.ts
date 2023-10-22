@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { BALANCER_POOL_DATA_QUERIES_ADDRESSES, ChainId } from '../src/utils';
+import { BATCHSIZE, ChainId, VAULT } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
@@ -18,7 +18,7 @@ import {
 
 describe('fx integration tests', () => {
     const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env['POLYGON_RPC_URL'] || 'https://polygon-rpc.com';
+    const rpcUrl = process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com';
 
     const USDC = new Token(
         chainId,
@@ -49,10 +49,8 @@ describe('fx integration tests', () => {
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
-            BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
-            {
-                loadSwapFees: false,
-            },
+            BATCHSIZE[chainId],
+            VAULT[chainId],
         );
 
         sor = new SmartOrderRouter({

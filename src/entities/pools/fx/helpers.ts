@@ -1,5 +1,5 @@
 import { parseUnits } from 'viem';
-import { HumanAmount } from '../../../types';
+import { HumanAmount } from '../../../data/types';
 
 export class MathFx {
     static mulDownFixed(a: bigint, b: bigint, decimals = 36): bigint {

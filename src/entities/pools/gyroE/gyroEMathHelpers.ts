@@ -1,5 +1,5 @@
 import { MAX_BALANCES } from './constants';
-import { DerivedGyroEParams, GyroEParams, Vector2 } from './gyroEPool';
+import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
 import { MathGyro, ONE_XP } from '../../../utils/gyroHelpers/math';
 
 /////////

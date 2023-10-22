@@ -1,7 +1,7 @@
 import { WAD } from '../../../utils';
 import { MathGyro } from '../../../utils/gyroHelpers/math';
 import { virtualOffset0, virtualOffset1 } from './gyroEMathHelpers';
-import { DerivedGyroEParams, GyroEParams, Vector2 } from './gyroEPool';
+import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
 
 /////////
 /// SPOT PRICE DERIVATIVE CALCULATIONS

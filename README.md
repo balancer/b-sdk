@@ -103,3 +103,13 @@ await client.sendTransaction({
 });
 ```
 Full working exit example: [examples/exit/weighted.ts](./examples/exit/weighted.ts)
+
+## Anvil client
+To download and install the anvil client, run the following commands (MacOS):
+- `curl -L https://foundry.paradigm.xyz | bash`
+- `brew install libusb`
+- `source /Users/$(whoami)/.zshenv`
+- `foundryup`
+
+For other SO's check https://book.getfoundry.sh/getting-started/installation
+```

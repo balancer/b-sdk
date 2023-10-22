@@ -1,4 +1,4 @@
-import { ExitInput, ExitKind } from '..';
+import { ExitInput, ExitKind } from '../types';
 import { PoolStateInput } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 

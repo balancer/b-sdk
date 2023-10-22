@@ -157,7 +157,7 @@ export class Swap {
         });
 
         const queriesContract = getContract({
-            address: BALANCER_QUERIES,
+            address: BALANCER_QUERIES[this.chainId],
             abi: balancerQueriesAbi,
             publicClient,
         });

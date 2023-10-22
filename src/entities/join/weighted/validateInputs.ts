@@ -1,4 +1,4 @@
-import { JoinInput, JoinKind } from '..';
+import { JoinInput, JoinKind } from '../types';
 import { PoolStateInput } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 

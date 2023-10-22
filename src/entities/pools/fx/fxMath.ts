@@ -1,6 +1,6 @@
 import { parseUnits } from 'viem';
-import { RAY } from '../../../utils';
-import { FxPoolPairData } from './fxPool';
+import { RAY } from '../../../utils/math';
+import { FxPoolPairData } from './types';
 import { SwapKind } from '../../../types';
 
 export const CURVEMATH_MAX_DIFF = parseUnits('-0.000001000000000000024', 36);
