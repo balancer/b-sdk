@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import { config } from 'dotenv';
+config();
 
 import {
   BalancerApi,
@@ -23,6 +23,7 @@ import {
   walletActions
 } from "viem";
 import { forkSetup, sendTransactionGetBalances } from "../../test/lib/utils/helper";
+import anvilGlobalSetup from "../../test/anvil/anvil-global-setup";
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
 const poolId = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
@@ -33,10 +34,11 @@ const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DA
 const slippage = Slippage.fromPercentage('1'); // 1%
 
 const join = async () => {
+  await anvilGlobalSetup();
   const balancerApi = new BalancerApi(balancerApiUrl, 1);
   const poolState: PoolStateInput = await balancerApi.pools.fetchPoolState(poolId);
   const client: Client & PublicActions & TestActions & WalletActions = createTestClient({
-    mode: 'hardhat',
+    mode: 'anvil',
     chain: CHAINS[chainId],
     transport: http(rpcUrl),
   })
@@ -52,8 +54,6 @@ const join = async () => {
       ...poolState.tokens.map((t) => parseUnits('100', t.decimals)),
       parseUnits('100', 18),
     ],
-    process.env.ETHEREUM_RPC_URL as string,
-    blockNumber,
   );
 
 
@@ -93,6 +93,7 @@ const join = async () => {
     );
   console.log(`transaction status: ${transactionReceipt.status}`);
   console.log(`token amounts deltas per token: ${balanceDeltas}`);
+  return;
 }
 
-join();
+join().then(()=>{});

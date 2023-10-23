@@ -3,21 +3,14 @@ import { ChainId } from '../../../../utils';
 export class BalancerApiClient {
     apiUrl: string;
     chainId: ChainId;
-    constructor(apiUrl: string, chainId: number) {
+    constructor(apiUrl: string, chainId: ChainId) {
         this.apiUrl = apiUrl;
         this.chainId = chainId;
     }
 
     async fetch(
-        operationName: string,
-        query: string,
-        variables: { id: string },
+        requestQuery: {operationName?:string, query:string, variables?:any}
     ) {
-        const requestQuery = {
-            operationName,
-            query,
-            variables,
-        };
         const response = await fetch(this.apiUrl, {
             method: 'post',
             body: JSON.stringify(requestQuery),

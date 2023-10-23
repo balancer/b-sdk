@@ -80,9 +80,11 @@ export class Pools {
   async fetchPoolState(id: string): Promise<PoolStateInput> {
     const {
       data: { poolGetPool },
-    } = await this.balancerApiClient.fetch('GetPool', this.poolStateQuery, {
+    } = await this.balancerApiClient.fetch({
+      query: this.poolStateQuery, 
+      variables: {
       id,
-    });
+    }});
     return poolGetPool;
   }
 }

@@ -1,5 +1,6 @@
 import { Pools } from "./modules/pool-state";
 import { BalancerApiClient } from "./client";
+import { ChainId } from "../../../utils";
 
 export class BalancerApi {
   
@@ -7,7 +8,7 @@ export class BalancerApi {
   pools: Pools;
   
   
-  constructor(balancerApiUrl: string, chainId: number){
+  constructor(balancerApiUrl: string, chainId: ChainId){
     this.balancerApiClient = new BalancerApiClient(balancerApiUrl, chainId);
     this.pools = new Pools(this.balancerApiClient);
   }
