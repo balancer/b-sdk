@@ -1,25 +1,30 @@
 import { Token } from '../token';
-import { NestedExitInput, NestedExitCallAttributes } from './types';
+import {
+    NestedProportionalExitInput,
+    NestedSingleTokenExitInput,
+    NestedExitCallAttributes,
+} from './types';
 import { NestedPool, NestedPoolState } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address } from '../../types';
 
 export const getQueryCallsAttributes = (
-    {
-        bptAmountIn,
-        chainId,
-        accountAddress,
-        tokenOut,
-        useNativeAssetAsWrappedAmountOut = false,
-        toInternalBalance = false,
-    }: NestedExitInput,
+    input: NestedProportionalExitInput | NestedSingleTokenExitInput,
     { pools }: NestedPoolState,
+    isProportional: boolean,
 ): {
     bptAmountIn: TokenAmount;
     callsAttributes: NestedExitCallAttributes[];
 } => {
-    const isProportional = tokenOut === undefined;
-    let poolsTopDown: NestedPool[];
+    // sort pools by descending level
+    const poolsTopDown = pools.sort((a, b) => b.level - a.level);
+    const {
+        bptAmountIn,
+        chainId,
+        accountAddress,
+        useNativeAssetAsWrappedAmountOut = false,
+        toInternalBalance = false,
+    } = input;
     let callsAttributes: NestedExitCallAttributes[];
 
     if (isProportional) {
@@ -29,9 +34,6 @@ export const getQueryCallsAttributes = (
          * 2. Inputs will be bptAmountIn provided or output of the previous level
          * 3. Output at bottom level is the amountsOut
          */
-
-        // sort pools by descending level
-        poolsTopDown = pools.sort((a, b) => b.level - a.level);
 
         callsAttributes = getProportionalExitCallsAttributes(
             poolsTopDown,
@@ -50,8 +52,8 @@ export const getQueryCallsAttributes = (
          * 4. Output at bottom level is the amountOut
          */
 
-        // sort pools by descending level
-        poolsTopDown = pools.sort((a, b) => b.level - a.level);
+        const { tokenOut } = input as NestedSingleTokenExitInput;
+
         const topPool = poolsTopDown[0];
 
         // Go BOTTOM-UP building exit path to tokenOut

@@ -5,7 +5,8 @@ import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi } from '../../abi';
 import {
-    NestedExitInput,
+    NestedProportionalExitInput,
+    NestedSingleTokenExitInput,
     NestedExitQueryResult,
     NestedExitCallInput,
 } from './types';
@@ -17,17 +18,25 @@ import { getPeekCalls } from './getPeekCalls';
 
 export class NestedExit {
     async query(
-        input: NestedExitInput,
+        input: NestedProportionalExitInput | NestedSingleTokenExitInput,
         nestedPoolState: NestedPoolState,
     ): Promise<NestedExitQueryResult> {
+        const isProportional = !(
+            'tokenOut' in input && input.tokenOut !== undefined
+        );
+
         const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
             input,
             nestedPoolState,
+            isProportional,
         );
 
-        const encodedCalls = encodeCalls(callsAttributes);
+        const encodedCalls = encodeCalls(callsAttributes, isProportional);
 
-        const { peekCalls, tokensOut } = getPeekCalls(callsAttributes);
+        const { peekCalls, tokensOut } = getPeekCalls(
+            callsAttributes,
+            isProportional,
+        );
 
         // append peek calls to get amountsOut
         encodedCalls.push(...peekCalls);
@@ -52,7 +61,7 @@ export class NestedExit {
             TokenAmount.fromRawAmount(tokenOut, peekedValues[i]),
         );
 
-        return { callsAttributes, bptAmountIn, amountsOut };
+        return { callsAttributes, bptAmountIn, amountsOut, isProportional };
     }
 
     buildCall(input: NestedExitCallInput): {
@@ -81,7 +90,10 @@ export class NestedExit {
             });
         });
 
-        const encodedCalls = encodeCalls(input.callsAttributes);
+        const encodedCalls = encodeCalls(
+            input.callsAttributes,
+            input.isProportional,
+        );
 
         // prepend relayer approval if provided
         if (input.relayerApprovalSignature !== undefined) {

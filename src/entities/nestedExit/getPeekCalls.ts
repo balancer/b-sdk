@@ -4,26 +4,14 @@ import { NestedExitCallAttributes } from './types';
 import { Relayer } from '../relayer';
 import { getPoolAddress } from '../../utils';
 
-export const getPeekCalls = (calls: NestedExitCallAttributes[]) => {
+export const getPeekCalls = (
+    calls: NestedExitCallAttributes[],
+    isProportional: boolean,
+) => {
     const tokensOut: Token[] = [];
     const peekCalls: Hex[] = [];
 
-    const isSingleTokenExit =
-        calls[calls.length - 1].tokenOutIndex !== undefined;
-    if (isSingleTokenExit) {
-        const lastCall = calls[calls.length - 1];
-        const tokenOut =
-            lastCall.sortedTokens[lastCall.tokenOutIndex as number];
-        tokensOut.push(tokenOut);
-        peekCalls.push(
-            Relayer.encodePeekChainedReferenceValue(
-                Relayer.toChainedReference(
-                    lastCall.outputReferenceKeys[0],
-                    false,
-                ),
-            ),
-        );
-    } else {
+    if (isProportional) {
         calls.forEach((call) => {
             call.outputReferenceKeys.forEach((opRefKey) => {
                 const tokenOut = call.sortedTokens[Number(opRefKey % 10n)];
@@ -43,6 +31,19 @@ export const getPeekCalls = (calls: NestedExitCallAttributes[]) => {
                 }
             });
         });
+    } else {
+        const lastCall = calls[calls.length - 1];
+        const tokenOut =
+            lastCall.sortedTokens[lastCall.tokenOutIndex as number];
+        tokensOut.push(tokenOut);
+        peekCalls.push(
+            Relayer.encodePeekChainedReferenceValue(
+                Relayer.toChainedReference(
+                    lastCall.outputReferenceKeys[0],
+                    false,
+                ),
+            ),
+        );
     }
 
     return { peekCalls, tokensOut };

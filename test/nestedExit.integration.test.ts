@@ -38,7 +38,10 @@ import {
 } from './lib/utils/helper';
 import { authorizerAbi, vaultAbi } from '../src/abi';
 import { Relayer } from '../src/entities/relayer';
-import { NestedExitInput } from '../src/entities/nestedExit/types';
+import {
+    NestedProportionalExitInput,
+    NestedSingleTokenExitInput,
+} from '../src/entities/nestedExit/types';
 
 /**
  * Deploy the new relayer contract with the new helper address:
@@ -204,14 +207,15 @@ export const doTransaction = async ({
     tokenOut,
     useNativeAssetAsWrappedAmountOut = false,
 }: TxInput) => {
-    const exitInput: NestedExitInput = {
-        bptAmountIn,
-        chainId,
-        rpcUrl,
-        accountAddress: testAddress,
-        useNativeAssetAsWrappedAmountOut,
-        tokenOut,
-    };
+    const exitInput: NestedProportionalExitInput | NestedSingleTokenExitInput =
+        {
+            bptAmountIn,
+            chainId,
+            rpcUrl,
+            accountAddress: testAddress,
+            useNativeAssetAsWrappedAmountOut,
+            tokenOut,
+        };
     const queryResult = await nestedExit.query(exitInput, nestedPoolFromApi);
 
     // build join call with expected minBpOut based on slippage

@@ -7,7 +7,10 @@ import { replaceWrapped } from '../utils/replaceWrapped';
 import { bathcRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
 
-export const encodeCalls = (callsAttributes: NestedExitCallAttributes[]) => {
+export const encodeCalls = (
+    callsAttributes: NestedExitCallAttributes[],
+    isProportional: boolean,
+) => {
     const encodedCalls: Hex[] = [];
     for (const callAttributes of callsAttributes) {
         const {
@@ -39,8 +42,7 @@ export const encodeCalls = (callsAttributes: NestedExitCallAttributes[]) => {
         let userData: Hex;
         let outputReferences: { index: bigint; key: bigint }[] = [];
 
-        if (tokenOutIndex === undefined) {
-            // Proportional Exit
+        if (isProportional) {
             switch (poolType) {
                 case 'Weighted':
                     userData = WeightedEncoder.exitProportional(_bptAmountIn);
@@ -61,7 +63,11 @@ export const encodeCalls = (callsAttributes: NestedExitCallAttributes[]) => {
                 };
             });
         } else {
-            // Single Token Exit
+            if (tokenOutIndex === undefined) {
+                throw new Error(
+                    "tokenOutIndex can't be undefined for single token exits",
+                );
+            }
             switch (poolType) {
                 case 'Weighted':
                     userData = WeightedEncoder.exitSingleAsset(
