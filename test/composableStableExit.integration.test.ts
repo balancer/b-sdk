@@ -33,7 +33,6 @@ import { doExit } from './lib/utils/exitHelper';
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
-const blockNumber = BigInt(18043296);
 const poolId =
     '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d000000000000000000000051b'; // baoETH-ETH StablePool
 
@@ -48,7 +47,7 @@ describe('composable stable exit test', () => {
         const poolInput = await api.getPool(poolId);
 
         const client = createTestClient({
-            mode: 'hardhat',
+            mode: 'anvil',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
         })
@@ -74,9 +73,7 @@ describe('composable stable exit test', () => {
             txInput.testAddress,
             [txInput.poolInput.address],
             undefined, // TODO: hardcode these values to improve test performance
-            [parseUnits('1000', 18)],
-            process.env.ETHEREUM_RPC_URL as string,
-            blockNumber,
+            [parseUnits('1000', 18)]
         );
     });
 
