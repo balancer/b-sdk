@@ -54,23 +54,8 @@ export const getQueryCallsAttributes = (
 
         const { tokenOut } = input as NestedSingleTokenExitInput;
 
-        const topPool = poolsTopDown[0];
-
-        // Go BOTTOM-UP building exit path to tokenOut
-        const exitPath: NestedPool[] = [];
-        let tokenOutByLevel = tokenOut;
-        while (tokenOutByLevel !== topPool.address) {
-            const currentPool = poolsTopDown.find(
-                (p) =>
-                    p.address !== tokenOutByLevel && // prevents pools with BPT as token to be picked up incorrectly
-                    p.tokens.some((t) => t.address === tokenOutByLevel),
-            ) as NestedPool;
-            exitPath.unshift(currentPool);
-            tokenOutByLevel = currentPool.address;
-        }
-
         callsAttributes = getSingleTokenExitCallsAttributes(
-            exitPath,
+            poolsTopDown,
             chainId,
             useNativeAssetAsWrappedAmountOut,
             accountAddress,
@@ -143,7 +128,7 @@ export const getProportionalExitCallsAttributes = (
 };
 
 export const getSingleTokenExitCallsAttributes = (
-    exitPath: NestedPool[],
+    poolsTopDown: NestedPool[],
     chainId: number,
     useNativeAssetAsWrappedAmountOut: boolean,
     accountAddress: Address,
@@ -151,6 +136,20 @@ export const getSingleTokenExitCallsAttributes = (
     toInternalBalance: boolean,
     tokenOut: Address,
 ) => {
+    // Go BOTTOM-UP building exit path to tokenOut
+    const topPool = poolsTopDown[0];
+    const exitPath: NestedPool[] = [];
+    let tokenOutByLevel = tokenOut;
+    while (tokenOutByLevel !== topPool.address) {
+        const currentPool = poolsTopDown.find(
+            (p) =>
+                p.address !== tokenOutByLevel && // prevents pools with BPT as token to be picked up incorrectly
+                p.tokens.some((t) => t.address === tokenOutByLevel),
+        ) as NestedPool;
+        exitPath.unshift(currentPool);
+        tokenOutByLevel = currentPool.address;
+    }
+
     const calls: NestedExitCallAttributes[] = [];
 
     for (let i = 0; i < exitPath.length; i++) {
