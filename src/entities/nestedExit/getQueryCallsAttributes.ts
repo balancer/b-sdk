@@ -16,8 +16,6 @@ export const getQueryCallsAttributes = (
     bptAmountIn: TokenAmount;
     callsAttributes: NestedExitCallAttributes[];
 } => {
-    // sort pools by descending level
-    const poolsTopDown = pools.sort((a, b) => b.level - a.level);
     const {
         bptAmountIn,
         chainId,
@@ -26,6 +24,9 @@ export const getQueryCallsAttributes = (
         toInternalBalance = false,
     } = input;
     let callsAttributes: NestedExitCallAttributes[];
+
+    // sort pools by descending level
+    const poolsTopDown = pools.sort((a, b) => b.level - a.level);
 
     if (isProportional) {
         /**
