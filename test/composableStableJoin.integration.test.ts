@@ -119,7 +119,7 @@ describe('composable stable join test', () => {
         expect(queryResult.tokenInIndex).to.be.undefined;
 
         // Should be no native value
-        expect(value).toBeUndefined;
+        expect(value).to.be.undefined
 
         // Expect some bpt amount
         expect(queryResult.bptOut.amount > BigInt(0)).to.be.true;
@@ -211,7 +211,7 @@ describe('composable stable join test', () => {
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
 
         // We only expect single asset to have a value for amount in
-        expect(queryResult.tokenInIndex).toBeDefined;
+        expect(queryResult.tokenInIndex).to.not.be.undefined;
         queryResult.amountsIn
             .filter((_, index) => index !== bptIndex)
             .forEach((a, i) => {
@@ -221,7 +221,7 @@ describe('composable stable join test', () => {
             });
 
         // Should be no native value
-        expect(value).toBeUndefined;
+        expect(value).to.be.undefined;
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
@@ -252,18 +252,19 @@ describe('composable stable join test', () => {
 
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
-
+        
+        console.log(queryResult.tokenInIndex);
+        
         // Expect all assets to have a value for amount in
-        expect(queryResult.tokenInIndex).toBeDefined;
+        expect(queryResult.tokenInIndex).to.be.undefined
         queryResult.amountsIn
             .filter((_, index) => index !== bptIndex)
             .forEach((a) => {
                 expect(a.amount > BigInt(0)).to.be.true;
             });
-        expect(queryResult.tokenInIndex).toBeUndefined;
 
         // Should be no native value
-        expect(value).toBeUndefined;
+        expect(value).to.be.undefined
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
