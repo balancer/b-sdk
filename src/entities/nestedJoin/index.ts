@@ -1,7 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
 import { Token } from '../token';
-import { BALANCER_RELAYER } from '../../utils';
+import { BALANCER_RELAYER, NATIVE_ASSETS } from '../../utils';
 import { Relayer } from '../relayer';
 import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../tokenAmount';
@@ -20,27 +20,7 @@ export class NestedJoin {
         input: NestedJoinInput,
         nestedPoolState: NestedPoolState,
     ): Promise<NestedJoinQueryResult> {
-        const nestedTokens = [
-            ...new Set(
-                nestedPoolState.pools
-                    .flatMap((p) => p.tokens)
-                    .map(
-                        (t) => new Token(input.chainId, t.address, t.decimals),
-                    ),
-            ),
-        ];
-
-        const amountsIn = input.amountsIn.map((amountIn) => {
-            const tokenIn = nestedTokens.find((t) =>
-                t.isSameAddress(amountIn.address),
-            );
-            if (tokenIn === undefined) {
-                throw new Error(
-                    `Token ${amountIn.address} not found in nested pool`,
-                );
-            }
-            return TokenAmount.fromRawAmount(tokenIn, amountIn.rawAmount);
-        });
+        const amountsIn = validateInputs(input, nestedPoolState);
 
         const callsAttributes = getQueryCallsAttributes(input, nestedPoolState);
 
@@ -124,3 +104,37 @@ export class NestedJoin {
         };
     }
 }
+
+const validateInputs = (
+    input: NestedJoinInput,
+    nestedPoolState: NestedPoolState,
+) => {
+    const mainTokens = nestedPoolState.mainTokens.map(
+        (t) => new Token(input.chainId, t.address, t.decimals),
+    );
+
+    const amountsIn = input.amountsIn.map((amountIn) => {
+        const tokenIn = mainTokens.find((t) =>
+            t.isSameAddress(amountIn.address),
+        );
+        if (tokenIn === undefined) {
+            throw new Error(
+                `Joinign with ${tokenIn} requires it to exist within main tokens`,
+            );
+        }
+        return TokenAmount.fromRawAmount(tokenIn, amountIn.rawAmount);
+    });
+
+    if (
+        input.useNativeAssetAsWrappedAmountIn &&
+        !mainTokens.some((t) =>
+            t.isUnderlyingEqual(NATIVE_ASSETS[input.chainId]),
+        )
+    ) {
+        throw new Error(
+            'Joining with native asset requires wrapped native asset to exist within main tokens',
+        );
+    }
+
+    return amountsIn;
+};

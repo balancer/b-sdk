@@ -38,4 +38,8 @@ export type NestedPool = {
 
 export type NestedPoolState = {
     pools: NestedPool[];
+    mainTokens: {
+        address: Address;
+        decimals: number;
+    }[];
 };
