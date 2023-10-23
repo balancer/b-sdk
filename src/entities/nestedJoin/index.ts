@@ -1,7 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
 import { Token } from '../token';
-import { BALANCER_RELAYER, getPoolAddress } from '../../utils';
+import { BALANCER_RELAYER } from '../../utils';
 import { Relayer } from '../relayer';
 import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../tokenAmount';
@@ -20,6 +20,28 @@ export class NestedJoin {
         input: NestedJoinInput,
         nestedPoolState: NestedPoolState,
     ): Promise<NestedJoinQueryResult> {
+        const nestedTokens = [
+            ...new Set(
+                nestedPoolState.pools
+                    .flatMap((p) => p.tokens)
+                    .map(
+                        (t) => new Token(input.chainId, t.address, t.decimals),
+                    ),
+            ),
+        ];
+
+        const amountsIn = input.amountsIn.map((amountIn) => {
+            const tokenIn = nestedTokens.find((t) =>
+                t.isSameAddress(amountIn.address),
+            );
+            if (tokenIn === undefined) {
+                throw new Error(
+                    `Token ${amountIn.address} not found in nested pool`,
+                );
+            }
+            return TokenAmount.fromRawAmount(tokenIn, amountIn.rawAmount);
+        });
+
         const callsAttributes = getQueryCallsAttributes(input, nestedPoolState);
 
         const { encodedCalls } = encodeCalls(callsAttributes);
@@ -47,12 +69,12 @@ export class NestedJoin {
 
         const tokenOut = new Token(
             input.chainId,
-            getPoolAddress(callsAttributes[callsAttributes.length - 1].poolId),
+            callsAttributes[callsAttributes.length - 1].poolAddress,
             18,
         );
         const bptOut = TokenAmount.fromRawAmount(tokenOut, peekedValue);
 
-        return { callsAttributes, bptOut };
+        return { callsAttributes, amountsIn, bptOut };
     }
 
     buildCall(input: NestedJoinCallInput): {

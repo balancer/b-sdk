@@ -6,7 +6,6 @@ import { TokenAmount } from '../tokenAmount';
 export type NestedJoinInput = {
     amountsIn: {
         address: Address;
-        decimals: number;
         rawAmount: bigint;
     }[];
     chainId: number;
@@ -37,6 +36,7 @@ export type NestedJoinCallAttributes = {
 
 export type NestedJoinQueryResult = {
     callsAttributes: NestedJoinCallAttributes[];
+    amountsIn: TokenAmount[];
     bptOut: TokenAmount;
 };
 

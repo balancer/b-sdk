@@ -18,7 +18,6 @@ import {
 import {
     Slippage,
     NestedJoin,
-    Token,
     replaceWrapped,
     NestedPoolState,
 } from '../src/entities';
@@ -60,7 +59,6 @@ type TxInput = {
     amountsIn: {
         address: Address; // DAI
         rawAmount: bigint;
-        decimals: number;
     }[];
     chainId: ChainId;
     rpcUrl: string;
@@ -143,7 +141,6 @@ describe('nested join test', () => {
         const amountIn = {
             address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
             rawAmount: parseUnits('1', 18),
-            decimals: 18,
         };
         await doTransaction({
             amountsIn: [amountIn],
@@ -162,25 +159,21 @@ describe('nested join test', () => {
                 address:
                     '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
                 rawAmount: parseUnits('1', 18),
-                decimals: 18,
             },
             {
                 address:
                     '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
                 rawAmount: parseUnits('1', 18),
-                decimals: 18,
             },
             {
                 address:
                     '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
                 rawAmount: parseUnits('1', 6),
-                decimals: 6,
             },
             {
                 address:
                     '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
                 rawAmount: parseUnits('1', 6),
-                decimals: 6,
             },
         ];
 
@@ -272,9 +265,7 @@ export const doTransaction = async ({
         relayerApprovalSignature: signature,
     });
 
-    let tokensIn = joinInput.amountsIn.map(
-        (a) => new Token(chainId, a.address, a.decimals),
-    );
+    let tokensIn = queryResult.amountsIn.map((a) => a.token);
     if (useNativeAssetAsWrappedAmountIn) {
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
