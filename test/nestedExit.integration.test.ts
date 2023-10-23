@@ -11,6 +11,7 @@ import {
     publicActions,
     PublicActions,
     TestActions,
+    TransactionReceipt,
     WalletActions,
     walletActions,
 } from 'viem';
@@ -20,6 +21,7 @@ import {
     NestedExit,
     replaceWrapped,
     NestedPoolState,
+    TokenAmount,
 } from '../src/entities';
 import { Address } from '../src/types';
 
@@ -59,7 +61,7 @@ import {
 
 type TxInput = {
     poolAddress: Address;
-    bptAmountIn: bigint;
+    amountIn: bigint;
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
@@ -111,51 +113,109 @@ describe('nested exit test', () => {
     });
 
     test('proportional exit', async () => {
-        const bptAmountIn = parseUnits('1', 18);
-        await doTransaction({
-            poolAddress,
+        const amountIn = parseUnits('1', 18);
+
+        const {
+            transactionReceipt,
             bptAmountIn,
+            amountsOut,
+            balanceDeltas,
+            slippage,
+            minAmountsOut,
+        } = await doTransaction({
+            poolAddress,
+            amountIn,
             chainId,
             rpcUrl,
             testAddress,
             client,
         });
+
+        assertResults(
+            transactionReceipt,
+            bptAmountIn,
+            amountsOut,
+            balanceDeltas,
+            slippage,
+            minAmountsOut,
+        );
     });
 
     test('proportional exit - native asset', async () => {
-        const bptAmountIn = parseUnits('1', 18);
+        const amountIn = parseUnits('1', 18);
 
-        await doTransaction({
-            poolAddress,
+        const {
+            transactionReceipt,
             bptAmountIn,
+            amountsOut,
+            balanceDeltas,
+            slippage,
+            minAmountsOut,
+        } = await doTransaction({
+            poolAddress,
+            amountIn,
             chainId,
             rpcUrl,
             testAddress,
             client,
             useNativeAssetAsWrappedAmountOut: true,
         });
+
+        assertResults(
+            transactionReceipt,
+            bptAmountIn,
+            amountsOut,
+            balanceDeltas,
+            slippage,
+            minAmountsOut,
+        );
     });
 
     test('single token exit', async () => {
-        const bptAmountIn = parseUnits('1', 18);
+        const amountIn = parseUnits('1', 18);
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
-        await doTransaction({
-            poolAddress,
+
+        const {
+            transactionReceipt,
             bptAmountIn,
+            amountsOut,
+            balanceDeltas,
+            slippage,
+            minAmountsOut,
+        } = await doTransaction({
+            poolAddress,
+            amountIn,
             chainId,
             rpcUrl,
             testAddress,
             client,
             tokenOut,
         });
+
+        assertResults(
+            transactionReceipt,
+            bptAmountIn,
+            amountsOut,
+            balanceDeltas,
+            slippage,
+            minAmountsOut,
+        );
     });
 
     test('single token exit - native asset', async () => {
-        const bptAmountIn = parseUnits('1', 18);
+        const amountIn = parseUnits('1', 18);
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
-        await doTransaction({
-            poolAddress,
+
+        const {
+            transactionReceipt,
             bptAmountIn,
+            amountsOut,
+            balanceDeltas,
+            slippage,
+            minAmountsOut,
+        } = await doTransaction({
+            poolAddress,
+            amountIn,
             chainId,
             rpcUrl,
             testAddress,
@@ -163,12 +223,21 @@ describe('nested exit test', () => {
             tokenOut,
             useNativeAssetAsWrappedAmountOut: true,
         });
+
+        assertResults(
+            transactionReceipt,
+            bptAmountIn,
+            amountsOut,
+            balanceDeltas,
+            slippage,
+            minAmountsOut,
+        );
     });
 });
 
 export const doTransaction = async ({
     poolAddress,
-    bptAmountIn,
+    amountIn,
     chainId,
     rpcUrl,
     testAddress,
@@ -185,7 +254,7 @@ export const doTransaction = async ({
     const nestedExit = new NestedExit();
     const exitInput: NestedProportionalExitInput | NestedSingleTokenExitInput =
         {
-            bptAmountIn,
+            bptAmountIn: amountIn,
             chainId,
             rpcUrl,
             accountAddress: testAddress,
@@ -229,21 +298,14 @@ export const doTransaction = async ({
             call,
         );
 
-    expect(transactionReceipt.status).to.eq('success');
-    queryResult.amountsOut.map(
-        (amountOut) => expect(amountOut.amount > 0n).to.be.true,
-    );
-    const expectedDeltas = [
-        queryResult.bptAmountIn.amount,
-        ...queryResult.amountsOut.map((amountOut) => amountOut.amount),
-    ];
-    expect(expectedDeltas).to.deep.eq(balanceDeltas);
-    const expectedMinAmountsOut = queryResult.amountsOut.map((amountOut) =>
-        slippage.removeFrom(amountOut.amount),
-    );
-    expect(expectedMinAmountsOut).to.deep.eq(
-        minAmountsOut.map((a) => a.amount),
-    );
+    return {
+        transactionReceipt,
+        bptAmountIn: queryResult.bptAmountIn,
+        amountsOut: queryResult.amountsOut,
+        balanceDeltas,
+        slippage,
+        minAmountsOut,
+    };
 };
 
 /*********************** Mock To Represent API Requirements **********************/
@@ -370,4 +432,27 @@ export const approveRelayer = async (
         args: [account, BALANCER_RELAYER[chainId], true],
     });
 };
+
+function assertResults(
+    transactionReceipt: TransactionReceipt,
+    bptAmountIn: TokenAmount,
+    amountsOut: TokenAmount[],
+    balanceDeltas: bigint[],
+    slippage: Slippage,
+    minAmountsOut: TokenAmount[],
+) {
+    expect(transactionReceipt.status).to.eq('success');
+    amountsOut.map((amountOut) => expect(amountOut.amount > 0n).to.be.true);
+    const expectedDeltas = [
+        bptAmountIn.amount,
+        ...amountsOut.map((amountOut) => amountOut.amount),
+    ];
+    expect(expectedDeltas).to.deep.eq(balanceDeltas);
+    const expectedMinAmountsOut = amountsOut.map((amountOut) =>
+        slippage.removeFrom(amountOut.amount),
+    );
+    expect(expectedMinAmountsOut).to.deep.eq(
+        minAmountsOut.map((a) => a.amount),
+    );
+}
 /******************************************************************************/

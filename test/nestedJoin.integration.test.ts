@@ -11,6 +11,7 @@ import {
     publicActions,
     PublicActions,
     TestActions,
+    TransactionReceipt,
     WalletActions,
     walletActions,
 } from 'viem';
@@ -20,6 +21,7 @@ import {
     NestedJoin,
     replaceWrapped,
     NestedPoolState,
+    TokenAmount,
 } from '../src/entities';
 import { Address } from '../src/types';
 
@@ -135,18 +137,39 @@ describe('nested join test', () => {
     });
 
     test('single asset join', async () => {
-        const amountIn = {
-            address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
-            rawAmount: parseUnits('1', 18),
-        };
-        await doTransaction({
+        const amountsIn = [
+            {
+                address:
+                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+                rawAmount: parseUnits('1', 18),
+            },
+        ];
+
+        const {
+            transactionReceipt,
+            balanceDeltas,
+            bptOut,
+            minBptOut,
+            slippage,
+            value,
+        } = await doTransaction({
             poolAddress,
-            amountsIn: [amountIn],
+            amountsIn,
             chainId,
             rpcUrl,
             testAddress,
             client,
         });
+
+        assertResults(
+            transactionReceipt,
+            bptOut,
+            amountsIn,
+            balanceDeltas,
+            slippage,
+            minBptOut,
+            value,
+        );
     });
 
     test('all assets join', async () => {
@@ -173,7 +196,14 @@ describe('nested join test', () => {
             },
         ];
 
-        await doTransaction({
+        const {
+            transactionReceipt,
+            balanceDeltas,
+            bptOut,
+            minBptOut,
+            slippage,
+            value,
+        } = await doTransaction({
             poolAddress,
             amountsIn,
             chainId,
@@ -181,6 +211,16 @@ describe('nested join test', () => {
             testAddress,
             client,
         });
+
+        assertResults(
+            transactionReceipt,
+            bptOut,
+            amountsIn,
+            balanceDeltas,
+            slippage,
+            minBptOut,
+            value,
+        );
     });
 
     test('native asset join', async () => {
@@ -207,15 +247,35 @@ describe('nested join test', () => {
             },
         ];
 
-        await doTransaction({
+        const useNativeAssetAsWrappedAmountIn = true;
+
+        const {
+            transactionReceipt,
+            balanceDeltas,
+            bptOut,
+            minBptOut,
+            slippage,
+            value,
+        } = await doTransaction({
             poolAddress,
             amountsIn,
             chainId,
             rpcUrl,
             testAddress,
             client,
-            useNativeAssetAsWrappedAmountIn: true,
+            useNativeAssetAsWrappedAmountIn,
         });
+
+        assertResults(
+            transactionReceipt,
+            bptOut,
+            amountsIn,
+            balanceDeltas,
+            slippage,
+            minBptOut,
+            value,
+            useNativeAssetAsWrappedAmountIn,
+        );
     });
 });
 
@@ -279,16 +339,47 @@ export const doTransaction = async ({
             call,
             value,
         );
+    return {
+        transactionReceipt,
+        balanceDeltas,
+        bptOut: queryResult.bptOut,
+        minBptOut,
+        slippage,
+        value,
+    };
+};
 
+const assertResults = (
+    transactionReceipt: TransactionReceipt,
+    bptOut: TokenAmount,
+    amountsIn: {
+        address: Address;
+        rawAmount: bigint;
+    }[],
+    balanceDeltas: bigint[],
+    slippage: Slippage,
+    minBptOut: bigint,
+    value?: bigint,
+    useNativeAssetAsWrappedAmountIn = false,
+) => {
     expect(transactionReceipt.status).to.eq('success');
-    expect(queryResult.bptOut.amount > 0n).to.be.true;
+    expect(bptOut.amount > 0n).to.be.true;
     const expectedDeltas = [
-        ...joinInput.amountsIn.map((a) => a.rawAmount),
-        queryResult.bptOut.amount,
+        ...amountsIn.map((a) => a.rawAmount),
+        bptOut.amount,
     ];
     expect(expectedDeltas).to.deep.eq(balanceDeltas);
-    const expectedMinBpt = slippage.removeFrom(queryResult.bptOut.amount);
+    const expectedMinBpt = slippage.removeFrom(bptOut.amount);
     expect(expectedMinBpt).to.deep.eq(minBptOut);
+
+    const weth = amountsIn.find(
+        (a) => a.address === '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    );
+    if (weth && useNativeAssetAsWrappedAmountIn) {
+        expect(value).to.eq(weth.rawAmount);
+    } else {
+        expect(value).to.eq(undefined || 0n);
+    }
 };
 
 /*********************** Mock To Represent API Requirements **********************/
@@ -415,4 +506,5 @@ export const approveRelayer = async (
         args: [account, BALANCER_RELAYER[chainId], true],
     });
 };
+
 /******************************************************************************/
