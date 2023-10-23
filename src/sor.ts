@@ -1,11 +1,6 @@
 import { Router } from './router';
 import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
-import {
-    BALANCER_POOL_DATA_QUERIES_ADDRESSES,
-    ChainId,
-    checkInputs,
-    SUBGRAPH_URLS,
-} from './utils';
+import { ChainId, checkInputs, SUBGRAPH_URLS, BATCHSIZE, VAULT } from './utils';
 import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
 import { OnChainPoolDataEnricher, SubgraphPoolProvider } from './data';
@@ -39,7 +34,8 @@ export class SmartOrderRouter {
             new OnChainPoolDataEnricher(
                 chainId,
                 rpcUrl,
-                BALANCER_POOL_DATA_QUERIES_ADDRESSES[chainId],
+                BATCHSIZE[chainId],
+                VAULT[chainId],
             );
         this.poolDataService = new PoolDataService(
             Array.isArray(poolDataProviders)
