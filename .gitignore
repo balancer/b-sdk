@@ -81,4 +81,5 @@ cache
 artifacts
 
 #IDE
-.idea/
+.idea
+

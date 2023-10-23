@@ -21,3 +21,13 @@ If your platform does not support one of the required features, it is also possi
 Testing requires access to an archive node for onchain quote comparisons. This can be done using Infura.
 
 `pnpm test`
+
+## Anvil client
+To download and install the anvil client, run the following commands (MacOS):
+- `curl -L https://foundry.paradigm.xyz | bash`
+- `brew install libusb`
+- `source /Users/$(whoami)/.zshenv`
+- `foundryup`
+
+For other SO's check https://book.getfoundry.sh/getting-started/installation
+```
