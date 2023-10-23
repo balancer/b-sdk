@@ -34,7 +34,6 @@ import { doJoin } from './lib/utils/joinHelper';
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
-const blockNumber = BigInt(18043296);
 const poolId =
     '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76000000000000000000000570'; // Balancer vETH/WETH StablePool
 
@@ -50,7 +49,7 @@ describe('composable stable join test', () => {
         const poolInput = await api.getPool(poolId);
 
         const client = createTestClient({
-            mode: 'hardhat',
+            mode: 'anvil',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
         })
@@ -82,9 +81,7 @@ describe('composable stable join test', () => {
                 ...txInput.poolInput.tokens.map((t) =>
                     parseUnits('100', t.decimals),
                 ),
-            ],
-            process.env.ETHEREUM_RPC_URL as string,
-            blockNumber,
+            ]
         );
     });
 
