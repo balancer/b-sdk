@@ -50,6 +50,6 @@
     },
     "packageManager": "^pnpm@8.6.0",
     "resolutions": {
-        "get-port": "5.1.2"
+        "get-port": "5.1.1"
     }
 }
