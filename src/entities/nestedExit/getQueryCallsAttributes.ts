@@ -137,19 +137,7 @@ export const getSingleTokenExitCallsAttributes = (
     tokenOut: Address,
 ) => {
     // Go BOTTOM-UP building exit path to tokenOut
-    const topPool = poolsTopDown[0];
-    const exitPath: NestedPool[] = [];
-    let tokenOutByLevel = tokenOut;
-    while (tokenOutByLevel !== topPool.address) {
-        const currentPool = poolsTopDown.find(
-            (p) =>
-                p.address !== tokenOutByLevel && // prevents pools with BPT as token to be picked up incorrectly
-                p.tokens.some((t) => t.address === tokenOutByLevel),
-        ) as NestedPool;
-        exitPath.unshift(currentPool);
-        tokenOutByLevel = currentPool.address;
-    }
-
+    const exitPath: NestedPool[] = getExitPath(tokenOut, poolsTopDown);
     const calls: NestedExitCallAttributes[] = [];
 
     for (let i = 0; i < exitPath.length; i++) {
@@ -191,4 +179,20 @@ export const getSingleTokenExitCallsAttributes = (
         });
     }
     return calls;
+};
+
+const getExitPath = (tokenOut: string, poolsTopDown: NestedPool[]) => {
+    const topPool = poolsTopDown[0];
+    const exitPath: NestedPool[] = [];
+    let tokenOutByLevel = tokenOut;
+    while (tokenOutByLevel !== topPool.address) {
+        const currentPool = poolsTopDown.find(
+            (p) =>
+                p.address !== tokenOutByLevel && // prevents pools with BPT as token to be picked up incorrectly
+                p.tokens.some((t) => t.address === tokenOutByLevel),
+        ) as NestedPool;
+        exitPath.unshift(currentPool);
+        tokenOutByLevel = currentPool.address;
+    }
+    return exitPath;
 };
