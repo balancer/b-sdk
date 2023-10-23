@@ -21,6 +21,7 @@ export type NestedExitCallAttributes = {
     useNativeAssetAsWrappedAmountOut: boolean;
     sortedTokens: Token[];
     poolId: Address;
+    poolAddress: Address;
     poolType: string;
     kind: number;
     sender: Address;
