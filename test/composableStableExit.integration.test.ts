@@ -104,7 +104,7 @@ describe('composable stable exit test', () => {
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
 
         // We only expect single asset to have a value for exit
-        expect(queryResult.tokenOutIndex).to.be.toBeDefined;
+        expect(queryResult.tokenOutIndex).to.not.be.undefined;
         queryResult.amountsOut
             .filter((_, index) => index !== bptIndex)
             .forEach((a, i) => {
