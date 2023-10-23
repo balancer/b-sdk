@@ -24,6 +24,18 @@ export const approveToken = async (
     token: Address,
     amount = MAX_UINT256, // approve max by default
 ): Promise<boolean> => {
+    const allowance = await client.readContract({
+        address: token,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [account, BALANCER_VAULT],
+    });
+
+    const hasAlreadyApproved = allowance >= 0n;
+    if (hasAlreadyApproved) {
+        return true;
+    }
+
     // approve token on the vault
     const hash = await client.writeContract({
         account,

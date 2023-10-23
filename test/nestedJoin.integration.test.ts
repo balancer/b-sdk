@@ -32,7 +32,6 @@ import {
 
 import {
     approveToken,
-    findTokenBalanceSlot,
     sendTransactionGetBalances,
     setTokenBalance,
 } from './lib/utils/helper';
@@ -56,6 +55,7 @@ import { NestedJoinInput } from '../src/entities/nestedJoin/types';
  */
 
 type TxInput = {
+    poolAddress: Address;
     amountsIn: {
         address: Address; // DAI
         rawAmount: bigint;
@@ -63,26 +63,18 @@ type TxInput = {
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
-    nestedJoin: NestedJoin;
-    nestedPoolFromApi: NestedPoolState;
     client: Client & PublicActions & TestActions & WalletActions;
     useNativeAssetAsWrappedAmountIn?: boolean;
 };
 
 describe('nested join test', () => {
-    let api: MockApi;
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
     let poolAddress: Address;
-    let nestedPoolFromApi: NestedPoolState;
-    let nestedJoin: NestedJoin;
     let testAddress: Address;
 
     beforeAll(async () => {
-        // setup mock api
-        api = new MockApi();
-
         // setup chain and test client
         chainId = ChainId.MAINNET;
         rpcUrl = 'http://127.0.0.1:8545/';
@@ -98,41 +90,46 @@ describe('nested join test', () => {
 
         poolAddress = '0x08775ccb6674d6bdceb0797c364c2653ed84f384'; // WETH-3POOL-BPT
 
-        // get pool state from api
-        nestedPoolFromApi = await api.getNestedPool(poolAddress);
-
-        // setup join helper
-        nestedJoin = new NestedJoin();
-
         // Fork setup - done only once per fork reset
         // Governance grant roles to the relayer
         await grantRoles(client);
 
         // User approve vault to spend their tokens and update user balance
-        const tokens = [
-            ...new Set(
-                nestedPoolFromApi.pools.flatMap((p) =>
-                    p.tokens.map((t) => {
-                        return { address: t.address, decimals: t.decimals };
-                    }),
-                ),
-            ),
+        const mainTokens = [
+            {
+                address:
+                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
+                balance: parseUnits('1000', 18),
+                slot: 3,
+            },
+            {
+                address:
+                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+                balance: parseUnits('1000', 18),
+                slot: 2,
+            },
+            {
+                address:
+                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+                balance: parseUnits('1000', 6),
+                slot: 9,
+            },
+            {
+                address:
+                    '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
+                balance: parseUnits('1000', 6),
+                slot: 2,
+            },
         ];
-        for (const token of tokens) {
+
+        for (const token of mainTokens) {
             await approveToken(client, testAddress, token.address);
-
-            const slot = (await findTokenBalanceSlot(
-                client,
-                testAddress,
-                token.address,
-            )) as number;
-
             await setTokenBalance(
                 client,
                 testAddress,
                 token.address,
-                slot,
-                parseUnits('1000', token.decimals),
+                token.slot,
+                token.balance,
             );
         }
     });
@@ -143,12 +140,11 @@ describe('nested join test', () => {
             rawAmount: parseUnits('1', 18),
         };
         await doTransaction({
+            poolAddress,
             amountsIn: [amountIn],
             chainId,
             rpcUrl,
             testAddress,
-            nestedJoin,
-            nestedPoolFromApi,
             client,
         });
     });
@@ -178,12 +174,11 @@ describe('nested join test', () => {
         ];
 
         await doTransaction({
+            poolAddress,
             amountsIn,
             chainId,
             rpcUrl,
             testAddress,
-            nestedJoin,
-            nestedPoolFromApi,
             client,
         });
     });
@@ -194,35 +189,30 @@ describe('nested join test', () => {
                 address:
                     '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
                 rawAmount: parseUnits('1', 18),
-                decimals: 18,
             },
             {
                 address:
                     '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
                 rawAmount: parseUnits('1', 18),
-                decimals: 18,
             },
             {
                 address:
                     '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
                 rawAmount: parseUnits('1', 6),
-                decimals: 6,
             },
             {
                 address:
                     '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
                 rawAmount: parseUnits('1', 6),
-                decimals: 6,
             },
         ];
 
         await doTransaction({
+            poolAddress,
             amountsIn,
             chainId,
             rpcUrl,
             testAddress,
-            nestedJoin,
-            nestedPoolFromApi,
             client,
             useNativeAssetAsWrappedAmountIn: true,
         });
@@ -230,15 +220,21 @@ describe('nested join test', () => {
 });
 
 export const doTransaction = async ({
+    poolAddress,
     amountsIn,
     chainId,
     rpcUrl,
     testAddress,
-    nestedJoin,
-    nestedPoolFromApi,
     client,
     useNativeAssetAsWrappedAmountIn = false,
 }: TxInput) => {
+    // setup mock api
+    const api = new MockApi();
+    // get pool state from api
+    const nestedPoolFromApi = await api.getNestedPool(poolAddress);
+    // setup join helper
+    const nestedJoin = new NestedJoin();
+
     const joinInput: NestedJoinInput = {
         amountsIn,
         chainId,

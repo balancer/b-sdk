@@ -32,7 +32,6 @@ import {
 
 import {
     approveToken,
-    findTokenBalanceSlot,
     sendTransactionGetBalances,
     setTokenBalance,
 } from './lib/utils/helper';
@@ -59,31 +58,24 @@ import {
  */
 
 type TxInput = {
+    poolAddress: Address;
     bptAmountIn: bigint;
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
-    nestedExit: NestedExit;
-    nestedPoolFromApi: NestedPoolState;
     client: Client & PublicActions & TestActions & WalletActions;
     tokenOut?: Address;
     useNativeAssetAsWrappedAmountOut?: boolean;
 };
 
 describe('nested exit test', () => {
-    let api: MockApi;
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
     let poolAddress: Address;
-    let nestedPoolFromApi: NestedPoolState;
-    let nestedExit: NestedExit;
     let testAddress: Address;
 
     beforeAll(async () => {
-        // setup mock api
-        api = new MockApi();
-
         // setup chain and test client
         chainId = ChainId.MAINNET;
         rpcUrl = 'http://127.0.0.1:8545/';
@@ -99,52 +91,33 @@ describe('nested exit test', () => {
 
         poolAddress = '0x08775ccb6674d6bdceb0797c364c2653ed84f384'; // WETH-3POOL-BPT
 
-        // get pool state from api
-        nestedPoolFromApi = await api.getNestedPool(poolAddress);
-
-        // setup join helper
-        nestedExit = new NestedExit();
-
         // Fork setup - done only once per fork reset
         // Governance grant roles to the relayer
         await grantRoles(client);
 
         // User approve vault to spend their tokens and update user balance
-        const tokens = [
-            ...new Set(
-                nestedPoolFromApi.pools.flatMap((p) => {
-                    return { address: p.address, decimals: 18 };
-                }),
-            ),
-        ];
-        for (const token of tokens) {
-            await approveToken(client, testAddress, token.address);
-
-            const slot = (await findTokenBalanceSlot(
-                client,
-                testAddress,
-                token.address,
-            )) as number;
-
-            await setTokenBalance(
-                client,
-                testAddress,
-                token.address,
-                slot,
-                parseUnits('1000', token.decimals),
-            );
-        }
+        await approveToken(
+            client,
+            testAddress,
+            '0x08775ccb6674d6bdceb0797c364c2653ed84f384',
+        );
+        await setTokenBalance(
+            client,
+            testAddress,
+            '0x08775ccb6674d6bdceb0797c364c2653ed84f384',
+            0,
+            parseUnits('1000', 18),
+        );
     });
 
     test('proportional exit', async () => {
         const bptAmountIn = parseUnits('1', 18);
         await doTransaction({
+            poolAddress,
             bptAmountIn,
             chainId,
             rpcUrl,
             testAddress,
-            nestedExit,
-            nestedPoolFromApi,
             client,
         });
     });
@@ -153,12 +126,11 @@ describe('nested exit test', () => {
         const bptAmountIn = parseUnits('1', 18);
 
         await doTransaction({
+            poolAddress,
             bptAmountIn,
             chainId,
             rpcUrl,
             testAddress,
-            nestedExit,
-            nestedPoolFromApi,
             client,
             useNativeAssetAsWrappedAmountOut: true,
         });
@@ -168,12 +140,11 @@ describe('nested exit test', () => {
         const bptAmountIn = parseUnits('1', 18);
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
         await doTransaction({
+            poolAddress,
             bptAmountIn,
             chainId,
             rpcUrl,
             testAddress,
-            nestedExit,
-            nestedPoolFromApi,
             client,
             tokenOut,
         });
@@ -183,12 +154,11 @@ describe('nested exit test', () => {
         const bptAmountIn = parseUnits('1', 18);
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
         await doTransaction({
+            poolAddress,
             bptAmountIn,
             chainId,
             rpcUrl,
             testAddress,
-            nestedExit,
-            nestedPoolFromApi,
             client,
             tokenOut,
             useNativeAssetAsWrappedAmountOut: true,
@@ -197,16 +167,22 @@ describe('nested exit test', () => {
 });
 
 export const doTransaction = async ({
+    poolAddress,
     bptAmountIn,
     chainId,
     rpcUrl,
     testAddress,
-    nestedExit,
-    nestedPoolFromApi,
     client,
     tokenOut,
     useNativeAssetAsWrappedAmountOut = false,
 }: TxInput) => {
+    // setup mock api
+    const api = new MockApi();
+    // get pool state from api
+    const nestedPoolFromApi = await api.getNestedPool(poolAddress);
+
+    // setup join helper
+    const nestedExit = new NestedExit();
     const exitInput: NestedProportionalExitInput | NestedSingleTokenExitInput =
         {
             bptAmountIn,
