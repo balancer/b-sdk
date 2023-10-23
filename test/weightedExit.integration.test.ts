@@ -46,7 +46,6 @@ type TxInput = {
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
-const blockNumber = 18043296n;
 const poolId =
     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
 
@@ -61,7 +60,7 @@ describe('weighted exit test', () => {
         const poolInput = await api.getPool(poolId);
 
         const client = createTestClient({
-            mode: 'hardhat',
+            mode: 'anvil',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
         })
@@ -87,8 +86,6 @@ describe('weighted exit test', () => {
             [txInput.poolInput.address],
             undefined, // TODO: hardcode these values to improve test performance
             [parseUnits('1', 18)],
-            process.env.ETHEREUM_RPC_URL as string,
-            blockNumber,
         );
     });
 
@@ -113,7 +110,7 @@ describe('weighted exit test', () => {
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
 
         // We only expect single asset to have a value for exit
-        expect(queryResult.tokenOutIndex).to.be.toBeDefined;
+        expect(queryResult.tokenOutIndex !== undefined).toEqual(true);
         queryResult.amountsOut.forEach((a, i) => {
             if (i === queryResult.tokenOutIndex)
                 expect(a.amount > 0n).to.be.true;
@@ -146,8 +143,8 @@ describe('weighted exit test', () => {
         // Query should use correct BPT amount
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
 
+        expect(queryResult.tokenOutIndex === undefined).toEqual(true);
         // We expect all assets to have a value for exit
-        expect(queryResult.tokenOutIndex).to.be.undefined;
         queryResult.amountsOut.forEach((a) => {
             expect(a.amount > 0n).to.be.true;
         });
@@ -184,8 +181,8 @@ describe('weighted exit test', () => {
         // We expect a BPT input amount > 0
         expect(queryResult.bptIn.amount > 0n).to.be.true;
 
+        expect(queryResult.tokenOutIndex === undefined).toEqual(true);
         // We expect assets to have same amount out as user defined
-        expect(queryResult.tokenOutIndex).to.be.undefined;
         queryResult.amountsOut.forEach((a, i) => {
             expect(a.amount).to.eq(amountsOut[i].amount);
         });
@@ -219,8 +216,9 @@ describe('weighted exit test', () => {
         // Query should use correct BPT amount
         expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
 
+        expect(queryResult.tokenOutIndex === undefined).toEqual(true);
+
         // We expect all assets to have a value for exit
-        expect(queryResult.tokenOutIndex).to.be.undefined;
         queryResult.amountsOut.forEach((a) => {
             expect(a.amount > 0n).to.be.true;
         });

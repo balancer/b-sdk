@@ -46,7 +46,7 @@ export const approveToken = async (
         args: [BALANCER_VAULT, amount],
     });
 
-    const txReceipt = await client.getTransactionReceipt({
+    const txReceipt = await client.waitForTransactionReceipt({
         hash,
     });
     return txReceipt.status === 'success';
@@ -119,7 +119,7 @@ export async function sendTransactionGetBalances(
         to,
         value,
     });
-    const transactionReceipt = await client.getTransactionReceipt({
+    const transactionReceipt = await client.waitForTransactionReceipt({
         hash,
     });
     const { gasUsed, effectiveGasPrice } = transactionReceipt;
@@ -274,15 +274,8 @@ export const forkSetup = async (
     tokens: Address[],
     slots: number[] | undefined,
     balances: bigint[],
-    jsonRpcUrl: string,
-    blockNumber?: bigint,
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
 ): Promise<void> => {
-    await client.reset({
-        blockNumber,
-        jsonRpcUrl,
-    });
-
     await client.impersonateAccount({ address: accountAddress });
 
     let _slots: number[];

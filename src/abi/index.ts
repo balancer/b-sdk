@@ -2,8 +2,6 @@ export * from './authorizer';
 export * from './balancerHelpers';
 export * from './balancerQueries';
 export * from './balancerRelayer';
-export * from './balancerPoolDataQueries';
 export * from './batchRelayerLibrary';
 export * from './erc20';
-export * from './tokenRates';
 export * from './vault';
