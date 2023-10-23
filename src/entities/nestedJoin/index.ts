@@ -28,7 +28,6 @@ export class NestedJoin {
         const peekCall = Relayer.encodePeekChainedReferenceValue(
             Relayer.toChainedReference(
                 callsAttributes[callsAttributes.length - 1].outputReferenceKey,
-                false,
             ),
         );
         encodedCalls.push(peekCall);

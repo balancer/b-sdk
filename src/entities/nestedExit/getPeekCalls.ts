@@ -25,7 +25,7 @@ export const getPeekCalls = (
                     tokensOut.push(tokenOut);
                     peekCalls.push(
                         Relayer.encodePeekChainedReferenceValue(
-                            Relayer.toChainedReference(opRefKey, false),
+                            Relayer.toChainedReference(opRefKey),
                         ),
                     );
                 }
@@ -38,10 +38,7 @@ export const getPeekCalls = (
         tokensOut.push(tokenOut);
         peekCalls.push(
             Relayer.encodePeekChainedReferenceValue(
-                Relayer.toChainedReference(
-                    lastCall.outputReferenceKeys[0],
-                    false,
-                ),
+                Relayer.toChainedReference(lastCall.outputReferenceKeys[0]),
             ),
         );
     }
