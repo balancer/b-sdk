@@ -34,6 +34,7 @@ import {
 
 import {
     approveToken,
+    hasApprovedToken,
     sendTransactionGetBalances,
     setTokenBalance,
 } from './lib/utils/helper';
@@ -125,7 +126,15 @@ describe('nested join test', () => {
         ];
 
         for (const token of mainTokens) {
-            await approveToken(client, testAddress, token.address);
+            // TODO: remove this check after relayer is deployed and we're able to reset the fork on every test
+            const approved = await hasApprovedToken(
+                client,
+                testAddress,
+                token.address,
+            );
+            if (!approved) {
+                await approveToken(client, testAddress, token.address);
+            }
             await setTokenBalance(
                 client,
                 testAddress,

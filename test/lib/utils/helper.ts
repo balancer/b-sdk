@@ -18,11 +18,11 @@ import {
 import { erc20Abi } from '../../../src/abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
 
-export const approveToken = async (
+export const hasApprovedToken = async (
     client: Client & PublicActions & WalletActions,
     account: Address,
     token: Address,
-    amount = MAX_UINT256, // approve max by default
+    amount = MAX_UINT256,
 ): Promise<boolean> => {
     const allowance = await client.readContract({
         address: token,
@@ -31,11 +31,16 @@ export const approveToken = async (
         args: [account, BALANCER_VAULT],
     });
 
-    const hasAlreadyApproved = allowance >= 0n;
-    if (hasAlreadyApproved) {
-        return true;
-    }
+    const hasApproved = allowance >= amount;
+    return hasApproved;
+};
 
+export const approveToken = async (
+    client: Client & PublicActions & WalletActions,
+    account: Address,
+    token: Address,
+    amount = MAX_UINT256, // approve max by default
+): Promise<boolean> => {
     // approve token on the vault
     const hash = await client.writeContract({
         account,
