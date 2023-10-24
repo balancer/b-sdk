@@ -17,6 +17,7 @@ import {
 } from 'viem';
 import { erc20Abi } from '../../../src/abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
+import { expect } from 'vitest';
 
 export const approveToken = async (
     client: Client & PublicActions & WalletActions,
@@ -297,4 +298,16 @@ export const forkSetup = async (
         // Approve appropriate allowances so that vault contract can move tokens
         await approveToken(client, accountAddress, tokens[i]);
     }
+};
+
+/*
+ * A function that asserts the transaction balance deltas and status
+ * */
+export const assertTransaction = (
+    expectedDeltas: bigint[],
+    balanceDeltas: bigint[],
+    transactionReceiptStatus: string,
+) => {
+    expect(expectedDeltas).to.deep.eq(balanceDeltas);
+    expect(transactionReceiptStatus).to.eq('success');
 };
