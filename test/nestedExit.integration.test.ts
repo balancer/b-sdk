@@ -117,9 +117,9 @@ describe('nested exit test', () => {
 
         const {
             transactionReceipt,
-            bptAmountIn,
-            amountsOut,
+            expectedDeltas,
             balanceDeltas,
+            amountsOut,
             slippage,
             minAmountsOut,
         } = await doTransaction({
@@ -133,9 +133,9 @@ describe('nested exit test', () => {
 
         assertResults(
             transactionReceipt,
-            bptAmountIn,
-            amountsOut,
+            expectedDeltas,
             balanceDeltas,
+            amountsOut,
             slippage,
             minAmountsOut,
         );
@@ -146,9 +146,9 @@ describe('nested exit test', () => {
 
         const {
             transactionReceipt,
-            bptAmountIn,
-            amountsOut,
+            expectedDeltas,
             balanceDeltas,
+            amountsOut,
             slippage,
             minAmountsOut,
         } = await doTransaction({
@@ -163,9 +163,9 @@ describe('nested exit test', () => {
 
         assertResults(
             transactionReceipt,
-            bptAmountIn,
-            amountsOut,
+            expectedDeltas,
             balanceDeltas,
+            amountsOut,
             slippage,
             minAmountsOut,
         );
@@ -177,9 +177,9 @@ describe('nested exit test', () => {
 
         const {
             transactionReceipt,
-            bptAmountIn,
-            amountsOut,
+            expectedDeltas,
             balanceDeltas,
+            amountsOut,
             slippage,
             minAmountsOut,
         } = await doTransaction({
@@ -194,9 +194,9 @@ describe('nested exit test', () => {
 
         assertResults(
             transactionReceipt,
-            bptAmountIn,
-            amountsOut,
+            expectedDeltas,
             balanceDeltas,
+            amountsOut,
             slippage,
             minAmountsOut,
         );
@@ -208,9 +208,9 @@ describe('nested exit test', () => {
 
         const {
             transactionReceipt,
-            bptAmountIn,
-            amountsOut,
+            expectedDeltas,
             balanceDeltas,
+            amountsOut,
             slippage,
             minAmountsOut,
         } = await doTransaction({
@@ -226,9 +226,9 @@ describe('nested exit test', () => {
 
         assertResults(
             transactionReceipt,
-            bptAmountIn,
-            amountsOut,
+            expectedDeltas,
             balanceDeltas,
+            amountsOut,
             slippage,
             minAmountsOut,
         );
@@ -298,11 +298,16 @@ export const doTransaction = async ({
             call,
         );
 
+    const expectedDeltas = [
+        queryResult.bptAmountIn.amount,
+        ...queryResult.amountsOut.map((amountOut) => amountOut.amount),
+    ];
+
     return {
         transactionReceipt,
-        bptAmountIn: queryResult.bptAmountIn,
-        amountsOut: queryResult.amountsOut,
+        expectedDeltas,
         balanceDeltas,
+        amountsOut: queryResult.amountsOut,
         slippage,
         minAmountsOut,
     };
@@ -453,18 +458,14 @@ export const approveRelayer = async (
 
 function assertResults(
     transactionReceipt: TransactionReceipt,
-    bptAmountIn: TokenAmount,
-    amountsOut: TokenAmount[],
+    expectedDeltas: bigint[],
     balanceDeltas: bigint[],
+    amountsOut: TokenAmount[],
     slippage: Slippage,
     minAmountsOut: TokenAmount[],
 ) {
     expect(transactionReceipt.status).to.eq('success');
     amountsOut.map((amountOut) => expect(amountOut.amount > 0n).to.be.true);
-    const expectedDeltas = [
-        bptAmountIn.amount,
-        ...amountsOut.map((amountOut) => amountOut.amount),
-    ];
     expect(expectedDeltas).to.deep.eq(balanceDeltas);
     const expectedMinAmountsOut = amountsOut.map((amountOut) =>
         slippage.removeFrom(amountOut.amount),
