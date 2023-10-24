@@ -8,9 +8,11 @@ export class BalancerApiClient {
         this.chainId = chainId;
     }
 
-    async fetch(
-        requestQuery: {operationName?:string, query:string, variables?:any}
-    ) {
+    async fetch(requestQuery: {
+        operationName?: string;
+        query: string;
+        variables?: any;
+    }) {
         const response = await fetch(this.apiUrl, {
             method: 'post',
             body: JSON.stringify(requestQuery),
