@@ -1,11 +1,12 @@
 import { Address, Hex } from '../../types';
+import { ChainId } from '../../utils';
 import { Slippage } from '../slippage';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 
 export type NestedProportionalExitInput = {
     bptAmountIn: bigint;
-    chainId: number;
+    chainId: ChainId;
     rpcUrl: string;
     accountAddress: Address;
     useNativeAssetAsWrappedAmountOut?: boolean;
@@ -17,7 +18,7 @@ export type NestedSingleTokenExitInput = NestedProportionalExitInput & {
 };
 
 export type NestedExitCallAttributes = {
-    chainId: number;
+    chainId: ChainId;
     useNativeAssetAsWrappedAmountOut: boolean;
     sortedTokens: Token[];
     poolId: Address;

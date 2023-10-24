@@ -5,11 +5,11 @@ import {
     http,
 } from 'viem';
 import { Address, Hex } from '../../types';
-import { BALANCER_RELAYER, CHAINS } from '../../utils';
+import { BALANCER_RELAYER, CHAINS, ChainId } from '../../utils';
 import { balancerRelayerAbi } from '../../abi';
 
 export const doQueryNestedExit = async (
-    chainId: number,
+    chainId: ChainId,
     rpcUrl: string,
     accountAddress: Address,
     encodedMulticall: Hex,

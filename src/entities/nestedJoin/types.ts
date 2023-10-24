@@ -1,4 +1,5 @@
 import { Address, Hex } from '../../types';
+import { ChainId } from '../../utils';
 import { Slippage } from '../slippage';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
@@ -8,7 +9,7 @@ export type NestedJoinInput = {
         address: Address;
         rawAmount: bigint;
     }[];
-    chainId: number;
+    chainId: ChainId;
     rpcUrl: string;
     accountAddress: Address;
     useNativeAssetAsWrappedAmountIn?: boolean;
@@ -16,7 +17,7 @@ export type NestedJoinInput = {
 };
 
 export type NestedJoinCallAttributes = {
-    chainId: number;
+    chainId: ChainId;
     useNativeAssetAsWrappedAmountIn: boolean;
     sortedTokens: Token[];
     poolId: Hex;

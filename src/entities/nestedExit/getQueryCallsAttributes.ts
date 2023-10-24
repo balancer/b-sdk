@@ -7,6 +7,7 @@ import {
 import { NestedPool, NestedPoolState } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address } from '../../types';
+import { ChainId } from '../../utils';
 
 export const getQueryCallsAttributes = (
     input: NestedProportionalExitInput | NestedSingleTokenExitInput,
@@ -73,7 +74,7 @@ export const getQueryCallsAttributes = (
 
 export const getProportionalExitCallsAttributes = (
     poolsSortedByLevel: NestedPool[],
-    chainId: number,
+    chainId: ChainId,
     useNativeAssetAsWrappedAmountOut: boolean,
     accountAddress: Address,
     bptAmountIn: bigint,
@@ -131,7 +132,7 @@ export const getProportionalExitCallsAttributes = (
 
 export const getSingleTokenExitCallsAttributes = (
     poolsTopDown: NestedPool[],
-    chainId: number,
+    chainId: ChainId,
     useNativeAssetAsWrappedAmountOut: boolean,
     accountAddress: Address,
     bptAmountIn: bigint,
