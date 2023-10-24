@@ -22,7 +22,10 @@ export class NestedJoin {
     ): Promise<NestedJoinQueryResult> {
         const amountsIn = validateInputs(input, nestedPoolState);
 
-        const callsAttributes = getQueryCallsAttributes(input, nestedPoolState);
+        const callsAttributes = getQueryCallsAttributes(
+            input,
+            nestedPoolState.pools,
+        );
 
         const { encodedCalls } = encodeCalls(callsAttributes);
 
@@ -119,7 +122,7 @@ const validateInputs = (
         );
         if (tokenIn === undefined) {
             throw new Error(
-                `Joinign with ${tokenIn} requires it to exist within main tokens`,
+                `Joining with ${tokenIn} requires it to exist within main tokens`,
             );
         }
         return TokenAmount.fromRawAmount(tokenIn, amountIn.rawAmount);

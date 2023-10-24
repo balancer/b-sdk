@@ -1,7 +1,7 @@
 import { Token } from '../token';
 import { getPoolAddress } from '../../utils';
 import { NestedJoinInput, NestedJoinCallAttributes } from './types';
-import { NestedPoolState, PoolKind } from '../types';
+import { NestedPool, PoolKind } from '../types';
 
 export const getQueryCallsAttributes = (
     {
@@ -11,7 +11,7 @@ export const getQueryCallsAttributes = (
         useNativeAssetAsWrappedAmountIn,
         fromInternalBalance,
     }: NestedJoinInput,
-    { pools }: NestedPoolState,
+    pools: NestedPool[],
 ): NestedJoinCallAttributes[] => {
     /**
      * Overall logic to build sequence of join calls:

@@ -4,14 +4,14 @@ import {
     NestedSingleTokenExitInput,
     NestedExitCallAttributes,
 } from './types';
-import { NestedPool, NestedPoolState, PoolKind } from '../types';
+import { NestedPool, PoolKind } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address } from '../../types';
 import { ChainId } from '../../utils';
 
 export const getQueryCallsAttributes = (
     input: NestedProportionalExitInput | NestedSingleTokenExitInput,
-    { pools }: NestedPoolState,
+    pools: NestedPool[],
     isProportional: boolean,
 ): {
     bptAmountIn: TokenAmount;
@@ -30,13 +30,6 @@ export const getQueryCallsAttributes = (
     const poolsTopDown = pools.sort((a, b) => b.level - a.level);
 
     if (isProportional) {
-        /**
-         * Overall logic to build sequence of proportional exit calls:
-         * 1. Go from top pool to bottom filling out input amounts and output refs
-         * 2. Inputs will be bptAmountIn provided or output of the previous level
-         * 3. Output at bottom level is the amountsOut
-         */
-
         callsAttributes = getProportionalExitCallsAttributes(
             poolsTopDown,
             chainId,
@@ -46,14 +39,6 @@ export const getQueryCallsAttributes = (
             toInternalBalance,
         );
     } else {
-        /**
-         * Overall logic to build sequence of single token exit calls:
-         * 1. Go BOTTOM-UP building exit path to tokenOut
-         * 2. Go through exit path filling out input amounts and output refs
-         * 3. Inputs will be bptAmountIn provided or output of the previous level
-         * 4. Output at bottom level is the amountOut
-         */
-
         const { tokenOut } = input as NestedSingleTokenExitInput;
 
         callsAttributes = getSingleTokenExitCallsAttributes(
@@ -80,6 +65,13 @@ export const getProportionalExitCallsAttributes = (
     bptAmountIn: bigint,
     toInternalBalance: boolean,
 ) => {
+    /**
+     * Overall logic to build sequence of proportional exit calls:
+     * 1. Go from top pool to bottom filling out input amounts and output refs
+     * 2. Inputs will be bptAmountIn provided or output of the previous level
+     * 3. Output at bottom level is the amountsOut
+     */
+
     const calls: NestedExitCallAttributes[] = [];
     for (const pool of poolsSortedByLevel) {
         const sortedTokens = pool.tokens
@@ -142,7 +134,14 @@ export const getSingleTokenExitCallsAttributes = (
     toInternalBalance: boolean,
     tokenOut: Address,
 ) => {
-    // Go BOTTOM-UP building exit path to tokenOut
+    /**
+     * Overall logic to build sequence of single token exit calls:
+     * 1. Go BOTTOM-UP building exit path to tokenOut
+     * 2. Go through exit path filling out input amounts and output refs
+     * 3. Inputs will be bptAmountIn provided or output of the previous level
+     * 4. Output at bottom level is the amountOut
+     */
+
     const exitPath: NestedPool[] = getExitPath(tokenOut, poolsTopDown);
     const calls: NestedExitCallAttributes[] = [];
 

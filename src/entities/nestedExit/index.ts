@@ -26,7 +26,7 @@ export class NestedExit {
 
         const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
             input,
-            nestedPoolState,
+            nestedPoolState.pools,
             isProportional,
         );
 
