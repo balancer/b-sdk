@@ -1,5 +1,4 @@
 // pnpm test -- test/gyro3Pool.integration.test.ts
-import { beforeEach, describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
