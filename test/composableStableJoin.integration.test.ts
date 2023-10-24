@@ -81,7 +81,7 @@ describe('composable stable join test', () => {
                 ...txInput.poolInput.tokens.map((t) =>
                     parseUnits('100', t.decimals),
                 ),
-            ]
+            ],
         );
     });
 
@@ -116,7 +116,7 @@ describe('composable stable join test', () => {
         expect(queryResult.tokenInIndex).to.be.undefined;
 
         // Should be no native value
-        expect(value).to.be.undefined
+        expect(value).to.be.undefined;
 
         // Expect some bpt amount
         expect(queryResult.bptOut.amount > BigInt(0)).to.be.true;
@@ -249,11 +249,11 @@ describe('composable stable join test', () => {
 
         // Query should use same bpt out as user sets
         expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
-        
+
         console.log(queryResult.tokenInIndex);
-        
+
         // Expect all assets to have a value for amount in
-        expect(queryResult.tokenInIndex).to.be.undefined
+        expect(queryResult.tokenInIndex).to.be.undefined;
         queryResult.amountsIn
             .filter((_, index) => index !== bptIndex)
             .forEach((a) => {
@@ -261,7 +261,7 @@ describe('composable stable join test', () => {
             });
 
         // Should be no native value
-        expect(value).to.be.undefined
+        expect(value).to.be.undefined;
 
         // Confirm slippage - only to amount in not bpt out
         const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>

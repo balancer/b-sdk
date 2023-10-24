@@ -115,7 +115,7 @@ export class ComposableStableJoin implements BaseJoin {
     private getAmountsQuery(
         poolTokens: Token[],
         input: JoinInput,
-        bptIndex?: number,
+        bptIndex: number,
     ): AmountsJoin {
         switch (input.kind) {
             case JoinKind.Init:
@@ -131,9 +131,6 @@ export class ComposableStableJoin implements BaseJoin {
                 };
             }
             case JoinKind.SingleAsset: {
-                if (bptIndex === undefined) {
-                    throw new Error('bptIndex is necessary');
-                }
                 const tokenInIndex = poolTokens
                     .filter((_, index) => index !== bptIndex) // Need to remove Bpt
                     .findIndex((t) => t.isSameAddress(input.tokenIn));
