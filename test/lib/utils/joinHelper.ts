@@ -45,17 +45,17 @@ export const doJoin = async (txInput: JoinTxInput) => {
     const poolTokensAddr = checkNativeBalance
         ? replaceWrapped(poolTokens, chainId).map((t) => t.address)
         : poolTokens.map((t) => t.address);
-    
+
     if (bptIndex >= 0) {
         /*
-        * If the pool type tokens list contains BPT (for example: Composable Stable), the poolTokensAddr 
-        * will already have the bpt address, so we don't need to add it again.
-        * */
+         * If the pool type tokens list contains BPT (for example: Composable Stable), the poolTokensAddr
+         * will already have the bpt address, so we don't need to add it again.
+         * */
         tokensForBalanceCheck = [...poolTokensAddr];
     } else {
         /**
          * If the pool type tokens list does not contains BPT (for example: Weighted), the poolTokensAddr
-         * will not have the bpt address, so we need to add it, so the balance delta of the bpt will be 
+         * will not have the bpt address, so we need to add it, so the balance delta of the bpt will be
          * checked in the tests.
          */
         tokensForBalanceCheck = [...poolTokensAddr, poolInput.address];
@@ -71,14 +71,13 @@ export const doJoin = async (txInput: JoinTxInput) => {
             call,
             value,
         );
-    expect(transactionReceipt.status).to.eq('success');
     let expectedDeltas;
     if (bptIndex >= 0) {
         /*
-         * If the pool type tokens list contains BPT (for example: Composable Stable), the queryResult.amountsIn 
-         * includes the amount in of the bptIn, which is always 0, so we need to remove it from the 
+         * If the pool type tokens list contains BPT (for example: Composable Stable), the queryResult.amountsIn
+         * includes the amount in of the bptIn, which is always 0, so we need to remove it from the
          * expectedDeltas and put the bptOut.amount in its place.
-        */
+         */
         expectedDeltas = [
             ...queryResult.amountsIn.slice(0, bptIndex).map((a) => a.amount),
             queryResult.bptOut.amount,
@@ -96,12 +95,24 @@ export const doJoin = async (txInput: JoinTxInput) => {
         ];
     }
     // Confirm final balance changes match query result
-    expect(expectedDeltas).to.deep.eq(balanceDeltas);
-
+    assertJoinTransaction(
+        expectedDeltas,
+        balanceDeltas,
+        transactionReceipt.status,
+    );
     return {
         queryResult,
         maxAmountsIn,
         minBptOut,
         value,
     };
+};
+
+const assertJoinTransaction = (
+    expectedDeltas: bigint[],
+    balanceDeltas: bigint[],
+    transactionReceiptStatus: string,
+) => {
+    expect(expectedDeltas).to.deep.eq(balanceDeltas);
+    expect(transactionReceiptStatus).to.eq('success');
 };
