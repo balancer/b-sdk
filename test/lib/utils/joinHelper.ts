@@ -1,6 +1,5 @@
 import { replaceWrapped, Token } from '../../../src';
-import { sendTransactionGetBalances } from './helper';
-import { expect } from 'vitest';
+import { assertTransaction, sendTransactionGetBalances } from './helper';
 import { JoinTxInput } from './types';
 
 /**
@@ -95,24 +94,11 @@ export const doJoin = async (txInput: JoinTxInput) => {
         ];
     }
     // Confirm final balance changes match query result
-    assertJoinTransaction(
-        expectedDeltas,
-        balanceDeltas,
-        transactionReceipt.status,
-    );
+    assertTransaction(expectedDeltas, balanceDeltas, transactionReceipt.status);
     return {
         queryResult,
         maxAmountsIn,
         minBptOut,
         value,
     };
-};
-
-const assertJoinTransaction = (
-    expectedDeltas: bigint[],
-    balanceDeltas: bigint[],
-    transactionReceiptStatus: string,
-) => {
-    expect(expectedDeltas).to.deep.eq(balanceDeltas);
-    expect(transactionReceiptStatus).to.eq('success');
 };
