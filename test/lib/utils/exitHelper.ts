@@ -1,6 +1,6 @@
 import { ExitTxInput } from './types';
 import { replaceWrapped, Token } from '../../../src';
-import { sendTransactionGetBalances } from './helper';
+import { assertTransaction, sendTransactionGetBalances } from './helper';
 import { expect } from 'vitest';
 
 /**
@@ -56,8 +56,8 @@ export const doExit = async (txInput: ExitTxInput) => {
         tokensForBalanceCheck = [...poolTokensAddr, poolInput.address];
     } else {
         /*
-          * If the pool type tokens list contains BPT (for example: Composable Stable), the poolTokensAddr
-          * will already have the bpt address, so we don't need to add it again.
+         * If the pool type tokens list contains BPT (for example: Composable Stable), the poolTokensAddr
+         * will already have the bpt address, so we don't need to add it again.
          */
         tokensForBalanceCheck = [...poolTokensAddr];
     }
@@ -72,14 +72,12 @@ export const doExit = async (txInput: ExitTxInput) => {
             call,
             value,
         );
-    expect(transactionReceipt.status).to.eq('success');
-
     let expectedDeltas;
 
     if (bptIndex < 0) {
         /*
-          * If the pool type tokens list does not contains BPT (for example: Weighted), the queryResult.amountsOut
-          * does not include any amount out of bpt, so we just need to add the bptIn.amount to the expectedDeltas.
+         * If the pool type tokens list does not contains BPT (for example: Weighted), the queryResult.amountsOut
+         * does not include any amount out of bpt, so we just need to add the bptIn.amount to the expectedDeltas.
          */
         expectedDeltas = [
             ...queryResult.amountsOut.map((a) => a.amount),
@@ -87,10 +85,10 @@ export const doExit = async (txInput: ExitTxInput) => {
         ];
     } else {
         /*
-         * If the pool type tokens list contains BPT (for example: Composable Stable), the queryResult.amountsOut 
-         * includes the amount out of the bpt, which is always 0, so we need to remove it from the 
+         * If the pool type tokens list contains BPT (for example: Composable Stable), the queryResult.amountsOut
+         * includes the amount out of the bpt, which is always 0, so we need to remove it from the
          * expectedDeltas and put the bptIn.amount in its place.
-        */
+         */
         expectedDeltas = [
             ...queryResult.amountsOut.slice(0, bptIndex).map((a) => a.amount),
             queryResult.bptIn.amount,
@@ -99,8 +97,7 @@ export const doExit = async (txInput: ExitTxInput) => {
     }
 
     // Confirm final balance changes match query result
-    expect(expectedDeltas).to.deep.eq(balanceDeltas);
-
+    assertTransaction(expectedDeltas, balanceDeltas, transactionReceipt.status);
     return {
         queryResult,
         maxBptIn,

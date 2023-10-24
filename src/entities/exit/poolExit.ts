@@ -8,7 +8,7 @@ import {
 } from './types';
 import { WeightedExit } from './weighted/weightedExit';
 import { PoolStateInput } from '../types';
-import { validateInputs } from './weighted/validateInputs';
+import { validateInputs } from './utils/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
 import { ComposableStableExit } from './composable-stable/composableStableExit';
 
