@@ -3,6 +3,7 @@ import { ChainId } from '../../utils';
 import { Slippage } from '../slippage';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
+import { PoolKind } from '../types';
 
 export type NestedProportionalExitInput = {
     bptAmountIn: bigint;
@@ -24,7 +25,7 @@ export type NestedExitCallAttributes = {
     poolId: Address;
     poolAddress: Address;
     poolType: string;
-    kind: number;
+    kind: PoolKind;
     sender: Address;
     recipient: Address;
     bptAmountIn: {

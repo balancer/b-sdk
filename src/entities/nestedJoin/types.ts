@@ -3,6 +3,7 @@ import { ChainId } from '../../utils';
 import { Slippage } from '../slippage';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
+import { PoolKind } from '../types';
 
 export type NestedJoinInput = {
     amountsIn: {
@@ -23,7 +24,7 @@ export type NestedJoinCallAttributes = {
     poolId: Hex;
     poolAddress: Address;
     poolType: string;
-    kind: number;
+    kind: PoolKind;
     sender: Address;
     recipient: Address;
     maxAmountsIn: {

@@ -43,3 +43,11 @@ export type NestedPoolState = {
         decimals: number;
     }[];
 };
+
+export enum PoolKind {
+    WEIGHTED = 0,
+    LEGACY_STABLE = 1,
+    COMPOSABLE_STABLE = 2,
+    COMPOSABLE_STABLE_V2 = 3,
+    // (note only Weighted and COMPOSABLE_STABLE_V2 will support proportional exits)
+}

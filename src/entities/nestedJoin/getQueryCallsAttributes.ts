@@ -1,7 +1,7 @@
 import { Token } from '../token';
 import { getPoolAddress } from '../../utils';
 import { NestedJoinInput, NestedJoinCallAttributes } from './types';
-import { NestedPoolState } from '../types';
+import { NestedPoolState, PoolKind } from '../types';
 
 export const getQueryCallsAttributes = (
     {
@@ -35,7 +35,10 @@ export const getQueryCallsAttributes = (
             poolId: pool.id,
             poolAddress: pool.address,
             poolType: pool.type,
-            kind: 0,
+            kind:
+                pool.type === 'ComposableStable'
+                    ? PoolKind.COMPOSABLE_STABLE_V2
+                    : PoolKind.WEIGHTED,
             sender: accountAddress,
             recipient: accountAddress,
             maxAmountsIn: sortedTokens.map((token) => {

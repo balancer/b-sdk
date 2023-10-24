@@ -4,7 +4,7 @@ import {
     NestedSingleTokenExitInput,
     NestedExitCallAttributes,
 } from './types';
-import { NestedPool, NestedPoolState } from '../types';
+import { NestedPool, NestedPoolState, PoolKind } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address } from '../../types';
 import { ChainId } from '../../utils';
@@ -101,7 +101,10 @@ export const getProportionalExitCallsAttributes = (
             poolId: pool.id,
             poolAddress: pool.address,
             poolType: pool.type,
-            kind: pool.type === 'ComposableStable' ? 3 : 0,
+            kind:
+                pool.type === 'ComposableStable'
+                    ? PoolKind.COMPOSABLE_STABLE_V2
+                    : PoolKind.WEIGHTED,
             sender: accountAddress,
             recipient: accountAddress,
             bptAmountIn:
@@ -161,7 +164,10 @@ export const getSingleTokenExitCallsAttributes = (
             poolId: pool.id,
             poolAddress: pool.address,
             poolType: pool.type,
-            kind: pool.type === 'ComposableStable' ? 3 : 0,
+            kind:
+                pool.type === 'ComposableStable'
+                    ? PoolKind.COMPOSABLE_STABLE_V2
+                    : PoolKind.WEIGHTED,
             sender: accountAddress,
             recipient: accountAddress,
             bptAmountIn:
