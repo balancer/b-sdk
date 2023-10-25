@@ -1,5 +1,5 @@
 import { Token } from '../token';
-import { getPoolAddress } from '../../utils';
+import { BALANCER_RELAYER, ChainId, getPoolAddress } from '../../utils';
 import { NestedJoinInput, NestedJoinCallAttributes } from './types';
 import { NestedPool, PoolKind } from '../types';
 import { Address } from '../../types';
@@ -29,6 +29,7 @@ export const getQueryCallsAttributes = (
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
             .map((t) => new Token(chainId, t.address, t.decimals));
+        const maxAmountsIn = getMaxAmountsIn(sortedTokens, amountsIn, calls);
         calls.push({
             chainId: chainId,
             useNativeAssetAsWrappedAmountIn:
@@ -41,9 +42,9 @@ export const getQueryCallsAttributes = (
                 pool.type === 'ComposableStable'
                     ? PoolKind.COMPOSABLE_STABLE_V2
                     : PoolKind.WEIGHTED,
-            sender: accountAddress,
-            recipient: accountAddress,
-            maxAmountsIn: getMaxAmountsIn(sortedTokens, amountsIn, calls),
+            sender: getSender(maxAmountsIn, accountAddress, chainId),
+            recipient: accountAddress, // set as placeholder, which might be updated later depending on following calls
+            maxAmountsIn,
             minBptOut: 0n, // limits set to zero for query calls
             fromInternalBalance: fromInternalBalance ?? false,
             outputReference: Relayer.toChainedReference(
@@ -51,6 +52,7 @@ export const getQueryCallsAttributes = (
             ),
         });
     }
+    updateRecipients(calls);
     return calls;
 };
 
@@ -93,4 +95,29 @@ const getMaxAmountsIn = (
             isRef: false,
         };
     });
+};
+
+// Sender's logic: if there is at least one amountIn that is not a reference,
+// then the sender is the user, otherwise it's the relayer.
+const getSender = (
+    maxAmountsIn: { amount: bigint; isRef: boolean }[],
+    accountAddress: Address,
+    chainId: ChainId,
+): Address => {
+    return maxAmountsIn.some((a) => !a.isRef && a.amount > 0n)
+        ? accountAddress
+        : BALANCER_RELAYER[chainId];
+};
+
+// Recipient's logic: if there is a following call, then the recipient is the
+// sender of that call, otherwise it's the user.
+const updateRecipients = (calls: NestedJoinCallAttributes[]) => {
+    for (const call of calls) {
+        const followingCall = calls.find((_call) =>
+            _call.maxAmountsIn.some((a) => a.amount === call.outputReference),
+        );
+        if (followingCall !== undefined) {
+            call.recipient = followingCall.sender;
+        }
+    }
 };
