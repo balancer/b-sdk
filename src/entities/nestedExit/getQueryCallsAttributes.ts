@@ -81,11 +81,6 @@ export const getProportionalExitCallsAttributes = (
         const sortedTokensWithoutBpt = sortedTokens.filter(
             (t) => !t.isSameAddress(pool.address),
         );
-        const upperLevelCall = calls.find((call) =>
-            call.sortedTokens
-                .map((token) => token.address)
-                .includes(pool.address),
-        );
         calls.push({
             chainId: chainId,
             useNativeAssetAsWrappedAmountOut,
@@ -99,20 +94,7 @@ export const getProportionalExitCallsAttributes = (
                     : PoolKind.WEIGHTED,
             sender: accountAddress,
             recipient: accountAddress,
-            bptAmountIn:
-                upperLevelCall === undefined
-                    ? {
-                          amount: bptAmountIn,
-                          isRef: false,
-                      }
-                    : {
-                          amount: upperLevelCall.outputReferenceKeys[
-                              upperLevelCall.sortedTokens
-                                  .map((token) => token.address)
-                                  .indexOf(pool.address)
-                          ],
-                          isRef: true,
-                      },
+            bptAmountIn: getBptAmountIn(pool, bptAmountIn, calls, true),
             minAmountsOut: Array(sortedTokens.length).fill(0n), // limits set to zero for query calls
             toInternalBalance,
             outputReferenceKeys: sortedTokensWithoutBpt.map(
@@ -150,7 +132,6 @@ export const getSingleTokenExitCallsAttributes = (
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
             .map((t) => new Token(chainId, t.address, t.decimals));
-        const upperLevelCall = i > 0 ? calls[i] : undefined;
         const currenTokenOut =
             i === exitPath.length - 1 ? tokenOut : exitPath[i + 1].address;
         const tokenOutIndex = sortedTokens.findIndex((t) =>
@@ -169,16 +150,7 @@ export const getSingleTokenExitCallsAttributes = (
                     : PoolKind.WEIGHTED,
             sender: accountAddress,
             recipient: accountAddress,
-            bptAmountIn:
-                upperLevelCall === undefined
-                    ? {
-                          amount: bptAmountIn,
-                          isRef: false,
-                      }
-                    : {
-                          amount: upperLevelCall.outputReferenceKeys[0],
-                          isRef: true,
-                      },
+            bptAmountIn: getBptAmountIn(pool, bptAmountIn, calls, false),
             minAmountsOut: Array(sortedTokens.length).fill(0n), // limits set to zero for query calls
             toInternalBalance,
             outputReferenceKeys: [
@@ -204,4 +176,40 @@ const getExitPath = (tokenOut: string, poolsTopDown: NestedPool[]) => {
         tokenOutByLevel = currentPool.address;
     }
     return exitPath;
+};
+
+const getBptAmountIn = (
+    pool: NestedPool,
+    bptAmountIn: bigint,
+    calls: NestedExitCallAttributes[],
+    isProportional: boolean,
+) => {
+    // first call has bptAmountIn provided as it's input
+    if (calls.length === 0) {
+        return {
+            amount: bptAmountIn,
+            isRef: false,
+        };
+    }
+
+    // following calls have their input as the outputReference of a previous call
+    let previousCall: NestedExitCallAttributes;
+    let outputReferenceIndex: number;
+    if (isProportional) {
+        previousCall = calls.find((call) =>
+            call.sortedTokens
+                .map((token) => token.address)
+                .includes(pool.address),
+        ) as NestedExitCallAttributes;
+        outputReferenceIndex = previousCall.sortedTokens
+            .map((token) => token.address)
+            .indexOf(pool.address);
+    } else {
+        previousCall = calls[calls.length - 1];
+        outputReferenceIndex = 0;
+    }
+    return {
+        amount: previousCall.outputReferenceKeys[outputReferenceIndex],
+        isRef: true,
+    };
 };

@@ -2,6 +2,7 @@ import { Token } from '../token';
 import { getPoolAddress } from '../../utils';
 import { NestedJoinInput, NestedJoinCallAttributes } from './types';
 import { NestedPool, PoolKind } from '../types';
+import { Address } from '../../types';
 
 export const getQueryCallsAttributes = (
     {
@@ -41,46 +42,52 @@ export const getQueryCallsAttributes = (
                     : PoolKind.WEIGHTED,
             sender: accountAddress,
             recipient: accountAddress,
-            maxAmountsIn: sortedTokens.map((token) => {
-                /**
-                 * There are 3 possible scenarios:
-                 * 1. token has amountIn provided by the user -> return amount
-                 * 2. token is the output of a previous join call -> return outputRef
-                 * 3. otherwise -> return zero
-                 */
-
-                // 1. token has amountIn provided by the user -> return amount
-                const amountIn = amountsIn.find((a) =>
-                    token.isSameAddress(a.address),
-                );
-                if (amountIn !== undefined) {
-                    return {
-                        amount: amountIn.rawAmount,
-                        isRef: false,
-                    };
-                }
-
-                // 2. token is the output of a previous join call -> return outputRef
-                const previousJoinCall = calls.find(
-                    (call) => getPoolAddress(call.poolId) === token.address,
-                );
-                if (previousJoinCall !== undefined) {
-                    return {
-                        amount: previousJoinCall.outputReferenceKey,
-                        isRef: true,
-                    };
-                }
-
-                // 3. otherwise -> return zero
-                return {
-                    amount: 0n,
-                    isRef: false,
-                };
-            }),
+            maxAmountsIn: getMaxAmountsIn(sortedTokens, amountsIn, calls),
             minBptOut: 0n, // limits set to zero for query calls
             fromInternalBalance: fromInternalBalance ?? false,
             outputReferenceKey: BigInt(poolsSortedByLevel.indexOf(pool)),
         });
     }
     return calls;
+};
+
+const getMaxAmountsIn = (
+    sortedTokens: Token[],
+    amountsIn: { address: Address; rawAmount: bigint }[],
+    calls: NestedJoinCallAttributes[],
+): { amount: bigint; isRef: boolean }[] => {
+    return sortedTokens.map((token) => {
+        /**
+         * There are 3 possible scenarios:
+         * 1. token has amountIn provided by the user -> return amount
+         * 2. token is the output of a previous join call -> return outputRef
+         * 3. otherwise -> return zero
+         */
+
+        // 1. token has amountIn provided by the user -> return amount
+        const amountIn = amountsIn.find((a) => token.isSameAddress(a.address));
+        if (amountIn !== undefined) {
+            return {
+                amount: amountIn.rawAmount,
+                isRef: false,
+            };
+        }
+
+        // 2. token is the output of a previous join call -> return outputRef
+        const previousCall = calls.find(
+            (call) => getPoolAddress(call.poolId) === token.address,
+        );
+        if (previousCall !== undefined) {
+            return {
+                amount: previousCall.outputReferenceKey,
+                isRef: true,
+            };
+        }
+
+        // 3. otherwise -> return zero
+        return {
+            amount: 0n,
+            isRef: false,
+        };
+    });
 };

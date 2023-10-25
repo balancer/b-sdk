@@ -55,11 +55,12 @@ export const encodeCalls = (
                     throw new Error('Unsupported pool type');
             }
 
-            outputReferences = outputReferenceKeys.map((k) => {
-                const tokenIndex = k % 10n;
+            outputReferences = outputReferenceKeys.map((outputReferenceKey) => {
+                // outputReferenceKey is set in a way that its last digit is the token index within the pool, so we can use it to get tokenIndex
+                const tokenIndex = outputReferenceKey % 10n;
                 return {
                     index: tokenIndex,
-                    key: Relayer.toChainedReference(k),
+                    key: Relayer.toChainedReference(outputReferenceKey),
                 };
             });
         } else {
