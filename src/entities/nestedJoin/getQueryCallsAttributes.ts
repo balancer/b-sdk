@@ -3,6 +3,7 @@ import { getPoolAddress } from '../../utils';
 import { NestedJoinInput, NestedJoinCallAttributes } from './types';
 import { NestedPool, PoolKind } from '../types';
 import { Address } from '../../types';
+import { Relayer } from '../relayer';
 
 export const getQueryCallsAttributes = (
     {
@@ -45,7 +46,9 @@ export const getQueryCallsAttributes = (
             maxAmountsIn: getMaxAmountsIn(sortedTokens, amountsIn, calls),
             minBptOut: 0n, // limits set to zero for query calls
             fromInternalBalance: fromInternalBalance ?? false,
-            outputReferenceKey: BigInt(poolsSortedByLevel.indexOf(pool)),
+            outputReference: Relayer.toChainedReference(
+                BigInt(poolsSortedByLevel.indexOf(pool)),
+            ),
         });
     }
     return calls;
@@ -79,7 +82,7 @@ const getMaxAmountsIn = (
         );
         if (previousCall !== undefined) {
             return {
-                amount: previousCall.outputReferenceKey,
+                amount: previousCall.outputReference,
                 isRef: true,
             };
         }

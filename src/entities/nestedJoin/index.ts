@@ -31,9 +31,7 @@ export class NestedJoin {
 
         // append peek call to get bptOut
         const peekCall = Relayer.encodePeekChainedReferenceValue(
-            Relayer.toChainedReference(
-                callsAttributes[callsAttributes.length - 1].outputReferenceKey,
-            ),
+            callsAttributes[callsAttributes.length - 1].outputReference,
         );
         encodedCalls.push(peekCall);
 

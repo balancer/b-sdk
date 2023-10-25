@@ -3,7 +3,6 @@ import { ZERO_ADDRESS } from '../../utils';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
 import { NestedJoinCallAttributes } from './types';
-import { Relayer } from '../relayer';
 import { replaceWrapped } from '../utils/replaceWrapped';
 import { bathcRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
@@ -25,7 +24,7 @@ export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
             maxAmountsIn,
             minBptOut,
             fromInternalBalance,
-            outputReferenceKey,
+            outputReference,
         } = callAttributes;
 
         // replace wrapped token with native asset if needed
@@ -42,9 +41,7 @@ export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
             }
         }
 
-        const _maxAmountsIn = maxAmountsIn.map((a) =>
-            a.isRef ? Relayer.toChainedReference(a.amount) : a.amount,
-        );
+        const _maxAmountsIn = maxAmountsIn.map((a) => a.amount);
         const amountsInWithoutBpt = _maxAmountsIn.filter(
             (_, i) => !sortedTokens[i].isSameAddress(poolAddress),
         );
@@ -65,8 +62,6 @@ export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
             default:
                 throw new Error('Unsupported pool type');
         }
-
-        const outputReference = Relayer.toChainedReference(outputReferenceKey);
 
         const joinPoolRequest = {
             assets: tokensIn.map((t) => t.address), // with BPT

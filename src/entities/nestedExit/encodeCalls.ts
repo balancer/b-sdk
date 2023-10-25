@@ -2,7 +2,6 @@ import { Hex } from '../../types';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
 import { NestedExitCallAttributes } from './types';
-import { Relayer } from '../relayer';
 import { replaceWrapped } from '../utils/replaceWrapped';
 import { bathcRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
@@ -25,7 +24,7 @@ export const encodeCalls = (
             bptAmountIn,
             minAmountsOut,
             toInternalBalance,
-            outputReferenceKeys,
+            outputReferences,
             tokenOutIndex,
         } = callAttributes;
 
@@ -35,34 +34,23 @@ export const encodeCalls = (
             tokensOut = replaceWrapped([...sortedTokens], chainId);
         }
 
-        const _bptAmountIn = bptAmountIn.isRef
-            ? Relayer.toChainedReference(bptAmountIn.amount)
-            : bptAmountIn.amount;
-
         let userData: Hex;
-        let outputReferences: { index: bigint; key: bigint }[] = [];
 
         if (isProportional) {
             switch (poolType) {
                 case 'Weighted':
-                    userData = WeightedEncoder.exitProportional(_bptAmountIn);
+                    userData = WeightedEncoder.exitProportional(
+                        bptAmountIn.amount,
+                    );
                     break;
                 case 'ComposableStable':
-                    userData =
-                        ComposableStableEncoder.exitProportional(_bptAmountIn);
+                    userData = ComposableStableEncoder.exitProportional(
+                        bptAmountIn.amount,
+                    );
                     break;
                 default:
                     throw new Error('Unsupported pool type');
             }
-
-            outputReferences = outputReferenceKeys.map((outputReferenceKey) => {
-                // outputReferenceKey is set in a way that its last digit is the token index within the pool, so we can use it to get tokenIndex
-                const tokenIndex = outputReferenceKey % 10n;
-                return {
-                    index: tokenIndex,
-                    key: Relayer.toChainedReference(outputReferenceKey),
-                };
-            });
         } else {
             if (tokenOutIndex === undefined) {
                 throw new Error(
@@ -72,25 +60,19 @@ export const encodeCalls = (
             switch (poolType) {
                 case 'Weighted':
                     userData = WeightedEncoder.exitSingleAsset(
-                        _bptAmountIn,
+                        bptAmountIn.amount,
                         tokenOutIndex,
                     );
                     break;
                 case 'ComposableStable':
                     userData = ComposableStableEncoder.exitSingleAsset(
-                        _bptAmountIn,
+                        bptAmountIn.amount,
                         tokenOutIndex,
                     );
                     break;
                 default:
                     throw new Error('Unsupported pool type');
             }
-            outputReferences = [
-                {
-                    index: BigInt(tokenOutIndex),
-                    key: Relayer.toChainedReference(outputReferenceKeys[0]),
-                },
-            ];
         }
 
         const exitPoolRequest = {

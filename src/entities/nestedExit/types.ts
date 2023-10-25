@@ -34,7 +34,10 @@ export type NestedExitCallAttributes = {
     };
     minAmountsOut: bigint[];
     toInternalBalance: boolean;
-    outputReferenceKeys: bigint[];
+    outputReferences: {
+        key: bigint;
+        index: bigint;
+    }[];
     tokenOutIndex?: number;
 };
 

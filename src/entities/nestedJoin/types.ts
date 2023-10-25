@@ -33,7 +33,7 @@ export type NestedJoinCallAttributes = {
     }[];
     minBptOut: bigint;
     fromInternalBalance: boolean;
-    outputReferenceKey: bigint;
+    outputReference: bigint;
 };
 
 export type NestedJoinQueryResult = {

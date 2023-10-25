@@ -8,6 +8,7 @@ import { NestedPool, PoolKind } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address } from '../../types';
 import { ChainId } from '../../utils';
+import { Relayer } from '../relayer';
 
 export const getQueryCallsAttributes = (
     input: NestedProportionalExitInput | NestedSingleTokenExitInput,
@@ -97,11 +98,15 @@ export const getProportionalExitCallsAttributes = (
             bptAmountIn: getBptAmountIn(pool, bptAmountIn, calls, true),
             minAmountsOut: Array(sortedTokens.length).fill(0n), // limits set to zero for query calls
             toInternalBalance,
-            outputReferenceKeys: sortedTokensWithoutBpt.map(
-                (token) =>
-                    BigInt(poolsSortedByLevel.indexOf(pool)) * 10n +
-                    BigInt(sortedTokens.indexOf(token)),
-            ),
+            outputReferences: sortedTokensWithoutBpt.map((token) => {
+                return {
+                    key: Relayer.toChainedReference(
+                        BigInt(poolsSortedByLevel.indexOf(pool)) * 10n +
+                            BigInt(sortedTokens.indexOf(token)),
+                    ),
+                    index: BigInt(sortedTokens.indexOf(token)),
+                };
+            }),
         });
     }
     return calls;
@@ -153,8 +158,14 @@ export const getSingleTokenExitCallsAttributes = (
             bptAmountIn: getBptAmountIn(pool, bptAmountIn, calls, false),
             minAmountsOut: Array(sortedTokens.length).fill(0n), // limits set to zero for query calls
             toInternalBalance,
-            outputReferenceKeys: [
-                BigInt(exitPath.indexOf(pool)) * 10n + BigInt(tokenOutIndex),
+            outputReferences: [
+                {
+                    key: Relayer.toChainedReference(
+                        BigInt(exitPath.indexOf(pool)) * 10n +
+                            BigInt(tokenOutIndex),
+                    ),
+                    index: BigInt(tokenOutIndex),
+                },
             ],
             tokenOutIndex,
         });
@@ -209,7 +220,7 @@ const getBptAmountIn = (
         outputReferenceIndex = 0;
     }
     return {
-        amount: previousCall.outputReferenceKeys[outputReferenceIndex],
+        amount: previousCall.outputReferences[outputReferenceIndex].key,
         isRef: true,
     };
 };

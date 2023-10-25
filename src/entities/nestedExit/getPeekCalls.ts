@@ -16,22 +16,19 @@ export const getPeekCalls = (
          * on another call is an output of the multicall and should be peeked.
          */
         calls.forEach((call) => {
-            call.outputReferenceKeys.forEach((outputReferenceKey) => {
-                // outputReferenceKey is set in a way that its last digit is the token index within the pool, so we can use it to get tokenOut
+            call.outputReferences.forEach((outputReference) => {
                 const tokenOut =
-                    call.sortedTokens[Number(outputReferenceKey % 10n)];
+                    call.sortedTokens[Number(outputReference.index)];
                 // check if tokenOut is a pool address of another call - this means that it's an input for that call
-                const isTokenBeingUsedAsInput = calls.some(
-                    (_call) =>
-                        _call.bptAmountIn.isRef === true &&
-                        tokenOut.isSameAddress(_call.poolAddress),
+                const isTokenBeingUsedAsInput = calls.some((_call) =>
+                    tokenOut.isSameAddress(_call.poolAddress),
                 );
 
                 if (!isTokenBeingUsedAsInput) {
                     tokensOut.push(tokenOut);
                     peekCalls.push(
                         Relayer.encodePeekChainedReferenceValue(
-                            Relayer.toChainedReference(outputReferenceKey),
+                            outputReference.key,
                         ),
                     );
                 }
@@ -45,7 +42,7 @@ export const getPeekCalls = (
         tokensOut.push(tokenOut);
         peekCalls.push(
             Relayer.encodePeekChainedReferenceValue(
-                Relayer.toChainedReference(lastCall.outputReferenceKeys[0]),
+                lastCall.outputReferences[0].key,
             ),
         );
     }
