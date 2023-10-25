@@ -35,44 +35,14 @@ export const encodeCalls = (
         }
 
         let userData: Hex;
-
         if (isProportional) {
-            switch (poolType) {
-                case 'Weighted':
-                    userData = WeightedEncoder.exitProportional(
-                        bptAmountIn.amount,
-                    );
-                    break;
-                case 'ComposableStable':
-                    userData = ComposableStableEncoder.exitProportional(
-                        bptAmountIn.amount,
-                    );
-                    break;
-                default:
-                    throw new Error('Unsupported pool type');
-            }
+            userData = getUserDataProportional(poolType, bptAmountIn.amount);
         } else {
-            if (tokenOutIndex === undefined) {
-                throw new Error(
-                    "tokenOutIndex can't be undefined for single token exits",
-                );
-            }
-            switch (poolType) {
-                case 'Weighted':
-                    userData = WeightedEncoder.exitSingleAsset(
-                        bptAmountIn.amount,
-                        tokenOutIndex,
-                    );
-                    break;
-                case 'ComposableStable':
-                    userData = ComposableStableEncoder.exitSingleAsset(
-                        bptAmountIn.amount,
-                        tokenOutIndex,
-                    );
-                    break;
-                default:
-                    throw new Error('Unsupported pool type');
-            }
+            userData = getUserDataSingleToken(
+                tokenOutIndex,
+                poolType,
+                bptAmountIn.amount,
+            );
         }
 
         const exitPoolRequest = {
@@ -99,4 +69,38 @@ export const encodeCalls = (
     }
 
     return encodedCalls;
+};
+
+const getUserDataProportional = (poolType: string, bptAmountIn: bigint) => {
+    switch (poolType) {
+        case 'Weighted':
+            return WeightedEncoder.exitProportional(bptAmountIn);
+        case 'ComposableStable':
+            return ComposableStableEncoder.exitProportional(bptAmountIn);
+        default:
+            throw new Error('Unsupported pool type');
+    }
+};
+
+const getUserDataSingleToken = (
+    tokenOutIndex: number | undefined,
+    poolType: string,
+    bptAmountIn: bigint,
+) => {
+    if (tokenOutIndex === undefined) {
+        throw new Error(
+            "tokenOutIndex can't be undefined for single token exits",
+        );
+    }
+    switch (poolType) {
+        case 'Weighted':
+            return WeightedEncoder.exitSingleAsset(bptAmountIn, tokenOutIndex);
+        case 'ComposableStable':
+            return ComposableStableEncoder.exitSingleAsset(
+                bptAmountIn,
+                tokenOutIndex,
+            );
+        default:
+            throw new Error('Unsupported pool type');
+    }
 };

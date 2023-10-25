@@ -45,23 +45,7 @@ export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
         const amountsInWithoutBpt = _maxAmountsIn.filter(
             (_, i) => !sortedTokens[i].isSameAddress(poolAddress),
         );
-        let userData: Hex;
-        switch (poolType) {
-            case 'Weighted':
-                userData = WeightedEncoder.joinUnbalanced(
-                    amountsInWithoutBpt,
-                    minBptOut,
-                );
-                break;
-            case 'ComposableStable':
-                userData = ComposableStableEncoder.joinUnbalanced(
-                    amountsInWithoutBpt,
-                    minBptOut,
-                );
-                break;
-            default:
-                throw new Error('Unsupported pool type');
-        }
+        const userData = getUserData(poolType, amountsInWithoutBpt, minBptOut);
 
         const joinPoolRequest = {
             assets: tokensIn.map((t) => t.address), // with BPT
@@ -88,4 +72,25 @@ export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
         values.push(value);
     }
     return { encodedCalls, values };
+};
+
+const getUserData = (
+    poolType: string,
+    amountsInWithoutBpt: bigint[],
+    minBptOut: bigint,
+) => {
+    switch (poolType) {
+        case 'Weighted':
+            return WeightedEncoder.joinUnbalanced(
+                amountsInWithoutBpt,
+                minBptOut,
+            );
+        case 'ComposableStable':
+            return ComposableStableEncoder.joinUnbalanced(
+                amountsInWithoutBpt,
+                minBptOut,
+            );
+        default:
+            throw new Error('Unsupported pool type');
+    }
 };
