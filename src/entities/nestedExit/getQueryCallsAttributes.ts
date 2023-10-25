@@ -7,7 +7,7 @@ import {
 import { NestedPool, PoolKind } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address } from '../../types';
-import { ChainId } from '../../utils';
+import { BALANCER_RELAYER, ChainId } from '../../utils';
 import { Relayer } from '../relayer';
 
 export const getQueryCallsAttributes = (
@@ -93,8 +93,13 @@ export const getProportionalExitCallsAttributes = (
                 pool.type === 'ComposableStable'
                     ? PoolKind.COMPOSABLE_STABLE_V2
                     : PoolKind.WEIGHTED,
-            sender: accountAddress,
-            recipient: accountAddress,
+            sender: getSenderProportional(calls, pool.address, accountAddress),
+            recipient: getRecipientProportional(
+                sortedTokensWithoutBpt,
+                poolsSortedByLevel,
+                accountAddress,
+                chainId,
+            ),
             bptAmountIn: getBptAmountIn(pool, bptAmountIn, calls, true),
             minAmountsOut: Array(sortedTokens.length).fill(0n), // limits set to zero for query calls
             toInternalBalance,
@@ -137,8 +142,8 @@ export const getSingleTokenExitCallsAttributes = (
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
             .map((t) => new Token(chainId, t.address, t.decimals));
-        const currenTokenOut =
-            i === exitPath.length - 1 ? tokenOut : exitPath[i + 1].address;
+        const isLastCall = i === exitPath.length - 1;
+        const currenTokenOut = isLastCall ? tokenOut : exitPath[i + 1].address;
         const tokenOutIndex = sortedTokens.findIndex((t) =>
             t.isSameAddress(currenTokenOut),
         );
@@ -153,8 +158,8 @@ export const getSingleTokenExitCallsAttributes = (
                 pool.type === 'ComposableStable'
                     ? PoolKind.COMPOSABLE_STABLE_V2
                     : PoolKind.WEIGHTED,
-            sender: accountAddress,
-            recipient: accountAddress,
+            sender: i === 0 ? accountAddress : BALANCER_RELAYER[chainId],
+            recipient: isLastCall ? accountAddress : BALANCER_RELAYER[chainId],
             bptAmountIn: getBptAmountIn(pool, bptAmountIn, calls, false),
             minAmountsOut: Array(sortedTokens.length).fill(0n), // limits set to zero for query calls
             toInternalBalance,
@@ -223,4 +228,34 @@ const getBptAmountIn = (
         amount: previousCall.outputReferences[outputReferenceIndex].key,
         isRef: true,
     };
+};
+
+// Sender's logic: if there is a previous call, then the sender is the
+// recipient of that call, otherwise it's the user.
+const getSenderProportional = (
+    calls: NestedExitCallAttributes[],
+    poolAddress: Address,
+    accountAddress: Address,
+): Address => {
+    const previousCall = calls.find((_call) =>
+        _call.sortedTokens.map((token) => token.address).includes(poolAddress),
+    );
+    return previousCall !== undefined ? previousCall.recipient : accountAddress;
+};
+
+// Recipient's logic: if there is at least one token that is an output of the
+// whole multicall, then the recipient is the user, otherwise it's the relayer.
+const getRecipientProportional = (
+    sortedTokensWithoutBpt: Token[],
+    poolsSortedByLevel: NestedPool[],
+    accountAddress: Address,
+    chainId: ChainId,
+): Address => {
+    const containsOutputToken = sortedTokensWithoutBpt.some(
+        (token) =>
+            !poolsSortedByLevel.some((_pool) =>
+                token.isSameAddress(_pool.address),
+            ),
+    );
+    return containsOutputToken ? accountAddress : BALANCER_RELAYER[chainId];
 };
