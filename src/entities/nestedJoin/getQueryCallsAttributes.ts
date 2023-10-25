@@ -43,7 +43,7 @@ export const getQueryCallsAttributes = (
                     ? PoolKind.COMPOSABLE_STABLE_V2
                     : PoolKind.WEIGHTED,
             sender: getSender(maxAmountsIn, accountAddress, chainId),
-            recipient: accountAddress, // set as placeholder, which might be updated later depending on following calls
+            recipient: '0x', // set as placeholder - will be updated after all calls are created
             maxAmountsIn,
             minBptOut: 0n, // limits set to zero for query calls
             fromInternalBalance: fromInternalBalance ?? false,
@@ -52,7 +52,7 @@ export const getQueryCallsAttributes = (
             ),
         });
     }
-    updateRecipients(calls);
+    getRecipients(calls, accountAddress);
     return calls;
 };
 
@@ -111,13 +111,18 @@ const getSender = (
 
 // Recipient's logic: if there is a following call, then the recipient is the
 // sender of that call, otherwise it's the user.
-const updateRecipients = (calls: NestedJoinCallAttributes[]) => {
+const getRecipients = (
+    calls: NestedJoinCallAttributes[],
+    accountAddress: Address,
+) => {
     for (const call of calls) {
         const followingCall = calls.find((_call) =>
             _call.maxAmountsIn.some((a) => a.amount === call.outputReference),
         );
         if (followingCall !== undefined) {
             call.recipient = followingCall.sender;
+        } else {
+            call.recipient = accountAddress;
         }
     }
 };
