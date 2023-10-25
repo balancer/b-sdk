@@ -52,7 +52,7 @@ export const getQueryCallsAttributes = (
             ),
         });
     }
-    getRecipients(calls, accountAddress);
+    updateRecipients(calls, accountAddress);
     return calls;
 };
 
@@ -111,7 +111,7 @@ const getSender = (
 
 // Recipient's logic: if there is a following call, then the recipient is the
 // sender of that call, otherwise it's the user.
-const getRecipients = (
+const updateRecipients = (
     calls: NestedJoinCallAttributes[],
     accountAddress: Address,
 ) => {
