@@ -12,9 +12,13 @@ import {
     ComposableStableJoinQueryResult,
     ComposableJoinCall,
 } from '../types';
-import { AmountsJoin, PoolState } from '../../types';
+import { AmountsJoin as AmountsJoinBase, PoolState } from '../../types';
 import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
+
+type AmountsJoin = AmountsJoinBase & {
+    maxAmountsInNoBpt: bigint[];
+};
 
 export class ComposableStableJoin implements BaseJoin {
     public async query(
@@ -25,15 +29,8 @@ export class ComposableStableJoin implements BaseJoin {
             (t) => t.address === poolState.address,
         );
         const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
-        const amountsWithoutBpt = {
-            ...amounts,
-            maxAmountsIn: [
-                ...amounts.maxAmountsIn.slice(0, bptIndex),
-                ...amounts.maxAmountsIn.slice(bptIndex + 1),
-            ],
-        };
 
-        const userData = this.encodeUserData(input.kind, amountsWithoutBpt);
+        const userData = this.encodeUserData(input.kind, amounts);
 
         const { args, tokensIn } = parseJoinArgs({
             useNativeAssetAsWrappedAmountIn:
@@ -75,15 +72,8 @@ export class ComposableStableJoin implements BaseJoin {
 
     public buildCall(input: ComposableJoinCall): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
-        const amountsWithoutBpt = {
-            ...amounts,
-            maxAmountsIn: [
-                ...amounts.maxAmountsIn.slice(0, input.bptIndex),
-                ...amounts.maxAmountsIn.slice(input.bptIndex + 1),
-            ],
-        };
 
-        const userData = this.encodeUserData(input.joinKind, amountsWithoutBpt);
+        const userData = this.encodeUserData(input.joinKind, amounts);
 
         const { args } = parseJoinArgs({
             ...input,
@@ -117,10 +107,11 @@ export class ComposableStableJoin implements BaseJoin {
         input: JoinInput,
         bptIndex: number,
     ): AmountsJoin {
+        let amountsJoin: AmountsJoinBase;
         switch (input.kind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
-                return {
+                amountsJoin = {
                     minimumBpt: 0n,
                     maxAmountsIn: getAmounts(
                         poolTokens,
@@ -129,6 +120,7 @@ export class ComposableStableJoin implements BaseJoin {
                     ),
                     tokenInIndex: undefined,
                 };
+                break;
             }
             case JoinKind.SingleAsset: {
                 const tokenInIndex = poolTokens
@@ -138,59 +130,81 @@ export class ComposableStableJoin implements BaseJoin {
                     throw Error("Can't find index of SingleAsset");
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
                 maxAmountsIn[tokenInIndex] = MAX_UINT256;
-                return {
+                amountsJoin = {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn,
                     tokenInIndex,
                 };
+                break;
             }
             case JoinKind.Proportional: {
-                return {
+                amountsJoin = {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
                     tokenInIndex: undefined,
                 };
+                break;
             }
             default:
                 throw Error('Unsupported Join Type');
         }
+
+        return {
+            ...amountsJoin,
+            maxAmountsInNoBpt: [
+                ...amountsJoin.maxAmountsIn.slice(0, bptIndex),
+                ...amountsJoin.maxAmountsIn.slice(bptIndex + 1),
+            ],
+        };
     }
 
     private getAmountsCall(input: ComposableJoinCall): AmountsJoin {
+        let amountsJoin: AmountsJoinBase;
         switch (input.joinKind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
                 const minimumBpt = input.slippage.removeFrom(
                     input.bptOut.amount,
                 );
-                return {
+                amountsJoin = {
                     minimumBpt,
                     maxAmountsIn: input.amountsIn.map((a) => a.amount),
                     tokenInIndex: input.tokenInIndex,
                 };
+                break;
             }
             case JoinKind.SingleAsset:
             case JoinKind.Proportional: {
-                return {
+                amountsJoin = {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn: input.amountsIn.map((a) =>
                         input.slippage.applyTo(a.amount),
                     ),
                     tokenInIndex: input.tokenInIndex,
                 };
+                break;
             }
             default:
                 throw Error('Unsupported Join Type');
         }
+        return {
+            ...amountsJoin,
+            maxAmountsInNoBpt: [
+                ...amountsJoin.maxAmountsIn.slice(0, input.bptIndex),
+                ...amountsJoin.maxAmountsIn.slice(input.bptIndex + 1),
+            ],
+        };
     }
 
     private encodeUserData(kind: JoinKind, amounts: AmountsJoin): Address {
         switch (kind) {
             case JoinKind.Init:
-                return ComposableStableEncoder.joinInit(amounts.maxAmountsIn);
+                return ComposableStableEncoder.joinInit(
+                    amounts.maxAmountsInNoBpt,
+                );
             case JoinKind.Unbalanced:
                 return ComposableStableEncoder.joinUnbalanced(
-                    amounts.maxAmountsIn,
+                    amounts.maxAmountsInNoBpt,
                     amounts.minimumBpt,
                 );
             case JoinKind.SingleAsset: {
