@@ -17,7 +17,7 @@ export class PoolExit {
     constructor(config?: ExitConfig) {
         const { customPoolExits } = config || {};
         this.poolExits = {
-            Weighted: new WeightedExit(),
+            WEIGHTED: new WeightedExit(),
             // custom pool Exits take precedence over base Exits
             ...customPoolExits,
         };
