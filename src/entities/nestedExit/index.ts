@@ -1,6 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
-import { BALANCER_RELAYER, NATIVE_ASSETS } from '../../utils';
+import { BALANCER_RELAYER } from '../../utils';
 import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi } from '../../abi';
@@ -15,7 +15,7 @@ import { doQueryNestedExit } from './doQueryNestedExit';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { encodeCalls } from './encodeCalls';
 import { getPeekCalls } from './getPeekCalls';
-import { Token } from '../token';
+import { validateInputs } from './validateInputs';
 
 export class NestedExit {
     async query(
@@ -118,30 +118,3 @@ export class NestedExit {
         };
     }
 }
-
-const validateInputs = (
-    input: NestedProportionalExitInput | NestedSingleTokenExitInput,
-    nestedPoolState: NestedPoolState,
-) => {
-    const tokenOut = 'tokenOut' in input ? input.tokenOut : undefined;
-    const isProportional = tokenOut === undefined;
-    const mainTokens = nestedPoolState.mainTokens.map(
-        (token) => new Token(input.chainId, token.address, token.decimals),
-    );
-    if (tokenOut && !mainTokens.some((t) => t.isSameAddress(tokenOut))) {
-        throw new Error(
-            `Exiting to ${tokenOut} requires it to exist within main tokens`,
-        );
-    }
-    if (
-        input.useNativeAssetAsWrappedAmountOut &&
-        !mainTokens.some((t) =>
-            t.isUnderlyingEqual(NATIVE_ASSETS[input.chainId]),
-        )
-    ) {
-        throw new Error(
-            'Exiting to native asset requires wrapped native asset to exist within main tokens',
-        );
-    }
-    return isProportional;
-};

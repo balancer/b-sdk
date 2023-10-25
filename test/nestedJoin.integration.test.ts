@@ -281,6 +281,32 @@ describe('nested join test', () => {
             useNativeAssetAsWrappedAmountIn,
         );
     });
+
+    test('native asset join - invalid input', async () => {
+        const amountsIn = [
+            {
+                address:
+                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+                rawAmount: parseUnits('1', 6),
+            },
+        ];
+
+        const useNativeAssetAsWrappedAmountIn = true;
+
+        await expect(() =>
+            doTransaction({
+                poolAddress,
+                amountsIn,
+                chainId,
+                rpcUrl,
+                testAddress,
+                client,
+                useNativeAssetAsWrappedAmountIn,
+            }),
+        ).rejects.toThrowError(
+            'Joining with native asset requires wrapped native asset to exist within amountsIn',
+        );
+    });
 });
 
 export const doTransaction = async ({

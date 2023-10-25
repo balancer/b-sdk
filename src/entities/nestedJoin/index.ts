@@ -1,7 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
 import { Token } from '../token';
-import { BALANCER_RELAYER, NATIVE_ASSETS } from '../../utils';
+import { BALANCER_RELAYER } from '../../utils';
 import { Relayer } from '../relayer';
 import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../tokenAmount';
@@ -14,6 +14,7 @@ import {
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { doQueryNestedJoin } from './doQueryNestedJoin';
 import { NestedPoolState } from '../types';
+import { validateInputs } from './validateInputs';
 
 export class NestedJoin {
     async query(
@@ -105,37 +106,3 @@ export class NestedJoin {
         };
     }
 }
-
-const validateInputs = (
-    input: NestedJoinInput,
-    nestedPoolState: NestedPoolState,
-) => {
-    const mainTokens = nestedPoolState.mainTokens.map(
-        (t) => new Token(input.chainId, t.address, t.decimals),
-    );
-
-    const amountsIn = input.amountsIn.map((amountIn) => {
-        const tokenIn = mainTokens.find((t) =>
-            t.isSameAddress(amountIn.address),
-        );
-        if (tokenIn === undefined) {
-            throw new Error(
-                `Joining with ${tokenIn} requires it to exist within main tokens`,
-            );
-        }
-        return TokenAmount.fromRawAmount(tokenIn, amountIn.rawAmount);
-    });
-
-    if (
-        input.useNativeAssetAsWrappedAmountIn &&
-        !mainTokens.some((t) =>
-            t.isUnderlyingEqual(NATIVE_ASSETS[input.chainId]),
-        )
-    ) {
-        throw new Error(
-            'Joining with native asset requires wrapped native asset to exist within main tokens',
-        );
-    }
-
-    return amountsIn;
-};

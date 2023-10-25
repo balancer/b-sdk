@@ -138,6 +138,7 @@ describe('nested exit test', () => {
 
     test('proportional exit - native asset', async () => {
         const amountIn = parseUnits('1', 18);
+        const useNativeAssetAsWrappedAmountOut = true;
 
         const {
             transactionReceipt,
@@ -153,7 +154,7 @@ describe('nested exit test', () => {
             rpcUrl,
             testAddress,
             client,
-            useNativeAssetAsWrappedAmountOut: true,
+            useNativeAssetAsWrappedAmountOut,
         });
 
         assertResults(
@@ -200,6 +201,7 @@ describe('nested exit test', () => {
     test('single token exit - native asset', async () => {
         const amountIn = parseUnits('1', 18);
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
+        const useNativeAssetAsWrappedAmountOut = true;
 
         const {
             transactionReceipt,
@@ -216,7 +218,7 @@ describe('nested exit test', () => {
             testAddress,
             client,
             tokenOut,
-            useNativeAssetAsWrappedAmountOut: true,
+            useNativeAssetAsWrappedAmountOut,
         });
 
         assertResults(
@@ -226,6 +228,27 @@ describe('nested exit test', () => {
             amountsOut,
             slippage,
             minAmountsOut,
+        );
+    });
+
+    test('single token exit - native asset - invalid input', async () => {
+        const amountIn = parseUnits('1', 18);
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
+        const useNativeAssetAsWrappedAmountOut = true;
+
+        await expect(
+            doTransaction({
+                poolAddress,
+                amountIn,
+                chainId,
+                rpcUrl,
+                testAddress,
+                client,
+                tokenOut,
+                useNativeAssetAsWrappedAmountOut,
+            }),
+        ).rejects.toThrow(
+            'Exiting to native asset requires wrapped native asset to be the tokenOut',
         );
     });
 });
