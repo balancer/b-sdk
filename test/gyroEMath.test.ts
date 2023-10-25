@@ -1,5 +1,4 @@
 // pnpm test -- gyroEMath.test.ts
-import { describe, expect, test } from 'vitest';
 import testPools from './lib/testData/gyroETestPool.json';
 import { RawGyroEPool } from '../src/data/types';
 import { ChainId } from '../src/utils';
