@@ -211,7 +211,7 @@ export class ComposableStableJoin implements BaseJoin {
                 if (amounts.tokenInIndex === undefined) throw Error('No Index');
                 return ComposableStableEncoder.joinSingleAsset(
                     amounts.minimumBpt,
-                    amounts.tokenInIndex,
+                    amounts.tokenInIndex, // Has to be index without BPT
                 );
             }
             case JoinKind.Proportional: {

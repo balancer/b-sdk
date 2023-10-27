@@ -1,9 +1,106 @@
-import { replaceWrapped, Token } from '../../../src';
-import { assertTransaction, sendTransactionGetBalances } from './helper';
+import { expect } from 'vitest';
+import {
+    PoolJoin,
+    JoinInput,
+    PoolStateInput,
+    Slippage,
+    Address,
+    JoinBuildOutput,
+    JoinQueryResult,
+    ZERO_ADDRESS,
+    UnbalancedJoinInput,
+    BALANCER_VAULT,
+    SingleAssetJoinInput,
+    ProportionalJoinInput,
+    Token,
+    ChainId,
+    TokenAmount,
+    ComposableStableJoinQueryResult,
+    NATIVE_ASSETS,
+} from '../../../src';
+import { TxResult, sendTransactionGetBalances } from './helper';
 import { JoinTxInput } from './types';
+import { zeroAddress } from 'viem';
+
+type JoinResult = {
+    joinQueryResult: JoinQueryResult;
+    joinBuildOutput: JoinBuildOutput;
+    txOutput: TxResult;
+};
+
+async function sdkJoin({
+    poolJoin,
+    joinInput,
+    poolStateInput,
+    slippage,
+    testAddress,
+}: {
+    poolJoin: PoolJoin;
+    joinInput: JoinInput;
+    poolStateInput: PoolStateInput;
+    slippage: Slippage;
+    testAddress: Address;
+}): Promise<{
+    joinBuildOutput: JoinBuildOutput;
+    joinQueryResult: JoinQueryResult;
+}> {
+    const joinQueryResult = await poolJoin.query(joinInput, poolStateInput);
+    const joinBuildOutput = poolJoin.buildCall({
+        ...joinQueryResult,
+        slippage,
+        sender: testAddress,
+        recipient: testAddress,
+    });
+
+    return {
+        joinBuildOutput,
+        joinQueryResult,
+    };
+}
+
+function getTokens(poolStateInput: PoolStateInput): Address[] {
+    // pool tokens, bpt, eth
+    const tokens = poolStateInput.tokens
+        .filter((t) => t.address !== poolStateInput.address)
+        .map((t) => t.address);
+    tokens.push(poolStateInput.address);
+    tokens.push(ZERO_ADDRESS);
+    return tokens;
+}
+
+function isComposableStableJoinQueryResult(result: JoinQueryResult): boolean {
+    return (result as ComposableStableJoinQueryResult).bptIndex !== undefined;
+}
+
+function getCheck(result: JoinQueryResult, isExactIn: boolean) {
+    if (isComposableStableJoinQueryResult(result)) {
+        if (isExactIn) {
+            // Using this destructuring to return only the fields of interest
+            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+            const { bptOut, bptIndex, ...check } =
+                result as ComposableStableJoinQueryResult;
+            return check;
+        } else {
+            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+            const { amountsIn, bptIndex, ...check } =
+                result as ComposableStableJoinQueryResult;
+            return check;
+        }
+    } else {
+        if (isExactIn) {
+            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+            const { bptOut, ...check } = result;
+            return check;
+        } else {
+            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+            const { amountsIn, ...check } = result;
+            return check;
+        }
+    }
+}
 
 /**
- * Helper function that sends a join transaction and check for balance deltas
+ * Create and submit join transaction.
  * @param txInput
  *      @param poolJoin: PoolJoin - The pool join class, used to query the join and build the join call
  *      @param poolInput: PoolStateInput - The state of the pool being joined
@@ -11,94 +108,295 @@ import { JoinTxInput } from './types';
  *      @param testAddress: Address - The address to send the transaction from
  *      @param client: Client & PublicActions & WalletActions - The RPC client
  *      @param slippage: Slippage - The slippage tolerance for the join transaction
- *      @param checkNativeBalance: boolean - Whether to check the native asset balance or not
- *      @param chainId: ChainId - The Chain Id of the pool being joined, for example: 1 for Mainnet, 137 for Polygon, etc.
  */
-
-export const doJoin = async (txInput: JoinTxInput) => {
+export async function doJoin(txInput: JoinTxInput) {
     const {
         poolJoin,
-        poolInput,
+        poolStateInput,
         joinInput,
         testAddress,
         client,
         slippage,
-        checkNativeBalance,
-        chainId,
     } = txInput;
-    const queryResult = await poolJoin.query(joinInput, poolInput);
-    const { call, to, value, maxAmountsIn, minBptOut } = poolJoin.buildCall({
-        ...queryResult,
+
+    const { joinQueryResult, joinBuildOutput } = await sdkJoin({
+        poolJoin,
+        joinInput,
+        poolStateInput,
         slippage,
-        sender: testAddress,
-        recipient: testAddress,
+        testAddress,
     });
 
-    const poolTokens = poolInput.tokens.map(
-        (t) => new Token(chainId, t.address, t.decimals),
-    );
-    const bptIndex = poolInput.tokens.findIndex(
-        (t) => t.address === poolInput.address,
-    );
-    let tokensForBalanceCheck; // Replace with native asset if required
-    const poolTokensAddr = checkNativeBalance
-        ? replaceWrapped(poolTokens, chainId).map((t) => t.address)
-        : poolTokens.map((t) => t.address);
+    // get tokens for balance change - pool tokens, BPT, native
+    const tokens = getTokens(poolStateInput);
 
-    if (bptIndex >= 0) {
-        /*
-         * If the pool type tokens list contains BPT (for example: Composable Stable), the poolTokensAddr
-         * will already have the bpt address, so we don't need to add it again.
-         * */
-        tokensForBalanceCheck = [...poolTokensAddr];
-    } else {
-        /**
-         * If the pool type tokens list does not contains BPT (for example: Weighted), the poolTokensAddr
-         * will not have the bpt address, so we need to add it, so the balance delta of the bpt will be
-         * checked in the tests.
-         */
-        tokensForBalanceCheck = [...poolTokensAddr, poolInput.address];
-    }
+    // send transaction and calculate balance changes
+    const txOutput = await sendTransactionGetBalances(
+        tokens,
+        client,
+        testAddress,
+        joinBuildOutput.to,
+        joinBuildOutput.call,
+        joinBuildOutput.value,
+    );
 
-    // send transaction and check balance changes
-    const { transactionReceipt, balanceDeltas } =
-        await sendTransactionGetBalances(
-            tokensForBalanceCheck,
-            client,
-            testAddress,
-            to,
-            call,
-            value,
-        );
-    let expectedDeltas;
-    if (bptIndex >= 0) {
-        /*
-         * If the pool type tokens list contains BPT (for example: Composable Stable), the queryResult.amountsIn
-         * includes the amount in of the bptIn, which is always 0, so we need to remove it from the
-         * expectedDeltas and put the bptOut.amount in its place.
-         */
-        expectedDeltas = [
-            ...queryResult.amountsIn.slice(0, bptIndex).map((a) => a.amount),
-            queryResult.bptOut.amount,
-            ...queryResult.amountsIn.slice(bptIndex + 1).map((a) => a.amount),
-        ];
-    } else {
-        /**
-         * If the pool type tokens list does not contains BPT (for example: Weighted), the queryResult.amountsIn
-         * does not include the amount of the bptIn, so we just need to add the bptOut.amount in the end
-         * of the expectedDeltas.
-         */
-        expectedDeltas = [
-            ...queryResult.amountsIn.map((a) => a.amount),
-            queryResult.bptOut.amount,
-        ];
-    }
-    // Confirm final balance changes match query result
-    assertTransaction(expectedDeltas, balanceDeltas, transactionReceipt.status);
     return {
-        queryResult,
+        joinQueryResult,
+        joinBuildOutput,
+        txOutput,
+    };
+}
+
+export function assertUnbalancedJoin(
+    chainId: ChainId,
+    poolStateInput: PoolStateInput,
+    joinInput: UnbalancedJoinInput,
+    joinResult: JoinResult,
+    slippage: Slippage,
+) {
+    const { txOutput, joinQueryResult, joinBuildOutput } = joinResult;
+
+    // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
+    const expectedAmountsIn = poolStateInput.tokens.map((t) => {
+        let token;
+        if (
+            joinInput.useNativeAssetAsWrappedAmountIn &&
+            t.address === NATIVE_ASSETS[chainId].wrapped
+        )
+            token = new Token(chainId, zeroAddress, t.decimals);
+        else token = new Token(chainId, t.address, t.decimals);
+        const input = joinInput.amountsIn.find(
+            (a) => a.token.address === t.address,
+        );
+        if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
+        else return TokenAmount.fromRawAmount(token, input.amount);
+    });
+
+    const expectedQueryResult: Omit<JoinQueryResult, 'bptOut' | 'bptIndex'> = {
+        // Query should use same amountsIn as input
+        amountsIn: expectedAmountsIn,
+        tokenInIndex: undefined,
+        // Should match inputs
+        poolId: poolStateInput.id,
+        poolType: poolStateInput.type,
+        fromInternalBalance: !!joinInput.fromInternalBalance,
+        joinKind: joinInput.kind,
+    };
+
+    const queryCheck = getCheck(joinQueryResult, true);
+
+    expect(queryCheck).to.deep.eq(expectedQueryResult);
+
+    // Expect some bpt amount
+    expect(joinQueryResult.bptOut.amount > 0n).to.be.true;
+
+    assertJoinBuildOutput(
+        joinInput,
+        joinQueryResult,
+        joinBuildOutput,
+        true,
+        slippage,
+    );
+
+    assertTokenDeltas(
+        poolStateInput,
+        joinInput,
+        joinQueryResult,
+        joinBuildOutput,
+        txOutput,
+    );
+}
+
+export function assertSingleToken(
+    chainId: ChainId,
+    poolStateInput: PoolStateInput,
+    joinInput: SingleAssetJoinInput,
+    joinResult: JoinResult,
+    slippage: Slippage,
+) {
+    const { txOutput, joinQueryResult, joinBuildOutput } = joinResult;
+
+    if (!joinQueryResult.tokenInIndex) throw Error('No index');
+
+    const bptToken = new Token(chainId, poolStateInput.address, 18);
+
+    const tokensWithoutBpt = poolStateInput.tokens.filter(
+        (t) => t.address !== poolStateInput.address,
+    );
+
+    const expectedQueryResult: Omit<JoinQueryResult, 'amountsIn' | 'bptIndex'> =
+        {
+            // Query should use same bpt out as user sets
+            bptOut: TokenAmount.fromRawAmount(
+                bptToken,
+                joinInput.bptOut.amount,
+            ),
+            tokenInIndex: tokensWithoutBpt.findIndex(
+                (t) => t.address === joinInput.tokenIn,
+            ),
+            // Should match inputs
+            poolId: poolStateInput.id,
+            poolType: poolStateInput.type,
+            fromInternalBalance: !!joinInput.fromInternalBalance,
+            joinKind: joinInput.kind,
+        };
+
+    const queryCheck = getCheck(joinQueryResult, false);
+
+    expect(queryCheck).to.deep.eq(expectedQueryResult);
+
+    // Expect only tokenIn to have amount > 0
+    // (Note joinQueryResult also has value for bpt if pre-minted)
+    joinQueryResult.amountsIn.forEach((a) => {
+        if (
+            !joinInput.useNativeAssetAsWrappedAmountIn &&
+            a.token.address === joinInput.tokenIn
+        )
+            expect(a.amount > 0n).to.be.true;
+        else if (
+            joinInput.useNativeAssetAsWrappedAmountIn &&
+            a.token.address === zeroAddress
+        )
+            expect(a.amount > 0n).to.be.true;
+        else expect(a.amount).toEqual(0n);
+    });
+
+    assertJoinBuildOutput(
+        joinInput,
+        joinQueryResult,
+        joinBuildOutput,
+        false,
+        slippage,
+    );
+
+    assertTokenDeltas(
+        poolStateInput,
+        joinInput,
+        joinQueryResult,
+        joinBuildOutput,
+        txOutput,
+    );
+}
+
+export function assertProportional(
+    chainId: ChainId,
+    poolStateInput: PoolStateInput,
+    joinInput: ProportionalJoinInput,
+    joinResult: JoinResult,
+    slippage: Slippage,
+) {
+    const { txOutput, joinQueryResult, joinBuildOutput } = joinResult;
+
+    const bptToken = new Token(chainId, poolStateInput.address, 18);
+
+    const expectedQueryResult: Omit<JoinQueryResult, 'amountsIn' | 'bptIndex'> =
+        {
+            // Query should use same bpt out as user sets
+            bptOut: TokenAmount.fromRawAmount(
+                bptToken,
+                joinInput.bptOut.amount,
+            ),
+            // Only expect tokenInIndex for SingleAssetJoin
+            tokenInIndex: undefined,
+            // Should match inputs
+            poolId: poolStateInput.id,
+            poolType: poolStateInput.type,
+            fromInternalBalance: !!joinInput.fromInternalBalance,
+            joinKind: joinInput.kind,
+        };
+
+    const queryCheck = getCheck(joinQueryResult, false);
+
+    expect(queryCheck).to.deep.eq(expectedQueryResult);
+
+    // Expect all assets in to have an amount > 0 apart from BPT if it exists
+    joinQueryResult.amountsIn.forEach((a) => {
+        if (a.token.address === poolStateInput.address)
+            expect(a.amount).toEqual(0n);
+        else expect(a.amount > 0n).to.be.true;
+    });
+
+    assertJoinBuildOutput(
+        joinInput,
+        joinQueryResult,
+        joinBuildOutput,
+        false,
+        slippage,
+    );
+
+    assertTokenDeltas(
+        poolStateInput,
+        joinInput,
+        joinQueryResult,
+        joinBuildOutput,
+        txOutput,
+    );
+}
+
+function assertTokenDeltas(
+    poolStateInput: PoolStateInput,
+    joinInput: JoinInput,
+    joinQueryResult: JoinQueryResult,
+    joinBuildOutput: JoinBuildOutput,
+    txOutput: TxResult,
+) {
+    expect(txOutput.transactionReceipt.status).to.eq('success');
+
+    // joinQueryResult amountsIn will have a value for the BPT token if it is a pre-minted pool
+    const amountsWithoutBpt = [...joinQueryResult.amountsIn].filter(
+        (t) => t.token.address !== poolStateInput.address,
+    );
+
+    // Matching order of getTokens helper: [poolTokens, BPT, native]
+    const expectedDeltas = [
+        ...amountsWithoutBpt.map((a) => a.amount),
+        joinQueryResult.bptOut.amount,
+        0n,
+    ];
+
+    // If input is wrapped native we must replace it with 0 and update native value instead
+    if (joinInput.useNativeAssetAsWrappedAmountIn) {
+        const index = amountsWithoutBpt.findIndex(
+            (a) => a.token.address === zeroAddress,
+        );
+        expectedDeltas[index] = 0n;
+        expectedDeltas[expectedDeltas.length - 1] =
+            joinBuildOutput.value as bigint;
+    }
+
+    expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
+}
+
+function assertJoinBuildOutput(
+    joinInput: JoinInput,
+    joinQueryResult: JoinQueryResult,
+    joinBuildOutput: JoinBuildOutput,
+    isExactIn: boolean,
+    slippage: Slippage,
+) {
+    // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
+    const maxAmountsIn = isExactIn
+        ? joinQueryResult.amountsIn.map((a) => a.amount)
+        : joinQueryResult.amountsIn.map((a) => slippage.applyTo(a.amount));
+
+    // if exactIn slippage should be applied to bptOut else should use same bptOut as input
+    const minBptOut = isExactIn
+        ? slippage.removeFrom(joinQueryResult.bptOut.amount)
+        : joinQueryResult.bptOut.amount;
+
+    const expectedBuildOutput: Omit<JoinBuildOutput, 'call'> = {
         maxAmountsIn,
         minBptOut,
-        value,
+        to: BALANCER_VAULT,
+        // Value should equal value of any wrapped asset if using native
+        value: joinInput.useNativeAssetAsWrappedAmountIn
+            ? joinQueryResult.amountsIn.find(
+                  (a) => a.token.address === zeroAddress,
+              )?.amount
+            : undefined,
     };
-};
+
+    // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+    const { call, ...buildCheck } = joinBuildOutput;
+    expect(buildCheck).to.deep.eq(expectedBuildOutput);
+}
