@@ -96,7 +96,7 @@ export class ComposableStableJoin implements BaseJoin {
         return {
             call,
             to: BALANCER_VAULT,
-            value,
+            value: value === undefined ? 0n : value,
             minBptOut: amounts.minimumBpt,
             maxAmountsIn: amounts.maxAmountsIn,
         };

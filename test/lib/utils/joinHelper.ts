@@ -360,8 +360,7 @@ function assertTokenDeltas(
             (a) => a.token.address === zeroAddress,
         );
         expectedDeltas[index] = 0n;
-        expectedDeltas[expectedDeltas.length - 1] =
-            joinBuildOutput.value as bigint;
+        expectedDeltas[expectedDeltas.length - 1] = joinBuildOutput.value;
     }
 
     expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
@@ -390,10 +389,10 @@ function assertJoinBuildOutput(
         to: BALANCER_VAULT,
         // Value should equal value of any wrapped asset if using native
         value: joinInput.useNativeAssetAsWrappedAmountIn
-            ? joinQueryResult.amountsIn.find(
+            ? (joinQueryResult.amountsIn.find(
                   (a) => a.token.address === zeroAddress,
-              )?.amount
-            : undefined,
+              )?.amount as bigint)
+            : 0n,
     };
 
     // rome-ignore lint/correctness/noUnusedVariables: <explanation>
