@@ -18,6 +18,12 @@ import {
 import { erc20Abi } from '../../../src/abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
 
+export type TxResult = {
+    transactionReceipt: TransactionReceipt;
+    balanceDeltas: bigint[];
+    gasUsed: bigint;
+};
+
 export const approveToken = async (
     client: Client & PublicActions & WalletActions,
     account: Address,
@@ -71,7 +77,7 @@ export const getBalances = async (
 };
 
 /**
- * Helper function that sends a transaction and check for balance deltas
+ * Helper function that sends a transaction and calculates balance changes
  *
  * @param tokensForBalanceCheck Token addresses to check balance deltas
  * @param client Client that will perform transactions
@@ -88,11 +94,7 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
-): Promise<{
-    transactionReceipt: TransactionReceipt;
-    balanceDeltas: bigint[];
-    gasUsed: bigint;
-}> {
+): Promise<TxResult> {
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
         client,

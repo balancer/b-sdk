@@ -11,7 +11,7 @@ export enum JoinKind {
 }
 
 // This will be extended for each pools specific input requirements
-export type BaseJoinInput = {
+type BaseJoinInput = {
     chainId: number;
     rpcUrl: string;
     useNativeAssetAsWrappedAmountIn?: boolean;
@@ -45,8 +45,7 @@ export type JoinInput =
     | SingleAssetJoinInput
     | ProportionalJoinInput;
 
-// Returned from a join query
-export type JoinQueryResult = {
+type BaseJoinQueryResult = {
     poolType: string;
     poolId: Hex;
     joinKind: JoinKind;
@@ -56,18 +55,33 @@ export type JoinQueryResult = {
     tokenInIndex?: number;
 };
 
-export type JoinCallInput = JoinQueryResult & {
+export type WeightedJoinQueryResult = BaseJoinQueryResult;
+
+export type ComposableStableJoinQueryResult = BaseJoinQueryResult & {
+    bptIndex: number;
+};
+
+export type JoinQueryResult =
+    | WeightedJoinQueryResult
+    | ComposableStableJoinQueryResult;
+
+type BaseJoinCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
 };
 
+export type ComposableJoinCall = BaseJoinCall & ComposableStableJoinQueryResult;
+export type WeightedJoinCall = BaseJoinCall & BaseJoinQueryResult;
+
+export type JoinCall = WeightedJoinCall | ComposableJoinCall;
+
 export interface BaseJoin {
     query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
-    buildCall(input: JoinCallInput): {
+    buildCall(input: JoinCall): {
         call: Hex;
         to: Address;
-        value: bigint | undefined;
+        value: bigint;
         minBptOut: bigint;
         maxAmountsIn: bigint[];
     };
@@ -76,7 +90,7 @@ export interface BaseJoin {
 export type JoinBuildOutput = {
     call: Hex;
     to: Address;
-    value: bigint | undefined;
+    value: bigint;
     minBptOut: bigint;
     maxAmountsIn: bigint[];
 };
