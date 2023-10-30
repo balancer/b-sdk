@@ -216,7 +216,7 @@ export function assertSingleToken(
 ) {
     const { txOutput, joinQueryResult, joinBuildOutput } = joinResult;
 
-    if (!joinQueryResult.tokenInIndex) throw Error('No index');
+    if (joinQueryResult.tokenInIndex === undefined) throw Error('No index');
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
 

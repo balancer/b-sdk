@@ -134,15 +134,12 @@ describe('composable stable join test', () => {
             };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
             });
             assertUnbalancedJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                { ...joinInput, useNativeAssetAsWrappedAmountIn: true },
+                joinInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -150,11 +147,11 @@ describe('composable stable join test', () => {
     });
 
     describe('single asset join', () => {
-        let joinInput: SingleAssetJoinInput;
+        let input: SingleAssetJoinInput;
         beforeAll(() => {
             const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-            joinInput = {
+            input = {
                 bptOut,
                 tokenIn,
                 chainId,
@@ -165,34 +162,32 @@ describe('composable stable join test', () => {
         test('with token', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                joinInput: input,
             });
 
             assertSingleToken(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                input,
                 joinResult,
                 txInput.slippage,
             );
         });
 
         test('with native', async () => {
+            const joinInput = {
+                ...input,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
             });
 
             assertSingleToken(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -200,10 +195,10 @@ describe('composable stable join test', () => {
     });
 
     describe('proportional join', () => {
-        let joinInput: ProportionalJoinInput;
+        let input: ProportionalJoinInput;
         beforeAll(() => {
             const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
-            joinInput = {
+            input = {
                 bptOut,
                 chainId,
                 rpcUrl,
@@ -213,32 +208,30 @@ describe('composable stable join test', () => {
         test('with tokens', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                joinInput: input,
             });
 
             assertProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                input,
                 joinResult,
                 txInput.slippage,
             );
         });
         test('with native', async () => {
+            const joinInput = {
+                ...input,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
             });
             assertProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
                 joinResult,
                 txInput.slippage,
             );
