@@ -4,7 +4,7 @@ import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
 import { NestedJoinCallAttributes } from './types';
 import { replaceWrapped } from '../utils/replaceWrapped';
-import { bathcRelayerLibraryAbi } from '../../abi';
+import { batchRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
 
 export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
@@ -55,7 +55,7 @@ export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
         };
 
         const encodedCall = encodeFunctionData({
-            abi: bathcRelayerLibraryAbi,
+            abi: batchRelayerLibraryAbi,
             functionName: 'joinPool',
             args: [
                 poolId,

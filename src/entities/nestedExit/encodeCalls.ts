@@ -3,7 +3,7 @@ import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
 import { NestedExitCallAttributes } from './types';
 import { replaceWrapped } from '../utils/replaceWrapped';
-import { bathcRelayerLibraryAbi } from '../../abi';
+import { batchRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
 
 export const encodeCalls = (
@@ -53,7 +53,7 @@ export const encodeCalls = (
         };
 
         const encodedCall = encodeFunctionData({
-            abi: bathcRelayerLibraryAbi,
+            abi: batchRelayerLibraryAbi,
             functionName: 'exitPool',
             args: [
                 poolId,

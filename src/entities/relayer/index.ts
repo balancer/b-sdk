@@ -10,7 +10,7 @@ import {
     WalletActions,
 } from 'viem';
 import { Address, Hex } from '../../types';
-import { bathcRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
+import { batchRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
 import { RelayerAuthorization } from './authorization';
 import { vaultAbi } from '../../abi';
 import { MAX_UINT256 } from '../../utils';
@@ -36,7 +36,7 @@ export class Relayer {
 
     static encodePeekChainedReferenceValue(reference: bigint): Hex {
         return encodeFunctionData({
-            abi: bathcRelayerLibraryAbi,
+            abi: batchRelayerLibraryAbi,
             functionName: 'peekChainedReferenceValue',
             args: [reference],
         });
@@ -48,7 +48,7 @@ export class Relayer {
         signature: Hex,
     ): Hex {
         return encodeFunctionData({
-            abi: bathcRelayerLibraryAbi,
+            abi: batchRelayerLibraryAbi,
             functionName: 'setRelayerApproval',
             args: [relayerAddress, approved, signature],
         });

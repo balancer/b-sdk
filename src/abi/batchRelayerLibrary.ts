@@ -1,4 +1,4 @@
-export const bathcRelayerLibraryAbi = [
+export const batchRelayerLibraryAbi = [
     {
         inputs: [
             {
