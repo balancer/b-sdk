@@ -185,7 +185,17 @@ const getExitPath = (tokenOut: string, poolsTopDown: NestedPool[]) => {
     while (tokenOutByLevel !== topPool.address) {
         const currentPool = poolsTopDown.find(
             (p) =>
-                p.address !== tokenOutByLevel && // prevents pools with BPT as token to be picked up incorrectly
+                /**
+                 * Filter out pools that have tokenOutByLevel as it's own address
+                 * in order to prevent pools with BPT as token to be picked up
+                 * incorrectly - e.g. when exiting from WETH/3-POOL to DAI, the
+                 * first iteration will pick 3-POOL as the "bottom" pool and update
+                 * tokenOutByLevel to 3-POOL-BPT. Since 3-POOL-BPT is contained
+                 * on both WETH/3-POOL and 3-POOL itself, simply checking if the
+                 * pool contains that token could result in the bottom pool being
+                 * picked up again.
+                 */
+                p.address !== tokenOutByLevel &&
                 p.tokens.some((t) => t.address === tokenOutByLevel),
         ) as NestedPool;
         exitPath.unshift(currentPool);
