@@ -18,7 +18,7 @@ import {
 
 describe('gyro3 integration tests', () => {
     const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env['POLYGON_RPC_URL'] || 'https://polygon-rpc.com';
+    const rpcUrl = 'http://127.0.0.1:8137/';
     const rawPool = { ...testPools }.pools[1] as RawGyro3Pool;
     const USDC = new Token(
         chainId,

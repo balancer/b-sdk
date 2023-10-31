@@ -21,7 +21,7 @@ import { MockPoolProvider } from './lib/utils/mockPoolProvider';
 
 describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com';
+    const rpcUrl = 'http://127.0.0.1:8137/';
     const WMATIC = new Token(
         chainId,
         '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',

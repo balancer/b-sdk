@@ -22,7 +22,8 @@ const NETWORKS: Networks = [
         // Public Polygon RPCs are usually unreliable
         fallBackRpc: undefined,
         port: 8137,
-        forkBlockNumber: 43878700n,
+        // Note - this has to be >= highest blockNo used in tests
+        forkBlockNumber: 44215395n,
     },
 ];
 
