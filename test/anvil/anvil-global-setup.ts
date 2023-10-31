@@ -25,6 +25,13 @@ const NETWORKS: Networks = [
         // Note - this has to be >= highest blockNo used in tests
         forkBlockNumber: 44215395n,
     },
+        {
+        rpcEnv: 'FANTOM_RPC_URL',
+        // Public Fantom RPCs are usually unreliable
+        fallBackRpc: undefined,
+        port: 8138,
+        forkBlockNumber: 65313450n,
+    },
 ];
 
 export default async function () {
