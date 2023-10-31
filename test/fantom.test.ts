@@ -12,7 +12,7 @@ import { SwapKind, SwapOptions } from "../src/types";
 import { BasePool } from "../src/entities/pools";
 import { MockPoolProvider } from "./lib/utils/mockPoolProvider";
 
-import testPools from "./lib/testData/fantom_65313450.json";
+import testPools from "./lib/testData/testPools/fantom_65313450.json";
 import { RawBasePool } from "../src";
 
 describe(

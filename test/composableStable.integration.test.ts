@@ -12,7 +12,7 @@ import { SwapKind, SwapOptions } from "../src/types";
 import { BasePool } from "../src/entities/pools";
 import { MockPoolProvider } from "./lib/utils/mockPoolProvider";
 
-import testPools from "./lib/testData/composableStable.json";
+import testPools from "./lib/testData/testPools/composableStable_17473810.json";
 import { RawStablePool } from "../src";
 
 describe("ComposableStable Swap tests", () => {

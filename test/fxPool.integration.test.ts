@@ -17,7 +17,7 @@ import {
 } from '../src';
 import { MockPoolProvider } from './lib/utils/mockPoolProvider';
 
-import testPools from './lib/testData/fxPool_43667355.json';
+import testPools from './lib/testData/testPools/fx_43667355.json';
 
 describe('fx integration tests', () => {
     const chainId = ChainId.POLYGON;

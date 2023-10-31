@@ -12,7 +12,7 @@ import { SwapKind, SwapOptions } from "../src/types";
 import { BasePool } from "../src/entities/pools";
 import { MockPoolProvider } from "./lib/utils/mockPoolProvider";
 
-import testPools from "./lib/testData/weighted.json";
+import testPools from "./lib/testData/testPools/weighted_17473810.json";
 import { RawWeightedPool } from "../src";
 
 describe(

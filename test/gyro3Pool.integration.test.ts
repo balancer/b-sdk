@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import testPools from './lib/testData/gyro3TestPool.json';
+import testPools from './lib/testData/testPools/gyro3_44133130.json';
 import { ChainId } from '../src/utils';
 import { RawGyro3Pool } from '../src/data/types';
 import {

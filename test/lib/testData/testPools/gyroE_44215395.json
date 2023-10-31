@@ -1,14 +1,4 @@
 {
-    "tradeInfo": {
-        "SwapType": "n/a",
-        "TokenIn": "n/a",
-        "TokenOut": "n/a",
-        "NoPools": 1,
-        "SwapAmount": "n/a",
-        "GasPrice": "n/a",
-        "SwapAmountDecimals": "n/a",
-        "ReturnAmountDecimals": "n/a"
-    },
     "pools": [
         {
             "id": "0x12311573a96806182c01ef6c349948edc6635b040002000000000000000002ab",
