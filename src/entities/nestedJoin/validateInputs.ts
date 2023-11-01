@@ -2,12 +2,14 @@ import { NATIVE_ASSETS } from '../../utils';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { NestedPoolState } from '../types';
+import { constraintValidation } from '../utils';
 import { NestedJoinInput } from './types';
 
 export const validateInputs = (
     input: NestedJoinInput,
     nestedPoolState: NestedPoolState,
 ): TokenAmount[] => {
+    constraintValidation(nestedPoolState);
     const mainTokens = nestedPoolState.mainTokens.map(
         (t) => new Token(input.chainId, t.address, t.decimals),
     );
