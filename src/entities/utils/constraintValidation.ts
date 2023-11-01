@@ -14,7 +14,9 @@ export function constraintValidation(
     e.g. We can't validate pool state without constructing it which would require more complexity and data.
     So we assume pool state is correct. 
     */
-    const topLevel = nestedPoolState.pools[0].level;
+    // pools may not be in order so find highest level which will be top pool
+    const topLevel = Math.max(...nestedPoolState.pools.map((p) => p.level));
+
     nestedPoolState.mainTokens.forEach((t) => {
         const poolsWithToken = nestedPoolState.pools.filter((p) =>
             p.tokens.some((pt) => pt.address === t.address),
