@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import testPools from './lib/testData/gyroETestPool.json';
+import testPools from './lib/testData/testPools/gyroE_44215395.json';
 import { BATCHSIZE, ChainId, VAULT } from '../src/utils';
 import {
     BasePool,
@@ -21,7 +21,7 @@ import { MockPoolProvider } from './lib/utils/mockPoolProvider';
 
 describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com';
+    const rpcUrl = 'http://127.0.0.1:8137/';
     const WMATIC = new Token(
         chainId,
         '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',

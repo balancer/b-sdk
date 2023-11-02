@@ -1,5 +1,5 @@
 // pnpm test -- composableStableJoin.integration.test.ts
-import { describe, expect, test, beforeAll, beforeEach } from 'vitest';
+import { describe, test, beforeAll, beforeEach } from 'vitest';
 import { config } from 'dotenv';
 config();
 
@@ -30,7 +30,12 @@ import {
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import { JoinTxInput } from './lib/utils/types';
-import { doJoin } from './lib/utils/joinHelper';
+import {
+    doJoin,
+    assertUnbalancedJoin,
+    assertSingleToken,
+    assertProportional,
+} from './lib/utils/joinHelper';
 
 const chainId = ChainId.MAINNET;
 const rpcUrl = 'http://127.0.0.1:8545/';
@@ -60,11 +65,9 @@ describe('composable stable join test', () => {
             client,
             poolJoin: new PoolJoin(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolInput,
+            poolStateInput: poolInput,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             joinInput: {} as JoinInput,
-            checkNativeBalance: false,
-            chainId,
         };
 
         // setup BPT token
@@ -75,200 +78,164 @@ describe('composable stable join test', () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [...txInput.poolInput.tokens.map((t) => t.address)],
+            [...txInput.poolStateInput.tokens.map((t) => t.address)],
             [0, 0, 3],
             [
-                ...txInput.poolInput.tokens.map((t) =>
+                ...txInput.poolStateInput.tokens.map((t) =>
                     parseUnits('100', t.decimals),
                 ),
             ],
         );
     });
 
-    test('unbalanced join', async () => {
-        const bptIndex = txInput.poolInput.tokens.findIndex(
-            (t) => t.address === txInput.poolInput.address,
-        );
-        const poolTokensWithoutBpt = txInput.poolInput.tokens
-            .map((t) => new Token(chainId, t.address, t.decimals))
-            .filter((_, index) => index !== bptIndex);
+    describe('unbalanced join', () => {
+        let input: Omit<UnbalancedJoinInput, 'amountsIn'>;
+        let amountsIn: TokenAmount[];
+        beforeAll(() => {
+            const bptIndex = txInput.poolStateInput.tokens.findIndex(
+                (t) => t.address === txInput.poolStateInput.address,
+            );
+            const poolTokensWithoutBpt = txInput.poolStateInput.tokens
+                .map((t) => new Token(chainId, t.address, t.decimals))
+                .filter((_, index) => index !== bptIndex);
 
-        const amountsIn = poolTokensWithoutBpt.map((t) =>
-            TokenAmount.fromHumanAmount(t, '1'),
-        );
-
-        // perform join query to get expected bpt out
-        const joinInput: UnbalancedJoinInput = {
-            amountsIn,
-            chainId,
-            rpcUrl,
-            kind: JoinKind.Unbalanced,
-        };
-
-        const { queryResult, maxAmountsIn, minBptOut, value } = await doJoin({
-            ...txInput,
-            joinInput,
+            amountsIn = poolTokensWithoutBpt.map((t) =>
+                TokenAmount.fromHumanAmount(t, '1'),
+            );
+            input = {
+                chainId,
+                rpcUrl,
+                kind: JoinKind.Unbalanced,
+            };
         });
-        // Query should use same amountsIn as user sets
-        expect(
-            queryResult.amountsIn.filter((_, index) => index !== bptIndex),
-        ).to.deep.eq(amountsIn);
-        expect(queryResult.tokenInIndex).to.be.undefined;
+        test('token inputs', async () => {
+            const joinInput = {
+                ...input,
+                amountsIn: [...amountsIn.splice(0, 1)],
+            };
+            const joinResult = await doJoin({
+                ...txInput,
+                joinInput,
+            });
+            assertUnbalancedJoin(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                joinInput,
+                joinResult,
+                txInput.slippage,
+            );
+        });
 
-        // Should be no native value
-        expect(value).to.be.undefined;
-
-        // Expect some bpt amount
-        expect(queryResult.bptOut.amount > BigInt(0)).to.be.true;
-
-        // Confirm slippage - only bpt out
-        const expectedMinBpt = txInput.slippage.removeFrom(
-            queryResult.bptOut.amount,
-        );
-        expect(expectedMinBpt).to.deep.eq(minBptOut);
-        const expectedMaxAmountsIn = amountsIn.map((a) => a.amount);
-        expect(expectedMaxAmountsIn).to.deep.eq(
-            maxAmountsIn.filter((_, index) => index !== bptIndex),
-        );
+        test('with native', async () => {
+            const joinInput = {
+                ...input,
+                amountsIn,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
+            const joinResult = await doJoin({
+                ...txInput,
+                joinInput,
+            });
+            assertUnbalancedJoin(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                joinInput,
+                joinResult,
+                txInput.slippage,
+            );
+        });
     });
 
-    test('native asset join', async () => {
-        const bptIndex = txInput.poolInput.tokens.findIndex(
-            (t) => t.address === txInput.poolInput.address,
-        );
-
-        const poolTokensWithoutBpt = txInput.poolInput.tokens
-            .map((t) => new Token(chainId, t.address, t.decimals))
-            .filter((_, index) => index !== bptIndex);
-
-        const amountsIn = poolTokensWithoutBpt.map((t) =>
-            TokenAmount.fromHumanAmount(t, '1'),
-        );
-
-        // perform join query to get expected bpt out
-        const joinInput: UnbalancedJoinInput = {
-            amountsIn,
-            chainId,
-            rpcUrl,
-            kind: JoinKind.Unbalanced,
-            useNativeAssetAsWrappedAmountIn: true,
-        };
-
-        // We have to use zero address for balanceDeltas
-        const { queryResult, maxAmountsIn, minBptOut, value } = await doJoin({
-            ...txInput,
-            joinInput,
-            checkNativeBalance: true,
+    describe('single asset join', () => {
+        let input: SingleAssetJoinInput;
+        beforeAll(() => {
+            const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
+            const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+            input = {
+                bptOut,
+                tokenIn,
+                chainId,
+                rpcUrl,
+                kind: JoinKind.SingleAsset,
+            };
         });
-        // Query should use same amountsIn as user sets
-        expect(
-            queryResult.amountsIn
-                .filter((_, index) => index !== bptIndex)
-                .map((a) => a.amount),
-        ).to.deep.eq(amountsIn.map((a) => a.amount));
-        expect(queryResult.tokenInIndex).to.be.undefined;
-        // Should have native value equal to input amount
-        expect(value).eq(amountsIn[1].amount);
-
-        // Expect some bpt amount
-        expect(queryResult.bptOut.amount > BigInt(0)).to.be.true;
-
-        // Confirm slippage - only bpt out
-        const expectedMinBpt = txInput.slippage.removeFrom(
-            queryResult.bptOut.amount,
-        );
-        expect(expectedMinBpt).to.deep.eq(minBptOut);
-        const expectedMaxAmountsIn = amountsIn.map((a) => a.amount);
-        expect(expectedMaxAmountsIn).to.deep.eq(
-            maxAmountsIn.filter((_, index) => index !== bptIndex),
-        );
-    });
-
-    test('single asset join', async () => {
-        const bptIndex = txInput.poolInput.tokens.findIndex(
-            (t) => t.address === txInput.poolInput.address,
-        );
-        const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
-        const tokenIn = '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f';
-
-        // perform join query to get expected bpt out
-        const joinInput: SingleAssetJoinInput = {
-            bptOut,
-            tokenIn,
-            chainId,
-            rpcUrl,
-            kind: JoinKind.SingleAsset,
-        };
-
-        const { queryResult, maxAmountsIn, minBptOut, value } = await doJoin({
-            ...txInput,
-            joinInput,
-        });
-        // Query should use same bpt out as user sets
-        expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
-
-        // We only expect single asset to have a value for amount in
-        expect(queryResult.tokenInIndex).to.not.be.undefined;
-        queryResult.amountsIn
-            .filter((_, index) => index !== bptIndex)
-            .forEach((a, i) => {
-                if (i === queryResult.tokenInIndex)
-                    expect(a.amount > BigInt(0)).to.be.true;
-                else expect(a.amount === BigInt(0)).to.be.true;
+        test('with token', async () => {
+            const joinResult = await doJoin({
+                ...txInput,
+                joinInput: input,
             });
 
-        // Should be no native value
-        expect(value).to.be.undefined;
-
-        // Confirm slippage - only to amount in not bpt out
-        const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
-            txInput.slippage.applyTo(a.amount),
-        );
-        expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
-        expect(minBptOut).to.eq(bptOut.amount);
-    });
-
-    test('proportional join', async () => {
-        const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
-        const bptIndex = txInput.poolInput.tokens.findIndex(
-            (t) => t.address === txInput.poolInput.address,
-        );
-
-        // perform join query to get expected bpt out
-        const joinInput: ProportionalJoinInput = {
-            bptOut,
-            chainId,
-            rpcUrl,
-            kind: JoinKind.Proportional,
-        };
-
-        const { queryResult, maxAmountsIn, minBptOut, value } = await doJoin({
-            ...txInput,
-            joinInput,
+            assertSingleToken(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                input,
+                joinResult,
+                txInput.slippage,
+            );
         });
 
-        // Query should use same bpt out as user sets
-        expect(queryResult.bptOut.amount).to.deep.eq(bptOut.amount);
-
-        console.log(queryResult.tokenInIndex);
-
-        // Expect all assets to have a value for amount in
-        expect(queryResult.tokenInIndex).to.be.undefined;
-        queryResult.amountsIn
-            .filter((_, index) => index !== bptIndex)
-            .forEach((a) => {
-                expect(a.amount > BigInt(0)).to.be.true;
+        test('with native', async () => {
+            const joinInput = {
+                ...input,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
+            const joinResult = await doJoin({
+                ...txInput,
+                joinInput,
             });
 
-        // Should be no native value
-        expect(value).to.be.undefined;
+            assertSingleToken(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                joinInput,
+                joinResult,
+                txInput.slippage,
+            );
+        });
+    });
 
-        // Confirm slippage - only to amount in not bpt out
-        const expectedMaxAmountsIn = queryResult.amountsIn.map((a) =>
-            txInput.slippage.applyTo(a.amount),
-        );
-        expect(expectedMaxAmountsIn).to.deep.eq(maxAmountsIn);
-        expect(minBptOut).to.eq(bptOut.amount);
+    describe('proportional join', () => {
+        let input: ProportionalJoinInput;
+        beforeAll(() => {
+            const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
+            input = {
+                bptOut,
+                chainId,
+                rpcUrl,
+                kind: JoinKind.Proportional,
+            };
+        });
+        test('with tokens', async () => {
+            const joinResult = await doJoin({
+                ...txInput,
+                joinInput: input,
+            });
+
+            assertProportional(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                input,
+                joinResult,
+                txInput.slippage,
+            );
+        });
+        test('with native', async () => {
+            const joinInput = {
+                ...input,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
+            const joinResult = await doJoin({
+                ...txInput,
+                joinInput,
+            });
+            assertProportional(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                joinInput,
+                joinResult,
+                txInput.slippage,
+            );
+        });
     });
 });
 

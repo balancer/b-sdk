@@ -81,7 +81,7 @@ export interface BaseJoin {
     buildCall(input: JoinCall): {
         call: Hex;
         to: Address;
-        value: bigint | undefined;
+        value: bigint;
         minBptOut: bigint;
         maxAmountsIn: bigint[];
     };
@@ -90,7 +90,7 @@ export interface BaseJoin {
 export type JoinBuildOutput = {
     call: Hex;
     to: Address;
-    value: bigint | undefined;
+    value: bigint;
     minBptOut: bigint;
     maxAmountsIn: bigint[];
 };

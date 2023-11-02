@@ -18,7 +18,7 @@ export class PoolExit {
     constructor(config?: ExitConfig) {
         const { customPoolExits } = config || {};
         this.poolExits = {
-            Weighted: new WeightedExit(),
+            WEIGHTED: new WeightedExit(),
             // PHANTOM_STABLE === ComposableStables in API
             PHANTOM_STABLE: new ComposableStableExit(),
             // custom pool Exits take precedence over base Exits
