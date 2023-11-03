@@ -36,9 +36,10 @@ import {
     doJoin,
 } from './lib/utils/joinHelper';
 import { JoinTxInput } from './lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
-const rpcUrl = 'http://127.0.0.1:8545/';
 const poolId =
     '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512'; // 80wjAURA-20WETH
 

@@ -1,5 +1,7 @@
-import { CreateAnvilOptions, createAnvil } from '@viem/anvil';
+import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { sleep } from '../lib/utils/promises';
+import { ChainId } from '../../src/utils/constants';
+import os from 'os';
 
 type NetworkSetup = {
     rpcEnv: string;
@@ -8,16 +10,19 @@ type NetworkSetup = {
     forkBlockNumber: bigint;
 };
 
-type Networks = NetworkSetup[];
+type NetworksWithFork = Extract<
+    keyof typeof ChainId,
+    'MAINNET' | 'POLYGON' | 'FANTOM'
+>;
 
-const NETWORKS: Networks = [
-    {
+export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
+    MAINNET: {
         rpcEnv: 'ETHEREUM_RPC_URL',
         fallBackRpc: 'https://cloudflare-eth.com',
         port: 8545,
         forkBlockNumber: 18043296n,
     },
-    {
+    POLYGON: {
         rpcEnv: 'POLYGON_RPC_URL',
         // Public Polygon RPCs are usually unreliable
         fallBackRpc: undefined,
@@ -25,19 +30,22 @@ const NETWORKS: Networks = [
         // Note - this has to be >= highest blockNo used in tests
         forkBlockNumber: 44215395n,
     },
-        {
+    FANTOM: {
         rpcEnv: 'FANTOM_RPC_URL',
         // Public Fantom RPCs are usually unreliable
         fallBackRpc: undefined,
         port: 8138,
         forkBlockNumber: 65313450n,
     },
-];
+};
 
 export default async function () {
-    for (const network of NETWORKS) {
+    const numberOfCpus = os.cpus().length;
+    for (const network of Object.values(ANVIL_NETWORKS)) {
         const config = getAnvilOptions(network);
-        await startFork(config);
+        for (let jobId = 0; jobId < numberOfCpus; jobId++) {
+            await startFork(config, jobId);
+        }
     }
 }
 
@@ -64,19 +72,65 @@ function getAnvilOptions(network: NetworkSetup): CreateAnvilOptions {
     };
 }
 
-async function startFork(anvilOptions: CreateAnvilOptions) {
+// Controls the current running forks to avoid starting the same fork twice
+let runningForks: Record<string, Anvil> = {};
+
+// Make sure that forks are stopped after each test suite
+export async function stopAnvilForks() {
+    await Promise.all(
+        Object.values(runningForks).map(async (anvil) => {
+            // console.log('Stopping anvil fork', anvil.options);
+            return anvil.stop();
+        }),
+    );
+    runningForks = {};
+}
+
+/*
+    Starts an anvil fork with the given options.
+    In vitest, each thread is assigned a unique, numerical id (`process.env.VITEST_POOL_ID`).
+    When jobId is provided, the fork uses this id to create a different local rpc url (e.g. `http://127.0.0.1:<8545+jobId>/`
+    so that tests can be run in parallel (depending on the number of threads of the host machine)
+*/
+export async function startFork(
+    network: NetworkSetup,
+    jobId = Number(process.env.VITEST_POOL_ID) || 0,
+) {
+    const anvilOptions = getAnvilOptions(network);
+
+    const defaultAnvilPort = 8545;
+    let port = (anvilOptions.port || defaultAnvilPort) + jobId;
+    //Skip 8550, 8551 ports because they are already used
+    if ([8550, 8551].includes(port)) port = 8552;
+
+    if (!anvilOptions.forkUrl) {
+        throw Error(
+            'Anvil forkUrl must have a value. Please review your anvil setup',
+        );
+    }
+    const rpcUrl = `http://127.0.0.1:${port}`;
+
+    // Avoid starting fork if it was running already
+    if (runningForks[rpcUrl]) return { rpcUrl };
+
     // https://www.npmjs.com/package/@viem/anvil
-    const anvil = createAnvil(anvilOptions);
+    const anvil = createAnvil({ ...anvilOptions, port });
+    // Save reference to running fork
+    runningForks[rpcUrl] = anvil;
+
     if (process.env.SKIP_GLOBAL_SETUP === 'true') {
         console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
-anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8555 --fork-block-number=17878719
+anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --fork-block-number=17878719
 `);
         await sleep(5000);
-        return;
+        return { rpcUrl };
     }
     console.log('🛠️  Starting anvil', {
-        port: anvilOptions.port,
+        port,
         forkBlockNumber: anvilOptions.forkBlockNumber,
     });
-    return await anvil.start();
+    await anvil.start();
+    return {
+        rpcUrl,
+    };
 }
