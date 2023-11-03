@@ -2,6 +2,7 @@ import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { sleep } from '../lib/utils/promises';
 import { ChainId } from '../../src/utils/constants';
 import os from 'os';
+import { av } from 'vitest/dist/reporters-5f784f42';
 
 type NetworkSetup = {
     rpcEnv: string;
@@ -15,18 +16,25 @@ type NetworksWithFork = Extract<
     'MAINNET' | 'POLYGON' | 'FANTOM'
 >;
 
+const ANVIL_PORTS: Record<NetworksWithFork, number> = {
+    //Ports separated by 100 to avoid port collision when running tests in parallel
+    MAINNET: 8545,
+    POLYGON: 8645,
+    FANTOM: 8745,
+};
+
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     MAINNET: {
         rpcEnv: 'ETHEREUM_RPC_URL',
         fallBackRpc: 'https://cloudflare-eth.com',
-        port: 8545,
+        port: ANVIL_PORTS.MAINNET,
         forkBlockNumber: 18043296n,
     },
     POLYGON: {
         rpcEnv: 'POLYGON_RPC_URL',
         // Public Polygon RPCs are usually unreliable
         fallBackRpc: undefined,
-        port: 8137,
+        port: ANVIL_PORTS.POLYGON,
         // Note - this has to be >= highest blockNo used in tests
         forkBlockNumber: 44215395n,
     },
@@ -34,7 +42,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'FANTOM_RPC_URL',
         // Public Fantom RPCs are usually unreliable
         fallBackRpc: undefined,
-        port: 8138,
+        port: ANVIL_PORTS.FANTOM,
         forkBlockNumber: 65313450n,
     },
 };
@@ -73,7 +81,7 @@ function getAnvilOptions(network: NetworkSetup): CreateAnvilOptions {
 }
 
 // Controls the current running forks to avoid starting the same fork twice
-let runningForks: Record<string, Anvil> = {};
+let runningForks: Record<number, Anvil> = {};
 
 // Make sure that forks are stopped after each test suite
 export async function stopAnvilForks() {
@@ -99,9 +107,7 @@ export async function startFork(
     const anvilOptions = getAnvilOptions(network);
 
     const defaultAnvilPort = 8545;
-    let port = (anvilOptions.port || defaultAnvilPort) + jobId;
-    //Skip 8550, 8551 ports because they are already used
-    if ([8550, 8551].includes(port)) port = 8552;
+    const port = (anvilOptions.port || defaultAnvilPort) + jobId;
 
     if (!anvilOptions.forkUrl) {
         throw Error(
@@ -110,13 +116,15 @@ export async function startFork(
     }
     const rpcUrl = `http://127.0.0.1:${port}`;
 
+    console.log('checking rpcUrl', port, runningForks);
+
     // Avoid starting fork if it was running already
-    if (runningForks[rpcUrl]) return { rpcUrl };
+    if (runningForks[port]) return { rpcUrl };
 
     // https://www.npmjs.com/package/@viem/anvil
     const anvil = createAnvil({ ...anvilOptions, port });
     // Save reference to running fork
-    runningForks[rpcUrl] = anvil;
+    runningForks[port] = anvil;
 
     if (process.env.SKIP_GLOBAL_SETUP === 'true') {
         console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
