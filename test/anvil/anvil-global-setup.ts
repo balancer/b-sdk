@@ -18,9 +18,9 @@ type NetworksWithFork = Extract<
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     //Ports separated by 100 to avoid port collision when running tests in parallel
-    MAINNET: 8545,
-    POLYGON: 8645,
-    FANTOM: 8745,
+    MAINNET: 8645,
+    POLYGON: 8745,
+    FANTOM: 8845,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -46,16 +46,6 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         forkBlockNumber: 65313450n,
     },
 };
-
-export default async function () {
-    const numberOfCpus = os.cpus().length;
-    for (const network of Object.values(ANVIL_NETWORKS)) {
-        const config = getAnvilOptions(network);
-        for (let jobId = 0; jobId < numberOfCpus; jobId++) {
-            await startFork(config, jobId);
-        }
-    }
-}
 
 function getAnvilOptions(network: NetworkSetup): CreateAnvilOptions {
     let forkUrl: string;
