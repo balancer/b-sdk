@@ -72,7 +72,7 @@ const exit = async () => {
         rpcUrl,
         bptIn,
         tokenOut,
-        kind: ExitKind.SINGLE_ASSET,
+        kind: ExitKind.SingleAsset,
     };
 
     const queryResult = await poolExit.query(exitInput, poolState);

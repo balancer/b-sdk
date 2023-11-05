@@ -60,16 +60,17 @@ export class WeightedExit implements BaseExit {
         return {
             poolType: poolState.type,
             exitKind: input.kind,
-            id: poolState.id,
+            poolId: poolState.id,
             bptIn,
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
+            toInternalBalance: !!input.toInternalBalance,
         };
     }
 
     private getAmountsQuery(tokens: Token[], input: ExitInput): AmountsExit {
         switch (input.kind) {
-            case ExitKind.UNBALANCED:
+            case ExitKind.Unbalanced:
                 return {
                     minAmountsOut: tokens.map(
                         (t) =>
@@ -79,7 +80,7 @@ export class WeightedExit implements BaseExit {
                     tokenOutIndex: undefined,
                     maxBptAmountIn: MAX_UINT256,
                 };
-            case ExitKind.SINGLE_ASSET:
+            case ExitKind.SingleAsset:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: tokens.findIndex((t) =>
@@ -87,7 +88,7 @@ export class WeightedExit implements BaseExit {
                     ),
                     maxBptAmountIn: input.bptIn.amount,
                 };
-            case ExitKind.PROPORTIONAL:
+            case ExitKind.Proportional:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: undefined,
@@ -102,7 +103,7 @@ export class WeightedExit implements BaseExit {
         const userData = this.encodeUserData(input.exitKind, amounts);
 
         const { args } = parseExitArgs({
-            poolId: input.id,
+            poolId: input.poolId,
             sortedTokens: input.amountsOut.map((a) => a.token),
             sender: input.sender,
             recipient: input.recipient,
@@ -128,16 +129,16 @@ export class WeightedExit implements BaseExit {
 
     private getAmountsCall(input: ExitCall): AmountsExit {
         switch (input.exitKind) {
-            case ExitKind.UNBALANCED:
+            case ExitKind.Unbalanced:
                 return {
                     minAmountsOut: input.amountsOut.map((a) => a.amount),
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.slippage.applyTo(input.bptIn.amount),
                 };
-            case ExitKind.SINGLE_ASSET:
+            case ExitKind.SingleAsset:
                 if (input.tokenOutIndex === undefined) {
                     throw new Error(
-                        'tokenOutIndex must be defined for SINGLE_ASSET exit',
+                        'tokenOutIndex must be defined for SingleAsset exit',
                     );
                 }
                 return {
@@ -147,7 +148,7 @@ export class WeightedExit implements BaseExit {
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,
                 };
-            case ExitKind.PROPORTIONAL:
+            case ExitKind.Proportional:
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
                         input.slippage.removeFrom(a.amount),
@@ -162,12 +163,12 @@ export class WeightedExit implements BaseExit {
 
     private encodeUserData(kind: ExitKind, amounts: AmountsExit): Address {
         switch (kind) {
-            case ExitKind.UNBALANCED:
+            case ExitKind.Unbalanced:
                 return WeightedEncoder.exitUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
-            case ExitKind.SINGLE_ASSET:
+            case ExitKind.SingleAsset:
                 if (amounts.tokenOutIndex === undefined)
                     throw Error('No Index');
 
@@ -175,7 +176,7 @@ export class WeightedExit implements BaseExit {
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
-            case ExitKind.PROPORTIONAL:
+            case ExitKind.Proportional:
                 return WeightedEncoder.exitProportional(amounts.maxBptAmountIn);
             default:
                 throw Error('Unsupported Exit Type');

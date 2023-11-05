@@ -33,8 +33,8 @@ import { JoinTxInput } from './lib/utils/types';
 import {
     doJoin,
     assertUnbalancedJoin,
-    assertSingleToken,
-    assertProportional,
+    assertSingleTokenJoin,
+    assertProportionalJoin,
 } from './lib/utils/joinHelper';
 
 const chainId = ChainId.MAINNET;
@@ -165,7 +165,7 @@ describe('composable stable join test', () => {
                 joinInput: input,
             });
 
-            assertSingleToken(
+            assertSingleTokenJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
@@ -184,7 +184,7 @@ describe('composable stable join test', () => {
                 joinInput,
             });
 
-            assertSingleToken(
+            assertSingleTokenJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 joinInput,
@@ -211,7 +211,7 @@ describe('composable stable join test', () => {
                 joinInput: input,
             });
 
-            assertProportional(
+            assertProportionalJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
@@ -228,7 +228,7 @@ describe('composable stable join test', () => {
                 ...txInput,
                 joinInput,
             });
-            assertProportional(
+            assertProportionalJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 joinInput,

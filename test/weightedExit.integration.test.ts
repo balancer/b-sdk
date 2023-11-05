@@ -28,7 +28,7 @@ import {
     ExitInput,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
-import { doExit } from './lib/utils/exitHelper';
+import { assertProportionalExit, assertSingleTokenExit, assertUnbalancedExit, doExit } from './lib/utils/exitHelper';
 import { ExitTxInput } from './lib/utils/types';
 
 const chainId = ChainId.MAINNET;
@@ -58,11 +58,9 @@ describe('weighted exit test', () => {
             client,
             poolExit: new PoolExit(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolInput,
-            testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
+            poolStateInput: poolInput,
+            testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             exitInput: {} as ExitInput,
-            checkNativeBalance: false,
-            chainId,
         };
         bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
@@ -71,152 +69,152 @@ describe('weighted exit test', () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [txInput.poolInput.address],
+            [txInput.poolStateInput.address],
             undefined, // TODO: hardcode these values to improve test performance
-            [parseUnits('1', 18)],
+            [parseUnits('1000', 18)],
         );
     });
 
-    test('single asset exit', async () => {
-        const { slippage } = txInput;
-        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
-        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3D'; // BAL
+    describe('unbalanced exit', async () => {
+        let input: Omit<UnbalancedExitInput, 'amountsOut'>;
+        let amountsOut: TokenAmount[];
+        beforeAll(() => {
+            const poolTokens = txInput.poolStateInput.tokens
+                .map((t) => new Token(chainId, t.address, t.decimals))
 
-        const exitInput: SingleAssetExitInput = {
-            chainId,
-            rpcUrl,
-            bptIn,
-            tokenOut,
-            kind: ExitKind.SINGLE_ASSET,
-        };
-        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
-            ...txInput,
-            exitInput,
+            amountsOut = poolTokens.map((t) =>
+                TokenAmount.fromHumanAmount(t, '1'),
+            );
+            input = {
+                chainId,
+                rpcUrl,
+                kind: ExitKind.Unbalanced,
+            };
         });
-
-        // Query should use correct BPT amount
-        expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
-
-        // We only expect single asset to have a value for exit
-        expect(queryResult.tokenOutIndex !== undefined).toEqual(true);
-        queryResult.amountsOut.forEach((a, i) => {
-            if (i === queryResult.tokenOutIndex)
-                expect(a.amount > 0n).to.be.true;
-            else expect(a.amount === 0n).to.be.true;
+        test('exiting with wrapped', async () => {
+            const exitInput = {
+                ...input,
+                amountsOut: amountsOut.slice(0, 1),
+            };
+            const exitResult = await doExit({ ...txInput, exitInput });
+            assertUnbalancedExit(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                exitInput,
+                exitResult,
+                txInput.slippage,
+            );
         });
-
-        // Confirm slippage - only to amounts out not bpt in
-        const expectedMinAmountsOut = queryResult.amountsOut.map((a) =>
-            slippage.removeFrom(a.amount),
-        );
-        expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
-        expect(maxBptIn).to.eq(bptIn.amount);
+        test('exiting with native', async () => {
+            const exitInput = {
+                ...input,
+                amountsOut: amountsOut.slice(0, 1),
+                exitWithNativeAsset: true,
+            };
+            const exitResult = await doExit({
+                ...txInput,
+                exitInput,
+            });
+            assertUnbalancedExit(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                exitInput,
+                exitResult,
+                txInput.slippage,
+            );
+        });
     });
 
-    test('proportional exit', async () => {
-        const { slippage } = txInput;
-        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+    describe('single asset exit', () => {
+        let input: SingleAssetExitInput;
+        beforeAll(() => {
+            const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+            const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
+            input = {
+                chainId,
+                rpcUrl,
+                bptIn,
+                tokenOut,
+                kind: ExitKind.SingleAsset,
+            };
+        });
+        test('exiting with wrapped', async () => {
+            const exitResult = await doExit({
+                ...txInput,
+                exitInput: input,
+            });
 
-        const exitInput: ProportionalExitInput = {
-            chainId,
-            rpcUrl,
-            bptIn,
-            kind: ExitKind.PROPORTIONAL,
-        };
-        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
-            ...txInput,
-            exitInput,
+            assertSingleTokenExit(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                input,
+                exitResult,
+                txInput.slippage,
+            );
         });
 
-        // Query should use correct BPT amount
-        expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
+        test('exiting with native', async () => {
+            const exitInput = {
+                ...input,
+                exitWithNativeAsset: true,
+            };
+            const exitResult = await doExit({
+                ...txInput,
+                exitInput,
+            });
 
-        expect(queryResult.tokenOutIndex === undefined).toEqual(true);
-        // We expect all assets to have a value for exit
-        queryResult.amountsOut.forEach((a) => {
-            expect(a.amount > 0n).to.be.true;
+            assertSingleTokenExit(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                exitInput,
+                exitResult,
+                txInput.slippage,
+            );
         });
-
-        // Confirm slippage - only to amounts out not bpt in
-        const expectedMinAmountsOut = queryResult.amountsOut.map((a) =>
-            slippage.removeFrom(a.amount),
-        );
-        expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
-        expect(maxBptIn).to.eq(bptIn.amount);
     });
 
-    test('unbalanced exit', async () => {
-        const { poolInput, slippage } = txInput;
-
-        const poolTokens = poolInput.tokens.map(
-            (t) => new Token(chainId, t.address, t.decimals),
-        );
-        const amountsOut = poolTokens.map((t) =>
-            TokenAmount.fromHumanAmount(t, '0.001'),
-        );
-
-        const exitInput: UnbalancedExitInput = {
-            chainId,
-            rpcUrl,
-            amountsOut,
-            kind: ExitKind.UNBALANCED,
-        };
-        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
-            ...txInput,
-            exitInput,
+    describe('proportional exit', () => {
+        let input: ProportionalExitInput;
+        beforeAll(() => {
+            const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+            input = {
+                bptIn,
+                chainId,
+                rpcUrl,
+                kind: ExitKind.Proportional,
+            };
         });
+        test('with tokens', async () => {
+            const exitResult = await doExit({
+                ...txInput,
+                exitInput: input,
+            });
 
-        // We expect a BPT input amount > 0
-        expect(queryResult.bptIn.amount > 0n).to.be.true;
-
-        expect(queryResult.tokenOutIndex === undefined).toEqual(true);
-        // We expect assets to have same amount out as user defined
-        queryResult.amountsOut.forEach((a, i) => {
-            expect(a.amount).to.eq(amountsOut[i].amount);
+            assertProportionalExit(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                input,
+                exitResult,
+                txInput.slippage,
+            );
         });
-
-        // Confirm slippage - only to bpt in, not amounts out
-        const expectedMinAmountsOut = amountsOut.map((a) => a.amount);
-        expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
-        const expectedMaxBptIn = slippage.applyTo(queryResult.bptIn.amount);
-        expect(expectedMaxBptIn).to.deep.eq(maxBptIn);
-    });
-
-    test('exit with native asset', async () => {
-        const { slippage } = txInput;
-        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
-
-        const exitInput: ProportionalExitInput = {
-            chainId,
-            rpcUrl,
-            bptIn,
-            kind: ExitKind.PROPORTIONAL,
-            exitWithNativeAsset: true,
-        };
-
-        // Note - checking native balance
-        const { queryResult, maxBptIn, minAmountsOut } = await doExit({
-            ...txInput,
-            exitInput,
-            checkNativeBalance: true,
+        test('with native', async () => {
+            const exitInput = {
+                ...input,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
+            const exitResult = await doExit({
+                ...txInput,
+                exitInput,
+            });
+            assertProportionalExit(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                exitInput,
+                exitResult,
+                txInput.slippage,
+            );
         });
-
-        // Query should use correct BPT amount
-        expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
-
-        expect(queryResult.tokenOutIndex === undefined).toEqual(true);
-
-        // We expect all assets to have a value for exit
-        queryResult.amountsOut.forEach((a) => {
-            expect(a.amount > 0n).to.be.true;
-        });
-
-        // Confirm slippage - only to amounts out not bpt in
-        const expectedMinAmountsOut = queryResult.amountsOut.map((a) =>
-            slippage.removeFrom(a.amount),
-        );
-        expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
-        expect(maxBptIn).to.eq(bptIn.amount);
     });
 });
 
