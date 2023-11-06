@@ -20,6 +20,7 @@ import {
 } from '../types';
 import { AmountsExit, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
+import { getAmounts } from '../../utils';
 
 export class WeightedExit implements BaseExit {
     public async query(
@@ -70,12 +71,7 @@ export class WeightedExit implements BaseExit {
         switch (input.kind) {
             case ExitKind.UNBALANCED:
                 return {
-                    minAmountsOut: tokens.map(
-                        (t) =>
-                            input.amountsOut.find((a) =>
-                                t.isSameAddress(a.address),
-                            )?.rawAmount ?? 0n,
-                    ),
+                    minAmountsOut: getAmounts(tokens, input.amountsOut),
                     tokenOutIndex: undefined,
                     maxBptAmountIn: MAX_UINT256,
                 };
