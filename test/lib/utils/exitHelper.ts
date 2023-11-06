@@ -183,21 +183,9 @@ export function assertUnbalancedExit(
     // Expect some bpt amount
     expect(exitQueryResult.bptIn.amount > 0n).to.be.true;
 
-    assertExitBuildOutput(
-        exitInput,
-        exitQueryResult,
-        exitBuildOutput,
-        false,
-        slippage,
-    );
+    assertExitBuildOutput(exitQueryResult, exitBuildOutput, false, slippage);
 
-    assertTokenDeltas(
-        poolStateInput,
-        exitInput,
-        exitQueryResult,
-        exitBuildOutput,
-        txOutput,
-    );
+    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
 }
 
 export function assertSingleTokenExit(
@@ -253,21 +241,9 @@ export function assertSingleTokenExit(
         else expect(a.amount).toEqual(0n);
     });
 
-    assertExitBuildOutput(
-        exitInput,
-        exitQueryResult,
-        exitBuildOutput,
-        true,
-        slippage,
-    );
+    assertExitBuildOutput(exitQueryResult, exitBuildOutput, true, slippage);
 
-    assertTokenDeltas(
-        poolStateInput,
-        exitInput,
-        exitQueryResult,
-        exitBuildOutput,
-        txOutput,
-    );
+    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
 }
 
 export function assertProportionalExit(
@@ -307,28 +283,15 @@ export function assertProportionalExit(
         else expect(a.amount > 0n).to.be.true;
     });
 
-    assertExitBuildOutput(
-        exitInput,
-        exitQueryResult,
-        exitBuildOutput,
-        true,
-        slippage,
-    );
+    assertExitBuildOutput(exitQueryResult, exitBuildOutput, true, slippage);
 
-    assertTokenDeltas(
-        poolStateInput,
-        exitInput,
-        exitQueryResult,
-        exitBuildOutput,
-        txOutput,
-    );
+    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
 }
 
 function assertTokenDeltas(
     poolStateInput: PoolStateInput,
     exitInput: ExitInput,
     exitQueryResult: ExitQueryResult,
-    exitBuildOutput: ExitBuildOutput,
     txOutput: TxResult,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
@@ -358,7 +321,6 @@ function assertTokenDeltas(
 }
 
 function assertExitBuildOutput(
-    exitInput: ExitInput,
     exitQueryResult: ExitQueryResult,
     exitBuildOutput: ExitBuildOutput,
     isExactIn: boolean,

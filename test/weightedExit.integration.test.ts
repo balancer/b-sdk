@@ -1,5 +1,5 @@
 // pnpm test -- weightedExit.integration.test.ts
-import { describe, expect, test, beforeAll, beforeEach } from 'vitest';
+import { describe, test, beforeAll, beforeEach } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -28,7 +28,12 @@ import {
     ExitInput,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
-import { assertProportionalExit, assertSingleTokenExit, assertUnbalancedExit, doExit } from './lib/utils/exitHelper';
+import {
+    assertProportionalExit,
+    assertSingleTokenExit,
+    assertUnbalancedExit,
+    doExit,
+} from './lib/utils/exitHelper';
 import { ExitTxInput } from './lib/utils/types';
 
 const chainId = ChainId.MAINNET;
@@ -79,8 +84,9 @@ describe('weighted exit test', () => {
         let input: Omit<UnbalancedExitInput, 'amountsOut'>;
         let amountsOut: TokenAmount[];
         beforeAll(() => {
-            const poolTokens = txInput.poolStateInput.tokens
-                .map((t) => new Token(chainId, t.address, t.decimals))
+            const poolTokens = txInput.poolStateInput.tokens.map(
+                (t) => new Token(chainId, t.address, t.decimals),
+            );
 
             amountsOut = poolTokens.map((t) =>
                 TokenAmount.fromHumanAmount(t, '1'),
