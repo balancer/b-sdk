@@ -30,9 +30,7 @@ import {
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import {
-    assertProportional,
     assertProportionalJoin,
-    assertSingleToken,
     assertSingleTokenJoin,
     assertUnbalancedJoin,
     doJoin,
