@@ -1,7 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { PoolState } from '../types';
-import { Address, Hex } from '../../types';
+import { Address, Hex, InputAmount } from '../../types';
 
 export enum JoinKind {
     Init = 'Init',
@@ -19,23 +19,23 @@ type BaseJoinInput = {
 };
 
 export type InitJoinInput = BaseJoinInput & {
-    amountsIn: TokenAmount[];
+    amountsIn: InputAmount[];
     kind: JoinKind.Init;
 };
 
 export type UnbalancedJoinInput = BaseJoinInput & {
-    amountsIn: TokenAmount[];
+    amountsIn: InputAmount[];
     kind: JoinKind.Unbalanced;
 };
 
 export type SingleAssetJoinInput = BaseJoinInput & {
-    bptOut: TokenAmount;
+    bptOut: InputAmount;
     tokenIn: Address;
     kind: JoinKind.SingleAsset;
 };
 
 export type ProportionalJoinInput = BaseJoinInput & {
-    bptOut: TokenAmount;
+    bptOut: InputAmount;
     kind: JoinKind.Proportional;
 };
 

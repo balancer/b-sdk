@@ -13,7 +13,7 @@ export function validateInputs(input: JoinInput, poolState: PoolStateInput) {
         case JoinKind.Init:
         case JoinKind.Unbalanced:
             areTokensInArray(
-                input.amountsIn.map((a) => a.token.address),
+                input.amountsIn.map((a) => a.address),
                 poolState.tokens.map((t) => t.address),
             );
             break;
@@ -23,7 +23,7 @@ export function validateInputs(input: JoinInput, poolState: PoolStateInput) {
                 poolState.tokens.map((t) => t.address),
             );
         case JoinKind.Proportional:
-            areTokensInArray([input.bptOut.token.address], [poolState.address]);
+            areTokensInArray([input.bptOut.address], [poolState.address]);
         default:
             break;
     }

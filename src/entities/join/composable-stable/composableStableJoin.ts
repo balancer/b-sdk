@@ -131,7 +131,7 @@ export class ComposableStableJoin implements BaseJoin {
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
                 maxAmountsIn[tokenInIndex] = MAX_UINT256;
                 amountsJoin = {
-                    minimumBpt: input.bptOut.amount,
+                    minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn,
                     tokenInIndex,
                 };
@@ -139,7 +139,7 @@ export class ComposableStableJoin implements BaseJoin {
             }
             case JoinKind.Proportional: {
                 amountsJoin = {
-                    minimumBpt: input.bptOut.amount,
+                    minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
                     tokenInIndex: undefined,
                 };

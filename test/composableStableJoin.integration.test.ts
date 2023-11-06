@@ -9,6 +9,7 @@ import {
     parseUnits,
     publicActions,
     walletActions,
+    parseEther,
 } from 'viem';
 
 import {
@@ -17,8 +18,6 @@ import {
     SingleAssetJoinInput,
     JoinKind,
     Slippage,
-    Token,
-    TokenAmount,
     Address,
     Hex,
     PoolStateInput,
@@ -27,6 +26,7 @@ import {
     getPoolAddress,
     PoolJoin,
     JoinInput,
+    InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import { JoinTxInput } from './lib/utils/types';
@@ -45,14 +45,14 @@ const poolId =
 
 describe('composable stable join test', () => {
     let txInput: JoinTxInput;
-    let bptToken: Token;
+    let poolStateInput: PoolStateInput;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        const poolInput = await api.getPool(poolId);
+        poolStateInput = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -66,13 +66,10 @@ describe('composable stable join test', () => {
             client,
             poolJoin: new PoolJoin(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateInput: poolInput,
+            poolStateInput: poolStateInput,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             joinInput: {} as JoinInput,
         };
-
-        // setup BPT token
-        bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
@@ -91,18 +88,18 @@ describe('composable stable join test', () => {
 
     describe('unbalanced join', () => {
         let input: Omit<UnbalancedJoinInput, 'amountsIn'>;
-        let amountsIn: TokenAmount[];
+        let amountsIn: InputAmount[];
         beforeAll(() => {
             const bptIndex = txInput.poolStateInput.tokens.findIndex(
                 (t) => t.address === txInput.poolStateInput.address,
             );
-            const poolTokensWithoutBpt = txInput.poolStateInput.tokens
-                .map((t) => new Token(chainId, t.address, t.decimals))
+            amountsIn = txInput.poolStateInput.tokens
+                .map((t) => ({
+                    rawAmount: parseUnits('1', t.decimals),
+                    decimals: t.decimals,
+                    address: t.address,
+                }))
                 .filter((_, index) => index !== bptIndex);
-
-            amountsIn = poolTokensWithoutBpt.map((t) =>
-                TokenAmount.fromHumanAmount(t, '1'),
-            );
             input = {
                 chainId,
                 rpcUrl,
@@ -150,7 +147,11 @@ describe('composable stable join test', () => {
     describe('single asset join', () => {
         let input: SingleAssetJoinInput;
         beforeAll(() => {
-            const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
+            const bptOut: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolStateInput.address,
+            };
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
             input = {
                 bptOut,
@@ -198,7 +199,11 @@ describe('composable stable join test', () => {
     describe('proportional join', () => {
         let input: ProportionalJoinInput;
         beforeAll(() => {
-            const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
+            const bptOut: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolStateInput.address,
+            };
             input = {
                 bptOut,
                 chainId,

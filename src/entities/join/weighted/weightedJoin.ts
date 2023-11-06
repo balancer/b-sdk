@@ -116,14 +116,14 @@ export class WeightedJoin implements BaseJoin {
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
                 maxAmountsIn[tokenInIndex] = MAX_UINT256;
                 return {
-                    minimumBpt: input.bptOut.amount,
+                    minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn,
                     tokenInIndex,
                 };
             }
             case JoinKind.Proportional: {
                 return {
-                    minimumBpt: input.bptOut.amount,
+                    minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
                     tokenInIndex: undefined,
                 };
