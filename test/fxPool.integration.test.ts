@@ -16,13 +16,13 @@ import {
     sorGetSwapsWithPools,
 } from '../src';
 import { MockPoolProvider } from './lib/utils/mockPoolProvider';
-
 import testPools from './lib/testData/testPools/fx_43667355.json';
+import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+
+const chainId = ChainId.POLYGON;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 
 describe('fx integration tests', () => {
-    const chainId = ChainId.POLYGON;
-    const rpcUrl = 'http://127.0.0.1:8137/';
-
     const USDC = new Token(
         chainId,
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
