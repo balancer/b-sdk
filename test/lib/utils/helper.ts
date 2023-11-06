@@ -255,7 +255,6 @@ export async function findTokenBalanceSlot(
  * @param slots Slot that stores token balance in memory - use npm package `slot20` to identify which slot to provide
  * @param balances Balances in EVM amounts
  * @param jsonRpcUrl Url with remote node to be forked locally
- * @param blockNumber Number of the block that the fork will happen
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
  */
 export const forkSetup = async (

@@ -18,11 +18,11 @@ export default defineConfig(({ mode }) => {
         test: {
             testTimeout: 20_000,
             hookTimeout: 30_000,
-            globalSetup: ['./test/anvil/anvil-global-setup.ts'],
+            setupFiles: ['/test/vitest-setup.ts'],
             // Uncomment to debug suite excluding some tests
             // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
-            // Avoid testing threads to avoid problems with shared fork data
-            threads: false,
+            // Uncomment to run integration tests sequentially
+            // threads: false,
         },
     };
 });

@@ -7,19 +7,22 @@ import { BATCHSIZE, ChainId, VAULT } from '../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
+    RawFxPool,
     SmartOrderRouter,
-    SubgraphPoolProvider,
     SwapKind,
     SwapOptions,
     Token,
     TokenAmount,
     sorGetSwapsWithPools,
 } from '../src';
+import { MockPoolProvider } from './lib/utils/mockPoolProvider';
+import testPools from './lib/testData/testPools/fx_43667355.json';
+import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+
+const chainId = ChainId.POLYGON;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 
 describe('fx integration tests', () => {
-    const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com';
-
     const USDC = new Token(
         chainId,
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -33,19 +36,15 @@ describe('fx integration tests', () => {
         'XSGD',
     );
     const swapOptions: SwapOptions = {
-        block: 43878700n,
+        block: 43667355n,
     };
 
     let sor: SmartOrderRouter;
 
     beforeAll(() => {
-        const subgraphPoolDataService = new SubgraphPoolProvider(
-            chainId,
-            undefined,
-            {
-                poolTypeIn: ['FX'],
-            },
-        );
+        const pools = testPools.pools as RawFxPool[];
+        const mockPoolProvider = new MockPoolProvider(pools);
+
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
@@ -55,7 +54,7 @@ describe('fx integration tests', () => {
 
         sor = new SmartOrderRouter({
             chainId,
-            poolDataProviders: subgraphPoolDataService,
+            poolDataProviders: mockPoolProvider,
             poolDataEnrichers: onChainPoolDataEnricher,
             rpcUrl: rpcUrl,
         });
