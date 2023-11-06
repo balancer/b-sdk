@@ -47,7 +47,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
 
 function getAnvilOptions(network: NetworkSetup): CreateAnvilOptions {
     let forkUrl: string;
-    if (process.env[network.rpcEnv]) {
+    if (process.env[network.rpcEnv] !== 'undefined') {
         forkUrl = process.env[network.rpcEnv] as string;
     } else {
         if (!network.fallBackRpc)
