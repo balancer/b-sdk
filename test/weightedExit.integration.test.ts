@@ -7,6 +7,7 @@ import {
     Client,
     createTestClient,
     http,
+    parseEther,
     parseUnits,
     publicActions,
     PublicActions,
@@ -21,7 +22,6 @@ import {
     ExitKind,
     Slippage,
     Token,
-    TokenAmount,
     replaceWrapped,
     PoolStateInput,
     PoolExit,
@@ -31,6 +31,7 @@ import {
     ChainId,
     getPoolAddress,
     ExitInput,
+    InputAmount,
 } from '../src';
 import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
@@ -52,13 +53,13 @@ const poolId =
 
 describe('weighted exit test', () => {
     let txInput: TxInput;
-    let bptToken: Token;
+    let poolInput: PoolStateInput;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        const poolInput = await api.getPool(poolId);
+        poolInput = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -77,7 +78,6 @@ describe('weighted exit test', () => {
             exitInput: {} as ExitInput,
             checkNativeBalance: false,
         };
-        bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
@@ -92,7 +92,11 @@ describe('weighted exit test', () => {
 
     test('single asset exit', async () => {
         const { slippage } = txInput;
-        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+        const bptIn: InputAmount = {
+            rawAmount: parseEther('1'),
+            decimals: 18,
+            address: poolInput.address,
+        };
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3D'; // BAL
 
         const exitInput: SingleAssetExitInput = {
@@ -108,7 +112,7 @@ describe('weighted exit test', () => {
         });
 
         // Query should use correct BPT amount
-        expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
+        expect(queryResult.bptIn.amount).to.eq(bptIn.rawAmount);
 
         // We only expect single asset to have a value for exit
         expect(queryResult.tokenOutIndex !== undefined).toEqual(true);
@@ -123,12 +127,16 @@ describe('weighted exit test', () => {
             slippage.removeFrom(a.amount),
         );
         expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
-        expect(maxBptIn).to.eq(bptIn.amount);
+        expect(maxBptIn).to.eq(bptIn.rawAmount);
     });
 
     test('proportional exit', async () => {
         const { slippage } = txInput;
-        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+        const bptIn: InputAmount = {
+            rawAmount: parseEther('1'),
+            decimals: 18,
+            address: poolInput.address,
+        };
 
         const exitInput: ProportionalExitInput = {
             chainId,
@@ -142,7 +150,7 @@ describe('weighted exit test', () => {
         });
 
         // Query should use correct BPT amount
-        expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
+        expect(queryResult.bptIn.amount).to.eq(bptIn.rawAmount);
 
         expect(queryResult.tokenOutIndex === undefined).toEqual(true);
         // We expect all assets to have a value for exit
@@ -155,18 +163,17 @@ describe('weighted exit test', () => {
             slippage.removeFrom(a.amount),
         );
         expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
-        expect(maxBptIn).to.eq(bptIn.amount);
+        expect(maxBptIn).to.eq(bptIn.rawAmount);
     });
 
     test('unbalanced exit', async () => {
         const { poolInput, slippage } = txInput;
 
-        const poolTokens = poolInput.tokens.map(
-            (t) => new Token(chainId, t.address, t.decimals),
-        );
-        const amountsOut = poolTokens.map((t) =>
-            TokenAmount.fromHumanAmount(t, '0.001'),
-        );
+        const amountsOut = poolInput.tokens.map((t) => ({
+            rawAmount: parseUnits('0.001', t.decimals),
+            decimals: t.decimals,
+            address: t.address,
+        }));
 
         const exitInput: UnbalancedExitInput = {
             chainId,
@@ -185,11 +192,11 @@ describe('weighted exit test', () => {
         expect(queryResult.tokenOutIndex === undefined).toEqual(true);
         // We expect assets to have same amount out as user defined
         queryResult.amountsOut.forEach((a, i) => {
-            expect(a.amount).to.eq(amountsOut[i].amount);
+            expect(a.amount).to.eq(amountsOut[i].rawAmount);
         });
 
         // Confirm slippage - only to bpt in, not amounts out
-        const expectedMinAmountsOut = amountsOut.map((a) => a.amount);
+        const expectedMinAmountsOut = amountsOut.map((a) => a.rawAmount);
         expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
         const expectedMaxBptIn = slippage.applyTo(queryResult.bptIn.amount);
         expect(expectedMaxBptIn).to.deep.eq(maxBptIn);
@@ -197,7 +204,11 @@ describe('weighted exit test', () => {
 
     test('exit with native asset', async () => {
         const { slippage } = txInput;
-        const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+        const bptIn: InputAmount = {
+            rawAmount: parseEther('1'),
+            decimals: 18,
+            address: poolInput.address,
+        };
 
         const exitInput: ProportionalExitInput = {
             chainId,
@@ -215,7 +226,7 @@ describe('weighted exit test', () => {
         });
 
         // Query should use correct BPT amount
-        expect(queryResult.bptIn.amount).to.eq(bptIn.amount);
+        expect(queryResult.bptIn.amount).to.eq(bptIn.rawAmount);
 
         expect(queryResult.tokenOutIndex === undefined).toEqual(true);
 
@@ -229,7 +240,7 @@ describe('weighted exit test', () => {
             slippage.removeFrom(a.amount),
         );
         expect(expectedMinAmountsOut).to.deep.eq(minAmountsOut);
-        expect(maxBptIn).to.eq(bptIn.amount);
+        expect(maxBptIn).to.eq(bptIn.rawAmount);
     });
 
     async function doTransaction(txIp: TxInput) {

@@ -1,3 +1,4 @@
+// Run with - pnpm example ./examples/exit/weighted.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -11,7 +12,7 @@ import {
     SingleAssetExitInput,
     Slippage,
     Token,
-    TokenAmount,
+    InputAmount,
 } from '../../src';
 import {
     Client,
@@ -23,6 +24,7 @@ import {
     TestActions,
     WalletActions,
     walletActions,
+    parseEther,
 } from 'viem';
 import {
     forkSetup,
@@ -61,7 +63,11 @@ const exit = async () => {
         [parseUnits('100', 18)],
     );
 
-    const bptIn = TokenAmount.fromHumanAmount(bpt, '1');
+    const bptIn: InputAmount = {
+        rawAmount: parseEther('1'),
+        decimals: 18,
+        address: poolState.address,
+    };
     const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3D'; // BAL
 
     const poolExit = new PoolExit();

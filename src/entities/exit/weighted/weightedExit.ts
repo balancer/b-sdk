@@ -72,8 +72,9 @@ export class WeightedExit implements BaseExit {
                 return {
                     minAmountsOut: tokens.map(
                         (t) =>
-                            input.amountsOut.find((a) => a.token.isEqual(t))
-                                ?.amount ?? 0n,
+                            input.amountsOut.find((a) =>
+                                t.isSameAddress(a.address),
+                            )?.rawAmount ?? 0n,
                     ),
                     tokenOutIndex: undefined,
                     maxBptAmountIn: MAX_UINT256,
@@ -84,13 +85,13 @@ export class WeightedExit implements BaseExit {
                     tokenOutIndex: tokens.findIndex((t) =>
                         t.isSameAddress(input.tokenOut),
                     ),
-                    maxBptAmountIn: input.bptIn.amount,
+                    maxBptAmountIn: input.bptIn.rawAmount,
                 };
             case ExitKind.PROPORTIONAL:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: undefined,
-                    maxBptAmountIn: input.bptIn.amount,
+                    maxBptAmountIn: input.bptIn.rawAmount,
                 };
         }
     }
