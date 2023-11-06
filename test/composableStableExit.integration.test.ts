@@ -75,7 +75,7 @@ describe('composable stable exit test', () => {
             txInput.client,
             txInput.testAddress,
             [txInput.poolStateInput.address],
-            undefined, // TODO: hardcode these values to improve test performance
+            [0], // TODO: hardcode these values to improve test performance
             [parseUnits('1000', 18)],
         );
     });
