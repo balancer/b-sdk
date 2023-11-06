@@ -1,3 +1,4 @@
+// Run with - pnpm example ./examples/join/weighted.ts
 import { config } from 'dotenv';
 config();
 
@@ -9,8 +10,6 @@ import {
     PoolJoin,
     PoolStateInput,
     Slippage,
-    Token,
-    TokenAmount,
     UnbalancedJoinInput,
 } from '../../src';
 import {
@@ -64,12 +63,12 @@ const join = async () => {
     );
 
     const poolJoin = new PoolJoin();
-    const poolTokens = poolState.tokens.map(
-        (t) => new Token(chainId, t.address, t.decimals),
-    );
-    const amountsIn = poolTokens.map((t) =>
-        TokenAmount.fromHumanAmount(t, '1'),
-    );
+
+    const amountsIn = poolState.tokens.map((t) => ({
+        rawAmount: parseUnits('1', t.decimals),
+        decimals: t.decimals,
+        address: t.address,
+    }));
 
     // perform join query to get expected bpt out
     const joinInput: UnbalancedJoinInput = {

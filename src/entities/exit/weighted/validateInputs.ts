@@ -6,7 +6,7 @@ export function validateInputs(input: ExitInput, poolState: PoolStateInput) {
     switch (input.kind) {
         case ExitKind.UNBALANCED:
             areTokensInArray(
-                input.amountsOut.map((a) => a.token.address),
+                input.amountsOut.map((a) => a.address),
                 poolState.tokens.map((t) => t.address),
             );
             break;
@@ -16,7 +16,7 @@ export function validateInputs(input: ExitInput, poolState: PoolStateInput) {
                 poolState.tokens.map((t) => t.address),
             );
         case ExitKind.PROPORTIONAL:
-            areTokensInArray([input.bptIn.token.address], [poolState.address]);
+            areTokensInArray([input.bptIn.address], [poolState.address]);
         default:
             break;
     }
