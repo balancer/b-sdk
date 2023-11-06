@@ -158,11 +158,9 @@ export function assertUnbalancedExit(
         )
             token = new Token(chainId, zeroAddress, t.decimals);
         else token = new Token(chainId, t.address, t.decimals);
-        const input = exitInput.amountsOut.find(
-            (a) => a.token.address === t.address,
-        );
+        const input = exitInput.amountsOut.find((a) => a.address === t.address);
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
-        else return TokenAmount.fromRawAmount(token, input.amount);
+        else return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
     const expectedQueryResult: Omit<ExitQueryResult, 'bptIn' | 'bptIndex'> = {
@@ -210,7 +208,7 @@ export function assertSingleTokenExit(
         'amountsOut' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
-        bptIn: TokenAmount.fromRawAmount(bptToken, exitInput.bptIn.amount),
+        bptIn: TokenAmount.fromRawAmount(bptToken, exitInput.bptIn.rawAmount),
         tokenOutIndex: tokensWithoutBpt.findIndex(
             (t) => t.address === exitInput.tokenOut,
         ),
@@ -262,7 +260,7 @@ export function assertProportionalExit(
         'amountsOut' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
-        bptIn: TokenAmount.fromRawAmount(bptToken, exitInput.bptIn.amount),
+        bptIn: TokenAmount.fromRawAmount(bptToken, exitInput.bptIn.rawAmount),
         // Only expect tokenInIndex for SingleAssetJoin
         tokenOutIndex: undefined,
         // Should match inputs

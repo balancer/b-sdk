@@ -1,3 +1,4 @@
+// Run with - pnpm example ./examples/join/weighted.ts
 import { config } from 'dotenv';
 config();
 
@@ -9,8 +10,6 @@ import {
     PoolJoin,
     PoolStateInput,
     Slippage,
-    Token,
-    TokenAmount,
     UnbalancedJoinInput,
 } from '../../src';
 import {
@@ -28,18 +27,17 @@ import {
     forkSetup,
     sendTransactionGetBalances,
 } from '../../test/lib/utils/helper';
-import anvilGlobalSetup from '../../test/anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
 const poolId =
     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
 const chainId = ChainId.MAINNET;
-const rpcUrl = 'http://127.0.0.1:8545/';
 const testAddress = '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f'; // Balancer DAO Multisig
 const slippage = Slippage.fromPercentage('1'); // 1%
 
 const join = async () => {
-    await anvilGlobalSetup();
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
     const balancerApi = new BalancerApi(balancerApiUrl, 1);
     const poolState: PoolStateInput = await balancerApi.pools.fetchPoolState(
         poolId,
@@ -65,12 +63,12 @@ const join = async () => {
     );
 
     const poolJoin = new PoolJoin();
-    const poolTokens = poolState.tokens.map(
-        (t) => new Token(chainId, t.address, t.decimals),
-    );
-    const amountsIn = poolTokens.map((t) =>
-        TokenAmount.fromHumanAmount(t, '1'),
-    );
+
+    const amountsIn = poolState.tokens.map((t) => ({
+        rawAmount: parseUnits('1', t.decimals),
+        decimals: t.decimals,
+        address: t.address,
+    }));
 
     // perform join query to get expected bpt out
     const joinInput: UnbalancedJoinInput = {

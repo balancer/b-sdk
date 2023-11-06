@@ -21,6 +21,7 @@ import {
 } from '../types';
 import { AmountsExit, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
+import { getAmounts } from '../../utils';
 
 export class WeightedExit implements BaseExit {
     public async query(
@@ -72,11 +73,7 @@ export class WeightedExit implements BaseExit {
         switch (input.kind) {
             case ExitKind.Unbalanced:
                 return {
-                    minAmountsOut: tokens.map(
-                        (t) =>
-                            input.amountsOut.find((a) => a.token.isEqual(t))
-                                ?.amount ?? 0n,
-                    ),
+                    minAmountsOut: getAmounts(tokens, input.amountsOut),
                     tokenOutIndex: undefined,
                     maxBptAmountIn: MAX_UINT256,
                 };
@@ -86,13 +83,13 @@ export class WeightedExit implements BaseExit {
                     tokenOutIndex: tokens.findIndex((t) =>
                         t.isSameAddress(input.tokenOut),
                     ),
-                    maxBptAmountIn: input.bptIn.amount,
+                    maxBptAmountIn: input.bptIn.rawAmount,
                 };
             case ExitKind.Proportional:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: undefined,
-                    maxBptAmountIn: input.bptIn.amount,
+                    maxBptAmountIn: input.bptIn.rawAmount,
                 };
         }
     }

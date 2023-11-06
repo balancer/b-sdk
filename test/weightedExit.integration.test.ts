@@ -6,6 +6,7 @@ dotenv.config();
 import {
     createTestClient,
     http,
+    parseEther,
     parseUnits,
     publicActions,
     walletActions,
@@ -16,8 +17,6 @@ import {
     UnbalancedExitInput,
     ExitKind,
     Slippage,
-    Token,
-    TokenAmount,
     PoolStateInput,
     PoolExit,
     Address,
@@ -26,6 +25,7 @@ import {
     ChainId,
     getPoolAddress,
     ExitInput,
+    InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import {
@@ -35,21 +35,22 @@ import {
     doExit,
 } from './lib/utils/exitHelper';
 import { ExitTxInput } from './lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
 const chainId = ChainId.MAINNET;
-const rpcUrl = 'http://127.0.0.1:8545/';
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const poolId =
     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
 
 describe('weighted exit test', () => {
     let txInput: ExitTxInput;
-    let bptToken: Token;
+    let poolInput: PoolStateInput;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        const poolInput = await api.getPool(poolId);
+        poolInput = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -67,7 +68,6 @@ describe('weighted exit test', () => {
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             exitInput: {} as ExitInput,
         };
-        bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
@@ -82,15 +82,13 @@ describe('weighted exit test', () => {
 
     describe('unbalanced exit', async () => {
         let input: Omit<UnbalancedExitInput, 'amountsOut'>;
-        let amountsOut: TokenAmount[];
+        let amountsOut: InputAmount[];
         beforeAll(() => {
-            const poolTokens = txInput.poolStateInput.tokens.map(
-                (t) => new Token(chainId, t.address, t.decimals),
-            );
-
-            amountsOut = poolTokens.map((t) =>
-                TokenAmount.fromHumanAmount(t, '1'),
-            );
+            amountsOut = poolInput.tokens.map((t) => ({
+                rawAmount: parseUnits('0.001', t.decimals),
+                decimals: t.decimals,
+                address: t.address,
+            }));
             input = {
                 chainId,
                 rpcUrl,
@@ -134,7 +132,11 @@ describe('weighted exit test', () => {
     describe('single asset exit', () => {
         let input: SingleAssetExitInput;
         beforeAll(() => {
-            const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+            const bptIn: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolInput.address,
+            };
             const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
             input = {
                 chainId,
@@ -182,7 +184,11 @@ describe('weighted exit test', () => {
     describe('proportional exit', () => {
         let input: ProportionalExitInput;
         beforeAll(() => {
-            const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+            const bptIn: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolInput.address,
+            };
             input = {
                 bptIn,
                 chainId,

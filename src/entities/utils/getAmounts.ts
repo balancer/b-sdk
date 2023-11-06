@@ -1,5 +1,5 @@
+import { InputAmount } from '../../types';
 import { Token } from '../token';
-import { TokenAmount } from '../tokenAmount';
 
 /**
  * Get amounts from array of TokenAmounts returning default if not a value for tokens.
@@ -10,10 +10,12 @@ import { TokenAmount } from '../tokenAmount';
  */
 export function getAmounts(
     tokens: Token[],
-    amounts: TokenAmount[],
+    amounts: InputAmount[],
     defaultAmount = 0n,
 ): bigint[] {
     return tokens.map(
-        (t) => amounts.find((a) => a.token.isEqual(t))?.amount ?? defaultAmount,
+        (t) =>
+            amounts.find((a) => t.isSameAddress(a.address))?.rawAmount ??
+            defaultAmount,
     );
 }

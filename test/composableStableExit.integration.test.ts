@@ -6,6 +6,7 @@ config();
 import {
     createTestClient,
     http,
+    parseEther,
     parseUnits,
     publicActions,
     walletActions,
@@ -17,7 +18,6 @@ import {
     ExitKind,
     Slippage,
     Token,
-    TokenAmount,
     PoolStateInput,
     PoolExit,
     Address,
@@ -26,6 +26,7 @@ import {
     ChainId,
     getPoolAddress,
     ExitInput,
+    InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import { ExitTxInput } from './lib/utils/types';
@@ -35,21 +36,23 @@ import {
     assertUnbalancedExit,
     doExit,
 } from './lib/utils/exitHelper';
+import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
 const chainId = ChainId.MAINNET;
-const rpcUrl = 'http://127.0.0.1:8545/';
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const poolId =
     '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d000000000000000000000051b'; // baoETH-ETH StablePool
 
 describe('composable stable exit test', () => {
     let txInput: ExitTxInput;
     let bptToken: Token;
+    let poolInput: PoolStateInput;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        const poolInput = await api.getPool(poolId);
+        poolInput = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -82,7 +85,7 @@ describe('composable stable exit test', () => {
 
     describe('unbalanced exit', async () => {
         let input: Omit<UnbalancedExitInput, 'amountsOut'>;
-        let amountsOut: TokenAmount[];
+        let amountsOut: InputAmount[];
         beforeAll(() => {
             const bptIndex = txInput.poolStateInput.tokens.findIndex(
                 (t) => t.address === txInput.poolStateInput.address,
@@ -91,9 +94,11 @@ describe('composable stable exit test', () => {
                 .map((t) => new Token(chainId, t.address, t.decimals))
                 .filter((_, index) => index !== bptIndex);
 
-            amountsOut = poolTokensWithoutBpt.map((t) =>
-                TokenAmount.fromHumanAmount(t, '20'),
-            );
+            amountsOut = poolTokensWithoutBpt.map((t) => ({
+                rawAmount: parseUnits('20', t.decimals),
+                decimals: t.decimals,
+                address: t.address,
+            }));
             input = {
                 chainId,
                 rpcUrl,
@@ -137,7 +142,11 @@ describe('composable stable exit test', () => {
     describe('single asset exit', () => {
         let input: SingleAssetExitInput;
         beforeAll(() => {
-            const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+            const bptIn: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolInput.address,
+            };
             const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
             input = {
                 chainId,
@@ -185,7 +194,11 @@ describe('composable stable exit test', () => {
     describe('proportional exit', () => {
         let input: ProportionalExitInput;
         beforeAll(() => {
-            const bptIn = TokenAmount.fromHumanAmount(bptToken, '1');
+            const bptIn: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolInput.address,
+            };
             input = {
                 bptIn,
                 chainId,

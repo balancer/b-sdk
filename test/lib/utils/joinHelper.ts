@@ -165,11 +165,9 @@ export function assertUnbalancedJoin(
         )
             token = new Token(chainId, zeroAddress, t.decimals);
         else token = new Token(chainId, t.address, t.decimals);
-        const input = joinInput.amountsIn.find(
-            (a) => a.token.address === t.address,
-        );
+        const input = joinInput.amountsIn.find((a) => a.address === t.address);
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
-        else return TokenAmount.fromRawAmount(token, input.amount);
+        else return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
     const expectedQueryResult: Omit<JoinQueryResult, 'bptOut' | 'bptIndex'> = {
@@ -229,7 +227,7 @@ export function assertSingleTokenJoin(
             // Query should use same bpt out as user sets
             bptOut: TokenAmount.fromRawAmount(
                 bptToken,
-                joinInput.bptOut.amount,
+                joinInput.bptOut.rawAmount,
             ),
             tokenInIndex: tokensWithoutBpt.findIndex(
                 (t) => t.address === joinInput.tokenIn,
@@ -294,7 +292,7 @@ export function assertProportionalJoin(
             // Query should use same bpt out as user sets
             bptOut: TokenAmount.fromRawAmount(
                 bptToken,
-                joinInput.bptOut.amount,
+                joinInput.bptOut.rawAmount,
             ),
             // Only expect tokenInIndex for SingleAssetJoin
             tokenInIndex: undefined,

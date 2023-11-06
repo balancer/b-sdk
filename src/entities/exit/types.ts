@@ -1,6 +1,6 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
-import { Address } from '../../types';
+import { Address, InputAmount } from '../../types';
 import { PoolState } from '../types';
 
 export enum ExitKind {
@@ -18,18 +18,18 @@ export type BaseExitInput = {
 };
 
 export type UnbalancedExitInput = BaseExitInput & {
-    amountsOut: TokenAmount[];
+    amountsOut: InputAmount[];
     kind: ExitKind.Unbalanced;
 };
 
 export type SingleAssetExitInput = BaseExitInput & {
-    bptIn: TokenAmount;
+    bptIn: InputAmount;
     tokenOut: Address;
     kind: ExitKind.SingleAsset;
 };
 
 export type ProportionalExitInput = BaseExitInput & {
-    bptIn: TokenAmount;
+    bptIn: InputAmount;
     kind: ExitKind.Proportional;
 };
 

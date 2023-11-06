@@ -9,6 +9,7 @@ import {
     parseUnits,
     publicActions,
     walletActions,
+    parseEther,
 } from 'viem';
 
 import {
@@ -17,8 +18,6 @@ import {
     SingleAssetJoinInput,
     JoinKind,
     Slippage,
-    Token,
-    TokenAmount,
     Address,
     Hex,
     PoolStateInput,
@@ -27,6 +26,7 @@ import {
     getPoolAddress,
     PoolJoin,
     JoinInput,
+    InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import {
@@ -36,22 +36,23 @@ import {
     doJoin,
 } from './lib/utils/joinHelper';
 import { JoinTxInput } from './lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
-const rpcUrl = 'http://127.0.0.1:8545/';
 const poolId =
     '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512'; // 80wjAURA-20WETH
 
 describe('weighted join test', () => {
     let txInput: JoinTxInput;
-    let bptToken: Token;
+    let poolStateInput: PoolStateInput;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        const poolStateInput = await api.getPool(poolId);
+        poolStateInput = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -69,9 +70,6 @@ describe('weighted join test', () => {
             testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
             joinInput: {} as JoinInput,
         };
-
-        // setup BPT token
-        bptToken = new Token(chainId, poolStateInput.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
@@ -94,14 +92,13 @@ describe('weighted join test', () => {
 
     describe('unbalanced join', () => {
         let input: Omit<UnbalancedJoinInput, 'amountsIn'>;
-        let amountsIn: TokenAmount[];
+        let amountsIn: InputAmount[];
         beforeAll(() => {
-            const poolTokens = txInput.poolStateInput.tokens.map(
-                (t) => new Token(chainId, t.address, t.decimals),
-            );
-            amountsIn = poolTokens.map((t) =>
-                TokenAmount.fromHumanAmount(t, '1'),
-            );
+            amountsIn = txInput.poolStateInput.tokens.map((t) => ({
+                rawAmount: parseUnits('0.001', t.decimals),
+                decimals: t.decimals,
+                address: t.address,
+            }));
             input = {
                 chainId,
                 rpcUrl,
@@ -150,7 +147,11 @@ describe('weighted join test', () => {
     describe('single asset join', () => {
         let joinInput: SingleAssetJoinInput;
         beforeAll(() => {
-            const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
+            const bptOut: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolStateInput.address,
+            };
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
             joinInput = {
                 bptOut,
@@ -201,7 +202,11 @@ describe('weighted join test', () => {
     describe('proportional join', () => {
         let joinInput: ProportionalJoinInput;
         beforeAll(() => {
-            const bptOut = TokenAmount.fromHumanAmount(bptToken, '1');
+            const bptOut: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolStateInput.address,
+            };
             joinInput = {
                 bptOut,
                 chainId,
