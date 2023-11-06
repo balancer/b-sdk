@@ -207,7 +207,7 @@ export function assertUnbalancedJoin(
     );
 }
 
-export function assertSingleToken(
+export function assertSingleTokenJoin(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
     joinInput: SingleAssetJoinInput,
@@ -278,7 +278,7 @@ export function assertSingleToken(
     );
 }
 
-export function assertProportional(
+export function assertProportionalJoin(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
     joinInput: ProportionalJoinInput,

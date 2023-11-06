@@ -4,9 +4,9 @@ import { Address } from '../../types';
 import { PoolState } from '../types';
 
 export enum ExitKind {
-    UNBALANCED = 'UNBALANCED', // exitExactOut
-    SINGLE_ASSET = 'SINGLE_ASSET', // exitExactInSingleAsset
-    PROPORTIONAL = 'PROPORTIONAL', // exitExactInProportional
+    Unbalanced = 'Unbalanced', // exitExactOut
+    SingleAsset = 'SingleAsset', // exitExactInSingleAsset
+    Proportional = 'Proportional', // exitExactInProportional
 }
 
 // This will be extended for each pools specific output requirements
@@ -19,18 +19,18 @@ export type BaseExitInput = {
 
 export type UnbalancedExitInput = BaseExitInput & {
     amountsOut: TokenAmount[];
-    kind: ExitKind.UNBALANCED;
+    kind: ExitKind.Unbalanced;
 };
 
 export type SingleAssetExitInput = BaseExitInput & {
     bptIn: TokenAmount;
     tokenOut: Address;
-    kind: ExitKind.SINGLE_ASSET;
+    kind: ExitKind.SingleAsset;
 };
 
 export type ProportionalExitInput = BaseExitInput & {
     bptIn: TokenAmount;
-    kind: ExitKind.PROPORTIONAL;
+    kind: ExitKind.Proportional;
 };
 
 export type ExitInput =
@@ -45,12 +45,12 @@ export type ExitQueryResult =
 // Returned from a exit query
 export type BaseExitQueryResult = {
     poolType: string;
-    id: Address;
+    poolId: Address;
     exitKind: ExitKind;
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
     tokenOutIndex?: number;
-    toInternalBalance?: boolean;
+    toInternalBalance: boolean;
 };
 
 export type ComposableStableExitQueryResult = BaseExitQueryResult & {
@@ -71,7 +71,7 @@ export type ExitCall = ComposableStableExitCall | WeightedExitCall;
 export type ExitBuildOutput = {
     call: Address;
     to: Address;
-    value: bigint | undefined;
+    value: bigint;
     maxBptIn: bigint;
     minAmountsOut: bigint[];
 };
