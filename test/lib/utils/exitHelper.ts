@@ -338,7 +338,7 @@ function assertExitBuildOutput(
         minAmountsOut,
         maxBptIn,
         to: BALANCER_VAULT,
-        // Value should equal value of any wrapped asset if using native
+        // Value should always be 0 for exits
         value: 0n,
     };
 
