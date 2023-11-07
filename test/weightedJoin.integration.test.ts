@@ -30,8 +30,8 @@ import {
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import {
-    assertProportional,
-    assertSingleToken,
+    assertProportionalJoin,
+    assertSingleTokenJoin,
     assertUnbalancedJoin,
     doJoin,
 } from './lib/utils/joinHelper';
@@ -168,7 +168,7 @@ describe('weighted join test', () => {
                 joinInput,
             });
 
-            assertSingleToken(
+            assertSingleTokenJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 joinInput,
@@ -186,7 +186,7 @@ describe('weighted join test', () => {
                 },
             });
 
-            assertSingleToken(
+            assertSingleTokenJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 {
@@ -220,7 +220,7 @@ describe('weighted join test', () => {
                 joinInput,
             });
 
-            assertProportional(
+            assertProportionalJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 joinInput,
@@ -237,7 +237,7 @@ describe('weighted join test', () => {
                 },
             });
 
-            assertProportional(
+            assertProportionalJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 {

@@ -1,15 +1,16 @@
 import {
     BaseExit,
     ExitBuildOutput,
-    ExitCallInput,
+    ExitCall,
     ExitConfig,
     ExitInput,
     ExitQueryResult,
 } from './types';
 import { WeightedExit } from './weighted/weightedExit';
 import { PoolStateInput } from '../types';
-import { validateInputs } from './weighted/validateInputs';
+import { validateInputs } from './utils/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
+import { ComposableStableExit } from './composable-stable/composableStableExit';
 
 export class PoolExit {
     private readonly poolExits: Record<string, BaseExit> = {};
@@ -18,6 +19,8 @@ export class PoolExit {
         const { customPoolExits } = config || {};
         this.poolExits = {
             WEIGHTED: new WeightedExit(),
+            // PHANTOM_STABLE === ComposableStables in API
+            PHANTOM_STABLE: new ComposableStableExit(),
             // custom pool Exits take precedence over base Exits
             ...customPoolExits,
         };
@@ -46,7 +49,7 @@ export class PoolExit {
         return this.getExit(poolState.type).query(input, mappedPoolState);
     }
 
-    public buildCall(input: ExitCallInput): ExitBuildOutput {
+    public buildCall(input: ExitCall): ExitBuildOutput {
         return this.getExit(input.poolType).buildCall(input);
     }
 }
