@@ -79,7 +79,7 @@ export class ComposableStableExit implements BaseExit {
     private getAmountsQuery(
         tokens: Token[],
         input: ExitInput,
-        bptIndex?: number,
+        bptIndex: number,
     ): AmountsExit {
         switch (input.kind) {
             case ExitKind.Unbalanced:

@@ -7,7 +7,6 @@ import {
     Address,
     JoinBuildOutput,
     JoinQueryResult,
-    ZERO_ADDRESS,
     UnbalancedJoinInput,
     BALANCER_VAULT,
     SingleAssetJoinInput,
@@ -21,6 +20,7 @@ import {
 import { TxResult, sendTransactionGetBalances } from './helper';
 import { JoinTxInput } from './types';
 import { zeroAddress } from 'viem';
+import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 
 type JoinResult = {
     joinQueryResult: JoinQueryResult;
@@ -56,16 +56,6 @@ async function sdkJoin({
         joinBuildOutput,
         joinQueryResult,
     };
-}
-
-function getTokens(poolStateInput: PoolStateInput): Address[] {
-    // pool tokens, bpt, eth
-    const tokens = poolStateInput.tokens
-        .filter((t) => t.address !== poolStateInput.address)
-        .map((t) => t.address);
-    tokens.push(poolStateInput.address);
-    tokens.push(ZERO_ADDRESS);
-    return tokens;
 }
 
 function isComposableStableJoinQueryResult(result: JoinQueryResult): boolean {
@@ -127,8 +117,7 @@ export async function doJoin(txInput: JoinTxInput) {
         testAddress,
     });
 
-    // get tokens for balance change - pool tokens, BPT, native
-    const tokens = getTokens(poolStateInput);
+    const tokens = getTokensForBalanceCheck(poolStateInput);
 
     // send transaction and calculate balance changes
     const txOutput = await sendTransactionGetBalances(

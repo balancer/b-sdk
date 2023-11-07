@@ -1,6 +1,5 @@
 import { ExitTxInput } from './types';
 import {
-    Address,
     ChainId,
     ComposableStableExitQueryResult,
     ExitBuildOutput,
@@ -11,7 +10,6 @@ import {
     Slippage,
     Token,
     UnbalancedExitInput,
-    ZERO_ADDRESS,
     SingleAssetExitInput,
     BALANCER_VAULT,
     ExitInput,
@@ -20,6 +18,7 @@ import {
 import { sendTransactionGetBalances, TxResult } from './helper';
 import { expect } from 'vitest';
 import { zeroAddress } from 'viem';
+import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 
 type ExitResult = {
     exitQueryResult: ExitQueryResult;
@@ -51,15 +50,7 @@ export const sdkExit = async ({
     };
 };
 
-function getTokens(poolStateInput: PoolStateInput): Address[] {
-    // pool tokens, bpt, eth
-    const tokens = poolStateInput.tokens
-        .filter((t) => t.address !== poolStateInput.address)
-        .map((t) => t.address);
-    tokens.push(poolStateInput.address);
-    tokens.push(ZERO_ADDRESS);
-    return tokens;
-}
+
 
 function isComposableStableExitQueryResult(result: ExitQueryResult): boolean {
     return (result as ComposableStableExitQueryResult).bptIndex !== undefined;
@@ -121,7 +112,7 @@ export async function doExit(txInput: ExitTxInput) {
     });
 
     // get tokens for balance change - pool tokens, BPT, native
-    const tokens = getTokens(poolStateInput);
+    const tokens = getTokensForBalanceCheck(poolStateInput);
 
     // send transaction and calculate balance changes
     const txOutput = await sendTransactionGetBalances(
