@@ -2,7 +2,7 @@ import { CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { sleep } from '../lib/utils/promises';
 
 export default async function () {
-    if (process.env.SKIP_GLOBAL_SETUP) {
+    if (process.env.SKIP_GLOBAL_SETUP === 'true') {
         console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
 anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8555 --fork-block-number=17878719
 `);

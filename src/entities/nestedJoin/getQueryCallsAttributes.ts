@@ -2,7 +2,7 @@ import { Token } from '../token';
 import { BALANCER_RELAYER, ChainId, getPoolAddress } from '../../utils';
 import { NestedJoinInput, NestedJoinCallAttributes } from './types';
 import { NestedPool, PoolKind } from '../types';
-import { Address } from '../../types';
+import { Address, PoolType } from '../../types';
 import { Relayer } from '../relayer';
 
 export const getQueryCallsAttributes = (
@@ -39,7 +39,7 @@ export const getQueryCallsAttributes = (
             poolAddress: pool.address,
             poolType: pool.type,
             kind:
-                pool.type === 'ComposableStable'
+                pool.type === PoolType.ComposableStable
                     ? PoolKind.COMPOSABLE_STABLE_V2
                     : PoolKind.WEIGHTED,
             sender: getSender(maxAmountsIn, accountAddress, chainId),

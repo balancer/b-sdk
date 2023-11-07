@@ -1,4 +1,4 @@
-import { Address, Hex } from '../../types';
+import { Address, Hex, PoolType } from '../../types';
 import { ChainId } from '../../utils';
 import { Slippage } from '../slippage';
 import { Token } from '../token';
@@ -24,7 +24,7 @@ export type NestedExitCallAttributes = {
     sortedTokens: Token[];
     poolId: Address;
     poolAddress: Address;
-    poolType: string;
+    poolType: PoolType;
     kind: PoolKind;
     sender: Address;
     recipient: Address;

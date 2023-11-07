@@ -6,7 +6,7 @@ import {
 } from './types';
 import { NestedPool, PoolKind } from '../types';
 import { TokenAmount } from '../tokenAmount';
-import { Address } from '../../types';
+import { Address, PoolType } from '../../types';
 import { BALANCER_RELAYER, ChainId } from '../../utils';
 import { Relayer } from '../relayer';
 
@@ -90,7 +90,7 @@ export const getProportionalExitCallsAttributes = (
             poolAddress: pool.address,
             poolType: pool.type,
             kind:
-                pool.type === 'ComposableStable'
+                pool.type === PoolType.ComposableStable
                     ? PoolKind.COMPOSABLE_STABLE_V2
                     : PoolKind.WEIGHTED,
             sender: getSenderProportional(calls, pool.address, accountAddress),
@@ -155,7 +155,7 @@ export const getSingleTokenExitCallsAttributes = (
             poolAddress: pool.address,
             poolType: pool.type,
             kind:
-                pool.type === 'ComposableStable'
+                pool.type === PoolType.ComposableStable
                     ? PoolKind.COMPOSABLE_STABLE_V2
                     : PoolKind.WEIGHTED,
             sender: i === 0 ? accountAddress : BALANCER_RELAYER[chainId],

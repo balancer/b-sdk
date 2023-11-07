@@ -1,4 +1,4 @@
-import { Hex } from '../../types';
+import { Hex, PoolType } from '../../types';
 import { ZERO_ADDRESS } from '../../utils';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
@@ -75,22 +75,22 @@ export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
 };
 
 const getUserData = (
-    poolType: string,
+    poolType: PoolType,
     amountsInWithoutBpt: bigint[],
     minBptOut: bigint,
 ) => {
     switch (poolType) {
-        case 'Weighted':
+        case PoolType.Weighted:
             return WeightedEncoder.joinUnbalanced(
                 amountsInWithoutBpt,
                 minBptOut,
             );
-        case 'ComposableStable':
+        case PoolType.ComposableStable:
             return ComposableStableEncoder.joinUnbalanced(
                 amountsInWithoutBpt,
                 minBptOut,
             );
         default:
-            throw new Error('Unsupported pool type');
+            throw new Error(`Unsupported pool type: ${poolType}`);
     }
 };

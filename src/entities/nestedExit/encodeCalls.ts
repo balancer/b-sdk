@@ -1,4 +1,4 @@
-import { Hex } from '../../types';
+import { Hex, PoolType } from '../../types';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
 import { NestedExitCallAttributes } from './types';
@@ -71,20 +71,20 @@ export const encodeCalls = (
     return encodedCalls;
 };
 
-const getUserDataProportional = (poolType: string, bptAmountIn: bigint) => {
+const getUserDataProportional = (poolType: PoolType, bptAmountIn: bigint) => {
     switch (poolType) {
-        case 'Weighted':
+        case PoolType.Weighted:
             return WeightedEncoder.exitProportional(bptAmountIn);
-        case 'ComposableStable':
+        case PoolType.ComposableStable:
             return ComposableStableEncoder.exitProportional(bptAmountIn);
         default:
-            throw new Error('Unsupported pool type');
+            throw new Error(`Unsupported pool type ${poolType}`);
     }
 };
 
 const getUserDataSingleToken = (
     tokenOutIndex: number | undefined,
-    poolType: string,
+    poolType: PoolType,
     bptAmountIn: bigint,
 ) => {
     if (tokenOutIndex === undefined) {
@@ -93,14 +93,14 @@ const getUserDataSingleToken = (
         );
     }
     switch (poolType) {
-        case 'Weighted':
+        case PoolType.Weighted:
             return WeightedEncoder.exitSingleAsset(bptAmountIn, tokenOutIndex);
-        case 'ComposableStable':
+        case PoolType.ComposableStable:
             return ComposableStableEncoder.exitSingleAsset(
                 bptAmountIn,
                 tokenOutIndex,
             );
         default:
-            throw new Error('Unsupported pool type');
+            throw new Error(`Unsupported pool type ${poolType}`);
     }
 };

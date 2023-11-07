@@ -20,10 +20,10 @@ import {
     Slippage,
     NestedJoin,
     replaceWrapped,
-    NestedPoolState,
     TokenAmount,
+    NestedPoolState,
 } from '../src/entities';
-import { Address } from '../src/types';
+import { Address, Hex, PoolType } from '../src/types';
 
 import { BALANCER_RELAYER, CHAINS, ChainId } from '../src/utils';
 
@@ -53,7 +53,7 @@ import { grantRoles } from './lib/utils/relayerHelper';
  */
 
 type TxInput = {
-    poolAddress: Address;
+    poolId: Hex;
     amountsIn: {
         address: Address; // DAI
         rawAmount: bigint;
@@ -69,7 +69,7 @@ describe('nested join test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
-    let poolAddress: Address;
+    let poolId: Hex;
     let testAddress: Address;
 
     beforeAll(async () => {
@@ -86,7 +86,8 @@ describe('nested join test', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        poolAddress = '0x08775ccb6674d6bdceb0797c364c2653ed84f384'; // WETH-3POOL-BPT
+        poolId =
+            '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0'; // WETH-3POOL-BPT
 
         // Fork setup - done only once per fork reset
         // Governance grant roles to the relayer
@@ -157,7 +158,7 @@ describe('nested join test', () => {
             slippage,
             value,
         } = await doTransaction({
-            poolAddress,
+            poolId,
             amountsIn,
             chainId,
             rpcUrl,
@@ -208,7 +209,7 @@ describe('nested join test', () => {
             slippage,
             value,
         } = await doTransaction({
-            poolAddress,
+            poolId,
             amountsIn,
             chainId,
             rpcUrl,
@@ -261,7 +262,7 @@ describe('nested join test', () => {
             slippage,
             value,
         } = await doTransaction({
-            poolAddress,
+            poolId,
             amountsIn,
             chainId,
             rpcUrl,
@@ -295,7 +296,7 @@ describe('nested join test', () => {
 
         await expect(() =>
             doTransaction({
-                poolAddress,
+                poolId,
                 amountsIn,
                 chainId,
                 rpcUrl,
@@ -310,7 +311,7 @@ describe('nested join test', () => {
 });
 
 export const doTransaction = async ({
-    poolAddress,
+    poolId,
     amountsIn,
     chainId,
     rpcUrl,
@@ -321,7 +322,7 @@ export const doTransaction = async ({
     // setup mock api
     const api = new MockApi();
     // get pool state from api
-    const nestedPoolFromApi = await api.getNestedPool(poolAddress);
+    const nestedPoolFromApi = await api.getNestedPool(poolId);
     // setup join helper
     const nestedJoin = new NestedJoin();
 
@@ -415,15 +416,18 @@ const assertResults = (
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getNestedPool(address: Address): Promise<NestedPoolState> {
-        if (address !== '0x08775ccb6674d6bdceb0797c364c2653ed84f384')
+    public async getNestedPool(poolId: Hex): Promise<NestedPoolState> {
+        if (
+            poolId !==
+            '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0'
+        )
             throw Error();
         return {
             pools: [
                 {
                     id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',
                     address: '0x08775ccb6674d6bdceb0797c364c2653ed84f384',
-                    type: 'Weighted',
+                    type: PoolType.Weighted,
                     level: 1,
                     tokens: [
                         {
@@ -443,7 +447,7 @@ export class MockApi {
                 {
                     id: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
                     address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
-                    type: 'ComposableStable',
+                    type: PoolType.ComposableStable,
                     level: 0,
                     tokens: [
                         {

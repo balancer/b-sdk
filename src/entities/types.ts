@@ -1,12 +1,12 @@
 import { MinimalToken } from '../data';
-import { Address, Hex } from '../types';
+import { Address, Hex, PoolType } from '../types';
 import { Token } from './token';
 
 // Returned from API and used as input
 export type PoolState = {
     id: Hex;
     address: Address;
-    type: string;
+    type: string; // TODO: refactor this to PoolType on a separate PR
     tokens: Token[];
 };
 
@@ -28,10 +28,11 @@ export type AmountsExit = {
     tokenOutIndex: number | undefined;
     maxBptAmountIn: bigint;
 };
+
 export type NestedPool = {
     id: Hex;
     address: Address;
-    type: string;
+    type: PoolType;
     level: number; // 0 is the bottom and the highest level is the top
     tokens: MinimalToken[]; // each token should have at least one
 };
