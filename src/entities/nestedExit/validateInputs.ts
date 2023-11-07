@@ -1,6 +1,7 @@
 import { NATIVE_ASSETS } from '../../utils';
 import { Token } from '../token';
 import { NestedPoolState } from '../types';
+import { constraintValidation } from '../utils';
 import {
     NestedProportionalExitInput,
     NestedSingleTokenExitInput,
@@ -10,6 +11,7 @@ export const validateInputs = (
     input: NestedProportionalExitInput | NestedSingleTokenExitInput,
     nestedPoolState: NestedPoolState,
 ) => {
+    constraintValidation(nestedPoolState);
     const tokenOut = 'tokenOut' in input ? input.tokenOut : undefined;
     const isProportional = tokenOut === undefined;
     const mainTokens = nestedPoolState.mainTokens.map(
