@@ -18,10 +18,13 @@ export class PoolJoin {
     constructor(config?: JoinConfig) {
         const { customPoolJoins } = config || {};
         this.poolJoins = {
-            WEIGHTED: new WeightedJoin(),
             // PHANTOM_STABLE === ComposableStables in API
-            PHANTOM_STABLE: new ComposableStableJoin(),
             // custom pool Joins take precedence over base Joins
+            PHANTOM_STABLE: new ComposableStableJoin(),
+            GYRO2: new WeightedJoin(),
+            GYRO3: new WeightedJoin(),
+            GYROE: new WeightedJoin(),
+            WEIGHTED: new WeightedJoin(),
             ...customPoolJoins,
         };
     }

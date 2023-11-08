@@ -18,6 +18,9 @@ export class PoolExit {
     constructor(config?: ExitConfig) {
         const { customPoolExits } = config || {};
         this.poolExits = {
+            GYRO2: new WeightedExit(),
+            GYRO3: new WeightedExit(),
+            GYROE: new WeightedExit(),
             WEIGHTED: new WeightedExit(),
             // PHANTOM_STABLE === ComposableStables in API
             PHANTOM_STABLE: new ComposableStableExit(),
