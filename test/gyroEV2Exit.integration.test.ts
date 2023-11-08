@@ -36,7 +36,7 @@ import { gyroExitKindNotSupported } from '../src/entities/exit/utils/validateInp
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const poolId =
-    '0xf01b0684c98cd7ada480bfdf6e43876422fa1fc10002000000000000000005de'; // 80BAL-20WETH
+    '0xf01b0684c98cd7ada480bfdf6e43876422fa1fc10002000000000000000005de'; // ECLP-wstETH-wETH
 
 describe('weighted exit test', () => {
     let txInput: ExitTxInput;
@@ -71,7 +71,7 @@ describe('weighted exit test', () => {
             txInput.client,
             txInput.testAddress,
             [txInput.poolStateInput.address],
-            [0], // TODO: hardcode these values to improve test performance
+            [0],
             [parseUnits('1000', 18)],
         );
     });
