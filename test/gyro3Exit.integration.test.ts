@@ -33,12 +33,12 @@ import { ExitTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { gyroExitKindNotSupported } from '../src/entities/exit/utils/validateInputs';
 
-const chainId = ChainId.MAINNET;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const chainId = ChainId.POLYGON;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 const poolId =
-    '0xf01b0684c98cd7ada480bfdf6e43876422fa1fc10002000000000000000005de'; // ECLP-wstETH-wETH
+    '0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799'; // 3CLP-BUSD-USDC-USDT
 
-describe('GyroE V2 exit test', () => {
+describe('Gyro3 exit test', () => {
     let txInput: ExitTxInput;
     let poolInput: PoolStateInput;
     beforeAll(async () => {
@@ -61,7 +61,7 @@ describe('GyroE V2 exit test', () => {
             poolExit: new PoolExit(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput: poolInput,
-            testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
+            testAddress: '0xe84f75fc9caa49876d0ba18d309da4231d44e94d', // MATIC Holder Wallet, must hold amount of matic to approve tokens
             exitInput: {} as ExitInput,
         };
     });
@@ -104,23 +104,7 @@ describe('GyroE V2 exit test', () => {
                 exitResult,
                 txInput.slippage,
             );
-        });
-        test('with native', async () => {
-            const exitInput = {
-                ...input,
-                useNativeAssetAsWrappedAmountIn: true,
-            };
-            const exitResult = await doExit({
-                ...txInput,
-                exitInput,
-            });
-            assertProportionalExit(
-                txInput.client.chain?.id as number,
-                txInput.poolStateInput,
-                exitInput,
-                exitResult,
-                txInput.slippage,
-            );
+            //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
         });
     });
 
@@ -176,22 +160,28 @@ describe('GyroE V2 exit test', () => {
 });
 
 /*********************** Mock To Represent API Requirements **********************/
+
 export class MockApi {
     public async getPool(id: Hex): Promise<PoolStateInput> {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'GYROE',
+            type: 'GYRO2',
             tokens: [
                 {
-                    address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', // wstETH
-                    decimals: 18,
+                    address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC(PoS)
+                    decimals: 6,
                     index: 0,
                 },
                 {
-                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // wETH
+                    address: '0x9c9e5fd8bbc25984b178fdce6117defa39d2db39', // BUSD
                     decimals: 18,
                     index: 1,
+                },
+                {
+                    address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // USDT(PoS)
+                    decimals: 6,
+                    index: 2,
                 },
             ],
         };

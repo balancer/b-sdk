@@ -34,12 +34,12 @@ import { JoinTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { gyroJoinKindNotSupported } from '../src/entities/join/utils/validateInputs';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
-const chainId = ChainId.MAINNET;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
+const chainId = ChainId.POLYGON;
 const poolId =
-    '0xf01b0684c98cd7ada480bfdf6e43876422fa1fc10002000000000000000005de'; // ECLP-wstETH-wETH
+    '0xa489c057de6c3177380ea264ebdf686b7f564f510002000000000000000008e2'; // ECLP-wstETH-wETH
 
-describe('GyroE V2 join test', () => {
+describe('gyroE V2 join test', () => {
     let txInput: JoinTxInput;
     let poolStateInput: PoolStateInput;
 
@@ -63,7 +63,7 @@ describe('GyroE V2 join test', () => {
             poolJoin: new PoolJoin(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput,
-            testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
+            testAddress: '0xe84f75fc9caa49876d0ba18d309da4231d44e94d', // MATIC Holder Wallet, must hold amount of matic to approve tokens
             joinInput: {} as JoinInput,
         };
     });
@@ -76,12 +76,12 @@ describe('GyroE V2 join test', () => {
                 ...txInput.poolStateInput.tokens.map((t) => t.address),
                 txInput.poolStateInput.address,
             ],
-            [0, 98, 0],
+            undefined,
             [
                 ...txInput.poolStateInput.tokens.map((t) =>
-                    parseUnits('100', t.decimals),
+                    parseUnits('10000', t.decimals),
                 ),
-                parseUnits('100', 18),
+                parseUnits('10000', 18),
             ],
         );
     });
@@ -90,7 +90,7 @@ describe('GyroE V2 join test', () => {
         let joinInput: ProportionalJoinInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
-                rawAmount: parseEther('2'),
+                rawAmount: parseEther('1'),
                 decimals: 18,
                 address: poolStateInput.address,
             };
@@ -111,25 +111,6 @@ describe('GyroE V2 join test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 joinInput,
-                joinResult,
-                txInput.slippage,
-            );
-        });
-        test('with native', async () => {
-            const joinResult = await doJoin({
-                ...txInput,
-                joinInput: {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
-            });
-            assertProportionalJoin(
-                txInput.client.chain?.id as number,
-                txInput.poolStateInput,
-                {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
                 joinResult,
                 txInput.slippage,
             );
@@ -163,6 +144,7 @@ describe('GyroE V2 join test', () => {
                 }),
             ).rejects.toThrowError(gyroJoinKindNotSupported);
         });
+        //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
     });
 
     describe('single asset join', () => {
@@ -204,12 +186,12 @@ export class MockApi {
             type: 'GYROE',
             tokens: [
                 {
-                    address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', // wstETH
-                    decimals: 18,
+                    address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC
+                    decimals: 6,
                     index: 0,
                 },
                 {
-                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // wETH
+                    address: '0x2e1ad108ff1d8c782fcbbb89aad783ac49586756', // TUSD
                     decimals: 18,
                     index: 1,
                 },

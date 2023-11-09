@@ -21,6 +21,7 @@ export class PoolJoin {
             // PHANTOM_STABLE === ComposableStables in API
             // custom pool Joins take precedence over base Joins
             PHANTOM_STABLE: new ComposableStableJoin(),
+            //GYRO2, GYRO3, GYROE pool types only support Proportional Join(3 - ALL_TOKENS_IN_FOR_BPT_OUT)
             GYRO2: new WeightedJoin(),
             GYRO3: new WeightedJoin(),
             GYROE: new WeightedJoin(),

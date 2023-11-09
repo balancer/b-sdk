@@ -18,6 +18,7 @@ export class PoolExit {
     constructor(config?: ExitConfig) {
         const { customPoolExits } = config || {};
         this.poolExits = {
+            //GYRO2, GYRO3, GYROE only support Proportional Exit(1 - EXACT_BPT_IN_FOR_TOKENS_OUT)
             GYRO2: new WeightedExit(),
             GYRO3: new WeightedExit(),
             GYROE: new WeightedExit(),
