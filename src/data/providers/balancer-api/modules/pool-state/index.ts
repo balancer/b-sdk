@@ -85,25 +85,37 @@ export class Pools {
             },
         });
         const poolGetPool: PoolStateInput = data.poolGetPool;
-        /**
-         * TODO:
-         * We are working on assumption that API will return BPT token in token list (as current SG does)
-         * It does not currently do this so we have to add it manually
-         */
+
         if (poolGetPool.type === 'PHANTOM_STABLE') {
-            let missingBPTIndex = 0;
-            const sortedIndexes = poolGetPool.tokens.map((t) => t.index).sort();
-            for (let i = 0; i < poolGetPool.tokens.length + 1; i++) {
-                if (i === poolGetPool.tokens.length || sortedIndexes[i] !== i) {
-                    missingBPTIndex = i;
-                    break;
+            if (
+                !poolGetPool.tokens.some(
+                    (t) => t.address === poolGetPool.address,
+                )
+            ) {
+                /**
+                 * TODO:
+                 * We are working on assumption that API will return BPT token in token list (as current SG does)
+                 * If it doesn't (as of 09/11/23) we have to add it manually
+                 */
+                let missingBPTIndex = 0;
+                const sortedIndexes = poolGetPool.tokens
+                    .map((t) => t.index)
+                    .sort();
+                for (let i = 0; i < poolGetPool.tokens.length + 1; i++) {
+                    if (
+                        i === poolGetPool.tokens.length ||
+                        sortedIndexes[i] !== i
+                    ) {
+                        missingBPTIndex = i;
+                        break;
+                    }
                 }
+                poolGetPool.tokens.splice(missingBPTIndex, 0, {
+                    index: missingBPTIndex,
+                    address: poolGetPool.address,
+                    decimals: 18,
+                });
             }
-            poolGetPool.tokens.splice(missingBPTIndex, 0, {
-                index: missingBPTIndex,
-                address: poolGetPool.address,
-                decimals: 18,
-            });
         }
         return poolGetPool;
     }
