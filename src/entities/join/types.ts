@@ -82,8 +82,8 @@ export interface BaseJoin {
         call: Hex;
         to: Address;
         value: bigint;
-        minBptOut: bigint;
-        maxAmountsIn: bigint[];
+        minBptOut: TokenAmount;
+        maxAmountsIn: TokenAmount[];
     };
 }
 
@@ -91,8 +91,8 @@ export type JoinBuildOutput = {
     call: Hex;
     to: Address;
     value: bigint;
-    minBptOut: bigint;
-    maxAmountsIn: bigint[];
+    minBptOut: TokenAmount;
+    maxAmountsIn: TokenAmount[];
 };
 
 export type JoinConfig = {

@@ -97,8 +97,13 @@ export class ComposableStableJoin implements BaseJoin {
             call,
             to: BALANCER_VAULT,
             value: value === undefined ? 0n : value,
-            minBptOut: amounts.minimumBpt,
-            maxAmountsIn: amounts.maxAmountsIn,
+            minBptOut: TokenAmount.fromRawAmount(
+                input.bptOut.token,
+                amounts.minimumBpt,
+            ),
+            maxAmountsIn: input.amountsIn.map((a, i) =>
+                TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
+            ),
         };
     }
 
