@@ -13,11 +13,11 @@ import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
     BaseExit,
     ExitBuildOutput,
-    ExitCall,
+    RemoveLiquidityCall,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
-    WeightedExitCall,
+    RemoveLiquidityWeightedCall,
 } from '../types';
 import { RemoveLiquidityAmounts, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
@@ -97,7 +97,7 @@ export class WeightedExit implements BaseExit {
         }
     }
 
-    public buildCall(input: WeightedExitCall): ExitBuildOutput {
+    public buildCall(input: RemoveLiquidityWeightedCall): ExitBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(
@@ -135,7 +135,7 @@ export class WeightedExit implements BaseExit {
         };
     }
 
-    private getAmountsCall(input: ExitCall): RemoveLiquidityAmounts {
+    private getAmountsCall(input: RemoveLiquidityCall): RemoveLiquidityAmounts {
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:
                 return {

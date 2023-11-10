@@ -1,7 +1,7 @@
 import {
     BaseExit,
     ExitBuildOutput,
-    ExitCall,
+    RemoveLiquidityCall,
     ExitConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
@@ -49,7 +49,7 @@ export class PoolExit {
         return this.getExit(poolState.type).query(input, mappedPoolState);
     }
 
-    public buildCall(input: ExitCall): ExitBuildOutput {
+    public buildCall(input: RemoveLiquidityCall): ExitBuildOutput {
         return this.getExit(input.poolType).buildCall(input);
     }
 }

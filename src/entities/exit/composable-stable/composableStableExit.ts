@@ -11,7 +11,7 @@ import { vaultAbi } from '../../../abi';
 import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
     BaseExit,
-    ComposableStableExitCall,
+    RemoveLiquidityComposableStableCall,
     ExitBuildOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
@@ -105,7 +105,9 @@ export class ComposableStableExit implements BaseExit {
         }
     }
 
-    public buildCall(input: ComposableStableExitCall): ExitBuildOutput {
+    public buildCall(
+        input: RemoveLiquidityComposableStableCall,
+    ): ExitBuildOutput {
         const amounts = this.getAmountsCall(input);
         const amountsWithoutBpt = {
             ...amounts,
@@ -149,7 +151,7 @@ export class ComposableStableExit implements BaseExit {
     }
 
     private getAmountsCall(
-        input: ComposableStableExitCall,
+        input: RemoveLiquidityComposableStableCall,
     ): RemoveLiquidityAmounts {
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:

@@ -58,16 +58,19 @@ export type RemoveLiquidityComposableStableQueryOutput =
         bptIndex: number;
     };
 
-type BaseExitCall = {
+type RemoveLiquidityBaseCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
 };
-export type ComposableStableExitCall = BaseExitCall &
+export type RemoveLiquidityComposableStableCall = RemoveLiquidityBaseCall &
     RemoveLiquidityComposableStableQueryOutput;
-export type WeightedExitCall = BaseExitCall & RemoveLiquidityBaseQueryOutput;
+export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall &
+    RemoveLiquidityBaseQueryOutput;
 
-export type ExitCall = ComposableStableExitCall | WeightedExitCall;
+export type RemoveLiquidityCall =
+    | RemoveLiquidityComposableStableCall
+    | RemoveLiquidityWeightedCall;
 
 export type ExitBuildOutput = {
     call: Address;
@@ -82,7 +85,7 @@ export interface BaseExit {
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput>;
-    buildCall(input: ExitCall): ExitBuildOutput;
+    buildCall(input: RemoveLiquidityCall): ExitBuildOutput;
 }
 
 export type ExitConfig = {
