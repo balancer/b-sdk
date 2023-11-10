@@ -45,7 +45,7 @@ export type AddLiquidityInput =
     | AddLiquiditySingleAssetInput
     | AddLiquidityProportionalInput;
 
-type BaseJoinQueryResult = {
+type AddLiquidityBaseQueryResult = {
     poolType: string;
     poolId: Hex;
     addLiquidityKind: AddLiquidityKind;
@@ -55,15 +55,16 @@ type BaseJoinQueryResult = {
     tokenInIndex?: number;
 };
 
-export type WeightedJoinQueryResult = BaseJoinQueryResult;
+export type AddLiquidityWeightedQueryResult = AddLiquidityBaseQueryResult;
 
-export type ComposableStableJoinQueryResult = BaseJoinQueryResult & {
-    bptIndex: number;
-};
+export type AddLiquidityComposableStableQueryResult =
+    AddLiquidityBaseQueryResult & {
+        bptIndex: number;
+    };
 
-export type JoinQueryResult =
-    | WeightedJoinQueryResult
-    | ComposableStableJoinQueryResult;
+export type AddLiquidityQueryResult =
+    | AddLiquidityWeightedQueryResult
+    | AddLiquidityComposableStableQueryResult;
 
 type BaseJoinCall = {
     slippage: Slippage;
@@ -71,8 +72,9 @@ type BaseJoinCall = {
     recipient: Address;
 };
 
-export type ComposableJoinCall = BaseJoinCall & ComposableStableJoinQueryResult;
-export type WeightedJoinCall = BaseJoinCall & BaseJoinQueryResult;
+export type ComposableJoinCall = BaseJoinCall &
+    AddLiquidityComposableStableQueryResult;
+export type WeightedJoinCall = BaseJoinCall & AddLiquidityBaseQueryResult;
 
 export type JoinCall = WeightedJoinCall | ComposableJoinCall;
 
@@ -80,7 +82,7 @@ export interface BaseJoin {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<JoinQueryResult>;
+    ): Promise<AddLiquidityQueryResult>;
     buildCall(input: JoinCall): {
         call: Hex;
         to: Address;

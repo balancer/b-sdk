@@ -9,7 +9,7 @@ import {
     JoinBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    ComposableStableJoinQueryResult,
+    AddLiquidityComposableStableQueryResult,
     ComposableJoinCall,
 } from '../types';
 import {
@@ -27,7 +27,7 @@ export class ComposableStableJoin implements BaseJoin {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<ComposableStableJoinQueryResult> {
+    ): Promise<AddLiquidityComposableStableQueryResult> {
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
         );

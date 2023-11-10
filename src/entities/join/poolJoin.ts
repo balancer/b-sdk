@@ -3,7 +3,7 @@ import {
     JoinBuildOutput,
     JoinConfig,
     AddLiquidityInput,
-    JoinQueryResult,
+    AddLiquidityQueryResult,
     JoinCall,
 } from './types';
 import { WeightedJoin } from './weighted/weightedJoin';
@@ -37,7 +37,7 @@ export class PoolJoin {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolStateInput,
-    ): Promise<JoinQueryResult> {
+    ): Promise<AddLiquidityQueryResult> {
         validateInputs(input, poolState);
 
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);

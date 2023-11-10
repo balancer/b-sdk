@@ -10,7 +10,7 @@ import {
     JoinBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    WeightedJoinQueryResult,
+    AddLiquidityWeightedQueryResult,
     WeightedJoinCall,
 } from '../types';
 import { AddLiquidityAmounts, PoolState } from '../../types';
@@ -20,7 +20,7 @@ export class WeightedJoin implements BaseJoin {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<WeightedJoinQueryResult> {
+    ): Promise<AddLiquidityWeightedQueryResult> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
 
         const userData = this.encodeUserData(input.kind, amounts);
