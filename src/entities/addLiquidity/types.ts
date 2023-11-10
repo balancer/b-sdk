@@ -90,8 +90,8 @@ export interface AddLiquidityBase {
         call: Hex;
         to: Address;
         value: bigint;
-        minBptOut: bigint;
-        maxAmountsIn: bigint[];
+        minBptOut: TokenAmount;
+        maxAmountsIn: TokenAmount[];
     };
 }
 
@@ -99,8 +99,8 @@ export type AddLiquidityBuildOutput = {
     call: Hex;
     to: Address;
     value: bigint;
-    minBptOut: bigint;
-    maxAmountsIn: bigint[];
+    minBptOut: TokenAmount;
+    maxAmountsIn: TokenAmount[];
 };
 
 export type AddLiquidityConfig = {

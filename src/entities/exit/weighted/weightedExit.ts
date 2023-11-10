@@ -16,7 +16,7 @@ import {
     ExitCall,
     ExitInput,
     ExitKind,
-    ExitQueryOutput,
+    ExitQueryResult,
     WeightedExitCall,
 } from '../types';
 import { AmountsExit, PoolState } from '../../types';
@@ -27,7 +27,7 @@ export class WeightedExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
-    ): Promise<ExitQueryOutput> {
+    ): Promise<ExitQueryResult> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
 
         const userData = this.encodeUserData(input.kind, amounts);
@@ -119,8 +119,13 @@ export class WeightedExit implements BaseExit {
             call,
             to: BALANCER_VAULT,
             value: 0n,
-            maxBptIn: amounts.maxBptAmountIn,
-            minAmountsOut: amounts.minAmountsOut,
+            maxBptIn: TokenAmount.fromRawAmount(
+                input.bptIn.token,
+                amounts.maxBptAmountIn,
+            ),
+            minAmountsOut: input.amountsOut.map((a, i) =>
+                TokenAmount.fromRawAmount(a.token, amounts.minAmountsOut[i]),
+            ),
         };
     }
 

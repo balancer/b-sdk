@@ -15,7 +15,7 @@ import {
     ExitBuildOutput,
     ExitInput,
     ExitKind,
-    ExitQueryOutput,
+    ExitQueryResult,
 } from '../types';
 import { AmountsExit, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
@@ -26,7 +26,7 @@ export class ComposableStableExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
-    ): Promise<ExitQueryOutput> {
+    ): Promise<ExitQueryResult> {
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
         );
@@ -135,8 +135,13 @@ export class ComposableStableExit implements BaseExit {
             call,
             to: BALANCER_VAULT,
             value: 0n,
-            maxBptIn: amounts.maxBptAmountIn,
-            minAmountsOut: amounts.minAmountsOut,
+            maxBptIn: TokenAmount.fromRawAmount(
+                input.bptIn.token,
+                amounts.maxBptAmountIn,
+            ),
+            minAmountsOut: input.amountsOut.map((a, i) =>
+                TokenAmount.fromRawAmount(a.token, amounts.minAmountsOut[i]),
+            ),
         };
     }
 

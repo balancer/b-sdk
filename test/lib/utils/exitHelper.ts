@@ -1,9 +1,9 @@
 import { ExitTxInput } from './types';
 import {
     ChainId,
-    ComposableStableExitQueryOutput,
+    ComposableStableExitQueryResult,
     ExitBuildOutput,
-    ExitQueryOutput,
+    ExitQueryResult,
     NATIVE_ASSETS,
     PoolStateInput,
     TokenAmount,
@@ -21,7 +21,7 @@ import { zeroAddress } from 'viem';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 
 type ExitResult = {
-    exitQueryOutput: ExitQueryOutput;
+    exitQueryResult: ExitQueryResult;
     exitBuildOutput: ExitBuildOutput;
     txOutput: TxResult;
 };
@@ -34,11 +34,11 @@ export const sdkExit = async ({
     testAddress,
 }: Omit<ExitTxInput, 'client'>): Promise<{
     exitBuildOutput: ExitBuildOutput;
-    exitQueryOutput: ExitQueryOutput;
+    exitQueryResult: ExitQueryResult;
 }> => {
-    const exitQueryOutput = await poolExit.query(exitInput, poolStateInput);
+    const exitQueryResult = await poolExit.query(exitInput, poolStateInput);
     const exitBuildOutput = poolExit.buildCall({
-        ...exitQueryOutput,
+        ...exitQueryResult,
         slippage,
         sender: testAddress,
         recipient: testAddress,
@@ -46,26 +46,26 @@ export const sdkExit = async ({
 
     return {
         exitBuildOutput,
-        exitQueryOutput,
+        exitQueryResult,
     };
 };
 
-function isComposableStableExitQueryOutput(result: ExitQueryOutput): boolean {
-    return (result as ComposableStableExitQueryOutput).bptIndex !== undefined;
+function isComposableStableExitQueryResult(result: ExitQueryResult): boolean {
+    return (result as ComposableStableExitQueryResult).bptIndex !== undefined;
 }
 
-function getCheck(result: ExitQueryOutput, isExactIn: boolean) {
-    if (isComposableStableExitQueryOutput(result)) {
+function getCheck(result: ExitQueryResult, isExactIn: boolean) {
+    if (isComposableStableExitQueryResult(result)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
             // rome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { amountsOut, bptIndex, ...check } =
-                result as ComposableStableExitQueryOutput;
+                result as ComposableStableExitQueryResult;
             return check;
         } else {
             // rome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { bptIn, bptIndex, ...check } =
-                result as ComposableStableExitQueryOutput;
+                result as ComposableStableExitQueryResult;
             return check;
         }
     } else {
@@ -101,7 +101,7 @@ export async function doExit(txInput: ExitTxInput) {
         slippage,
     } = txInput;
 
-    const { exitQueryOutput, exitBuildOutput } = await sdkExit({
+    const { exitQueryResult, exitBuildOutput } = await sdkExit({
         poolExit,
         exitInput,
         poolStateInput,
@@ -123,7 +123,7 @@ export async function doExit(txInput: ExitTxInput) {
     );
 
     return {
-        exitQueryOutput,
+        exitQueryResult,
         exitBuildOutput,
         txOutput,
     };
@@ -136,7 +136,7 @@ export function assertUnbalancedExit(
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
-    const { txOutput, exitQueryOutput, exitBuildOutput } = exitResult;
+    const { txOutput, exitQueryResult, exitBuildOutput } = exitResult;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsOut = poolStateInput.tokens.map((t) => {
@@ -152,7 +152,7 @@ export function assertUnbalancedExit(
         else return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
-    const expectedQueryOutput: Omit<ExitQueryOutput, 'bptIn' | 'bptIndex'> = {
+    const expectedQueryOutput: Omit<ExitQueryResult, 'bptIn' | 'bptIndex'> = {
         // Query should use same amountsOut as input
         amountsOut: expectedAmountsOut,
         tokenOutIndex: undefined,
@@ -163,16 +163,16 @@ export function assertUnbalancedExit(
         exitKind: exitInput.kind,
     };
 
-    const queryCheck = getCheck(exitQueryOutput, false);
+    const queryCheck = getCheck(exitQueryResult, false);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
 
     // Expect some bpt amount
-    expect(exitQueryOutput.bptIn.amount > 0n).to.be.true;
+    expect(exitQueryResult.bptIn.amount > 0n).to.be.true;
 
-    assertExitBuildOutput(exitQueryOutput, exitBuildOutput, false, slippage);
+    assertExitBuildOutput(exitQueryResult, exitBuildOutput, false, slippage);
 
-    assertTokenDeltas(poolStateInput, exitInput, exitQueryOutput, txOutput);
+    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
 }
 
 export function assertSingleTokenExit(
@@ -182,9 +182,9 @@ export function assertSingleTokenExit(
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
-    const { txOutput, exitQueryOutput, exitBuildOutput } = exitResult;
+    const { txOutput, exitQueryResult, exitBuildOutput } = exitResult;
 
-    if (exitQueryOutput.tokenOutIndex === undefined) throw Error('No index');
+    if (exitQueryResult.tokenOutIndex === undefined) throw Error('No index');
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
 
@@ -193,7 +193,7 @@ export function assertSingleTokenExit(
     );
 
     const expectedQueryOutput: Omit<
-        ExitQueryOutput,
+        ExitQueryResult,
         'amountsOut' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
@@ -208,13 +208,13 @@ export function assertSingleTokenExit(
         exitKind: exitInput.kind,
     };
 
-    const queryCheck = getCheck(exitQueryOutput, true);
+    const queryCheck = getCheck(exitQueryResult, true);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
 
     // Expect only tokenOut to have amount > 0
-    // (Note exitQueryOutput also has value for bpt if pre-minted)
-    exitQueryOutput.amountsOut.forEach((a) => {
+    // (Note exitQueryResult also has value for bpt if pre-minted)
+    exitQueryResult.amountsOut.forEach((a) => {
         if (
             !exitInput.exitWithNativeAsset &&
             a.token.address === exitInput.tokenOut
@@ -228,9 +228,9 @@ export function assertSingleTokenExit(
         else expect(a.amount).toEqual(0n);
     });
 
-    assertExitBuildOutput(exitQueryOutput, exitBuildOutput, true, slippage);
+    assertExitBuildOutput(exitQueryResult, exitBuildOutput, true, slippage);
 
-    assertTokenDeltas(poolStateInput, exitInput, exitQueryOutput, txOutput);
+    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
 }
 
 export function assertProportionalExit(
@@ -240,12 +240,12 @@ export function assertProportionalExit(
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
-    const { txOutput, exitQueryOutput, exitBuildOutput } = exitResult;
+    const { txOutput, exitQueryResult, exitBuildOutput } = exitResult;
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
 
     const expectedQueryOutput: Omit<
-        ExitQueryOutput,
+        ExitQueryResult,
         'amountsOut' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
@@ -259,39 +259,39 @@ export function assertProportionalExit(
         exitKind: exitInput.kind,
     };
 
-    const queryCheck = getCheck(exitQueryOutput, true);
+    const queryCheck = getCheck(exitQueryResult, true);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
 
     // Expect all assets in to have an amount > 0 apart from BPT if it exists
-    exitQueryOutput.amountsOut.forEach((a) => {
+    exitQueryResult.amountsOut.forEach((a) => {
         if (a.token.address === poolStateInput.address)
             expect(a.amount).toEqual(0n);
         else expect(a.amount > 0n).to.be.true;
     });
 
-    assertExitBuildOutput(exitQueryOutput, exitBuildOutput, true, slippage);
+    assertExitBuildOutput(exitQueryResult, exitBuildOutput, true, slippage);
 
-    assertTokenDeltas(poolStateInput, exitInput, exitQueryOutput, txOutput);
+    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
 }
 
 function assertTokenDeltas(
     poolStateInput: PoolStateInput,
     exitInput: ExitInput,
-    exitQueryOutput: ExitQueryOutput,
+    exitQueryResult: ExitQueryResult,
     txOutput: TxResult,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
-    // exitQueryOutput amountsOut will have a value for the BPT token if it is a pre-minted pool
-    const amountsWithoutBpt = [...exitQueryOutput.amountsOut].filter(
+    // exitQueryResult amountsOut will have a value for the BPT token if it is a pre-minted pool
+    const amountsWithoutBpt = [...exitQueryResult.amountsOut].filter(
         (t) => t.token.address !== poolStateInput.address,
     );
 
     // Matching order of getTokens helper: [poolTokens, BPT, native]
     const expectedDeltas = [
         ...amountsWithoutBpt.map((a) => a.amount),
-        exitQueryOutput.bptIn.amount,
+        exitQueryResult.bptIn.amount,
         0n,
     ];
 
@@ -308,20 +308,26 @@ function assertTokenDeltas(
 }
 
 function assertExitBuildOutput(
-    exitQueryOutput: ExitQueryOutput,
+    exitQueryResult: ExitQueryResult,
     exitBuildOutput: ExitBuildOutput,
     isExactIn: boolean,
     slippage: Slippage,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
+    // slippage.removeFrom(a.amount)
     const minAmountsOut = isExactIn
-        ? exitQueryOutput.amountsOut.map((a) => slippage.removeFrom(a.amount))
-        : exitQueryOutput.amountsOut.map((a) => a.amount);
+        ? exitQueryResult.amountsOut.map((a) =>
+              TokenAmount.fromRawAmount(a.token, slippage.removeFrom(a.amount)),
+          )
+        : [...exitQueryResult.amountsOut];
 
     // if exactIn slippage cannot be applied to bptIn, else should use bptIn with slippage applied
     const maxBptIn = isExactIn
-        ? exitQueryOutput.bptIn.amount
-        : slippage.applyTo(exitQueryOutput.bptIn.amount);
+        ? ({ ...exitQueryResult.bptIn } as TokenAmount)
+        : TokenAmount.fromRawAmount(
+              exitQueryResult.bptIn.token,
+              slippage.applyTo(exitQueryResult.bptIn.amount),
+          );
 
     const expectedBuildOutput: Omit<ExitBuildOutput, 'call'> = {
         minAmountsOut,

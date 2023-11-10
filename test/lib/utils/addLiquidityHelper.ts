@@ -385,15 +385,18 @@ function assertAddLiquidityBuildOutput(
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
     const maxAmountsIn = isExactIn
-        ? addLiquidityQueryOutput.amountsIn.map((a) => a.amount)
+        ? [...addLiquidityQueryOutput.amountsIn]
         : addLiquidityQueryOutput.amountsIn.map((a) =>
-              slippage.applyTo(a.amount),
+              TokenAmount.fromRawAmount(a.token, slippage.applyTo(a.amount)),
           );
 
     // if exactIn slippage should be applied to bptOut else should use same bptOut as input
     const minBptOut = isExactIn
-        ? slippage.removeFrom(addLiquidityQueryOutput.bptOut.amount)
-        : addLiquidityQueryOutput.bptOut.amount;
+        ? TokenAmount.fromRawAmount(
+              addLiquidityQueryOutput.bptOut.token,
+              slippage.removeFrom(addLiquidityQueryOutput.bptOut.amount),
+          )
+        : ({ ...addLiquidityQueryOutput.bptOut } as TokenAmount);
 
     const expectedBuildOutput: Omit<AddLiquidityBuildOutput, 'call'> = {
         maxAmountsIn,

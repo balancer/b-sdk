@@ -75,8 +75,11 @@ const exit = async () => {
     });
 
     console.log('\nWith slippage applied:');
-    console.log(`Max BPT In: ${call.maxBptIn.toString()}`); // TODO these should be InputAmounts or TokenAmounts?
-    console.log(`Min amounts out: ${call.minAmountsOut}`); // TODO these should be InputAmounts or TokenAmounts?
+    console.log(`Max BPT In: ${call.maxBptIn.amount}`);
+    console.log('Min amounts out: ');
+    call.minAmountsOut.forEach((a) =>
+        console.log(a.token.address, a.amount.toString()),
+    );
 
     // Make the tx against the local fork and print the result
     await makeForkTx(

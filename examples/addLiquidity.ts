@@ -76,8 +76,11 @@ const addLiquidity = async () => {
     });
 
     console.log('\nWith slippage applied:');
-    console.log(`Max tokens in: ${call.maxAmountsIn}`); // TODO these should be InputAmounts or TokenAmounts?
-    console.log(`Min BPT Out: ${call.minBptOut.toString()}`); // TODO these should be InputAmounts or TokenAmounts?
+    console.log('Max tokens in:');
+    call.maxAmountsIn.forEach((a) =>
+        console.log(a.token.address, a.amount.toString()),
+    );
+    console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 
     // Make the tx against the local fork and print the result
     const slots = [1, 3, 0];
