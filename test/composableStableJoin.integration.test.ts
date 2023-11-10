@@ -1,7 +1,7 @@
-// pnpm test -- weightedJoin.integration.test.ts
+// pnpm test -- composableStableJoin.integration.test.ts
 import { describe, test, beforeAll, beforeEach } from 'vitest';
-import dotenv from 'dotenv';
-dotenv.config();
+import { config } from 'dotenv';
+config();
 
 import {
     createTestClient,
@@ -29,21 +29,21 @@ import {
     InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
-import {
-    assertProportionalJoin,
-    assertSingleTokenJoin,
-    assertUnbalancedJoin,
-    doJoin,
-} from './lib/utils/joinHelper';
 import { JoinTxInput } from './lib/utils/types';
+import {
+    doJoin,
+    assertUnbalancedJoin,
+    assertSingleTokenJoin,
+    assertProportionalJoin,
+} from './lib/utils/joinHelper';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
 const poolId =
-    '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512'; // 80wjAURA-20WETH
+    '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76000000000000000000000570'; // Balancer vETH/WETH StablePool
 
-describe('weighted join test', () => {
+describe('composable stable join test', () => {
     let txInput: JoinTxInput;
     let poolStateInput: PoolStateInput;
 
@@ -66,8 +66,8 @@ describe('weighted join test', () => {
             client,
             poolJoin: new PoolJoin(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateInput,
-            testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
+            poolStateInput: poolStateInput,
+            testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             joinInput: {} as JoinInput,
         };
     });
@@ -76,16 +76,12 @@ describe('weighted join test', () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [
-                ...txInput.poolStateInput.tokens.map((t) => t.address),
-                txInput.poolStateInput.address,
-            ],
-            undefined, // TODO: hardcode these values to improve test performance
+            [...txInput.poolStateInput.tokens.map((t) => t.address)],
+            [0, 0, 3],
             [
                 ...txInput.poolStateInput.tokens.map((t) =>
                     parseUnits('100', t.decimals),
                 ),
-                parseUnits('100', 18),
             ],
         );
     });
@@ -94,23 +90,27 @@ describe('weighted join test', () => {
         let input: Omit<UnbalancedJoinInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
-            amountsIn = txInput.poolStateInput.tokens.map((t) => ({
-                rawAmount: parseUnits('0.001', t.decimals),
-                decimals: t.decimals,
-                address: t.address,
-            }));
+            const bptIndex = txInput.poolStateInput.tokens.findIndex(
+                (t) => t.address === txInput.poolStateInput.address,
+            );
+            amountsIn = txInput.poolStateInput.tokens
+                .map((t) => ({
+                    rawAmount: parseUnits('1', t.decimals),
+                    decimals: t.decimals,
+                    address: t.address,
+                }))
+                .filter((_, index) => index !== bptIndex);
             input = {
                 chainId,
                 rpcUrl,
                 kind: JoinKind.Unbalanced,
             };
         });
-        test('with tokens', async () => {
+        test('token inputs', async () => {
             const joinInput = {
                 ...input,
                 amountsIn: [...amountsIn.splice(0, 1)],
             };
-
             const joinResult = await doJoin({
                 ...txInput,
                 joinInput,
@@ -145,7 +145,7 @@ describe('weighted join test', () => {
     });
 
     describe('single asset join', () => {
-        let joinInput: SingleAssetJoinInput;
+        let input: SingleAssetJoinInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -153,7 +153,7 @@ describe('weighted join test', () => {
                 address: poolStateInput.address,
             };
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-            joinInput = {
+            input = {
                 bptOut,
                 tokenIn,
                 chainId,
@@ -161,38 +161,35 @@ describe('weighted join test', () => {
                 kind: JoinKind.SingleAsset,
             };
         });
-
         test('with token', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                joinInput: input,
             });
 
             assertSingleTokenJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                input,
                 joinResult,
                 txInput.slippage,
             );
         });
 
         test('with native', async () => {
+            const joinInput = {
+                ...input,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
             });
 
             assertSingleTokenJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -200,14 +197,14 @@ describe('weighted join test', () => {
     });
 
     describe('proportional join', () => {
-        let joinInput: ProportionalJoinInput;
+        let input: ProportionalJoinInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
                 address: poolStateInput.address,
             };
-            joinInput = {
+            input = {
                 bptOut,
                 chainId,
                 rpcUrl,
@@ -217,33 +214,30 @@ describe('weighted join test', () => {
         test('with tokens', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                joinInput: input,
             });
 
             assertProportionalJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                input,
                 joinResult,
                 txInput.slippage,
             );
         });
         test('with native', async () => {
+            const joinInput = {
+                ...input,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
             });
-
             assertProportionalJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                {
-                    ...joinInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                joinInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -258,22 +252,28 @@ export class MockApi {
         const tokens = [
             {
                 address:
-                    '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f' as Address, // wjAURA
+                    '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76' as Address, // vETH/WETH BPT
                 decimals: 18,
                 index: 0,
             },
             {
                 address:
-                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
+                    '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f' as Address, // VETH
                 decimals: 18,
                 index: 1,
+            },
+            {
+                address:
+                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
+                decimals: 18,
+                index: 2,
             },
         ];
 
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'WEIGHTED',
+            type: 'PHANTOM_STABLE',
             tokens,
         };
     }

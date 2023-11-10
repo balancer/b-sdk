@@ -1,6 +1,6 @@
 // pnpm test -- gyro3Pool.test.ts
 import { describe, expect, test } from 'vitest';
-import testPools from './lib/testData/gyro3TestPool.json';
+import testPools from './lib/testData/testPools/gyro3_44133130.json';
 import { ChainId, RawGyro3Pool, SwapKind, Token, TokenAmount } from '../src';
 import { Gyro3Pool } from '../src/entities/pools/gyro3';
 

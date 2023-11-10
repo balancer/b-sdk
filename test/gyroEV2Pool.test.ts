@@ -2,7 +2,7 @@
 import { describe, expect, test } from 'vitest';
 import { ChainId, RawGyroEPool, SwapKind, Token, TokenAmount } from '../src';
 import { GyroEPool } from '../src/entities/pools/gyroE';
-import testPools from './lib/testData/gyroETestPool.json';
+import testPools from './lib/testData/testPools/gyroE_44215395.json';
 
 describe('gyroEPool tests', () => {
     const testPool = { ...testPools }.pools[1] as RawGyroEPool;

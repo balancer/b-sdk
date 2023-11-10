@@ -1,38 +1,132 @@
-import { CreateAnvilOptions, createAnvil } from '@viem/anvil';
+import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { sleep } from '../lib/utils/promises';
+import { ChainId } from '../../src/utils/constants';
 
-export default async function () {
-    if (process.env.SKIP_GLOBAL_SETUP === 'true') {
-        console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
-anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8555 --fork-block-number=17878719
-`);
-        await sleep(5000);
-        return;
-    }
+type NetworkSetup = {
+    rpcEnv: string;
+    fallBackRpc: string | undefined;
+    port: number;
+    forkBlockNumber: bigint;
+};
 
+type NetworksWithFork = Extract<
+    keyof typeof ChainId,
+    'MAINNET' | 'POLYGON' | 'FANTOM'
+>;
+
+const ANVIL_PORTS: Record<NetworksWithFork, number> = {
+    //Ports separated by 100 to avoid port collision when running tests in parallel
+    MAINNET: 8645,
+    POLYGON: 8745,
+    FANTOM: 8845,
+};
+
+export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
+    MAINNET: {
+        rpcEnv: 'ETHEREUM_RPC_URL',
+        fallBackRpc: 'https://cloudflare-eth.com',
+        port: ANVIL_PORTS.MAINNET,
+        forkBlockNumber: 18043296n,
+    },
+    POLYGON: {
+        rpcEnv: 'POLYGON_RPC_URL',
+        // Public Polygon RPCs are usually unreliable
+        fallBackRpc: undefined,
+        port: ANVIL_PORTS.POLYGON,
+        // Note - this has to be >= highest blockNo used in tests
+        forkBlockNumber: 44215395n,
+    },
+    FANTOM: {
+        rpcEnv: 'FANTOM_RPC_URL',
+        // Public Fantom RPCs are usually unreliable
+        fallBackRpc: undefined,
+        port: ANVIL_PORTS.FANTOM,
+        forkBlockNumber: 65313450n,
+    },
+};
+
+function getAnvilOptions(network: NetworkSetup): CreateAnvilOptions {
     let forkUrl: string;
-    if (process.env.ETHEREUM_RPC_URL) {
-        forkUrl = process.env.ETHEREUM_RPC_URL;
+    if (process.env[network.rpcEnv] !== 'undefined') {
+        forkUrl = process.env[network.rpcEnv] as string;
     } else {
-        forkUrl = 'https://cloudflare-eth.com';
+        if (!network.fallBackRpc)
+            throw Error(
+                `Please add a environment variable for: ${network.rpcEnv}`,
+            );
+        forkUrl = network.fallBackRpc;
         console.warn(
-            `\`ETHEREUM_RPC_URL\` not found. Falling back to \`${forkUrl}\`.`,
+            `\`${network.rpcEnv}\` not found. Falling back to \`${forkUrl}\`.`,
         );
     }
-
-    const port = 8545;
-    const forkBlockNumber = 18043296n;
-    // https://www.npmjs.com/package/@viem/anvil
-    const anvilOptions: CreateAnvilOptions = {
+    const port = network.port;
+    const forkBlockNumber = network.forkBlockNumber;
+    return {
         forkUrl,
         port,
         forkBlockNumber,
     };
-    const anvil = createAnvil(anvilOptions);
+}
 
+// Controls the current running forks to avoid starting the same fork twice
+let runningForks: Record<number, Anvil> = {};
+
+// Make sure that forks are stopped after each test suite
+export async function stopAnvilForks() {
+    await Promise.all(
+        Object.values(runningForks).map(async (anvil) => {
+            // console.log('Stopping anvil fork', anvil.options);
+            return anvil.stop();
+        }),
+    );
+    runningForks = {};
+}
+
+/*
+    Starts an anvil fork with the given options.
+    In vitest, each thread is assigned a unique, numerical id (`process.env.VITEST_POOL_ID`).
+    When jobId is provided, the fork uses this id to create a different local rpc url (e.g. `http://127.0.0.1:<8545+jobId>/`
+    so that tests can be run in parallel (depending on the number of threads of the host machine)
+*/
+export async function startFork(
+    network: NetworkSetup,
+    jobId = Number(process.env.VITEST_POOL_ID) || 0,
+) {
+    const anvilOptions = getAnvilOptions(network);
+
+    const defaultAnvilPort = 8545;
+    const port = (anvilOptions.port || defaultAnvilPort) + jobId;
+
+    if (!anvilOptions.forkUrl) {
+        throw Error(
+            'Anvil forkUrl must have a value. Please review your anvil setup',
+        );
+    }
+    const rpcUrl = `http://127.0.0.1:${port}`;
+
+    console.log('checking rpcUrl', port, runningForks);
+
+    // Avoid starting fork if it was running already
+    if (runningForks[port]) return { rpcUrl };
+
+    // https://www.npmjs.com/package/@viem/anvil
+    const anvil = createAnvil({ ...anvilOptions, port });
+    // Save reference to running fork
+    runningForks[port] = anvil;
+
+    if (process.env.SKIP_GLOBAL_SETUP === 'true') {
+        console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
+anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --fork-block-number=17878719
+`);
+        await sleep(5000);
+        return { rpcUrl };
+    }
     console.log('🛠️  Starting anvil', {
         port,
-        forkBlockNumber,
+        forkBlockNumber: anvilOptions.forkBlockNumber,
     });
-    return await anvil.start();
+    await anvil.start();
+    return {
+        rpcUrl,
+    };
 }

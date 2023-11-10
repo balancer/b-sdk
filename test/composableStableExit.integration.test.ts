@@ -1,7 +1,7 @@
 // pnpm test -- weightedExit.integration.test.ts
 import { describe, test, beforeAll, beforeEach } from 'vitest';
-import dotenv from 'dotenv';
-dotenv.config();
+import { config } from 'dotenv';
+config();
 
 import {
     createTestClient,
@@ -17,6 +17,7 @@ import {
     UnbalancedExitInput,
     ExitKind,
     Slippage,
+    Token,
     PoolStateInput,
     PoolExit,
     Address,
@@ -28,22 +29,23 @@ import {
     InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
+import { ExitTxInput } from './lib/utils/types';
 import {
     assertProportionalExit,
     assertSingleTokenExit,
     assertUnbalancedExit,
     doExit,
 } from './lib/utils/exitHelper';
-import { ExitTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const poolId =
-    '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
+    '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d000000000000000000000051b'; // baoETH-ETH StablePool
 
-describe('weighted exit test', () => {
+describe('composable stable exit test', () => {
     let txInput: ExitTxInput;
+    let bptToken: Token;
     let poolInput: PoolStateInput;
     beforeAll(async () => {
         // setup mock api
@@ -68,6 +70,7 @@ describe('weighted exit test', () => {
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             exitInput: {} as ExitInput,
         };
+        bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
 
     beforeEach(async () => {
@@ -84,8 +87,15 @@ describe('weighted exit test', () => {
         let input: Omit<UnbalancedExitInput, 'amountsOut'>;
         let amountsOut: InputAmount[];
         beforeAll(() => {
-            amountsOut = poolInput.tokens.map((t) => ({
-                rawAmount: parseUnits('0.001', t.decimals),
+            const bptIndex = txInput.poolStateInput.tokens.findIndex(
+                (t) => t.address === txInput.poolStateInput.address,
+            );
+            const poolTokensWithoutBpt = txInput.poolStateInput.tokens
+                .map((t) => new Token(chainId, t.address, t.decimals))
+                .filter((_, index) => index !== bptIndex);
+
+            amountsOut = poolTokensWithoutBpt.map((t) => ({
+                rawAmount: parseUnits('20', t.decimals),
                 decimals: t.decimals,
                 address: t.address,
             }));
@@ -234,45 +244,31 @@ describe('weighted exit test', () => {
 
 export class MockApi {
     public async getPool(id: Hex): Promise<PoolStateInput> {
-        let tokens: { address: Address; decimals: number; index: number }[] =
-            [];
-        if (
-            id ===
-            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'
-        ) {
-            tokens = [
-                {
-                    address: '0xba100000625a3754423978a60c9317c58a424e3d', // BAL
-                    decimals: 18,
-                    index: 0,
-                },
-                {
-                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // wETH
-                    decimals: 18,
-                    index: 1,
-                },
-            ];
-        } else if (
-            id ===
-            '0x87a867f5d240a782d43d90b6b06dea470f3f8f22000200000000000000000516'
-        ) {
-            tokens = [
-                {
-                    address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', // wstETH slot 0
-                    decimals: 18,
-                    index: 0,
-                },
-                {
-                    address: '0xc00e94cb662c3520282e6f5717214004a7f26888', // COMP slot 1
-                    decimals: 18,
-                    index: 1,
-                },
-            ];
-        }
+        const tokens = [
+            {
+                address:
+                    '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d0' as Address, // B-baoETH-ETH-BPT
+                decimals: 18,
+                index: 0,
+            },
+            {
+                address:
+                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
+                decimals: 18,
+                index: 1,
+            },
+            {
+                address:
+                    '0xf4edfad26ee0d23b69ca93112ecce52704e0006f' as Address, // baoETH
+                decimals: 18,
+                index: 2,
+            },
+        ];
+
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'WEIGHTED',
+            type: 'PHANTOM_STABLE',
             tokens,
         };
     }

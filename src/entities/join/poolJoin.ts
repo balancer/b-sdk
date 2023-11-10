@@ -4,12 +4,13 @@ import {
     JoinConfig,
     JoinInput,
     JoinQueryResult,
-    JoinCallInput,
+    JoinCall,
 } from './types';
 import { WeightedJoin } from './weighted/weightedJoin';
 import { PoolStateInput } from '../types';
-import { validateInputs } from './weighted/validateInputs';
+import { validateInputs } from './utils/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
+import { ComposableStableJoin } from './composable-stable/composableStableJoin';
 
 export class PoolJoin {
     private readonly poolJoins: Record<string, BaseJoin> = {};
@@ -18,6 +19,8 @@ export class PoolJoin {
         const { customPoolJoins } = config || {};
         this.poolJoins = {
             WEIGHTED: new WeightedJoin(),
+            // PHANTOM_STABLE === ComposableStables in API
+            PHANTOM_STABLE: new ComposableStableJoin(),
             // custom pool Joins take precedence over base Joins
             ...customPoolJoins,
         };
@@ -46,7 +49,7 @@ export class PoolJoin {
         return this.getJoin(poolState.type).query(input, mappedPoolState);
     }
 
-    public buildCall(input: JoinCallInput): JoinBuildOutput {
+    public buildCall(input: JoinCall): JoinBuildOutput {
         return this.getJoin(input.poolType).buildCall(input);
     }
 }

@@ -18,6 +18,12 @@ import {
 import { erc20Abi } from '../../../src/abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
 
+export type TxResult = {
+    transactionReceipt: TransactionReceipt;
+    balanceDeltas: bigint[];
+    gasUsed: bigint;
+};
+
 export const hasApprovedToken = async (
     client: Client & PublicActions & WalletActions,
     account: Address,
@@ -88,7 +94,7 @@ export const getBalances = async (
 };
 
 /**
- * Helper function that sends a transaction and check for balance deltas
+ * Helper function that sends a transaction and calculates balance changes
  *
  * @param tokensForBalanceCheck Token addresses to check balance deltas
  * @param client Client that will perform transactions
@@ -105,11 +111,7 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
-): Promise<{
-    transactionReceipt: TransactionReceipt;
-    balanceDeltas: bigint[];
-    gasUsed: bigint;
-}> {
+): Promise<TxResult> {
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
         client,
@@ -270,7 +272,6 @@ export async function findTokenBalanceSlot(
  * @param slots Slot that stores token balance in memory - use npm package `slot20` to identify which slot to provide
  * @param balances Balances in EVM amounts
  * @param jsonRpcUrl Url with remote node to be forked locally
- * @param blockNumber Number of the block that the fork will happen
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
  */
 export const forkSetup = async (

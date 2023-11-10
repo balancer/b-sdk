@@ -1,7 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { WeightedEncoder } from '../../encoders/weighted';
 import { Address } from '../../../types';
 import {
     BALANCER_VAULT,
@@ -12,25 +11,34 @@ import { vaultAbi } from '../../../abi';
 import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
     BaseExit,
+    ComposableStableExitCall,
     ExitBuildOutput,
-    ExitCall,
     ExitInput,
     ExitKind,
     ExitQueryResult,
-    WeightedExitCall,
 } from '../types';
 import { AmountsExit, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
+import { ComposableStableEncoder } from '../../encoders/composableStable';
 import { getAmounts } from '../../utils';
 
-export class WeightedExit implements BaseExit {
+export class ComposableStableExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
-        const amounts = this.getAmountsQuery(poolState.tokens, input);
-
-        const userData = this.encodeUserData(input.kind, amounts);
+        const bptIndex = poolState.tokens.findIndex(
+            (t) => t.address === poolState.address,
+        );
+        const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
+        const amountsWithoutBpt = {
+            ...amounts,
+            minAmountsOut: [
+                ...amounts.minAmountsOut.slice(0, bptIndex),
+                ...amounts.minAmountsOut.slice(bptIndex + 1),
+            ],
+        };
+        const userData = this.encodeUserData(input.kind, amountsWithoutBpt);
 
         // tokensOut will have zero address if exit with native asset
         const { args, tokensOut } = parseExitArgs({
@@ -44,13 +52,11 @@ export class WeightedExit implements BaseExit {
             userData,
             toInternalBalance: !!input.toInternalBalance,
         });
-
         const queryResult = await doQueryExit(
             input.rpcUrl,
             input.chainId,
             args,
         );
-
         const bpt = new Token(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(bpt, queryResult.bptIn);
 
@@ -66,10 +72,15 @@ export class WeightedExit implements BaseExit {
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
             toInternalBalance: !!input.toInternalBalance,
+            bptIndex,
         };
     }
 
-    private getAmountsQuery(tokens: Token[], input: ExitInput): AmountsExit {
+    private getAmountsQuery(
+        tokens: Token[],
+        input: ExitInput,
+        bptIndex: number,
+    ): AmountsExit {
         switch (input.kind) {
             case ExitKind.Unbalanced:
                 return {
@@ -80,9 +91,9 @@ export class WeightedExit implements BaseExit {
             case ExitKind.SingleAsset:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
-                    tokenOutIndex: tokens.findIndex((t) =>
-                        t.isSameAddress(input.tokenOut),
-                    ),
+                    tokenOutIndex: tokens
+                        .filter((_, index) => index !== bptIndex)
+                        .findIndex((t) => t.isSameAddress(input.tokenOut)),
                     maxBptAmountIn: input.bptIn.rawAmount,
                 };
             case ExitKind.Proportional:
@@ -94,10 +105,16 @@ export class WeightedExit implements BaseExit {
         }
     }
 
-    public buildCall(input: WeightedExitCall): ExitBuildOutput {
+    public buildCall(input: ComposableStableExitCall): ExitBuildOutput {
         const amounts = this.getAmountsCall(input);
-
-        const userData = this.encodeUserData(input.exitKind, amounts);
+        const amountsWithoutBpt = {
+            ...amounts,
+            minAmountsOut: [
+                ...amounts.minAmountsOut.slice(0, input.bptIndex),
+                ...amounts.minAmountsOut.slice(input.bptIndex + 1),
+            ],
+        };
+        const userData = this.encodeUserData(input.exitKind, amountsWithoutBpt);
 
         const { args } = parseExitArgs({
             poolId: input.poolId,
@@ -108,7 +125,6 @@ export class WeightedExit implements BaseExit {
             userData,
             toInternalBalance: !!input.toInternalBalance,
         });
-
         const call = encodeFunctionData({
             abi: vaultAbi,
             functionName: 'exitPool',
@@ -124,7 +140,7 @@ export class WeightedExit implements BaseExit {
         };
     }
 
-    private getAmountsCall(input: ExitCall): AmountsExit {
+    private getAmountsCall(input: ComposableStableExitCall): AmountsExit {
         switch (input.exitKind) {
             case ExitKind.Unbalanced:
                 return {
@@ -161,7 +177,7 @@ export class WeightedExit implements BaseExit {
     private encodeUserData(kind: ExitKind, amounts: AmountsExit): Address {
         switch (kind) {
             case ExitKind.Unbalanced:
-                return WeightedEncoder.exitUnbalanced(
+                return ComposableStableEncoder.exitUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
@@ -169,12 +185,14 @@ export class WeightedExit implements BaseExit {
                 if (amounts.tokenOutIndex === undefined)
                     throw Error('No Index');
 
-                return WeightedEncoder.exitSingleAsset(
+                return ComposableStableEncoder.exitSingleAsset(
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
             case ExitKind.Proportional:
-                return WeightedEncoder.exitProportional(amounts.maxBptAmountIn);
+                return ComposableStableEncoder.exitProportional(
+                    amounts.maxBptAmountIn,
+                );
             default:
                 throw Error('Unsupported Exit Type');
         }

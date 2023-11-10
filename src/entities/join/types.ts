@@ -1,7 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { PoolState } from '../types';
-import { Address, Hex } from '../../types';
+import { Address, Hex, InputAmount } from '../../types';
 
 export enum JoinKind {
     Init = 'Init',
@@ -11,7 +11,7 @@ export enum JoinKind {
 }
 
 // This will be extended for each pools specific input requirements
-export type BaseJoinInput = {
+type BaseJoinInput = {
     chainId: number;
     rpcUrl: string;
     useNativeAssetAsWrappedAmountIn?: boolean;
@@ -19,23 +19,23 @@ export type BaseJoinInput = {
 };
 
 export type InitJoinInput = BaseJoinInput & {
-    amountsIn: TokenAmount[];
+    amountsIn: InputAmount[];
     kind: JoinKind.Init;
 };
 
 export type UnbalancedJoinInput = BaseJoinInput & {
-    amountsIn: TokenAmount[];
+    amountsIn: InputAmount[];
     kind: JoinKind.Unbalanced;
 };
 
 export type SingleAssetJoinInput = BaseJoinInput & {
-    bptOut: TokenAmount;
+    bptOut: InputAmount;
     tokenIn: Address;
     kind: JoinKind.SingleAsset;
 };
 
 export type ProportionalJoinInput = BaseJoinInput & {
-    bptOut: TokenAmount;
+    bptOut: InputAmount;
     kind: JoinKind.Proportional;
 };
 
@@ -45,8 +45,7 @@ export type JoinInput =
     | SingleAssetJoinInput
     | ProportionalJoinInput;
 
-// Returned from a join query
-export type JoinQueryResult = {
+type BaseJoinQueryResult = {
     poolType: string;
     poolId: Hex;
     joinKind: JoinKind;
@@ -56,18 +55,33 @@ export type JoinQueryResult = {
     tokenInIndex?: number;
 };
 
-export type JoinCallInput = JoinQueryResult & {
+export type WeightedJoinQueryResult = BaseJoinQueryResult;
+
+export type ComposableStableJoinQueryResult = BaseJoinQueryResult & {
+    bptIndex: number;
+};
+
+export type JoinQueryResult =
+    | WeightedJoinQueryResult
+    | ComposableStableJoinQueryResult;
+
+type BaseJoinCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
 };
 
+export type ComposableJoinCall = BaseJoinCall & ComposableStableJoinQueryResult;
+export type WeightedJoinCall = BaseJoinCall & BaseJoinQueryResult;
+
+export type JoinCall = WeightedJoinCall | ComposableJoinCall;
+
 export interface BaseJoin {
     query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
-    buildCall(input: JoinCallInput): {
+    buildCall(input: JoinCall): {
         call: Hex;
         to: Address;
-        value: bigint | undefined;
+        value: bigint;
         minBptOut: bigint;
         maxAmountsIn: bigint[];
     };
@@ -76,7 +90,7 @@ export interface BaseJoin {
 export type JoinBuildOutput = {
     call: Hex;
     to: Address;
-    value: bigint | undefined;
+    value: bigint;
     minBptOut: bigint;
     maxAmountsIn: bigint[];
 };

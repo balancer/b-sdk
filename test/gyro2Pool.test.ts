@@ -5,7 +5,7 @@ dotenv.config();
 
 import { parseEther } from 'viem';
 
-import testPools from './lib/testData/gyro2TestPool.json';
+import testPools from './lib/testData/testPools/gyro2.json';
 import { MockPoolDataEnricher } from './lib/utils/mockPoolEnricher';
 import { MockPoolProvider } from './lib/utils/mockPoolProvider';
 import {

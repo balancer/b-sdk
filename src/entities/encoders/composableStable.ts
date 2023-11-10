@@ -5,6 +5,7 @@ export enum ComposableStablePoolJoinKind {
     INIT = 0,
     EXACT_TOKENS_IN_FOR_BPT_OUT = 1,
     TOKEN_IN_FOR_EXACT_BPT_OUT = 2,
+    ALL_TOKENS_IN_FOR_EXACT_BPT_OUT = 3,
 }
 
 export enum ComposableStablePoolExitKind {
@@ -22,7 +23,7 @@ export class ComposableStableEncoder {
     }
 
     /**
-     * Encodes the userData parameter for providing the initial liquidity to a StablePool
+     * Encodes the userData parameter for providing the initial liquidity to a ComposableStablePool
      * @param initialBalances - the amounts of tokens to send to the pool to form the initial balances
      */
     static joinInit = (amountsIn: bigint[]): Address =>
@@ -32,7 +33,7 @@ export class ComposableStableEncoder {
         );
 
     /**
-     * Encodes the userData parameter for joining a StablePool with exact token inputs
+     * Encodes the userData parameter for joining a ComposableStablePool with exact token inputs
      * @param amountsIn - the amounts each of token to deposit in the pool as liquidity
      * @param minimumBPT - the minimum acceptable BPT to receive in return for deposited tokens
      */
@@ -52,7 +53,7 @@ export class ComposableStableEncoder {
         );
 
     /**
-     * Encodes the userData parameter for joining a StablePool with a single token to receive an exact amount of BPT
+     * Encodes the userData parameter for joining a ComposableStablePool with a single token to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
      * @param enterTokenIndex - the index of the token to be provided as liquidity
      */
@@ -72,7 +73,23 @@ export class ComposableStableEncoder {
     };
 
     /**
-     * Encodes the userData parameter for exiting a StablePool by removing tokens in return for an exact amount of BPT
+     * Encodes the userData parameter for joining a ComposableStablePool proportionally to receive an exact amount of BPT
+     * @param bptAmountOut - the amount of BPT to be minted
+     */
+    static joinProportional = (bptAmountOut: bigint): Address => {
+        return encodeAbiParameters(
+            [{ type: 'uint256' }, { type: 'uint256' }],
+            [
+                BigInt(
+                    ComposableStablePoolJoinKind.ALL_TOKENS_IN_FOR_EXACT_BPT_OUT,
+                ),
+                bptAmountOut,
+            ],
+        );
+    };
+
+    /**
+     * Encodes the userData parameter for exiting a ComposableStablePool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
      * @param enterTokenIndex - the index of the token to removed from the pool
      */
@@ -93,7 +110,7 @@ export class ComposableStableEncoder {
     };
 
     /**
-     * Encodes the userData parameter for exiting a StablePool by removing tokens in return for an exact amount of BPT
+     * Encodes the userData parameter for exiting a ComposableStablePool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
      */
     static exitProportional = (bptAmountIn: bigint): Address => {
@@ -109,7 +126,7 @@ export class ComposableStableEncoder {
     };
 
     /**
-     * Encodes the userData parameter for exiting a StablePool by removing exact amounts of tokens
+     * Encodes the userData parameter for exiting a ComposableStablePool by removing exact amounts of tokens
      * @param amountsOut - the amounts of each token to be withdrawn from the pool
      * @param maxBPTAmountIn - the minimum acceptable BPT to burn in return for withdrawn tokens
      */
