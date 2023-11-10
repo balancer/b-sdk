@@ -27,18 +27,18 @@ export class WeightedEncoder {
      * Encodes the userData parameter for providing the initial liquidity to a WeightedPool
      * @param initialBalances - the amounts of tokens to send to the pool to form the initial balances
      */
-    static joinInit = (amountsIn: bigint[]): Address =>
+    static addLiquidityInit = (amountsIn: bigint[]): Address =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }],
             [BigInt(WeightedPoolJoinKind.INIT), amountsIn],
         );
 
     /**
-     * Encodes the userData parameter for joining a WeightedPool with exact token inputs
+     * Encodes the userData parameter for adding liquidity to a WeightedPool with exact token inputs
      * @param amountsIn - the amounts each of token to deposit in the pool as liquidity
      * @param minimumBPT - the minimum acceptable BPT to receive in return for deposited tokens
      */
-    static joinUnbalanced = (
+    static addLiquidityUnbalanced = (
         amountsIn: bigint[],
         minimumBPT: bigint,
     ): Address =>
@@ -52,11 +52,11 @@ export class WeightedEncoder {
         );
 
     /**
-     * Encodes the userData parameter for joining a WeightedPool with a single token to receive an exact amount of BPT
+     * Encodes the userData parameter for adding liquidity to a WeightedPool with a single token to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
      * @param enterTokenIndex - the index of the token to be provided as liquidity
      */
-    static joinSingleAsset = (
+    static addLiquiditySingleAsset = (
         bptAmountOut: bigint,
         enterTokenIndex: number,
     ): Address => {
@@ -72,10 +72,10 @@ export class WeightedEncoder {
     };
 
     /**
-     * Encodes the userData parameter for joining a WeightedPool proportionally to receive an exact amount of BPT
+     * Encodes the userData parameter for adding liquidity to a WeightedPool proportionally to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
      */
-    static joinProportional = (bptAmountOut: bigint): Address => {
+    static addLiquidityProportional = (bptAmountOut: bigint): Address => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [

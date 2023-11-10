@@ -173,21 +173,23 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
     ): Address {
         switch (kind) {
             case AddLiquidityKind.Init:
-                return WeightedEncoder.joinInit(amounts.maxAmountsIn);
+                return WeightedEncoder.addLiquidityInit(amounts.maxAmountsIn);
             case AddLiquidityKind.Unbalanced:
-                return WeightedEncoder.joinUnbalanced(
+                return WeightedEncoder.addLiquidityUnbalanced(
                     amounts.maxAmountsIn,
                     amounts.minimumBpt,
                 );
             case AddLiquidityKind.SingleAsset: {
                 if (amounts.tokenInIndex === undefined) throw Error('No Index');
-                return WeightedEncoder.joinSingleAsset(
+                return WeightedEncoder.addLiquiditySingleAsset(
                     amounts.minimumBpt,
                     amounts.tokenInIndex,
                 );
             }
             case AddLiquidityKind.Proportional: {
-                return WeightedEncoder.joinProportional(amounts.minimumBpt);
+                return WeightedEncoder.addLiquidityProportional(
+                    amounts.minimumBpt,
+                );
             }
             default:
                 throw Error('Unsupported Add Liquidity Kind');

@@ -213,23 +213,23 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     ): Address {
         switch (kind) {
             case AddLiquidityKind.Init:
-                return ComposableStableEncoder.joinInit(
+                return ComposableStableEncoder.addLiquidityInit(
                     amounts.maxAmountsInNoBpt,
                 );
             case AddLiquidityKind.Unbalanced:
-                return ComposableStableEncoder.joinUnbalanced(
+                return ComposableStableEncoder.addLiquidityUnbalanced(
                     amounts.maxAmountsInNoBpt,
                     amounts.minimumBpt,
                 );
             case AddLiquidityKind.SingleAsset: {
                 if (amounts.tokenInIndex === undefined) throw Error('No Index');
-                return ComposableStableEncoder.joinSingleAsset(
+                return ComposableStableEncoder.addLiquiditySingleAsset(
                     amounts.minimumBpt,
                     amounts.tokenInIndex, // Has to be index without BPT
                 );
             }
             case AddLiquidityKind.Proportional: {
-                return ComposableStableEncoder.joinProportional(
+                return ComposableStableEncoder.addLiquidityProportional(
                     amounts.minimumBpt,
                 );
             }
