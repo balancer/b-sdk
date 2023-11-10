@@ -119,8 +119,13 @@ export class WeightedExit implements BaseExit {
             call,
             to: BALANCER_VAULT,
             value: 0n,
-            maxBptIn: amounts.maxBptAmountIn,
-            minAmountsOut: amounts.minAmountsOut,
+            maxBptIn: TokenAmount.fromRawAmount(
+                input.bptIn.token,
+                amounts.maxBptAmountIn,
+            ),
+            minAmountsOut: input.amountsOut.map((a, i) =>
+                TokenAmount.fromRawAmount(a.token, amounts.minAmountsOut[i]),
+            ),
         };
     }
 

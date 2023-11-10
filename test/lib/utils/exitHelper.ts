@@ -50,8 +50,6 @@ export const sdkExit = async ({
     };
 };
 
-
-
 function isComposableStableExitQueryResult(result: ExitQueryResult): boolean {
     return (result as ComposableStableExitQueryResult).bptIndex !== undefined;
 }
@@ -316,14 +314,20 @@ function assertExitBuildOutput(
     slippage: Slippage,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
+    // slippage.removeFrom(a.amount)
     const minAmountsOut = isExactIn
-        ? exitQueryResult.amountsOut.map((a) => slippage.removeFrom(a.amount))
-        : exitQueryResult.amountsOut.map((a) => a.amount);
+        ? exitQueryResult.amountsOut.map((a) =>
+              TokenAmount.fromRawAmount(a.token, slippage.removeFrom(a.amount)),
+          )
+        : [...exitQueryResult.amountsOut];
 
     // if exactIn slippage cannot be applied to bptIn, else should use bptIn with slippage applied
     const maxBptIn = isExactIn
-        ? exitQueryResult.bptIn.amount
-        : slippage.applyTo(exitQueryResult.bptIn.amount);
+        ? ({ ...exitQueryResult.bptIn } as TokenAmount)
+        : TokenAmount.fromRawAmount(
+              exitQueryResult.bptIn.token,
+              slippage.applyTo(exitQueryResult.bptIn.amount),
+          );
 
     const expectedBuildOutput: Omit<ExitBuildOutput, 'call'> = {
         minAmountsOut,

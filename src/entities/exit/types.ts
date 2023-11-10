@@ -72,8 +72,8 @@ export type ExitBuildOutput = {
     call: Address;
     to: Address;
     value: bigint;
-    maxBptIn: bigint;
-    minAmountsOut: bigint[];
+    maxBptIn: TokenAmount;
+    minAmountsOut: TokenAmount[];
 };
 
 export interface BaseExit {
