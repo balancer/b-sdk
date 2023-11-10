@@ -29,12 +29,12 @@ import {
     InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
-import { JoinTxInput } from './lib/utils/types';
+import { AddLiquidityTxInput } from './lib/utils/types';
 import {
-    doJoin,
-    assertUnbalancedJoin,
-    assertSingleTokenJoin,
-    assertProportionalJoin,
+    doAddLiquidity,
+    assertAddLiquidityUnbalanced,
+    assertAddLiquiditySingleToken,
+    assertAddLiquidityProportional,
 } from './lib/utils/joinHelper';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
@@ -44,7 +44,7 @@ const poolId =
     '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76000000000000000000000570'; // Balancer vETH/WETH StablePool
 
 describe('composable stable join test', () => {
-    let txInput: JoinTxInput;
+    let txInput: AddLiquidityTxInput;
     let poolStateInput: PoolStateInput;
 
     beforeAll(async () => {
@@ -111,15 +111,15 @@ describe('composable stable join test', () => {
                 ...input,
                 amountsIn: [...amountsIn.splice(0, 1)],
             };
-            const joinResult = await doJoin({
+            const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
             });
-            assertUnbalancedJoin(
+            assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 addLiquidityInput,
-                joinResult,
+                addLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -130,15 +130,15 @@ describe('composable stable join test', () => {
                 amountsIn,
                 useNativeAssetAsWrappedAmountIn: true,
             };
-            const joinResult = await doJoin({
+            const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
             });
-            assertUnbalancedJoin(
+            assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 addLiquidityInput,
-                joinResult,
+                addLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -162,16 +162,16 @@ describe('composable stable join test', () => {
             };
         });
         test('with token', async () => {
-            const joinResult = await doJoin({
+            const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput: input,
             });
 
-            assertSingleTokenJoin(
+            assertAddLiquiditySingleToken(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
-                joinResult,
+                addLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -181,16 +181,16 @@ describe('composable stable join test', () => {
                 ...input,
                 useNativeAssetAsWrappedAmountIn: true,
             };
-            const joinResult = await doJoin({
+            const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
             });
 
-            assertSingleTokenJoin(
+            assertAddLiquiditySingleToken(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 addLiquidityInput,
-                joinResult,
+                addLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -212,16 +212,16 @@ describe('composable stable join test', () => {
             };
         });
         test('with tokens', async () => {
-            const joinResult = await doJoin({
+            const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput: input,
             });
 
-            assertProportionalJoin(
+            assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
-                joinResult,
+                addLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -230,15 +230,15 @@ describe('composable stable join test', () => {
                 ...input,
                 useNativeAssetAsWrappedAmountIn: true,
             };
-            const joinResult = await doJoin({
+            const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
             });
-            assertProportionalJoin(
+            assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 addLiquidityInput,
-                joinResult,
+                addLiquidityOutput,
                 txInput.slippage,
             );
         });

@@ -18,17 +18,17 @@ import {
     NATIVE_ASSETS,
 } from '../../../src';
 import { TxResult, sendTransactionGetBalances } from './helper';
-import { JoinTxInput } from './types';
+import { AddLiquidityTxInput } from './types';
 import { zeroAddress } from 'viem';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 
-type JoinResult = {
+type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
     addLiquidityBuildOutput: AddLiquidityBuildOutput;
     txOutput: TxResult;
 };
 
-async function sdkJoin({
+async function sdkAddLiquidity({
     addLiquidity,
     addLiquidityInput,
     poolStateInput,
@@ -107,7 +107,7 @@ function getCheck(result: AddLiquidityQueryOutput, isExactIn: boolean) {
  *      @param client: Client & PublicActions & WalletActions - The RPC client
  *      @param slippage: Slippage - The slippage tolerance for the join transaction
  */
-export async function doJoin(txInput: JoinTxInput) {
+export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
     const {
         addLiquidity,
         poolStateInput,
@@ -117,13 +117,14 @@ export async function doJoin(txInput: JoinTxInput) {
         slippage,
     } = txInput;
 
-    const { addLiquidityQueryOutput, addLiquidityBuildOutput } = await sdkJoin({
-        addLiquidity,
-        addLiquidityInput,
-        poolStateInput,
-        slippage,
-        testAddress,
-    });
+    const { addLiquidityQueryOutput, addLiquidityBuildOutput } =
+        await sdkAddLiquidity({
+            addLiquidity,
+            addLiquidityInput,
+            poolStateInput,
+            slippage,
+            testAddress,
+        });
 
     const tokens = getTokensForBalanceCheck(poolStateInput);
 
@@ -144,15 +145,15 @@ export async function doJoin(txInput: JoinTxInput) {
     };
 }
 
-export function assertUnbalancedJoin(
+export function assertAddLiquidityUnbalanced(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
     addLiquidityInput: AddLiquidityUnbalancedInput,
-    joinResult: JoinResult,
+    addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
-        joinResult;
+        addLiquidityOutput;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsIn = poolStateInput.tokens.map((t) => {
@@ -208,15 +209,15 @@ export function assertUnbalancedJoin(
     );
 }
 
-export function assertSingleTokenJoin(
+export function assertAddLiquiditySingleToken(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
     addLiquidityInput: AddLiquiditySingleAssetInput,
-    joinResult: JoinResult,
+    addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
-        joinResult;
+        addLiquidityOutput;
 
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
         throw Error('No index');
@@ -283,15 +284,15 @@ export function assertSingleTokenJoin(
     );
 }
 
-export function assertProportionalJoin(
+export function assertAddLiquidityProportional(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
     addLiquidityInput: AddLiquidityProportionalInput,
-    joinResult: JoinResult,
+    addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
-        joinResult;
+        addLiquidityOutput;
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
 

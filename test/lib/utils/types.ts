@@ -9,7 +9,7 @@ import {
     Slippage,
 } from '../../../src';
 
-export type JoinTxInput = {
+export type AddLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
