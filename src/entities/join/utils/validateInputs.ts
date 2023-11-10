@@ -1,8 +1,11 @@
-import { JoinInput, AddLiquidityKind } from '../types';
+import { AddLiquidityInput, AddLiquidityKind } from '../types';
 import { PoolStateInput } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
-export function validateInputs(input: JoinInput, poolState: PoolStateInput) {
+export function validateInputs(
+    input: AddLiquidityInput,
+    poolState: PoolStateInput,
+) {
     const bptIndex = poolState.tokens.findIndex(
         (t) => t.address === poolState.address,
     );

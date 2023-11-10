@@ -11,7 +11,7 @@ config();
 import {
     BalancerApi,
     ChainId,
-    JoinInput,
+    AddLiquidityInput,
     AddLiquidityKind,
     PoolJoin,
     Slippage,
@@ -45,8 +45,8 @@ const join = async () => {
         address: t.address,
     }));
 
-    // Construct the JoinInput, in this case an Unbalanced join
-    const joinInput: JoinInput = {
+    // Construct the AddLiquidityInput, in this case an Unbalanced join
+    const addLiquidityInput: AddLiquidityInput = {
         amountsIn,
         chainId,
         rpcUrl,
@@ -55,7 +55,7 @@ const join = async () => {
 
     // Simulate the join to get the amount of BPT out
     const poolJoin = new PoolJoin();
-    const queryResult = await poolJoin.query(joinInput, poolStateInput);
+    const queryResult = await poolJoin.query(addLiquidityInput, poolStateInput);
 
     console.log('\nJoin Query Result:');
     console.log('Tokens In:');

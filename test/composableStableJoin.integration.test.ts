@@ -13,9 +13,9 @@ import {
 } from 'viem';
 
 import {
-    UnbalancedJoinInput,
-    ProportionalJoinInput,
-    SingleAssetJoinInput,
+    AddLiquidityUnbalancedInput,
+    AddLiquidityProportionalInput,
+    AddLiquiditySingleAssetInput,
     AddLiquidityKind,
     Slippage,
     Address,
@@ -25,7 +25,7 @@ import {
     ChainId,
     getPoolAddress,
     PoolJoin,
-    JoinInput,
+    AddLiquidityInput,
     InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
@@ -68,7 +68,7 @@ describe('composable stable join test', () => {
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput: poolStateInput,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
-            joinInput: {} as JoinInput,
+            addLiquidityInput: {} as AddLiquidityInput,
         };
     });
 
@@ -87,7 +87,7 @@ describe('composable stable join test', () => {
     });
 
     describe('unbalanced join', () => {
-        let input: Omit<UnbalancedJoinInput, 'amountsIn'>;
+        let input: Omit<AddLiquidityUnbalancedInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
             const bptIndex = txInput.poolStateInput.tokens.findIndex(
@@ -107,37 +107,37 @@ describe('composable stable join test', () => {
             };
         });
         test('token inputs', async () => {
-            const joinInput = {
+            const addLiquidityInput = {
                 ...input,
                 amountsIn: [...amountsIn.splice(0, 1)],
             };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
             assertUnbalancedJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                addLiquidityInput,
                 joinResult,
                 txInput.slippage,
             );
         });
 
         test('with native', async () => {
-            const joinInput = {
+            const addLiquidityInput = {
                 ...input,
                 amountsIn,
                 useNativeAssetAsWrappedAmountIn: true,
             };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
             assertUnbalancedJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                addLiquidityInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -145,7 +145,7 @@ describe('composable stable join test', () => {
     });
 
     describe('single asset join', () => {
-        let input: SingleAssetJoinInput;
+        let input: AddLiquiditySingleAssetInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -164,7 +164,7 @@ describe('composable stable join test', () => {
         test('with token', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: input,
+                addLiquidityInput: input,
             });
 
             assertSingleTokenJoin(
@@ -177,19 +177,19 @@ describe('composable stable join test', () => {
         });
 
         test('with native', async () => {
-            const joinInput = {
+            const addLiquidityInput = {
                 ...input,
                 useNativeAssetAsWrappedAmountIn: true,
             };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
 
             assertSingleTokenJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                addLiquidityInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -197,7 +197,7 @@ describe('composable stable join test', () => {
     });
 
     describe('proportional join', () => {
-        let input: ProportionalJoinInput;
+        let input: AddLiquidityProportionalInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -214,7 +214,7 @@ describe('composable stable join test', () => {
         test('with tokens', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: input,
+                addLiquidityInput: input,
             });
 
             assertProportionalJoin(
@@ -226,18 +226,18 @@ describe('composable stable join test', () => {
             );
         });
         test('with native', async () => {
-            const joinInput = {
+            const addLiquidityInput = {
                 ...input,
                 useNativeAssetAsWrappedAmountIn: true,
             };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
             assertProportionalJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                addLiquidityInput,
                 joinResult,
                 txInput.slippage,
             );

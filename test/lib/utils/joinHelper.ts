@@ -1,16 +1,16 @@
 import { expect } from 'vitest';
 import {
     PoolJoin,
-    JoinInput,
+    AddLiquidityInput,
     PoolStateInput,
     Slippage,
     Address,
     JoinBuildOutput,
     JoinQueryResult,
-    UnbalancedJoinInput,
+    AddLiquidityUnbalancedInput,
     BALANCER_VAULT,
-    SingleAssetJoinInput,
-    ProportionalJoinInput,
+    AddLiquiditySingleAssetInput,
+    AddLiquidityProportionalInput,
     Token,
     ChainId,
     TokenAmount,
@@ -30,13 +30,13 @@ type JoinResult = {
 
 async function sdkJoin({
     poolJoin,
-    joinInput,
+    addLiquidityInput,
     poolStateInput,
     slippage,
     testAddress,
 }: {
     poolJoin: PoolJoin;
-    joinInput: JoinInput;
+    addLiquidityInput: AddLiquidityInput;
     poolStateInput: PoolStateInput;
     slippage: Slippage;
     testAddress: Address;
@@ -44,7 +44,10 @@ async function sdkJoin({
     joinBuildOutput: JoinBuildOutput;
     joinQueryResult: JoinQueryResult;
 }> {
-    const joinQueryResult = await poolJoin.query(joinInput, poolStateInput);
+    const joinQueryResult = await poolJoin.query(
+        addLiquidityInput,
+        poolStateInput,
+    );
     const joinBuildOutput = poolJoin.buildCall({
         ...joinQueryResult,
         slippage,
@@ -94,7 +97,7 @@ function getCheck(result: JoinQueryResult, isExactIn: boolean) {
  * @param txInput
  *      @param poolJoin: PoolJoin - The pool join class, used to query the join and build the join call
  *      @param poolInput: PoolStateInput - The state of the pool being joined
- *      @param joinInput: JoinInput - The parameters of the join transaction, example: bptOut, amountsIn, etc.
+ *      @param addLiquidityInput: AddLiquidityInput - The parameters of the join transaction, example: bptOut, amountsIn, etc.
  *      @param testAddress: Address - The address to send the transaction from
  *      @param client: Client & PublicActions & WalletActions - The RPC client
  *      @param slippage: Slippage - The slippage tolerance for the join transaction
@@ -103,7 +106,7 @@ export async function doJoin(txInput: JoinTxInput) {
     const {
         poolJoin,
         poolStateInput,
-        joinInput,
+        addLiquidityInput,
         testAddress,
         client,
         slippage,
@@ -111,7 +114,7 @@ export async function doJoin(txInput: JoinTxInput) {
 
     const { joinQueryResult, joinBuildOutput } = await sdkJoin({
         poolJoin,
-        joinInput,
+        addLiquidityInput,
         poolStateInput,
         slippage,
         testAddress,
@@ -139,7 +142,7 @@ export async function doJoin(txInput: JoinTxInput) {
 export function assertUnbalancedJoin(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
-    joinInput: UnbalancedJoinInput,
+    addLiquidityInput: AddLiquidityUnbalancedInput,
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
@@ -149,12 +152,14 @@ export function assertUnbalancedJoin(
     const expectedAmountsIn = poolStateInput.tokens.map((t) => {
         let token;
         if (
-            joinInput.useNativeAssetAsWrappedAmountIn &&
+            addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             t.address === NATIVE_ASSETS[chainId].wrapped
         )
             token = new Token(chainId, zeroAddress, t.decimals);
         else token = new Token(chainId, t.address, t.decimals);
-        const input = joinInput.amountsIn.find((a) => a.address === t.address);
+        const input = addLiquidityInput.amountsIn.find(
+            (a) => a.address === t.address,
+        );
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
         else return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
@@ -166,8 +171,8 @@ export function assertUnbalancedJoin(
         // Should match inputs
         poolId: poolStateInput.id,
         poolType: poolStateInput.type,
-        fromInternalBalance: !!joinInput.fromInternalBalance,
-        addLiquidityKind: joinInput.kind,
+        fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
+        addLiquidityKind: addLiquidityInput.kind,
     };
 
     const queryCheck = getCheck(joinQueryResult, true);
@@ -178,7 +183,7 @@ export function assertUnbalancedJoin(
     expect(joinQueryResult.bptOut.amount > 0n).to.be.true;
 
     assertJoinBuildOutput(
-        joinInput,
+        addLiquidityInput,
         joinQueryResult,
         joinBuildOutput,
         true,
@@ -187,7 +192,7 @@ export function assertUnbalancedJoin(
 
     assertTokenDeltas(
         poolStateInput,
-        joinInput,
+        addLiquidityInput,
         joinQueryResult,
         joinBuildOutput,
         txOutput,
@@ -197,7 +202,7 @@ export function assertUnbalancedJoin(
 export function assertSingleTokenJoin(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
-    joinInput: SingleAssetJoinInput,
+    addLiquidityInput: AddLiquiditySingleAssetInput,
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
@@ -216,16 +221,16 @@ export function assertSingleTokenJoin(
             // Query should use same bpt out as user sets
             bptOut: TokenAmount.fromRawAmount(
                 bptToken,
-                joinInput.bptOut.rawAmount,
+                addLiquidityInput.bptOut.rawAmount,
             ),
             tokenInIndex: tokensWithoutBpt.findIndex(
-                (t) => t.address === joinInput.tokenIn,
+                (t) => t.address === addLiquidityInput.tokenIn,
             ),
             // Should match inputs
             poolId: poolStateInput.id,
             poolType: poolStateInput.type,
-            fromInternalBalance: !!joinInput.fromInternalBalance,
-            addLiquidityKind: joinInput.kind,
+            fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
+            addLiquidityKind: addLiquidityInput.kind,
         };
 
     const queryCheck = getCheck(joinQueryResult, false);
@@ -236,12 +241,12 @@ export function assertSingleTokenJoin(
     // (Note joinQueryResult also has value for bpt if pre-minted)
     joinQueryResult.amountsIn.forEach((a) => {
         if (
-            !joinInput.useNativeAssetAsWrappedAmountIn &&
-            a.token.address === joinInput.tokenIn
+            !addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
+            a.token.address === addLiquidityInput.tokenIn
         )
             expect(a.amount > 0n).to.be.true;
         else if (
-            joinInput.useNativeAssetAsWrappedAmountIn &&
+            addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             a.token.address === zeroAddress
         )
             expect(a.amount > 0n).to.be.true;
@@ -249,7 +254,7 @@ export function assertSingleTokenJoin(
     });
 
     assertJoinBuildOutput(
-        joinInput,
+        addLiquidityInput,
         joinQueryResult,
         joinBuildOutput,
         false,
@@ -258,7 +263,7 @@ export function assertSingleTokenJoin(
 
     assertTokenDeltas(
         poolStateInput,
-        joinInput,
+        addLiquidityInput,
         joinQueryResult,
         joinBuildOutput,
         txOutput,
@@ -268,7 +273,7 @@ export function assertSingleTokenJoin(
 export function assertProportionalJoin(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
-    joinInput: ProportionalJoinInput,
+    addLiquidityInput: AddLiquidityProportionalInput,
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
@@ -281,15 +286,15 @@ export function assertProportionalJoin(
             // Query should use same bpt out as user sets
             bptOut: TokenAmount.fromRawAmount(
                 bptToken,
-                joinInput.bptOut.rawAmount,
+                addLiquidityInput.bptOut.rawAmount,
             ),
             // Only expect tokenInIndex for SingleAssetJoin
             tokenInIndex: undefined,
             // Should match inputs
             poolId: poolStateInput.id,
             poolType: poolStateInput.type,
-            fromInternalBalance: !!joinInput.fromInternalBalance,
-            addLiquidityKind: joinInput.kind,
+            fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
+            addLiquidityKind: addLiquidityInput.kind,
         };
 
     const queryCheck = getCheck(joinQueryResult, false);
@@ -304,7 +309,7 @@ export function assertProportionalJoin(
     });
 
     assertJoinBuildOutput(
-        joinInput,
+        addLiquidityInput,
         joinQueryResult,
         joinBuildOutput,
         false,
@@ -313,7 +318,7 @@ export function assertProportionalJoin(
 
     assertTokenDeltas(
         poolStateInput,
-        joinInput,
+        addLiquidityInput,
         joinQueryResult,
         joinBuildOutput,
         txOutput,
@@ -322,7 +327,7 @@ export function assertProportionalJoin(
 
 function assertTokenDeltas(
     poolStateInput: PoolStateInput,
-    joinInput: JoinInput,
+    addLiquidityInput: AddLiquidityInput,
     joinQueryResult: JoinQueryResult,
     joinBuildOutput: JoinBuildOutput,
     txOutput: TxResult,
@@ -342,7 +347,7 @@ function assertTokenDeltas(
     ];
 
     // If input is wrapped native we must replace it with 0 and update native value instead
-    if (joinInput.useNativeAssetAsWrappedAmountIn) {
+    if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
         const index = amountsWithoutBpt.findIndex(
             (a) => a.token.address === zeroAddress,
         );
@@ -354,7 +359,7 @@ function assertTokenDeltas(
 }
 
 function assertJoinBuildOutput(
-    joinInput: JoinInput,
+    addLiquidityInput: AddLiquidityInput,
     joinQueryResult: JoinQueryResult,
     joinBuildOutput: JoinBuildOutput,
     isExactIn: boolean,
@@ -375,7 +380,7 @@ function assertJoinBuildOutput(
         minBptOut,
         to: BALANCER_VAULT,
         // Value should equal value of any wrapped asset if using native
-        value: joinInput.useNativeAssetAsWrappedAmountIn
+        value: addLiquidityInput.useNativeAssetAsWrappedAmountIn
             ? (joinQueryResult.amountsIn.find(
                   (a) => a.token.address === zeroAddress,
               )?.amount as bigint)

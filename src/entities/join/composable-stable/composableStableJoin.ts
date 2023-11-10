@@ -7,7 +7,7 @@ import { vaultAbi } from '../../../abi';
 import {
     BaseJoin,
     JoinBuildOutput,
-    JoinInput,
+    AddLiquidityInput,
     AddLiquidityKind,
     ComposableStableJoinQueryResult,
     ComposableJoinCall,
@@ -25,7 +25,7 @@ type AddLiquidityAmounts = AddLiquidityAmountsBase & {
 
 export class ComposableStableJoin implements BaseJoin {
     public async query(
-        input: JoinInput,
+        input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<ComposableStableJoinQueryResult> {
         const bptIndex = poolState.tokens.findIndex(
@@ -107,7 +107,7 @@ export class ComposableStableJoin implements BaseJoin {
 
     private getAmountsQuery(
         poolTokens: Token[],
-        input: JoinInput,
+        input: AddLiquidityInput,
         bptIndex: number,
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;

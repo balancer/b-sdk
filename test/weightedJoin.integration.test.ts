@@ -13,9 +13,9 @@ import {
 } from 'viem';
 
 import {
-    UnbalancedJoinInput,
-    ProportionalJoinInput,
-    SingleAssetJoinInput,
+    AddLiquidityUnbalancedInput,
+    AddLiquidityProportionalInput,
+    AddLiquiditySingleAssetInput,
     AddLiquidityKind,
     Slippage,
     Address,
@@ -25,7 +25,7 @@ import {
     ChainId,
     getPoolAddress,
     PoolJoin,
-    JoinInput,
+    AddLiquidityInput,
     InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
@@ -68,7 +68,7 @@ describe('weighted join test', () => {
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput,
             testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
-            joinInput: {} as JoinInput,
+            addLiquidityInput: {} as AddLiquidityInput,
         };
     });
 
@@ -91,7 +91,7 @@ describe('weighted join test', () => {
     });
 
     describe('unbalanced join', () => {
-        let input: Omit<UnbalancedJoinInput, 'amountsIn'>;
+        let input: Omit<AddLiquidityUnbalancedInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
             amountsIn = txInput.poolStateInput.tokens.map((t) => ({
@@ -106,38 +106,38 @@ describe('weighted join test', () => {
             };
         });
         test('with tokens', async () => {
-            const joinInput = {
+            const addLiquidityInput = {
                 ...input,
                 amountsIn: [...amountsIn.splice(0, 1)],
             };
 
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
             assertUnbalancedJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                addLiquidityInput,
                 joinResult,
                 txInput.slippage,
             );
         });
 
         test('with native', async () => {
-            const joinInput = {
+            const addLiquidityInput = {
                 ...input,
                 amountsIn,
                 useNativeAssetAsWrappedAmountIn: true,
             };
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
             assertUnbalancedJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                addLiquidityInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -145,7 +145,7 @@ describe('weighted join test', () => {
     });
 
     describe('single asset join', () => {
-        let joinInput: SingleAssetJoinInput;
+        let addLiquidityInput: AddLiquiditySingleAssetInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -153,7 +153,7 @@ describe('weighted join test', () => {
                 address: poolStateInput.address,
             };
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-            joinInput = {
+            addLiquidityInput = {
                 bptOut,
                 tokenIn,
                 chainId,
@@ -165,13 +165,13 @@ describe('weighted join test', () => {
         test('with token', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
 
             assertSingleTokenJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                addLiquidityInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -180,8 +180,8 @@ describe('weighted join test', () => {
         test('with native', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: {
-                    ...joinInput,
+                addLiquidityInput: {
+                    ...addLiquidityInput,
                     useNativeAssetAsWrappedAmountIn: true,
                 },
             });
@@ -190,7 +190,7 @@ describe('weighted join test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 {
-                    ...joinInput,
+                    ...addLiquidityInput,
                     useNativeAssetAsWrappedAmountIn: true,
                 },
                 joinResult,
@@ -200,14 +200,14 @@ describe('weighted join test', () => {
     });
 
     describe('proportional join', () => {
-        let joinInput: ProportionalJoinInput;
+        let addLiquidityInput: AddLiquidityProportionalInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
                 address: poolStateInput.address,
             };
-            joinInput = {
+            addLiquidityInput = {
                 bptOut,
                 chainId,
                 rpcUrl,
@@ -217,13 +217,13 @@ describe('weighted join test', () => {
         test('with tokens', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
 
             assertProportionalJoin(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
+                addLiquidityInput,
                 joinResult,
                 txInput.slippage,
             );
@@ -231,8 +231,8 @@ describe('weighted join test', () => {
         test('with native', async () => {
             const joinResult = await doJoin({
                 ...txInput,
-                joinInput: {
-                    ...joinInput,
+                addLiquidityInput: {
+                    ...addLiquidityInput,
                     useNativeAssetAsWrappedAmountIn: true,
                 },
             });
@@ -241,7 +241,7 @@ describe('weighted join test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 {
-                    ...joinInput,
+                    ...addLiquidityInput,
                     useNativeAssetAsWrappedAmountIn: true,
                 },
                 joinResult,

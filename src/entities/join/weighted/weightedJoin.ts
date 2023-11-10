@@ -8,7 +8,7 @@ import { vaultAbi } from '../../../abi';
 import {
     BaseJoin,
     JoinBuildOutput,
-    JoinInput,
+    AddLiquidityInput,
     AddLiquidityKind,
     WeightedJoinQueryResult,
     WeightedJoinCall,
@@ -18,7 +18,7 @@ import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
 
 export class WeightedJoin implements BaseJoin {
     public async query(
-        input: JoinInput,
+        input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<WeightedJoinQueryResult> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
@@ -96,7 +96,7 @@ export class WeightedJoin implements BaseJoin {
 
     private getAmountsQuery(
         poolTokens: Token[],
-        input: JoinInput,
+        input: AddLiquidityInput,
     ): AddLiquidityAmounts {
         switch (input.kind) {
             case AddLiquidityKind.Init:

@@ -11,39 +11,39 @@ export enum AddLiquidityKind {
 }
 
 // This will be extended for each pools specific input requirements
-type BaseJoinInput = {
+type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
     useNativeAssetAsWrappedAmountIn?: boolean;
     fromInternalBalance?: boolean;
 };
 
-export type InitJoinInput = BaseJoinInput & {
+export type AddLiquidityInitInput = AddLiquidityBaseInput & {
     amountsIn: InputAmount[];
     kind: AddLiquidityKind.Init;
 };
 
-export type UnbalancedJoinInput = BaseJoinInput & {
+export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {
     amountsIn: InputAmount[];
     kind: AddLiquidityKind.Unbalanced;
 };
 
-export type SingleAssetJoinInput = BaseJoinInput & {
+export type AddLiquiditySingleAssetInput = AddLiquidityBaseInput & {
     bptOut: InputAmount;
     tokenIn: Address;
     kind: AddLiquidityKind.SingleAsset;
 };
 
-export type ProportionalJoinInput = BaseJoinInput & {
+export type AddLiquidityProportionalInput = AddLiquidityBaseInput & {
     bptOut: InputAmount;
     kind: AddLiquidityKind.Proportional;
 };
 
-export type JoinInput =
-    | InitJoinInput
-    | UnbalancedJoinInput
-    | SingleAssetJoinInput
-    | ProportionalJoinInput;
+export type AddLiquidityInput =
+    | AddLiquidityInitInput
+    | AddLiquidityUnbalancedInput
+    | AddLiquiditySingleAssetInput
+    | AddLiquidityProportionalInput;
 
 type BaseJoinQueryResult = {
     poolType: string;
@@ -77,7 +77,10 @@ export type WeightedJoinCall = BaseJoinCall & BaseJoinQueryResult;
 export type JoinCall = WeightedJoinCall | ComposableJoinCall;
 
 export interface BaseJoin {
-    query(input: JoinInput, poolState: PoolState): Promise<JoinQueryResult>;
+    query(
+        input: AddLiquidityInput,
+        poolState: PoolState,
+    ): Promise<JoinQueryResult>;
     buildCall(input: JoinCall): {
         call: Hex;
         to: Address;

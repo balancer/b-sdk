@@ -2,7 +2,7 @@ import {
     BaseJoin,
     JoinBuildOutput,
     JoinConfig,
-    JoinInput,
+    AddLiquidityInput,
     JoinQueryResult,
     JoinCall,
 } from './types';
@@ -35,7 +35,7 @@ export class PoolJoin {
     }
 
     public async query(
-        input: JoinInput,
+        input: AddLiquidityInput,
         poolState: PoolStateInput,
     ): Promise<JoinQueryResult> {
         validateInputs(input, poolState);

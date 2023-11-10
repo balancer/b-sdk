@@ -1,7 +1,7 @@
 import { Client, PublicActions, TestActions, WalletActions } from 'viem';
 import {
     Address,
-    JoinInput,
+    AddLiquidityInput,
     ExitInput,
     PoolExit,
     PoolJoin,
@@ -12,7 +12,7 @@ import {
 export type JoinTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
     poolJoin: PoolJoin;
-    joinInput: JoinInput;
+    addLiquidityInput: AddLiquidityInput;
     slippage: Slippage;
     poolStateInput: PoolStateInput;
     testAddress: Address;
