@@ -95,7 +95,7 @@ export interface AddLiquidityBase {
     };
 }
 
-export type JoinBuildOutput = {
+export type AddLiquidityBuildOutput = {
     call: Hex;
     to: Address;
     value: bigint;

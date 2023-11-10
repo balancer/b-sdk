@@ -6,7 +6,7 @@ import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
 import {
     AddLiquidityBase,
-    JoinBuildOutput,
+    AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
     AddLiquidityComposableStableQueryResult,
@@ -73,7 +73,9 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         };
     }
 
-    public buildCall(input: AddLiquidityComposableStableCall): JoinBuildOutput {
+    public buildCall(
+        input: AddLiquidityComposableStableCall,
+    ): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.addLiquidityKind, amounts);

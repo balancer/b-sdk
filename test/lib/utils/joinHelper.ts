@@ -5,7 +5,7 @@ import {
     PoolStateInput,
     Slippage,
     Address,
-    JoinBuildOutput,
+    AddLiquidityBuildOutput,
     AddLiquidityQueryResult,
     AddLiquidityUnbalancedInput,
     BALANCER_VAULT,
@@ -24,7 +24,7 @@ import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 
 type JoinResult = {
     addLiquidityQueryResult: AddLiquidityQueryResult;
-    joinBuildOutput: JoinBuildOutput;
+    addLiquidityBuildOutput: AddLiquidityBuildOutput;
     txOutput: TxResult;
 };
 
@@ -41,14 +41,14 @@ async function sdkJoin({
     slippage: Slippage;
     testAddress: Address;
 }): Promise<{
-    joinBuildOutput: JoinBuildOutput;
+    addLiquidityBuildOutput: AddLiquidityBuildOutput;
     addLiquidityQueryResult: AddLiquidityQueryResult;
 }> {
     const addLiquidityQueryResult = await addLiquidity.query(
         addLiquidityInput,
         poolStateInput,
     );
-    const joinBuildOutput = addLiquidity.buildCall({
+    const addLiquidityBuildOutput = addLiquidity.buildCall({
         ...addLiquidityQueryResult,
         slippage,
         sender: testAddress,
@@ -56,7 +56,7 @@ async function sdkJoin({
     });
 
     return {
-        joinBuildOutput,
+        addLiquidityBuildOutput,
         addLiquidityQueryResult,
     };
 }
@@ -117,7 +117,7 @@ export async function doJoin(txInput: JoinTxInput) {
         slippage,
     } = txInput;
 
-    const { addLiquidityQueryResult, joinBuildOutput } = await sdkJoin({
+    const { addLiquidityQueryResult, addLiquidityBuildOutput } = await sdkJoin({
         addLiquidity,
         addLiquidityInput,
         poolStateInput,
@@ -132,14 +132,14 @@ export async function doJoin(txInput: JoinTxInput) {
         tokens,
         client,
         testAddress,
-        joinBuildOutput.to,
-        joinBuildOutput.call,
-        joinBuildOutput.value,
+        addLiquidityBuildOutput.to,
+        addLiquidityBuildOutput.call,
+        addLiquidityBuildOutput.value,
     );
 
     return {
         addLiquidityQueryResult,
-        joinBuildOutput,
+        addLiquidityBuildOutput,
         txOutput,
     };
 }
@@ -151,7 +151,8 @@ export function assertUnbalancedJoin(
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
-    const { txOutput, addLiquidityQueryResult, joinBuildOutput } = joinResult;
+    const { txOutput, addLiquidityQueryResult, addLiquidityBuildOutput } =
+        joinResult;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsIn = poolStateInput.tokens.map((t) => {
@@ -190,10 +191,10 @@ export function assertUnbalancedJoin(
     // Expect some bpt amount
     expect(addLiquidityQueryResult.bptOut.amount > 0n).to.be.true;
 
-    assertJoinBuildOutput(
+    assertAddLiquidityBuildOutput(
         addLiquidityInput,
         addLiquidityQueryResult,
-        joinBuildOutput,
+        addLiquidityBuildOutput,
         true,
         slippage,
     );
@@ -202,7 +203,7 @@ export function assertUnbalancedJoin(
         poolStateInput,
         addLiquidityInput,
         addLiquidityQueryResult,
-        joinBuildOutput,
+        addLiquidityBuildOutput,
         txOutput,
     );
 }
@@ -214,7 +215,8 @@ export function assertSingleTokenJoin(
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
-    const { txOutput, addLiquidityQueryResult, joinBuildOutput } = joinResult;
+    const { txOutput, addLiquidityQueryResult, addLiquidityBuildOutput } =
+        joinResult;
 
     if (addLiquidityQueryResult.tokenInIndex === undefined)
         throw Error('No index');
@@ -264,10 +266,10 @@ export function assertSingleTokenJoin(
         else expect(a.amount).toEqual(0n);
     });
 
-    assertJoinBuildOutput(
+    assertAddLiquidityBuildOutput(
         addLiquidityInput,
         addLiquidityQueryResult,
-        joinBuildOutput,
+        addLiquidityBuildOutput,
         false,
         slippage,
     );
@@ -276,7 +278,7 @@ export function assertSingleTokenJoin(
         poolStateInput,
         addLiquidityInput,
         addLiquidityQueryResult,
-        joinBuildOutput,
+        addLiquidityBuildOutput,
         txOutput,
     );
 }
@@ -288,7 +290,8 @@ export function assertProportionalJoin(
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
-    const { txOutput, addLiquidityQueryResult, joinBuildOutput } = joinResult;
+    const { txOutput, addLiquidityQueryResult, addLiquidityBuildOutput } =
+        joinResult;
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
 
@@ -321,10 +324,10 @@ export function assertProportionalJoin(
         else expect(a.amount > 0n).to.be.true;
     });
 
-    assertJoinBuildOutput(
+    assertAddLiquidityBuildOutput(
         addLiquidityInput,
         addLiquidityQueryResult,
-        joinBuildOutput,
+        addLiquidityBuildOutput,
         false,
         slippage,
     );
@@ -333,7 +336,7 @@ export function assertProportionalJoin(
         poolStateInput,
         addLiquidityInput,
         addLiquidityQueryResult,
-        joinBuildOutput,
+        addLiquidityBuildOutput,
         txOutput,
     );
 }
@@ -342,7 +345,7 @@ function assertTokenDeltas(
     poolStateInput: PoolStateInput,
     addLiquidityInput: AddLiquidityInput,
     addLiquidityQueryResult: AddLiquidityQueryResult,
-    joinBuildOutput: JoinBuildOutput,
+    addLiquidityBuildOutput: AddLiquidityBuildOutput,
     txOutput: TxResult,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
@@ -365,16 +368,17 @@ function assertTokenDeltas(
             (a) => a.token.address === zeroAddress,
         );
         expectedDeltas[index] = 0n;
-        expectedDeltas[expectedDeltas.length - 1] = joinBuildOutput.value;
+        expectedDeltas[expectedDeltas.length - 1] =
+            addLiquidityBuildOutput.value;
     }
 
     expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
 }
 
-function assertJoinBuildOutput(
+function assertAddLiquidityBuildOutput(
     addLiquidityInput: AddLiquidityInput,
     addLiquidityQueryResult: AddLiquidityQueryResult,
-    joinBuildOutput: JoinBuildOutput,
+    addLiquidityBuildOutput: AddLiquidityBuildOutput,
     isExactIn: boolean,
     slippage: Slippage,
 ) {
@@ -390,7 +394,7 @@ function assertJoinBuildOutput(
         ? slippage.removeFrom(addLiquidityQueryResult.bptOut.amount)
         : addLiquidityQueryResult.bptOut.amount;
 
-    const expectedBuildOutput: Omit<JoinBuildOutput, 'call'> = {
+    const expectedBuildOutput: Omit<AddLiquidityBuildOutput, 'call'> = {
         maxAmountsIn,
         minBptOut,
         to: BALANCER_VAULT,
@@ -403,6 +407,6 @@ function assertJoinBuildOutput(
     };
 
     // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { call, ...buildCheck } = joinBuildOutput;
+    const { call, ...buildCheck } = addLiquidityBuildOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

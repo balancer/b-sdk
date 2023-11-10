@@ -1,6 +1,6 @@
 import {
     AddLiquidityBase,
-    JoinBuildOutput,
+    AddLiquidityBuildOutput,
     AddLiquidityConfig,
     AddLiquidityInput,
     AddLiquidityQueryResult,
@@ -52,7 +52,7 @@ export class AddLiquidity {
         );
     }
 
-    public buildCall(input: AddLiquidityCall): JoinBuildOutput {
+    public buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
         return this.getAddLiquidity(input.poolType).buildCall(input);
     }
 }
