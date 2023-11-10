@@ -38,12 +38,12 @@ export type RemoveLiquidityInput =
     | RemoveLiquiditySingleTokenInput
     | RemoveLiquidityProportionalInput;
 
-export type ExitQueryResult =
-    | BaseExitQueryResult
-    | ComposableStableExitQueryResult;
+export type RemoveLiquidityQueryOutput =
+    | RemoveLiquidityBaseQueryOutput
+    | RemoveLiquidityComposableStableQueryOutput;
 
 // Returned from a exit query
-export type BaseExitQueryResult = {
+export type RemoveLiquidityBaseQueryOutput = {
     poolType: string;
     poolId: Address;
     removeLiquidityKind: RemoveLiquidityKind;
@@ -53,9 +53,10 @@ export type BaseExitQueryResult = {
     toInternalBalance: boolean;
 };
 
-export type ComposableStableExitQueryResult = BaseExitQueryResult & {
-    bptIndex: number;
-};
+export type RemoveLiquidityComposableStableQueryOutput =
+    RemoveLiquidityBaseQueryOutput & {
+        bptIndex: number;
+    };
 
 type BaseExitCall = {
     slippage: Slippage;
@@ -63,8 +64,8 @@ type BaseExitCall = {
     recipient: Address;
 };
 export type ComposableStableExitCall = BaseExitCall &
-    ComposableStableExitQueryResult;
-export type WeightedExitCall = BaseExitCall & BaseExitQueryResult;
+    RemoveLiquidityComposableStableQueryOutput;
+export type WeightedExitCall = BaseExitCall & RemoveLiquidityBaseQueryOutput;
 
 export type ExitCall = ComposableStableExitCall | WeightedExitCall;
 
@@ -80,7 +81,7 @@ export interface BaseExit {
     query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
-    ): Promise<ExitQueryResult>;
+    ): Promise<RemoveLiquidityQueryOutput>;
     buildCall(input: ExitCall): ExitBuildOutput;
 }
 

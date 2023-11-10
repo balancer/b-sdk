@@ -15,7 +15,7 @@ import {
     ExitBuildOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-    ExitQueryResult,
+    RemoveLiquidityQueryOutput,
 } from '../types';
 import { RemoveLiquidityAmounts, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
@@ -26,7 +26,7 @@ export class ComposableStableExit implements BaseExit {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
-    ): Promise<ExitQueryResult> {
+    ): Promise<RemoveLiquidityQueryOutput> {
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
         );
