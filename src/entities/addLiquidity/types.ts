@@ -6,7 +6,7 @@ import { Address, Hex, InputAmount } from '../../types';
 export enum AddLiquidityKind {
     Init = 'Init',
     Unbalanced = 'Unbalanced',
-    SingleAsset = 'SingleAsset',
+    SingleToken = 'SingleToken',
     Proportional = 'Proportional',
 }
 
@@ -28,10 +28,10 @@ export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {
     kind: AddLiquidityKind.Unbalanced;
 };
 
-export type AddLiquiditySingleAssetInput = AddLiquidityBaseInput & {
+export type AddLiquiditySingleTokenInput = AddLiquidityBaseInput & {
     bptOut: InputAmount;
     tokenIn: Address;
-    kind: AddLiquidityKind.SingleAsset;
+    kind: AddLiquidityKind.SingleToken;
 };
 
 export type AddLiquidityProportionalInput = AddLiquidityBaseInput & {
@@ -42,7 +42,7 @@ export type AddLiquidityProportionalInput = AddLiquidityBaseInput & {
 export type AddLiquidityInput =
     | AddLiquidityInitInput
     | AddLiquidityUnbalancedInput
-    | AddLiquiditySingleAssetInput
+    | AddLiquiditySingleTokenInput
     | AddLiquidityProportionalInput;
 
 type AddLiquidityBaseQueryOutput = {

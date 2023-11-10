@@ -56,7 +56,7 @@ export class WeightedEncoder {
      * @param bptAmountOut - the amount of BPT to be minted
      * @param enterTokenIndex - the index of the token to be provided as liquidity
      */
-    static addLiquiditySingleAsset = (
+    static addLiquiditySingleToken = (
         bptAmountOut: bigint,
         enterTokenIndex: number,
     ): Address => {

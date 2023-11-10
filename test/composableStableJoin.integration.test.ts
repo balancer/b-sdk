@@ -15,7 +15,7 @@ import {
 import {
     AddLiquidityUnbalancedInput,
     AddLiquidityProportionalInput,
-    AddLiquiditySingleAssetInput,
+    AddLiquiditySingleTokenInput,
     AddLiquidityKind,
     Slippage,
     Address,
@@ -145,7 +145,7 @@ describe('add liquidity composable stable test', () => {
     });
 
     describe('add liquidity single asset', () => {
-        let input: AddLiquiditySingleAssetInput;
+        let input: AddLiquiditySingleTokenInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -158,7 +158,7 @@ describe('add liquidity composable stable test', () => {
                 tokenIn,
                 chainId,
                 rpcUrl,
-                kind: AddLiquidityKind.SingleAsset,
+                kind: AddLiquidityKind.SingleToken,
             };
         });
         test('with token', async () => {

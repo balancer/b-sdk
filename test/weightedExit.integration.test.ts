@@ -146,7 +146,7 @@ describe('weighted remove liquidity test', () => {
                 rpcUrl,
                 bptIn,
                 tokenOut,
-                kind: RemoveLiquidityKind.SingleAsset,
+                kind: RemoveLiquidityKind.SingleToken,
             };
         });
         test('with wrapped', async () => {

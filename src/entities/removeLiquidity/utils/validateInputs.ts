@@ -19,7 +19,7 @@ export function validateInputs(
                 poolState.tokens.map((t) => t.address),
             );
             break;
-        case RemoveLiquidityKind.SingleAsset:
+        case RemoveLiquidityKind.SingleToken:
             areTokensInArray(
                 [input.tokenOut],
                 poolState.tokens.map((t) => t.address),

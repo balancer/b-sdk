@@ -136,12 +136,12 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                 };
                 break;
             }
-            case AddLiquidityKind.SingleAsset: {
+            case AddLiquidityKind.SingleToken: {
                 const tokenInIndex = poolTokens
                     .filter((_, index) => index !== bptIndex) // Need to remove Bpt
                     .findIndex((t) => t.isSameAddress(input.tokenIn));
                 if (tokenInIndex === -1)
-                    throw Error("Can't find index of SingleAsset");
+                    throw Error("Can't find index of SingleToken");
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
                 maxAmountsIn[tokenInIndex] = MAX_UINT256;
                 addLiquidityAmounts = {
@@ -189,7 +189,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                 };
                 break;
             }
-            case AddLiquidityKind.SingleAsset:
+            case AddLiquidityKind.SingleToken:
             case AddLiquidityKind.Proportional: {
                 addLiquidityAmounts = {
                     minimumBpt: input.bptOut.amount,
@@ -226,9 +226,9 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                     amounts.maxAmountsInNoBpt,
                     amounts.minimumBpt,
                 );
-            case AddLiquidityKind.SingleAsset: {
+            case AddLiquidityKind.SingleToken: {
                 if (amounts.tokenInIndex === undefined) throw Error('No Index');
-                return ComposableStableEncoder.addLiquiditySingleAsset(
+                return ComposableStableEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
                     amounts.tokenInIndex, // Has to be index without BPT
                 );

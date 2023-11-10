@@ -116,12 +116,12 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                     tokenInIndex: undefined,
                 };
             }
-            case AddLiquidityKind.SingleAsset: {
+            case AddLiquidityKind.SingleToken: {
                 const tokenInIndex = poolTokens.findIndex((t) =>
                     t.isSameAddress(input.tokenIn),
                 );
                 if (tokenInIndex === -1)
-                    throw Error("Can't find index of SingleAsset");
+                    throw Error("Can't find index of SingleToken");
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
                 maxAmountsIn[tokenInIndex] = MAX_UINT256;
                 return {
@@ -157,7 +157,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                     tokenInIndex: input.tokenInIndex,
                 };
             }
-            case AddLiquidityKind.SingleAsset:
+            case AddLiquidityKind.SingleToken:
             case AddLiquidityKind.Proportional: {
                 return {
                     minimumBpt: input.bptOut.amount,
@@ -184,9 +184,9 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                     amounts.maxAmountsIn,
                     amounts.minimumBpt,
                 );
-            case AddLiquidityKind.SingleAsset: {
+            case AddLiquidityKind.SingleToken: {
                 if (amounts.tokenInIndex === undefined) throw Error('No Index');
-                return WeightedEncoder.addLiquiditySingleAsset(
+                return WeightedEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
                     amounts.tokenInIndex,
                 );

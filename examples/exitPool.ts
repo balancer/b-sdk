@@ -42,7 +42,7 @@ const exit = async () => {
     const poolStateInput: PoolStateInput =
         await balancerApi.pools.fetchPoolState(poolId);
 
-    // Construct the RemoveLiquidityInput, in this case a SingleAsset exit
+    // Construct the RemoveLiquidityInput, in this case a SingleToken exit
     const bptIn: InputAmount = {
         rawAmount: parseEther('1'),
         decimals: 18,
@@ -53,7 +53,7 @@ const exit = async () => {
         rpcUrl,
         bptIn,
         tokenOut,
-        kind: RemoveLiquidityKind.SingleAsset,
+        kind: RemoveLiquidityKind.SingleToken,
     };
 
     // Simulate the exit to get the tokens out

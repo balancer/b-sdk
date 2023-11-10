@@ -76,7 +76,7 @@ const removeLiquidityInput: RemoveLiquiditySingleTokenInput = {
   rpcUrl,
   bptIn,
   tokenOut,
-  kind: RemoveLiquidityKind.SingleAsset,
+  kind: RemoveLiquidityKind.SingleToken,
 };
 
 const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);

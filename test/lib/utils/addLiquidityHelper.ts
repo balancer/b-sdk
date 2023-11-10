@@ -9,7 +9,7 @@ import {
     AddLiquidityQueryOutput,
     AddLiquidityUnbalancedInput,
     BALANCER_VAULT,
-    AddLiquiditySingleAssetInput,
+    AddLiquiditySingleTokenInput,
     AddLiquidityProportionalInput,
     Token,
     ChainId,
@@ -212,7 +212,7 @@ export function assertAddLiquidityUnbalanced(
 export function assertAddLiquiditySingleToken(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
-    addLiquidityInput: AddLiquiditySingleAssetInput,
+    addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
 ) {
@@ -305,7 +305,7 @@ export function assertAddLiquidityProportional(
             bptToken,
             addLiquidityInput.bptOut.rawAmount,
         ),
-        // Only expect tokenInIndex for AddLiquiditySingleAsset
+        // Only expect tokenInIndex for AddLiquiditySingleToken
         tokenInIndex: undefined,
         // Should match inputs
         poolId: poolStateInput.id,

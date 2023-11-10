@@ -294,7 +294,7 @@ export function assertRemoveLiquidityProportional(
             bptToken,
             removeLiquidityInput.bptIn.rawAmount,
         ),
-        // Only expect tokenInIndex for AddLiquiditySingleAsset
+        // Only expect tokenInIndex for AddLiquiditySingleToken
         tokenOutIndex: undefined,
         // Should match inputs
         poolId: poolStateInput.id,
