@@ -12,7 +12,7 @@ import { vaultAbi } from '../../../abi';
 import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
     RemoveLiquidityBase,
-    ExitBuildOutput,
+    RemoveLiquidityBuildOutput,
     RemoveLiquidityCall,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
@@ -97,7 +97,9 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         }
     }
 
-    public buildCall(input: RemoveLiquidityWeightedCall): ExitBuildOutput {
+    public buildCall(
+        input: RemoveLiquidityWeightedCall,
+    ): RemoveLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(

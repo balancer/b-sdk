@@ -72,7 +72,7 @@ export type RemoveLiquidityCall =
     | RemoveLiquidityComposableStableCall
     | RemoveLiquidityWeightedCall;
 
-export type ExitBuildOutput = {
+export type RemoveLiquidityBuildOutput = {
     call: Address;
     to: Address;
     value: bigint;
@@ -85,7 +85,7 @@ export interface RemoveLiquidityBase {
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput>;
-    buildCall(input: RemoveLiquidityCall): ExitBuildOutput;
+    buildCall(input: RemoveLiquidityCall): RemoveLiquidityBuildOutput;
 }
 
 export type RemoveLiquidityConfig = {

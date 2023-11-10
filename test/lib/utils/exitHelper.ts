@@ -2,7 +2,7 @@ import { ExitTxInput } from './types';
 import {
     ChainId,
     RemoveLiquidityComposableStableQueryOutput,
-    ExitBuildOutput,
+    RemoveLiquidityBuildOutput,
     RemoveLiquidityQueryOutput,
     NATIVE_ASSETS,
     PoolStateInput,
@@ -22,7 +22,7 @@ import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 
 type ExitResult = {
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
-    exitBuildOutput: ExitBuildOutput;
+    RemoveLiquidityBuildOutput: RemoveLiquidityBuildOutput;
     txOutput: TxResult;
 };
 
@@ -33,14 +33,14 @@ export const sdkExit = async ({
     slippage,
     testAddress,
 }: Omit<ExitTxInput, 'client'>): Promise<{
-    exitBuildOutput: ExitBuildOutput;
+    RemoveLiquidityBuildOutput: RemoveLiquidityBuildOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
     const removeLiquidityQueryOutput = await removeLiquidity.query(
         removeLiquidityInput,
         poolStateInput,
     );
-    const exitBuildOutput = removeLiquidity.buildCall({
+    const RemoveLiquidityBuildOutput = removeLiquidity.buildCall({
         ...removeLiquidityQueryOutput,
         slippage,
         sender: testAddress,
@@ -48,7 +48,7 @@ export const sdkExit = async ({
     });
 
     return {
-        exitBuildOutput,
+        RemoveLiquidityBuildOutput,
         removeLiquidityQueryOutput,
     };
 };
@@ -109,13 +109,14 @@ export async function doExit(txInput: ExitTxInput) {
         slippage,
     } = txInput;
 
-    const { removeLiquidityQueryOutput, exitBuildOutput } = await sdkExit({
-        removeLiquidity,
-        removeLiquidityInput,
-        poolStateInput,
-        slippage,
-        testAddress,
-    });
+    const { removeLiquidityQueryOutput, RemoveLiquidityBuildOutput } =
+        await sdkExit({
+            removeLiquidity,
+            removeLiquidityInput,
+            poolStateInput,
+            slippage,
+            testAddress,
+        });
 
     // get tokens for balance change - pool tokens, BPT, native
     const tokens = getTokensForBalanceCheck(poolStateInput);
@@ -125,14 +126,14 @@ export async function doExit(txInput: ExitTxInput) {
         tokens,
         client,
         testAddress,
-        exitBuildOutput.to,
-        exitBuildOutput.call,
-        exitBuildOutput.value,
+        RemoveLiquidityBuildOutput.to,
+        RemoveLiquidityBuildOutput.call,
+        RemoveLiquidityBuildOutput.value,
     );
 
     return {
         removeLiquidityQueryOutput,
-        exitBuildOutput,
+        RemoveLiquidityBuildOutput,
         txOutput,
     };
 }
@@ -144,7 +145,7 @@ export function assertUnbalancedExit(
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
-    const { txOutput, removeLiquidityQueryOutput, exitBuildOutput } =
+    const { txOutput, removeLiquidityQueryOutput, RemoveLiquidityBuildOutput } =
         exitResult;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
@@ -184,9 +185,9 @@ export function assertUnbalancedExit(
     // Expect some bpt amount
     expect(removeLiquidityQueryOutput.bptIn.amount > 0n).to.be.true;
 
-    assertExitBuildOutput(
+    assertRemoveLiquidityBuildOutput(
         removeLiquidityQueryOutput,
-        exitBuildOutput,
+        RemoveLiquidityBuildOutput,
         false,
         slippage,
     );
@@ -206,7 +207,7 @@ export function assertSingleTokenExit(
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
-    const { txOutput, removeLiquidityQueryOutput, exitBuildOutput } =
+    const { txOutput, removeLiquidityQueryOutput, RemoveLiquidityBuildOutput } =
         exitResult;
 
     if (removeLiquidityQueryOutput.tokenOutIndex === undefined)
@@ -257,9 +258,9 @@ export function assertSingleTokenExit(
         else expect(a.amount).toEqual(0n);
     });
 
-    assertExitBuildOutput(
+    assertRemoveLiquidityBuildOutput(
         removeLiquidityQueryOutput,
-        exitBuildOutput,
+        RemoveLiquidityBuildOutput,
         true,
         slippage,
     );
@@ -279,7 +280,7 @@ export function assertProportionalExit(
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
-    const { txOutput, removeLiquidityQueryOutput, exitBuildOutput } =
+    const { txOutput, removeLiquidityQueryOutput, RemoveLiquidityBuildOutput } =
         exitResult;
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
@@ -313,9 +314,9 @@ export function assertProportionalExit(
         else expect(a.amount > 0n).to.be.true;
     });
 
-    assertExitBuildOutput(
+    assertRemoveLiquidityBuildOutput(
         removeLiquidityQueryOutput,
-        exitBuildOutput,
+        RemoveLiquidityBuildOutput,
         true,
         slippage,
     );
@@ -360,9 +361,9 @@ function assertTokenDeltas(
     expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
 }
 
-function assertExitBuildOutput(
+function assertRemoveLiquidityBuildOutput(
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
-    exitBuildOutput: ExitBuildOutput,
+    RemoveLiquidityBuildOutput: RemoveLiquidityBuildOutput,
     isExactIn: boolean,
     slippage: Slippage,
 ) {
@@ -382,7 +383,7 @@ function assertExitBuildOutput(
               slippage.applyTo(removeLiquidityQueryOutput.bptIn.amount),
           );
 
-    const expectedBuildOutput: Omit<ExitBuildOutput, 'call'> = {
+    const expectedBuildOutput: Omit<RemoveLiquidityBuildOutput, 'call'> = {
         minAmountsOut,
         maxBptIn,
         to: BALANCER_VAULT,
@@ -391,6 +392,6 @@ function assertExitBuildOutput(
     };
 
     // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { call, ...buildCheck } = exitBuildOutput;
+    const { call, ...buildCheck } = RemoveLiquidityBuildOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

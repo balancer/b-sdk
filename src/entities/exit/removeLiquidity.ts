@@ -1,6 +1,6 @@
 import {
     RemoveLiquidityBase,
-    ExitBuildOutput,
+    RemoveLiquidityBuildOutput,
     RemoveLiquidityCall,
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
@@ -53,7 +53,7 @@ export class RemoveLiquidity {
         );
     }
 
-    public buildCall(input: RemoveLiquidityCall): ExitBuildOutput {
+    public buildCall(input: RemoveLiquidityCall): RemoveLiquidityBuildOutput {
         return this.getRemoveLiquidity(input.poolType).buildCall(input);
     }
 }

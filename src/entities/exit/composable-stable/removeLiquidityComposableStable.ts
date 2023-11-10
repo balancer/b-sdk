@@ -12,7 +12,7 @@ import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityComposableStableCall,
-    ExitBuildOutput,
+    RemoveLiquidityBuildOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
@@ -107,7 +107,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
 
     public buildCall(
         input: RemoveLiquidityComposableStableCall,
-    ): ExitBuildOutput {
+    ): RemoveLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
         const amountsWithoutBpt = {
             ...amounts,
