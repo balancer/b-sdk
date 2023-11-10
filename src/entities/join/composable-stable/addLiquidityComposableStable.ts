@@ -9,7 +9,7 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityComposableStableQueryResult,
+    AddLiquidityComposableStableQueryOutput,
     AddLiquidityComposableStableCall,
 } from '../types';
 import {
@@ -27,7 +27,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityComposableStableQueryResult> {
+    ): Promise<AddLiquidityComposableStableQueryOutput> {
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
         );
@@ -48,16 +48,16 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             fromInternalBalance: input.fromInternalBalance ?? false,
         });
 
-        const queryResult = await doQueryJoin(
+        const queryOutput = await doQueryJoin(
             input.rpcUrl,
             input.chainId,
             args,
         );
 
         const bpt = new Token(input.chainId, poolState.address, 18);
-        const bptOut = TokenAmount.fromRawAmount(bpt, queryResult.bptOut);
+        const bptOut = TokenAmount.fromRawAmount(bpt, queryOutput.bptOut);
 
-        const amountsIn = queryResult.amountsIn.map((a, i) =>
+        const amountsIn = queryOutput.amountsIn.map((a, i) =>
             TokenAmount.fromRawAmount(tokensIn[i], a),
         );
 

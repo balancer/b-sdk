@@ -3,7 +3,7 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityConfig,
     AddLiquidityInput,
-    AddLiquidityQueryResult,
+    AddLiquidityQueryOutput,
     AddLiquidityCall,
 } from './types';
 import { AddLiquidityWeighted } from './weighted/addLiquidityWeighted';
@@ -37,7 +37,7 @@ export class AddLiquidity {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolStateInput,
-    ): Promise<AddLiquidityQueryResult> {
+    ): Promise<AddLiquidityQueryOutput> {
         validateInputs(input, poolState);
 
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);

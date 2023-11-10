@@ -58,17 +58,17 @@ const exit = async () => {
 
     // Simulate the exit to get the tokens out
     const poolExit = new PoolExit();
-    const queryResult = await poolExit.query(exitInput, poolStateInput);
+    const queryOutput = await poolExit.query(exitInput, poolStateInput);
 
     console.log('\nExit Query Result:');
-    console.log(`BPT In: ${queryResult.bptIn.amount.toString()}\nTokens Out:`);
-    queryResult.amountsOut.map((a) =>
+    console.log(`BPT In: ${queryOutput.bptIn.amount.toString()}\nTokens Out:`);
+    queryOutput.amountsOut.map((a) =>
         console.log(a.token.address, a.amount.toString()),
     );
 
     // Apply slippage to the tokens out received from the query and construct the call
     const call = poolExit.buildCall({
-        ...queryResult,
+        ...queryOutput,
         slippage,
         sender: userAccount,
         recipient: userAccount,

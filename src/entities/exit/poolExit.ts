@@ -4,7 +4,7 @@ import {
     ExitCall,
     ExitConfig,
     ExitInput,
-    ExitQueryResult,
+    ExitQueryOutput,
 } from './types';
 import { WeightedExit } from './weighted/weightedExit';
 import { PoolStateInput } from '../types';
@@ -37,7 +37,7 @@ export class PoolExit {
     public async query(
         input: ExitInput,
         poolState: PoolStateInput,
-    ): Promise<ExitQueryResult> {
+    ): Promise<ExitQueryOutput> {
         validateInputs(input, poolState);
 
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);

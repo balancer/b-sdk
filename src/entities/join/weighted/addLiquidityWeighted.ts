@@ -10,7 +10,7 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityWeightedQueryResult,
+    AddLiquidityWeightedQueryOutput,
     AddLiquidityWeightedCall,
 } from '../types';
 import { AddLiquidityAmounts, PoolState } from '../../types';
@@ -20,7 +20,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityWeightedQueryResult> {
+    ): Promise<AddLiquidityWeightedQueryOutput> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
 
         const userData = this.encodeUserData(input.kind, amounts);
@@ -38,16 +38,16 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             fromInternalBalance: input.fromInternalBalance ?? false,
         });
 
-        const queryResult = await doQueryJoin(
+        const queryOutput = await doQueryJoin(
             input.rpcUrl,
             input.chainId,
             args,
         );
 
         const bpt = new Token(input.chainId, poolState.address, 18);
-        const bptOut = TokenAmount.fromRawAmount(bpt, queryResult.bptOut);
+        const bptOut = TokenAmount.fromRawAmount(bpt, queryOutput.bptOut);
 
-        const amountsIn = queryResult.amountsIn.map((a, i) =>
+        const amountsIn = queryOutput.amountsIn.map((a, i) =>
             TokenAmount.fromRawAmount(tokensIn[i], a),
         );
 

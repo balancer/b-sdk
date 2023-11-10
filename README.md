@@ -45,10 +45,10 @@ it can be used for:
     const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
     const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
     const addLiquidity = new AddLiquidity();
-    const queryResult = await addLiquidity.query(addLiquidityInput, poolState);
+    const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
     const { call, to, value, maxAmountsIn, minBptOut } =
         addLiquidity.buildCall({
-            ...queryResult,
+            ...queryOutput,
             slippage,
             sender: signerAddress,
             recipient: signerAddress,
@@ -82,10 +82,10 @@ const exitInput: SingleAssetExitInput = {
 const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
 const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
 const poolExit = new PoolExit();
-const queryResult = await poolExit.query(exitInput, poolState);
+const queryOutput = await poolExit.query(exitInput, poolState);
 const { call, to, value, maxAmountsIn, minBptOut } =
   poolExit.buildCall({
-    ...queryResult,
+    ...queryOutput,
     slippage,
     sender: signerAddress,
     recipient: signerAddress,

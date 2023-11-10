@@ -45,7 +45,7 @@ export type AddLiquidityInput =
     | AddLiquiditySingleAssetInput
     | AddLiquidityProportionalInput;
 
-type AddLiquidityBaseQueryResult = {
+type AddLiquidityBaseQueryOutput = {
     poolType: string;
     poolId: Hex;
     addLiquidityKind: AddLiquidityKind;
@@ -55,16 +55,16 @@ type AddLiquidityBaseQueryResult = {
     tokenInIndex?: number;
 };
 
-export type AddLiquidityWeightedQueryResult = AddLiquidityBaseQueryResult;
+export type AddLiquidityWeightedQueryOutput = AddLiquidityBaseQueryOutput;
 
-export type AddLiquidityComposableStableQueryResult =
-    AddLiquidityBaseQueryResult & {
+export type AddLiquidityComposableStableQueryOutput =
+    AddLiquidityBaseQueryOutput & {
         bptIndex: number;
     };
 
-export type AddLiquidityQueryResult =
-    | AddLiquidityWeightedQueryResult
-    | AddLiquidityComposableStableQueryResult;
+export type AddLiquidityQueryOutput =
+    | AddLiquidityWeightedQueryOutput
+    | AddLiquidityComposableStableQueryOutput;
 
 type AddLiquidityBaseCall = {
     slippage: Slippage;
@@ -73,9 +73,9 @@ type AddLiquidityBaseCall = {
 };
 
 export type AddLiquidityComposableStableCall = AddLiquidityBaseCall &
-    AddLiquidityComposableStableQueryResult;
+    AddLiquidityComposableStableQueryOutput;
 export type AddLiquidityWeightedCall = AddLiquidityBaseCall &
-    AddLiquidityBaseQueryResult;
+    AddLiquidityBaseQueryOutput;
 
 export type AddLiquidityCall =
     | AddLiquidityWeightedCall
@@ -85,7 +85,7 @@ export interface AddLiquidityBase {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityQueryResult>;
+    ): Promise<AddLiquidityQueryOutput>;
     buildCall(input: AddLiquidityCall): {
         call: Hex;
         to: Address;

@@ -6,7 +6,7 @@ import {
     Slippage,
     Address,
     AddLiquidityBuildOutput,
-    AddLiquidityQueryResult,
+    AddLiquidityQueryOutput,
     AddLiquidityUnbalancedInput,
     BALANCER_VAULT,
     AddLiquiditySingleAssetInput,
@@ -14,7 +14,7 @@ import {
     Token,
     ChainId,
     TokenAmount,
-    AddLiquidityComposableStableQueryResult,
+    AddLiquidityComposableStableQueryOutput,
     NATIVE_ASSETS,
 } from '../../../src';
 import { TxResult, sendTransactionGetBalances } from './helper';
@@ -23,7 +23,7 @@ import { zeroAddress } from 'viem';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 
 type JoinResult = {
-    addLiquidityQueryResult: AddLiquidityQueryResult;
+    addLiquidityQueryOutput: AddLiquidityQueryOutput;
     addLiquidityBuildOutput: AddLiquidityBuildOutput;
     txOutput: TxResult;
 };
@@ -42,14 +42,14 @@ async function sdkJoin({
     testAddress: Address;
 }): Promise<{
     addLiquidityBuildOutput: AddLiquidityBuildOutput;
-    addLiquidityQueryResult: AddLiquidityQueryResult;
+    addLiquidityQueryOutput: AddLiquidityQueryOutput;
 }> {
-    const addLiquidityQueryResult = await addLiquidity.query(
+    const addLiquidityQueryOutput = await addLiquidity.query(
         addLiquidityInput,
         poolStateInput,
     );
     const addLiquidityBuildOutput = addLiquidity.buildCall({
-        ...addLiquidityQueryResult,
+        ...addLiquidityQueryOutput,
         slippage,
         sender: testAddress,
         recipient: testAddress,
@@ -57,31 +57,31 @@ async function sdkJoin({
 
     return {
         addLiquidityBuildOutput,
-        addLiquidityQueryResult,
+        addLiquidityQueryOutput,
     };
 }
 
-function isAddLiquidityComposableStableQueryResult(
-    result: AddLiquidityQueryResult,
+function isAddLiquidityComposableStableQueryOutput(
+    result: AddLiquidityQueryOutput,
 ): boolean {
     return (
-        (result as AddLiquidityComposableStableQueryResult).bptIndex !==
+        (result as AddLiquidityComposableStableQueryOutput).bptIndex !==
         undefined
     );
 }
 
-function getCheck(result: AddLiquidityQueryResult, isExactIn: boolean) {
-    if (isAddLiquidityComposableStableQueryResult(result)) {
+function getCheck(result: AddLiquidityQueryOutput, isExactIn: boolean) {
+    if (isAddLiquidityComposableStableQueryOutput(result)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
             // rome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { bptOut, bptIndex, ...check } =
-                result as AddLiquidityComposableStableQueryResult;
+                result as AddLiquidityComposableStableQueryOutput;
             return check;
         } else {
             // rome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { amountsIn, bptIndex, ...check } =
-                result as AddLiquidityComposableStableQueryResult;
+                result as AddLiquidityComposableStableQueryOutput;
             return check;
         }
     } else {
@@ -117,7 +117,7 @@ export async function doJoin(txInput: JoinTxInput) {
         slippage,
     } = txInput;
 
-    const { addLiquidityQueryResult, addLiquidityBuildOutput } = await sdkJoin({
+    const { addLiquidityQueryOutput, addLiquidityBuildOutput } = await sdkJoin({
         addLiquidity,
         addLiquidityInput,
         poolStateInput,
@@ -138,7 +138,7 @@ export async function doJoin(txInput: JoinTxInput) {
     );
 
     return {
-        addLiquidityQueryResult,
+        addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
     };
@@ -151,7 +151,7 @@ export function assertUnbalancedJoin(
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
-    const { txOutput, addLiquidityQueryResult, addLiquidityBuildOutput } =
+    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         joinResult;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
@@ -170,8 +170,8 @@ export function assertUnbalancedJoin(
         else return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
-    const expectedQueryResult: Omit<
-        AddLiquidityQueryResult,
+    const expectedQueryOutput: Omit<
+        AddLiquidityQueryOutput,
         'bptOut' | 'bptIndex'
     > = {
         // Query should use same amountsIn as input
@@ -184,16 +184,16 @@ export function assertUnbalancedJoin(
         addLiquidityKind: addLiquidityInput.kind,
     };
 
-    const queryCheck = getCheck(addLiquidityQueryResult, true);
+    const queryCheck = getCheck(addLiquidityQueryOutput, true);
 
-    expect(queryCheck).to.deep.eq(expectedQueryResult);
+    expect(queryCheck).to.deep.eq(expectedQueryOutput);
 
     // Expect some bpt amount
-    expect(addLiquidityQueryResult.bptOut.amount > 0n).to.be.true;
+    expect(addLiquidityQueryOutput.bptOut.amount > 0n).to.be.true;
 
     assertAddLiquidityBuildOutput(
         addLiquidityInput,
-        addLiquidityQueryResult,
+        addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         true,
         slippage,
@@ -202,7 +202,7 @@ export function assertUnbalancedJoin(
     assertTokenDeltas(
         poolStateInput,
         addLiquidityInput,
-        addLiquidityQueryResult,
+        addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
     );
@@ -215,10 +215,10 @@ export function assertSingleTokenJoin(
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
-    const { txOutput, addLiquidityQueryResult, addLiquidityBuildOutput } =
+    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         joinResult;
 
-    if (addLiquidityQueryResult.tokenInIndex === undefined)
+    if (addLiquidityQueryOutput.tokenInIndex === undefined)
         throw Error('No index');
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
@@ -227,8 +227,8 @@ export function assertSingleTokenJoin(
         (t) => t.address !== poolStateInput.address,
     );
 
-    const expectedQueryResult: Omit<
-        AddLiquidityQueryResult,
+    const expectedQueryOutput: Omit<
+        AddLiquidityQueryOutput,
         'amountsIn' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
@@ -246,13 +246,13 @@ export function assertSingleTokenJoin(
         addLiquidityKind: addLiquidityInput.kind,
     };
 
-    const queryCheck = getCheck(addLiquidityQueryResult, false);
+    const queryCheck = getCheck(addLiquidityQueryOutput, false);
 
-    expect(queryCheck).to.deep.eq(expectedQueryResult);
+    expect(queryCheck).to.deep.eq(expectedQueryOutput);
 
     // Expect only tokenIn to have amount > 0
-    // (Note addLiquidityQueryResult also has value for bpt if pre-minted)
-    addLiquidityQueryResult.amountsIn.forEach((a) => {
+    // (Note addLiquidityQueryOutput also has value for bpt if pre-minted)
+    addLiquidityQueryOutput.amountsIn.forEach((a) => {
         if (
             !addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             a.token.address === addLiquidityInput.tokenIn
@@ -268,7 +268,7 @@ export function assertSingleTokenJoin(
 
     assertAddLiquidityBuildOutput(
         addLiquidityInput,
-        addLiquidityQueryResult,
+        addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         false,
         slippage,
@@ -277,7 +277,7 @@ export function assertSingleTokenJoin(
     assertTokenDeltas(
         poolStateInput,
         addLiquidityInput,
-        addLiquidityQueryResult,
+        addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
     );
@@ -290,13 +290,13 @@ export function assertProportionalJoin(
     joinResult: JoinResult,
     slippage: Slippage,
 ) {
-    const { txOutput, addLiquidityQueryResult, addLiquidityBuildOutput } =
+    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         joinResult;
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
 
-    const expectedQueryResult: Omit<
-        AddLiquidityQueryResult,
+    const expectedQueryOutput: Omit<
+        AddLiquidityQueryOutput,
         'amountsIn' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
@@ -313,12 +313,12 @@ export function assertProportionalJoin(
         addLiquidityKind: addLiquidityInput.kind,
     };
 
-    const queryCheck = getCheck(addLiquidityQueryResult, false);
+    const queryCheck = getCheck(addLiquidityQueryOutput, false);
 
-    expect(queryCheck).to.deep.eq(expectedQueryResult);
+    expect(queryCheck).to.deep.eq(expectedQueryOutput);
 
     // Expect all assets in to have an amount > 0 apart from BPT if it exists
-    addLiquidityQueryResult.amountsIn.forEach((a) => {
+    addLiquidityQueryOutput.amountsIn.forEach((a) => {
         if (a.token.address === poolStateInput.address)
             expect(a.amount).toEqual(0n);
         else expect(a.amount > 0n).to.be.true;
@@ -326,7 +326,7 @@ export function assertProportionalJoin(
 
     assertAddLiquidityBuildOutput(
         addLiquidityInput,
-        addLiquidityQueryResult,
+        addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         false,
         slippage,
@@ -335,7 +335,7 @@ export function assertProportionalJoin(
     assertTokenDeltas(
         poolStateInput,
         addLiquidityInput,
-        addLiquidityQueryResult,
+        addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
     );
@@ -344,21 +344,21 @@ export function assertProportionalJoin(
 function assertTokenDeltas(
     poolStateInput: PoolStateInput,
     addLiquidityInput: AddLiquidityInput,
-    addLiquidityQueryResult: AddLiquidityQueryResult,
+    addLiquidityQueryOutput: AddLiquidityQueryOutput,
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
     txOutput: TxResult,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
-    // addLiquidityQueryResult amountsIn will have a value for the BPT token if it is a pre-minted pool
-    const amountsWithoutBpt = [...addLiquidityQueryResult.amountsIn].filter(
+    // addLiquidityQueryOutput amountsIn will have a value for the BPT token if it is a pre-minted pool
+    const amountsWithoutBpt = [...addLiquidityQueryOutput.amountsIn].filter(
         (t) => t.token.address !== poolStateInput.address,
     );
 
     // Matching order of getTokens helper: [poolTokens, BPT, native]
     const expectedDeltas = [
         ...amountsWithoutBpt.map((a) => a.amount),
-        addLiquidityQueryResult.bptOut.amount,
+        addLiquidityQueryOutput.bptOut.amount,
         0n,
     ];
 
@@ -377,22 +377,22 @@ function assertTokenDeltas(
 
 function assertAddLiquidityBuildOutput(
     addLiquidityInput: AddLiquidityInput,
-    addLiquidityQueryResult: AddLiquidityQueryResult,
+    addLiquidityQueryOutput: AddLiquidityQueryOutput,
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
     isExactIn: boolean,
     slippage: Slippage,
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
     const maxAmountsIn = isExactIn
-        ? addLiquidityQueryResult.amountsIn.map((a) => a.amount)
-        : addLiquidityQueryResult.amountsIn.map((a) =>
+        ? addLiquidityQueryOutput.amountsIn.map((a) => a.amount)
+        : addLiquidityQueryOutput.amountsIn.map((a) =>
               slippage.applyTo(a.amount),
           );
 
     // if exactIn slippage should be applied to bptOut else should use same bptOut as input
     const minBptOut = isExactIn
-        ? slippage.removeFrom(addLiquidityQueryResult.bptOut.amount)
-        : addLiquidityQueryResult.bptOut.amount;
+        ? slippage.removeFrom(addLiquidityQueryOutput.bptOut.amount)
+        : addLiquidityQueryOutput.bptOut.amount;
 
     const expectedBuildOutput: Omit<AddLiquidityBuildOutput, 'call'> = {
         maxAmountsIn,
@@ -400,7 +400,7 @@ function assertAddLiquidityBuildOutput(
         to: BALANCER_VAULT,
         // Value should equal value of any wrapped asset if using native
         value: addLiquidityInput.useNativeAssetAsWrappedAmountIn
-            ? (addLiquidityQueryResult.amountsIn.find(
+            ? (addLiquidityQueryOutput.amountsIn.find(
                   (a) => a.token.address === zeroAddress,
               )?.amount as bigint)
             : 0n,

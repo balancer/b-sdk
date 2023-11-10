@@ -55,21 +55,21 @@ const join = async () => {
 
     // Simulate the join to get the amount of BPT out
     const addLiquidity = new AddLiquidity();
-    const queryResult = await addLiquidity.query(
+    const queryOutput = await addLiquidity.query(
         addLiquidityInput,
         poolStateInput,
     );
 
     console.log('\nJoin Query Result:');
     console.log('Tokens In:');
-    queryResult.amountsIn.map((a) =>
+    queryOutput.amountsIn.map((a) =>
         console.log(a.token.address, a.amount.toString()),
     );
-    console.log(`BPT Out: ${queryResult.bptOut.amount.toString()}`);
+    console.log(`BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
     // Apply slippage to the BPT amount received from the query and construct the call
     const call = addLiquidity.buildCall({
-        ...queryResult,
+        ...queryOutput,
         slippage,
         sender: userAccount,
         recipient: userAccount,

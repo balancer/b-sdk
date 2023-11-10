@@ -15,7 +15,7 @@ import {
     ExitBuildOutput,
     ExitInput,
     ExitKind,
-    ExitQueryResult,
+    ExitQueryOutput,
 } from '../types';
 import { AmountsExit, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
@@ -26,7 +26,7 @@ export class ComposableStableExit implements BaseExit {
     public async query(
         input: ExitInput,
         poolState: PoolState,
-    ): Promise<ExitQueryResult> {
+    ): Promise<ExitQueryOutput> {
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
         );
@@ -52,15 +52,15 @@ export class ComposableStableExit implements BaseExit {
             userData,
             toInternalBalance: !!input.toInternalBalance,
         });
-        const queryResult = await doQueryExit(
+        const queryOutput = await doQueryExit(
             input.rpcUrl,
             input.chainId,
             args,
         );
         const bpt = new Token(input.chainId, poolState.address, 18);
-        const bptIn = TokenAmount.fromRawAmount(bpt, queryResult.bptIn);
+        const bptIn = TokenAmount.fromRawAmount(bpt, queryOutput.bptIn);
 
-        const amountsOut = queryResult.amountsOut.map((a, i) =>
+        const amountsOut = queryOutput.amountsOut.map((a, i) =>
             TokenAmount.fromRawAmount(tokensOut[i], a),
         );
 

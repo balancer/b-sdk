@@ -38,12 +38,12 @@ export type ExitInput =
     | SingleAssetExitInput
     | ProportionalExitInput;
 
-export type ExitQueryResult =
-    | BaseExitQueryResult
-    | ComposableStableExitQueryResult;
+export type ExitQueryOutput =
+    | BaseExitQueryOutput
+    | ComposableStableExitQueryOutput;
 
 // Returned from a exit query
-export type BaseExitQueryResult = {
+export type BaseExitQueryOutput = {
     poolType: string;
     poolId: Address;
     exitKind: ExitKind;
@@ -53,7 +53,7 @@ export type BaseExitQueryResult = {
     toInternalBalance: boolean;
 };
 
-export type ComposableStableExitQueryResult = BaseExitQueryResult & {
+export type ComposableStableExitQueryOutput = BaseExitQueryOutput & {
     bptIndex: number;
 };
 
@@ -63,8 +63,8 @@ type BaseExitCall = {
     recipient: Address;
 };
 export type ComposableStableExitCall = BaseExitCall &
-    ComposableStableExitQueryResult;
-export type WeightedExitCall = BaseExitCall & BaseExitQueryResult;
+    ComposableStableExitQueryOutput;
+export type WeightedExitCall = BaseExitCall & BaseExitQueryOutput;
 
 export type ExitCall = ComposableStableExitCall | WeightedExitCall;
 
@@ -77,7 +77,7 @@ export type ExitBuildOutput = {
 };
 
 export interface BaseExit {
-    query(input: ExitInput, poolState: PoolState): Promise<ExitQueryResult>;
+    query(input: ExitInput, poolState: PoolState): Promise<ExitQueryOutput>;
     buildCall(input: ExitCall): ExitBuildOutput;
 }
 
