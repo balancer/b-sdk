@@ -27,10 +27,10 @@ Testing requires access to an archive node for onchain quote comparisons. This c
 The Balancer API Provider is a provider that facilitates 
 data fetching from the Balancer API,
 it can be used for:
-- Fetch Pool State for Joins;
+- Fetch Pool State for AddLiquidity;
 - Fetch Pool State for Exits.
 
-### Usage for Joining Pool
+### Usage for adding liquidity to a Pool
 
 ```ts
   import { BalancerApi, AddLiquidity } from "@balancer/sdk";
@@ -65,7 +65,7 @@ it can be used for:
       value,
     });
 ```
-Full working join example: [examples/join/weighted.ts](./examples/join/weighted.ts)
+Full working add liquidity example: [examples/addLiquidity.ts](./examples/addLiquidity.ts)
 
 ### Usage for Exiting Pool
 ```ts

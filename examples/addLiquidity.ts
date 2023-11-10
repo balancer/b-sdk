@@ -1,9 +1,9 @@
 /**
- * Example showing how to join a pool.
+ * Example showing how to add liquidity to a pool.
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/joinPool.ts
+ * pnpm example ./examples/addLiquidity.ts
  */
 import { config } from 'dotenv';
 config();
@@ -20,7 +20,7 @@ import { parseUnits } from 'viem';
 import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
 import { makeForkTx } from './utils/makeForkTx';
 
-const join = async () => {
+const addLiquidity = async () => {
     // User defined
     const chainId = ChainId.MAINNET;
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
@@ -45,7 +45,7 @@ const join = async () => {
         address: t.address,
     }));
 
-    // Construct the AddLiquidityInput, in this case an Unbalanced join
+    // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced
     const addLiquidityInput: AddLiquidityInput = {
         amountsIn,
         chainId,
@@ -53,14 +53,14 @@ const join = async () => {
         kind: AddLiquidityKind.Unbalanced,
     };
 
-    // Simulate the join to get the amount of BPT out
+    // Simulate addLiquidity to get the amount of BPT out
     const addLiquidity = new AddLiquidity();
     const queryOutput = await addLiquidity.query(
         addLiquidityInput,
         poolStateInput,
     );
 
-    console.log('\nJoin Query Result:');
+    console.log('Add Liquidity Query Output:');
     console.log('Tokens In:');
     queryOutput.amountsIn.map((a) =>
         console.log(a.token.address, a.amount.toString()),
@@ -97,4 +97,4 @@ const join = async () => {
     );
 };
 
-join().then(() => {});
+addLiquidity().then(() => {});
