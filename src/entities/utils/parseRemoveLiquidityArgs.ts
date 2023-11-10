@@ -3,7 +3,7 @@ import { Token } from '../token';
 import { ExitPoolRequest } from '../exit/types';
 import { replaceWrapped } from './replaceWrapped';
 
-export function parseExitArgs({
+export function parseRemoveLiquidityArgs({
     chainId,
     exitWithNativeAsset,
     sortedTokens,

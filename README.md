@@ -67,7 +67,7 @@ it can be used for:
 ```
 Full working add liquidity example: [examples/addLiquidity.ts](./examples/addLiquidity.ts)
 
-### Usage for Exiting Pool
+### Usage for removing liquidity from a Pool
 ```ts
 import { BalancerApi, RemoveLiquidity } from "@balancer/sdk";
 ...

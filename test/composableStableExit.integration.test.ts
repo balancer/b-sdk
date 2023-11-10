@@ -29,7 +29,7 @@ import {
     InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
-import { ExitTxInput } from './lib/utils/types';
+import { RemoveLiquidityTxInput } from './lib/utils/types';
 import {
     assertProportionalExit,
     assertSingleTokenExit,
@@ -44,7 +44,7 @@ const poolId =
     '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d000000000000000000000051b'; // baoETH-ETH StablePool
 
 describe('composable stable exit test', () => {
-    let txInput: ExitTxInput;
+    let txInput: RemoveLiquidityTxInput;
     let bptToken: Token;
     let poolInput: PoolStateInput;
     beforeAll(async () => {
@@ -105,12 +105,12 @@ describe('composable stable exit test', () => {
                 kind: RemoveLiquidityKind.Unbalanced,
             };
         });
-        test('exiting with wrapped', async () => {
+        test('removing liquidity with wrapped', async () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
             };
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput,
             });
@@ -118,17 +118,17 @@ describe('composable stable exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
-        test('exiting with native', async () => {
+        test('removing liquidity with native', async () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
                 exitWithNativeAsset: true,
             };
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput,
             });
@@ -136,7 +136,7 @@ describe('composable stable exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -159,8 +159,8 @@ describe('composable stable exit test', () => {
                 kind: RemoveLiquidityKind.SingleAsset,
             };
         });
-        test('exiting with wrapped', async () => {
-            const exitResult = await doExit({
+        test('removing liquidity with wrapped', async () => {
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput: input,
             });
@@ -169,17 +169,17 @@ describe('composable stable exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
 
-        test('exiting with native', async () => {
+        test('removing liquidity with native', async () => {
             const removeLiquidityInput = {
                 ...input,
                 exitWithNativeAsset: true,
             };
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput,
             });
@@ -188,7 +188,7 @@ describe('composable stable exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -210,7 +210,7 @@ describe('composable stable exit test', () => {
             };
         });
         test('with tokens', async () => {
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput: input,
             });
@@ -219,7 +219,7 @@ describe('composable stable exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -228,7 +228,7 @@ describe('composable stable exit test', () => {
                 ...input,
                 useNativeAssetAsWrappedAmountIn: true,
             };
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput,
             });
@@ -236,7 +236,7 @@ describe('composable stable exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });

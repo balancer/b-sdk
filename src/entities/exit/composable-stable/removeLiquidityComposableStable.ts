@@ -8,7 +8,7 @@ import {
     ZERO_ADDRESS,
 } from '../../../utils/constants';
 import { vaultAbi } from '../../../abi';
-import { parseExitArgs } from '../../utils/parseExitArgs';
+import { parseRemoveLiquidityArgs } from '../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityComposableStableCall,
@@ -18,7 +18,7 @@ import {
     RemoveLiquidityQueryOutput,
 } from '../types';
 import { RemoveLiquidityAmounts, PoolState } from '../../types';
-import { doQueryExit } from '../../utils/doQueryExit';
+import { doRemoveLiquidity } from '../../utils/doRemoveLiquidity';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
 import { getAmounts } from '../../utils';
 
@@ -41,7 +41,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         const userData = this.encodeUserData(input.kind, amountsWithoutBpt);
 
         // tokensOut will have zero address if exit with native asset
-        const { args, tokensOut } = parseExitArgs({
+        const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
             exitWithNativeAsset: !!input.exitWithNativeAsset,
             poolId: poolState.id,
@@ -52,7 +52,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             userData,
             toInternalBalance: !!input.toInternalBalance,
         });
-        const queryOutput = await doQueryExit(
+        const queryOutput = await doRemoveLiquidity(
             input.rpcUrl,
             input.chainId,
             args,
@@ -121,7 +121,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             amountsWithoutBpt,
         );
 
-        const { args } = parseExitArgs({
+        const { args } = parseRemoveLiquidityArgs({
             poolId: input.poolId,
             sortedTokens: input.amountsOut.map((a) => a.token),
             sender: input.sender,
@@ -192,7 +192,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     ): Address {
         switch (kind) {
             case RemoveLiquidityKind.Unbalanced:
-                return ComposableStableEncoder.exitUnbalanced(
+                return ComposableStableEncoder.removeLiquidityUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
@@ -200,12 +200,12 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                 if (amounts.tokenOutIndex === undefined)
                     throw Error('No Index');
 
-                return ComposableStableEncoder.exitSingleAsset(
+                return ComposableStableEncoder.removeLiquiditySingleToken(
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
             case RemoveLiquidityKind.Proportional:
-                return ComposableStableEncoder.exitProportional(
+                return ComposableStableEncoder.removeLiquidityProportional(
                     amounts.maxBptAmountIn,
                 );
             default:

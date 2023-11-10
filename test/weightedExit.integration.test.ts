@@ -34,7 +34,7 @@ import {
     assertUnbalancedExit,
     doExit,
 } from './lib/utils/exitHelper';
-import { ExitTxInput } from './lib/utils/types';
+import { RemoveLiquidityTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
 const chainId = ChainId.MAINNET;
@@ -43,7 +43,7 @@ const poolId =
     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
 
 describe('weighted exit test', () => {
-    let txInput: ExitTxInput;
+    let txInput: RemoveLiquidityTxInput;
     let poolInput: PoolStateInput;
     beforeAll(async () => {
         // setup mock api
@@ -95,12 +95,12 @@ describe('weighted exit test', () => {
                 kind: RemoveLiquidityKind.Unbalanced,
             };
         });
-        test('exiting with wrapped', async () => {
+        test('removing liquidity with wrapped', async () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
             };
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput,
             });
@@ -108,17 +108,17 @@ describe('weighted exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
-        test('exiting with native', async () => {
+        test('removing liquidity with native', async () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
                 exitWithNativeAsset: true,
             };
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput,
             });
@@ -126,7 +126,7 @@ describe('weighted exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -149,8 +149,8 @@ describe('weighted exit test', () => {
                 kind: RemoveLiquidityKind.SingleAsset,
             };
         });
-        test('exiting with wrapped', async () => {
-            const exitResult = await doExit({
+        test('removing liquidity with wrapped', async () => {
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput: input,
             });
@@ -159,17 +159,17 @@ describe('weighted exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
 
-        test('exiting with native', async () => {
+        test('removing liquidity with native', async () => {
             const removeLiquidityInput = {
                 ...input,
                 exitWithNativeAsset: true,
             };
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput,
             });
@@ -178,7 +178,7 @@ describe('weighted exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -200,7 +200,7 @@ describe('weighted exit test', () => {
             };
         });
         test('with tokens', async () => {
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput: input,
             });
@@ -209,7 +209,7 @@ describe('weighted exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });
@@ -218,7 +218,7 @@ describe('weighted exit test', () => {
                 ...input,
                 useNativeAssetAsWrappedAmountIn: true,
             };
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doExit({
                 ...txInput,
                 removeLiquidityInput,
             });
@@ -226,7 +226,7 @@ describe('weighted exit test', () => {
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
         });

@@ -9,7 +9,7 @@ import {
     ZERO_ADDRESS,
 } from '../../../utils/constants';
 import { vaultAbi } from '../../../abi';
-import { parseExitArgs } from '../../utils/parseExitArgs';
+import { parseRemoveLiquidityArgs } from '../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildOutput,
@@ -20,7 +20,7 @@ import {
     RemoveLiquidityWeightedCall,
 } from '../types';
 import { RemoveLiquidityAmounts, PoolState } from '../../types';
-import { doQueryExit } from '../../utils/doQueryExit';
+import { doRemoveLiquidity } from '../../utils/doRemoveLiquidity';
 import { getAmounts } from '../../utils';
 
 export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
@@ -33,7 +33,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         const userData = this.encodeUserData(input.kind, amounts);
 
         // tokensOut will have zero address if exit with native asset
-        const { args, tokensOut } = parseExitArgs({
+        const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
             exitWithNativeAsset: !!input.exitWithNativeAsset,
             poolId: poolState.id,
@@ -45,7 +45,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             toInternalBalance: !!input.toInternalBalance,
         });
 
-        const queryOutput = await doQueryExit(
+        const queryOutput = await doRemoveLiquidity(
             input.rpcUrl,
             input.chainId,
             args,
@@ -107,7 +107,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             amounts,
         );
 
-        const { args } = parseExitArgs({
+        const { args } = parseRemoveLiquidityArgs({
             poolId: input.poolId,
             sortedTokens: input.amountsOut.map((a) => a.token),
             sender: input.sender,
@@ -177,7 +177,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     ): Address {
         switch (kind) {
             case RemoveLiquidityKind.Unbalanced:
-                return WeightedEncoder.exitUnbalanced(
+                return WeightedEncoder.removeLiquidityUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
@@ -185,12 +185,14 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
                 if (amounts.tokenOutIndex === undefined)
                     throw Error('No Index');
 
-                return WeightedEncoder.exitSingleAsset(
+                return WeightedEncoder.removeLiquiditySingleToken(
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
             case RemoveLiquidityKind.Proportional:
-                return WeightedEncoder.exitProportional(amounts.maxBptAmountIn);
+                return WeightedEncoder.removeLiquidityProportional(
+                    amounts.maxBptAmountIn,
+                );
             default:
                 throw Error('Unsupported Exit Type');
         }

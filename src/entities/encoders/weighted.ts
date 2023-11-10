@@ -86,11 +86,11 @@ export class WeightedEncoder {
     };
 
     /**
-     * Encodes the userData parameter for exiting a WeightedPool by removing tokens in return for an exact amount of BPT
+     * Encodes the userData parameter for removing liquidity from a WeightedPool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
      * @param enterTokenIndex - the index of the token to removed from the pool
      */
-    static exitSingleAsset = (
+    static removeLiquiditySingleToken = (
         bptAmountIn: bigint,
         exitTokenIndex: number,
     ): Address => {
@@ -105,10 +105,10 @@ export class WeightedEncoder {
     };
 
     /**
-     * Encodes the userData parameter for exiting a WeightedPool by removing tokens in return for an exact amount of BPT
+     * Encodes the userData parameter for removing liquidity from a WeightedPool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
      */
-    static exitProportional = (bptAmountIn: bigint): Address => {
+    static removeLiquidityProportional = (bptAmountIn: bigint): Address => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [
@@ -119,11 +119,11 @@ export class WeightedEncoder {
     };
 
     /**
-     * Encodes the userData parameter for exiting a WeightedPool by removing exact amounts of tokens
+     * Encodes the userData parameter for removing liquidity from a WeightedPool by removing exact amounts of tokens
      * @param amountsOut - the amounts of each token to be withdrawn from the pool
      * @param maxBPTAmountIn - the minimum acceptable BPT to burn in return for withdrawn tokens
      */
-    static exitUnbalanced = (
+    static removeLiquidityUnbalanced = (
         amountsOut: bigint[],
         maxBPTAmountIn: bigint,
     ): Address =>

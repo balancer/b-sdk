@@ -18,7 +18,7 @@ export type AddLiquidityTxInput = {
     testAddress: Address;
 };
 
-export type ExitTxInput = {
+export type RemoveLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
     removeLiquidity: RemoveLiquidity;
     removeLiquidityInput: RemoveLiquidityInput;
