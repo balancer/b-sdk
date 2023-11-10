@@ -1,5 +1,5 @@
-export * from './doQueryJoin';
+export * from './doAddLiquidityQuery';
 export * from './getAmounts';
 export * from './getSortedTokens';
-export * from './parseJoinArgs';
+export * from './parseAddLiquidityArgs';
 export * from './replaceWrapped';

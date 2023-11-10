@@ -1,5 +1,5 @@
 export * from './encoders';
-export * from './join';
+export * from './addLiquidity';
 export * from './exit';
 export * from './path';
 export * from './swap';

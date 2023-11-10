@@ -2,7 +2,7 @@ import { Address, Hex } from '../../types';
 import { Token } from '../token';
 import { replaceWrapped } from './replaceWrapped';
 
-export function parseJoinArgs({
+export function parseAddLiquidityArgs({
     useNativeAssetAsWrappedAmountIn,
     chainId,
     sortedTokens,

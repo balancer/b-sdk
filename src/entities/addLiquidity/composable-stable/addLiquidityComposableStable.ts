@@ -1,7 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { WeightedEncoder } from '../../encoders/weighted';
 import { Address } from '../../../types';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
@@ -10,22 +9,37 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityWeightedQueryOutput,
-    AddLiquidityWeightedCall,
+    AddLiquidityComposableStableQueryOutput,
+    AddLiquidityComposableStableCall,
 } from '../types';
-import { AddLiquidityAmounts, PoolState } from '../../types';
-import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
+import {
+    AddLiquidityAmounts as AddLiquidityAmountsBase,
+    PoolState,
+} from '../../types';
+import {
+    doAddLiquidityQuery,
+    getAmounts,
+    parseAddLiquidityArgs,
+} from '../../utils';
+import { ComposableStableEncoder } from '../../encoders/composableStable';
 
-export class AddLiquidityWeighted implements AddLiquidityBase {
+type AddLiquidityAmounts = AddLiquidityAmountsBase & {
+    maxAmountsInNoBpt: bigint[];
+};
+
+export class AddLiquidityComposableStable implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityWeightedQueryOutput> {
-        const amounts = this.getAmountsQuery(poolState.tokens, input);
+    ): Promise<AddLiquidityComposableStableQueryOutput> {
+        const bptIndex = poolState.tokens.findIndex(
+            (t) => t.address === poolState.address,
+        );
+        const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
 
         const userData = this.encodeUserData(input.kind, amounts);
 
-        const { args, tokensIn } = parseJoinArgs({
+        const { args, tokensIn } = parseAddLiquidityArgs({
             useNativeAssetAsWrappedAmountIn:
                 !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
@@ -38,16 +52,16 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             fromInternalBalance: input.fromInternalBalance ?? false,
         });
 
-        const queryOutput = await doQueryJoin(
+        const queryResult = await doAddLiquidityQuery(
             input.rpcUrl,
             input.chainId,
             args,
         );
 
         const bpt = new Token(input.chainId, poolState.address, 18);
-        const bptOut = TokenAmount.fromRawAmount(bpt, queryOutput.bptOut);
+        const bptOut = TokenAmount.fromRawAmount(bpt, queryResult.bptOut);
 
-        const amountsIn = queryOutput.amountsIn.map((a, i) =>
+        const amountsIn = queryResult.amountsIn.map((a, i) =>
             TokenAmount.fromRawAmount(tokensIn[i], a),
         );
 
@@ -59,15 +73,18 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
             fromInternalBalance: !!input.fromInternalBalance,
+            bptIndex,
         };
     }
 
-    public buildCall(input: AddLiquidityWeightedCall): AddLiquidityBuildOutput {
+    public buildCall(
+        input: AddLiquidityComposableStableCall,
+    ): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.addLiquidityKind, amounts);
 
-        const { args } = parseJoinArgs({
+        const { args } = parseAddLiquidityArgs({
             ...input,
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
@@ -97,70 +114,97 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
     private getAmountsQuery(
         poolTokens: Token[],
         input: AddLiquidityInput,
+        bptIndex: number,
     ): AddLiquidityAmounts {
+        let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.kind) {
             case AddLiquidityKind.Init:
             case AddLiquidityKind.Unbalanced: {
-                return {
+                addLiquidityAmounts = {
                     minimumBpt: 0n,
-                    maxAmountsIn: getAmounts(poolTokens, input.amountsIn),
+                    maxAmountsIn: getAmounts(
+                        poolTokens,
+                        input.amountsIn,
+                        BigInt(0),
+                    ),
                     tokenInIndex: undefined,
                 };
+                break;
             }
             case AddLiquidityKind.SingleAsset: {
-                const tokenInIndex = poolTokens.findIndex((t) =>
-                    t.isSameAddress(input.tokenIn),
-                );
+                const tokenInIndex = poolTokens
+                    .filter((_, index) => index !== bptIndex) // Need to remove Bpt
+                    .findIndex((t) => t.isSameAddress(input.tokenIn));
                 if (tokenInIndex === -1)
                     throw Error("Can't find index of SingleAsset");
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
                 maxAmountsIn[tokenInIndex] = MAX_UINT256;
-                return {
+                addLiquidityAmounts = {
                     minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn,
                     tokenInIndex,
                 };
+                break;
             }
             case AddLiquidityKind.Proportional: {
-                return {
+                addLiquidityAmounts = {
                     minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
                     tokenInIndex: undefined,
                 };
+                break;
             }
             default:
                 throw Error('Unsupported Join Type');
         }
+
+        return {
+            ...addLiquidityAmounts,
+            maxAmountsInNoBpt: [
+                ...addLiquidityAmounts.maxAmountsIn.slice(0, bptIndex),
+                ...addLiquidityAmounts.maxAmountsIn.slice(bptIndex + 1),
+            ],
+        };
     }
 
     private getAmountsCall(
-        input: AddLiquidityWeightedCall,
+        input: AddLiquidityComposableStableCall,
     ): AddLiquidityAmounts {
+        let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Init:
             case AddLiquidityKind.Unbalanced: {
                 const minimumBpt = input.slippage.removeFrom(
                     input.bptOut.amount,
                 );
-                return {
+                addLiquidityAmounts = {
                     minimumBpt,
                     maxAmountsIn: input.amountsIn.map((a) => a.amount),
                     tokenInIndex: input.tokenInIndex,
                 };
+                break;
             }
             case AddLiquidityKind.SingleAsset:
             case AddLiquidityKind.Proportional: {
-                return {
+                addLiquidityAmounts = {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn: input.amountsIn.map((a) =>
                         input.slippage.applyTo(a.amount),
                     ),
                     tokenInIndex: input.tokenInIndex,
                 };
+                break;
             }
             default:
                 throw Error('Unsupported Join Type');
         }
+        return {
+            ...addLiquidityAmounts,
+            maxAmountsInNoBpt: [
+                ...addLiquidityAmounts.maxAmountsIn.slice(0, input.bptIndex),
+                ...addLiquidityAmounts.maxAmountsIn.slice(input.bptIndex + 1),
+            ],
+        };
     }
 
     private encodeUserData(
@@ -169,21 +213,25 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
     ): Address {
         switch (kind) {
             case AddLiquidityKind.Init:
-                return WeightedEncoder.joinInit(amounts.maxAmountsIn);
+                return ComposableStableEncoder.joinInit(
+                    amounts.maxAmountsInNoBpt,
+                );
             case AddLiquidityKind.Unbalanced:
-                return WeightedEncoder.joinUnbalanced(
-                    amounts.maxAmountsIn,
+                return ComposableStableEncoder.joinUnbalanced(
+                    amounts.maxAmountsInNoBpt,
                     amounts.minimumBpt,
                 );
             case AddLiquidityKind.SingleAsset: {
                 if (amounts.tokenInIndex === undefined) throw Error('No Index');
-                return WeightedEncoder.joinSingleAsset(
+                return ComposableStableEncoder.joinSingleAsset(
                     amounts.minimumBpt,
-                    amounts.tokenInIndex,
+                    amounts.tokenInIndex, // Has to be index without BPT
                 );
             }
             case AddLiquidityKind.Proportional: {
-                return WeightedEncoder.joinProportional(amounts.minimumBpt);
+                return ComposableStableEncoder.joinProportional(
+                    amounts.minimumBpt,
+                );
             }
             default:
                 throw Error('Unsupported Join Type');
