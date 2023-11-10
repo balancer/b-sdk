@@ -18,7 +18,7 @@ import {
 import { erc20Abi } from '../../../src/abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
 
-export type TxResult = {
+export type TxOutput = {
     transactionReceipt: TransactionReceipt;
     balanceDeltas: bigint[];
     gasUsed: bigint;
@@ -94,7 +94,7 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
-): Promise<TxResult> {
+): Promise<TxOutput> {
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
         client,

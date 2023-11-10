@@ -15,7 +15,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
 } from '../../../src';
-import { sendTransactionGetBalances, TxResult } from './helper';
+import { sendTransactionGetBalances, TxOutput } from './helper';
 import { expect } from 'vitest';
 import { zeroAddress } from 'viem';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
@@ -23,7 +23,7 @@ import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 type RemoveLiquidityOutput = {
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
     removeLiquidityBuildOutput: RemoveLiquidityBuildOutput;
-    txOutput: TxResult;
+    txOutput: TxOutput;
 };
 
 export const sdkRemoveLiquidity = async ({
@@ -333,7 +333,7 @@ function assertTokenDeltas(
     poolStateInput: PoolStateInput,
     removeLiquidityInput: RemoveLiquidityInput,
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
-    txOutput: TxResult,
+    txOutput: TxOutput,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 

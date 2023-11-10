@@ -17,7 +17,7 @@ import {
     AddLiquidityComposableStableQueryOutput,
     NATIVE_ASSETS,
 } from '../../../src';
-import { TxResult, sendTransactionGetBalances } from './helper';
+import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { zeroAddress } from 'viem';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
@@ -25,7 +25,7 @@ import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
     addLiquidityBuildOutput: AddLiquidityBuildOutput;
-    txOutput: TxResult;
+    txOutput: TxOutput;
 };
 
 async function sdkAddLiquidity({
@@ -347,7 +347,7 @@ function assertTokenDeltas(
     addLiquidityInput: AddLiquidityInput,
     addLiquidityQueryOutput: AddLiquidityQueryOutput,
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
-    txOutput: TxResult,
+    txOutput: TxOutput,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 

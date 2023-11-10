@@ -52,16 +52,16 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             fromInternalBalance: input.fromInternalBalance ?? false,
         });
 
-        const queryResult = await doAddLiquidityQuery(
+        const queryOutput = await doAddLiquidityQuery(
             input.rpcUrl,
             input.chainId,
             args,
         );
 
         const bpt = new Token(input.chainId, poolState.address, 18);
-        const bptOut = TokenAmount.fromRawAmount(bpt, queryResult.bptOut);
+        const bptOut = TokenAmount.fromRawAmount(bpt, queryOutput.bptOut);
 
-        const amountsIn = queryResult.amountsIn.map((a, i) =>
+        const amountsIn = queryOutput.amountsIn.map((a, i) =>
             TokenAmount.fromRawAmount(tokensIn[i], a),
         );
 
