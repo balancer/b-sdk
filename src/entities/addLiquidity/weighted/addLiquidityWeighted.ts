@@ -133,7 +133,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                 };
             }
             default:
-                throw Error('Unsupported Join Type');
+                throw Error('Unsupported Add Liquidity Kind');
         }
     }
 
@@ -163,7 +163,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                 };
             }
             default:
-                throw Error('Unsupported Join Type');
+                throw Error('Unsupported Add Liquidity Kind');
         }
     }
 
@@ -190,7 +190,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                 return WeightedEncoder.joinProportional(amounts.minimumBpt);
             }
             default:
-                throw Error('Unsupported Join Type');
+                throw Error('Unsupported Add Liquidity Kind');
         }
     }
 }

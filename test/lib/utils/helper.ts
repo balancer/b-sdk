@@ -285,7 +285,7 @@ export const forkSetup = async (
     }
 
     for (let i = 0; i < tokens.length; i++) {
-        // Set initial account balance for each token that will be used to join pool
+        // Set initial account balance for each token that will be used to add liquidity to the pool
         await setTokenBalance(
             client,
             accountAddress,

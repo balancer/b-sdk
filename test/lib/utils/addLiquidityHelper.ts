@@ -98,14 +98,14 @@ function getCheck(result: AddLiquidityQueryOutput, isExactIn: boolean) {
 }
 
 /**
- * Create and submit join transaction.
+ * Create and submit add liquidity transaction.
  * @param txInput
- *      @param addLiquidity: AddLiquidity - The pool join class, used to query the join and build the join call
- *      @param poolInput: PoolStateInput - The state of the pool being joined
- *      @param addLiquidityInput: AddLiquidityInput - The parameters of the join transaction, example: bptOut, amountsIn, etc.
+ *      @param addLiquidity: AddLiquidity - The add liquidity class, used to query outputs and build transaction call
+ *      @param poolInput: PoolStateInput - The state of the pool
+ *      @param addLiquidityInput: AddLiquidityInput - The parameters of the transaction, example: bptOut, amountsIn, etc.
  *      @param testAddress: Address - The address to send the transaction from
  *      @param client: Client & PublicActions & WalletActions - The RPC client
- *      @param slippage: Slippage - The slippage tolerance for the join transaction
+ *      @param slippage: Slippage - The slippage tolerance for the transaction
  */
 export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
     const {
@@ -305,7 +305,7 @@ export function assertAddLiquidityProportional(
             bptToken,
             addLiquidityInput.bptOut.rawAmount,
         ),
-        // Only expect tokenInIndex for SingleAssetJoin
+        // Only expect tokenInIndex for AddLiquiditySingleAsset
         tokenInIndex: undefined,
         // Should match inputs
         poolId: poolStateInput.id,

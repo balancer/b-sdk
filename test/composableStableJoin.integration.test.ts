@@ -35,7 +35,7 @@ import {
     assertAddLiquidityUnbalanced,
     assertAddLiquiditySingleToken,
     assertAddLiquidityProportional,
-} from './lib/utils/joinHelper';
+} from './lib/utils/addLiquidityHelper';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
@@ -43,7 +43,7 @@ const chainId = ChainId.MAINNET;
 const poolId =
     '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76000000000000000000000570'; // Balancer vETH/WETH StablePool
 
-describe('composable stable join test', () => {
+describe('add liquidity composable stable test', () => {
     let txInput: AddLiquidityTxInput;
     let poolStateInput: PoolStateInput;
 
@@ -86,7 +86,7 @@ describe('composable stable join test', () => {
         );
     });
 
-    describe('unbalanced join', () => {
+    describe('add liquidity unbalanced', () => {
         let input: Omit<AddLiquidityUnbalancedInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
@@ -144,7 +144,7 @@ describe('composable stable join test', () => {
         });
     });
 
-    describe('single asset join', () => {
+    describe('add liquidity single asset', () => {
         let input: AddLiquiditySingleAssetInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
@@ -196,7 +196,7 @@ describe('composable stable join test', () => {
         });
     });
 
-    describe('proportional join', () => {
+    describe('add liquidity proportional', () => {
         let input: AddLiquidityProportionalInput;
         beforeAll(() => {
             const bptOut: InputAmount = {

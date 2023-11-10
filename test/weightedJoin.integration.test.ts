@@ -34,7 +34,7 @@ import {
     assertAddLiquiditySingleToken,
     assertAddLiquidityUnbalanced,
     doAddLiquidity,
-} from './lib/utils/joinHelper';
+} from './lib/utils/addLiquidityHelper';
 import { AddLiquidityTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
@@ -43,7 +43,7 @@ const chainId = ChainId.MAINNET;
 const poolId =
     '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512'; // 80wjAURA-20WETH
 
-describe('weighted join test', () => {
+describe('add liquidity weighted test', () => {
     let txInput: AddLiquidityTxInput;
     let poolStateInput: PoolStateInput;
 
@@ -90,7 +90,7 @@ describe('weighted join test', () => {
         );
     });
 
-    describe('unbalanced join', () => {
+    describe('add liquidity unbalanced', () => {
         let input: Omit<AddLiquidityUnbalancedInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
@@ -144,7 +144,7 @@ describe('weighted join test', () => {
         });
     });
 
-    describe('single asset join', () => {
+    describe('add liquidity single asset', () => {
         let addLiquidityInput: AddLiquiditySingleAssetInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
@@ -199,7 +199,7 @@ describe('weighted join test', () => {
         });
     });
 
-    describe('proportional join', () => {
+    describe('add liquidity proportional', () => {
         let addLiquidityInput: AddLiquidityProportionalInput;
         beforeAll(() => {
             const bptOut: InputAmount = {

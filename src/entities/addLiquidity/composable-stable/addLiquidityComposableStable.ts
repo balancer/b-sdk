@@ -155,7 +155,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                 break;
             }
             default:
-                throw Error('Unsupported Join Type');
+                throw Error('Unsupported Add Liquidity Kind');
         }
 
         return {
@@ -196,7 +196,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                 break;
             }
             default:
-                throw Error('Unsupported Join Type');
+                throw Error('Unsupported Add Liquidity Kind');
         }
         return {
             ...addLiquidityAmounts,
@@ -234,7 +234,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                 );
             }
             default:
-                throw Error('Unsupported Join Type');
+                throw Error('Unsupported Add Liquidity Kind');
         }
     }
 }

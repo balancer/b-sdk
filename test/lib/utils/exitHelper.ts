@@ -250,7 +250,7 @@ export function assertProportionalExit(
     > = {
         // Query should use same bpt out as user sets
         bptIn: TokenAmount.fromRawAmount(bptToken, exitInput.bptIn.rawAmount),
-        // Only expect tokenInIndex for SingleAssetJoin
+        // Only expect tokenInIndex for AddLiquiditySingleAsset
         tokenOutIndex: undefined,
         // Should match inputs
         poolId: poolStateInput.id,

@@ -21,7 +21,7 @@ export class AddLiquidity {
             WEIGHTED: new AddLiquidityWeighted(),
             // PHANTOM_STABLE === ComposableStables in API
             PHANTOM_STABLE: new AddLiquidityComposableStable(),
-            // custom pool Joins take precedence over base Joins
+            // custom pool add liquidity types take precedence over base types
             ...customAddLiquidityTypes,
         };
     }
