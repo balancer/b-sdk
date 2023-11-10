@@ -1,4 +1,4 @@
-// pnpm test -- removeLiquidityWeighted.integration.test.ts
+// pnpm test -- removeLiquidityComposableStable.integration.test.ts
 import { describe, test, beforeAll, beforeEach } from 'vitest';
 import { config } from 'dotenv';
 config();
