@@ -166,7 +166,7 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'GYRO2',
+            type: 'GYRO3',
             tokens: [
                 {
                     address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC(PoS)
