@@ -16,7 +16,7 @@ import {
     UnbalancedJoinInput,
     ProportionalJoinInput,
     SingleAssetJoinInput,
-    JoinKind,
+    AddLiquidityKind,
     Slippage,
     Address,
     Hex,
@@ -102,7 +102,7 @@ describe('weighted join test', () => {
             input = {
                 chainId,
                 rpcUrl,
-                kind: JoinKind.Unbalanced,
+                kind: AddLiquidityKind.Unbalanced,
             };
         });
         test('with tokens', async () => {
@@ -158,7 +158,7 @@ describe('weighted join test', () => {
                 tokenIn,
                 chainId,
                 rpcUrl,
-                kind: JoinKind.SingleAsset,
+                kind: AddLiquidityKind.SingleAsset,
             };
         });
 
@@ -211,7 +211,7 @@ describe('weighted join test', () => {
                 bptOut,
                 chainId,
                 rpcUrl,
-                kind: JoinKind.Proportional,
+                kind: AddLiquidityKind.Proportional,
             };
         });
         test('with tokens', async () => {

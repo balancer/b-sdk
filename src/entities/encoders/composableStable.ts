@@ -1,6 +1,7 @@
 import { encodeAbiParameters } from 'viem';
 import { Address } from '../../types';
 
+// TODO: check if we should update join interface here as well - asking because it's matching v2 SC exactly
 export enum ComposableStablePoolJoinKind {
     INIT = 0,
     EXACT_TOKENS_IN_FOR_BPT_OUT = 1,

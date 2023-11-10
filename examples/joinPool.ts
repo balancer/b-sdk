@@ -12,7 +12,7 @@ import {
     BalancerApi,
     ChainId,
     JoinInput,
-    JoinKind,
+    AddLiquidityKind,
     PoolJoin,
     Slippage,
 } from '../src';
@@ -50,7 +50,7 @@ const join = async () => {
         amountsIn,
         chainId,
         rpcUrl,
-        kind: JoinKind.Unbalanced,
+        kind: AddLiquidityKind.Unbalanced,
     };
 
     // Simulate the join to get the amount of BPT out

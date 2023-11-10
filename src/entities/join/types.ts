@@ -3,7 +3,7 @@ import { Slippage } from '../slippage';
 import { PoolState } from '../types';
 import { Address, Hex, InputAmount } from '../../types';
 
-export enum JoinKind {
+export enum AddLiquidityKind {
     Init = 'Init',
     Unbalanced = 'Unbalanced',
     SingleAsset = 'SingleAsset',
@@ -20,23 +20,23 @@ type BaseJoinInput = {
 
 export type InitJoinInput = BaseJoinInput & {
     amountsIn: InputAmount[];
-    kind: JoinKind.Init;
+    kind: AddLiquidityKind.Init;
 };
 
 export type UnbalancedJoinInput = BaseJoinInput & {
     amountsIn: InputAmount[];
-    kind: JoinKind.Unbalanced;
+    kind: AddLiquidityKind.Unbalanced;
 };
 
 export type SingleAssetJoinInput = BaseJoinInput & {
     bptOut: InputAmount;
     tokenIn: Address;
-    kind: JoinKind.SingleAsset;
+    kind: AddLiquidityKind.SingleAsset;
 };
 
 export type ProportionalJoinInput = BaseJoinInput & {
     bptOut: InputAmount;
-    kind: JoinKind.Proportional;
+    kind: AddLiquidityKind.Proportional;
 };
 
 export type JoinInput =
@@ -48,7 +48,7 @@ export type JoinInput =
 type BaseJoinQueryResult = {
     poolType: string;
     poolId: Hex;
-    joinKind: JoinKind;
+    addLiquidityKind: AddLiquidityKind;
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
     fromInternalBalance: boolean;

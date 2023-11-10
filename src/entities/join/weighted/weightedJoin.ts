@@ -9,7 +9,7 @@ import {
     BaseJoin,
     JoinBuildOutput,
     JoinInput,
-    JoinKind,
+    AddLiquidityKind,
     WeightedJoinQueryResult,
     WeightedJoinCall,
 } from '../types';
@@ -53,7 +53,7 @@ export class WeightedJoin implements BaseJoin {
 
         return {
             poolType: poolState.type,
-            joinKind: input.kind,
+            addLiquidityKind: input.kind,
             poolId: poolState.id,
             bptOut,
             amountsIn,
@@ -65,7 +65,7 @@ export class WeightedJoin implements BaseJoin {
     public buildCall(input: WeightedJoinCall): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        const userData = this.encodeUserData(input.joinKind, amounts);
+        const userData = this.encodeUserData(input.addLiquidityKind, amounts);
 
         const { args } = parseJoinArgs({
             ...input,
@@ -99,15 +99,15 @@ export class WeightedJoin implements BaseJoin {
         input: JoinInput,
     ): AddLiquidityAmounts {
         switch (input.kind) {
-            case JoinKind.Init:
-            case JoinKind.Unbalanced: {
+            case AddLiquidityKind.Init:
+            case AddLiquidityKind.Unbalanced: {
                 return {
                     minimumBpt: 0n,
                     maxAmountsIn: getAmounts(poolTokens, input.amountsIn),
                     tokenInIndex: undefined,
                 };
             }
-            case JoinKind.SingleAsset: {
+            case AddLiquidityKind.SingleAsset: {
                 const tokenInIndex = poolTokens.findIndex((t) =>
                     t.isSameAddress(input.tokenIn),
                 );
@@ -121,7 +121,7 @@ export class WeightedJoin implements BaseJoin {
                     tokenInIndex,
                 };
             }
-            case JoinKind.Proportional: {
+            case AddLiquidityKind.Proportional: {
                 return {
                     minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
@@ -134,9 +134,9 @@ export class WeightedJoin implements BaseJoin {
     }
 
     private getAmountsCall(input: WeightedJoinCall): AddLiquidityAmounts {
-        switch (input.joinKind) {
-            case JoinKind.Init:
-            case JoinKind.Unbalanced: {
+        switch (input.addLiquidityKind) {
+            case AddLiquidityKind.Init:
+            case AddLiquidityKind.Unbalanced: {
                 const minimumBpt = input.slippage.removeFrom(
                     input.bptOut.amount,
                 );
@@ -146,8 +146,8 @@ export class WeightedJoin implements BaseJoin {
                     tokenInIndex: input.tokenInIndex,
                 };
             }
-            case JoinKind.SingleAsset:
-            case JoinKind.Proportional: {
+            case AddLiquidityKind.SingleAsset:
+            case AddLiquidityKind.Proportional: {
                 return {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn: input.amountsIn.map((a) =>
@@ -162,25 +162,25 @@ export class WeightedJoin implements BaseJoin {
     }
 
     private encodeUserData(
-        kind: JoinKind,
+        kind: AddLiquidityKind,
         amounts: AddLiquidityAmounts,
     ): Address {
         switch (kind) {
-            case JoinKind.Init:
+            case AddLiquidityKind.Init:
                 return WeightedEncoder.joinInit(amounts.maxAmountsIn);
-            case JoinKind.Unbalanced:
+            case AddLiquidityKind.Unbalanced:
                 return WeightedEncoder.joinUnbalanced(
                     amounts.maxAmountsIn,
                     amounts.minimumBpt,
                 );
-            case JoinKind.SingleAsset: {
+            case AddLiquidityKind.SingleAsset: {
                 if (amounts.tokenInIndex === undefined) throw Error('No Index');
                 return WeightedEncoder.joinSingleAsset(
                     amounts.minimumBpt,
                     amounts.tokenInIndex,
                 );
             }
-            case JoinKind.Proportional: {
+            case AddLiquidityKind.Proportional: {
                 return WeightedEncoder.joinProportional(amounts.minimumBpt);
             }
             default:

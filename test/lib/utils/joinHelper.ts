@@ -167,7 +167,7 @@ export function assertUnbalancedJoin(
         poolId: poolStateInput.id,
         poolType: poolStateInput.type,
         fromInternalBalance: !!joinInput.fromInternalBalance,
-        joinKind: joinInput.kind,
+        addLiquidityKind: joinInput.kind,
     };
 
     const queryCheck = getCheck(joinQueryResult, true);
@@ -225,7 +225,7 @@ export function assertSingleTokenJoin(
             poolId: poolStateInput.id,
             poolType: poolStateInput.type,
             fromInternalBalance: !!joinInput.fromInternalBalance,
-            joinKind: joinInput.kind,
+            addLiquidityKind: joinInput.kind,
         };
 
     const queryCheck = getCheck(joinQueryResult, false);
@@ -289,7 +289,7 @@ export function assertProportionalJoin(
             poolId: poolStateInput.id,
             poolType: poolStateInput.type,
             fromInternalBalance: !!joinInput.fromInternalBalance,
-            joinKind: joinInput.kind,
+            addLiquidityKind: joinInput.kind,
         };
 
     const queryCheck = getCheck(joinQueryResult, false);

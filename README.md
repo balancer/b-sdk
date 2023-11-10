@@ -39,7 +39,7 @@ it can be used for:
       bptOut,
       chainId,
       rpcUrl,
-      kind: JoinKind.Proportional,
+      kind: AddLiquidityKind.Proportional,
     };
 
     const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);

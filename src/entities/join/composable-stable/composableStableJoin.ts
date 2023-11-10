@@ -8,7 +8,7 @@ import {
     BaseJoin,
     JoinBuildOutput,
     JoinInput,
-    JoinKind,
+    AddLiquidityKind,
     ComposableStableJoinQueryResult,
     ComposableJoinCall,
 } from '../types';
@@ -63,7 +63,7 @@ export class ComposableStableJoin implements BaseJoin {
 
         return {
             poolType: poolState.type,
-            joinKind: input.kind,
+            addLiquidityKind: input.kind,
             poolId: poolState.id,
             bptOut,
             amountsIn,
@@ -76,7 +76,7 @@ export class ComposableStableJoin implements BaseJoin {
     public buildCall(input: ComposableJoinCall): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        const userData = this.encodeUserData(input.joinKind, amounts);
+        const userData = this.encodeUserData(input.addLiquidityKind, amounts);
 
         const { args } = parseJoinArgs({
             ...input,
@@ -112,8 +112,8 @@ export class ComposableStableJoin implements BaseJoin {
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.kind) {
-            case JoinKind.Init:
-            case JoinKind.Unbalanced: {
+            case AddLiquidityKind.Init:
+            case AddLiquidityKind.Unbalanced: {
                 addLiquidityAmounts = {
                     minimumBpt: 0n,
                     maxAmountsIn: getAmounts(
@@ -125,7 +125,7 @@ export class ComposableStableJoin implements BaseJoin {
                 };
                 break;
             }
-            case JoinKind.SingleAsset: {
+            case AddLiquidityKind.SingleAsset: {
                 const tokenInIndex = poolTokens
                     .filter((_, index) => index !== bptIndex) // Need to remove Bpt
                     .findIndex((t) => t.isSameAddress(input.tokenIn));
@@ -140,7 +140,7 @@ export class ComposableStableJoin implements BaseJoin {
                 };
                 break;
             }
-            case JoinKind.Proportional: {
+            case AddLiquidityKind.Proportional: {
                 addLiquidityAmounts = {
                     minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
@@ -163,9 +163,9 @@ export class ComposableStableJoin implements BaseJoin {
 
     private getAmountsCall(input: ComposableJoinCall): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
-        switch (input.joinKind) {
-            case JoinKind.Init:
-            case JoinKind.Unbalanced: {
+        switch (input.addLiquidityKind) {
+            case AddLiquidityKind.Init:
+            case AddLiquidityKind.Unbalanced: {
                 const minimumBpt = input.slippage.removeFrom(
                     input.bptOut.amount,
                 );
@@ -176,8 +176,8 @@ export class ComposableStableJoin implements BaseJoin {
                 };
                 break;
             }
-            case JoinKind.SingleAsset:
-            case JoinKind.Proportional: {
+            case AddLiquidityKind.SingleAsset:
+            case AddLiquidityKind.Proportional: {
                 addLiquidityAmounts = {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn: input.amountsIn.map((a) =>
@@ -200,27 +200,27 @@ export class ComposableStableJoin implements BaseJoin {
     }
 
     private encodeUserData(
-        kind: JoinKind,
+        kind: AddLiquidityKind,
         amounts: AddLiquidityAmounts,
     ): Address {
         switch (kind) {
-            case JoinKind.Init:
+            case AddLiquidityKind.Init:
                 return ComposableStableEncoder.joinInit(
                     amounts.maxAmountsInNoBpt,
                 );
-            case JoinKind.Unbalanced:
+            case AddLiquidityKind.Unbalanced:
                 return ComposableStableEncoder.joinUnbalanced(
                     amounts.maxAmountsInNoBpt,
                     amounts.minimumBpt,
                 );
-            case JoinKind.SingleAsset: {
+            case AddLiquidityKind.SingleAsset: {
                 if (amounts.tokenInIndex === undefined) throw Error('No Index');
                 return ComposableStableEncoder.joinSingleAsset(
                     amounts.minimumBpt,
                     amounts.tokenInIndex, // Has to be index without BPT
                 );
             }
-            case JoinKind.Proportional: {
+            case AddLiquidityKind.Proportional: {
                 return ComposableStableEncoder.joinProportional(
                     amounts.minimumBpt,
                 );
