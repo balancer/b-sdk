@@ -22,7 +22,7 @@ export class RemoveLiquidity {
             WEIGHTED: new RemoveLiquidityWeighted(),
             // PHANTOM_STABLE === ComposableStables in API
             PHANTOM_STABLE: new RemoveLiquidityComposableStable(),
-            // custom pool Exits take precedence over base Exits
+            // custom remove liquidity types take precedence over base types
             ...customRemoveLiquidityTypes,
         };
     }

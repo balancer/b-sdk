@@ -152,7 +152,7 @@ export function assertRemoveLiquidityUnbalanced(
     const expectedAmountsOut = poolStateInput.tokens.map((t) => {
         let token;
         if (
-            removeLiquidityInput.exitWithNativeAsset &&
+            removeLiquidityInput.toNativeAsset &&
             t.address === NATIVE_ASSETS[chainId].wrapped
         )
             token = new Token(chainId, zeroAddress, t.decimals);
@@ -246,12 +246,12 @@ export function assertRemoveLiquiditySingleToken(
     // (Note removeLiquidityQueryOutput also has value for bpt if pre-minted)
     removeLiquidityQueryOutput.amountsOut.forEach((a) => {
         if (
-            !removeLiquidityInput.exitWithNativeAsset &&
+            !removeLiquidityInput.toNativeAsset &&
             a.token.address === removeLiquidityInput.tokenOut
         )
             expect(a.amount > 0n).to.be.true;
         else if (
-            removeLiquidityInput.exitWithNativeAsset &&
+            removeLiquidityInput.toNativeAsset &&
             a.token.address === zeroAddress
         )
             expect(a.amount > 0n).to.be.true;
@@ -349,8 +349,8 @@ function assertTokenDeltas(
         0n,
     ];
 
-    // If input is exit with native we must replace it with 0 and update native value instead
-    if (removeLiquidityInput.exitWithNativeAsset) {
+    // If removing liquidity to native asset we must replace it with 0 and update native value instead
+    if (removeLiquidityInput.toNativeAsset) {
         const index = amountsWithoutBpt.findIndex(
             (a) => a.token.address === zeroAddress,
         );

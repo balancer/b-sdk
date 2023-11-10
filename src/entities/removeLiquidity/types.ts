@@ -4,16 +4,16 @@ import { Address, InputAmount } from '../../types';
 import { PoolState } from '../types';
 
 export enum RemoveLiquidityKind {
-    Unbalanced = 'Unbalanced', // exitExactOut
-    SingleToken = 'SingleToken', // exitExactInSingleToken
-    Proportional = 'Proportional', // exitExactInProportional
+    Unbalanced = 'Unbalanced', // exact out
+    SingleToken = 'SingleToken', // exact in (single token out)
+    Proportional = 'Proportional', // exact in (all tokens out)
 }
 
 // This will be extended for each pools specific output requirements
 export type RemoveLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
-    exitWithNativeAsset?: boolean;
+    toNativeAsset?: boolean;
     toInternalBalance?: boolean;
 };
 
@@ -42,7 +42,7 @@ export type RemoveLiquidityQueryOutput =
     | RemoveLiquidityBaseQueryOutput
     | RemoveLiquidityComposableStableQueryOutput;
 
-// Returned from a exit query
+// Returned from a remove liquidity query
 export type RemoveLiquidityBaseQueryOutput = {
     poolType: string;
     poolId: Address;

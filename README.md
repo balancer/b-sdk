@@ -28,7 +28,7 @@ The Balancer API Provider is a provider that facilitates
 data fetching from the Balancer API,
 it can be used for:
 - Fetch Pool State for AddLiquidity;
-- Fetch Pool State for Exits.
+- Fetch Pool State for RemoveLiquidity.
 
 ### Usage for adding liquidity to a Pool
 
@@ -102,7 +102,7 @@ await client.sendTransaction({
   value,
 });
 ```
-Full working exit example: [examples/exit/weighted.ts](./examples/exit/weighted.ts)
+Full working remove liquidity example: [examples/removeLiquidity.ts](./examples/removeLiquidity.ts)
 
 ## Anvil client
 To download and install the anvil client, run the following commands (MacOS):

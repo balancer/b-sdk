@@ -40,10 +40,10 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         };
         const userData = this.encodeUserData(input.kind, amountsWithoutBpt);
 
-        // tokensOut will have zero address if exit with native asset
+        // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
-            exitWithNativeAsset: !!input.exitWithNativeAsset,
+            toNativeAsset: !!input.toNativeAsset,
             poolId: poolState.id,
             sortedTokens: poolState.tokens,
             sender: ZERO_ADDRESS,
@@ -163,7 +163,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             case RemoveLiquidityKind.SingleToken:
                 if (input.tokenOutIndex === undefined) {
                     throw new Error(
-                        'tokenOutIndex must be defined for SingleToken exit',
+                        'tokenOutIndex must be defined for RemoveLiquiditySingleToken',
                     );
                 }
                 return {

@@ -1,9 +1,9 @@
 /**
- * Example showing how to exit a pool.
+ * Example showing how to remove liquidity from a pool.
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/exitPool.ts
+ * pnpm example ./examples/removeLiquidity.ts
  */
 import dotenv from 'dotenv';
 dotenv.config();
@@ -22,7 +22,7 @@ import { parseEther } from 'viem';
 import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
 import { makeForkTx } from './utils/makeForkTx';
 
-const exit = async () => {
+const removeLiquidity = async () => {
     // User defined:
     const chainId = ChainId.MAINNET;
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
@@ -42,7 +42,7 @@ const exit = async () => {
     const poolStateInput: PoolStateInput =
         await balancerApi.pools.fetchPoolState(poolId);
 
-    // Construct the RemoveLiquidityInput, in this case a SingleToken exit
+    // Construct the RemoveLiquidityInput, in this case a RemoveLiquiditySingleToken
     const bptIn: InputAmount = {
         rawAmount: parseEther('1'),
         decimals: 18,
@@ -56,14 +56,14 @@ const exit = async () => {
         kind: RemoveLiquidityKind.SingleToken,
     };
 
-    // Simulate the exit to get the tokens out
+    // Simulate removing liquidity to get the tokens out
     const removeLiquidity = new RemoveLiquidity();
     const queryOutput = await removeLiquidity.query(
         removeLiquidityInput,
         poolStateInput,
     );
 
-    console.log('\nExit Query Result:');
+    console.log('Remove Liquidity Query Output:');
     console.log(`BPT In: ${queryOutput.bptIn.amount.toString()}\nTokens Out:`);
     queryOutput.amountsOut.map((a) =>
         console.log(a.token.address, a.amount.toString()),
@@ -103,4 +103,4 @@ const exit = async () => {
     );
 };
 
-exit();
+removeLiquidity();

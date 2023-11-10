@@ -54,19 +54,19 @@ export class WeightedEncoder {
     /**
      * Encodes the userData parameter for adding liquidity to a WeightedPool with a single token to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
-     * @param enterTokenIndex - the index of the token to be provided as liquidity
+     * @param tokenIndex - the index of the token to be provided as liquidity
      */
     static addLiquiditySingleToken = (
         bptAmountOut: bigint,
-        enterTokenIndex: number,
+        tokenIndex: number,
     ): Address => {
-        // if enterTokenIndex is provided, it's assumed to be an allTokensIn
+        // if tokenIndex is provided, it's assumed to be an allTokensIn
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
             [
                 BigInt(WeightedPoolJoinKind.TOKEN_IN_FOR_EXACT_BPT_OUT),
                 bptAmountOut,
-                BigInt(enterTokenIndex),
+                BigInt(tokenIndex),
             ],
         );
     };
@@ -88,18 +88,18 @@ export class WeightedEncoder {
     /**
      * Encodes the userData parameter for removing liquidity from a WeightedPool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
-     * @param enterTokenIndex - the index of the token to removed from the pool
+     * @param tokenIndex - the index of the token to removed from the pool
      */
     static removeLiquiditySingleToken = (
         bptAmountIn: bigint,
-        exitTokenIndex: number,
+        tokenIndex: number,
     ): Address => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
             [
                 BigInt(WeightedPoolExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT),
                 bptAmountIn,
-                BigInt(exitTokenIndex),
+                BigInt(tokenIndex),
             ],
         );
     };
