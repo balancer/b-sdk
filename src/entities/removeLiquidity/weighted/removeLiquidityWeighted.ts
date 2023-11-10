@@ -20,7 +20,7 @@ import {
     RemoveLiquidityWeightedCall,
 } from '../types';
 import { RemoveLiquidityAmounts, PoolState } from '../../types';
-import { doRemoveLiquidity } from '../../utils/doRemoveLiquidity';
+import { doRemoveLiquidityQuery } from '../../utils/doRemoveLiquidityQuery';
 import { getAmounts } from '../../utils';
 
 export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
@@ -45,7 +45,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             toInternalBalance: !!input.toInternalBalance,
         });
 
-        const queryOutput = await doRemoveLiquidity(
+        const queryOutput = await doRemoveLiquidityQuery(
             input.rpcUrl,
             input.chainId,
             args,

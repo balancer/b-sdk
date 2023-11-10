@@ -4,7 +4,7 @@ import { BALANCER_HELPERS, CHAINS } from '../../utils/constants';
 import { balancerHelpersAbi } from '../../abi';
 import { ExitPoolRequest } from '../removeLiquidity/types';
 
-export async function doRemoveLiquidity(
+export async function doRemoveLiquidityQuery(
     rpcUrl: string,
     chainId: number,
     args: readonly [Address, Address, Address, ExitPoolRequest],
