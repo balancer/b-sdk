@@ -12,11 +12,14 @@ import {
     ComposableStableJoinQueryResult,
     ComposableJoinCall,
 } from '../types';
-import { AmountsJoin as AmountsJoinBase, PoolState } from '../../types';
+import {
+    AddLiquidityAmounts as AddLiquidityAmountsBase,
+    PoolState,
+} from '../../types';
 import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
 
-type AmountsJoin = AmountsJoinBase & {
+type AddLiquidityAmounts = AddLiquidityAmountsBase & {
     maxAmountsInNoBpt: bigint[];
 };
 
@@ -106,12 +109,12 @@ export class ComposableStableJoin implements BaseJoin {
         poolTokens: Token[],
         input: JoinInput,
         bptIndex: number,
-    ): AmountsJoin {
-        let amountsJoin: AmountsJoinBase;
+    ): AddLiquidityAmounts {
+        let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.kind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
-                amountsJoin = {
+                addLiquidityAmounts = {
                     minimumBpt: 0n,
                     maxAmountsIn: getAmounts(
                         poolTokens,
@@ -130,7 +133,7 @@ export class ComposableStableJoin implements BaseJoin {
                     throw Error("Can't find index of SingleAsset");
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
                 maxAmountsIn[tokenInIndex] = MAX_UINT256;
-                amountsJoin = {
+                addLiquidityAmounts = {
                     minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn,
                     tokenInIndex,
@@ -138,7 +141,7 @@ export class ComposableStableJoin implements BaseJoin {
                 break;
             }
             case JoinKind.Proportional: {
-                amountsJoin = {
+                addLiquidityAmounts = {
                     minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
                     tokenInIndex: undefined,
@@ -150,23 +153,23 @@ export class ComposableStableJoin implements BaseJoin {
         }
 
         return {
-            ...amountsJoin,
+            ...addLiquidityAmounts,
             maxAmountsInNoBpt: [
-                ...amountsJoin.maxAmountsIn.slice(0, bptIndex),
-                ...amountsJoin.maxAmountsIn.slice(bptIndex + 1),
+                ...addLiquidityAmounts.maxAmountsIn.slice(0, bptIndex),
+                ...addLiquidityAmounts.maxAmountsIn.slice(bptIndex + 1),
             ],
         };
     }
 
-    private getAmountsCall(input: ComposableJoinCall): AmountsJoin {
-        let amountsJoin: AmountsJoinBase;
+    private getAmountsCall(input: ComposableJoinCall): AddLiquidityAmounts {
+        let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.joinKind) {
             case JoinKind.Init:
             case JoinKind.Unbalanced: {
                 const minimumBpt = input.slippage.removeFrom(
                     input.bptOut.amount,
                 );
-                amountsJoin = {
+                addLiquidityAmounts = {
                     minimumBpt,
                     maxAmountsIn: input.amountsIn.map((a) => a.amount),
                     tokenInIndex: input.tokenInIndex,
@@ -175,7 +178,7 @@ export class ComposableStableJoin implements BaseJoin {
             }
             case JoinKind.SingleAsset:
             case JoinKind.Proportional: {
-                amountsJoin = {
+                addLiquidityAmounts = {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn: input.amountsIn.map((a) =>
                         input.slippage.applyTo(a.amount),
@@ -188,15 +191,18 @@ export class ComposableStableJoin implements BaseJoin {
                 throw Error('Unsupported Join Type');
         }
         return {
-            ...amountsJoin,
+            ...addLiquidityAmounts,
             maxAmountsInNoBpt: [
-                ...amountsJoin.maxAmountsIn.slice(0, input.bptIndex),
-                ...amountsJoin.maxAmountsIn.slice(input.bptIndex + 1),
+                ...addLiquidityAmounts.maxAmountsIn.slice(0, input.bptIndex),
+                ...addLiquidityAmounts.maxAmountsIn.slice(input.bptIndex + 1),
             ],
         };
     }
 
-    private encodeUserData(kind: JoinKind, amounts: AmountsJoin): Address {
+    private encodeUserData(
+        kind: JoinKind,
+        amounts: AddLiquidityAmounts,
+    ): Address {
         switch (kind) {
             case JoinKind.Init:
                 return ComposableStableEncoder.joinInit(
