@@ -1,6 +1,6 @@
 import { Address } from '../../types';
 import { Token } from '../token';
-import { ExitPoolRequest } from '../exit/types';
+import { ExitPoolRequest } from '../removeLiquidity/types';
 import { replaceWrapped } from './replaceWrapped';
 
 export function parseRemoveLiquidityArgs({

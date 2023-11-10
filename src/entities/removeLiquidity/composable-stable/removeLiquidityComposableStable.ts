@@ -1,7 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { WeightedEncoder } from '../../encoders/weighted';
 import { Address } from '../../../types';
 import {
     BALANCER_VAULT,
@@ -12,25 +11,34 @@ import { vaultAbi } from '../../../abi';
 import { parseRemoveLiquidityArgs } from '../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
+    RemoveLiquidityComposableStableCall,
     RemoveLiquidityBuildOutput,
-    RemoveLiquidityCall,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
-    RemoveLiquidityWeightedCall,
 } from '../types';
 import { RemoveLiquidityAmounts, PoolState } from '../../types';
 import { doRemoveLiquidity } from '../../utils/doRemoveLiquidity';
+import { ComposableStableEncoder } from '../../encoders/composableStable';
 import { getAmounts } from '../../utils';
 
-export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
+export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
-        const amounts = this.getAmountsQuery(poolState.tokens, input);
-
-        const userData = this.encodeUserData(input.kind, amounts);
+        const bptIndex = poolState.tokens.findIndex(
+            (t) => t.address === poolState.address,
+        );
+        const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
+        const amountsWithoutBpt = {
+            ...amounts,
+            minAmountsOut: [
+                ...amounts.minAmountsOut.slice(0, bptIndex),
+                ...amounts.minAmountsOut.slice(bptIndex + 1),
+            ],
+        };
+        const userData = this.encodeUserData(input.kind, amountsWithoutBpt);
 
         // tokensOut will have zero address if exit with native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
@@ -44,13 +52,11 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             userData,
             toInternalBalance: !!input.toInternalBalance,
         });
-
         const queryOutput = await doRemoveLiquidity(
             input.rpcUrl,
             input.chainId,
             args,
         );
-
         const bpt = new Token(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(bpt, queryOutput.bptIn);
 
@@ -66,12 +72,14 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
             toInternalBalance: !!input.toInternalBalance,
+            bptIndex,
         };
     }
 
     private getAmountsQuery(
         tokens: Token[],
         input: RemoveLiquidityInput,
+        bptIndex: number,
     ): RemoveLiquidityAmounts {
         switch (input.kind) {
             case RemoveLiquidityKind.Unbalanced:
@@ -83,9 +91,9 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             case RemoveLiquidityKind.SingleAsset:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
-                    tokenOutIndex: tokens.findIndex((t) =>
-                        t.isSameAddress(input.tokenOut),
-                    ),
+                    tokenOutIndex: tokens
+                        .filter((_, index) => index !== bptIndex)
+                        .findIndex((t) => t.isSameAddress(input.tokenOut)),
                     maxBptAmountIn: input.bptIn.rawAmount,
                 };
             case RemoveLiquidityKind.Proportional:
@@ -98,13 +106,19 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityWeightedCall,
+        input: RemoveLiquidityComposableStableCall,
     ): RemoveLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
-
+        const amountsWithoutBpt = {
+            ...amounts,
+            minAmountsOut: [
+                ...amounts.minAmountsOut.slice(0, input.bptIndex),
+                ...amounts.minAmountsOut.slice(input.bptIndex + 1),
+            ],
+        };
         const userData = this.encodeUserData(
             input.removeLiquidityKind,
-            amounts,
+            amountsWithoutBpt,
         );
 
         const { args } = parseRemoveLiquidityArgs({
@@ -116,7 +130,6 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             userData,
             toInternalBalance: !!input.toInternalBalance,
         });
-
         const call = encodeFunctionData({
             abi: vaultAbi,
             functionName: 'exitPool',
@@ -137,7 +150,9 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         };
     }
 
-    private getAmountsCall(input: RemoveLiquidityCall): RemoveLiquidityAmounts {
+    private getAmountsCall(
+        input: RemoveLiquidityComposableStableCall,
+    ): RemoveLiquidityAmounts {
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:
                 return {
@@ -167,7 +182,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
                     maxBptAmountIn: input.bptIn.amount,
                 };
             default:
-                throw Error('Unsupported Exit Type');
+                throw Error('Unsupported Remove Liquidity Kind');
         }
     }
 
@@ -177,7 +192,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     ): Address {
         switch (kind) {
             case RemoveLiquidityKind.Unbalanced:
-                return WeightedEncoder.removeLiquidityUnbalanced(
+                return ComposableStableEncoder.removeLiquidityUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
@@ -185,16 +200,16 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
                 if (amounts.tokenOutIndex === undefined)
                     throw Error('No Index');
 
-                return WeightedEncoder.removeLiquiditySingleToken(
+                return ComposableStableEncoder.removeLiquiditySingleToken(
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
             case RemoveLiquidityKind.Proportional:
-                return WeightedEncoder.removeLiquidityProportional(
+                return ComposableStableEncoder.removeLiquidityProportional(
                     amounts.maxBptAmountIn,
                 );
             default:
-                throw Error('Unsupported Exit Type');
+                throw Error('Unsupported Remove Liquidity Kind');
         }
     }
 }

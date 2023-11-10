@@ -31,11 +31,11 @@ import {
 import { forkSetup } from './lib/utils/helper';
 import { RemoveLiquidityTxInput } from './lib/utils/types';
 import {
-    assertProportionalExit,
-    assertSingleTokenExit,
-    assertUnbalancedExit,
-    doExit,
-} from './lib/utils/exitHelper';
+    assertRemoveLiquidityProportional,
+    assertRemoveLiquiditySingleToken,
+    assertRemoveLiquidityUnbalanced,
+    doRemoveLiquidity,
+} from './lib/utils/removeLiquidityHelper';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
 const chainId = ChainId.MAINNET;
@@ -43,7 +43,7 @@ const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const poolId =
     '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d000000000000000000000051b'; // baoETH-ETH StablePool
 
-describe('composable stable exit test', () => {
+describe('composable stable remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
     let bptToken: Token;
     let poolInput: PoolStateInput;
@@ -83,7 +83,7 @@ describe('composable stable exit test', () => {
         );
     });
 
-    describe('unbalanced exit', async () => {
+    describe('remove liquidity unbalanced', async () => {
         let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
         let amountsOut: InputAmount[];
         beforeAll(() => {
@@ -105,16 +105,16 @@ describe('composable stable exit test', () => {
                 kind: RemoveLiquidityKind.Unbalanced,
             };
         });
-        test('removing liquidity with wrapped', async () => {
+        test('with wrapped', async () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
             };
-            const removeLiquidityOutput = await doExit({
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
             });
-            assertUnbalancedExit(
+            assertRemoveLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
@@ -122,17 +122,17 @@ describe('composable stable exit test', () => {
                 txInput.slippage,
             );
         });
-        test('removing liquidity with native', async () => {
+        test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
                 exitWithNativeAsset: true,
             };
-            const removeLiquidityOutput = await doExit({
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
             });
-            assertUnbalancedExit(
+            assertRemoveLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
@@ -142,7 +142,7 @@ describe('composable stable exit test', () => {
         });
     });
 
-    describe('single asset exit', () => {
+    describe('remove liquidity single token', () => {
         let input: RemoveLiquiditySingleTokenInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
@@ -159,13 +159,13 @@ describe('composable stable exit test', () => {
                 kind: RemoveLiquidityKind.SingleAsset,
             };
         });
-        test('removing liquidity with wrapped', async () => {
-            const removeLiquidityOutput = await doExit({
+        test('with wrapped', async () => {
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput: input,
             });
 
-            assertSingleTokenExit(
+            assertRemoveLiquiditySingleToken(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
@@ -174,17 +174,17 @@ describe('composable stable exit test', () => {
             );
         });
 
-        test('removing liquidity with native', async () => {
+        test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
                 exitWithNativeAsset: true,
             };
-            const removeLiquidityOutput = await doExit({
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
             });
 
-            assertSingleTokenExit(
+            assertRemoveLiquiditySingleToken(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,
@@ -194,7 +194,7 @@ describe('composable stable exit test', () => {
         });
     });
 
-    describe('proportional exit', () => {
+    describe('remove liquidity proportional', () => {
         let input: RemoveLiquidityProportionalInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
@@ -210,12 +210,12 @@ describe('composable stable exit test', () => {
             };
         });
         test('with tokens', async () => {
-            const removeLiquidityOutput = await doExit({
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput: input,
             });
 
-            assertProportionalExit(
+            assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
@@ -228,11 +228,11 @@ describe('composable stable exit test', () => {
                 ...input,
                 useNativeAssetAsWrappedAmountIn: true,
             };
-            const removeLiquidityOutput = await doExit({
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
             });
-            assertProportionalExit(
+            assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 removeLiquidityInput,

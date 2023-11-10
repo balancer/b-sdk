@@ -26,21 +26,21 @@ type RemoveLiquidityOutput = {
     txOutput: TxResult;
 };
 
-export const sdkExit = async ({
+export const sdkRemoveLiquidity = async ({
     removeLiquidity,
     removeLiquidityInput,
     poolStateInput,
     slippage,
     testAddress,
 }: Omit<RemoveLiquidityTxInput, 'client'>): Promise<{
-    RemoveLiquidityBuildOutput: RemoveLiquidityBuildOutput;
+    removeLiquidityBuildOutput: RemoveLiquidityBuildOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
     const removeLiquidityQueryOutput = await removeLiquidity.query(
         removeLiquidityInput,
         poolStateInput,
     );
-    const RemoveLiquidityBuildOutput = removeLiquidity.buildCall({
+    const removeLiquidityBuildOutput = removeLiquidity.buildCall({
         ...removeLiquidityQueryOutput,
         slippage,
         sender: testAddress,
@@ -48,7 +48,7 @@ export const sdkExit = async ({
     });
 
     return {
-        RemoveLiquidityBuildOutput,
+        removeLiquidityBuildOutput,
         removeLiquidityQueryOutput,
     };
 };
@@ -90,16 +90,16 @@ function getCheck(result: RemoveLiquidityQueryOutput, isExactIn: boolean) {
 }
 
 /**
- * Create and submit exit transaction.
+ * Create and submit remove liquidity transaction.
  * @param txInput
  *     @param client: Client & PublicActions & WalletActions - The RPC client
- *     @param removeLiquidity: RemoveLiquidity - The pool exit class, used to query the exit and build the exit call
- *     @param removeLiquidityInput: RemoveLiquidityInput - The parameters of the exit transaction, example: bptIn, amountsOut, etc.
- *     @param slippage: Slippage - The slippage tolerance for the exit transaction
- *     @param poolStateInput: PoolStateInput - The state of the pool being exited
+ *     @param removeLiquidity: RemoveLiquidity - The remove liquidity class, used to query outputs and build transaction call
+ *     @param removeLiquidityInput: RemoveLiquidityInput - The parameters of the transaction, example: bptIn, amountsOut, etc.
+ *     @param slippage: Slippage - The slippage tolerance for the transaction
+ *     @param poolStateInput: PoolStateInput - The state of the pool
  *     @param testAddress: Address - The address to send the transaction from
  *  */
-export async function doExit(txInput: RemoveLiquidityTxInput) {
+export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
     const {
         removeLiquidity,
         poolStateInput,
@@ -109,8 +109,8 @@ export async function doExit(txInput: RemoveLiquidityTxInput) {
         slippage,
     } = txInput;
 
-    const { removeLiquidityQueryOutput, RemoveLiquidityBuildOutput } =
-        await sdkExit({
+    const { removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
+        await sdkRemoveLiquidity({
             removeLiquidity,
             removeLiquidityInput,
             poolStateInput,
@@ -126,19 +126,19 @@ export async function doExit(txInput: RemoveLiquidityTxInput) {
         tokens,
         client,
         testAddress,
-        RemoveLiquidityBuildOutput.to,
-        RemoveLiquidityBuildOutput.call,
-        RemoveLiquidityBuildOutput.value,
+        removeLiquidityBuildOutput.to,
+        removeLiquidityBuildOutput.call,
+        removeLiquidityBuildOutput.value,
     );
 
     return {
         removeLiquidityQueryOutput,
-        RemoveLiquidityBuildOutput,
+        removeLiquidityBuildOutput,
         txOutput,
     };
 }
 
-export function assertUnbalancedExit(
+export function assertRemoveLiquidityUnbalanced(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
     removeLiquidityInput: RemoveLiquidityUnbalancedInput,
@@ -200,7 +200,7 @@ export function assertUnbalancedExit(
     );
 }
 
-export function assertSingleTokenExit(
+export function assertRemoveLiquiditySingleToken(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
     removeLiquidityInput: RemoveLiquiditySingleTokenInput,
@@ -273,7 +273,7 @@ export function assertSingleTokenExit(
     );
 }
 
-export function assertProportionalExit(
+export function assertRemoveLiquidityProportional(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
     removeLiquidityInput: RemoveLiquidityProportionalInput,
@@ -387,8 +387,7 @@ function assertRemoveLiquidityBuildOutput(
         minAmountsOut,
         maxBptIn,
         to: BALANCER_VAULT,
-        // Value should always be 0 for exits
-        value: 0n,
+        value: 0n, // Value should always be 0 when removing liquidity
     };
 
     // rome-ignore lint/correctness/noUnusedVariables: <explanation>

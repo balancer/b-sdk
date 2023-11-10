@@ -2,7 +2,7 @@ import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
 import { BALANCER_HELPERS, CHAINS } from '../../utils/constants';
 import { balancerHelpersAbi } from '../../abi';
-import { ExitPoolRequest } from '../exit/types';
+import { ExitPoolRequest } from '../removeLiquidity/types';
 
 export async function doRemoveLiquidity(
     rpcUrl: string,

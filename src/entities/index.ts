@@ -1,6 +1,6 @@
 export * from './encoders';
 export * from './addLiquidity';
-export * from './exit';
+export * from './removeLiquidity';
 export * from './path';
 export * from './swap';
 export * from './slippage';
