@@ -80,7 +80,7 @@ export type ExitBuildOutput = {
     minAmountsOut: TokenAmount[];
 };
 
-export interface BaseExit {
+export interface RemoveLiquidityBase {
     query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
@@ -88,8 +88,8 @@ export interface BaseExit {
     buildCall(input: RemoveLiquidityCall): ExitBuildOutput;
 }
 
-export type ExitConfig = {
-    customPoolExits: Record<string, BaseExit>;
+export type RemoveLiquidityConfig = {
+    customRemoveLiquidityTypes: Record<string, RemoveLiquidityBase>;
 };
 
 export type ExitPoolRequest = {

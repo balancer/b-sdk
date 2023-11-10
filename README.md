@@ -69,7 +69,7 @@ Full working add liquidity example: [examples/addLiquidity.ts](./examples/addLiq
 
 ### Usage for Exiting Pool
 ```ts
-import { BalancerApi, PoolExit } from "@balancer/sdk";
+import { BalancerApi, RemoveLiquidity } from "@balancer/sdk";
 ...
 const removeLiquidityInput: RemoveLiquiditySingleTokenInput = {
   chainId,
@@ -81,10 +81,10 @@ const removeLiquidityInput: RemoveLiquiditySingleTokenInput = {
 
 const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
 const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
-const poolExit = new PoolExit();
-const queryOutput = await poolExit.query(removeLiquidityInput, poolState);
+const removeLiquidity = new RemoveLiquidity();
+const queryOutput = await removeLiquidity.query(removeLiquidityInput, poolState);
 const { call, to, value, maxAmountsIn, minBptOut } =
-  poolExit.buildCall({
+  removeLiquidity.buildCall({
     ...queryOutput,
     slippage,
     sender: signerAddress,

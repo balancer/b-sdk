@@ -3,7 +3,7 @@ import {
     Address,
     AddLiquidityInput,
     RemoveLiquidityInput,
-    PoolExit,
+    RemoveLiquidity,
     AddLiquidity,
     PoolStateInput,
     Slippage,
@@ -20,7 +20,7 @@ export type AddLiquidityTxInput = {
 
 export type ExitTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
-    poolExit: PoolExit;
+    removeLiquidity: RemoveLiquidity;
     removeLiquidityInput: RemoveLiquidityInput;
     slippage: Slippage;
     poolStateInput: PoolStateInput;

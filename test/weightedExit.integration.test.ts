@@ -1,4 +1,4 @@
-// pnpm test -- weightedExit.integration.test.ts
+// pnpm test -- removeLiquidityWeighted.integration.test.ts
 import { describe, test, beforeAll, beforeEach } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -18,7 +18,7 @@ import {
     RemoveLiquidityKind,
     Slippage,
     PoolStateInput,
-    PoolExit,
+    RemoveLiquidity,
     Address,
     Hex,
     CHAINS,
@@ -62,7 +62,7 @@ describe('weighted exit test', () => {
 
         txInput = {
             client,
-            poolExit: new PoolExit(),
+            removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput: poolInput,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig

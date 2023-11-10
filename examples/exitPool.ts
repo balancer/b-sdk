@@ -11,7 +11,7 @@ dotenv.config();
 import {
     ChainId,
     RemoveLiquidityKind,
-    PoolExit,
+    RemoveLiquidity,
     PoolStateInput,
     Slippage,
     InputAmount,
@@ -57,8 +57,8 @@ const exit = async () => {
     };
 
     // Simulate the exit to get the tokens out
-    const poolExit = new PoolExit();
-    const queryOutput = await poolExit.query(
+    const removeLiquidity = new RemoveLiquidity();
+    const queryOutput = await removeLiquidity.query(
         removeLiquidityInput,
         poolStateInput,
     );
@@ -70,7 +70,7 @@ const exit = async () => {
     );
 
     // Apply slippage to the tokens out received from the query and construct the call
-    const call = poolExit.buildCall({
+    const call = removeLiquidity.buildCall({
         ...queryOutput,
         slippage,
         sender: userAccount,

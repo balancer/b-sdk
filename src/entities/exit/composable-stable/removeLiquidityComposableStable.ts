@@ -10,7 +10,7 @@ import {
 import { vaultAbi } from '../../../abi';
 import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
-    BaseExit,
+    RemoveLiquidityBase,
     RemoveLiquidityComposableStableCall,
     ExitBuildOutput,
     RemoveLiquidityInput,
@@ -22,7 +22,7 @@ import { doQueryExit } from '../../utils/doQueryExit';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
 import { getAmounts } from '../../utils';
 
-export class ComposableStableExit implements BaseExit {
+export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,

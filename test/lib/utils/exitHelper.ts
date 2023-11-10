@@ -27,7 +27,7 @@ type ExitResult = {
 };
 
 export const sdkExit = async ({
-    poolExit,
+    removeLiquidity,
     removeLiquidityInput,
     poolStateInput,
     slippage,
@@ -36,11 +36,11 @@ export const sdkExit = async ({
     exitBuildOutput: ExitBuildOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
-    const removeLiquidityQueryOutput = await poolExit.query(
+    const removeLiquidityQueryOutput = await removeLiquidity.query(
         removeLiquidityInput,
         poolStateInput,
     );
-    const exitBuildOutput = poolExit.buildCall({
+    const exitBuildOutput = removeLiquidity.buildCall({
         ...removeLiquidityQueryOutput,
         slippage,
         sender: testAddress,
@@ -93,7 +93,7 @@ function getCheck(result: RemoveLiquidityQueryOutput, isExactIn: boolean) {
  * Create and submit exit transaction.
  * @param txInput
  *     @param client: Client & PublicActions & WalletActions - The RPC client
- *     @param poolExit: PoolExit - The pool exit class, used to query the exit and build the exit call
+ *     @param removeLiquidity: RemoveLiquidity - The pool exit class, used to query the exit and build the exit call
  *     @param removeLiquidityInput: RemoveLiquidityInput - The parameters of the exit transaction, example: bptIn, amountsOut, etc.
  *     @param slippage: Slippage - The slippage tolerance for the exit transaction
  *     @param poolStateInput: PoolStateInput - The state of the pool being exited
@@ -101,7 +101,7 @@ function getCheck(result: RemoveLiquidityQueryOutput, isExactIn: boolean) {
  *  */
 export async function doExit(txInput: ExitTxInput) {
     const {
-        poolExit,
+        removeLiquidity,
         poolStateInput,
         removeLiquidityInput,
         testAddress,
@@ -110,7 +110,7 @@ export async function doExit(txInput: ExitTxInput) {
     } = txInput;
 
     const { removeLiquidityQueryOutput, exitBuildOutput } = await sdkExit({
-        poolExit,
+        removeLiquidity,
         removeLiquidityInput,
         poolStateInput,
         slippage,

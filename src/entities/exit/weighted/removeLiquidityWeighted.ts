@@ -11,7 +11,7 @@ import {
 import { vaultAbi } from '../../../abi';
 import { parseExitArgs } from '../../utils/parseExitArgs';
 import {
-    BaseExit,
+    RemoveLiquidityBase,
     ExitBuildOutput,
     RemoveLiquidityCall,
     RemoveLiquidityInput,
@@ -23,7 +23,7 @@ import { RemoveLiquidityAmounts, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
 import { getAmounts } from '../../utils';
 
-export class WeightedExit implements BaseExit {
+export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
