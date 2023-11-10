@@ -71,7 +71,7 @@ Full working add liquidity example: [examples/addLiquidity.ts](./examples/addLiq
 ```ts
 import { BalancerApi, PoolExit } from "@balancer/sdk";
 ...
-const exitInput: SingleAssetExitInput = {
+const removeLiquidityInput: RemoveLiquiditySingleTokenInput = {
   chainId,
   rpcUrl,
   bptIn,
@@ -82,7 +82,7 @@ const exitInput: SingleAssetExitInput = {
 const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
 const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
 const poolExit = new PoolExit();
-const queryOutput = await poolExit.query(exitInput, poolState);
+const queryOutput = await poolExit.query(removeLiquidityInput, poolState);
 const { call, to, value, maxAmountsIn, minBptOut } =
   poolExit.buildCall({
     ...queryOutput,

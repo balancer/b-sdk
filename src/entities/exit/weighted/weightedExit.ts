@@ -14,7 +14,7 @@ import {
     BaseExit,
     ExitBuildOutput,
     ExitCall,
-    ExitInput,
+    RemoveLiquidityInput,
     RemoveLiquidityKind,
     ExitQueryResult,
     WeightedExitCall,
@@ -25,7 +25,7 @@ import { getAmounts } from '../../utils';
 
 export class WeightedExit implements BaseExit {
     public async query(
-        input: ExitInput,
+        input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
@@ -71,7 +71,7 @@ export class WeightedExit implements BaseExit {
 
     private getAmountsQuery(
         tokens: Token[],
-        input: ExitInput,
+        input: RemoveLiquidityInput,
     ): RemoveLiquidityAmounts {
         switch (input.kind) {
             case RemoveLiquidityKind.Unbalanced:

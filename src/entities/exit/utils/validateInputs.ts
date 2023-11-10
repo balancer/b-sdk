@@ -1,8 +1,11 @@
-import { ExitInput, RemoveLiquidityKind } from '../types';
+import { RemoveLiquidityInput, RemoveLiquidityKind } from '../types';
 import { PoolStateInput } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
-export function validateInputs(input: ExitInput, poolState: PoolStateInput) {
+export function validateInputs(
+    input: RemoveLiquidityInput,
+    poolState: PoolStateInput,
+) {
     const bptIndex = poolState.tokens.findIndex(
         (t) => t.address === poolState.address,
     );

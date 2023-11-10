@@ -12,9 +12,9 @@ import {
     walletActions,
 } from 'viem';
 import {
-    SingleAssetExitInput,
-    ProportionalExitInput,
-    UnbalancedExitInput,
+    RemoveLiquiditySingleTokenInput,
+    RemoveLiquidityProportionalInput,
+    RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
     Slippage,
     PoolStateInput,
@@ -24,7 +24,7 @@ import {
     CHAINS,
     ChainId,
     getPoolAddress,
-    ExitInput,
+    RemoveLiquidityInput,
     InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
@@ -66,7 +66,7 @@ describe('weighted exit test', () => {
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput: poolInput,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
-            exitInput: {} as ExitInput,
+            removeLiquidityInput: {} as RemoveLiquidityInput,
         };
     });
 
@@ -81,7 +81,7 @@ describe('weighted exit test', () => {
     });
 
     describe('unbalanced exit', async () => {
-        let input: Omit<UnbalancedExitInput, 'amountsOut'>;
+        let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
         let amountsOut: InputAmount[];
         beforeAll(() => {
             amountsOut = poolInput.tokens.map((t) => ({
@@ -96,33 +96,36 @@ describe('weighted exit test', () => {
             };
         });
         test('exiting with wrapped', async () => {
-            const exitInput = {
+            const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
             };
-            const exitResult = await doExit({ ...txInput, exitInput });
+            const exitResult = await doExit({
+                ...txInput,
+                removeLiquidityInput,
+            });
             assertUnbalancedExit(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                exitInput,
+                removeLiquidityInput,
                 exitResult,
                 txInput.slippage,
             );
         });
         test('exiting with native', async () => {
-            const exitInput = {
+            const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
                 exitWithNativeAsset: true,
             };
             const exitResult = await doExit({
                 ...txInput,
-                exitInput,
+                removeLiquidityInput,
             });
             assertUnbalancedExit(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                exitInput,
+                removeLiquidityInput,
                 exitResult,
                 txInput.slippage,
             );
@@ -130,7 +133,7 @@ describe('weighted exit test', () => {
     });
 
     describe('single asset exit', () => {
-        let input: SingleAssetExitInput;
+        let input: RemoveLiquiditySingleTokenInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -149,7 +152,7 @@ describe('weighted exit test', () => {
         test('exiting with wrapped', async () => {
             const exitResult = await doExit({
                 ...txInput,
-                exitInput: input,
+                removeLiquidityInput: input,
             });
 
             assertSingleTokenExit(
@@ -162,19 +165,19 @@ describe('weighted exit test', () => {
         });
 
         test('exiting with native', async () => {
-            const exitInput = {
+            const removeLiquidityInput = {
                 ...input,
                 exitWithNativeAsset: true,
             };
             const exitResult = await doExit({
                 ...txInput,
-                exitInput,
+                removeLiquidityInput,
             });
 
             assertSingleTokenExit(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                exitInput,
+                removeLiquidityInput,
                 exitResult,
                 txInput.slippage,
             );
@@ -182,7 +185,7 @@ describe('weighted exit test', () => {
     });
 
     describe('proportional exit', () => {
-        let input: ProportionalExitInput;
+        let input: RemoveLiquidityProportionalInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -199,7 +202,7 @@ describe('weighted exit test', () => {
         test('with tokens', async () => {
             const exitResult = await doExit({
                 ...txInput,
-                exitInput: input,
+                removeLiquidityInput: input,
             });
 
             assertProportionalExit(
@@ -211,18 +214,18 @@ describe('weighted exit test', () => {
             );
         });
         test('with native', async () => {
-            const exitInput = {
+            const removeLiquidityInput = {
                 ...input,
                 useNativeAssetAsWrappedAmountIn: true,
             };
             const exitResult = await doExit({
                 ...txInput,
-                exitInput,
+                removeLiquidityInput,
             });
             assertProportionalExit(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                exitInput,
+                removeLiquidityInput,
                 exitResult,
                 txInput.slippage,
             );

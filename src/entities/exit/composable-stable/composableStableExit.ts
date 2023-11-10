@@ -13,7 +13,7 @@ import {
     BaseExit,
     ComposableStableExitCall,
     ExitBuildOutput,
-    ExitInput,
+    RemoveLiquidityInput,
     RemoveLiquidityKind,
     ExitQueryResult,
 } from '../types';
@@ -24,7 +24,7 @@ import { getAmounts } from '../../utils';
 
 export class ComposableStableExit implements BaseExit {
     public async query(
-        input: ExitInput,
+        input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<ExitQueryResult> {
         const bptIndex = poolState.tokens.findIndex(
@@ -78,7 +78,7 @@ export class ComposableStableExit implements BaseExit {
 
     private getAmountsQuery(
         tokens: Token[],
-        input: ExitInput,
+        input: RemoveLiquidityInput,
         bptIndex: number,
     ): RemoveLiquidityAmounts {
         switch (input.kind) {

@@ -3,7 +3,7 @@ import {
     ExitBuildOutput,
     ExitCall,
     ExitConfig,
-    ExitInput,
+    RemoveLiquidityInput,
     ExitQueryResult,
 } from './types';
 import { WeightedExit } from './weighted/weightedExit';
@@ -35,7 +35,7 @@ export class PoolExit {
     }
 
     public async query(
-        input: ExitInput,
+        input: RemoveLiquidityInput,
         poolState: PoolStateInput,
     ): Promise<ExitQueryResult> {
         validateInputs(input, poolState);

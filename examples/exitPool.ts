@@ -15,7 +15,7 @@ import {
     PoolStateInput,
     Slippage,
     InputAmount,
-    ExitInput,
+    RemoveLiquidityInput,
     BalancerApi,
 } from '../src';
 import { parseEther } from 'viem';
@@ -42,13 +42,13 @@ const exit = async () => {
     const poolStateInput: PoolStateInput =
         await balancerApi.pools.fetchPoolState(poolId);
 
-    // Construct the ExitInput, in this case a SingleAsset exit
+    // Construct the RemoveLiquidityInput, in this case a SingleAsset exit
     const bptIn: InputAmount = {
         rawAmount: parseEther('1'),
         decimals: 18,
         address: poolStateInput.address,
     };
-    const exitInput: ExitInput = {
+    const removeLiquidityInput: RemoveLiquidityInput = {
         chainId,
         rpcUrl,
         bptIn,
@@ -58,7 +58,10 @@ const exit = async () => {
 
     // Simulate the exit to get the tokens out
     const poolExit = new PoolExit();
-    const queryOutput = await poolExit.query(exitInput, poolStateInput);
+    const queryOutput = await poolExit.query(
+        removeLiquidityInput,
+        poolStateInput,
+    );
 
     console.log('\nExit Query Result:');
     console.log(`BPT In: ${queryOutput.bptIn.amount.toString()}\nTokens Out:`);

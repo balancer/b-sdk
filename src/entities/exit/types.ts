@@ -10,33 +10,33 @@ export enum RemoveLiquidityKind {
 }
 
 // This will be extended for each pools specific output requirements
-export type BaseExitInput = {
+export type RemoveLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
     exitWithNativeAsset?: boolean;
     toInternalBalance?: boolean;
 };
 
-export type UnbalancedExitInput = BaseExitInput & {
+export type RemoveLiquidityUnbalancedInput = RemoveLiquidityBaseInput & {
     amountsOut: InputAmount[];
     kind: RemoveLiquidityKind.Unbalanced;
 };
 
-export type SingleAssetExitInput = BaseExitInput & {
+export type RemoveLiquiditySingleTokenInput = RemoveLiquidityBaseInput & {
     bptIn: InputAmount;
     tokenOut: Address;
     kind: RemoveLiquidityKind.SingleAsset;
 };
 
-export type ProportionalExitInput = BaseExitInput & {
+export type RemoveLiquidityProportionalInput = RemoveLiquidityBaseInput & {
     bptIn: InputAmount;
     kind: RemoveLiquidityKind.Proportional;
 };
 
-export type ExitInput =
-    | UnbalancedExitInput
-    | SingleAssetExitInput
-    | ProportionalExitInput;
+export type RemoveLiquidityInput =
+    | RemoveLiquidityUnbalancedInput
+    | RemoveLiquiditySingleTokenInput
+    | RemoveLiquidityProportionalInput;
 
 export type ExitQueryResult =
     | BaseExitQueryResult
@@ -77,7 +77,10 @@ export type ExitBuildOutput = {
 };
 
 export interface BaseExit {
-    query(input: ExitInput, poolState: PoolState): Promise<ExitQueryResult>;
+    query(
+        input: RemoveLiquidityInput,
+        poolState: PoolState,
+    ): Promise<ExitQueryResult>;
     buildCall(input: ExitCall): ExitBuildOutput;
 }
 

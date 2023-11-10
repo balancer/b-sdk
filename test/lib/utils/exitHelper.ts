@@ -9,11 +9,11 @@ import {
     TokenAmount,
     Slippage,
     Token,
-    UnbalancedExitInput,
-    SingleAssetExitInput,
+    RemoveLiquidityUnbalancedInput,
+    RemoveLiquiditySingleTokenInput,
     BALANCER_VAULT,
-    ExitInput,
-    ProportionalExitInput,
+    RemoveLiquidityInput,
+    RemoveLiquidityProportionalInput,
 } from '../../../src';
 import { sendTransactionGetBalances, TxResult } from './helper';
 import { expect } from 'vitest';
@@ -28,7 +28,7 @@ type ExitResult = {
 
 export const sdkExit = async ({
     poolExit,
-    exitInput,
+    removeLiquidityInput,
     poolStateInput,
     slippage,
     testAddress,
@@ -36,7 +36,10 @@ export const sdkExit = async ({
     exitBuildOutput: ExitBuildOutput;
     exitQueryResult: ExitQueryResult;
 }> => {
-    const exitQueryResult = await poolExit.query(exitInput, poolStateInput);
+    const exitQueryResult = await poolExit.query(
+        removeLiquidityInput,
+        poolStateInput,
+    );
     const exitBuildOutput = poolExit.buildCall({
         ...exitQueryResult,
         slippage,
@@ -86,7 +89,7 @@ function getCheck(result: ExitQueryResult, isExactIn: boolean) {
  * @param txInput
  *     @param client: Client & PublicActions & WalletActions - The RPC client
  *     @param poolExit: PoolExit - The pool exit class, used to query the exit and build the exit call
- *     @param exitInput: ExitInput - The parameters of the exit transaction, example: bptIn, amountsOut, etc.
+ *     @param removeLiquidityInput: RemoveLiquidityInput - The parameters of the exit transaction, example: bptIn, amountsOut, etc.
  *     @param slippage: Slippage - The slippage tolerance for the exit transaction
  *     @param poolStateInput: PoolStateInput - The state of the pool being exited
  *     @param testAddress: Address - The address to send the transaction from
@@ -95,7 +98,7 @@ export async function doExit(txInput: ExitTxInput) {
     const {
         poolExit,
         poolStateInput,
-        exitInput,
+        removeLiquidityInput,
         testAddress,
         client,
         slippage,
@@ -103,7 +106,7 @@ export async function doExit(txInput: ExitTxInput) {
 
     const { exitQueryResult, exitBuildOutput } = await sdkExit({
         poolExit,
-        exitInput,
+        removeLiquidityInput,
         poolStateInput,
         slippage,
         testAddress,
@@ -132,7 +135,7 @@ export async function doExit(txInput: ExitTxInput) {
 export function assertUnbalancedExit(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
-    exitInput: UnbalancedExitInput,
+    removeLiquidityInput: RemoveLiquidityUnbalancedInput,
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
@@ -142,12 +145,14 @@ export function assertUnbalancedExit(
     const expectedAmountsOut = poolStateInput.tokens.map((t) => {
         let token;
         if (
-            exitInput.exitWithNativeAsset &&
+            removeLiquidityInput.exitWithNativeAsset &&
             t.address === NATIVE_ASSETS[chainId].wrapped
         )
             token = new Token(chainId, zeroAddress, t.decimals);
         else token = new Token(chainId, t.address, t.decimals);
-        const input = exitInput.amountsOut.find((a) => a.address === t.address);
+        const input = removeLiquidityInput.amountsOut.find(
+            (a) => a.address === t.address,
+        );
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
         else return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
@@ -159,8 +164,8 @@ export function assertUnbalancedExit(
         // Should match inputs
         poolId: poolStateInput.id,
         poolType: poolStateInput.type,
-        toInternalBalance: !!exitInput.toInternalBalance,
-        removeLiquidityKind: exitInput.kind,
+        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
+        removeLiquidityKind: removeLiquidityInput.kind,
     };
 
     const queryCheck = getCheck(exitQueryResult, false);
@@ -172,13 +177,18 @@ export function assertUnbalancedExit(
 
     assertExitBuildOutput(exitQueryResult, exitBuildOutput, false, slippage);
 
-    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
+    assertTokenDeltas(
+        poolStateInput,
+        removeLiquidityInput,
+        exitQueryResult,
+        txOutput,
+    );
 }
 
 export function assertSingleTokenExit(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
-    exitInput: SingleAssetExitInput,
+    removeLiquidityInput: RemoveLiquiditySingleTokenInput,
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
@@ -197,15 +207,18 @@ export function assertSingleTokenExit(
         'amountsOut' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
-        bptIn: TokenAmount.fromRawAmount(bptToken, exitInput.bptIn.rawAmount),
+        bptIn: TokenAmount.fromRawAmount(
+            bptToken,
+            removeLiquidityInput.bptIn.rawAmount,
+        ),
         tokenOutIndex: tokensWithoutBpt.findIndex(
-            (t) => t.address === exitInput.tokenOut,
+            (t) => t.address === removeLiquidityInput.tokenOut,
         ),
         // Should match inputs
         poolId: poolStateInput.id,
         poolType: poolStateInput.type,
-        toInternalBalance: !!exitInput.toInternalBalance,
-        removeLiquidityKind: exitInput.kind,
+        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
+        removeLiquidityKind: removeLiquidityInput.kind,
     };
 
     const queryCheck = getCheck(exitQueryResult, true);
@@ -216,12 +229,12 @@ export function assertSingleTokenExit(
     // (Note exitQueryResult also has value for bpt if pre-minted)
     exitQueryResult.amountsOut.forEach((a) => {
         if (
-            !exitInput.exitWithNativeAsset &&
-            a.token.address === exitInput.tokenOut
+            !removeLiquidityInput.exitWithNativeAsset &&
+            a.token.address === removeLiquidityInput.tokenOut
         )
             expect(a.amount > 0n).to.be.true;
         else if (
-            exitInput.exitWithNativeAsset &&
+            removeLiquidityInput.exitWithNativeAsset &&
             a.token.address === zeroAddress
         )
             expect(a.amount > 0n).to.be.true;
@@ -230,13 +243,18 @@ export function assertSingleTokenExit(
 
     assertExitBuildOutput(exitQueryResult, exitBuildOutput, true, slippage);
 
-    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
+    assertTokenDeltas(
+        poolStateInput,
+        removeLiquidityInput,
+        exitQueryResult,
+        txOutput,
+    );
 }
 
 export function assertProportionalExit(
     chainId: ChainId,
     poolStateInput: PoolStateInput,
-    exitInput: ProportionalExitInput,
+    removeLiquidityInput: RemoveLiquidityProportionalInput,
     exitResult: ExitResult,
     slippage: Slippage,
 ) {
@@ -249,14 +267,17 @@ export function assertProportionalExit(
         'amountsOut' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
-        bptIn: TokenAmount.fromRawAmount(bptToken, exitInput.bptIn.rawAmount),
+        bptIn: TokenAmount.fromRawAmount(
+            bptToken,
+            removeLiquidityInput.bptIn.rawAmount,
+        ),
         // Only expect tokenInIndex for AddLiquiditySingleAsset
         tokenOutIndex: undefined,
         // Should match inputs
         poolId: poolStateInput.id,
         poolType: poolStateInput.type,
-        toInternalBalance: !!exitInput.toInternalBalance,
-        removeLiquidityKind: exitInput.kind,
+        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
+        removeLiquidityKind: removeLiquidityInput.kind,
     };
 
     const queryCheck = getCheck(exitQueryResult, true);
@@ -272,12 +293,17 @@ export function assertProportionalExit(
 
     assertExitBuildOutput(exitQueryResult, exitBuildOutput, true, slippage);
 
-    assertTokenDeltas(poolStateInput, exitInput, exitQueryResult, txOutput);
+    assertTokenDeltas(
+        poolStateInput,
+        removeLiquidityInput,
+        exitQueryResult,
+        txOutput,
+    );
 }
 
 function assertTokenDeltas(
     poolStateInput: PoolStateInput,
-    exitInput: ExitInput,
+    removeLiquidityInput: RemoveLiquidityInput,
     exitQueryResult: ExitQueryResult,
     txOutput: TxResult,
 ) {
@@ -296,7 +322,7 @@ function assertTokenDeltas(
     ];
 
     // If input is exit with native we must replace it with 0 and update native value instead
-    if (exitInput.exitWithNativeAsset) {
+    if (removeLiquidityInput.exitWithNativeAsset) {
         const index = amountsWithoutBpt.findIndex(
             (a) => a.token.address === zeroAddress,
         );
