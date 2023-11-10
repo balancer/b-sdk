@@ -10,7 +10,7 @@ dotenv.config();
 
 import {
     ChainId,
-    ExitKind,
+    RemoveLiquidityKind,
     PoolExit,
     PoolStateInput,
     Slippage,
@@ -53,7 +53,7 @@ const exit = async () => {
         rpcUrl,
         bptIn,
         tokenOut,
-        kind: ExitKind.SingleAsset,
+        kind: RemoveLiquidityKind.SingleAsset,
     };
 
     // Simulate the exit to get the tokens out

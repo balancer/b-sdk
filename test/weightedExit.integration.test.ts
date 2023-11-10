@@ -15,7 +15,7 @@ import {
     SingleAssetExitInput,
     ProportionalExitInput,
     UnbalancedExitInput,
-    ExitKind,
+    RemoveLiquidityKind,
     Slippage,
     PoolStateInput,
     PoolExit,
@@ -92,7 +92,7 @@ describe('weighted exit test', () => {
             input = {
                 chainId,
                 rpcUrl,
-                kind: ExitKind.Unbalanced,
+                kind: RemoveLiquidityKind.Unbalanced,
             };
         });
         test('exiting with wrapped', async () => {
@@ -143,7 +143,7 @@ describe('weighted exit test', () => {
                 rpcUrl,
                 bptIn,
                 tokenOut,
-                kind: ExitKind.SingleAsset,
+                kind: RemoveLiquidityKind.SingleAsset,
             };
         });
         test('exiting with wrapped', async () => {
@@ -193,7 +193,7 @@ describe('weighted exit test', () => {
                 bptIn,
                 chainId,
                 rpcUrl,
-                kind: ExitKind.Proportional,
+                kind: RemoveLiquidityKind.Proportional,
             };
         });
         test('with tokens', async () => {

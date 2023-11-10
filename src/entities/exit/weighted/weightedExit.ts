@@ -15,11 +15,11 @@ import {
     ExitBuildOutput,
     ExitCall,
     ExitInput,
-    ExitKind,
+    RemoveLiquidityKind,
     ExitQueryResult,
     WeightedExitCall,
 } from '../types';
-import { AmountsExit, PoolState } from '../../types';
+import { RemoveLiquidityAmounts, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
 import { getAmounts } from '../../utils';
 
@@ -60,7 +60,7 @@ export class WeightedExit implements BaseExit {
 
         return {
             poolType: poolState.type,
-            exitKind: input.kind,
+            removeLiquidityKind: input.kind,
             poolId: poolState.id,
             bptIn,
             amountsOut,
@@ -69,15 +69,18 @@ export class WeightedExit implements BaseExit {
         };
     }
 
-    private getAmountsQuery(tokens: Token[], input: ExitInput): AmountsExit {
+    private getAmountsQuery(
+        tokens: Token[],
+        input: ExitInput,
+    ): RemoveLiquidityAmounts {
         switch (input.kind) {
-            case ExitKind.Unbalanced:
+            case RemoveLiquidityKind.Unbalanced:
                 return {
                     minAmountsOut: getAmounts(tokens, input.amountsOut),
                     tokenOutIndex: undefined,
                     maxBptAmountIn: MAX_UINT256,
                 };
-            case ExitKind.SingleAsset:
+            case RemoveLiquidityKind.SingleAsset:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: tokens.findIndex((t) =>
@@ -85,7 +88,7 @@ export class WeightedExit implements BaseExit {
                     ),
                     maxBptAmountIn: input.bptIn.rawAmount,
                 };
-            case ExitKind.Proportional:
+            case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: undefined,
@@ -97,7 +100,10 @@ export class WeightedExit implements BaseExit {
     public buildCall(input: WeightedExitCall): ExitBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        const userData = this.encodeUserData(input.exitKind, amounts);
+        const userData = this.encodeUserData(
+            input.removeLiquidityKind,
+            amounts,
+        );
 
         const { args } = parseExitArgs({
             poolId: input.poolId,
@@ -129,15 +135,15 @@ export class WeightedExit implements BaseExit {
         };
     }
 
-    private getAmountsCall(input: ExitCall): AmountsExit {
-        switch (input.exitKind) {
-            case ExitKind.Unbalanced:
+    private getAmountsCall(input: ExitCall): RemoveLiquidityAmounts {
+        switch (input.removeLiquidityKind) {
+            case RemoveLiquidityKind.Unbalanced:
                 return {
                     minAmountsOut: input.amountsOut.map((a) => a.amount),
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.slippage.applyTo(input.bptIn.amount),
                 };
-            case ExitKind.SingleAsset:
+            case RemoveLiquidityKind.SingleAsset:
                 if (input.tokenOutIndex === undefined) {
                     throw new Error(
                         'tokenOutIndex must be defined for SingleAsset exit',
@@ -150,7 +156,7 @@ export class WeightedExit implements BaseExit {
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,
                 };
-            case ExitKind.Proportional:
+            case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
                         input.slippage.removeFrom(a.amount),
@@ -163,14 +169,17 @@ export class WeightedExit implements BaseExit {
         }
     }
 
-    private encodeUserData(kind: ExitKind, amounts: AmountsExit): Address {
+    private encodeUserData(
+        kind: RemoveLiquidityKind,
+        amounts: RemoveLiquidityAmounts,
+    ): Address {
         switch (kind) {
-            case ExitKind.Unbalanced:
+            case RemoveLiquidityKind.Unbalanced:
                 return WeightedEncoder.exitUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
-            case ExitKind.SingleAsset:
+            case RemoveLiquidityKind.SingleAsset:
                 if (amounts.tokenOutIndex === undefined)
                     throw Error('No Index');
 
@@ -178,7 +187,7 @@ export class WeightedExit implements BaseExit {
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
-            case ExitKind.Proportional:
+            case RemoveLiquidityKind.Proportional:
                 return WeightedEncoder.exitProportional(amounts.maxBptAmountIn);
             default:
                 throw Error('Unsupported Exit Type');

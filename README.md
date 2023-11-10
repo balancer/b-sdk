@@ -76,7 +76,7 @@ const exitInput: SingleAssetExitInput = {
   rpcUrl,
   bptIn,
   tokenOut,
-  kind: ExitKind.SingleAsset,
+  kind: RemoveLiquidityKind.SingleAsset,
 };
 
 const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);

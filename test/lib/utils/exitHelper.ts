@@ -160,7 +160,7 @@ export function assertUnbalancedExit(
         poolId: poolStateInput.id,
         poolType: poolStateInput.type,
         toInternalBalance: !!exitInput.toInternalBalance,
-        exitKind: exitInput.kind,
+        removeLiquidityKind: exitInput.kind,
     };
 
     const queryCheck = getCheck(exitQueryResult, false);
@@ -205,7 +205,7 @@ export function assertSingleTokenExit(
         poolId: poolStateInput.id,
         poolType: poolStateInput.type,
         toInternalBalance: !!exitInput.toInternalBalance,
-        exitKind: exitInput.kind,
+        removeLiquidityKind: exitInput.kind,
     };
 
     const queryCheck = getCheck(exitQueryResult, true);
@@ -256,7 +256,7 @@ export function assertProportionalExit(
         poolId: poolStateInput.id,
         poolType: poolStateInput.type,
         toInternalBalance: !!exitInput.toInternalBalance,
-        exitKind: exitInput.kind,
+        removeLiquidityKind: exitInput.kind,
     };
 
     const queryCheck = getCheck(exitQueryResult, true);

@@ -15,7 +15,7 @@ import {
     SingleAssetExitInput,
     ProportionalExitInput,
     UnbalancedExitInput,
-    ExitKind,
+    RemoveLiquidityKind,
     Slippage,
     Token,
     PoolStateInput,
@@ -102,7 +102,7 @@ describe('composable stable exit test', () => {
             input = {
                 chainId,
                 rpcUrl,
-                kind: ExitKind.Unbalanced,
+                kind: RemoveLiquidityKind.Unbalanced,
             };
         });
         test('exiting with wrapped', async () => {
@@ -153,7 +153,7 @@ describe('composable stable exit test', () => {
                 rpcUrl,
                 bptIn,
                 tokenOut,
-                kind: ExitKind.SingleAsset,
+                kind: RemoveLiquidityKind.SingleAsset,
             };
         });
         test('exiting with wrapped', async () => {
@@ -203,7 +203,7 @@ describe('composable stable exit test', () => {
                 bptIn,
                 chainId,
                 rpcUrl,
-                kind: ExitKind.Proportional,
+                kind: RemoveLiquidityKind.Proportional,
             };
         });
         test('with tokens', async () => {

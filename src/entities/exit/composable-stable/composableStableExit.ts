@@ -14,10 +14,10 @@ import {
     ComposableStableExitCall,
     ExitBuildOutput,
     ExitInput,
-    ExitKind,
+    RemoveLiquidityKind,
     ExitQueryResult,
 } from '../types';
-import { AmountsExit, PoolState } from '../../types';
+import { RemoveLiquidityAmounts, PoolState } from '../../types';
 import { doQueryExit } from '../../utils/doQueryExit';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
 import { getAmounts } from '../../utils';
@@ -66,7 +66,7 @@ export class ComposableStableExit implements BaseExit {
 
         return {
             poolType: poolState.type,
-            exitKind: input.kind,
+            removeLiquidityKind: input.kind,
             poolId: poolState.id,
             bptIn,
             amountsOut,
@@ -80,15 +80,15 @@ export class ComposableStableExit implements BaseExit {
         tokens: Token[],
         input: ExitInput,
         bptIndex: number,
-    ): AmountsExit {
+    ): RemoveLiquidityAmounts {
         switch (input.kind) {
-            case ExitKind.Unbalanced:
+            case RemoveLiquidityKind.Unbalanced:
                 return {
                     minAmountsOut: getAmounts(tokens, input.amountsOut),
                     tokenOutIndex: undefined,
                     maxBptAmountIn: MAX_UINT256,
                 };
-            case ExitKind.SingleAsset:
+            case RemoveLiquidityKind.SingleAsset:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: tokens
@@ -96,7 +96,7 @@ export class ComposableStableExit implements BaseExit {
                         .findIndex((t) => t.isSameAddress(input.tokenOut)),
                     maxBptAmountIn: input.bptIn.rawAmount,
                 };
-            case ExitKind.Proportional:
+            case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: undefined,
@@ -114,7 +114,10 @@ export class ComposableStableExit implements BaseExit {
                 ...amounts.minAmountsOut.slice(input.bptIndex + 1),
             ],
         };
-        const userData = this.encodeUserData(input.exitKind, amountsWithoutBpt);
+        const userData = this.encodeUserData(
+            input.removeLiquidityKind,
+            amountsWithoutBpt,
+        );
 
         const { args } = parseExitArgs({
             poolId: input.poolId,
@@ -145,15 +148,17 @@ export class ComposableStableExit implements BaseExit {
         };
     }
 
-    private getAmountsCall(input: ComposableStableExitCall): AmountsExit {
-        switch (input.exitKind) {
-            case ExitKind.Unbalanced:
+    private getAmountsCall(
+        input: ComposableStableExitCall,
+    ): RemoveLiquidityAmounts {
+        switch (input.removeLiquidityKind) {
+            case RemoveLiquidityKind.Unbalanced:
                 return {
                     minAmountsOut: input.amountsOut.map((a) => a.amount),
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.slippage.applyTo(input.bptIn.amount),
                 };
-            case ExitKind.SingleAsset:
+            case RemoveLiquidityKind.SingleAsset:
                 if (input.tokenOutIndex === undefined) {
                     throw new Error(
                         'tokenOutIndex must be defined for SingleAsset exit',
@@ -166,7 +171,7 @@ export class ComposableStableExit implements BaseExit {
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,
                 };
-            case ExitKind.Proportional:
+            case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
                         input.slippage.removeFrom(a.amount),
@@ -179,14 +184,17 @@ export class ComposableStableExit implements BaseExit {
         }
     }
 
-    private encodeUserData(kind: ExitKind, amounts: AmountsExit): Address {
+    private encodeUserData(
+        kind: RemoveLiquidityKind,
+        amounts: RemoveLiquidityAmounts,
+    ): Address {
         switch (kind) {
-            case ExitKind.Unbalanced:
+            case RemoveLiquidityKind.Unbalanced:
                 return ComposableStableEncoder.exitUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
-            case ExitKind.SingleAsset:
+            case RemoveLiquidityKind.SingleAsset:
                 if (amounts.tokenOutIndex === undefined)
                     throw Error('No Index');
 
@@ -194,7 +202,7 @@ export class ComposableStableExit implements BaseExit {
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
-            case ExitKind.Proportional:
+            case RemoveLiquidityKind.Proportional:
                 return ComposableStableEncoder.exitProportional(
                     amounts.maxBptAmountIn,
                 );

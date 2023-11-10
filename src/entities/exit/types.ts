@@ -3,7 +3,7 @@ import { Slippage } from '../slippage';
 import { Address, InputAmount } from '../../types';
 import { PoolState } from '../types';
 
-export enum ExitKind {
+export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exitExactOut
     SingleAsset = 'SingleAsset', // exitExactInSingleAsset
     Proportional = 'Proportional', // exitExactInProportional
@@ -19,18 +19,18 @@ export type BaseExitInput = {
 
 export type UnbalancedExitInput = BaseExitInput & {
     amountsOut: InputAmount[];
-    kind: ExitKind.Unbalanced;
+    kind: RemoveLiquidityKind.Unbalanced;
 };
 
 export type SingleAssetExitInput = BaseExitInput & {
     bptIn: InputAmount;
     tokenOut: Address;
-    kind: ExitKind.SingleAsset;
+    kind: RemoveLiquidityKind.SingleAsset;
 };
 
 export type ProportionalExitInput = BaseExitInput & {
     bptIn: InputAmount;
-    kind: ExitKind.Proportional;
+    kind: RemoveLiquidityKind.Proportional;
 };
 
 export type ExitInput =
@@ -46,7 +46,7 @@ export type ExitQueryResult =
 export type BaseExitQueryResult = {
     poolType: string;
     poolId: Address;
-    exitKind: ExitKind;
+    removeLiquidityKind: RemoveLiquidityKind;
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
     tokenOutIndex?: number;

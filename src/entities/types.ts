@@ -23,7 +23,7 @@ export type AddLiquidityAmounts = {
     minimumBpt: bigint;
 };
 
-export type AmountsExit = {
+export type RemoveLiquidityAmounts = {
     minAmountsOut: bigint[];
     tokenOutIndex: number | undefined;
     maxBptAmountIn: bigint;
