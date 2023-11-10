@@ -1,4 +1,4 @@
-// pnpm test -- composableStableJoin.integration.test.ts
+// pnpm test -- addLiquidityComposableStable.integration.test.ts
 import { describe, test, beforeAll, beforeEach } from 'vitest';
 import { config } from 'dotenv';
 config();
@@ -24,7 +24,7 @@ import {
     CHAINS,
     ChainId,
     getPoolAddress,
-    PoolJoin,
+    AddLiquidity,
     AddLiquidityInput,
     InputAmount,
 } from '../src';
@@ -64,7 +64,7 @@ describe('composable stable join test', () => {
 
         txInput = {
             client,
-            poolJoin: new PoolJoin(),
+            addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput: poolStateInput,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig

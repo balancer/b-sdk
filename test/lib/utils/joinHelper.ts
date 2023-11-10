@@ -1,6 +1,6 @@
 import { expect } from 'vitest';
 import {
-    PoolJoin,
+    AddLiquidity,
     AddLiquidityInput,
     PoolStateInput,
     Slippage,
@@ -29,13 +29,13 @@ type JoinResult = {
 };
 
 async function sdkJoin({
-    poolJoin,
+    addLiquidity,
     addLiquidityInput,
     poolStateInput,
     slippage,
     testAddress,
 }: {
-    poolJoin: PoolJoin;
+    addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
     poolStateInput: PoolStateInput;
     slippage: Slippage;
@@ -44,11 +44,11 @@ async function sdkJoin({
     joinBuildOutput: JoinBuildOutput;
     addLiquidityQueryResult: AddLiquidityQueryResult;
 }> {
-    const addLiquidityQueryResult = await poolJoin.query(
+    const addLiquidityQueryResult = await addLiquidity.query(
         addLiquidityInput,
         poolStateInput,
     );
-    const joinBuildOutput = poolJoin.buildCall({
+    const joinBuildOutput = addLiquidity.buildCall({
         ...addLiquidityQueryResult,
         slippage,
         sender: testAddress,
@@ -100,7 +100,7 @@ function getCheck(result: AddLiquidityQueryResult, isExactIn: boolean) {
 /**
  * Create and submit join transaction.
  * @param txInput
- *      @param poolJoin: PoolJoin - The pool join class, used to query the join and build the join call
+ *      @param addLiquidity: AddLiquidity - The pool join class, used to query the join and build the join call
  *      @param poolInput: PoolStateInput - The state of the pool being joined
  *      @param addLiquidityInput: AddLiquidityInput - The parameters of the join transaction, example: bptOut, amountsIn, etc.
  *      @param testAddress: Address - The address to send the transaction from
@@ -109,7 +109,7 @@ function getCheck(result: AddLiquidityQueryResult, isExactIn: boolean) {
  */
 export async function doJoin(txInput: JoinTxInput) {
     const {
-        poolJoin,
+        addLiquidity,
         poolStateInput,
         addLiquidityInput,
         testAddress,
@@ -118,7 +118,7 @@ export async function doJoin(txInput: JoinTxInput) {
     } = txInput;
 
     const { addLiquidityQueryResult, joinBuildOutput } = await sdkJoin({
-        poolJoin,
+        addLiquidity,
         addLiquidityInput,
         poolStateInput,
         slippage,

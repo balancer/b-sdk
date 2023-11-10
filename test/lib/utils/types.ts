@@ -4,14 +4,14 @@ import {
     AddLiquidityInput,
     ExitInput,
     PoolExit,
-    PoolJoin,
+    AddLiquidity,
     PoolStateInput,
     Slippage,
 } from '../../../src';
 
 export type JoinTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
-    poolJoin: PoolJoin;
+    addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
     slippage: Slippage;
     poolStateInput: PoolStateInput;

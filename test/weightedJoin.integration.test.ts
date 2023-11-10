@@ -1,4 +1,4 @@
-// pnpm test -- weightedJoin.integration.test.ts
+// pnpm test -- addLiquidityWeighted.integration.test.ts
 import { describe, test, beforeAll, beforeEach } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -24,7 +24,7 @@ import {
     CHAINS,
     ChainId,
     getPoolAddress,
-    PoolJoin,
+    AddLiquidity,
     AddLiquidityInput,
     InputAmount,
 } from '../src';
@@ -64,7 +64,7 @@ describe('weighted join test', () => {
 
         txInput = {
             client,
-            poolJoin: new PoolJoin(),
+            addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput,
             testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig

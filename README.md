@@ -33,7 +33,7 @@ it can be used for:
 ### Usage for Joining Pool
 
 ```ts
-  import { BalancerApi, PoolJoin } from "@balancer/sdk";
+  import { BalancerApi, AddLiquidity } from "@balancer/sdk";
     ...
     const addLiquidityInput: AddLiquidityProportionalInput = {
       bptOut,
@@ -44,10 +44,10 @@ it can be used for:
 
     const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
     const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
-    const poolJoin = new PoolJoin();
-    const queryResult = await poolJoin.query(addLiquidityInput, poolState);
+    const addLiquidity = new AddLiquidity();
+    const queryResult = await addLiquidity.query(addLiquidityInput, poolState);
     const { call, to, value, maxAmountsIn, minBptOut } =
-        poolJoin.buildCall({
+        addLiquidity.buildCall({
             ...queryResult,
             slippage,
             sender: signerAddress,

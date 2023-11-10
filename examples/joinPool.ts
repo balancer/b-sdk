@@ -13,7 +13,7 @@ import {
     ChainId,
     AddLiquidityInput,
     AddLiquidityKind,
-    PoolJoin,
+    AddLiquidity,
     Slippage,
 } from '../src';
 import { parseUnits } from 'viem';
@@ -54,8 +54,11 @@ const join = async () => {
     };
 
     // Simulate the join to get the amount of BPT out
-    const poolJoin = new PoolJoin();
-    const queryResult = await poolJoin.query(addLiquidityInput, poolStateInput);
+    const addLiquidity = new AddLiquidity();
+    const queryResult = await addLiquidity.query(
+        addLiquidityInput,
+        poolStateInput,
+    );
 
     console.log('\nJoin Query Result:');
     console.log('Tokens In:');
@@ -65,7 +68,7 @@ const join = async () => {
     console.log(`BPT Out: ${queryResult.bptOut.amount.toString()}`);
 
     // Apply slippage to the BPT amount received from the query and construct the call
-    const call = poolJoin.buildCall({
+    const call = addLiquidity.buildCall({
         ...queryResult,
         slippage,
         sender: userAccount,

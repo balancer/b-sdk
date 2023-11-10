@@ -81,7 +81,7 @@ export type AddLiquidityCall =
     | AddLiquidityWeightedCall
     | AddLiquidityComposableStableCall;
 
-export interface BaseJoin {
+export interface AddLiquidityBase {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
@@ -103,6 +103,6 @@ export type JoinBuildOutput = {
     maxAmountsIn: bigint[];
 };
 
-export type JoinConfig = {
-    customPoolJoins: Record<string, BaseJoin>;
+export type AddLiquidityConfig = {
+    customAddLiquidityTypes: Record<string, AddLiquidityBase>;
 };
