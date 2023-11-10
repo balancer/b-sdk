@@ -4,7 +4,7 @@ import {
     JoinConfig,
     AddLiquidityInput,
     AddLiquidityQueryResult,
-    JoinCall,
+    AddLiquidityCall,
 } from './types';
 import { WeightedJoin } from './weighted/weightedJoin';
 import { PoolStateInput } from '../types';
@@ -49,7 +49,7 @@ export class PoolJoin {
         return this.getJoin(poolState.type).query(input, mappedPoolState);
     }
 
-    public buildCall(input: JoinCall): JoinBuildOutput {
+    public buildCall(input: AddLiquidityCall): JoinBuildOutput {
         return this.getJoin(input.poolType).buildCall(input);
     }
 }

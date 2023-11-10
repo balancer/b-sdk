@@ -66,24 +66,27 @@ export type AddLiquidityQueryResult =
     | AddLiquidityWeightedQueryResult
     | AddLiquidityComposableStableQueryResult;
 
-type BaseJoinCall = {
+type AddLiquidityBaseCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
 };
 
-export type ComposableJoinCall = BaseJoinCall &
+export type AddLiquidityComposableStableCall = AddLiquidityBaseCall &
     AddLiquidityComposableStableQueryResult;
-export type WeightedJoinCall = BaseJoinCall & AddLiquidityBaseQueryResult;
+export type AddLiquidityWeightedCall = AddLiquidityBaseCall &
+    AddLiquidityBaseQueryResult;
 
-export type JoinCall = WeightedJoinCall | ComposableJoinCall;
+export type AddLiquidityCall =
+    | AddLiquidityWeightedCall
+    | AddLiquidityComposableStableCall;
 
 export interface BaseJoin {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<AddLiquidityQueryResult>;
-    buildCall(input: JoinCall): {
+    buildCall(input: AddLiquidityCall): {
         call: Hex;
         to: Address;
         value: bigint;

@@ -11,7 +11,7 @@ import {
     AddLiquidityInput,
     AddLiquidityKind,
     AddLiquidityWeightedQueryResult,
-    WeightedJoinCall,
+    AddLiquidityWeightedCall,
 } from '../types';
 import { AddLiquidityAmounts, PoolState } from '../../types';
 import { doQueryJoin, getAmounts, parseJoinArgs } from '../../utils';
@@ -62,7 +62,7 @@ export class WeightedJoin implements BaseJoin {
         };
     }
 
-    public buildCall(input: WeightedJoinCall): JoinBuildOutput {
+    public buildCall(input: AddLiquidityWeightedCall): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.addLiquidityKind, amounts);
@@ -133,7 +133,9 @@ export class WeightedJoin implements BaseJoin {
         }
     }
 
-    private getAmountsCall(input: WeightedJoinCall): AddLiquidityAmounts {
+    private getAmountsCall(
+        input: AddLiquidityWeightedCall,
+    ): AddLiquidityAmounts {
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Init:
             case AddLiquidityKind.Unbalanced: {

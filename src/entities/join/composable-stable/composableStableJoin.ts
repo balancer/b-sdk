@@ -10,7 +10,7 @@ import {
     AddLiquidityInput,
     AddLiquidityKind,
     AddLiquidityComposableStableQueryResult,
-    ComposableJoinCall,
+    AddLiquidityComposableStableCall,
 } from '../types';
 import {
     AddLiquidityAmounts as AddLiquidityAmountsBase,
@@ -73,7 +73,7 @@ export class ComposableStableJoin implements BaseJoin {
         };
     }
 
-    public buildCall(input: ComposableJoinCall): JoinBuildOutput {
+    public buildCall(input: AddLiquidityComposableStableCall): JoinBuildOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = this.encodeUserData(input.addLiquidityKind, amounts);
@@ -161,7 +161,9 @@ export class ComposableStableJoin implements BaseJoin {
         };
     }
 
-    private getAmountsCall(input: ComposableJoinCall): AddLiquidityAmounts {
+    private getAmountsCall(
+        input: AddLiquidityComposableStableCall,
+    ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Init:
