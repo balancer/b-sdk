@@ -19,6 +19,10 @@ export class RemoveLiquidity {
     constructor(config?: RemoveLiquidityConfig) {
         const { customRemoveLiquidityTypes } = config || {};
         this.removeLiquidityTypes = {
+            //GYRO2, GYRO3, GYROE only support Remove Liquidity Proportional(1 - EXACT_BPT_IN_FOR_TOKENS_OUT)
+            GYRO2: new RemoveLiquidityWeighted(),
+            GYRO3: new RemoveLiquidityWeighted(),
+            GYROE: new RemoveLiquidityWeighted(),
             WEIGHTED: new RemoveLiquidityWeighted(),
             // PHANTOM_STABLE === ComposableStables in API
             PHANTOM_STABLE: new RemoveLiquidityComposableStable(),

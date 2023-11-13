@@ -18,10 +18,14 @@ export class AddLiquidity {
     constructor(config?: AddLiquidityConfig) {
         const { customAddLiquidityTypes } = config || {};
         this.addLiquidityTypes = {
+            //GYRO2, GYRO3, GYROE pool types only support Add Liquidity Proportional (3 - ALL_TOKENS_IN_FOR_BPT_OUT)
+            GYRO2: new AddLiquidityWeighted(),
+            GYRO3: new AddLiquidityWeighted(),
+            GYROE: new AddLiquidityWeighted(),
             WEIGHTED: new AddLiquidityWeighted(),
             // PHANTOM_STABLE === ComposableStables in API
             PHANTOM_STABLE: new AddLiquidityComposableStable(),
-            // custom pool add liquidity types take precedence over base types
+            // custom add liquidity types take precedence over base types
             ...customAddLiquidityTypes,
         };
     }
