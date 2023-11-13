@@ -8,12 +8,12 @@ export function validateInputs(
     input: AddLiquidityInput,
     poolState: PoolStateInput,
 ) {
-    validateComposableStableWithoutBPT(
+    validateComposableStableWithBPT(
         poolState.type,
         poolState.address,
         poolState.tokens,
     );
-    validateGyroPoolJoinIsNotProportional(input.kind, poolState.type);
+    validateAddLiquidityGyroIsProportional(input.kind, poolState.type);
     switch (input.kind) {
         case AddLiquidityKind.Init:
         case AddLiquidityKind.Unbalanced:
@@ -34,10 +34,10 @@ export function validateInputs(
     }
 }
 
-export const gyroJoinKindNotSupported =
-    'INPUT_ERROR: Gyro pools do not implement this join kind, only Proportional Joins(3 - ALL_TOKENS_IN_FOR_BPT_OUT) are supported';
+export const addLiquidityKindNotSupportedByGyro =
+    'INPUT_ERROR: Gyro pools do not implement this add liquidity kind, only Add Liquidity Proportional (3 - ALL_TOKENS_IN_FOR_BPT_OUT) is supported';
 
-function validateGyroPoolJoinIsNotProportional(
+function validateAddLiquidityGyroIsProportional(
     kind: AddLiquidityKind,
     poolType: string,
 ) {
@@ -45,11 +45,11 @@ function validateGyroPoolJoinIsNotProportional(
         ['GYROE', 'GYRO2', 'GYRO3'].includes(poolType) &&
         kind !== AddLiquidityKind.Proportional
     ) {
-        throw new Error(gyroJoinKindNotSupported);
+        throw new Error(addLiquidityKindNotSupportedByGyro);
     }
 }
 
-function validateComposableStableWithoutBPT(
+function validateComposableStableWithBPT(
     poolType: string,
     poolAddress: Address,
     poolTokens: MinimalToken[],
@@ -57,7 +57,7 @@ function validateComposableStableWithoutBPT(
     const bptIndex = poolTokens.findIndex((t) => t.address === poolAddress);
     if (['PHANTOM_STABLE'].includes(poolType) && bptIndex < 0) {
         throw new Error(
-            'INPUT_ERROR: Composable Stable Pool State without BPT token included',
+            'INPUT_ERROR: Composable Stable Pool State should have BPT token included',
         );
     }
 }

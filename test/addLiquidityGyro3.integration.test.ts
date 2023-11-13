@@ -1,4 +1,4 @@
-// pnpm test -- weightedJoin.integration.test.ts
+//0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799 - 3CLP-BUSD-USDC-USDT
 import { describe, test, beforeAll, beforeEach, expect } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -14,33 +14,36 @@ import {
 } from 'viem';
 
 import {
-    ProportionalJoinInput,
-    JoinKind,
+    AddLiquidityProportionalInput,
+    AddLiquidityKind,
     Slippage,
     Hex,
     PoolStateInput,
     CHAINS,
     ChainId,
-    PoolJoin,
-    JoinInput,
+    AddLiquidity,
+    AddLiquidityInput,
     InputAmount,
     getPoolAddress,
-    UnbalancedJoinInput,
-    SingleAssetJoinInput,
+    AddLiquidityUnbalancedInput,
+    AddLiquiditySingleTokenInput,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
-import { assertProportionalJoin, doJoin } from './lib/utils/joinHelper';
-import { JoinTxInput } from './lib/utils/types';
+import {
+    assertAddLiquidityProportional,
+    doAddLiquidity,
+} from './lib/utils/addLiquidityHelper';
+import { AddLiquidityTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { gyroJoinKindNotSupported } from '../src/entities/join/utils/validateInputs';
+import { addLiquidityKindNotSupportedByGyro } from '../src/entities/addLiquidity/utils/validateInputs';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 const chainId = ChainId.POLYGON;
 const poolId =
-    '0xa489c057de6c3177380ea264ebdf686b7f564f510002000000000000000008e2'; // ECLP-wstETH-wETH
+    '0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799'; // 3CLP-BUSD-USDC-USDT
 
-describe('gyroE V2 join test', () => {
-    let txInput: JoinTxInput;
+describe('Gyro3 add liquidity test', () => {
+    let txInput: AddLiquidityTxInput;
     let poolStateInput: PoolStateInput;
 
     beforeAll(async () => {
@@ -60,11 +63,11 @@ describe('gyroE V2 join test', () => {
 
         txInput = {
             client,
-            poolJoin: new PoolJoin(),
+            addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput,
             testAddress: '0xe84f75fc9caa49876d0ba18d309da4231d44e94d', // MATIC Holder Wallet, must hold amount of matic to approve tokens
-            joinInput: {} as JoinInput,
+            addLiquidityInput: {} as AddLiquidityInput,
         };
     });
 
@@ -76,7 +79,7 @@ describe('gyroE V2 join test', () => {
                 ...txInput.poolStateInput.tokens.map((t) => t.address),
                 txInput.poolStateInput.address,
             ],
-            undefined,
+            [0, 51, 0, 0],
             [
                 ...txInput.poolStateInput.tokens.map((t) =>
                     parseUnits('10000', t.decimals),
@@ -86,39 +89,40 @@ describe('gyroE V2 join test', () => {
         );
     });
 
-    describe('proportional join', () => {
-        let joinInput: ProportionalJoinInput;
+    describe('proportional', () => {
+        let addLiquidityInput: AddLiquidityProportionalInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
                 address: poolStateInput.address,
             };
-            joinInput = {
+            addLiquidityInput = {
                 bptOut,
                 chainId,
                 rpcUrl,
-                kind: JoinKind.Proportional,
+                kind: AddLiquidityKind.Proportional,
             };
         });
         test('with tokens', async () => {
-            const joinResult = await doJoin({
+            const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
-                joinInput,
+                addLiquidityInput,
             });
 
-            assertProportionalJoin(
+            assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
-                joinInput,
-                joinResult,
+                addLiquidityInput,
+                addLiquidityOutput,
                 txInput.slippage,
             );
         });
+        //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
     });
 
-    describe('unbalanced join', () => {
-        let input: Omit<UnbalancedJoinInput, 'amountsIn'>;
+    describe('unbalanced', () => {
+        let input: Omit<AddLiquidityUnbalancedInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
             amountsIn = txInput.poolStateInput.tokens.map((t) => ({
@@ -129,26 +133,25 @@ describe('gyroE V2 join test', () => {
             input = {
                 chainId,
                 rpcUrl,
-                kind: JoinKind.Unbalanced,
+                kind: AddLiquidityKind.Unbalanced,
             };
         });
-        test('with tokens', async () => {
-            const joinInput = {
+        test('must throw add liquidity kind not supported error', async () => {
+            const addLiquidityInput = {
                 ...input,
                 amountsIn: [...amountsIn.splice(0, 1)],
             };
             await expect(() =>
-                doJoin({
+                doAddLiquidity({
                     ...txInput,
-                    joinInput,
+                    addLiquidityInput,
                 }),
-            ).rejects.toThrowError(gyroJoinKindNotSupported);
+            ).rejects.toThrowError(addLiquidityKindNotSupportedByGyro);
         });
-        //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
     });
 
-    describe('single asset join', () => {
-        let joinInput: SingleAssetJoinInput;
+    describe('single token', () => {
+        let addLiquidityInput: AddLiquiditySingleTokenInput;
         beforeAll(() => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -156,22 +159,22 @@ describe('gyroE V2 join test', () => {
                 address: poolStateInput.address,
             };
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-            joinInput = {
+            addLiquidityInput = {
                 bptOut,
                 tokenIn,
                 chainId,
                 rpcUrl,
-                kind: JoinKind.SingleAsset,
+                kind: AddLiquidityKind.SingleToken,
             };
         });
 
-        test('must throw unsupported single asset join error', async () => {
+        test('must throw add liquidity kind not supported error', async () => {
             await expect(() =>
-                doJoin({
+                doAddLiquidity({
                     ...txInput,
-                    joinInput,
+                    addLiquidityInput,
                 }),
-            ).rejects.toThrowError(gyroJoinKindNotSupported);
+            ).rejects.toThrowError(addLiquidityKindNotSupportedByGyro);
         });
     });
 });
@@ -183,17 +186,22 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'GYROE',
+            type: 'GYRO3',
             tokens: [
                 {
-                    address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC
+                    address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC(PoS)
                     decimals: 6,
                     index: 0,
                 },
                 {
-                    address: '0x2e1ad108ff1d8c782fcbbb89aad783ac49586756', // TUSD
+                    address: '0x9c9e5fd8bbc25984b178fdce6117defa39d2db39', // BUSD
                     decimals: 18,
                     index: 1,
+                },
+                {
+                    address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // USDT(PoS)
+                    decimals: 6,
+                    index: 2,
                 },
             ],
         };

@@ -8,12 +8,12 @@ export function validateInputs(
     input: RemoveLiquidityInput,
     poolState: PoolStateInput,
 ) {
-    validateComposableStableWithoutBPT(
+    validateComposableStableWithBPT(
         poolState.type,
         poolState.address,
         poolState.tokens,
     );
-    validateGyroPoolJoinIsNotProportional(input.kind, poolState.type);
+    validateRemoveLiquidityGyroIsProportional(input.kind, poolState.type);
     switch (input.kind) {
         case RemoveLiquidityKind.Unbalanced:
             areTokensInArray(
@@ -33,10 +33,10 @@ export function validateInputs(
     }
 }
 
-export const gyroExitKindNotSupported =
-    'INPUT_ERROR: Gyro pools do not implement this exit kind, only Proportional Exits(1 - EXACT_BPT_IN_FOR_TOKENS_OUT) are supported';
+export const removeLiquidityKindNotSupportedByGyro =
+    'INPUT_ERROR: Gyro pools do not implement this remove liquidity kind, only Remove Liquidity Proportional (1 - EXACT_BPT_IN_FOR_TOKENS_OUT) is supported';
 
-function validateGyroPoolJoinIsNotProportional(
+function validateRemoveLiquidityGyroIsProportional(
     kind: RemoveLiquidityKind,
     poolType: string,
 ) {
@@ -44,11 +44,11 @@ function validateGyroPoolJoinIsNotProportional(
         ['GYROE', 'GYRO2', 'GYRO3'].includes(poolType) &&
         kind !== RemoveLiquidityKind.Proportional
     ) {
-        throw new Error(gyroExitKindNotSupported);
+        throw new Error(removeLiquidityKindNotSupportedByGyro);
     }
 }
 
-function validateComposableStableWithoutBPT(
+function validateComposableStableWithBPT(
     poolType: string,
     poolAddress: Address,
     poolTokens: MinimalToken[],
@@ -56,7 +56,7 @@ function validateComposableStableWithoutBPT(
     const bptIndex = poolTokens.findIndex((t) => t.address === poolAddress);
     if (['PHANTOM_STABLE'].includes(poolType) && bptIndex < 0) {
         throw new Error(
-            'INPUT_ERROR: Composable Stable Pool State without BPT token included',
+            'INPUT_ERROR: Composable Stable Pool State should have BPT token included',
         );
     }
 }

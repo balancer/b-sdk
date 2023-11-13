@@ -12,34 +12,37 @@ import {
     walletActions,
 } from 'viem';
 import {
-    SingleAssetExitInput,
-    ProportionalExitInput,
-    UnbalancedExitInput,
-    ExitKind,
+    RemoveLiquiditySingleTokenInput,
+    RemoveLiquidityProportionalInput,
+    RemoveLiquidityUnbalancedInput,
+    RemoveLiquidityKind,
     Slippage,
     PoolStateInput,
-    PoolExit,
+    RemoveLiquidity,
     Address,
     Hex,
     CHAINS,
     ChainId,
     getPoolAddress,
-    ExitInput,
+    RemoveLiquidityInput,
     InputAmount,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
-import { assertProportionalExit, doExit } from './lib/utils/exitHelper';
-import { ExitTxInput } from './lib/utils/types';
+import {
+    assertRemoveLiquidityProportional,
+    doRemoveLiquidity,
+} from './lib/utils/removeLiquidityHelper';
+import { RemoveLiquidityTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { gyroExitKindNotSupported } from '../src/entities/exit/utils/validateInputs';
+import { removeLiquidityKindNotSupportedByGyro } from '../src/entities/removeLiquidity/utils/validateInputs';
 
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 const poolId =
-    '0xdac42eeb17758daa38caf9a3540c808247527ae3000200000000000000000a2b'; // 2CLP-USDC-DAI
+    '0x97469e6236bd467cd147065f77752b00efadce8a0002000000000000000008c0'; // ECLP-TUSD-USDC
 
-describe('Gyro2 exit test', () => {
-    let txInput: ExitTxInput;
+describe('GyroE V1 remove liquidity test', () => {
+    let txInput: RemoveLiquidityTxInput;
     let poolInput: PoolStateInput;
     beforeAll(async () => {
         // setup mock api
@@ -58,11 +61,11 @@ describe('Gyro2 exit test', () => {
 
         txInput = {
             client,
-            poolExit: new PoolExit(),
+            removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput: poolInput,
             testAddress: '0xe84f75fc9caa49876d0ba18d309da4231d44e94d', // MATIC Holder Wallet, must hold amount of matic to approve tokens
-            exitInput: {} as ExitInput,
+            removeLiquidityInput: {} as RemoveLiquidityInput,
         };
     });
 
@@ -76,11 +79,11 @@ describe('Gyro2 exit test', () => {
         );
     });
 
-    describe('proportional exit', () => {
-        let input: ProportionalExitInput;
+    describe('proportional', () => {
+        let input: RemoveLiquidityProportionalInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
-                rawAmount: parseEther('0.01'),
+                rawAmount: parseEther('1'),
                 decimals: 18,
                 address: poolInput.address,
             };
@@ -88,54 +91,54 @@ describe('Gyro2 exit test', () => {
                 bptIn,
                 chainId,
                 rpcUrl,
-                kind: ExitKind.Proportional,
+                kind: RemoveLiquidityKind.Proportional,
             };
         });
         test('with tokens', async () => {
-            const exitResult = await doExit({
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
-                exitInput: input,
+                removeLiquidityInput: input,
             });
 
-            assertProportionalExit(
+            assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolStateInput,
                 input,
-                exitResult,
+                removeLiquidityOutput,
                 txInput.slippage,
             );
-            //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
         });
+        //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
     });
 
-    describe('unbalanced exit', async () => {
-        let input: Omit<UnbalancedExitInput, 'amountsOut'>;
+    describe('unbalanced', async () => {
+        let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
         let amountsOut: InputAmount[];
         beforeAll(() => {
             amountsOut = poolInput.tokens.map((t) => ({
-                rawAmount: parseUnits('0.001', t.decimals),
+                rawAmount: parseUnits('1', t.decimals),
                 decimals: t.decimals,
                 address: t.address,
             }));
             input = {
                 chainId,
                 rpcUrl,
-                kind: ExitKind.Unbalanced,
+                kind: RemoveLiquidityKind.Unbalanced,
             };
         });
-        test('must throw error, exit kind not supported', async () => {
-            const exitInput = {
+        test('must throw remove liquidity kind not supported error', async () => {
+            const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
             };
             await expect(() =>
-                doExit({ ...txInput, exitInput }),
-            ).rejects.toThrowError(gyroExitKindNotSupported);
+                doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
+            ).rejects.toThrowError(removeLiquidityKindNotSupportedByGyro);
         });
     });
 
-    describe('single asset exit', () => {
-        let input: SingleAssetExitInput;
+    describe('single token', () => {
+        let input: RemoveLiquiditySingleTokenInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -148,13 +151,13 @@ describe('Gyro2 exit test', () => {
                 rpcUrl,
                 bptIn,
                 tokenOut,
-                kind: ExitKind.SingleAsset,
+                kind: RemoveLiquidityKind.SingleToken,
             };
         });
-        test('must throw error, exit kind not supported', async () => {
+        test('must throw remove liquidity kind not supported error', async () => {
             await expect(() =>
-                doExit({ ...txInput, exitInput: input }),
-            ).rejects.toThrowError(gyroExitKindNotSupported);
+                doRemoveLiquidity({ ...txInput, removeLiquidityInput: input }),
+            ).rejects.toThrowError(removeLiquidityKindNotSupportedByGyro);
         });
     });
 });
@@ -166,15 +169,15 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'GYRO2',
+            type: 'GYROE',
             tokens: [
                 {
-                    address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC(PoS)
+                    address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC
                     decimals: 6,
                     index: 0,
                 },
                 {
-                    address: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
+                    address: '0x2e1ad108ff1d8c782fcbbb89aad783ac49586756', // TUSD
                     decimals: 18,
                     index: 1,
                 },
