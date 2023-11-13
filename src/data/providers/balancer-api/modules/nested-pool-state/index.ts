@@ -198,28 +198,6 @@ export class NestedPools {
             // Token represents nested pools only nested if they have a pool property
             if (token.pool === undefined) return;
 
-            /**
-             * TODO: Current development API has included BPT token in nested pools,
-             * but they are still deciding if that will be reverted.
-             * If they include it -> remove commented code
-             * If they don't -> uncomment code to apply hack
-             */
-            // // hack to add BPT token missing from nested pools on API result
-            // let missingBPTIndex = 0;
-            // const sortedIndexes = token.pool.tokens.map((t) => t.index).sort();
-            // for (let i = 0; i < token.pool.tokens.length + 1; i++) {
-            //     if (i === token.pool.tokens.length || sortedIndexes[i] !== i) {
-            //         missingBPTIndex = i;
-            //     }
-            // }
-            // token.pool.tokens.splice(missingBPTIndex, 0, {
-            //     index: missingBPTIndex,
-            //     name: 'BPT',
-            //     symbol: 'BPT',
-            //     address: token.pool.address,
-            //     decimals: 18,
-            // });
-
             // map API result to NestedPool
             pools.push({
                 id: token.pool.id,
