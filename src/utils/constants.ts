@@ -22,6 +22,8 @@ export const NATIVE_ADDRESS: Address =
     '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
+export const MAX_UINT256 =
+    115792089237316195423570985008687907853269984665640564039457584007913129639935n;
 export const PREMINTED_STABLE_BPT = 2596148429267413814265248164610048n; // 2**111
 
 export const DECIMAL_SCALES = {
@@ -147,6 +149,18 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.POLYGON]: 800,
     [ChainId.ZKEVM]: 128,
     [ChainId.FANTOM]: 128,
+};
+
+export const BALANCER_VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+
+export const BALANCER_HELPERS: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0x77d46184d22ca6a3726a2f500c776767b6a3d6ab',
+    [ChainId.AVALANCHE]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
+    [ChainId.GNOSIS_CHAIN]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
+    [ChainId.MAINNET]: '0x5addcca35b7a0d07c74063c48700c8590e87864e',
+    [ChainId.OPTIMISM]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
+    [ChainId.POLYGON]: '0x239e55f427d44c3cc793f49bfb507ebe76638a2b',
+    [ChainId.ZKEVM]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
 };
 
 export const NATIVE_ASSETS = {

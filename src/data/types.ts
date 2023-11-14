@@ -1,5 +1,6 @@
 import { Address, Hex } from 'viem';
-import { HumanAmount } from '../types';
+
+export type HumanAmount = `${number}`;
 
 // These are only the known pool types, additional pool types can be added via
 // extension through custom PoolFactories and PoolDataProviders
@@ -118,12 +119,15 @@ export interface RawFxPool extends RawBasePool {
     epsilon: HumanAmount;
 }
 
-export interface RawPoolToken {
+export interface MinimalToken {
     address: Address;
+    decimals: number;
     index: number;
+}
+
+export interface RawPoolToken extends MinimalToken {
     symbol: string;
     name: string;
-    decimals: number;
     balance: HumanAmount;
 }
 

@@ -1,6 +1,7 @@
-import { BigintIsh, Token, BasePool, BasePoolFactory } from './entities';
 import { PoolDataEnricher, PoolDataProvider } from './data/types';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
+import { BigintIsh } from './entities/tokenAmount';
+import { BasePoolFactory } from './entities/pools/index';
 
 export type Address = `0x${string}`;
 export type Hex = `0x${string}`;
@@ -45,13 +46,6 @@ export type SorConfig = {
     customPoolFactories?: BasePoolFactory[];
 };
 
-export interface PoolTokenPair {
-    id: string;
-    pool: BasePool;
-    tokenIn: Token;
-    tokenOut: Token;
-}
-
 export interface SingleSwap {
     poolId: Hex;
     kind: SwapKind;
@@ -69,4 +63,8 @@ export interface BatchSwapStep {
     userData: Hex;
 }
 
-export type HumanAmount = `${number}`;
+export type InputAmount = {
+    address: Address;
+    decimals: number;
+    rawAmount: bigint;
+};

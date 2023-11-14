@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import testPools from './lib/testData/gyro3TestPool.json';
+import testPools from './lib/testData/testPools/gyro3_44133130.json';
 import { ChainId } from '../src/utils';
 import { RawGyro3Pool } from '../src/data/types';
 import {
@@ -14,10 +14,12 @@ import {
     sorGetSwapsWithPools,
     sorParseRawPools,
 } from '../src';
+import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+
+const chainId = ChainId.POLYGON;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 
 describe('gyro3 integration tests', () => {
-    const chainId = ChainId.POLYGON;
-    const rpcUrl = process.env['POLYGON_RPC_URL'] || 'https://polygon-rpc.com';
     const rawPool = { ...testPools }.pools[1] as RawGyro3Pool;
     const USDC = new Token(
         chainId,

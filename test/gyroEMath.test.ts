@@ -1,8 +1,9 @@
 // pnpm test -- gyroEMath.test.ts
-import testPools from './lib/testData/gyroETestPool.json';
+import testPools from './lib/testData/testPools/gyroE_44215395.json';
 import { RawGyroEPool } from '../src/data/types';
 import { ChainId } from '../src/utils';
-import { GyroEPool, Vector2 } from '../src/entities/pools/gyroE/gyroEPool';
+import { GyroEPool } from '../src/entities/pools/gyroE/gyroEPool';
+import { Vector2 } from '../src/entities/pools/gyroE/types';
 import { Token, TokenAmount } from '../src/entities';
 import { calculateInvariantWithError } from '../src/entities/pools/gyroE/gyroEMath';
 import {

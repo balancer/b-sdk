@@ -5,7 +5,7 @@ export class Token {
     public readonly decimals: number;
     public readonly symbol?: string;
     public readonly name?: string;
-    public readonly wrapped: string;
+    public readonly wrapped: Address;
 
     public constructor(
         chainId: number,
@@ -13,7 +13,7 @@ export class Token {
         decimals: number,
         symbol?: string,
         name?: string,
-        wrapped?: string,
+        wrapped?: Address,
     ) {
         this.chainId = chainId;
         // Addresses are always lowercased for speed
@@ -21,7 +21,9 @@ export class Token {
         this.decimals = decimals;
         this.symbol = symbol;
         this.name = name;
-        this.wrapped = wrapped ? wrapped.toLowerCase() : address.toLowerCase();
+        this.wrapped = (
+            wrapped ? wrapped.toLowerCase() : address.toLowerCase()
+        ) as Address;
     }
 
     public isEqual(token: Token) {
@@ -30,5 +32,9 @@ export class Token {
 
     public isUnderlyingEqual(token: Token) {
         return this.chainId === token.chainId && this.wrapped === token.wrapped;
+    }
+
+    public isSameAddress(address: Address) {
+        return this.address === address.toLowerCase();
     }
 }

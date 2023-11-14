@@ -1,5 +1,5 @@
-import { BasePool, BasePoolFactory } from '../';
-import { LinearPool } from './';
+import { BasePool, BasePoolFactory } from '../index';
+import { LinearPool } from './linearPool';
 import { RawLinearPool, RawPool } from '../../../data/types';
 
 export class LinearPoolFactory implements BasePoolFactory {

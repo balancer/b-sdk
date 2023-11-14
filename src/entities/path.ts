@@ -1,5 +1,6 @@
 import { BasePool } from './pools/';
-import { Token, TokenAmount } from './';
+import { Token } from './token';
+import { TokenAmount } from './tokenAmount';
 import { SwapKind } from '../types';
 
 export class Path {

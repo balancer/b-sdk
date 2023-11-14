@@ -11,10 +11,10 @@ import {
     RawPool,
     RawPoolTokenWithRate,
     RawWeightedPoolToken,
+    HumanAmount,
 } from '../types';
-
 import { CHAINS } from '../../utils';
-import { HumanAmount, SwapOptions } from '../../types';
+import { SwapOptions } from '../../types';
 import { fetchAdditionalPoolData } from '../onChainPoolDataViaReadContract';
 
 export interface OnChainPoolData {
