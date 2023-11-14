@@ -1,5 +1,4 @@
 //0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799 - 3CLP-BUSD-USDC-USDT
-import { describe, test, beforeAll, beforeEach, expect } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 

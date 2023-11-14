@@ -1,6 +1,5 @@
 //0xdac42eeb17758daa38caf9a3540c808247527ae3000200000000000000000a2b - 2CLP-USDC-DAI
 // pnpm test -- addLiquidityGyro2.integration.test.ts
-import { describe, test, beforeAll, beforeEach, expect } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 

@@ -19,6 +19,6 @@
         "moduleResolution": "node",
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "types": ["vite/client"]
+        "types": ["vitest/globals", "vite/client"],
     }
 }

@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
             testTimeout: 20_000,
             hookTimeout: 30_000,
             setupFiles: ['/test/vitest-setup.ts'],
+            globals: true,
             // Uncomment to debug suite excluding some tests
             // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
             // Uncomment to run integration tests sequentially

@@ -16,7 +16,6 @@ import {
     RemoveLiquidityProportionalInput,
 } from '../../../src';
 import { sendTransactionGetBalances, TxOutput } from './helper';
-import { expect } from 'vitest';
 import { zeroAddress } from 'viem';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 
