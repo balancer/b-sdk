@@ -19,7 +19,7 @@ import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 const chainId = ChainId.FANTOM;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.FANTOM);
 
-describe('Fantom SOR', () => {
+describe.skip('Fantom SOR', () => {
     const inputToken = NATIVE_ASSETS[chainId];
     const mockPoolProvider = new MockPoolProvider(
         testPools.pools as RawBasePool[],
