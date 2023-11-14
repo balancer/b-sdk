@@ -27,28 +27,28 @@ Testing requires access to an archive node for onchain quote comparisons. This c
 The Balancer API Provider is a provider that facilitates 
 data fetching from the Balancer API,
 it can be used for:
-- Fetch Pool State for Joins;
-- Fetch Pool State for Exits.
+- Fetch Pool State for AddLiquidity;
+- Fetch Pool State for RemoveLiquidity.
 
-### Usage for Joining Pool
+### Usage for adding liquidity to a Pool
 
 ```ts
-  import { BalancerApi, PoolJoin } from "@balancer/sdk";
+  import { BalancerApi, AddLiquidity } from "@balancer/sdk";
     ...
-    const joinInput: ProportionalJoinInput = {
+    const addLiquidityInput: AddLiquidityProportionalInput = {
       bptOut,
       chainId,
       rpcUrl,
-      kind: JoinKind.Proportional,
+      kind: AddLiquidityKind.Proportional,
     };
 
     const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
     const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
-    const poolJoin = new PoolJoin();
-    const queryResult = await poolJoin.query(joinInput, poolState);
+    const addLiquidity = new AddLiquidity();
+    const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
     const { call, to, value, maxAmountsIn, minBptOut } =
-        poolJoin.buildCall({
-            ...queryResult,
+        addLiquidity.buildCall({
+            ...queryOutput,
             slippage,
             sender: signerAddress,
             recipient: signerAddress,
@@ -65,27 +65,27 @@ it can be used for:
       value,
     });
 ```
-Full working join example: [examples/join/weighted.ts](./examples/join/weighted.ts)
+Full working add liquidity example: [examples/addLiquidity.ts](./examples/addLiquidity.ts)
 
-### Usage for Exiting Pool
+### Usage for removing liquidity from a Pool
 ```ts
-import { BalancerApi, PoolExit } from "@balancer/sdk";
+import { BalancerApi, RemoveLiquidity } from "@balancer/sdk";
 ...
-const exitInput: SingleAssetExitInput = {
+const removeLiquidityInput: RemoveLiquiditySingleTokenInput = {
   chainId,
   rpcUrl,
   bptIn,
   tokenOut,
-  kind: ExitKind.SingleAsset,
+  kind: RemoveLiquidityKind.SingleToken,
 };
 
 const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);
 const poolState = await balancerApi.pools.fetchPoolState('0x5f1d6874cb1e7156e79a7563d2b61c6cbce03150000200000000000000000586');
-const poolExit = new PoolExit();
-const queryResult = await poolExit.query(exitInput, poolState);
+const removeLiquidity = new RemoveLiquidity();
+const queryOutput = await removeLiquidity.query(removeLiquidityInput, poolState);
 const { call, to, value, maxAmountsIn, minBptOut } =
-  poolExit.buildCall({
-    ...queryResult,
+  removeLiquidity.buildCall({
+    ...queryOutput,
     slippage,
     sender: signerAddress,
     recipient: signerAddress,
@@ -102,7 +102,7 @@ await client.sendTransaction({
   value,
 });
 ```
-Full working exit example: [examples/exit/weighted.ts](./examples/exit/weighted.ts)
+Full working remove liquidity example: [examples/removeLiquidity.ts](./examples/removeLiquidity.ts)
 
 ## Anvil client
 To download and install the anvil client, run the following commands (MacOS):

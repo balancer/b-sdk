@@ -1,27 +1,27 @@
 import { Client, PublicActions, TestActions, WalletActions } from 'viem';
 import {
     Address,
-    JoinInput,
-    ExitInput,
-    PoolExit,
-    PoolJoin,
+    AddLiquidityInput,
+    RemoveLiquidityInput,
+    RemoveLiquidity,
+    AddLiquidity,
     PoolStateInput,
     Slippage,
 } from '../../../src';
 
-export type JoinTxInput = {
+export type AddLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
-    poolJoin: PoolJoin;
-    joinInput: JoinInput;
+    addLiquidity: AddLiquidity;
+    addLiquidityInput: AddLiquidityInput;
     slippage: Slippage;
     poolStateInput: PoolStateInput;
     testAddress: Address;
 };
 
-export type ExitTxInput = {
+export type RemoveLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
-    poolExit: PoolExit;
-    exitInput: ExitInput;
+    removeLiquidity: RemoveLiquidity;
+    removeLiquidityInput: RemoveLiquidityInput;
     slippage: Slippage;
     poolStateInput: PoolStateInput;
     testAddress: Address;
