@@ -1,4 +1,4 @@
-// pnpm test -- weightedExit.integration.test.ts
+// pnpm test -- removeLiquidityGyro3.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
