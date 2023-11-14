@@ -1,5 +1,4 @@
 // pnpm test -- balancerApi.test.ts
-import { describe, expect, test } from 'vitest';
 import { BalancerApi, PoolStateInput, ChainId } from '../src';
 
 describe(

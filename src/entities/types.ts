@@ -17,13 +17,13 @@ export type PoolStateInput = {
     tokens: MinimalToken[];
 };
 
-export type AmountsJoin = {
+export type AddLiquidityAmounts = {
     maxAmountsIn: bigint[];
     tokenInIndex: number | undefined;
     minimumBpt: bigint;
 };
 
-export type AmountsExit = {
+export type RemoveLiquidityAmounts = {
     minAmountsOut: bigint[];
     tokenOutIndex: number | undefined;
     maxBptAmountIn: bigint;

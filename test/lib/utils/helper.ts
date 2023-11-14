@@ -18,7 +18,7 @@ import {
 import { erc20Abi } from '../../../src/abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
 
-export type TxResult = {
+export type TxOutput = {
     transactionReceipt: TransactionReceipt;
     balanceDeltas: bigint[];
     gasUsed: bigint;
@@ -111,7 +111,7 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
-): Promise<TxResult> {
+): Promise<TxOutput> {
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
         client,
@@ -302,7 +302,7 @@ export const forkSetup = async (
     }
 
     for (let i = 0; i < tokens.length; i++) {
-        // Set initial account balance for each token that will be used to join pool
+        // Set initial account balance for each token that will be used to add liquidity to the pool
         await setTokenBalance(
             client,
             accountAddress,

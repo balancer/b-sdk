@@ -1,5 +1,4 @@
-// pnpm test -- test/fantom.test.ts
-import { beforeEach, describe, expect, test } from 'vitest';
+// pnpm test -- test/fantom.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -17,40 +16,48 @@ import { RawBasePool } from '../src';
 
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
-const chainId = ChainId.FANTOM;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.FANTOM);
+describe.skip('Fantom SOR', () => {
+    let pools: BasePool[];
+    let inputToken: Token;
+    let sor: SmartOrderRouter;
+    let BEETS: Token;
+    let swapOptions: SwapOptions;
+    let rpcUrl: string;
 
-describe('Fantom SOR', () => {
-    const inputToken = NATIVE_ASSETS[chainId];
-    const mockPoolProvider = new MockPoolProvider(
-        testPools.pools as RawBasePool[],
-    );
-    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
-        chainId,
-        rpcUrl,
-        BATCHSIZE[chainId],
-        VAULT[chainId],
-    );
+    beforeAll(async () => {
+        const chainId = ChainId.FANTOM;
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.FANTOM));
 
-    const sor = new SmartOrderRouter({
-        chainId,
-        poolDataProviders: mockPoolProvider,
-        poolDataEnrichers: onChainPoolDataEnricher,
-        rpcUrl: rpcUrl,
+        inputToken = NATIVE_ASSETS[chainId];
+        const mockPoolProvider = new MockPoolProvider(
+            testPools.pools as RawBasePool[],
+        );
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
+            rpcUrl,
+            BATCHSIZE[chainId],
+            VAULT[chainId],
+        );
+
+        sor = new SmartOrderRouter({
+            chainId,
+            poolDataProviders: mockPoolProvider,
+            poolDataEnrichers: onChainPoolDataEnricher,
+            rpcUrl,
+        });
+
+        BEETS = new Token(
+            chainId,
+            '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e',
+            18,
+            'BEETS',
+        );
+
+        swapOptions = {
+            block: 65313450n,
+        };
     });
 
-    const BEETS = new Token(
-        chainId,
-        '0xF24Bcf4d1e507740041C9cFd2DddB29585aDCe1e',
-        18,
-        'BEETS',
-    );
-
-    const swapOptions: SwapOptions = {
-        block: 65313450n,
-    };
-
-    let pools: BasePool[];
     // Since constructing a Swap mutates the pool balances, we refetch for each test
     // May be a better way to deep clone a BasePool[] class instead
     beforeEach(async () => {

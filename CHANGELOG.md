@@ -1,5 +1,16 @@
 # @balancer/sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- e1efe6b: - Add add/remove liquidity pool support (non-nested pools)
+  - Weighted pool type
+  - ComposableStable pool type
+  - Uses balancerHelpers to query amounts in/out rather than relying on specific pool math and associated data
+  - Integration tests run against local viem fork
+- 73b19fc: Adds Balancer API Provider. A utility module designed to fetch pool data from [API](https://github.com/beethovenxfi/beethovenx-backend/blob/v3-main/README.md#branching-and-deployment-environments).
+
 ## 0.2.0
 
 ### Minor Changes

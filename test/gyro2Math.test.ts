@@ -1,5 +1,4 @@
 // pnpm test -- gyro2Math.test.ts
-import { describe, expect, test } from 'vitest';
 import testPools from './lib/testData/testPools/gyro2.json';
 import { ChainId, RawGyro2Pool, Token, TokenAmount, WAD } from '../src';
 import {

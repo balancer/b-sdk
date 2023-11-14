@@ -1,5 +1,4 @@
 // pnpm test -- fxPool.test.ts
-import { describe, expect, test } from 'vitest';
 import { ChainId, RawFxPool, SwapKind, Token } from '../src';
 import testPools from './lib/testData/testPools/fx_43667355.json';
 import { CurveMathRevert, FxPool, FxPoolToken } from '../src/entities/pools/fx';
