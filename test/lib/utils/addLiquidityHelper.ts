@@ -191,7 +191,7 @@ export function assertAddLiquidityUnbalanced(
         const queryCheck = getCheck(addLiquidityQueryOutput, true);
 
         expect(queryCheck).to.deep.eq(expectedQueryOutput);
-    } else throw Error('Missing check for V3!'); // TODO Add check
+    } else throw Error('Missing check for V3!'); // TODO V3: Add check
 
     // Expect some bpt amount
     expect(addLiquidityQueryOutput.bptOut.amount > 0n).to.be.true;
@@ -256,7 +256,7 @@ export function assertAddLiquiditySingleToken(
         const queryCheck = getCheck(addLiquidityQueryOutput, false);
 
         expect(queryCheck).to.deep.eq(expectedQueryOutput);
-    } else throw Error('Missing check for V3!'); // TODO Add check
+    } else throw Error('Missing check for V3!'); // TODO V3: Add check
 
     // Expect only tokenIn to have amount > 0
     // (Note addLiquidityQueryOutput also has value for bpt if pre-minted)
@@ -344,7 +344,7 @@ export function assertAddLiquidityProportional(
             addLiquidityKind: addLiquidityInput.kind,
             balancerVersion: poolStateInput.balancerVersion,
         };
-        // TODO getCheck for v3
+        // TODO V3: getCheck for v3
         const queryCheck = getCheck(addLiquidityQueryOutput, false);
 
         expect(queryCheck).to.deep.eq(expectedQueryOutput);

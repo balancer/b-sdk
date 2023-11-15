@@ -253,7 +253,7 @@ describe('V3: add liquidity weighted test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    // TODO - Needs to be updated with V3
+    // TODO V3: Needs to be updated with V3
     public async getPool(id: Hex): Promise<PoolStateInput> {
         const tokens = [
             {

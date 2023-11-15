@@ -1,7 +1,7 @@
 import { BalancerApiClient } from '../../client';
 import { PoolStateInput } from '../../../../../entities';
 
-// TODO - This needs a balancerVersion
+// TODO V3: This needs a balancerVersion
 export class Pools {
     readonly poolStateQuery = `query GetPool($id: String!){
     poolGetPool(id:$id) {

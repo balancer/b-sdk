@@ -23,7 +23,7 @@ export class AddLiquidityWeightedV3 implements AddLiquidityBase {
     ): Promise<AddLiquidityBaseQueryOutputV3> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
 
-        // TODO - The following functions are not properly implemented
+        // TODO V3: The following functions are not properly implemented
         const { args, tokensIn } = parseAddLiquidityArgsV3({
             useNativeAssetAsWrappedAmountIn:
                 !!input.useNativeAssetAsWrappedAmountIn,
@@ -64,7 +64,7 @@ export class AddLiquidityWeightedV3 implements AddLiquidityBase {
     ): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        // TODO - The following functions are not properly implemented
+        // TODO V3: The following functions are not properly implemented
         // rome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { args } = parseAddLiquidityArgsV3({
             ...input,
@@ -72,7 +72,7 @@ export class AddLiquidityWeightedV3 implements AddLiquidityBase {
             maxAmountsIn: amounts.maxAmountsIn,
         });
 
-        // TODO - Update with V3 encoding
+        // TODO V3: Update with V3 encoding
         // const call = encodeFunctionData({
         //     abi: vaultAbi,
         //     functionName: 'joinPool',
@@ -84,7 +84,7 @@ export class AddLiquidityWeightedV3 implements AddLiquidityBase {
         )?.amount;
 
         return {
-            call: '0x', // TODO
+            call: '0x', // TODO V3
             to: BALANCER_VAULT,
             value: value === undefined ? 0n : value,
             minBptOut: TokenAmount.fromRawAmount(
