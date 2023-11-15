@@ -274,6 +274,7 @@ export class MockApi {
             address: getPoolAddress(id) as Address,
             type: 'PHANTOM_STABLE',
             tokens,
+            balancerVersion: 2,
         };
     }
 }

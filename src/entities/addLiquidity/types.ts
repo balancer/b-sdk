@@ -45,7 +45,7 @@ export type AddLiquidityInput =
     | AddLiquiditySingleTokenInput
     | AddLiquidityProportionalInput;
 
-type AddLiquidityBaseQueryOutput = {
+export type AddLiquidityBaseQueryOutputV2 = {
     poolType: string;
     poolId: Hex;
     addLiquidityKind: AddLiquidityKind;
@@ -53,17 +53,27 @@ type AddLiquidityBaseQueryOutput = {
     amountsIn: TokenAmount[];
     fromInternalBalance: boolean;
     tokenInIndex?: number;
+    balancerVersion: 2;
 };
 
-export type AddLiquidityWeightedQueryOutput = AddLiquidityBaseQueryOutput;
+export type AddLiquidityBaseQueryOutputV3 = {
+    poolType: string;
+    poolAddress: Hex;
+    addLiquidityKind: AddLiquidityKind;
+    bptOut: TokenAmount;
+    amountsIn: TokenAmount[];
+    tokenInIndex?: number;
+    balancerVersion: 3;
+};
 
 export type AddLiquidityComposableStableQueryOutput =
-    AddLiquidityBaseQueryOutput & {
+    AddLiquidityBaseQueryOutputV2 & {
         bptIndex: number;
     };
 
 export type AddLiquidityQueryOutput =
-    | AddLiquidityWeightedQueryOutput
+    | AddLiquidityBaseQueryOutputV2
+    | AddLiquidityBaseQueryOutputV3
     | AddLiquidityComposableStableQueryOutput;
 
 type AddLiquidityBaseCall = {
@@ -74,11 +84,14 @@ type AddLiquidityBaseCall = {
 
 export type AddLiquidityComposableStableCall = AddLiquidityBaseCall &
     AddLiquidityComposableStableQueryOutput;
-export type AddLiquidityWeightedCall = AddLiquidityBaseCall &
-    AddLiquidityBaseQueryOutput;
+export type AddLiquidityWeightedV2Call = AddLiquidityBaseCall &
+    AddLiquidityBaseQueryOutputV2;
+export type AddLiquidityWeightedV3Call = AddLiquidityBaseCall &
+    AddLiquidityBaseQueryOutputV3;
 
 export type AddLiquidityCall =
-    | AddLiquidityWeightedCall
+    | AddLiquidityWeightedV2Call
+    | AddLiquidityWeightedV3Call
     | AddLiquidityComposableStableCall;
 
 export interface AddLiquidityBase {

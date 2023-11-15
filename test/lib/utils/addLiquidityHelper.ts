@@ -15,6 +15,7 @@ import {
     TokenAmount,
     AddLiquidityComposableStableQueryOutput,
     NATIVE_ASSETS,
+    AddLiquidityBaseQueryOutputV2,
 } from '../../../src';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
@@ -170,23 +171,26 @@ export function assertAddLiquidityUnbalanced(
         else return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'bptOut' | 'bptIndex'
-    > = {
-        // Query should use same amountsIn as input
-        amountsIn: expectedAmountsIn,
-        tokenInIndex: undefined,
-        // Should match inputs
-        poolId: poolStateInput.id,
-        poolType: poolStateInput.type,
-        fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
-        addLiquidityKind: addLiquidityInput.kind,
-    };
+    if (poolStateInput.balancerVersion === 2) {
+        const expectedQueryOutput: Omit<
+            AddLiquidityBaseQueryOutputV2,
+            'bptOut' | 'bptIndex'
+        > = {
+            // Query should use same amountsIn as input
+            amountsIn: expectedAmountsIn,
+            tokenInIndex: undefined,
+            // Should match inputs
+            poolId: poolStateInput.id,
+            poolType: poolStateInput.type,
+            fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
+            addLiquidityKind: addLiquidityInput.kind,
+            balancerVersion: poolStateInput.balancerVersion,
+        };
 
-    const queryCheck = getCheck(addLiquidityQueryOutput, true);
+        const queryCheck = getCheck(addLiquidityQueryOutput, true);
 
-    expect(queryCheck).to.deep.eq(expectedQueryOutput);
+        expect(queryCheck).to.deep.eq(expectedQueryOutput);
+    } else throw Error('Missing check for V3!'); // TODO Add check
 
     // Expect some bpt amount
     expect(addLiquidityQueryOutput.bptOut.amount > 0n).to.be.true;
@@ -227,28 +231,31 @@ export function assertAddLiquiditySingleToken(
         (t) => t.address !== poolStateInput.address,
     );
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'amountsIn' | 'bptIndex'
-    > = {
-        // Query should use same bpt out as user sets
-        bptOut: TokenAmount.fromRawAmount(
-            bptToken,
-            addLiquidityInput.bptOut.rawAmount,
-        ),
-        tokenInIndex: tokensWithoutBpt.findIndex(
-            (t) => t.address === addLiquidityInput.tokenIn,
-        ),
-        // Should match inputs
-        poolId: poolStateInput.id,
-        poolType: poolStateInput.type,
-        fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
-        addLiquidityKind: addLiquidityInput.kind,
-    };
+    if (poolStateInput.balancerVersion === 2) {
+        const expectedQueryOutput: Omit<
+            AddLiquidityBaseQueryOutputV2,
+            'amountsIn' | 'bptIndex'
+        > = {
+            // Query should use same bpt out as user sets
+            bptOut: TokenAmount.fromRawAmount(
+                bptToken,
+                addLiquidityInput.bptOut.rawAmount,
+            ),
+            tokenInIndex: tokensWithoutBpt.findIndex(
+                (t) => t.address === addLiquidityInput.tokenIn,
+            ),
+            // Should match inputs
+            poolId: poolStateInput.id,
+            poolType: poolStateInput.type,
+            fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
+            addLiquidityKind: addLiquidityInput.kind,
+            balancerVersion: poolStateInput.balancerVersion,
+        };
 
-    const queryCheck = getCheck(addLiquidityQueryOutput, false);
+        const queryCheck = getCheck(addLiquidityQueryOutput, false);
 
-    expect(queryCheck).to.deep.eq(expectedQueryOutput);
+        expect(queryCheck).to.deep.eq(expectedQueryOutput);
+    } else throw Error('Missing check for V3!'); // TODO Add check
 
     // Expect only tokenIn to have amount > 0
     // (Note addLiquidityQueryOutput also has value for bpt if pre-minted)
@@ -295,27 +302,30 @@ export function assertAddLiquidityProportional(
 
     const bptToken = new Token(chainId, poolStateInput.address, 18);
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'amountsIn' | 'bptIndex'
-    > = {
-        // Query should use same bpt out as user sets
-        bptOut: TokenAmount.fromRawAmount(
-            bptToken,
-            addLiquidityInput.bptOut.rawAmount,
-        ),
-        // Only expect tokenInIndex for AddLiquiditySingleToken
-        tokenInIndex: undefined,
-        // Should match inputs
-        poolId: poolStateInput.id,
-        poolType: poolStateInput.type,
-        fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
-        addLiquidityKind: addLiquidityInput.kind,
-    };
+    if (poolStateInput.balancerVersion === 2) {
+        const expectedQueryOutput: Omit<
+            AddLiquidityBaseQueryOutputV2,
+            'amountsIn' | 'bptIndex'
+        > = {
+            // Query should use same bpt out as user sets
+            bptOut: TokenAmount.fromRawAmount(
+                bptToken,
+                addLiquidityInput.bptOut.rawAmount,
+            ),
+            // Only expect tokenInIndex for AddLiquiditySingleToken
+            tokenInIndex: undefined,
+            // Should match inputs
+            poolId: poolStateInput.id,
+            poolType: poolStateInput.type,
+            fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
+            addLiquidityKind: addLiquidityInput.kind,
+            balancerVersion: poolStateInput.balancerVersion,
+        };
 
-    const queryCheck = getCheck(addLiquidityQueryOutput, false);
+        const queryCheck = getCheck(addLiquidityQueryOutput, false);
 
-    expect(queryCheck).to.deep.eq(expectedQueryOutput);
+        expect(queryCheck).to.deep.eq(expectedQueryOutput);
+    } else throw Error('Missing check for V3!'); // TODO Add check
 
     // Expect all assets in to have an amount > 0 apart from BPT if it exists
     addLiquidityQueryOutput.amountsIn.forEach((a) => {

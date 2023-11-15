@@ -181,6 +181,7 @@ export class MockApi {
                     index: 1,
                 },
             ],
+            balancerVersion: 2,
         };
     }
 }

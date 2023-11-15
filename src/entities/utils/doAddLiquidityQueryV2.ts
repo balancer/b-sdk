@@ -3,7 +3,7 @@ import { Address } from '../../types';
 import { BALANCER_HELPERS, CHAINS } from '../../utils';
 import { balancerHelpersAbi } from '../../abi';
 
-export async function doAddLiquidityQuery(
+export async function doAddLiquidityQueryV2(
     rpcUrl: string,
     chainId: number,
     args: readonly [
