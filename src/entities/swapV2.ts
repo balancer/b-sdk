@@ -16,10 +16,10 @@ import {
     getContract,
     http,
 } from 'viem';
-import { balancerQueriesAbi } from '../abi/';
+import { balancerQueriesAbi } from '../abi';
 
 // A Swap can be a single or multiple paths
-export class Swap {
+export class SwapV2 {
     public constructor({
         paths,
         swapKind,

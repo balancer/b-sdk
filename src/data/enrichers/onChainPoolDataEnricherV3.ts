@@ -17,7 +17,7 @@ import { CHAINS } from '../../utils';
 import { SwapOptions } from '../../types';
 import { fetchAdditionalPoolData } from '../onChainPoolDataViaReadContract';
 
-export interface OnChainPoolData {
+interface OnChainPoolData {
     id: string;
     balances: readonly bigint[];
     totalSupply: bigint;
@@ -35,7 +35,8 @@ export interface OnChainPoolData {
     inRecoveryMode: boolean;
 }
 
-export class OnChainPoolDataEnricher implements PoolDataEnricher {
+// TODO V3: This needs to be updated to match V3 data schema
+export class OnChainPoolDataEnricherV3 implements PoolDataEnricher {
     private readonly client: PublicClient;
 
     constructor(
@@ -54,6 +55,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
         data: GetPoolsResponse,
         options: SwapOptions,
     ): Promise<OnChainPoolData[]> {
+        // TODO V3: This will need its own implementation
         return fetchAdditionalPoolData(
             this.vault,
             data.pools,

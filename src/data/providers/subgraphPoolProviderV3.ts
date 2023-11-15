@@ -7,6 +7,7 @@ import {
 import { fetchWithRetry } from '../../utils/fetch';
 import { SUBGRAPH_URLS, brickedPools } from '../../utils';
 
+// rome-ignore lint/complexity/useLiteralKeys: <explanation>
 BigInt.prototype['toJSON'] = function () {
     return this.toString();
 };
@@ -40,7 +41,8 @@ interface SubgraphPoolProviderConfig {
     gqlAdditionalPoolQueryFields?: string;
 }
 
-export class SubgraphPoolProvider implements PoolDataProvider {
+// TODO V3: This needs to be updated to match V3 data schema
+export class SubgraphPoolProviderV3 implements PoolDataProvider {
     private readonly url: string;
     private readonly config: SubgraphPoolProviderConfig;
 

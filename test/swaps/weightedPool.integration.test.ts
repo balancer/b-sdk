@@ -6,7 +6,7 @@ import { SmartOrderRouter } from '../../src/sor';
 import { sorGetSwapsWithPools } from '../../src/static';
 import { ChainId, ETH, BATCHSIZE, VAULT } from '../../src/utils';
 import { Token, TokenAmount } from '../../src/entities';
-import { OnChainPoolDataEnricher } from '../../src/data/enrichers/onChainPoolDataEnricher';
+import { OnChainPoolDataEnricherV2 } from '../../src/data/enrichers/onChainPoolDataEnricherV2';
 import { SwapKind, SwapOptions } from '../../src/types';
 import { BasePool } from '../../src/entities/pools';
 import { MockPoolProvider } from '../lib/utils/mockPoolProvider';
@@ -22,7 +22,7 @@ describe('Weighted Swap tests', () => {
     const mockPoolProvider = new MockPoolProvider(
         testPools.pools as RawWeightedPool[],
     );
-    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+    const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
         chainId,
         rpcUrl,
         BATCHSIZE[chainId],
@@ -61,6 +61,7 @@ describe('Weighted Swap tests', () => {
         const inputAmount = TokenAmount.fromHumanAmount(ETH, '1');
 
         const swap = await sorGetSwapsWithPools(
+            2,
             ETH,
             BAL,
             SwapKind.GivenIn,
@@ -89,6 +90,7 @@ describe('Weighted Swap tests', () => {
         const outputAmount = TokenAmount.fromHumanAmount(BAL, '100');
 
         const swap = await sorGetSwapsWithPools(
+            2,
             ETH,
             BAL,
             SwapKind.GivenOut,

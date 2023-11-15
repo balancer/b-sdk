@@ -6,7 +6,7 @@ import { SmartOrderRouter } from '../../src/sor';
 import { sorGetSwapsWithPools } from '../../src/static';
 import { ChainId, NATIVE_ASSETS, BATCHSIZE, VAULT } from '../../src/utils';
 import { Token, TokenAmount } from '../../src/entities';
-import { OnChainPoolDataEnricher } from '../../src/data/enrichers/onChainPoolDataEnricher';
+import { OnChainPoolDataEnricherV2 } from '../../src/data/enrichers/onChainPoolDataEnricherV2';
 import { SwapKind, SwapOptions } from '../../src/types';
 import { BasePool } from '../../src/entities/pools';
 import { MockPoolProvider } from '../lib/utils/mockPoolProvider';
@@ -32,7 +32,7 @@ describe.skip('Fantom SOR', () => {
         const mockPoolProvider = new MockPoolProvider(
             testPools.pools as RawBasePool[],
         );
-        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
             chainId,
             rpcUrl,
             BATCHSIZE[chainId],
@@ -69,6 +69,7 @@ describe.skip('Fantom SOR', () => {
             const inputAmount = TokenAmount.fromHumanAmount(inputToken, '100');
 
             const swap = await sorGetSwapsWithPools(
+                2,
                 inputToken,
                 BEETS,
                 SwapKind.GivenIn,
@@ -90,6 +91,7 @@ describe.skip('Fantom SOR', () => {
             const outputAmount = TokenAmount.fromHumanAmount(BEETS, '100000');
 
             const swap = await sorGetSwapsWithPools(
+                2,
                 inputToken,
                 BEETS,
                 SwapKind.GivenOut,

@@ -1,4 +1,4 @@
-// pnpm test -- test/gyroEV2Pool.integration.test.ts
+// pnpm test -- test/swaps/gyroEV2Pool.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -6,7 +6,7 @@ import testPools from '../lib/testData/testPools/gyroE_44215395.json';
 import { BATCHSIZE, ChainId, VAULT } from '../../src/utils';
 import {
     BasePool,
-    OnChainPoolDataEnricher,
+    OnChainPoolDataEnricherV2,
     RawGyroEPool,
     SmartOrderRouter,
     SwapKind,
@@ -43,7 +43,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     beforeAll(() => {
         const pools = [{ ...testPools }.pools[2]] as RawGyroEPool[];
         const mockPoolProvider = new MockPoolProvider(pools);
-        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
             chainId,
             rpcUrl,
             BATCHSIZE[chainId],
@@ -70,6 +70,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             const tokenOut = stMATIC;
             const swapAmount = parseEther('11206540');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -92,6 +93,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 tIn.index,
             );
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -116,6 +118,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 tIn.index,
             );
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -138,6 +141,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             const tokenOut = stMATIC;
             const swapAmount = parseEther('30310600');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -160,6 +164,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 tOut.index,
             );
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -184,6 +189,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 tOut.index,
             );
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,

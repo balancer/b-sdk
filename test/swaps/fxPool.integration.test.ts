@@ -5,7 +5,7 @@ dotenv.config();
 import { BATCHSIZE, ChainId, VAULT } from '../../src/utils';
 import {
     BasePool,
-    OnChainPoolDataEnricher,
+    OnChainPoolDataEnricherV2,
     RawFxPool,
     SmartOrderRouter,
     SwapKind,
@@ -44,7 +44,7 @@ describe('fx integration tests', () => {
         const pools = testPools.pools as RawFxPool[];
         const mockPoolProvider = new MockPoolProvider(pools);
 
-        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
             chainId,
             rpcUrl,
             BATCHSIZE[chainId],
@@ -71,6 +71,7 @@ describe('fx integration tests', () => {
             const tokenOut = XSGD;
             const swapAmount = TokenAmount.fromHumanAmount(USDC, '6000000');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -86,6 +87,7 @@ describe('fx integration tests', () => {
             const tokenOut = XSGD;
             const swapAmount = TokenAmount.fromHumanAmount(USDC, '60000');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -103,6 +105,7 @@ describe('fx integration tests', () => {
             const tokenOut = USDC;
             const swapAmount = TokenAmount.fromHumanAmount(XSGD, '1');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -125,6 +128,7 @@ describe('fx integration tests', () => {
             const tokenOut = XSGD;
             const swapAmount = TokenAmount.fromHumanAmount(XSGD, '6000000');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -140,6 +144,7 @@ describe('fx integration tests', () => {
             const tokenOut = XSGD;
             const swapAmount = TokenAmount.fromHumanAmount(XSGD, '60000');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -157,6 +162,7 @@ describe('fx integration tests', () => {
             const tokenOut = USDC;
             const swapAmount = TokenAmount.fromHumanAmount(USDC, '1');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,

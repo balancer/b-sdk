@@ -12,7 +12,7 @@ import {
     RawGyro2Pool,
     SingleSwap,
     SmartOrderRouter,
-    Swap,
+    SwapV2,
     SwapKind,
     TokenAmount,
     Token,
@@ -130,7 +130,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                     tokenOut,
                     swapKind,
                     swapAmt,
-                )) as Swap;
+                )) as SwapV2;
 
                 const singleSwap = swapInfo.swaps as SingleSwap;
 

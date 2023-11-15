@@ -1,14 +1,14 @@
 // pnpm test -- test/data/subgraph.test.ts
-import { SubgraphPoolProvider } from '../../src/data/providers/subgraphPoolProvider';
+import { SubgraphPoolProviderV2 } from '../../src/data/providers/subgraphPoolProviderV2';
 import { ChainId } from '../../src/utils';
 import { ProviderSwapOptions } from '../../src/data/types';
 
 describe(
-    'SubgraphPoolProvider',
+    'SubgraphPoolProviderV2',
     () => {
         test('getPools mainnet', async () => {
             const chainId = ChainId.MAINNET;
-            const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
+            const subgraphPoolDataService = new SubgraphPoolProviderV2(chainId);
 
             const providerOptions: ProviderSwapOptions = {
                 timestamp: BigInt(Math.floor(new Date().getTime() / 1000)),
@@ -21,7 +21,7 @@ describe(
         });
         test('getPools fantom', async () => {
             const chainId = ChainId.FANTOM;
-            const subgraphPoolDataService = new SubgraphPoolProvider(chainId);
+            const subgraphPoolDataService = new SubgraphPoolProviderV2(chainId);
 
             const providerOptions: ProviderSwapOptions = {
                 timestamp: BigInt(Math.floor(new Date().getTime() / 1000)),
@@ -37,3 +37,5 @@ describe(
         timeout: 60000,
     },
 );
+
+// TODO V3: Add test

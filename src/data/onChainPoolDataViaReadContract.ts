@@ -1,6 +1,6 @@
 import { PublicClient, parseAbi, Address, Abi, Hex } from 'viem';
 import { getPoolAddress } from '../utils';
-import { OnChainPoolData } from './enrichers/onChainPoolDataEnricher';
+import { OnChainPoolData } from './enrichers/onChainPoolDataEnricherV2';
 import { SwapOptions } from '../types';
 
 type Result =

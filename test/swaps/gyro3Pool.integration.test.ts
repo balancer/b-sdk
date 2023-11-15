@@ -49,6 +49,7 @@ describe('gyro3 integration tests', () => {
             const tokenOut = USDT;
             const swapAmount = TokenAmount.fromHumanAmount(USDC, '100000');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -64,6 +65,7 @@ describe('gyro3 integration tests', () => {
             const tokenOut = USDT;
             const swapAmount = TokenAmount.fromHumanAmount(USDC, '1.123456');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -81,6 +83,7 @@ describe('gyro3 integration tests', () => {
             const tokenOut = USDC;
             const swapAmount = TokenAmount.fromHumanAmount(USDT, '0.999');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -103,6 +106,7 @@ describe('gyro3 integration tests', () => {
             const tokenOut = USDT;
             const swapAmount = TokenAmount.fromHumanAmount(USDT, '100000');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -118,6 +122,7 @@ describe('gyro3 integration tests', () => {
             const tokenOut = USDT;
             const swapAmount = TokenAmount.fromHumanAmount(USDT, '1.987654');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -134,6 +139,7 @@ describe('gyro3 integration tests', () => {
             const tokenOut = USDC;
             const swapAmount = TokenAmount.fromHumanAmount(USDC, '0.999');
             const swapInfo = await sorGetSwapsWithPools(
+                2,
                 tokenIn,
                 tokenOut,
                 swapKind,

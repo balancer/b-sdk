@@ -6,7 +6,7 @@ import { SmartOrderRouter } from '../../src/sor';
 import { sorGetSwapsWithPools } from '../../src/static';
 import { ChainId, BATCHSIZE, VAULT } from '../../src/utils';
 import { Token, TokenAmount } from '../../src/entities';
-import { OnChainPoolDataEnricher } from '../../src/data/enrichers/onChainPoolDataEnricher';
+import { OnChainPoolDataEnricherV2 } from '../../src/data/enrichers/onChainPoolDataEnricherV2';
 import { SwapKind, SwapOptions } from '../../src/types';
 import { BasePool } from '../../src/entities/pools';
 import { MockPoolProvider } from '../lib/utils/mockPoolProvider';
@@ -22,7 +22,7 @@ describe('ComposableStable Swap tests', () => {
     const mockPoolProvider = new MockPoolProvider(
         testPools.pools as RawStablePool[],
     );
-    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+    const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
         chainId,
         rpcUrl,
         BATCHSIZE[chainId],
@@ -70,6 +70,7 @@ describe('ComposableStable Swap tests', () => {
         const inputAmount = TokenAmount.fromHumanAmount(DAI, '100000');
 
         const swap = await sorGetSwapsWithPools(
+            2,
             DAI,
             USDT,
             SwapKind.GivenIn,
@@ -92,6 +93,7 @@ describe('ComposableStable Swap tests', () => {
         const outputAmount = TokenAmount.fromHumanAmount(DAI, '1000000');
 
         const swap = await sorGetSwapsWithPools(
+            2,
             USDC,
             DAI,
             SwapKind.GivenOut,

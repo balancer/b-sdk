@@ -2,7 +2,8 @@ import { RawPool } from './data';
 import {
     BasePool,
     BasePoolFactory,
-    Swap,
+    SwapV2,
+    SwapV3,
     Token,
     TokenAmount,
 } from './entities';
@@ -22,13 +23,14 @@ export function sorParseRawPools(
 }
 
 export async function sorGetSwapsWithPools(
+    balancerVersion: 2 | 3,
     tokenIn: Token,
     tokenOut: Token,
     swapKind: SwapKind,
     swapAmount: SwapInputRawAmount | TokenAmount,
     pools: BasePool[],
     swapOptions?: Omit<SwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
-): Promise<Swap | null> {
+): Promise<SwapV2 | SwapV3 | null> {
     const checkedSwapAmount = checkInputs(
         tokenIn,
         tokenOut,
@@ -51,5 +53,7 @@ export async function sorGetSwapsWithPools(
 
     if (!bestPaths) return null;
 
-    return new Swap({ paths: bestPaths, swapKind });
+    if (balancerVersion === 2)
+        return new SwapV2({ paths: bestPaths, swapKind });
+    else return new SwapV3({ paths: bestPaths, swapKind });
 }
