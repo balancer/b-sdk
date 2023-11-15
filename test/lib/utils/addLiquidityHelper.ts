@@ -16,6 +16,7 @@ import {
     AddLiquidityComposableStableQueryOutput,
     NATIVE_ASSETS,
     AddLiquidityBaseQueryOutputV2,
+    AddLiquidityBaseQueryOutputV3,
 } from '../../../src';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
@@ -325,7 +326,29 @@ export function assertAddLiquidityProportional(
         const queryCheck = getCheck(addLiquidityQueryOutput, false);
 
         expect(queryCheck).to.deep.eq(expectedQueryOutput);
-    } else throw Error('Missing check for V3!'); // TODO Add check
+    } else if (poolStateInput.balancerVersion === 3) {
+        const expectedQueryOutput: Omit<
+            AddLiquidityBaseQueryOutputV3,
+            'amountsIn' | 'bptIndex'
+        > = {
+            // Query should use same bpt out as user sets
+            bptOut: TokenAmount.fromRawAmount(
+                bptToken,
+                addLiquidityInput.bptOut.rawAmount,
+            ),
+            // Only expect tokenInIndex for AddLiquiditySingleToken
+            tokenInIndex: undefined,
+            // Should match inputs
+            poolAddress: poolStateInput.address,
+            poolType: poolStateInput.type,
+            addLiquidityKind: addLiquidityInput.kind,
+            balancerVersion: poolStateInput.balancerVersion,
+        };
+        // TODO getCheck for v3
+        const queryCheck = getCheck(addLiquidityQueryOutput, false);
+
+        expect(queryCheck).to.deep.eq(expectedQueryOutput);
+    } else throw Error('Unsupported balancerVersion');
 
     // Expect all assets in to have an amount > 0 apart from BPT if it exists
     addLiquidityQueryOutput.amountsIn.forEach((a) => {
