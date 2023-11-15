@@ -4,9 +4,9 @@ dotenv.config();
 
 import { parseEther } from 'viem';
 
-import testPools from './lib/testData/testPools/gyro2.json';
-import { MockPoolDataEnricher } from './lib/utils/mockPoolEnricher';
-import { MockPoolProvider } from './lib/utils/mockPoolProvider';
+import testPools from '../lib/testData/testPools/gyro2.json';
+import { MockPoolDataEnricher } from '../lib/utils/mockPoolEnricher';
+import { MockPoolProvider } from '../lib/utils/mockPoolProvider';
 import {
     ChainId,
     RawGyro2Pool,
@@ -16,8 +16,8 @@ import {
     SwapKind,
     TokenAmount,
     Token,
-} from '../src';
-import { Gyro2Pool } from '../src/entities/pools/gyro2';
+} from '../../src';
+import { Gyro2Pool } from '../../src/entities/pools/gyro2';
 
 describe('Gyro2Pool tests USDC > DAI', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;
@@ -111,7 +111,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 const swapKind = SwapKind.GivenIn;
                 const swapAmt = TokenAmount.fromHumanAmount(tokenIn, '13.5');
 
-                const rpcUrl = process.env['ETHEREUM_RPC_URL'] || '';
+                const rpcUrl = process.env.ETHEREUM_RPC_URL || '';
                 const mockPoolProvider = new MockPoolProvider(pools);
                 const mockPoolDataEnricher = new MockPoolDataEnricher();
 

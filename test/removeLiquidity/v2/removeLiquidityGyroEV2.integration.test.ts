@@ -1,4 +1,4 @@
-// pnpm test -- removeLiquidityGyro2.integration.test.ts
+// pnpm test -- removeLiquidityGyroEV2.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -25,22 +25,22 @@ import {
     getPoolAddress,
     RemoveLiquidityInput,
     InputAmount,
-} from '../src';
-import { forkSetup } from './lib/utils/helper';
+} from '../../../src';
+import { forkSetup } from '../../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
     doRemoveLiquidity,
-} from './lib/utils/removeLiquidityHelper';
-import { RemoveLiquidityTxInput } from './lib/utils/types';
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { removeLiquidityKindNotSupportedByGyro } from '../src/entities/removeLiquidity/utils/validateInputs';
+} from '../../lib/utils/removeLiquidityHelper';
+import { RemoveLiquidityTxInput } from '../../lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+import { removeLiquidityKindNotSupportedByGyro } from '../../../src/entities/removeLiquidity/utils/validateInputs';
 
-const chainId = ChainId.POLYGON;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
+const chainId = ChainId.MAINNET;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const poolId =
-    '0xdac42eeb17758daa38caf9a3540c808247527ae3000200000000000000000a2b'; // 2CLP-USDC-DAI
+    '0xf01b0684c98cd7ada480bfdf6e43876422fa1fc10002000000000000000005de'; // ECLP-wstETH-wETH
 
-describe('Gyro2 remove liquidity test', () => {
+describe('GyroE V2 remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
     let poolInput: PoolStateInput;
     beforeAll(async () => {
@@ -63,7 +63,7 @@ describe('Gyro2 remove liquidity test', () => {
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolStateInput: poolInput,
-            testAddress: '0xe84f75fc9caa49876d0ba18d309da4231d44e94d', // MATIC Holder Wallet, must hold amount of matic to approve tokens
+            testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
     });
@@ -106,7 +106,23 @@ describe('Gyro2 remove liquidity test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
             );
-            //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
+        });
+        test('with native', async () => {
+            const removeLiquidityInput = {
+                ...input,
+                useNativeAssetAsWrappedAmountIn: true,
+            };
+            const removeLiquidityOutput = await doRemoveLiquidity({
+                ...txInput,
+                removeLiquidityInput,
+            });
+            assertRemoveLiquidityProportional(
+                txInput.client.chain?.id as number,
+                txInput.poolStateInput,
+                removeLiquidityInput,
+                removeLiquidityOutput,
+                txInput.slippage,
+            );
         });
     });
 
@@ -162,21 +178,20 @@ describe('Gyro2 remove liquidity test', () => {
 });
 
 /*********************** Mock To Represent API Requirements **********************/
-
 export class MockApi {
     public async getPool(id: Hex): Promise<PoolStateInput> {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'GYRO2',
+            type: 'GYROE',
             tokens: [
                 {
-                    address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC(PoS)
-                    decimals: 6,
+                    address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', // wstETH
+                    decimals: 18,
                     index: 0,
                 },
                 {
-                    address: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
+                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // wETH
                     decimals: 18,
                     index: 1,
                 },

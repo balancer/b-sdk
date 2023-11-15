@@ -1,6 +1,6 @@
-import { SubgraphPoolProvider } from '../src/data/providers/subgraphPoolProvider';
-import { ChainId } from '../src/utils';
-import { ProviderSwapOptions } from '../src/data/types';
+import { SubgraphPoolProvider } from '../../src/data/providers/subgraphPoolProvider';
+import { ChainId } from '../../src/utils';
+import { ProviderSwapOptions } from '../../src/data/types';
 
 describe(
     'SubgraphPoolProvider',

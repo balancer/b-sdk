@@ -1,5 +1,5 @@
 // pnpm test -- balancerApi.test.ts
-import { BalancerApi, PoolStateInput, ChainId } from '../src';
+import { BalancerApi, PoolStateInput, ChainId } from '../../src';
 
 describe(
     'BalancerApi Provider',

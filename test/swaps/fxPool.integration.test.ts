@@ -1,53 +1,75 @@
-// pnpm test -- test/gyro3Pool.integration.test.ts
+// pnpm test -- test/fxPool.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
-import testPools from './lib/testData/testPools/gyro3_44133130.json';
-import { ChainId } from '../src/utils';
-import { RawGyro3Pool } from '../src/data/types';
+import { BATCHSIZE, ChainId, VAULT } from '../../src/utils';
 import {
     BasePool,
+    OnChainPoolDataEnricher,
+    RawFxPool,
+    SmartOrderRouter,
     SwapKind,
     SwapOptions,
     Token,
     TokenAmount,
     sorGetSwapsWithPools,
-    sorParseRawPools,
-} from '../src';
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+} from '../../src';
+import { MockPoolProvider } from '../lib/utils/mockPoolProvider';
+import testPools from '../lib/testData/testPools/fx_43667355.json';
+import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 
-describe('gyro3 integration tests', () => {
-    const rawPool = { ...testPools }.pools[1] as RawGyro3Pool;
+describe('fx integration tests', () => {
     const USDC = new Token(
         chainId,
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
         6,
         'USDC',
     );
-    const USDT = new Token(
+    const XSGD = new Token(
         chainId,
-        '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
+        '0xdc3326e71d45186f113a2f448984ca0e8d201995',
         6,
-        'USDT',
+        'XSGD',
     );
     const swapOptions: SwapOptions = {
-        block: 44133130n,
+        block: 43667355n,
     };
 
+    let sor: SmartOrderRouter;
+
+    beforeAll(() => {
+        const pools = testPools.pools as RawFxPool[];
+        const mockPoolProvider = new MockPoolProvider(pools);
+
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+            chainId,
+            rpcUrl,
+            BATCHSIZE[chainId],
+            VAULT[chainId],
+        );
+
+        sor = new SmartOrderRouter({
+            chainId,
+            poolDataProviders: mockPoolProvider,
+            poolDataEnrichers: onChainPoolDataEnricher,
+            rpcUrl: rpcUrl,
+        });
+    });
+
     let pools: BasePool[];
-    beforeEach(() => {
-        pools = sorParseRawPools(chainId, [rawPool]);
+    beforeEach(async () => {
+        pools = await sor.fetchAndCachePools(swapOptions.block);
     });
 
     describe('ExactIn', () => {
         const swapKind = SwapKind.GivenIn;
         test('should return no swaps when above limit', async () => {
             const tokenIn = USDC;
-            const tokenOut = USDT;
-            const swapAmount = TokenAmount.fromHumanAmount(USDC, '100000');
+            const tokenOut = XSGD;
+            const swapAmount = TokenAmount.fromHumanAmount(USDC, '6000000');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -59,10 +81,10 @@ describe('gyro3 integration tests', () => {
 
             expect(swapInfo).toBeNull();
         });
-        test('USDC > USDT, getSwaps result should match query', async () => {
+        test('USDC > XSGD, getSwaps result should match query', async () => {
             const tokenIn = USDC;
-            const tokenOut = USDT;
-            const swapAmount = TokenAmount.fromHumanAmount(USDC, '1.123456');
+            const tokenOut = XSGD;
+            const swapAmount = TokenAmount.fromHumanAmount(USDC, '60000');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -76,10 +98,10 @@ describe('gyro3 integration tests', () => {
             expect(swapAmount.amount).toEqual(swapInfo?.inputAmount.amount);
             expect(onchain).toEqual(swapInfo?.outputAmount);
         });
-        test('USDT > USDC, getSwaps result should match query', async () => {
-            const tokenIn = USDT;
+        test('XSGD > USDC, getSwaps result should match query', async () => {
+            const tokenIn = XSGD;
             const tokenOut = USDC;
-            const swapAmount = TokenAmount.fromHumanAmount(USDT, '0.999');
+            const swapAmount = TokenAmount.fromHumanAmount(XSGD, '1');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -100,8 +122,8 @@ describe('gyro3 integration tests', () => {
 
         test('should return no swaps when above limit', async () => {
             const tokenIn = USDC;
-            const tokenOut = USDT;
-            const swapAmount = TokenAmount.fromHumanAmount(USDT, '100000');
+            const tokenOut = XSGD;
+            const swapAmount = TokenAmount.fromHumanAmount(XSGD, '6000000');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -113,10 +135,10 @@ describe('gyro3 integration tests', () => {
 
             expect(swapInfo).toBeNull();
         });
-        test('USDC > USDT, getSwaps result should match query', async () => {
+        test('USDC > XSGD, getSwaps result should match query', async () => {
             const tokenIn = USDC;
-            const tokenOut = USDT;
-            const swapAmount = TokenAmount.fromHumanAmount(USDT, '1.987654');
+            const tokenOut = XSGD;
+            const swapAmount = TokenAmount.fromHumanAmount(XSGD, '60000');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -127,12 +149,13 @@ describe('gyro3 integration tests', () => {
             );
 
             const onchain = await swapInfo?.query(rpcUrl, swapOptions.block);
+            expect(swapAmount.amount).toEqual(swapInfo?.outputAmount.amount);
             expect(onchain).toEqual(swapInfo?.inputAmount);
         });
-        test('USDT > USDC, getSwaps result should match query', async () => {
-            const tokenIn = USDT;
+        test('XSGD > USDC, getSwaps result should match query', async () => {
+            const tokenIn = XSGD;
             const tokenOut = USDC;
-            const swapAmount = TokenAmount.fromHumanAmount(USDC, '0.999');
+            const swapAmount = TokenAmount.fromHumanAmount(USDC, '1');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,

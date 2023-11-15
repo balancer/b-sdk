@@ -1,4 +1,4 @@
-// pnpm test -- removeLiquidityGyro3.integration.test.ts
+// pnpm test -- removeLiquidityGyro2.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -25,22 +25,22 @@ import {
     getPoolAddress,
     RemoveLiquidityInput,
     InputAmount,
-} from '../src';
-import { forkSetup } from './lib/utils/helper';
+} from '../../../src';
+import { forkSetup } from '../../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
     doRemoveLiquidity,
-} from './lib/utils/removeLiquidityHelper';
-import { RemoveLiquidityTxInput } from './lib/utils/types';
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { removeLiquidityKindNotSupportedByGyro } from '../src/entities/removeLiquidity/utils/validateInputs';
+} from '../../lib/utils/removeLiquidityHelper';
+import { RemoveLiquidityTxInput } from '../../lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+import { removeLiquidityKindNotSupportedByGyro } from '../../../src/entities/removeLiquidity/utils/validateInputs';
 
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 const poolId =
-    '0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799'; // 3CLP-BUSD-USDC-USDT
+    '0xdac42eeb17758daa38caf9a3540c808247527ae3000200000000000000000a2b'; // 2CLP-USDC-DAI
 
-describe('Gyro3 remove liquidity test', () => {
+describe('Gyro2 remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
     let poolInput: PoolStateInput;
     beforeAll(async () => {
@@ -168,7 +168,7 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'GYRO3',
+            type: 'GYRO2',
             tokens: [
                 {
                     address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC(PoS)
@@ -176,14 +176,9 @@ export class MockApi {
                     index: 0,
                 },
                 {
-                    address: '0x9c9e5fd8bbc25984b178fdce6117defa39d2db39', // BUSD
+                    address: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
                     decimals: 18,
                     index: 1,
-                },
-                {
-                    address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // USDT(PoS)
-                    decimals: 6,
-                    index: 2,
                 },
             ],
             balancerVersion: 2,

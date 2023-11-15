@@ -25,16 +25,16 @@ import {
     getPoolAddress,
     RemoveLiquidityInput,
     InputAmount,
-} from '../src';
-import { forkSetup } from './lib/utils/helper';
+} from '../../../src';
+import { forkSetup } from '../../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
     assertRemoveLiquiditySingleToken,
     assertRemoveLiquidityUnbalanced,
     doRemoveLiquidity,
-} from './lib/utils/removeLiquidityHelper';
-import { RemoveLiquidityTxInput } from './lib/utils/types';
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+} from '../../lib/utils/removeLiquidityHelper';
+import { RemoveLiquidityTxInput } from '../../lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);

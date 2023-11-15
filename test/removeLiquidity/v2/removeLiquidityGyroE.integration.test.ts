@@ -25,15 +25,15 @@ import {
     getPoolAddress,
     RemoveLiquidityInput,
     InputAmount,
-} from '../src';
-import { forkSetup } from './lib/utils/helper';
+} from '../../../src';
+import { forkSetup } from '../../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
     doRemoveLiquidity,
-} from './lib/utils/removeLiquidityHelper';
-import { RemoveLiquidityTxInput } from './lib/utils/types';
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { removeLiquidityKindNotSupportedByGyro } from '../src/entities/removeLiquidity/utils/validateInputs';
+} from '../../lib/utils/removeLiquidityHelper';
+import { RemoveLiquidityTxInput } from '../../lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+import { removeLiquidityKindNotSupportedByGyro } from '../../../src/entities/removeLiquidity/utils/validateInputs';
 
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);

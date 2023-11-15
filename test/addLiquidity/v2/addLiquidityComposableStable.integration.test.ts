@@ -26,16 +26,16 @@ import {
     AddLiquidity,
     AddLiquidityInput,
     InputAmount,
-} from '../src';
-import { forkSetup } from './lib/utils/helper';
-import { AddLiquidityTxInput } from './lib/utils/types';
+} from '../../../src';
+import { forkSetup } from '../../lib/utils/helper';
+import { AddLiquidityTxInput } from '../../lib/utils/types';
 import {
     doAddLiquidity,
     assertAddLiquidityUnbalanced,
     assertAddLiquiditySingleToken,
     assertAddLiquidityProportional,
-} from './lib/utils/addLiquidityHelper';
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+} from '../../lib/utils/addLiquidityHelper';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;

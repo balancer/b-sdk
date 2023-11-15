@@ -1,49 +1,48 @@
-// pnpm test -- test/fxPool.integration.test.ts
+// pnpm test -- test/gyroEV2Pool.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { BATCHSIZE, ChainId, VAULT } from '../src/utils';
+import testPools from '../lib/testData/testPools/gyroE_44215395.json';
+import { BATCHSIZE, ChainId, VAULT } from '../../src/utils';
 import {
     BasePool,
     OnChainPoolDataEnricher,
-    RawFxPool,
+    RawGyroEPool,
     SmartOrderRouter,
     SwapKind,
     SwapOptions,
     Token,
-    TokenAmount,
     sorGetSwapsWithPools,
-} from '../src';
-import { MockPoolProvider } from './lib/utils/mockPoolProvider';
-import testPools from './lib/testData/testPools/fx_43667355.json';
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+} from '../../src';
+import { parseEther } from 'viem';
+import { GyroEPool, GyroEPoolToken } from '../../src/entities/pools/gyroE';
+import { MockPoolProvider } from '../lib/utils/mockPoolProvider';
+import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 
-describe('fx integration tests', () => {
-    const USDC = new Token(
+describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
+    const WMATIC = new Token(
         chainId,
-        '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-        6,
-        'USDC',
+        '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+        18,
+        'WMATIC',
     );
-    const XSGD = new Token(
+    const stMATIC = new Token(
         chainId,
-        '0xdc3326e71d45186f113a2f448984ca0e8d201995',
-        6,
-        'XSGD',
+        '0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4',
+        18,
+        'stMATIC',
     );
     const swapOptions: SwapOptions = {
-        block: 43667355n,
+        block: 44215395n,
     };
-
     let sor: SmartOrderRouter;
 
     beforeAll(() => {
-        const pools = testPools.pools as RawFxPool[];
+        const pools = [{ ...testPools }.pools[2]] as RawGyroEPool[];
         const mockPoolProvider = new MockPoolProvider(pools);
-
         const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
             chainId,
             rpcUrl,
@@ -67,9 +66,9 @@ describe('fx integration tests', () => {
     describe('ExactIn', () => {
         const swapKind = SwapKind.GivenIn;
         test('should return no swaps when above limit', async () => {
-            const tokenIn = USDC;
-            const tokenOut = XSGD;
-            const swapAmount = TokenAmount.fromHumanAmount(USDC, '6000000');
+            const tokenIn = WMATIC;
+            const tokenOut = stMATIC;
+            const swapAmount = parseEther('11206540');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -81,10 +80,17 @@ describe('fx integration tests', () => {
 
             expect(swapInfo).toBeNull();
         });
-        test('USDC > XSGD, getSwaps result should match query', async () => {
-            const tokenIn = USDC;
-            const tokenOut = XSGD;
-            const swapAmount = TokenAmount.fromHumanAmount(USDC, '60000');
+        test('token > LSD, getSwaps result should match queryBatchSwap', async () => {
+            const tokenIn = WMATIC;
+            const tokenOut = stMATIC;
+            const gyroPool = pools[0] as GyroEPool;
+            const { tIn } = gyroPool.getRequiredTokenPair(tokenIn, tokenOut);
+            const swapAmount = new GyroEPoolToken(
+                tokenIn,
+                parseEther('1.12345678'),
+                tIn.rate,
+                tIn.index,
+            );
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -98,10 +104,17 @@ describe('fx integration tests', () => {
             expect(swapAmount.amount).toEqual(swapInfo?.inputAmount.amount);
             expect(onchain).toEqual(swapInfo?.outputAmount);
         });
-        test('XSGD > USDC, getSwaps result should match query', async () => {
-            const tokenIn = XSGD;
-            const tokenOut = USDC;
-            const swapAmount = TokenAmount.fromHumanAmount(XSGD, '1');
+        test('LSD > token, getSwaps result should match queryBatchSwap', async () => {
+            const tokenIn = stMATIC;
+            const tokenOut = WMATIC;
+            const gyroPool = pools[0] as GyroEPool;
+            const { tIn } = gyroPool.getRequiredTokenPair(tokenIn, tokenOut);
+            const swapAmount = new GyroEPoolToken(
+                tokenIn,
+                parseEther('0.999'),
+                tIn.rate,
+                tIn.index,
+            );
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -121,9 +134,9 @@ describe('fx integration tests', () => {
         const swapKind = SwapKind.GivenOut;
 
         test('should return no swaps when above limit', async () => {
-            const tokenIn = USDC;
-            const tokenOut = XSGD;
-            const swapAmount = TokenAmount.fromHumanAmount(XSGD, '6000000');
+            const tokenIn = WMATIC;
+            const tokenOut = stMATIC;
+            const swapAmount = parseEther('30310600');
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -135,10 +148,17 @@ describe('fx integration tests', () => {
 
             expect(swapInfo).toBeNull();
         });
-        test('USDC > XSGD, getSwaps result should match query', async () => {
-            const tokenIn = USDC;
-            const tokenOut = XSGD;
-            const swapAmount = TokenAmount.fromHumanAmount(XSGD, '60000');
+        test('token > LSD, getSwaps result should match queryBatchSwap', async () => {
+            const tokenIn = WMATIC;
+            const tokenOut = stMATIC;
+            const gyroPool = pools[0] as GyroEPool;
+            const { tOut } = gyroPool.getRequiredTokenPair(tokenIn, tokenOut);
+            const swapAmount = new GyroEPoolToken(
+                tokenOut,
+                parseEther('1.987654321'),
+                tOut.rate,
+                tOut.index,
+            );
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,
@@ -152,10 +172,17 @@ describe('fx integration tests', () => {
             expect(swapAmount.amount).toEqual(swapInfo?.outputAmount.amount);
             expect(onchain).toEqual(swapInfo?.inputAmount);
         });
-        test('XSGD > USDC, getSwaps result should match query', async () => {
-            const tokenIn = XSGD;
-            const tokenOut = USDC;
-            const swapAmount = TokenAmount.fromHumanAmount(USDC, '1');
+        test('LSD > token, getSwaps result should match queryBatchSwap', async () => {
+            const tokenIn = stMATIC;
+            const tokenOut = WMATIC;
+            const gyroPool = pools[0] as GyroEPool;
+            const { tOut } = gyroPool.getRequiredTokenPair(tokenIn, tokenOut);
+            const swapAmount = new GyroEPoolToken(
+                tokenOut,
+                parseEther('0.999'),
+                tOut.rate,
+                tOut.index,
+            );
             const swapInfo = await sorGetSwapsWithPools(
                 tokenIn,
                 tokenOut,

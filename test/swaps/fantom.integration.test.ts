@@ -2,19 +2,19 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { SmartOrderRouter } from '../src/sor';
-import { sorGetSwapsWithPools } from '../src/static';
-import { ChainId, NATIVE_ASSETS, BATCHSIZE, VAULT } from '../src/utils';
-import { Token, TokenAmount } from '../src/entities';
-import { OnChainPoolDataEnricher } from '../src/data/enrichers/onChainPoolDataEnricher';
-import { SwapKind, SwapOptions } from '../src/types';
-import { BasePool } from '../src/entities/pools';
-import { MockPoolProvider } from './lib/utils/mockPoolProvider';
+import { SmartOrderRouter } from '../../src/sor';
+import { sorGetSwapsWithPools } from '../../src/static';
+import { ChainId, NATIVE_ASSETS, BATCHSIZE, VAULT } from '../../src/utils';
+import { Token, TokenAmount } from '../../src/entities';
+import { OnChainPoolDataEnricher } from '../../src/data/enrichers/onChainPoolDataEnricher';
+import { SwapKind, SwapOptions } from '../../src/types';
+import { BasePool } from '../../src/entities/pools';
+import { MockPoolProvider } from '../lib/utils/mockPoolProvider';
 
-import testPools from './lib/testData/testPools/fantom_65313450.json';
-import { RawBasePool } from '../src';
+import testPools from '../lib/testData/testPools/fantom_65313450.json';
+import { RawBasePool } from '../../src';
 
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 
 describe.skip('Fantom SOR', () => {
     let pools: BasePool[];

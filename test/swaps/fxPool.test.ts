@@ -1,8 +1,12 @@
 // pnpm test -- fxPool.test.ts
-import { ChainId, RawFxPool, SwapKind, Token } from '../src';
-import testPools from './lib/testData/testPools/fx_43667355.json';
-import { CurveMathRevert, FxPool, FxPoolToken } from '../src/entities/pools/fx';
-import { parseFixedCurveParam } from '../src/entities/pools/fx/helpers';
+import { ChainId, RawFxPool, SwapKind, Token } from '../../src';
+import testPools from '../lib/testData/testPools/fx_43667355.json';
+import {
+    CurveMathRevert,
+    FxPool,
+    FxPoolToken,
+} from '../../src/entities/pools/fx';
+import { parseFixedCurveParam } from '../../src/entities/pools/fx/helpers';
 import { parseUnits } from 'viem';
 
 describe('xaveFxPool: fxPools stub test', () => {
