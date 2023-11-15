@@ -1,3 +1,4 @@
+// pnpm test -- test/data/subgraph.test.ts
 import { SubgraphPoolProvider } from '../../src/data/providers/subgraphPoolProvider';
 import { ChainId } from '../../src/utils';
 import { ProviderSwapOptions } from '../../src/data/types';

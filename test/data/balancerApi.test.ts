@@ -1,4 +1,4 @@
-// pnpm test -- balancerApi.test.ts
+// pnpm test -- test/data/balancerApi.test.ts
 import { BalancerApi, PoolStateInput, ChainId } from '../../src';
 
 describe(
