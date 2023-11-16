@@ -1,4 +1,4 @@
-// pnpm example ./examples/join/nestedJoin.ts
+// pnpm example ./examples/addLiquidityNested.ts
 import { config } from 'dotenv';
 config();
 
@@ -8,11 +8,11 @@ import {
     BalancerApi,
     ChainId,
     CHAINS,
-    NestedJoin,
+    AddLiquidityNested,
     NestedPoolState,
     replaceWrapped,
     Slippage,
-} from '../../src';
+} from '../src';
 import {
     Client,
     createTestClient,
@@ -24,31 +24,31 @@ import {
     WalletActions,
     walletActions,
 } from 'viem';
+import { AddLiquidityNestedInput } from '../src/entities/addLiquidityNested/types';
+import { Relayer } from '../src/entities/relayer';
 import {
     forkSetup,
     sendTransactionGetBalances,
-} from '../../test/lib/utils/helper';
-import anvilGlobalSetup from '../../test/anvil/anvil-global-setup';
-import { NestedJoinInput } from '../../src/entities/nestedJoin/types';
-import { Relayer } from '../../src/entities/relayer';
+} from '../test/lib/utils/helper';
+import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
 const poolId =
     '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0'; // WETH-3POOL
 const chainId = ChainId.MAINNET;
-const rpcUrl = 'http://127.0.0.1:8545/';
 
 /**
  * FIXME: the example will work properly only once we release relayer v6
  * containing relayer queries - at that moment, we should update blockNumber on
  * global anvil setup to after the relayer release
  */
-const nestedJoin = async () => {
+const addLiquidityNested = async () => {
     // User approve vault to spend their tokens and update user balance
-    const { client, accountAddress, nestedPoolState } = await exampleSetup();
+    const { client, accountAddress, nestedPoolState, rpcUrl } =
+        await exampleSetup();
 
-    // setup join helper
-    const nestedJoin = new NestedJoin();
+    // setup add liquidity helper
+    const addLiquidityNested = new AddLiquidityNested();
 
     const amountsIn = [
         {
@@ -59,16 +59,19 @@ const nestedJoin = async () => {
 
     const useNativeAssetAsWrappedAmountIn = false;
 
-    const joinInput: NestedJoinInput = {
+    const addLiquidityInput: AddLiquidityNestedInput = {
         amountsIn,
         chainId,
         rpcUrl,
         accountAddress,
         useNativeAssetAsWrappedAmountIn,
     };
-    const queryResult = await nestedJoin.query(joinInput, nestedPoolState);
+    const queryResult = await addLiquidityNested.query(
+        addLiquidityInput,
+        nestedPoolState,
+    );
 
-    // build join call with expected minBpOut based on slippage
+    // build add liquidity nested call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
 
     const signature = await Relayer.signRelayerApproval(
@@ -77,7 +80,7 @@ const nestedJoin = async () => {
         client,
     );
 
-    const { call, to, value } = nestedJoin.buildCall({
+    const { call, to, value } = addLiquidityNested.buildCall({
         ...queryResult,
         slippage,
         sender: accountAddress,
@@ -95,7 +98,7 @@ const nestedJoin = async () => {
         queryResult.bptOut.token.address,
     ];
 
-    // send join transaction and check balance changes
+    // send add liquidity nested transaction and check balance changes
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
             tokens,
@@ -116,9 +119,10 @@ const exampleSetup = async (): Promise<{
     client: Client & PublicActions & TestActions & WalletActions;
     accountAddress: Address;
     nestedPoolState: NestedPoolState;
+    rpcUrl: string;
 }> => {
-    await anvilGlobalSetup();
-    const balancerApi = new BalancerApi(balancerApiUrl, 1);
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+    const balancerApi = new BalancerApi(balancerApiUrl, chainId);
     const nestedPoolState = await balancerApi.nestedPools.fetchNestedPoolState(
         poolId,
     );
@@ -169,7 +173,8 @@ const exampleSetup = async (): Promise<{
         client,
         accountAddress,
         nestedPoolState,
+        rpcUrl,
     };
 };
 
-nestedJoin().then(() => {});
+addLiquidityNested().then(() => {});

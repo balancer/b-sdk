@@ -1,4 +1,4 @@
-// pnpm test -- nestedJoin.integration.test.ts
+// pnpm test -- addLiquidityNested.integration.test.ts
 import { describe, expect, test, beforeAll } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -18,7 +18,7 @@ import {
 
 import {
     Slippage,
-    NestedJoin,
+    AddLiquidityNested,
     replaceWrapped,
     TokenAmount,
     NestedPoolState,
@@ -34,7 +34,7 @@ import {
     setTokenBalance,
 } from './lib/utils/helper';
 import { Relayer } from '../src/entities/relayer';
-import { NestedJoinInput } from '../src/entities/nestedJoin/types';
+import { AddLiquidityNestedInput } from '../src/entities/addLiquidityNested/types';
 import { grantRoles } from './lib/utils/relayerHelper';
 
 /**
@@ -65,7 +65,7 @@ type TxInput = {
     useNativeAssetAsWrappedAmountIn?: boolean;
 };
 
-describe('nested join test', () => {
+describe('add liquidity nested test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
@@ -141,7 +141,7 @@ describe('nested join test', () => {
         }
     });
 
-    test('single asset join', async () => {
+    test('single token', async () => {
         const amountsIn = [
             {
                 address:
@@ -177,7 +177,7 @@ describe('nested join test', () => {
         );
     });
 
-    test('all assets join', async () => {
+    test('all tokens', async () => {
         const amountsIn = [
             {
                 address:
@@ -228,7 +228,7 @@ describe('nested join test', () => {
         );
     });
 
-    test('native asset join', async () => {
+    test('native asset', async () => {
         const amountsIn = [
             {
                 address:
@@ -283,7 +283,7 @@ describe('nested join test', () => {
         );
     });
 
-    test('native asset join - invalid input', async () => {
+    test('native asset - invalid input', async () => {
         const amountsIn = [
             {
                 address:
@@ -305,7 +305,7 @@ describe('nested join test', () => {
                 useNativeAssetAsWrappedAmountIn,
             }),
         ).rejects.toThrowError(
-            'Joining with native asset requires wrapped native asset to exist within amountsIn',
+            'Adding liquidity with native asset requires wrapped native asset to exist within amountsIn',
         );
     });
 });
@@ -323,19 +323,22 @@ export const doTransaction = async ({
     const api = new MockApi();
     // get pool state from api
     const nestedPoolFromApi = await api.getNestedPool(poolId);
-    // setup join helper
-    const nestedJoin = new NestedJoin();
+    // setup add liquidity helper
+    const addLiquidityNested = new AddLiquidityNested();
 
-    const joinInput: NestedJoinInput = {
+    const addLiquidityInput: AddLiquidityNestedInput = {
         amountsIn,
         chainId,
         rpcUrl,
         accountAddress: testAddress,
         useNativeAssetAsWrappedAmountIn,
     };
-    const queryResult = await nestedJoin.query(joinInput, nestedPoolFromApi);
+    const queryResult = await addLiquidityNested.query(
+        addLiquidityInput,
+        nestedPoolFromApi,
+    );
 
-    // build join call with expected minBpOut based on slippage
+    // build add liquidity call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
 
     const signature = await Relayer.signRelayerApproval(
@@ -344,7 +347,7 @@ export const doTransaction = async ({
         client,
     );
 
-    const { call, to, value, minBptOut } = nestedJoin.buildCall({
+    const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
         ...queryResult,
         slippage,
         sender: testAddress,
@@ -357,7 +360,7 @@ export const doTransaction = async ({
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
 
-    // send join transaction and check balance changes
+    // send add liquidity transaction and check balance changes
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
             [

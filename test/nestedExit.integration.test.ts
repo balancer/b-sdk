@@ -269,7 +269,7 @@ export const doTransaction = async ({
     // get pool state from api
     const nestedPoolFromApi = await api.getNestedPool(poolId);
 
-    // setup join helper
+    // setup exit helper
     const nestedExit = new NestedExit();
     const exitInput: NestedProportionalExitInput | NestedSingleTokenExitInput =
         {
@@ -282,7 +282,7 @@ export const doTransaction = async ({
         };
     const queryResult = await nestedExit.query(exitInput, nestedPoolFromApi);
 
-    // build join call with expected minBpOut based on slippage
+    // build exit call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
 
     const signature = await Relayer.signRelayerApproval(
@@ -304,7 +304,7 @@ export const doTransaction = async ({
         tokensOut = replaceWrapped(tokensOut, chainId);
     }
 
-    // send join transaction and check balance changes
+    // send exit transaction and check balance changes
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
             [

@@ -1,6 +1,9 @@
 import { Token } from '../token';
 import { BALANCER_RELAYER, ChainId, getPoolAddress } from '../../utils';
-import { NestedJoinInput, NestedJoinCallAttributes } from './types';
+import {
+    AddLiquidityNestedInput,
+    AddLiquidityNestedCallAttributes,
+} from './types';
 import { NestedPool, PoolKind } from '../types';
 import { Address, PoolType } from '../../types';
 import { Relayer } from '../relayer';
@@ -12,11 +15,11 @@ export const getQueryCallsAttributes = (
         accountAddress,
         useNativeAssetAsWrappedAmountIn,
         fromInternalBalance,
-    }: NestedJoinInput,
+    }: AddLiquidityNestedInput,
     pools: NestedPool[],
-): NestedJoinCallAttributes[] => {
+): AddLiquidityNestedCallAttributes[] => {
     /**
-     * Overall logic to build sequence of join calls:
+     * Overall logic to build sequence of add liquidity calls:
      * 1. Go from bottom pool to up filling out input amounts and output refs
      * 2. Inputs will be amountsIn provided, output of the previous level or 0n
      * 3. Output at max level is the bptOut
@@ -24,7 +27,7 @@ export const getQueryCallsAttributes = (
 
     const poolsSortedByLevel = pools.sort((a, b) => a.level - b.level);
 
-    const calls: NestedJoinCallAttributes[] = [];
+    const calls: AddLiquidityNestedCallAttributes[] = [];
     for (const pool of poolsSortedByLevel) {
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
@@ -59,13 +62,13 @@ export const getQueryCallsAttributes = (
 const getMaxAmountsIn = (
     sortedTokens: Token[],
     amountsIn: { address: Address; rawAmount: bigint }[],
-    calls: NestedJoinCallAttributes[],
+    calls: AddLiquidityNestedCallAttributes[],
 ): { amount: bigint; isRef: boolean }[] => {
     return sortedTokens.map((token) => {
         /**
          * There are 3 possible scenarios:
          * 1. token has amountIn provided by the user -> return amount
-         * 2. token is the output of a previous join call -> return outputRef
+         * 2. token is the output of a previous add liquidity call -> return outputRef
          * 3. otherwise -> return zero
          */
 
@@ -78,7 +81,7 @@ const getMaxAmountsIn = (
             };
         }
 
-        // 2. token is the output of a previous join call -> return outputRef
+        // 2. token is the output of a previous add liquidity call -> return outputRef
         const previousCall = calls.find(
             (call) => getPoolAddress(call.poolId) === token.address,
         );
@@ -112,7 +115,7 @@ const getSender = (
 // Recipient's logic: if there is a following call, then the recipient is the
 // sender of that call, otherwise it's the user.
 const updateRecipients = (
-    calls: NestedJoinCallAttributes[],
+    calls: AddLiquidityNestedCallAttributes[],
     accountAddress: Address,
 ) => {
     for (const call of calls) {

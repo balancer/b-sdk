@@ -7,20 +7,20 @@ import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi } from '../../abi';
 import {
-    NestedJoinInput,
-    NestedJoinQueryResult,
-    NestedJoinCallInput,
+    AddLiquidityNestedInput,
+    AddLiquidityNestedQueryResult,
+    AddLiquidityNestedCallInput,
 } from './types';
+import { doAddLiquidityNestedQuery } from './doAddLiquidityNestedQuery';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
-import { doQueryNestedJoin } from './doQueryNestedJoin';
-import { NestedPoolState } from '../types';
 import { validateInputs } from './validateInputs';
+import { NestedPoolState } from '../types';
 
-export class NestedJoin {
+export class AddLiquidityNested {
     async query(
-        input: NestedJoinInput,
+        input: AddLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
-    ): Promise<NestedJoinQueryResult> {
+    ): Promise<AddLiquidityNestedQueryResult> {
         const amountsIn = validateInputs(input, nestedPoolState);
 
         const callsAttributes = getQueryCallsAttributes(
@@ -42,7 +42,7 @@ export class NestedJoin {
             args: [encodedCalls],
         });
 
-        const peekedValue = await doQueryNestedJoin(
+        const peekedValue = await doAddLiquidityNestedQuery(
             input.chainId,
             input.rpcUrl,
             input.accountAddress,
@@ -59,7 +59,7 @@ export class NestedJoin {
         return { callsAttributes, amountsIn, bptOut };
     }
 
-    buildCall(input: NestedJoinCallInput): {
+    buildCall(input: AddLiquidityNestedCallInput): {
         call: Hex;
         to: Address;
         value: bigint | undefined;

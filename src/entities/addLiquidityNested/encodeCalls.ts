@@ -2,12 +2,14 @@ import { Hex, PoolType } from '../../types';
 import { ZERO_ADDRESS } from '../../utils';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
-import { NestedJoinCallAttributes } from './types';
+import { AddLiquidityNestedCallAttributes } from './types';
 import { replaceWrapped } from '../utils/replaceWrapped';
 import { batchRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
 
-export const encodeCalls = (callsAttributes: NestedJoinCallAttributes[]) => {
+export const encodeCalls = (
+    callsAttributes: AddLiquidityNestedCallAttributes[],
+) => {
     const encodedCalls: Hex[] = [];
     const values: bigint[] = [];
     for (const callAttributes of callsAttributes) {

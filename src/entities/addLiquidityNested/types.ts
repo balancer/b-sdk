@@ -5,7 +5,7 @@ import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { PoolKind } from '../types';
 
-export type NestedJoinInput = {
+export type AddLiquidityNestedInput = {
     amountsIn: {
         address: Address;
         rawAmount: bigint;
@@ -17,7 +17,7 @@ export type NestedJoinInput = {
     fromInternalBalance?: boolean;
 };
 
-export type NestedJoinCallAttributes = {
+export type AddLiquidityNestedCallAttributes = {
     chainId: ChainId;
     useNativeAssetAsWrappedAmountIn: boolean;
     sortedTokens: Token[];
@@ -36,13 +36,13 @@ export type NestedJoinCallAttributes = {
     outputReference: bigint;
 };
 
-export type NestedJoinQueryResult = {
-    callsAttributes: NestedJoinCallAttributes[];
+export type AddLiquidityNestedQueryResult = {
+    callsAttributes: AddLiquidityNestedCallAttributes[];
     amountsIn: TokenAmount[];
     bptOut: TokenAmount;
 };
 
-export type NestedJoinCallInput = NestedJoinQueryResult & {
+export type AddLiquidityNestedCallInput = AddLiquidityNestedQueryResult & {
     slippage: Slippage;
     sender: Address;
     recipient: Address;

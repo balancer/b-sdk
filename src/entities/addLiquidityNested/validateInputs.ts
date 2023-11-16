@@ -3,10 +3,10 @@ import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { NestedPoolState } from '../types';
 import { constraintValidation } from '../utils';
-import { NestedJoinInput } from './types';
+import { AddLiquidityNestedInput } from './types';
 
 export const validateInputs = (
-    input: NestedJoinInput,
+    input: AddLiquidityNestedInput,
     nestedPoolState: NestedPoolState,
 ): TokenAmount[] => {
     constraintValidation(nestedPoolState);
@@ -20,7 +20,7 @@ export const validateInputs = (
         );
         if (tokenIn === undefined) {
             throw new Error(
-                `Joining with ${tokenIn} requires it to exist within mainTokens`,
+                `Adding liquidity with ${tokenIn} requires it to exist within mainTokens`,
             );
         }
         return TokenAmount.fromRawAmount(tokenIn, amountIn.rawAmount);
@@ -33,7 +33,7 @@ export const validateInputs = (
             )
         ) {
             throw new Error(
-                'Joining with native asset requires wrapped native asset to exist within mainTokens',
+                'Adding liquidity with native asset requires wrapped native asset to exist within mainTokens',
             );
         }
         if (
@@ -42,7 +42,7 @@ export const validateInputs = (
             )
         ) {
             throw new Error(
-                'Joining with native asset requires wrapped native asset to exist within amountsIn',
+                'Adding liquidity with native asset requires wrapped native asset to exist within amountsIn',
             );
         }
     }

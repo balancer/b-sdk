@@ -5,9 +5,9 @@ export function constraintValidation(
 ): boolean {
     /*
     General rules:
-      * Can only join/exit with the main tokens
+      * Can only add/remove liquidity with the main tokens
       * Main tokens only supported to a max of 1 level of nesting
-      * Can still pure join with > 1 level 
+      * Can still pure add liquidity with > 1 level 
       * A main token can't be a token in > 1 pool
 
     We can only do minimal validation without introducing complexity/data overhead that the API should be handling. 

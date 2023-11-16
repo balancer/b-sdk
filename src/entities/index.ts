@@ -1,5 +1,5 @@
 export * from './encoders';
-export * from './nestedJoin';
+export * from './addLiquidityNested';
 export * from './nestedExit';
 export * from './addLiquidity';
 export * from './removeLiquidity';
