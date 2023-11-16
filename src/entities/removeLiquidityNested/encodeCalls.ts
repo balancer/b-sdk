@@ -1,13 +1,13 @@
 import { Hex, PoolType } from '../../types';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
-import { NestedExitCallAttributes } from './types';
+import { RemoveLiquidityNestedCallAttributes } from './types';
 import { replaceWrapped } from '../utils/replaceWrapped';
 import { batchRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
 
 export const encodeCalls = (
-    callsAttributes: NestedExitCallAttributes[],
+    callsAttributes: RemoveLiquidityNestedCallAttributes[],
     isProportional: boolean,
 ) => {
     const encodedCalls: Hex[] = [];
@@ -74,9 +74,11 @@ export const encodeCalls = (
 const getUserDataProportional = (poolType: PoolType, bptAmountIn: bigint) => {
     switch (poolType) {
         case PoolType.Weighted:
-            return WeightedEncoder.exitProportional(bptAmountIn);
+            return WeightedEncoder.removeLiquidityProportional(bptAmountIn);
         case PoolType.ComposableStable:
-            return ComposableStableEncoder.exitProportional(bptAmountIn);
+            return ComposableStableEncoder.removeLiquidityProportional(
+                bptAmountIn,
+            );
         default:
             throw new Error(`Unsupported pool type ${poolType}`);
     }
@@ -89,14 +91,17 @@ const getUserDataSingleToken = (
 ) => {
     if (tokenOutIndex === undefined) {
         throw new Error(
-            "tokenOutIndex can't be undefined for single token exits",
+            "tokenOutIndex can't be undefined for removing liquidity to single token",
         );
     }
     switch (poolType) {
         case PoolType.Weighted:
-            return WeightedEncoder.exitSingleAsset(bptAmountIn, tokenOutIndex);
+            return WeightedEncoder.removeLiquiditySingleToken(
+                bptAmountIn,
+                tokenOutIndex,
+            );
         case PoolType.ComposableStable:
-            return ComposableStableEncoder.exitSingleAsset(
+            return ComposableStableEncoder.removeLiquiditySingleToken(
                 bptAmountIn,
                 tokenOutIndex,
             );

@@ -5,23 +5,25 @@ import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi } from '../../abi';
 import {
-    NestedProportionalExitInput,
-    NestedSingleTokenExitInput,
-    NestedExitQueryResult,
-    NestedExitCallInput,
+    RemoveLiquidityNestedProportionalInput,
+    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedQueryOutput,
+    RemoveLiquidityNestedCallInput,
 } from './types';
 import { NestedPoolState } from '../types';
-import { doQueryNestedExit } from './doQueryNestedExit';
+import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { encodeCalls } from './encodeCalls';
 import { getPeekCalls } from './getPeekCalls';
 import { validateInputs } from './validateInputs';
 
-export class NestedExit {
+export class RemoveLiquidityNested {
     async query(
-        input: NestedProportionalExitInput | NestedSingleTokenExitInput,
+        input:
+            | RemoveLiquidityNestedProportionalInput
+            | RemoveLiquidityNestedSingleTokenInput,
         nestedPoolState: NestedPoolState,
-    ): Promise<NestedExitQueryResult> {
+    ): Promise<RemoveLiquidityNestedQueryOutput> {
         const isProportional = validateInputs(input, nestedPoolState);
 
         const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
@@ -46,7 +48,7 @@ export class NestedExit {
             args: [encodedCalls],
         });
 
-        const peekedValues = await doQueryNestedExit(
+        const peekedValues = await doRemoveLiquidityNestedQuery(
             input.chainId,
             input.rpcUrl,
             input.accountAddress,
@@ -63,7 +65,7 @@ export class NestedExit {
         return { callsAttributes, bptAmountIn, amountsOut, isProportional };
     }
 
-    buildCall(input: NestedExitCallInput): {
+    buildCall(input: RemoveLiquidityNestedCallInput): {
         call: Hex;
         to: Address;
         minAmountsOut: TokenAmount[];

@@ -61,36 +61,36 @@ async function sdkAddLiquidity({
 }
 
 function isAddLiquidityComposableStableQueryOutput(
-    result: AddLiquidityQueryOutput,
+    output: AddLiquidityQueryOutput,
 ): boolean {
     return (
-        (result as AddLiquidityComposableStableQueryOutput).bptIndex !==
+        (output as AddLiquidityComposableStableQueryOutput).bptIndex !==
         undefined
     );
 }
 
-function getCheck(result: AddLiquidityQueryOutput, isExactIn: boolean) {
-    if (isAddLiquidityComposableStableQueryOutput(result)) {
+function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
+    if (isAddLiquidityComposableStableQueryOutput(output)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
             // rome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { bptOut, bptIndex, ...check } =
-                result as AddLiquidityComposableStableQueryOutput;
+                output as AddLiquidityComposableStableQueryOutput;
             return check;
         } else {
             // rome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { amountsIn, bptIndex, ...check } =
-                result as AddLiquidityComposableStableQueryOutput;
+                output as AddLiquidityComposableStableQueryOutput;
             return check;
         }
     } else {
         if (isExactIn) {
             // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { bptOut, ...check } = result;
+            const { bptOut, ...check } = output;
             return check;
         } else {
             // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { amountsIn, ...check } = result;
+            const { amountsIn, ...check } = output;
             return check;
         }
     }

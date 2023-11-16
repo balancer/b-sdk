@@ -8,7 +8,7 @@ import { Address, Hex } from '../../types';
 import { BALANCER_RELAYER, CHAINS, ChainId } from '../../utils';
 import { balancerRelayerAbi } from '../../abi';
 
-export const doQueryNestedExit = async (
+export const doRemoveLiquidityNestedQuery = async (
     chainId: ChainId,
     rpcUrl: string,
     accountAddress: Address,

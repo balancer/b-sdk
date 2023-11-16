@@ -1,6 +1,6 @@
 export * from './encoders';
 export * from './addLiquidityNested';
-export * from './nestedExit';
+export * from './removeLiquidityNested';
 export * from './addLiquidity';
 export * from './removeLiquidity';
 export * from './path';

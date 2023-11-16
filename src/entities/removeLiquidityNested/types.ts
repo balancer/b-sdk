@@ -5,7 +5,7 @@ import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { PoolKind } from '../types';
 
-export type NestedProportionalExitInput = {
+export type RemoveLiquidityNestedProportionalInput = {
     bptAmountIn: bigint;
     chainId: ChainId;
     rpcUrl: string;
@@ -14,11 +14,12 @@ export type NestedProportionalExitInput = {
     toInternalBalance?: boolean;
 };
 
-export type NestedSingleTokenExitInput = NestedProportionalExitInput & {
-    tokenOut: Address;
-};
+export type RemoveLiquidityNestedSingleTokenInput =
+    RemoveLiquidityNestedProportionalInput & {
+        tokenOut: Address;
+    };
 
-export type NestedExitCallAttributes = {
+export type RemoveLiquidityNestedCallAttributes = {
     chainId: ChainId;
     useNativeAssetAsWrappedAmountOut: boolean;
     sortedTokens: Token[];
@@ -41,16 +42,17 @@ export type NestedExitCallAttributes = {
     tokenOutIndex?: number;
 };
 
-export type NestedExitQueryResult = {
-    callsAttributes: NestedExitCallAttributes[];
+export type RemoveLiquidityNestedQueryOutput = {
+    callsAttributes: RemoveLiquidityNestedCallAttributes[];
     bptAmountIn: TokenAmount;
     amountsOut: TokenAmount[];
     isProportional: boolean;
 };
 
-export type NestedExitCallInput = NestedExitQueryResult & {
-    slippage: Slippage;
-    sender: Address;
-    recipient: Address;
-    relayerApprovalSignature?: Hex;
-};
+export type RemoveLiquidityNestedCallInput =
+    RemoveLiquidityNestedQueryOutput & {
+        slippage: Slippage;
+        sender: Address;
+        recipient: Address;
+        relayerApprovalSignature?: Hex;
+    };

@@ -1,4 +1,4 @@
-// pnpm test -- nestedExit.integration.test.ts
+// pnpm test -- removeLiquidityNested.integration.test.ts
 import { describe, expect, test, beforeAll } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -18,7 +18,7 @@ import {
 
 import {
     Slippage,
-    NestedExit,
+    RemoveLiquidityNested,
     replaceWrapped,
     NestedPoolState,
     TokenAmount,
@@ -34,9 +34,9 @@ import {
 } from './lib/utils/helper';
 import { Relayer } from '../src/entities/relayer';
 import {
-    NestedProportionalExitInput,
-    NestedSingleTokenExitInput,
-} from '../src/entities/nestedExit/types';
+    RemoveLiquidityNestedProportionalInput,
+    RemoveLiquidityNestedSingleTokenInput,
+} from '../src/entities/removeLiquidityNested/types';
 import { grantRoles } from './lib/utils/relayerHelper';
 
 /**
@@ -65,7 +65,7 @@ type TxInput = {
     useNativeAssetAsWrappedAmountOut?: boolean;
 };
 
-describe('nested exit test', () => {
+describe('remove liquidity nested test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
@@ -108,7 +108,7 @@ describe('nested exit test', () => {
         );
     });
 
-    test('proportional exit', async () => {
+    test('proportional', async () => {
         const amountIn = parseUnits('1', 18);
 
         const {
@@ -137,7 +137,7 @@ describe('nested exit test', () => {
         );
     });
 
-    test('proportional exit - native asset', async () => {
+    test('proportional - native asset', async () => {
         const amountIn = parseUnits('1', 18);
         const useNativeAssetAsWrappedAmountOut = true;
 
@@ -168,7 +168,7 @@ describe('nested exit test', () => {
         );
     });
 
-    test('single token exit', async () => {
+    test('single token', async () => {
         const amountIn = parseUnits('1', 18);
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
 
@@ -199,7 +199,7 @@ describe('nested exit test', () => {
         );
     });
 
-    test('single token exit - native asset', async () => {
+    test('single token - native asset', async () => {
         const amountIn = parseUnits('1', 18);
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
         const useNativeAssetAsWrappedAmountOut = true;
@@ -232,7 +232,7 @@ describe('nested exit test', () => {
         );
     });
 
-    test('single token exit - native asset - invalid input', async () => {
+    test('single token - native asset - invalid input', async () => {
         const amountIn = parseUnits('1', 18);
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
         const useNativeAssetAsWrappedAmountOut = true;
@@ -249,7 +249,7 @@ describe('nested exit test', () => {
                 useNativeAssetAsWrappedAmountOut,
             }),
         ).rejects.toThrow(
-            'Exiting to native asset requires wrapped native asset to be the tokenOut',
+            'Removing liquidity to native asset requires wrapped native asset to be the tokenOut',
         );
     });
 });
@@ -269,20 +269,24 @@ export const doTransaction = async ({
     // get pool state from api
     const nestedPoolFromApi = await api.getNestedPool(poolId);
 
-    // setup exit helper
-    const nestedExit = new NestedExit();
-    const exitInput: NestedProportionalExitInput | NestedSingleTokenExitInput =
-        {
-            bptAmountIn: amountIn,
-            chainId,
-            rpcUrl,
-            accountAddress: testAddress,
-            useNativeAssetAsWrappedAmountOut,
-            tokenOut,
-        };
-    const queryResult = await nestedExit.query(exitInput, nestedPoolFromApi);
+    // setup remove liquidity helper
+    const removeLiquidityNested = new RemoveLiquidityNested();
+    const removeLiquidityInput:
+        | RemoveLiquidityNestedProportionalInput
+        | RemoveLiquidityNestedSingleTokenInput = {
+        bptAmountIn: amountIn,
+        chainId,
+        rpcUrl,
+        accountAddress: testAddress,
+        useNativeAssetAsWrappedAmountOut,
+        tokenOut,
+    };
+    const queryOutput = await removeLiquidityNested.query(
+        removeLiquidityInput,
+        nestedPoolFromApi,
+    );
 
-    // build exit call with expected minBpOut based on slippage
+    // build remove liquidity call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
 
     const signature = await Relayer.signRelayerApproval(
@@ -291,8 +295,8 @@ export const doTransaction = async ({
         client,
     );
 
-    const { call, to, minAmountsOut } = nestedExit.buildCall({
-        ...queryResult,
+    const { call, to, minAmountsOut } = removeLiquidityNested.buildCall({
+        ...queryOutput,
         slippage,
         sender: testAddress,
         recipient: testAddress,
@@ -304,11 +308,11 @@ export const doTransaction = async ({
         tokensOut = replaceWrapped(tokensOut, chainId);
     }
 
-    // send exit transaction and check balance changes
+    // send remove liquidity transaction and check balance changes
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
             [
-                queryResult.bptAmountIn.token.address,
+                queryOutput.bptAmountIn.token.address,
                 ...tokensOut.map((t) => t.address),
             ],
             client,
@@ -318,15 +322,15 @@ export const doTransaction = async ({
         );
 
     const expectedDeltas = [
-        queryResult.bptAmountIn.amount,
-        ...queryResult.amountsOut.map((amountOut) => amountOut.amount),
+        queryOutput.bptAmountIn.amount,
+        ...queryOutput.amountsOut.map((amountOut) => amountOut.amount),
     ];
 
     return {
         transactionReceipt,
         expectedDeltas,
         balanceDeltas,
-        amountsOut: queryResult.amountsOut,
+        amountsOut: queryOutput.amountsOut,
         slippage,
         minAmountsOut,
     };

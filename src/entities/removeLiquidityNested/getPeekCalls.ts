@@ -1,10 +1,10 @@
 import { Hex } from 'viem';
 import { Token } from '../token';
-import { NestedExitCallAttributes } from './types';
+import { RemoveLiquidityNestedCallAttributes } from './types';
 import { Relayer } from '../relayer';
 
 export const getPeekCalls = (
-    calls: NestedExitCallAttributes[],
+    calls: RemoveLiquidityNestedCallAttributes[],
     isProportional: boolean,
 ) => {
     const tokensOut: Token[] = [];
@@ -35,7 +35,7 @@ export const getPeekCalls = (
             });
         });
     } else {
-        // For single token exits, the outputReference of the last call is the only output to be peeked
+        // For removing liquidity to single token, the outputReference of the last call is the only output to be peeked
         const lastCall = calls[calls.length - 1];
         const tokenOut =
             lastCall.sortedTokens[lastCall.tokenOutIndex as number];

@@ -333,7 +333,7 @@ export const doTransaction = async ({
         accountAddress: testAddress,
         useNativeAssetAsWrappedAmountIn,
     };
-    const queryResult = await addLiquidityNested.query(
+    const queryOutput = await addLiquidityNested.query(
         addLiquidityInput,
         nestedPoolFromApi,
     );
@@ -348,14 +348,14 @@ export const doTransaction = async ({
     );
 
     const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
-        ...queryResult,
+        ...queryOutput,
         slippage,
         sender: testAddress,
         recipient: testAddress,
         relayerApprovalSignature: signature,
     });
 
-    let tokensIn = queryResult.amountsIn.map((a) => a.token);
+    let tokensIn = queryOutput.amountsIn.map((a) => a.token);
     if (useNativeAssetAsWrappedAmountIn) {
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
@@ -365,7 +365,7 @@ export const doTransaction = async ({
         await sendTransactionGetBalances(
             [
                 ...tokensIn.map((t) => t.address),
-                queryResult.bptOut.token.address,
+                queryOutput.bptOut.token.address,
             ],
             client,
             testAddress,
@@ -376,7 +376,7 @@ export const doTransaction = async ({
     return {
         transactionReceipt,
         balanceDeltas,
-        bptOut: queryResult.bptOut,
+        bptOut: queryOutput.bptOut,
         minBptOut,
         slippage,
         value,

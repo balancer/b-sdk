@@ -3,12 +3,14 @@ import { Token } from '../token';
 import { NestedPoolState } from '../types';
 import { constraintValidation } from '../utils';
 import {
-    NestedProportionalExitInput,
-    NestedSingleTokenExitInput,
+    RemoveLiquidityNestedProportionalInput,
+    RemoveLiquidityNestedSingleTokenInput,
 } from './types';
 
 export const validateInputs = (
-    input: NestedProportionalExitInput | NestedSingleTokenExitInput,
+    input:
+        | RemoveLiquidityNestedProportionalInput
+        | RemoveLiquidityNestedSingleTokenInput,
     nestedPoolState: NestedPoolState,
 ) => {
     constraintValidation(nestedPoolState);
@@ -19,12 +21,12 @@ export const validateInputs = (
     );
     if (isProportional) {
         validateInputsProportional(
-            input as NestedProportionalExitInput,
+            input as RemoveLiquidityNestedProportionalInput,
             mainTokens,
         );
     } else {
         validateInputsSingleToken(
-            input as NestedSingleTokenExitInput,
+            input as RemoveLiquidityNestedSingleTokenInput,
             mainTokens,
         );
     }
@@ -33,7 +35,7 @@ export const validateInputs = (
 };
 
 const validateInputsProportional = (
-    input: NestedProportionalExitInput,
+    input: RemoveLiquidityNestedProportionalInput,
     mainTokens: Token[],
 ) => {
     if (
@@ -43,20 +45,20 @@ const validateInputsProportional = (
         )
     ) {
         throw new Error(
-            'Exiting to native asset requires wrapped native asset to exist within main tokens',
+            'Removing liquidity to native asset requires wrapped native asset to exist within main tokens',
         );
     }
 };
 
 const validateInputsSingleToken = (
-    input: NestedSingleTokenExitInput,
+    input: RemoveLiquidityNestedSingleTokenInput,
     mainTokens: Token[],
 ) => {
     const tokenOut = mainTokens.find((t) => t.isSameAddress(input.tokenOut));
 
     if (tokenOut === undefined) {
         throw new Error(
-            `Exiting to ${input.tokenOut} requires it to exist within main tokens`,
+            `Removing liquidity to ${input.tokenOut} requires it to exist within main tokens`,
         );
     }
 
@@ -65,7 +67,7 @@ const validateInputsSingleToken = (
         !tokenOut.isUnderlyingEqual(NATIVE_ASSETS[input.chainId])
     ) {
         throw new Error(
-            'Exiting to native asset requires wrapped native asset to be the tokenOut',
+            'Removing liquidity to native asset requires wrapped native asset to be the tokenOut',
         );
     }
 };

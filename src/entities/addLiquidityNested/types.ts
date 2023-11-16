@@ -36,13 +36,13 @@ export type AddLiquidityNestedCallAttributes = {
     outputReference: bigint;
 };
 
-export type AddLiquidityNestedQueryResult = {
+export type AddLiquidityNestedQueryOutput = {
     callsAttributes: AddLiquidityNestedCallAttributes[];
     amountsIn: TokenAmount[];
     bptOut: TokenAmount;
 };
 
-export type AddLiquidityNestedCallInput = AddLiquidityNestedQueryResult & {
+export type AddLiquidityNestedCallInput = AddLiquidityNestedQueryOutput & {
     slippage: Slippage;
     sender: Address;
     recipient: Address;

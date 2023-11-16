@@ -8,7 +8,7 @@ import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi } from '../../abi';
 import {
     AddLiquidityNestedInput,
-    AddLiquidityNestedQueryResult,
+    AddLiquidityNestedQueryOutput,
     AddLiquidityNestedCallInput,
 } from './types';
 import { doAddLiquidityNestedQuery } from './doAddLiquidityNestedQuery';
@@ -20,7 +20,7 @@ export class AddLiquidityNested {
     async query(
         input: AddLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
-    ): Promise<AddLiquidityNestedQueryResult> {
+    ): Promise<AddLiquidityNestedQueryOutput> {
         const amountsIn = validateInputs(input, nestedPoolState);
 
         const callsAttributes = getQueryCallsAttributes(

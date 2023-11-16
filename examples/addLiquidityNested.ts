@@ -66,7 +66,7 @@ const addLiquidityNested = async () => {
         accountAddress,
         useNativeAssetAsWrappedAmountIn,
     };
-    const queryResult = await addLiquidityNested.query(
+    const queryOutput = await addLiquidityNested.query(
         addLiquidityInput,
         nestedPoolState,
     );
@@ -81,21 +81,21 @@ const addLiquidityNested = async () => {
     );
 
     const { call, to, value } = addLiquidityNested.buildCall({
-        ...queryResult,
+        ...queryOutput,
         slippage,
         sender: accountAddress,
         recipient: accountAddress,
         relayerApprovalSignature: signature,
     });
 
-    let tokensIn = queryResult.amountsIn.map((a) => a.token);
+    let tokensIn = queryOutput.amountsIn.map((a) => a.token);
     if (useNativeAssetAsWrappedAmountIn) {
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
 
     const tokens = [
         ...tokensIn.map((t) => t.address),
-        queryResult.bptOut.token.address,
+        queryOutput.bptOut.token.address,
     ];
 
     // send add liquidity nested transaction and check balance changes

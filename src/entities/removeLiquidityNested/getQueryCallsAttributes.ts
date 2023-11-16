@@ -1,8 +1,8 @@
 import { Token } from '../token';
 import {
-    NestedProportionalExitInput,
-    NestedSingleTokenExitInput,
-    NestedExitCallAttributes,
+    RemoveLiquidityNestedProportionalInput,
+    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedCallAttributes,
 } from './types';
 import { NestedPool, PoolKind } from '../types';
 import { TokenAmount } from '../tokenAmount';
@@ -11,12 +11,14 @@ import { BALANCER_RELAYER, ChainId } from '../../utils';
 import { Relayer } from '../relayer';
 
 export const getQueryCallsAttributes = (
-    input: NestedProportionalExitInput | NestedSingleTokenExitInput,
+    input:
+        | RemoveLiquidityNestedProportionalInput
+        | RemoveLiquidityNestedSingleTokenInput,
     pools: NestedPool[],
     isProportional: boolean,
 ): {
     bptAmountIn: TokenAmount;
-    callsAttributes: NestedExitCallAttributes[];
+    callsAttributes: RemoveLiquidityNestedCallAttributes[];
 } => {
     const {
         bptAmountIn,
@@ -25,13 +27,13 @@ export const getQueryCallsAttributes = (
         useNativeAssetAsWrappedAmountOut = false,
         toInternalBalance = false,
     } = input;
-    let callsAttributes: NestedExitCallAttributes[];
+    let callsAttributes: RemoveLiquidityNestedCallAttributes[];
 
     // sort pools by descending level
     const poolsTopDown = pools.sort((a, b) => b.level - a.level);
 
     if (isProportional) {
-        callsAttributes = getProportionalExitCallsAttributes(
+        callsAttributes = getProportionalCallsAttributes(
             poolsTopDown,
             chainId,
             useNativeAssetAsWrappedAmountOut,
@@ -40,9 +42,9 @@ export const getQueryCallsAttributes = (
             toInternalBalance,
         );
     } else {
-        const { tokenOut } = input as NestedSingleTokenExitInput;
+        const { tokenOut } = input as RemoveLiquidityNestedSingleTokenInput;
 
-        callsAttributes = getSingleTokenExitCallsAttributes(
+        callsAttributes = getSingleTokenCallsAttributes(
             poolsTopDown,
             chainId,
             useNativeAssetAsWrappedAmountOut,
@@ -58,7 +60,7 @@ export const getQueryCallsAttributes = (
     return { callsAttributes, bptAmountIn: _bptAmountIn };
 };
 
-export const getProportionalExitCallsAttributes = (
+const getProportionalCallsAttributes = (
     poolsSortedByLevel: NestedPool[],
     chainId: ChainId,
     useNativeAssetAsWrappedAmountOut: boolean,
@@ -67,13 +69,13 @@ export const getProportionalExitCallsAttributes = (
     toInternalBalance: boolean,
 ) => {
     /**
-     * Overall logic to build sequence of proportional exit calls:
+     * Overall logic to build sequence of remove liquidity nested proportional calls:
      * 1. Go from top pool to bottom filling out input amounts and output refs
      * 2. Inputs will be bptAmountIn provided or output of the previous level
      * 3. Output at bottom level is the amountsOut
      */
 
-    const calls: NestedExitCallAttributes[] = [];
+    const calls: RemoveLiquidityNestedCallAttributes[] = [];
     for (const pool of poolsSortedByLevel) {
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
@@ -117,7 +119,7 @@ export const getProportionalExitCallsAttributes = (
     return calls;
 };
 
-export const getSingleTokenExitCallsAttributes = (
+const getSingleTokenCallsAttributes = (
     poolsTopDown: NestedPool[],
     chainId: ChainId,
     useNativeAssetAsWrappedAmountOut: boolean,
@@ -127,23 +129,28 @@ export const getSingleTokenExitCallsAttributes = (
     tokenOut: Address,
 ) => {
     /**
-     * Overall logic to build sequence of single token exit calls:
-     * 1. Go BOTTOM-UP building exit path to tokenOut
-     * 2. Go through exit path filling out input amounts and output refs
+     * Overall logic to build sequence of remove liquidity nested single token calls:
+     * 1. Go BOTTOM-UP building remove liquidity path to tokenOut
+     * 2. Go through remove liquidity path filling out input amounts and output refs
      * 3. Inputs will be bptAmountIn provided or output of the previous level
      * 4. Output at bottom level is the amountOut
      */
 
-    const exitPath: NestedPool[] = getExitPath(tokenOut, poolsTopDown);
-    const calls: NestedExitCallAttributes[] = [];
+    const removeLiquidityPath: NestedPool[] = getRemoveLiquidityPath(
+        tokenOut,
+        poolsTopDown,
+    );
+    const calls: RemoveLiquidityNestedCallAttributes[] = [];
 
-    for (let i = 0; i < exitPath.length; i++) {
-        const pool = exitPath[i];
+    for (let i = 0; i < removeLiquidityPath.length; i++) {
+        const pool = removeLiquidityPath[i];
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
             .map((t) => new Token(chainId, t.address, t.decimals));
-        const isLastCall = i === exitPath.length - 1;
-        const currenTokenOut = isLastCall ? tokenOut : exitPath[i + 1].address;
+        const isLastCall = i === removeLiquidityPath.length - 1;
+        const currenTokenOut = isLastCall
+            ? tokenOut
+            : removeLiquidityPath[i + 1].address;
         const tokenOutIndex = sortedTokens.findIndex((t) =>
             t.isSameAddress(currenTokenOut),
         );
@@ -166,7 +173,7 @@ export const getSingleTokenExitCallsAttributes = (
             outputReferences: [
                 {
                     key: Relayer.toChainedReference(
-                        BigInt(exitPath.indexOf(pool)) * 10n +
+                        BigInt(removeLiquidityPath.indexOf(pool)) * 10n +
                             BigInt(tokenOutIndex),
                     ),
                     index: BigInt(tokenOutIndex),
@@ -178,9 +185,12 @@ export const getSingleTokenExitCallsAttributes = (
     return calls;
 };
 
-const getExitPath = (tokenOut: string, poolsTopDown: NestedPool[]) => {
+const getRemoveLiquidityPath = (
+    tokenOut: string,
+    poolsTopDown: NestedPool[],
+) => {
     const topPool = poolsTopDown[0];
-    const exitPath: NestedPool[] = [];
+    const removeLiquidityPath: NestedPool[] = [];
     let tokenOutByLevel = tokenOut;
     while (tokenOutByLevel !== topPool.address) {
         const currentPool = poolsTopDown.find(
@@ -188,7 +198,7 @@ const getExitPath = (tokenOut: string, poolsTopDown: NestedPool[]) => {
                 /**
                  * Filter out pools that have tokenOutByLevel as it's own address
                  * in order to prevent pools with BPT as token to be picked up
-                 * incorrectly - e.g. when exiting from WETH/3-POOL to DAI, the
+                 * incorrectly - e.g. when removing liquidity from WETH/3-POOL to DAI, the
                  * first iteration will pick 3-POOL as the "bottom" pool and update
                  * tokenOutByLevel to 3-POOL-BPT. Since 3-POOL-BPT is contained
                  * on both WETH/3-POOL and 3-POOL itself, simply checking if the
@@ -198,16 +208,16 @@ const getExitPath = (tokenOut: string, poolsTopDown: NestedPool[]) => {
                 p.address !== tokenOutByLevel &&
                 p.tokens.some((t) => t.address === tokenOutByLevel),
         ) as NestedPool;
-        exitPath.unshift(currentPool);
+        removeLiquidityPath.unshift(currentPool);
         tokenOutByLevel = currentPool.address;
     }
-    return exitPath;
+    return removeLiquidityPath;
 };
 
 const getBptAmountIn = (
     pool: NestedPool,
     bptAmountIn: bigint,
-    calls: NestedExitCallAttributes[],
+    calls: RemoveLiquidityNestedCallAttributes[],
     isProportional: boolean,
 ) => {
     // first call has bptAmountIn provided as it's input
@@ -219,14 +229,14 @@ const getBptAmountIn = (
     }
 
     // following calls have their input as the outputReference of a previous call
-    let previousCall: NestedExitCallAttributes;
+    let previousCall: RemoveLiquidityNestedCallAttributes;
     let outputReferenceIndex: number;
     if (isProportional) {
         previousCall = calls.find((call) =>
             call.sortedTokens
                 .map((token) => token.address)
                 .includes(pool.address),
-        ) as NestedExitCallAttributes;
+        ) as RemoveLiquidityNestedCallAttributes;
         outputReferenceIndex = previousCall.sortedTokens
             .map((token) => token.address)
             .indexOf(pool.address);
@@ -243,7 +253,7 @@ const getBptAmountIn = (
 // Sender's logic: if there is a previous call, then the sender is the
 // recipient of that call, otherwise it's the user.
 const getSenderProportional = (
-    calls: NestedExitCallAttributes[],
+    calls: RemoveLiquidityNestedCallAttributes[],
     poolAddress: Address,
     accountAddress: Address,
 ): Address => {
