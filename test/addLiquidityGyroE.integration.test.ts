@@ -1,4 +1,4 @@
-// pnpm test -- addLiquidityGyro3.integration.test.ts
+// pnpm test -- addLiquidityGyroE.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -78,7 +78,7 @@ describe('gyroE V2 add liquidity test', () => {
                 ...txInput.poolStateInput.tokens.map((t) => t.address),
                 txInput.poolStateInput.address,
             ],
-            undefined,
+            [0, 0, 0],
             [
                 ...txInput.poolStateInput.tokens.map((t) =>
                     parseUnits('10000', t.decimals),

@@ -79,7 +79,7 @@ describe('add liquidity weighted test', () => {
                 ...txInput.poolStateInput.tokens.map((t) => t.address),
                 txInput.poolStateInput.address,
             ],
-            undefined, // TODO: hardcode these values to improve test performance
+            [0, 3, 0],
             [
                 ...txInput.poolStateInput.tokens.map((t) =>
                     parseUnits('100', t.decimals),
