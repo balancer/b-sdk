@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.3.1
+
+### Patch Changes
+
+- 4eda061: Add Op pools from vulnerability to filter list.
+
 ## 0.3.0
 
 ### Minor Changes
