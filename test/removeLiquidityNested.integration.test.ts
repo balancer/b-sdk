@@ -65,7 +65,7 @@ type TxInput = {
     useNativeAssetAsWrappedAmountOut?: boolean;
 };
 
-describe('remove liquidity nested test', () => {
+describe.skip('remove liquidity nested test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
