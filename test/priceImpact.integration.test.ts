@@ -11,10 +11,12 @@ import {
     ChainId,
     getPoolAddress,
     InputAmount,
+    AddLiquidityUnbalancedInput,
 } from '../src';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { PriceImpact } from '../src/entities/priceImpact';
 import { PriceImpactAmount } from '../src/entities/priceImpactAmount';
+import { formatEther, parseEther } from 'viem';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -63,6 +65,47 @@ describe('price impact', () => {
             expect(priceImpactABA.decimal).closeTo(
                 priceImpactSpot.decimal,
                 1e-4, // 1 bps
+            );
+        });
+    });
+
+    describe('add liquidity unbalanced', () => {
+        let amountsIn: InputAmount[];
+        let input: AddLiquidityUnbalancedInput;
+        beforeAll(() => {
+            amountsIn = poolStateInput.tokens.map((t, i) => {
+                return {
+                    rawAmount:
+                        i === 0
+                            ? 0n
+                            : parseEther((10n ** BigInt(i)).toString()),
+                    decimals: t.decimals,
+                    address: t.address,
+                };
+            });
+            console.log(
+                'amountsIn',
+                amountsIn.map((a) => formatEther(a.rawAmount)),
+            );
+
+            input = {
+                chainId,
+                rpcUrl,
+                kind: AddLiquidityKind.Unbalanced,
+                amountsIn,
+            };
+        });
+        test('ABA close to Spot Price', async () => {
+            const priceImpactABA = await PriceImpact.addLiquidityUnbalanced(
+                input,
+                poolStateInput,
+            );
+            const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                '0.001395038034686279', // from previous SDK/SOR
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                priceImpactSpot.decimal,
+                1e-3, // 1 bps
             );
         });
     });
