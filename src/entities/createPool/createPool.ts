@@ -13,7 +13,7 @@ export class CreatePool {
 
     private getCreatePool(poolType: string): CreatePoolBase {
         if (!this.createPoolTypes[poolType]) {
-            throw new Error('Unsupported pool type');
+            throw new Error('Unsupported pool type: ${poolType}');
         }
         return this.createPoolTypes[poolType];
     }
