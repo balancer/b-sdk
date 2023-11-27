@@ -2,10 +2,10 @@ import { formatEther, parseEther } from 'viem';
 import { BigintIsh } from './tokenAmount';
 
 export class PriceImpactAmount {
-    public amount: bigint;
-    public decimal: number;
-    public percentage: number;
-    public bps: number;
+    public amount: bigint; // raw amount in wei (i.e. 18 decimals)
+    public decimal: number; // decimal = wei * 1e-18
+    public percentage: number; // percentage = decimal * 1e-2
+    public bps: number; // bps = basis points = decimal * 1e-4
 
     public static fromRawAmount(rawAmount: BigintIsh) {
         return new PriceImpactAmount(rawAmount);
