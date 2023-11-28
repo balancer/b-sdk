@@ -1,5 +1,5 @@
 import { CreatePoolBase, CreatePoolInput } from './types';
-import { ValidateInputs } from './utils/validateInputs';
+import { validateCreatePoolInputs } from './utils/validateInputs';
 import { CreatePoolWeighted } from './weighted/createPoolWeighted';
 
 export class CreatePool {
@@ -18,9 +18,8 @@ export class CreatePool {
         return this.createPoolTypes[poolType];
     }
 
-    public buildCreatePoolCall(poolType:string, input: CreatePoolInput) {
-        ValidateInputs.validateCreatePoolInputs(poolType, input);
+    public buildCreatePoolCall(poolType: string, input: CreatePoolInput) {
+        validateCreatePoolInputs(poolType, input);
         return this.getCreatePool(poolType).buildCall(input);
     }
-
 }

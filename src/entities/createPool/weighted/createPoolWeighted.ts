@@ -3,13 +3,13 @@ import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
     CreateWeightedPoolArgs,
-    WeightedCreatedPoolInput,
+    CreateWeightedPoolInput,
 } from '../types';
 import { getRandomBytes32 } from '../../utils/getRandomBytes32';
 import { weightedFactoryV4Abi } from '../../../abi/weightedFactoryV4';
 
 export class CreatePoolWeighted implements CreatePoolBase {
-    buildCall(input: WeightedCreatedPoolInput): CreatePoolBuildCallOutput {
+    buildCall(input: CreateWeightedPoolInput): CreatePoolBuildCallOutput {
         const args = this.parseCreateFunctionArgs(input);
         const encodedCall = encodeFunctionData({
             abi: weightedFactoryV4Abi,
@@ -20,7 +20,7 @@ export class CreatePoolWeighted implements CreatePoolBase {
     }
 
     private parseCreateFunctionArgs(
-        input: WeightedCreatedPoolInput,
+        input: CreateWeightedPoolInput,
     ): CreateWeightedPoolArgs {
         const sortedTokenParams = input.tokens.map((tokenAddress) => {
             let weight: number = 1 / input.tokens.length;

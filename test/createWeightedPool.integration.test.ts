@@ -40,7 +40,7 @@ describe('Create Weighted Pool tests', () => {
         };
     });
 
-    test('Create Weighted Pool', async () => {
+    test('Create Weighted Pool with 2 tokens', async () => {
         const createWeightedPoolInput: WeightedCreatedPoolInput = {
             name: 'test pool',
             symbol: 'TEST',
@@ -48,25 +48,24 @@ describe('Create Weighted Pool tests', () => {
                 '0xba100000625a3754423978a60c9317c58a424e3d', //BAL
                 '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
             ],
-            weights: [
-                {
-                    tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
-                    weight: 0.5,
-                },
-                {
-                    tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-                    weight: 0.5,
-                },
-            ],
-            rateProviders: [
-                {
-                    tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
-                    rateProviderAddress: zeroAddress,
-                },
-                {
-                    tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-                    rateProviderAddress: zeroAddress,
-                },
+            swapFee: '0.01',
+            poolOwnerAddress: txInput.testAddress, // Balancer DAO Multisig
+        };
+        poolAddress = await doCreatePool({
+            ...txInput,
+            createPoolInput: createWeightedPoolInput,
+        });
+        expect(poolAddress).to.not.be.undefined;
+    });
+
+    test('Create Weighted Pool with 3 tokens, automatically set weight', async () => {
+        const createWeightedPoolInput: WeightedCreatedPoolInput = {
+            name: 'test pool',
+            symbol: 'TEST',
+            tokens: [
+                '0xba100000625a3754423978a60c9317c58a424e3d', //BAL
+                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+                '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
             ],
             swapFee: '0.01',
             poolOwnerAddress: txInput.testAddress, // Balancer DAO Multisig

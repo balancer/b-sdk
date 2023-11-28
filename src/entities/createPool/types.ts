@@ -4,9 +4,9 @@ export interface CreatePoolBase {
     buildCall(input: CreatePoolInput): CreatePoolBuildCallOutput;
 }
 
-export type CreatePoolInput = WeightedCreatedPoolInput;
+export type CreatePoolInput = CreateWeightedPoolInput;
 
-export type WeightedCreatedPoolInput = {
+export type CreateWeightedPoolInput = {
     name?: string;
     symbol: string;
     tokens: Address[];
