@@ -37,6 +37,6 @@ export async function doCreatePool(
     const {
         args: { pool: poolAddress },
     } = poolCreatedEvent;
-    
+
     return poolAddress;
 }
