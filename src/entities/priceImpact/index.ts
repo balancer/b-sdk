@@ -91,8 +91,7 @@ export class PriceImpact {
             if (diffs[i] === 0n) {
                 diffBPTs.push(0n);
             } else {
-                const diffBPT = await queryBPTForDiffAtIndex(i);
-                diffBPTs.push(diffs[i] > 0n ? diffBPT : diffBPT * -1n);
+                diffBPTs.push(await queryBPTForDiffAtIndex(i));
             }
         }
 
@@ -133,53 +132,38 @@ export class PriceImpact {
                         diffBPT === max(diffBPTs.filter((a) => a < 0n)),
                 );
 
+                let kind: SwapKind;
+                let givenIndex: number;
+                let resultIndex: number;
                 if (
                     diffBPTs[minPositiveDiffIndex] <
                     abs(diffBPTs[minNegativeDiffIndex])
                 ) {
-                    // zero out min positive diff
-                    const returnAmount = await doQuerySwap(
-                        poolState.id,
-                        SwapKind.GivenIn,
-                        TokenAmount.fromRawAmount(
-                            poolTokens[minPositiveDiffIndex],
-                            diffs[minPositiveDiffIndex],
-                        ),
-                        poolTokens[minNegativeDiffIndex],
-                        input.rpcUrl,
-                        input.chainId,
-                    );
-                    diffs[minPositiveDiffIndex] = 0n;
-                    diffBPTs[minPositiveDiffIndex] = 0n;
-                    diffs[minNegativeDiffIndex] =
-                        diffs[minNegativeDiffIndex] + returnAmount.amount;
-
-                    const diffBPT = await queryBPTForDiffAtIndex(
-                        minNegativeDiffIndex,
-                    );
-                    diffBPTs[minNegativeDiffIndex] = diffBPT * -1n;
+                    kind = SwapKind.GivenIn;
+                    givenIndex = minPositiveDiffIndex;
+                    resultIndex = minNegativeDiffIndex;
                 } else {
-                    // zero out min negative diff
-                    const returnAmount = await doQuerySwap(
-                        poolState.id,
-                        SwapKind.GivenOut,
-                        TokenAmount.fromRawAmount(
-                            poolTokens[minPositiveDiffIndex],
-                            abs(diffs[minNegativeDiffIndex]),
-                        ),
-                        poolTokens[minNegativeDiffIndex],
-                        input.rpcUrl,
-                        input.chainId,
-                    );
-                    diffs[minNegativeDiffIndex] = 0n;
-                    diffBPTs[minNegativeDiffIndex] = 0n;
-                    diffs[minPositiveDiffIndex] =
-                        diffs[minPositiveDiffIndex] + returnAmount.amount;
-                    const diffBPT = await queryBPTForDiffAtIndex(
-                        minPositiveDiffIndex,
-                    );
-                    diffBPTs[minPositiveDiffIndex] = diffBPT;
+                    kind = SwapKind.GivenOut;
+                    givenIndex = minNegativeDiffIndex;
+                    resultIndex = minPositiveDiffIndex;
                 }
+
+                const resultAmount = await doQuerySwap({
+                    poolId: poolState.id,
+                    kind,
+                    tokenIn: poolTokens[minPositiveDiffIndex].toInputToken(),
+                    tokenOut: poolTokens[minNegativeDiffIndex].toInputToken(),
+                    givenAmount: abs(diffs[givenIndex]),
+                    rpcUrl: input.rpcUrl,
+                    chainId: input.chainId,
+                });
+
+                diffs[givenIndex] = 0n;
+                diffBPTs[givenIndex] = 0n;
+                diffs[resultIndex] = diffs[resultIndex] + resultAmount.amount;
+                diffBPTs[resultIndex] = await queryBPTForDiffAtIndex(
+                    resultIndex,
+                );
             }
             return minNegativeDiffIndex;
         }
@@ -196,7 +180,8 @@ export class PriceImpact {
                 },
                 poolState,
             );
-            return diffBPT.amount;
+            const signal = diffs[i] >= 0n ? 1n : -1n;
+            return diffBPT.amount * signal;
         }
     };
 }
