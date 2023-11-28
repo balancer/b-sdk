@@ -1,18 +1,5 @@
-import {
-    createPublicClient,
-    formatEther,
-    formatUnits,
-    getContract,
-    http,
-} from 'viem';
-import {
-    BALANCER_QUERIES,
-    ChainId,
-    DEFAULT_FUND_MANAGMENT,
-    abs,
-    max,
-    min,
-} from '../../utils';
+import { formatUnits } from 'viem';
+import { abs, max, min } from '../../utils';
 import {
     AddLiquidity,
     AddLiquiditySingleTokenInput,
@@ -27,9 +14,8 @@ import {
 import { TokenAmount } from '../tokenAmount';
 import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils';
-import { Hex, SingleSwap, SwapKind } from '../../types';
-import { balancerQueriesAbi } from '../../abi';
-import { Token } from '../token';
+import { SwapKind } from '../../types';
+import { doQuerySwap } from '../utils/doQuerySwap';
 
 export class PriceImpact {
     static addLiquiditySingleToken = async (
@@ -81,13 +67,6 @@ export class PriceImpact {
             input,
             poolState,
         );
-
-        console.log(
-            'amountsIn',
-            amountsIn.map((a) => a.toSignificant()),
-        );
-        console.log('bptOut', bptOut.toSignificant());
-
         const poolTokens = amountsIn.map((a) => a.token);
 
         // simulate removing liquidity to get amounts out
@@ -102,14 +81,9 @@ export class PriceImpact {
             removeLiquidityInput,
             poolState,
         );
-        console.log(
-            'amountsOut',
-            amountsOut.map((a) => a.amount),
-        );
 
-        // diff between unbalanced and proportional amounts
+        // diffs between unbalanced and proportional amounts
         const diffs = amountsOut.map((a, i) => a.amount - amountsIn[i].amount);
-        console.log('diffs', diffs);
 
         // get how much BPT each diff would mint
         const diffBPTs: bigint[] = [];
@@ -121,87 +95,94 @@ export class PriceImpact {
                 diffBPTs.push(diffs[i] > 0n ? diffBPT : diffBPT * -1n);
             }
         }
-        console.log('diffBPTs', diffBPTs);
 
-        let minPositiveDiffIndex = 0;
-        let minNegativeDiffIndex = 1;
+        // zero out diffs by swapping between tokens from proportionalAmounts
+        // to exactAmountsIn, leaving the remaining diff within a single token
+        const remainingDiffIndex = await zeroOutDiffs(diffs, diffBPTs);
 
-        const nonZeroDiffs = diffs.filter((d) => d !== 0n);
-        for (let i = 0; i < nonZeroDiffs.length - 1; i++) {
-            minPositiveDiffIndex = diffBPTs.findIndex(
-                (diffBPT) => diffBPT === min(diffBPTs.filter((a) => a > 0n)),
-            );
-            minNegativeDiffIndex = diffBPTs.findIndex(
-                (diffBPT) => diffBPT === max(diffBPTs.filter((a) => a < 0n)),
-            );
-
-            if (
-                diffBPTs[minPositiveDiffIndex] <
-                abs(diffBPTs[minNegativeDiffIndex])
-            ) {
-                // swap that diff to token other (non-excess)
-                const returnAmount = await doQuerySwap(
-                    poolState.id,
-                    SwapKind.GivenIn,
-                    TokenAmount.fromRawAmount(
-                        poolTokens[minPositiveDiffIndex],
-                        diffs[minPositiveDiffIndex],
-                    ),
-                    poolTokens[minNegativeDiffIndex],
-                    input.rpcUrl,
-                    input.chainId,
-                );
-                diffs[minPositiveDiffIndex] = 0n;
-                diffBPTs[minPositiveDiffIndex] = 0n;
-                diffs[minNegativeDiffIndex] =
-                    diffs[minNegativeDiffIndex] + returnAmount.amount;
-
-                const diffBPT = await queryBPTForDiffAtIndex(
-                    minNegativeDiffIndex,
-                );
-                diffBPTs[minNegativeDiffIndex] = diffBPT * -1n;
-            } else {
-                const returnAmount = await doQuerySwap(
-                    poolState.id,
-                    SwapKind.GivenOut,
-                    TokenAmount.fromRawAmount(
-                        poolTokens[minPositiveDiffIndex],
-                        abs(diffs[minNegativeDiffIndex]),
-                    ),
-                    poolTokens[minNegativeDiffIndex],
-                    input.rpcUrl,
-                    input.chainId,
-                );
-                diffs[minNegativeDiffIndex] = 0n;
-                diffBPTs[minNegativeDiffIndex] = 0n;
-                diffs[minPositiveDiffIndex] =
-                    diffs[minPositiveDiffIndex] + returnAmount.amount;
-                const diffBPT = await queryBPTForDiffAtIndex(
-                    minPositiveDiffIndex,
-                );
-                diffBPTs[minPositiveDiffIndex] = diffBPT;
-            }
-        }
-
+        // get relevant amounts for price impact calculation
         const amountInitial = parseFloat(
             formatUnits(
-                amountsIn[minNegativeDiffIndex].amount,
-                amountsIn[minNegativeDiffIndex].token.decimals,
+                amountsIn[remainingDiffIndex].amount,
+                amountsIn[remainingDiffIndex].token.decimals,
             ),
         );
-        console.log('amountInitial', amountInitial);
-
         const amountDiff = parseFloat(
             formatUnits(
-                abs(diffs[minNegativeDiffIndex]),
-                amountsIn[minNegativeDiffIndex].token.decimals,
+                abs(diffs[remainingDiffIndex]),
+                amountsIn[remainingDiffIndex].token.decimals,
             ),
         );
-        console.log('amountDiff', amountDiff);
 
         // calculate price impact using ABA method
         const priceImpact = amountDiff / amountInitial / 2;
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+
+        // helper functions
+
+        async function zeroOutDiffs(diffs: bigint[], diffBPTs: bigint[]) {
+            let minNegativeDiffIndex = 0;
+            const nonZeroDiffs = diffs.filter((d) => d !== 0n);
+            for (let i = 0; i < nonZeroDiffs.length - 1; i++) {
+                const minPositiveDiffIndex = diffBPTs.findIndex(
+                    (diffBPT) =>
+                        diffBPT === min(diffBPTs.filter((a) => a > 0n)),
+                );
+                minNegativeDiffIndex = diffBPTs.findIndex(
+                    (diffBPT) =>
+                        diffBPT === max(diffBPTs.filter((a) => a < 0n)),
+                );
+
+                if (
+                    diffBPTs[minPositiveDiffIndex] <
+                    abs(diffBPTs[minNegativeDiffIndex])
+                ) {
+                    // zero out min positive diff
+                    const returnAmount = await doQuerySwap(
+                        poolState.id,
+                        SwapKind.GivenIn,
+                        TokenAmount.fromRawAmount(
+                            poolTokens[minPositiveDiffIndex],
+                            diffs[minPositiveDiffIndex],
+                        ),
+                        poolTokens[minNegativeDiffIndex],
+                        input.rpcUrl,
+                        input.chainId,
+                    );
+                    diffs[minPositiveDiffIndex] = 0n;
+                    diffBPTs[minPositiveDiffIndex] = 0n;
+                    diffs[minNegativeDiffIndex] =
+                        diffs[minNegativeDiffIndex] + returnAmount.amount;
+
+                    const diffBPT = await queryBPTForDiffAtIndex(
+                        minNegativeDiffIndex,
+                    );
+                    diffBPTs[minNegativeDiffIndex] = diffBPT * -1n;
+                } else {
+                    // zero out min negative diff
+                    const returnAmount = await doQuerySwap(
+                        poolState.id,
+                        SwapKind.GivenOut,
+                        TokenAmount.fromRawAmount(
+                            poolTokens[minPositiveDiffIndex],
+                            abs(diffs[minNegativeDiffIndex]),
+                        ),
+                        poolTokens[minNegativeDiffIndex],
+                        input.rpcUrl,
+                        input.chainId,
+                    );
+                    diffs[minNegativeDiffIndex] = 0n;
+                    diffBPTs[minNegativeDiffIndex] = 0n;
+                    diffs[minPositiveDiffIndex] =
+                        diffs[minPositiveDiffIndex] + returnAmount.amount;
+                    const diffBPT = await queryBPTForDiffAtIndex(
+                        minPositiveDiffIndex,
+                    );
+                    diffBPTs[minPositiveDiffIndex] = diffBPT;
+                }
+            }
+            return minNegativeDiffIndex;
+        }
 
         async function queryBPTForDiffAtIndex(i: number): Promise<bigint> {
             const absDiff = TokenAmount.fromRawAmount(
@@ -219,44 +200,3 @@ export class PriceImpact {
         }
     };
 }
-
-const doQuerySwap = async (
-    poolId: Hex,
-    kind: SwapKind,
-    givenAmount: TokenAmount,
-    returnToken: Token,
-    rpcUrl: string,
-    chainId: ChainId,
-): Promise<TokenAmount> => {
-    const publicClient = createPublicClient({
-        transport: http(rpcUrl),
-    });
-
-    const queriesContract = getContract({
-        address: BALANCER_QUERIES[chainId],
-        abi: balancerQueriesAbi,
-        publicClient,
-    });
-
-    const swap: SingleSwap = {
-        poolId,
-        kind,
-        assetIn:
-            kind === SwapKind.GivenIn
-                ? givenAmount.token.address
-                : returnToken.address,
-        assetOut:
-            kind === SwapKind.GivenOut
-                ? givenAmount.token.address
-                : returnToken.address,
-        amount: givenAmount.amount,
-        userData: '0x',
-    };
-
-    const { result } = await queriesContract.simulate.querySwap([
-        swap,
-        DEFAULT_FUND_MANAGMENT,
-    ]);
-
-    return TokenAmount.fromRawAmount(returnToken, result);
-};
