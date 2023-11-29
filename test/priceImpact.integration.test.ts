@@ -17,7 +17,7 @@ import {
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { PriceImpact } from '../src/entities/priceImpact';
 import { PriceImpactAmount } from '../src/entities/priceImpactAmount';
-import { formatEther, parseEther } from 'viem';
+import { parseEther } from 'viem';
 import { SingleSwapInput } from '../src/entities/utils/doQuerySwap';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
