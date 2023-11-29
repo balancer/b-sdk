@@ -13,6 +13,8 @@ import {
     InputAmount,
     AddLiquidityUnbalancedInput,
     SwapKind,
+    RemoveLiquiditySingleTokenInput,
+    RemoveLiquidityKind,
 } from '../src';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { PriceImpact } from '../src/entities/priceImpact';
@@ -103,7 +105,7 @@ describe('price impact', () => {
             );
             expect(priceImpactABA.decimal).closeTo(
                 priceImpactSpot.decimal,
-                1e-3, // 1 bps
+                1e-3, // 10 bps
             );
         });
     });
@@ -168,6 +170,36 @@ describe('price impact', () => {
                     1e-4, // 1 bps
                 );
             });
+        });
+    });
+
+    describe('remove liquidity single token', () => {
+        let input: RemoveLiquiditySingleTokenInput;
+        beforeAll(() => {
+            input = {
+                chainId,
+                rpcUrl,
+                bptIn: {
+                    rawAmount: parseEther('100'),
+                    decimals: 18,
+                    address: poolStateInput.address,
+                },
+                tokenOut: wstETH,
+                kind: RemoveLiquidityKind.SingleToken,
+            };
+        });
+        test('ABA close to Spot Price', async () => {
+            const priceImpactABA = await PriceImpact.removeLiquiditySingleToken(
+                input,
+                poolStateInput,
+            );
+            const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                '0.000314661068454677', // from previous SDK/SOR
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                priceImpactSpot.decimal,
+                1e-4, // 1 bps
+            );
         });
     });
 });
