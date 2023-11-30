@@ -82,106 +82,106 @@ export class PriceImpact {
             poolState,
         );
 
-        // diffs between unbalanced and proportional amounts
-        const diffs = amountsOut.map((a, i) => a.amount - amountsIn[i].amount);
+        // deltas between unbalanced and proportional amounts
+        const deltas = amountsOut.map((a, i) => a.amount - amountsIn[i].amount);
 
-        // get how much BPT each diff would mint
-        const diffBPTs: bigint[] = [];
-        for (let i = 0; i < diffs.length; i++) {
-            if (diffs[i] === 0n) {
-                diffBPTs.push(0n);
+        // get how much BPT each delta would mint
+        const deltaBPTs: bigint[] = [];
+        for (let i = 0; i < deltas.length; i++) {
+            if (deltas[i] === 0n) {
+                deltaBPTs.push(0n);
             } else {
-                diffBPTs.push(await queryBPTForDiffAtIndex(i));
+                deltaBPTs.push(await queryBPTForDeltaAtIndex(i));
             }
         }
 
-        // zero out diffs by swapping between tokens from proportionalAmounts
-        // to exactAmountsIn, leaving the remaining diff within a single token
-        const remainingDiffIndex = await zeroOutDiffs(diffs, diffBPTs);
+        // zero out deltas by swapping between tokens from proportionalAmounts
+        // to exactAmountsIn, leaving the remaining delta within a single token
+        const remainingDeltaIndex = await zeroOutDeltas(deltas, deltaBPTs);
 
         // get relevant amounts for price impact calculation
         const amountInitial = parseFloat(
             formatUnits(
-                amountsIn[remainingDiffIndex].amount,
-                amountsIn[remainingDiffIndex].token.decimals,
+                amountsIn[remainingDeltaIndex].amount,
+                amountsIn[remainingDeltaIndex].token.decimals,
             ),
         );
-        const amountDiff = parseFloat(
+        const amountDelta = parseFloat(
             formatUnits(
-                abs(diffs[remainingDiffIndex]),
-                amountsIn[remainingDiffIndex].token.decimals,
+                abs(deltas[remainingDeltaIndex]),
+                amountsIn[remainingDeltaIndex].token.decimals,
             ),
         );
 
         // calculate price impact using ABA method
-        const priceImpact = amountDiff / amountInitial / 2;
+        const priceImpact = amountDelta / amountInitial / 2;
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
 
         // helper functions
 
-        async function zeroOutDiffs(diffs: bigint[], diffBPTs: bigint[]) {
-            let minNegativeDiffIndex = 0;
-            const nonZeroDiffs = diffs.filter((d) => d !== 0n);
-            for (let i = 0; i < nonZeroDiffs.length - 1; i++) {
-                const minPositiveDiffIndex = diffBPTs.findIndex(
-                    (diffBPT) =>
-                        diffBPT === min(diffBPTs.filter((a) => a > 0n)),
+        async function zeroOutDeltas(deltas: bigint[], deltaBPTs: bigint[]) {
+            let minNegativeDeltaIndex = 0;
+            const nonZeroDeltas = deltas.filter((d) => d !== 0n);
+            for (let i = 0; i < nonZeroDeltas.length - 1; i++) {
+                const minPositiveDeltaIndex = deltaBPTs.findIndex(
+                    (deltaBPT) =>
+                        deltaBPT === min(deltaBPTs.filter((a) => a > 0n)),
                 );
-                minNegativeDiffIndex = diffBPTs.findIndex(
-                    (diffBPT) =>
-                        diffBPT === max(diffBPTs.filter((a) => a < 0n)),
+                minNegativeDeltaIndex = deltaBPTs.findIndex(
+                    (deltaBPT) =>
+                        deltaBPT === max(deltaBPTs.filter((a) => a < 0n)),
                 );
 
                 let kind: SwapKind;
                 let givenIndex: number;
                 let resultIndex: number;
                 if (
-                    diffBPTs[minPositiveDiffIndex] <
-                    abs(diffBPTs[minNegativeDiffIndex])
+                    deltaBPTs[minPositiveDeltaIndex] <
+                    abs(deltaBPTs[minNegativeDeltaIndex])
                 ) {
                     kind = SwapKind.GivenIn;
-                    givenIndex = minPositiveDiffIndex;
-                    resultIndex = minNegativeDiffIndex;
+                    givenIndex = minPositiveDeltaIndex;
+                    resultIndex = minNegativeDeltaIndex;
                 } else {
                     kind = SwapKind.GivenOut;
-                    givenIndex = minNegativeDiffIndex;
-                    resultIndex = minPositiveDiffIndex;
+                    givenIndex = minNegativeDeltaIndex;
+                    resultIndex = minPositiveDeltaIndex;
                 }
 
                 const resultAmount = await doQuerySwap({
                     poolId: poolState.id,
                     kind,
-                    tokenIn: poolTokens[minPositiveDiffIndex].toInputToken(),
-                    tokenOut: poolTokens[minNegativeDiffIndex].toInputToken(),
-                    givenAmount: abs(diffs[givenIndex]),
+                    tokenIn: poolTokens[minPositiveDeltaIndex].toInputToken(),
+                    tokenOut: poolTokens[minNegativeDeltaIndex].toInputToken(),
+                    givenAmount: abs(deltas[givenIndex]),
                     rpcUrl: input.rpcUrl,
                     chainId: input.chainId,
                 });
 
-                diffs[givenIndex] = 0n;
-                diffBPTs[givenIndex] = 0n;
-                diffs[resultIndex] = diffs[resultIndex] + resultAmount.amount;
-                diffBPTs[resultIndex] = await queryBPTForDiffAtIndex(
+                deltas[givenIndex] = 0n;
+                deltaBPTs[givenIndex] = 0n;
+                deltas[resultIndex] = deltas[resultIndex] + resultAmount.amount;
+                deltaBPTs[resultIndex] = await queryBPTForDeltaAtIndex(
                     resultIndex,
                 );
             }
-            return minNegativeDiffIndex;
+            return minNegativeDeltaIndex;
         }
 
-        async function queryBPTForDiffAtIndex(i: number): Promise<bigint> {
-            const absDiff = TokenAmount.fromRawAmount(
+        async function queryBPTForDeltaAtIndex(i: number): Promise<bigint> {
+            const absDelta = TokenAmount.fromRawAmount(
                 poolTokens[i],
-                abs(diffs[i]),
+                abs(deltas[i]),
             );
-            const { bptOut: diffBPT } = await addLiquidity.query(
+            const { bptOut: deltaBPT } = await addLiquidity.query(
                 {
                     ...input,
-                    amountsIn: [absDiff.toInputAmount()],
+                    amountsIn: [absDelta.toInputAmount()],
                 },
                 poolState,
             );
-            const signal = diffs[i] >= 0n ? 1n : -1n;
-            return diffBPT.amount * signal;
+            const signal = deltas[i] >= 0n ? 1n : -1n;
+            return deltaBPT.amount * signal;
         }
     };
 }
