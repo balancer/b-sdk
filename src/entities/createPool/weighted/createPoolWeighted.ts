@@ -1,4 +1,4 @@
-import { Address, encodeFunctionData, parseEther, zeroAddress } from 'viem';
+import { Address, encodeFunctionData, parseEther } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
