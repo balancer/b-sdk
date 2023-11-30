@@ -10,8 +10,8 @@ export type CreateWeightedPoolInput = {
     name?: string;
     symbol: string;
     tokens: Address[];
-    weights?: { tokenAddress: Address; weight: number }[];
-    rateProviders?: { tokenAddress: Address; rateProviderAddress: Address }[];
+    weights: { tokenAddress: Address; weight: string }[];
+    rateProviders: { tokenAddress: Address; rateProviderAddress: Address }[];
     swapFee: string;
     poolOwnerAddress: Address;
     salt?: Hex;
