@@ -91,7 +91,7 @@ export class PriceImpact {
             if (deltas[i] === 0n) {
                 deltaBPTs.push(0n);
             } else {
-                deltaBPTs.push(await queryBPTForDeltaAtIndex(i));
+                deltaBPTs.push(await queryAddLiquidityForTokenDelta(i));
             }
         }
 
@@ -133,19 +133,19 @@ export class PriceImpact {
                 );
 
                 let kind: SwapKind;
-                let givenIndex: number;
-                let resultIndex: number;
+                let givenTokenIndex: number;
+                let resultTokenIndex: number;
                 if (
                     deltaBPTs[minPositiveDeltaIndex] <
                     abs(deltaBPTs[minNegativeDeltaIndex])
                 ) {
                     kind = SwapKind.GivenIn;
-                    givenIndex = minPositiveDeltaIndex;
-                    resultIndex = minNegativeDeltaIndex;
+                    givenTokenIndex = minPositiveDeltaIndex;
+                    resultTokenIndex = minNegativeDeltaIndex;
                 } else {
                     kind = SwapKind.GivenOut;
-                    givenIndex = minNegativeDeltaIndex;
-                    resultIndex = minPositiveDeltaIndex;
+                    givenTokenIndex = minNegativeDeltaIndex;
+                    resultTokenIndex = minPositiveDeltaIndex;
                 }
 
                 const resultAmount = await doQuerySwap({
@@ -153,25 +153,27 @@ export class PriceImpact {
                     kind,
                     tokenIn: poolTokens[minPositiveDeltaIndex].toInputToken(),
                     tokenOut: poolTokens[minNegativeDeltaIndex].toInputToken(),
-                    givenAmount: abs(deltas[givenIndex]),
+                    givenAmount: abs(deltas[givenTokenIndex]),
                     rpcUrl: input.rpcUrl,
                     chainId: input.chainId,
                 });
 
-                deltas[givenIndex] = 0n;
-                deltaBPTs[givenIndex] = 0n;
-                deltas[resultIndex] = deltas[resultIndex] + resultAmount.amount;
-                deltaBPTs[resultIndex] = await queryBPTForDeltaAtIndex(
-                    resultIndex,
-                );
+                deltas[givenTokenIndex] = 0n;
+                deltaBPTs[givenTokenIndex] = 0n;
+                deltas[resultTokenIndex] =
+                    deltas[resultTokenIndex] + resultAmount.amount;
+                deltaBPTs[resultTokenIndex] =
+                    await queryAddLiquidityForTokenDelta(resultTokenIndex);
             }
             return minNegativeDeltaIndex;
         }
 
-        async function queryBPTForDeltaAtIndex(i: number): Promise<bigint> {
+        async function queryAddLiquidityForTokenDelta(
+            tokenIndex: number,
+        ): Promise<bigint> {
             const absDelta = TokenAmount.fromRawAmount(
-                poolTokens[i],
-                abs(deltas[i]),
+                poolTokens[tokenIndex],
+                abs(deltas[tokenIndex]),
             );
             const { bptOut: deltaBPT } = await addLiquidity.query(
                 {
@@ -180,7 +182,7 @@ export class PriceImpact {
                 },
                 poolState,
             );
-            const signal = deltas[i] >= 0n ? 1n : -1n;
+            const signal = deltas[tokenIndex] >= 0n ? 1n : -1n;
             return deltaBPT.amount * signal;
         }
     };
