@@ -12,6 +12,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquiditySingleTokenInput,
+    RemoveLiquidityUnbalancedInput,
 } from '../removeLiquidity';
 import { TokenAmount } from '../tokenAmount';
 import { PoolStateInput } from '../types';
@@ -240,8 +241,8 @@ export class PriceImpact {
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
     };
 
-    static removeLiquiditySingleToken = async (
-        input: RemoveLiquiditySingleTokenInput,
+    static removeLiquidity = async (
+        input: RemoveLiquiditySingleTokenInput | RemoveLiquidityUnbalancedInput,
         poolState: PoolStateInput,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within RemoveLiquidity
