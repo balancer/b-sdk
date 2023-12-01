@@ -63,8 +63,11 @@ export interface BatchSwapStep {
     userData: Hex;
 }
 
-export type InputAmount = {
+export type InputToken = {
     address: Address;
     decimals: number;
+};
+
+export type InputAmount = InputToken & {
     rawAmount: bigint;
 };
