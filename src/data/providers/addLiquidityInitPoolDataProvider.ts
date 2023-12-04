@@ -66,9 +66,8 @@ export class AddLiquidityInitPoolDataProvider {
                     address,
                     decimals,
                     index,
-                    weight: input.weights?.find(
-                        (w) => w.tokenAddress === address,
-                    )?.weight,
+                    weight: input.tokens.find((t) => t.tokenAddress === address)
+                        ?.weight,
                 })),
         };
     }

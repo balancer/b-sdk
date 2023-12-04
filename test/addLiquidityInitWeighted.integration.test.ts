@@ -54,27 +54,15 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             name: 'Test Pool',
             symbol: '50BAL-50WETH',
             tokens: [
-                '0xba100000625a3754423978a60c9317c58a424e3d', //BAL
-                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-            ],
-            weights: [
                 {
                     tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                     weight: parseEther(`${1 / 2}`).toString(),
+                    rateProvider: zeroAddress,
                 },
                 {
                     tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                     weight: parseEther(`${1 / 2}`).toString(),
-                },
-            ],
-            rateProviders: [
-                {
-                    tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
-                    rateProviderAddress: zeroAddress,
-                },
-                {
-                    tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-                    rateProviderAddress: zeroAddress,
+                    rateProvider: zeroAddress,
                 },
             ],
             swapFee: '0.01',
@@ -93,13 +81,13 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             recipient: signerAddress,
             amountsIn: [
                 {
-                    address: createWeightedPoolInput.tokens[0],
+                    address: createWeightedPoolInput.tokens[0].tokenAddress,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                     weight: parseEther(`${1 / 2}`),
                 },
                 {
-                    address: createWeightedPoolInput.tokens[1],
+                    address: createWeightedPoolInput.tokens[1].tokenAddress,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                     weight: parseEther(`${1 / 2}`),
@@ -131,7 +119,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             addLiquidityInitTxInput.client,
             addLiquidityInitTxInput.testAddress,
             [...poolState.tokens.map((t) => t.address)],
-            undefined,
+            [1, 3],
             [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
         );
     });
