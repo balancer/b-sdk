@@ -23,34 +23,10 @@ export class CreatePoolWeighted implements CreatePoolBase {
         input: CreatePoolWeightedInput,
     ): CreatePoolWeightedArgs {
         const sortedTokenParams = input.tokens
-            .sort((address1, address2) => {
+            .sort(({ tokenAddress: address1 }, { tokenAddress: address2 }) => {
                 const diff = BigInt(address1) - BigInt(address2);
                 return diff > 0 ? 1 : diff < 0 ? -1 : 0;
             })
-            .map((tokenAddress) => {
-                const weight: string | undefined = input.weights.find(
-                    (w) => w.tokenAddress === tokenAddress,
-                )?.weight;
-                const rateProvider: Address | undefined =
-                    input.rateProviders.find(
-                        (rp) => rp.tokenAddress === tokenAddress,
-                    )?.rateProviderAddress;
-                if (!weight) {
-                    throw new Error(
-                        `Weight not found for token: ${tokenAddress}`,
-                    );
-                }
-                if (!rateProvider) {
-                    throw new Error(
-                        `Rate provider not found for token: ${tokenAddress}`,
-                    );
-                }
-                return {
-                    tokenAddress,
-                    weight,
-                    rateProvider,
-                };
-            });
 
         const [tokens, weights, rateProviders] = sortedTokenParams.reduce(
             (acc, curr) => {
