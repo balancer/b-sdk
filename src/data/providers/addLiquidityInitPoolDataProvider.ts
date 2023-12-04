@@ -8,9 +8,7 @@ import {
 } from 'viem';
 import { CHAINS } from '../../utils';
 import { InputAmount } from '../../types';
-import {
-    PoolStateInput,
-} from '../../entities';
+import { PoolStateInput } from '../../entities';
 import { CreatePoolInput } from '../../entities/createPool/types';
 
 export class AddLiquidityInitPoolDataProvider {
@@ -55,8 +53,6 @@ export class AddLiquidityInitPoolDataProvider {
         });
 
         const poolId = (await poolContract.read.getPoolId()) as Hex;
-        // const bptOut = this.calculateBptOut(poolType, amounts, input);
-        // console.log(bptOut);
         return {
             id: poolId,
             address: poolAddress,

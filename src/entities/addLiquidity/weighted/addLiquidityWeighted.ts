@@ -118,8 +118,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             fromInternalBalance: input.fromInternalBalance ?? false,
         });
 
-        console.log(args);
-
         const call = encodeFunctionData({
             abi: vaultAbi,
             functionName: 'joinPool',
