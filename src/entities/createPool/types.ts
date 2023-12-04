@@ -4,14 +4,16 @@ export interface CreatePoolBase {
     buildCall(input: CreatePoolInput): CreatePoolBuildCallOutput;
 }
 
-export type CreatePoolInput = CreateWeightedPoolInput;
+export type CreatePoolInput = CreatePoolWeightedInput;
 
-export type CreateWeightedPoolInput = {
+export type CreatePoolWeightedInput = {
     name?: string;
     symbol: string;
-    tokens: Address[];
-    weights: { tokenAddress: Address; weight: string }[];
-    rateProviders: { tokenAddress: Address; rateProviderAddress: Address }[];
+    tokens: {
+        tokenAddress: Address;
+        weight: string;
+        rateProvider: Address;
+    }[];
     swapFee: string;
     poolOwnerAddress: Address;
     salt?: Hex;
@@ -21,7 +23,7 @@ export type CreatePoolBuildCallOutput = {
     call: Hex;
 };
 
-export type CreateWeightedPoolArgs = [
+export type CreatePoolWeightedArgs = [
     string,
     string,
     Address[],

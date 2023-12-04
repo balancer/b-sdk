@@ -11,23 +11,25 @@ export function validateCreatePoolInputs(
         if (input.tokens.length < 2) {
             throw new Error('Minimum of 2 tokens required');
         }
-        const weightsSum = input.weights.reduce(
-            (acc, w) => acc + BigInt(w.weight),
+        const weightsSum = input.tokens.reduce(
+            (acc, { weight }) => acc + BigInt(weight),
             0n,
         );
         if (weightsSum !== BigInt(1e18)) {
             throw new Error('Weights must sum to 1e18');
         }
-        if (input.tokens.length !== input.weights.length) {
-            throw new Error('Tokens and weights must be the same length');
+        if (input.tokens.find(({ weight }) => BigInt(weight) === 0n)) {
+            throw new Error('Weight cannot be 0');
         }
-        if (input.tokens.length !== input.rateProviders.length) {
-            throw new Error(
-                'Tokens and rateProviders must have the same length',
-            );
-        }
-        if (input.tokens.length !== input.weights.length) {
-            throw new Error('Tokens and weights must have the same length');
+        const tokenAddresses = input.tokens.map(
+            ({ tokenAddress }) => tokenAddress,
+        );
+        if (
+            tokenAddresses.some(
+                (address, idx) => tokenAddresses.indexOf(address) !== idx,
+            )
+        ) {
+            throw new Error('Duplicate token addresses');
         }
     }
 }
