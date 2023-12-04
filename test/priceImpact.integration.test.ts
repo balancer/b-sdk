@@ -13,6 +13,9 @@ import {
     InputAmount,
     AddLiquidityUnbalancedInput,
     SwapKind,
+    RemoveLiquiditySingleTokenInput,
+    RemoveLiquidityKind,
+    RemoveLiquidityUnbalancedInput,
 } from '../src';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { PriceImpact } from '../src/entities/priceImpact';
@@ -103,7 +106,7 @@ describe('price impact', () => {
             );
             expect(priceImpactABA.decimal).closeTo(
                 priceImpactSpot.decimal,
-                1e-3, // 1 bps
+                1e-3, // 10 bps
             );
         });
     });
@@ -168,6 +171,68 @@ describe('price impact', () => {
                     1e-4, // 1 bps
                 );
             });
+        });
+    });
+
+    describe('remove liquidity single token', () => {
+        let input: RemoveLiquiditySingleTokenInput;
+        beforeAll(() => {
+            input = {
+                chainId,
+                rpcUrl,
+                bptIn: {
+                    rawAmount: parseEther('100'),
+                    decimals: 18,
+                    address: poolStateInput.address,
+                },
+                tokenOut: wstETH,
+                kind: RemoveLiquidityKind.SingleToken,
+            };
+        });
+        test('ABA close to Spot Price', async () => {
+            const priceImpactABA = await PriceImpact.removeLiquidity(
+                input,
+                poolStateInput,
+            );
+            const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                '0.000314661068454677', // from previous SDK/SOR
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                priceImpactSpot.decimal,
+                1e-4, // 1 bps
+            );
+        });
+    });
+
+    describe('remove liquidity unbalanced', () => {
+        let input: RemoveLiquidityUnbalancedInput;
+        beforeAll(() => {
+            const amounts = ['0', '1000', '100', '10'];
+            input = {
+                chainId,
+                rpcUrl,
+                amountsOut: poolStateInput.tokens.map((t, i) => {
+                    return {
+                        rawAmount: parseEther(amounts[i]),
+                        decimals: t.decimals,
+                        address: t.address,
+                    };
+                }),
+                kind: RemoveLiquidityKind.Unbalanced,
+            };
+        });
+        test('ABA close to Spot Price', async () => {
+            const priceImpactABA = await PriceImpact.removeLiquidity(
+                input,
+                poolStateInput,
+            );
+            const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                '0.000478949021982815', // from previous SDK/SOR
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                priceImpactSpot.decimal,
+                1e-4, // 1 bps
+            );
         });
     });
 });

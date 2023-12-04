@@ -2,6 +2,7 @@ import { formatUnits } from 'viem';
 import { abs, max, min } from '../../utils';
 import {
     AddLiquidity,
+    AddLiquidityKind,
     AddLiquiditySingleTokenInput,
     AddLiquidityUnbalancedInput,
 } from '../addLiquidity';
@@ -10,6 +11,8 @@ import {
     RemoveLiquidity,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
+    RemoveLiquiditySingleTokenInput,
+    RemoveLiquidityUnbalancedInput,
 } from '../removeLiquidity';
 import { TokenAmount } from '../tokenAmount';
 import { PoolStateInput } from '../types';
@@ -237,6 +240,41 @@ export class PriceImpact {
             Math.abs(amountInitialFloat - amountFinalFloat) /
             amountInitialFloat /
             2;
+        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+    };
+
+    static removeLiquidity = async (
+        input: RemoveLiquiditySingleTokenInput | RemoveLiquidityUnbalancedInput,
+        poolState: PoolStateInput,
+    ): Promise<PriceImpactAmount> => {
+        // inputs are being validated within RemoveLiquidity
+
+        // simulate removing liquidity to get amounts out
+        const removeLiquidity = new RemoveLiquidity();
+        const { bptIn, amountsOut } = await removeLiquidity.query(
+            input,
+            poolState,
+        );
+
+        // simulate adding liquidity to get amounts in
+        const addLiquidity = new AddLiquidity();
+        const addLiquidityInput: AddLiquidityUnbalancedInput = {
+            chainId: input.chainId,
+            rpcUrl: input.rpcUrl,
+            amountsIn: amountsOut.map((a) => a.toInputAmount()),
+            kind: AddLiquidityKind.Unbalanced,
+        };
+        const { bptOut } = await addLiquidity.query(
+            addLiquidityInput,
+            poolState,
+        );
+
+        // get relevant amounts for price impact calculation
+        const amountInitial = parseFloat(bptIn.toSignificant());
+        const amountFinal = parseFloat(bptOut.toSignificant());
+
+        // calculate price impact using ABA method
+        const priceImpact = (amountInitial - amountFinal) / amountInitial / 2;
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
     };
 }
