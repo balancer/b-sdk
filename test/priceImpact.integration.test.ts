@@ -12,11 +12,13 @@ import {
     getPoolAddress,
     InputAmount,
     AddLiquidityUnbalancedInput,
+    SwapKind,
 } from '../src';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { PriceImpact } from '../src/entities/priceImpact';
 import { PriceImpactAmount } from '../src/entities/priceImpactAmount';
-import { formatEther, parseEther } from 'viem';
+import { parseEther } from 'viem';
+import { SingleSwapInput } from '../src/entities/utils/doQuerySwap';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -83,10 +85,6 @@ describe('price impact', () => {
                     address: t.address,
                 };
             });
-            console.log(
-                'amountsIn',
-                amountsIn.map((a) => formatEther(a.rawAmount)),
-            );
 
             input = {
                 chainId,
@@ -107,6 +105,69 @@ describe('price impact', () => {
                 priceImpactSpot.decimal,
                 1e-3, // 1 bps
             );
+        });
+    });
+
+    describe('swap', () => {
+        let input: SingleSwapInput;
+        describe('given in', () => {
+            beforeAll(() => {
+                input = {
+                    poolId,
+                    kind: SwapKind.GivenIn,
+                    tokenIn: {
+                        address: wstETH,
+                        decimals: 18,
+                    },
+                    tokenOut: {
+                        address: rETH,
+                        decimals: 18,
+                    },
+                    givenAmount: parseEther('100'),
+                    chainId,
+                    rpcUrl,
+                };
+            });
+            test('ABA close to Spot Price', async () => {
+                const priceImpactABA = await PriceImpact.singleSwap(input);
+                const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                    '0.0006892372576572821', // from previous SDK/SOR
+                );
+                expect(priceImpactABA.decimal).closeTo(
+                    priceImpactSpot.decimal,
+                    1e-4, // 1 bps
+                );
+            });
+        });
+
+        describe('given out', () => {
+            beforeAll(() => {
+                input = {
+                    poolId,
+                    kind: SwapKind.GivenOut,
+                    tokenIn: {
+                        address: wstETH,
+                        decimals: 18,
+                    },
+                    tokenOut: {
+                        address: rETH,
+                        decimals: 18,
+                    },
+                    givenAmount: parseEther('100'),
+                    chainId,
+                    rpcUrl,
+                };
+            });
+            test('ABA close to Spot Price', async () => {
+                const priceImpactABA = await PriceImpact.singleSwap(input);
+                const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                    '0.0006892372576572821', // from previous SDK/SOR
+                );
+                expect(priceImpactABA.decimal).closeTo(
+                    priceImpactSpot.decimal,
+                    1e-4, // 1 bps
+                );
+            });
         });
     });
 });

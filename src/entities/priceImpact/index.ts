@@ -15,7 +15,8 @@ import { TokenAmount } from '../tokenAmount';
 import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils';
 import { SwapKind } from '../../types';
-import { doQuerySwap } from '../utils/doQuerySwap';
+import { SingleSwapInput, doQuerySwap } from '../utils/doQuerySwap';
+import { Token } from '../token';
 
 export class PriceImpact {
     static addLiquiditySingleToken = async (
@@ -185,5 +186,57 @@ export class PriceImpact {
             const signal = deltas[tokenIndex] >= 0n ? 1n : -1n;
             return deltaBPT.amount * signal;
         }
+    };
+
+    static singleSwap = async ({
+        poolId,
+        kind,
+        tokenIn,
+        tokenOut,
+        givenAmount,
+        rpcUrl,
+        chainId,
+    }: SingleSwapInput): Promise<PriceImpactAmount> => {
+        const givenToken =
+            kind === SwapKind.GivenIn
+                ? new Token(chainId, tokenIn.address, tokenIn.decimals)
+                : new Token(chainId, tokenOut.address, tokenOut.decimals);
+        const amountInitial = TokenAmount.fromRawAmount(
+            givenToken,
+            givenAmount,
+        );
+
+        // simulate swap in original direction
+        const resultAmount = await doQuerySwap({
+            poolId,
+            kind,
+            tokenIn,
+            tokenOut,
+            givenAmount,
+            rpcUrl,
+            chainId,
+        });
+
+        // simulate swap in the reverse direction
+        const amountFinal = await doQuerySwap({
+            poolId: poolId,
+            kind: kind,
+            tokenIn: tokenOut,
+            tokenOut: tokenIn,
+            givenAmount: resultAmount.amount,
+            rpcUrl,
+            chainId,
+        });
+
+        // get relevant amounts for price impact calculation
+        const amountInitialFloat = parseFloat(amountInitial.toSignificant());
+        const amountFinalFloat = parseFloat(amountFinal.toSignificant());
+
+        // calculate price impact using ABA method
+        const priceImpact =
+            Math.abs(amountInitialFloat - amountFinalFloat) /
+            amountInitialFloat /
+            2;
+        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
     };
 }
