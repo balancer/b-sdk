@@ -2,14 +2,14 @@ import { Address, encodeFunctionData, parseEther } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
-    CreateWeightedPoolArgs,
-    CreateWeightedPoolInput,
+    CreatePoolWeightedArgs,
+    CreatePoolWeightedInput,
 } from '../types';
 import { getRandomBytes32 } from '../../utils/getRandomBytes32';
 import { weightedFactoryV4Abi } from '../../../abi/weightedFactoryV4';
 
 export class CreatePoolWeighted implements CreatePoolBase {
-    buildCall(input: CreateWeightedPoolInput): CreatePoolBuildCallOutput {
+    buildCall(input: CreatePoolWeightedInput): CreatePoolBuildCallOutput {
         const args = this.parseCreateFunctionArgs(input);
         const encodedCall = encodeFunctionData({
             abi: weightedFactoryV4Abi,
@@ -20,8 +20,8 @@ export class CreatePoolWeighted implements CreatePoolBase {
     }
 
     private parseCreateFunctionArgs(
-        input: CreateWeightedPoolInput,
-    ): CreateWeightedPoolArgs {
+        input: CreatePoolWeightedInput,
+    ): CreatePoolWeightedArgs {
         const sortedTokenParams = input.tokens
             .sort((address1, address2) => {
                 const diff = BigInt(address1) - BigInt(address2);

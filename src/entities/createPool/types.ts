@@ -4,9 +4,9 @@ export interface CreatePoolBase {
     buildCall(input: CreatePoolInput): CreatePoolBuildCallOutput;
 }
 
-export type CreatePoolInput = CreateWeightedPoolInput;
+export type CreatePoolInput = CreatePoolWeightedInput;
 
-export type CreateWeightedPoolInput = {
+export type CreatePoolWeightedInput = {
     name?: string;
     symbol: string;
     tokens: Address[];
@@ -21,7 +21,7 @@ export type CreatePoolBuildCallOutput = {
     call: Hex;
 };
 
-export type CreateWeightedPoolArgs = [
+export type CreatePoolWeightedArgs = [
     string,
     string,
     Address[],

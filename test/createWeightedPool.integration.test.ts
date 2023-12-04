@@ -14,7 +14,7 @@ import { doCreatePool } from './lib/utils/createPoolHelper';
 import { CreatePoolTxInput } from './lib/utils/types';
 import {
     CreatePoolInput,
-    CreateWeightedPoolInput,
+    CreatePoolWeightedInput,
 } from '../src/entities/createPool/types';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
@@ -23,7 +23,7 @@ describe('Create Weighted Pool tests', () => {
     const chainId = ChainId.MAINNET;
     let txInput: CreatePoolTxInput;
     let poolAddress: Address;
-    let createWeightedPoolInput: CreateWeightedPoolInput;
+    let createWeightedPoolInput: CreatePoolWeightedInput;
     beforeAll(async () => {
         const client = createTestClient({
             mode: 'anvil',
@@ -90,7 +90,7 @@ describe('Create Weighted Pool tests', () => {
     });
 
     test('Wrong weights, expect error', async () => {
-        const weights: CreateWeightedPoolInput['weights'] = [
+        const weights: CreatePoolWeightedInput['weights'] = [
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                 weight: parseEther(`${1 / 3}`).toString(),
@@ -112,7 +112,7 @@ describe('Create Weighted Pool tests', () => {
         ).rejects.toThrowError('Weights must sum to 1e18');
     });
     test('Wrong tokens in rateProvider, expects error', async () => {
-        const rateProviders: CreateWeightedPoolInput['rateProviders'] = [
+        const rateProviders: CreatePoolWeightedInput['rateProviders'] = [
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a434e3d',
                 rateProviderAddress: zeroAddress,
@@ -136,7 +136,7 @@ describe('Create Weighted Pool tests', () => {
         );
     });
     test('Wrong tokens in weights, expects error', async () => {
-        const weights: CreateWeightedPoolInput['weights'] = [
+        const weights: CreatePoolWeightedInput['weights'] = [
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a444e3d',
                 weight: parseEther(`${1 / 4}`).toString(),
@@ -160,7 +160,7 @@ describe('Create Weighted Pool tests', () => {
         );
     });
     test('Tokens and Weights length mismatch, expects error', async () => {
-        const weights: CreateWeightedPoolInput['weights'] = [
+        const weights: CreatePoolWeightedInput['weights'] = [
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                 weight: parseEther(`${1 / 2}`).toString(),
@@ -178,7 +178,7 @@ describe('Create Weighted Pool tests', () => {
         ).rejects.toThrowError('Tokens and weights must be the same length');
     });
     test('Tokens and Rate Providers length mismatch, expects error', async () => {
-        const rateProviders: CreateWeightedPoolInput['rateProviders'] = [
+        const rateProviders: CreatePoolWeightedInput['rateProviders'] = [
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                 rateProviderAddress: zeroAddress,
