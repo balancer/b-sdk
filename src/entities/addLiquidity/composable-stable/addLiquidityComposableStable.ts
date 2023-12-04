@@ -11,6 +11,7 @@ import {
     AddLiquidityKind,
     AddLiquidityComposableStableQueryOutput,
     AddLiquidityComposableStableCall,
+    AddLiquidityInitInput,
 } from '../types';
 import {
     AddLiquidityAmounts as AddLiquidityAmountsBase,
@@ -114,6 +115,14 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                 TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
             ),
         };
+    }
+
+    buildInitCall(
+        input: AddLiquidityInitInput,
+        poolState: PoolState,
+    ): AddLiquidityBuildOutput {
+        console.log(input, poolState);
+        throw new Error('Method not implemented.');
     }
 
     private getAmountsQuery(
