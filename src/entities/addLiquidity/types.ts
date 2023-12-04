@@ -1,7 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { PoolState } from '../types';
-import { Address, Hex, InputAmount } from '../../types';
+import { Address, Hex, InitInputAmount, InputAmount } from '../../types';
 
 export enum AddLiquidityKind {
     Init = 'Init',
@@ -19,7 +19,9 @@ type AddLiquidityBaseInput = {
 };
 
 export type AddLiquidityInitInput = AddLiquidityBaseInput & {
-    amountsIn: InputAmount[];
+    sender: Address;
+    recipient: Address;
+    amountsIn: InitInputAmount[];
     kind: AddLiquidityKind.Init;
 };
 
@@ -86,13 +88,12 @@ export interface AddLiquidityBase {
         input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<AddLiquidityQueryOutput>;
-    buildCall(input: AddLiquidityCall): {
-        call: Hex;
-        to: Address;
-        value: bigint;
-        minBptOut: TokenAmount;
-        maxAmountsIn: TokenAmount[];
-    };
+    buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput;
+
+    buildInitCall(
+        input: AddLiquidityInitInput,
+        poolState: PoolState,
+    ): AddLiquidityBuildOutput;
 }
 
 export type AddLiquidityBuildOutput = {

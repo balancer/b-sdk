@@ -5,6 +5,7 @@ import {
     AddLiquidityInput,
     AddLiquidityQueryOutput,
     AddLiquidityCall,
+    AddLiquidityInitInput,
 } from './types';
 import { AddLiquidityWeighted } from './weighted/addLiquidityWeighted';
 import { PoolStateInput } from '../types';
@@ -58,5 +59,22 @@ export class AddLiquidity {
 
     public buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
         return this.getAddLiquidity(input.poolType).buildCall(input);
+    }
+
+    public buildInitCall(
+        input: AddLiquidityInitInput,
+        poolState: PoolStateInput,
+    ): AddLiquidityBuildOutput {
+        validateInputs(input, poolState);
+
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        const mappedPoolState = {
+            ...poolState,
+            tokens: sortedTokens,
+        };
+        return this.getAddLiquidity(poolState.type).buildInitCall(
+            input,
+            mappedPoolState,
+        );
     }
 }
