@@ -51,24 +51,31 @@ export class AddLiquidityInitPoolDataProvider {
             address: poolAddress,
             publicClient: this.client,
         });
-
-        const poolId = (await poolContract.read.getPoolId()) as Hex;
-        return {
-            id: poolId,
-            address: poolAddress,
-            type: poolType.toUpperCase(),
-            tokens: amounts
-                .sort((a, b) => {
-                    const diff = BigInt(a.address) - BigInt(b.address);
-                    return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-                })
-                .map(({ address, decimals }, index) => ({
-                    address,
-                    decimals,
-                    index,
-                    weight: input.tokens.find((t) => t.tokenAddress === address)
-                        ?.weight,
-                })),
-        };
+        try {
+            const poolId = (await poolContract.read.getPoolId()) as Hex;
+            return {
+                id: poolId,
+                address: poolAddress,
+                type: poolType.toUpperCase(),
+                tokens: amounts
+                    .sort((a, b) => {
+                        const diff = BigInt(a.address) - BigInt(b.address);
+                        return diff > 0 ? 1 : diff < 0 ? -1 : 0;
+                    })
+                    .map(({ address, decimals }, index) => ({
+                        address,
+                        decimals,
+                        index,
+                        weight: input.tokens.find(
+                            (t) => t.tokenAddress === address,
+                        )?.weight,
+                    })),
+            };
+        } catch (e) {
+            console.warn(e);
+            throw new Error(
+                'Invalid address, not possible to retrieve Pool Id',
+            );
+        }
     }
 }
