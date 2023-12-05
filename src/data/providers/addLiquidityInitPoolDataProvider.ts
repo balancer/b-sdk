@@ -59,8 +59,7 @@ export class AddLiquidityInitPoolDataProvider {
             type: poolType.toUpperCase(),
             tokens: amounts
                 .sort((a, b) => {
-                    const diff = BigInt(a.address) - BigInt(b.address);
-                    return diff > 0 ? 1 : diff < 0 ? -1 : 0;
+                    return BigInt(a.address) - BigInt(b.address);
                 })
                 .map(({ address, decimals }, index) => ({
                     address,
