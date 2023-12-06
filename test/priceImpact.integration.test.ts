@@ -118,15 +118,10 @@ describe('price impact', () => {
                 input = {
                     poolId,
                     kind: SwapKind.GivenIn,
-                    tokenIn: {
-                        address: wstETH,
-                        decimals: 18,
-                    },
-                    tokenOut: {
-                        address: rETH,
-                        decimals: 18,
-                    },
-                    givenAmount: parseEther('100'),
+                    assetIn: wstETH,
+                    assetOut: rETH,
+                    amount: parseEther('100'),
+                    userData: '0x',
                     chainId,
                     rpcUrl,
                 };
@@ -148,15 +143,10 @@ describe('price impact', () => {
                 input = {
                     poolId,
                     kind: SwapKind.GivenOut,
-                    tokenIn: {
-                        address: wstETH,
-                        decimals: 18,
-                    },
-                    tokenOut: {
-                        address: rETH,
-                        decimals: 18,
-                    },
-                    givenAmount: parseEther('100'),
+                    assetIn: wstETH,
+                    assetOut: rETH,
+                    amount: parseEther('100'),
+                    userData: '0x',
                     chainId,
                     rpcUrl,
                 };

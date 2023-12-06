@@ -1,16 +1,9 @@
 import { createPublicClient, getContract, http } from 'viem';
 import { BALANCER_QUERIES, ChainId, DEFAULT_FUND_MANAGMENT } from '../../utils';
-import { TokenAmount } from '../tokenAmount';
-import { Hex, InputToken, SingleSwap, SwapKind } from '../../types';
+import { SingleSwap } from '../../types';
 import { balancerQueriesAbi } from '../../abi';
-import { Token } from '../token';
 
-export type SingleSwapInput = {
-    poolId: Hex;
-    tokenIn: InputToken;
-    tokenOut: InputToken;
-    kind: SwapKind;
-    givenAmount: bigint;
+export type SingleSwapInput = SingleSwap & {
     rpcUrl: string;
     chainId: ChainId;
 };
@@ -18,12 +11,12 @@ export type SingleSwapInput = {
 export const doQuerySwap = async ({
     poolId,
     kind,
-    tokenIn,
-    tokenOut,
-    givenAmount,
+    assetIn,
+    assetOut,
+    amount,
     rpcUrl,
     chainId,
-}: SingleSwapInput): Promise<TokenAmount> => {
+}: SingleSwapInput): Promise<bigint> => {
     const publicClient = createPublicClient({
         transport: http(rpcUrl),
     });
@@ -37,9 +30,9 @@ export const doQuerySwap = async ({
     const swap: SingleSwap = {
         poolId,
         kind,
-        assetIn: tokenIn.address,
-        assetOut: tokenOut.address,
-        amount: givenAmount,
+        assetIn,
+        assetOut,
+        amount,
         userData: '0x',
     };
 
@@ -48,9 +41,5 @@ export const doQuerySwap = async ({
         DEFAULT_FUND_MANAGMENT,
     ]);
 
-    const resultToken =
-        kind === SwapKind.GivenIn
-            ? new Token(chainId, tokenOut.address, tokenOut.decimals)
-            : new Token(chainId, tokenIn.address, tokenIn.decimals);
-    return TokenAmount.fromRawAmount(resultToken, result);
+    return result;
 };
