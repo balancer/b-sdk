@@ -163,6 +163,16 @@ export const BALANCER_HELPERS: Record<number, Address> = {
     [ChainId.ZKEVM]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
 };
 
+export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
+    [ChainId.AVALANCHE]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
+    [ChainId.GNOSIS_CHAIN]: '0x6cad2ea22bfa7f4c14aae92e47f510cd5c509bc7',
+    [ChainId.MAINNET]: '0x897888115ada5773e02aa29f775430bfb5f34c51',
+    [ChainId.OPTIMISM]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
+    [ChainId.POLYGON]: '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
+    [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
+};
+
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(
         ChainId.MAINNET,
