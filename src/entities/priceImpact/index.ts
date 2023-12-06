@@ -19,7 +19,6 @@ import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils';
 import { SingleSwap, SwapKind } from '../../types';
 import { SingleSwapInput, doQuerySwap } from '../utils/doQuerySwap';
-import { Token } from '../token';
 
 export class PriceImpact {
     static addLiquiditySingleToken = async (
