@@ -8,6 +8,7 @@ import {
     DEFAULT_FUND_MANAGMENT,
     ZERO_ADDRESS,
     NATIVE_ADDRESS,
+    MathSol,
 } from '../utils';
 import {
     Address,
@@ -170,7 +171,11 @@ export class Swap {
     public get priceImpact(): PriceImpactAmount {
         const paths = this.paths.map(
             (path) =>
-                new PathWithAmount(path.tokens, path.pools, path.swapAmount),
+                new PathWithAmount(
+                    [...path.tokens],
+                    [...path.pools],
+                    path.swapAmount,
+                ),
         );
 
         const pathsReverse = paths.map(
@@ -184,21 +189,21 @@ export class Swap {
                 ),
         );
 
-        const amountInitial = parseFloat(
+        const amountInitial =
             this.swapKind === SwapKind.GivenIn
-                ? this.getInputAmount(paths).toSignificant()
-                : this.getOutputAmount(paths).toSignificant(),
-        );
+                ? this.getInputAmount(paths).amount
+                : this.getOutputAmount(paths).amount;
 
-        const amountFinal = parseFloat(
+        const amountFinal =
             this.swapKind === SwapKind.GivenIn
-                ? this.getOutputAmount(pathsReverse).toSignificant()
-                : this.getInputAmount(pathsReverse).toSignificant(),
-        );
+                ? this.getOutputAmount(pathsReverse).amount
+                : this.getInputAmount(pathsReverse).amount;
 
-        const priceImpact =
-            Math.abs(amountInitial - amountFinal) / amountInitial / 2;
-        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+        const priceImpact = MathSol.divDownFixed(
+            abs(amountInitial - amountFinal),
+            amountInitial * 2n,
+        );
+        return PriceImpactAmount.fromRawAmount(priceImpact);
     }
 
     // public get executionPrice(): Price {}

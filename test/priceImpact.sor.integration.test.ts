@@ -77,7 +77,7 @@ describe('Weighted Swap tests', () => {
             rpcUrl,
             chainId,
         });
-        expect(priceImpactSOR.amount).toEqual(priceImpactSDK.amount);
+        expect(priceImpactSOR.decimal).closeTo(priceImpactSDK.decimal, 1e-4);
     });
 
     // ETH -> BAL swapGivenOut single hop
@@ -105,6 +105,6 @@ describe('Weighted Swap tests', () => {
             chainId,
         });
 
-        expect(priceImpactSOR.amount).toEqual(priceImpactSDK.amount);
+        expect(priceImpactSOR.decimal).closeTo(priceImpactSDK.decimal, 1e-4);
     });
 });
