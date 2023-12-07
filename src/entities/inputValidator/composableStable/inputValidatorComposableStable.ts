@@ -27,6 +27,7 @@ export class InputValidatorComposableStable implements InputValidatorBase {
     }
 
     validateCreatePool(input: CreatePoolWeightedInput): void {
+        console.log(input);
         throw new Error('Method not implemented.');
     }
 }

@@ -1,7 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { Address } from '../../../types';
 import {
     BALANCER_VAULT,
     MAX_UINT256,
@@ -187,12 +186,5 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             default:
                 throw Error('Unsupported Remove Liquidity Kind');
         }
-    }
-
-    private encodeUserData(
-        kind: RemoveLiquidityKind,
-        amounts: RemoveLiquidityAmounts,
-    ): Address {
-      
     }
 }

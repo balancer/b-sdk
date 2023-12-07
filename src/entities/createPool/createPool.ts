@@ -1,6 +1,5 @@
 import { InputValidator } from '../inputValidator/inputValidator';
 import { CreatePoolBase, CreatePoolInput } from './types';
-import { validateCreatePoolInputs } from './utils/validateInputs';
 import { CreatePoolWeighted } from './weighted/createPoolWeighted';
 
 export class CreatePool {

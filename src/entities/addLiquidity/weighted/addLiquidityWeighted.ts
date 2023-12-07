@@ -1,8 +1,7 @@
-import { encodeFunctionData, formatUnits, parseEther } from 'viem';
+import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
 import { WeightedEncoder } from '../../encoders/weighted';
-import { Address, WeightedInitInputAmount } from '../../../types';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
 import {
@@ -12,7 +11,6 @@ import {
     AddLiquidityKind,
     AddLiquidityWeightedQueryOutput,
     AddLiquidityWeightedCall,
-    AddLiquidityInitInput,
 } from '../types';
 import { AddLiquidityAmounts, PoolState } from '../../types';
 import {
@@ -20,7 +18,6 @@ import {
     getAmounts,
     parseAddLiquidityArgs,
 } from '../../utils';
-import { sortTokensByAddress } from '../../../utils/tokens';
 
 export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
@@ -174,35 +171,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                     ),
                     tokenInIndex: input.tokenInIndex,
                 };
-            }
-            default:
-                throw Error('Unsupported Add Liquidity Kind');
-        }
-    }
-
-    private encodeUserData(
-        kind: AddLiquidityKind,
-        amounts: AddLiquidityAmounts,
-    ): Address {
-        switch (kind) {
-            case AddLiquidityKind.Init:
-                return WeightedEncoder.addLiquidityInit(amounts.maxAmountsIn);
-            case AddLiquidityKind.Unbalanced:
-                return WeightedEncoder.addLiquidityUnbalanced(
-                    amounts.maxAmountsIn,
-                    amounts.minimumBpt,
-                );
-            case AddLiquidityKind.SingleToken: {
-                if (amounts.tokenInIndex === undefined) throw Error('No Index');
-                return WeightedEncoder.addLiquiditySingleToken(
-                    amounts.minimumBpt,
-                    amounts.tokenInIndex,
-                );
-            }
-            case AddLiquidityKind.Proportional: {
-                return WeightedEncoder.addLiquidityProportional(
-                    amounts.minimumBpt,
-                );
             }
             default:
                 throw Error('Unsupported Add Liquidity Kind');

@@ -9,8 +9,7 @@ import {
     Slippage,
 } from '../../../src';
 import { CreatePool } from '../../../src/entities/createPool/createPool';
-import { CreatePoolInput } from '../../../src/entities/createPool/types';
-import { P } from 'pino';
+import { CreatePoolInput } from '../../../src/entities/createPool/types';s
 import { AddLiquidityInit } from '../../../src/entities/addLiquidityInit/addLiquidityInit';
 
 export type AddLiquidityTxInput = {

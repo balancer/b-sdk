@@ -1,7 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { Address } from '../../../types';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
 import {
@@ -11,7 +10,6 @@ import {
     AddLiquidityKind,
     AddLiquidityComposableStableQueryOutput,
     AddLiquidityComposableStableCall,
-    AddLiquidityInitInput,
 } from '../types';
 import {
     AddLiquidityAmounts as AddLiquidityAmountsBase,
@@ -123,14 +121,6 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         };
     }
 
-    buildInitCall(
-        input: AddLiquidityInitInput,
-        poolState: PoolState,
-    ): AddLiquidityBuildOutput {
-        console.log(input, poolState);
-        throw new Error('Method not implemented.');
-    }
-
     private getAmountsQuery(
         poolTokens: Token[],
         input: AddLiquidityInput,
@@ -225,36 +215,5 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                 ...addLiquidityAmounts.maxAmountsIn.slice(input.bptIndex + 1),
             ],
         };
-    }
-
-    private encodeUserData(
-        kind: AddLiquidityKind,
-        amounts: AddLiquidityAmounts,
-    ): Address {
-        switch (kind) {
-            case AddLiquidityKind.Init:
-                return ComposableStableEncoder.addLiquidityInit(
-                    amounts.maxAmountsInNoBpt,
-                );
-            case AddLiquidityKind.Unbalanced:
-                return ComposableStableEncoder.addLiquidityUnbalanced(
-                    amounts.maxAmountsInNoBpt,
-                    amounts.minimumBpt,
-                );
-            case AddLiquidityKind.SingleToken: {
-                if (amounts.tokenInIndex === undefined) throw Error('No Index');
-                return ComposableStableEncoder.addLiquiditySingleToken(
-                    amounts.minimumBpt,
-                    amounts.tokenInIndex, // Has to be index without BPT
-                );
-            }
-            case AddLiquidityKind.Proportional: {
-                return ComposableStableEncoder.addLiquidityProportional(
-                    amounts.minimumBpt,
-                );
-            }
-            default:
-                throw Error('Unsupported Add Liquidity Kind');
-        }
     }
 }
