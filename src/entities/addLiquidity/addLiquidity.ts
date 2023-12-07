@@ -5,7 +5,6 @@ import {
     AddLiquidityInput,
     AddLiquidityQueryOutput,
     AddLiquidityCall,
-    AddLiquidityInitInput,
 } from './types';
 import { AddLiquidityWeighted } from './weighted/addLiquidityWeighted';
 import { PoolStateInput } from '../types';
@@ -60,12 +59,5 @@ export class AddLiquidity {
 
     public buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
         return this.getAddLiquidity(input.poolType).buildCall(input);
-    }
-
-    public buildInitCall(
-        input: AddLiquidityInitInput,
-        poolState: PoolStateInput,
-    ): AddLiquidityBuildOutput {
-        this.inputValidator.validateAddLiquidity(input, poolState);
     }
 }
