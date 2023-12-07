@@ -1,3 +1,4 @@
+import { InputValidator } from '../inputValidator/inputValidator';
 import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils';
 import {
@@ -9,6 +10,8 @@ import { AddLiquidityInitWeighted } from './weighted/addLiquidityInitWeighted';
 
 export class AddLiquidityInit {
     addLiquidityInitTypes: Record<string, AddLiquidityInitBase> = {};
+
+    inputValidator: InputValidator = new InputValidator();
 
     constructor(config?: AddLiquidityInitConfig) {
         const { customAddLiquidityInitTypes } = config || {};
@@ -26,6 +29,7 @@ export class AddLiquidityInit {
     }
 
     buildCall(input: AddLiquidityInitInput, poolState: PoolStateInput): any {
+        this.inputValidator.validateAddLiquidity(input, poolState);
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const mappedPoolState = {
             ...poolState,
