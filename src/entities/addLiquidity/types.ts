@@ -11,18 +11,11 @@ export enum AddLiquidityKind {
 }
 
 // This will be extended for each pools specific input requirements
-type AddLiquidityBaseInput = {
+export type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
     useNativeAssetAsWrappedAmountIn?: boolean;
     fromInternalBalance?: boolean;
-};
-
-export type AddLiquidityInitInput = AddLiquidityBaseInput & {
-    sender: Address;
-    recipient: Address;
-    amountsIn: InitInputAmount[];
-    kind: AddLiquidityKind.Init;
 };
 
 export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {

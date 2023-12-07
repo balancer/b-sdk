@@ -38,7 +38,10 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                 ...amounts.minAmountsOut.slice(bptIndex + 1),
             ],
         };
-        const userData = this.encodeUserData(input.kind, amountsWithoutBpt);
+        const userData = ComposableStableEncoder.encodeRemoveLiquidityUserData(
+            input.kind,
+            amountsWithoutBpt,
+        );
 
         // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
@@ -116,7 +119,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                 ...amounts.minAmountsOut.slice(input.bptIndex + 1),
             ],
         };
-        const userData = this.encodeUserData(
+        const userData = ComposableStableEncoder.encodeRemoveLiquidityUserData(
             input.removeLiquidityKind,
             amountsWithoutBpt,
         );
@@ -190,26 +193,6 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         kind: RemoveLiquidityKind,
         amounts: RemoveLiquidityAmounts,
     ): Address {
-        switch (kind) {
-            case RemoveLiquidityKind.Unbalanced:
-                return ComposableStableEncoder.removeLiquidityUnbalanced(
-                    amounts.minAmountsOut,
-                    amounts.maxBptAmountIn,
-                );
-            case RemoveLiquidityKind.SingleToken:
-                if (amounts.tokenOutIndex === undefined)
-                    throw Error('No Index');
-
-                return ComposableStableEncoder.removeLiquiditySingleToken(
-                    amounts.maxBptAmountIn,
-                    amounts.tokenOutIndex,
-                );
-            case RemoveLiquidityKind.Proportional:
-                return ComposableStableEncoder.removeLiquidityProportional(
-                    amounts.maxBptAmountIn,
-                );
-            default:
-                throw Error('Unsupported Remove Liquidity Kind');
-        }
+      
     }
 }

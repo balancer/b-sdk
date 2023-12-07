@@ -15,7 +15,6 @@ import {
     TokenAmount,
     AddLiquidityComposableStableQueryOutput,
     NATIVE_ASSETS,
-    AddLiquidityInitInput,
 } from '../../../src';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
@@ -58,29 +57,6 @@ async function sdkAddLiquidity({
     return {
         addLiquidityBuildOutput,
         addLiquidityQueryOutput,
-    };
-}
-
-function sdkAddLiquidityInit({
-    addLiquidity,
-    addLiquidityInput,
-    poolStateInput,
-}: {
-    addLiquidity: AddLiquidity;
-    addLiquidityInput: AddLiquidityInitInput;
-    poolStateInput: PoolStateInput;
-    slippage: Slippage;
-    testAddress: Address;
-}): {
-    addLiquidityBuildOutput: AddLiquidityBuildOutput;
-} {
-    const addLiquidityBuildOutput = addLiquidity.buildInitCall(
-        addLiquidityInput,
-        poolStateInput,
-    );
-
-    return {
-        addLiquidityBuildOutput,
     };
 }
 
@@ -163,41 +139,6 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
 
     return {
         addLiquidityQueryOutput,
-        addLiquidityBuildOutput,
-        txOutput,
-    };
-}
-
-export async function doAddLiquidityInit(txInput: AddLiquidityTxInput) {
-    const {
-        addLiquidity,
-        poolStateInput,
-        addLiquidityInput,
-        testAddress,
-        client,
-        slippage,
-    } = txInput;
-
-    const { addLiquidityBuildOutput } = await sdkAddLiquidityInit({
-        addLiquidity,
-        addLiquidityInput: addLiquidityInput as AddLiquidityInitInput,
-        poolStateInput,
-        slippage,
-        testAddress,
-    });
-
-    const tokens = getTokensForBalanceCheck(poolStateInput);
-
-    // send transaction and calculate balance changes
-    const txOutput = await sendTransactionGetBalances(
-        tokens,
-        client,
-        testAddress,
-        addLiquidityBuildOutput.to,
-        addLiquidityBuildOutput.call,
-        addLiquidityBuildOutput.value,
-    );
-    return {
         addLiquidityBuildOutput,
         txOutput,
     };
@@ -471,32 +412,4 @@ function assertAddLiquidityBuildOutput(
     // rome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { call, ...buildCheck } = addLiquidityBuildOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
-}
-
-export function assertAddLiquidityInit(
-    addLiquidityInput: AddLiquidityInitInput,
-    addLiquidityOutput: {
-        txOutput: TxOutput;
-        addLiquidityBuildOutput: AddLiquidityBuildOutput;
-    },
-) {
-    const { txOutput, addLiquidityBuildOutput } = addLiquidityOutput;
-
-    expect(txOutput.transactionReceipt.status).to.eq('success');
-
-    // Matching order of getTokens helper: [poolTokens, BPT, native]
-    const expectedDeltas = [
-        ...addLiquidityInput.amountsIn.map((a) => a.rawAmount),
-        addLiquidityBuildOutput.minBptOut.amount,
-        0n,
-    ];
-
-    expect(
-        txOutput.balanceDeltas.slice(0, addLiquidityInput.amountsIn.length),
-    ).to.deep.eq(expectedDeltas.slice(0, addLiquidityInput.amountsIn.length));
-
-    // TODO: Improve this test - BPT Amount is slightly different from calculated Bpt: expected: 200000000000000000000n, real: 199999999999994999520n,
-    expect(
-        txOutput.balanceDeltas[addLiquidityInput.amountsIn.length],
-    ).to.not.be.equal(0n);
 }

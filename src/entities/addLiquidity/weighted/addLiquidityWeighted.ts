@@ -29,7 +29,10 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
     ): Promise<AddLiquidityWeightedQueryOutput> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
 
-        const userData = this.encodeUserData(input.kind, amounts);
+        const userData = WeightedEncoder.encodeAddLiquidityUserData(
+            input.kind,
+            amounts,
+        );
 
         const { args, tokensIn } = parseAddLiquidityArgs({
             useNativeAssetAsWrappedAmountIn:
@@ -71,7 +74,10 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
     public buildCall(input: AddLiquidityWeightedCall): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        const userData = this.encodeUserData(input.addLiquidityKind, amounts);
+        const userData = WeightedEncoder.encodeAddLiquidityUserData(
+            input.addLiquidityKind,
+            amounts,
+        );
 
         const { args } = parseAddLiquidityArgs({
             ...input,
@@ -101,40 +107,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             ),
             maxAmountsIn: input.amountsIn.map((a, i) =>
                 TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
-            ),
-        };
-    }
-
-    public buildInitCall(input: AddLiquidityInitInput, poolState: PoolState) {
-        const amounts = this.getAmountsForInit(input, poolState.tokens);
-        const userData = this.encodeUserData(input.kind, amounts);
-        const bpt = new Token(input.chainId, poolState.address, 18);
-        const { args } = parseAddLiquidityArgs({
-            ...input,
-            poolId: poolState.id,
-            sortedTokens: sortTokensByAddress(poolState.tokens),
-            maxAmountsIn: amounts.maxAmountsIn,
-            userData,
-            fromInternalBalance: input.fromInternalBalance ?? false,
-        });
-
-        const call = encodeFunctionData({
-            abi: vaultAbi,
-            functionName: 'joinPool',
-            args,
-        });
-
-        const value = input.amountsIn.find(
-            (a) => a.address === ZERO_ADDRESS,
-        )?.rawAmount;
-
-        return {
-            call,
-            to: BALANCER_VAULT as Address,
-            value: value === undefined ? 0n : value,
-            minBptOut: TokenAmount.fromRawAmount(bpt, amounts.minimumBpt),
-            maxAmountsIn: sortTokensByAddress(poolState.tokens).map((t, i) =>
-                TokenAmount.fromRawAmount(t, amounts.maxAmountsIn[i]),
             ),
         };
     }
@@ -208,23 +180,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         }
     }
 
-    private getAmountsForInit(
-        input: AddLiquidityInitInput,
-        poolTokens: Token[],
-    ): AddLiquidityAmounts {
-        const minimumBpt = this.calculateInitBptOut(
-            input.amountsIn as WeightedInitInputAmount[],
-        );
-        return {
-            minimumBpt,
-            maxAmountsIn: getAmounts(
-                sortTokensByAddress(poolTokens),
-                input.amountsIn,
-            ),
-            tokenInIndex: undefined,
-        };
-    }
-
     private encodeUserData(
         kind: AddLiquidityKind,
         amounts: AddLiquidityAmounts,
@@ -252,18 +207,5 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             default:
                 throw Error('Unsupported Add Liquidity Kind');
         }
-    }
-
-    private calculateInitBptOut(amounts: WeightedInitInputAmount[]): bigint {
-        const tokensQtd = amounts.length;
-        const poolInvariant = amounts.reduce((acc, curr) => {
-            return (
-                acc *
-                parseFloat(formatUnits(curr.rawAmount, curr.decimals)) **
-                    parseFloat(formatUnits(BigInt(curr.weight), 18))
-            );
-        }, 1);
-        const bptOut = poolInvariant * tokensQtd;
-        return parseEther(bptOut.toString());
     }
 }

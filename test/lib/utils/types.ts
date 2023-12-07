@@ -10,6 +10,8 @@ import {
 } from '../../../src';
 import { CreatePool } from '../../../src/entities/createPool/createPool';
 import { CreatePoolInput } from '../../../src/entities/createPool/types';
+import { P } from 'pino';
+import { AddLiquidityInit } from '../../../src/entities/addLiquidityInit/addLiquidityInit';
 
 export type AddLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
@@ -18,6 +20,13 @@ export type AddLiquidityTxInput = {
     slippage: Slippage;
     poolStateInput: PoolStateInput;
     testAddress: Address;
+};
+
+export type AddLiquidityInitTxInput = Omit<
+    AddLiquidityTxInput,
+    'addLiquidity'
+> & {
+    addLiquidityInit: AddLiquidityInit;
 };
 
 export type RemoveLiquidityTxInput = {

@@ -34,7 +34,7 @@ import {
 } from './lib/utils/addLiquidityHelper';
 import { AddLiquidityTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { addLiquidityKindNotSupportedByGyro } from '../src/entities/addLiquidity/utils/validateInputs';
+import { InputValidatorGyro } from '../src/entities/inputValidator/gyro/inputValidatorGyro';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -163,7 +163,9 @@ describe('GyroE V2 add liquidity test', () => {
                     ...txInput,
                     addLiquidityInput,
                 }),
-            ).rejects.toThrowError(addLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.addLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 
@@ -191,7 +193,9 @@ describe('GyroE V2 add liquidity test', () => {
                     ...txInput,
                     addLiquidityInput,
                 }),
-            ).rejects.toThrowError(addLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.addLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 });

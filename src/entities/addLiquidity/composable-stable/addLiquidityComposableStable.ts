@@ -38,7 +38,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         );
         const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
 
-        const userData = this.encodeUserData(input.kind, amounts);
+        const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
+            input.kind,
+            amounts,
+        );
 
         const { args, tokensIn } = parseAddLiquidityArgs({
             useNativeAssetAsWrappedAmountIn:
@@ -83,7 +86,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     ): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        const userData = this.encodeUserData(input.addLiquidityKind, amounts);
+        const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
+            input.addLiquidityKind,
+            amounts,
+        );
 
         const { args } = parseAddLiquidityArgs({
             ...input,

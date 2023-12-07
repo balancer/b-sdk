@@ -33,7 +33,7 @@ import {
 } from './lib/utils/removeLiquidityHelper';
 import { RemoveLiquidityTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { removeLiquidityKindNotSupportedByGyro } from '../src/entities/removeLiquidity/utils/validateInputs';
+import { InputValidatorGyro } from '../src/entities/inputValidator/gyro/inputValidatorGyro';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
@@ -148,7 +148,9 @@ describe('GyroE V2 remove liquidity test', () => {
             };
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
-            ).rejects.toThrowError(removeLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 
@@ -172,7 +174,9 @@ describe('GyroE V2 remove liquidity test', () => {
         test('must throw remove liquidity kind not supported error', async () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput: input }),
-            ).rejects.toThrowError(removeLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 });

@@ -8,8 +8,6 @@ import {
     zeroAddress,
 } from 'viem';
 import {
-    AddLiquidity,
-    AddLiquidityInitInput,
     AddLiquidityKind,
     Address,
     CHAINS,
@@ -20,14 +18,16 @@ import {
 import { CreatePool } from '../src/entities/createPool/createPool';
 import { CreatePoolWeightedInput } from '../src/entities/createPool/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { AddLiquidityTxInput, CreatePoolTxInput } from './lib/utils/types';
+import { AddLiquidityInitTxInput, CreatePoolTxInput } from './lib/utils/types';
 import { doCreatePool } from './lib/utils/createPoolHelper';
 import { AddLiquidityInitPoolDataProvider } from '../src/data/providers/addLiquidityInitPoolDataProvider';
+import { forkSetup } from './lib/utils/helper';
+import { AddLiquidityInit } from '../src/entities/addLiquidityInit/addLiquidityInit';
+import { AddLiquidityInitInput } from '../src/entities/addLiquidityInit/types';
 import {
     assertAddLiquidityInit,
     doAddLiquidityInit,
-} from './lib/utils/addLiquidityHelper';
-import { forkSetup } from './lib/utils/helper';
+} from './lib/utils/addLiquidityInitHelper';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -36,7 +36,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
     let poolAddress: Address;
     let createPoolWeightedInput: CreatePoolWeightedInput;
     let createTxInput: CreatePoolTxInput;
-    let addLiquidityInitTxInput: AddLiquidityTxInput;
+    let addLiquidityInitTxInput: AddLiquidityInitTxInput;
     let addLiquidityInitInput: AddLiquidityInitInput;
     let poolState: PoolStateInput;
     beforeAll(async () => {
@@ -101,7 +101,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
 
         addLiquidityInitTxInput = {
             client,
-            addLiquidity: new AddLiquidity(),
+            addLiquidityInit: new AddLiquidityInit(),
             testAddress: signerAddress,
             addLiquidityInput: {} as AddLiquidityInitInput,
             slippage: Slippage.fromPercentage('0.01'),

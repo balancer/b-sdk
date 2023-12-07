@@ -1,3 +1,4 @@
+import { InputValidator } from '../inputValidator/inputValidator';
 import { CreatePoolBase, CreatePoolInput } from './types';
 import { validateCreatePoolInputs } from './utils/validateInputs';
 import { CreatePoolWeighted } from './weighted/createPoolWeighted';
@@ -5,7 +6,10 @@ import { CreatePoolWeighted } from './weighted/createPoolWeighted';
 export class CreatePool {
     private readonly createPoolTypes: Record<string, CreatePoolBase> = {};
 
+    private readonly inputValidator: InputValidator;
+
     constructor() {
+        this.inputValidator = new InputValidator();
         this.createPoolTypes = {
             WEIGHTED: new CreatePoolWeighted(),
         };
@@ -19,7 +23,7 @@ export class CreatePool {
     }
 
     public buildCreatePoolCall(poolType: string, input: CreatePoolInput) {
-        validateCreatePoolInputs(poolType, input);
+        this.inputValidator.validateCreatePool(poolType, input);
         return this.getCreatePool(poolType).buildCall(input);
     }
 }
