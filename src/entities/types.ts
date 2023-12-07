@@ -13,7 +13,7 @@ export type PoolState = {
 export type PoolStateInput = {
     id: Hex;
     address: Address;
-    type: PoolType;
+    type: string;
     tokens: MinimalToken[];
 };
 
