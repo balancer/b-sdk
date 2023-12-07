@@ -2,7 +2,7 @@ import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { PoolState } from '../types';
 import { Address, Hex, InputAmount } from '../../types';
-import { AddLiquidityInitInput } from '../addLiquidityInit/types';
+import { InitPoolInput } from '../initPool/types';
 
 export enum AddLiquidityKind {
     Init = 'Init',
@@ -36,7 +36,7 @@ export type AddLiquidityProportionalInput = AddLiquidityBaseInput & {
 };
 
 export type AddLiquidityInput =
-    | AddLiquidityInitInput
+    | InitPoolInput
     | AddLiquidityUnbalancedInput
     | AddLiquiditySingleTokenInput
     | AddLiquidityProportionalInput;
@@ -92,6 +92,8 @@ export type AddLiquidityBuildOutput = {
     minBptOut: TokenAmount;
     maxAmountsIn: TokenAmount[];
 };
+
+export type InitPoolBuildOutput = AddLiquidityBuildOutput
 
 export type AddLiquidityConfig = {
     customAddLiquidityTypes: Record<string, AddLiquidityBase>;

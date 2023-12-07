@@ -69,8 +69,8 @@ export type InputAmount = {
     rawAmount: bigint;
 };
 
-export type InitInputAmount = InputAmount | WeightedInitInputAmount;
+export type InputAmountInit = InputAmount | InputAmountInitWeighted;
 
-export type WeightedInitInputAmount = InputAmount & {
+export type InputAmountInitWeighted = InputAmount & {
     weight: bigint;
 };

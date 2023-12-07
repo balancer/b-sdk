@@ -1,6 +1,6 @@
 import { Address, encodeFunctionData, formatUnits, parseEther } from 'viem';
 import { AddLiquidityAmounts, PoolState } from '../../types';
-import { AddLiquidityInitBase, AddLiquidityInitInput } from '../types';
+import { InitPoolBase, InitPoolInput } from '../types';
 import { BALANCER_VAULT, ZERO_ADDRESS } from '../../../utils';
 import { TokenAmount } from '../../tokenAmount';
 import { sortTokensByAddress } from '../../../utils/tokens';
@@ -9,12 +9,11 @@ import { getAmounts, parseAddLiquidityArgs } from '../../utils';
 import { Token } from '../../token';
 import { WeightedEncoder } from '../../encoders';
 import { AddLiquidityBuildOutput } from '../../addLiquidity/types';
-import { WeightedInitInputAmount } from '../../../types';
+import { InputAmountInitWeighted } from '../../../types';
 
-export class AddLiquidityInitWeighted implements AddLiquidityInitBase {
-    
+export class AddLiquidityInitWeighted implements InitPoolBase {
     buildCall(
-        input: AddLiquidityInitInput,
+        input: InitPoolInput,
         poolState: PoolState,
     ): AddLiquidityBuildOutput {
         const amounts = this.getAmounts(input, poolState.tokens);
@@ -54,11 +53,11 @@ export class AddLiquidityInitWeighted implements AddLiquidityInitBase {
     }
 
     private getAmounts(
-        input: AddLiquidityInitInput,
+        input: InitPoolInput,
         poolTokens: Token[],
     ): AddLiquidityAmounts {
         const minimumBpt = this.calculateBptOut(
-            input.amountsIn as WeightedInitInputAmount[],
+            input.amountsIn as InputAmountInitWeighted[],
         );
         return {
             minimumBpt,
@@ -70,7 +69,7 @@ export class AddLiquidityInitWeighted implements AddLiquidityInitBase {
         };
     }
 
-    private calculateBptOut(amounts: WeightedInitInputAmount[]): bigint {
+    private calculateBptOut(amounts: InputAmountInitWeighted[]): bigint {
         const tokensQtd = amounts.length;
         const poolInvariant = amounts.reduce((acc, curr) => {
             return (

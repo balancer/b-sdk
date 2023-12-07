@@ -33,16 +33,16 @@ export class ComposableStableEncoder {
      */
     static encodeAddLiquidityUserData(
         kind: AddLiquidityKind,
-        amounts: AddLiquidityAmounts & { maxAmountsInNoBpt: bigint[] },
+        amounts: AddLiquidityAmounts & { maxAmountsInWithoutBpt: bigint[] },
     ): Address {
         switch (kind) {
             case AddLiquidityKind.Init:
                 return ComposableStableEncoder.addLiquidityInit(
-                    amounts.maxAmountsInNoBpt,
+                    amounts.maxAmountsInWithoutBpt,
                 );
             case AddLiquidityKind.Unbalanced:
                 return ComposableStableEncoder.addLiquidityUnbalanced(
-                    amounts.maxAmountsInNoBpt,
+                    amounts.maxAmountsInWithoutBpt,
                     amounts.minimumBpt,
                 );
             case AddLiquidityKind.SingleToken: {

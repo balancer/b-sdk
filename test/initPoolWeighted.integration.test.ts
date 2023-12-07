@@ -18,16 +18,13 @@ import {
 import { CreatePool } from '../src/entities/createPool/createPool';
 import { CreatePoolWeightedInput } from '../src/entities/createPool/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { AddLiquidityInitTxInput, CreatePoolTxInput } from './lib/utils/types';
+import { InitPoolTxInput, CreatePoolTxInput } from './lib/utils/types';
 import { doCreatePool } from './lib/utils/createPoolHelper';
-import { AddLiquidityInitPoolDataProvider } from '../src/data/providers/addLiquidityInitPoolDataProvider';
+import { InitPoolDataProvider } from '../src/data/providers/initPoolDataProvider';
 import { forkSetup } from './lib/utils/helper';
-import { AddLiquidityInit } from '../src/entities/addLiquidityInit/addLiquidityInit';
-import { AddLiquidityInitInput } from '../src/entities/addLiquidityInit/types';
-import {
-    assertAddLiquidityInit,
-    doAddLiquidityInit,
-} from './lib/utils/addLiquidityInitHelper';
+import { InitPool } from '../src/entities/initPool/initPool';
+import { InitPoolInput } from '../src/entities/initPool/types';
+import { assertAddLiquidityInit, doInitPool } from './lib/utils/initPoolHelper';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -36,8 +33,8 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
     let poolAddress: Address;
     let createPoolWeightedInput: CreatePoolWeightedInput;
     let createTxInput: CreatePoolTxInput;
-    let addLiquidityInitTxInput: AddLiquidityInitTxInput;
-    let addLiquidityInitInput: AddLiquidityInitInput;
+    let initPoolTxInput: InitPoolTxInput;
+    let initPoolInput: InitPoolInput;
     let poolState: PoolStateInput;
     beforeAll(async () => {
         const client = createTestClient({
@@ -47,8 +44,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
         })
             .extend(publicActions)
             .extend(walletActions);
-        const addLiquidityInitPoolDataProvider =
-            new AddLiquidityInitPoolDataProvider(chainId, rpcUrl);
+        const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
         const signerAddress = (await client.getAddresses())[0];
         createPoolWeightedInput = {
             name: 'Test Pool',
@@ -76,7 +72,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             createPoolInput: createPoolWeightedInput,
         };
 
-        addLiquidityInitInput = {
+        initPoolInput = {
             sender: signerAddress,
             recipient: signerAddress,
             amountsIn: [
@@ -99,37 +95,35 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
         };
         poolAddress = await doCreatePool(createTxInput);
 
-        addLiquidityInitTxInput = {
+        initPoolTxInput = {
             client,
-            addLiquidityInit: new AddLiquidityInit(),
+            initPool: new InitPool(),
             testAddress: signerAddress,
-            addLiquidityInput: {} as AddLiquidityInitInput,
+            initPoolInput: {} as InitPoolInput,
             slippage: Slippage.fromPercentage('0.01'),
             poolStateInput: {} as PoolStateInput,
         };
 
-        poolState =
-            await addLiquidityInitPoolDataProvider.getAddLiquidityInitPoolData(
-                poolAddress,
-                'WEIGHTED',
-                addLiquidityInitInput.amountsIn,
-                createPoolWeightedInput,
-            );
+        poolState = await initPoolDataProvider.getInitPoolData(
+            poolAddress,
+            'WEIGHTED',
+            initPoolInput.amountsIn,
+        );
         await forkSetup(
-            addLiquidityInitTxInput.client,
-            addLiquidityInitTxInput.testAddress,
+            initPoolTxInput.client,
+            initPoolTxInput.testAddress,
             [...poolState.tokens.map((t) => t.address)],
             [1, 3],
             [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
         );
     });
     test('Add Liquidity Init - Weighted Pool', async () => {
-        const addLiquidityOutput = await doAddLiquidityInit({
-            ...addLiquidityInitTxInput,
-            addLiquidityInput: addLiquidityInitInput,
+        const addLiquidityOutput = await doInitPool({
+            ...initPoolTxInput,
+            initPoolInput,
             poolStateInput: poolState,
         });
 
-        assertAddLiquidityInit(addLiquidityInitInput, addLiquidityOutput);
+        assertAddLiquidityInit(initPoolInput, addLiquidityOutput);
     });
 });

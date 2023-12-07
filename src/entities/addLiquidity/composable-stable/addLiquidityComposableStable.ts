@@ -23,7 +23,7 @@ import {
 import { ComposableStableEncoder } from '../../encoders/composableStable';
 
 type AddLiquidityAmounts = AddLiquidityAmountsBase & {
-    maxAmountsInNoBpt: bigint[];
+    maxAmountsInWithoutBpt: bigint[];
 };
 
 export class AddLiquidityComposableStable implements AddLiquidityBase {
@@ -170,7 +170,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
 
         return {
             ...addLiquidityAmounts,
-            maxAmountsInNoBpt: [
+            maxAmountsInWithoutBpt: [
                 ...addLiquidityAmounts.maxAmountsIn.slice(0, bptIndex),
                 ...addLiquidityAmounts.maxAmountsIn.slice(bptIndex + 1),
             ],
@@ -210,7 +210,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         }
         return {
             ...addLiquidityAmounts,
-            maxAmountsInNoBpt: [
+            maxAmountsInWithoutBpt: [
                 ...addLiquidityAmounts.maxAmountsIn.slice(0, input.bptIndex),
                 ...addLiquidityAmounts.maxAmountsIn.slice(input.bptIndex + 1),
             ],

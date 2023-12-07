@@ -9,8 +9,10 @@ import {
     Slippage,
 } from '../../../src';
 import { CreatePool } from '../../../src/entities/createPool/createPool';
-import { CreatePoolInput } from '../../../src/entities/createPool/types';s
-import { AddLiquidityInit } from '../../../src/entities/addLiquidityInit/addLiquidityInit';
+import { CreatePoolInput } from '../../../src/entities/createPool/types';
+s;
+import { InitPool } from '../../../src/entities/initPool/initPool';
+import { InitPoolInput } from '../../../src/entities/initPool/types';
 
 export type AddLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
@@ -21,11 +23,12 @@ export type AddLiquidityTxInput = {
     testAddress: Address;
 };
 
-export type AddLiquidityInitTxInput = Omit<
+export type InitPoolTxInput = Omit<
     AddLiquidityTxInput,
-    'addLiquidity'
+    'addLiquidity' | 'addLiquidityInput'
 > & {
-    addLiquidityInit: AddLiquidityInit;
+    initPoolInput: InitPoolInput;
+    initPool: InitPool;
 };
 
 export type RemoveLiquidityTxInput = {

@@ -7,11 +7,10 @@ import {
     http,
 } from 'viem';
 import { CHAINS } from '../../utils';
-import { InputAmount } from '../../types';
+import { InputAmountInit } from '../../types';
 import { PoolStateInput } from '../../entities';
-import { CreatePoolInput } from '../../entities/createPool/types';
 
-export class AddLiquidityInitPoolDataProvider {
+export class InitPoolDataProvider {
     private readonly client: PublicClient;
 
     private readonly simplePoolAbi = [
@@ -40,11 +39,10 @@ export class AddLiquidityInitPoolDataProvider {
         });
     }
 
-    public async getAddLiquidityInitPoolData(
+    public async getInitPoolData(
         poolAddress: Address,
         poolType: string,
-        amounts: InputAmount[],
-        input: CreatePoolInput,
+        amounts: InputAmountInit[],
     ): Promise<PoolStateInput> {
         const poolContract = getContract({
             abi: this.simplePoolAbi,
@@ -63,12 +61,9 @@ export class AddLiquidityInitPoolDataProvider {
                         return diff > 0 ? 1 : diff < 0 ? -1 : 0;
                     })
                     .map(({ address, decimals }, index) => ({
-                        address,
+                        address: address.toLowerCase() as Address,
                         decimals,
                         index,
-                        weight: input.tokens.find(
-                            (t) => t.tokenAddress === address,
-                        )?.weight,
                     })),
             };
         } catch (e) {

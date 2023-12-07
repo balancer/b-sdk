@@ -4,23 +4,23 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityKind,
 } from '../addLiquidity/types';
-import { InitInputAmount } from '../../types';
+import { InputAmountInit } from '../../types';
 import { PoolState } from '../types';
 
-export interface AddLiquidityInitBase {
+export interface InitPoolBase {
     buildCall(
-        input: AddLiquidityInitInput,
+        input: InitPoolInput,
         poolState: PoolState,
     ): AddLiquidityBuildOutput;
 }
 
-export type AddLiquidityInitInput = AddLiquidityBaseInput & {
+export type InitPoolInput = AddLiquidityBaseInput & {
     sender: Address;
     recipient: Address;
-    amountsIn: InitInputAmount[];
+    amountsIn: InputAmountInit[];
     kind: AddLiquidityKind.Init;
 };
 
-export type AddLiquidityInitConfig = {
-    customAddLiquidityInitTypes: Record<string, AddLiquidityInitBase>;
+export type InitPoolConfig = {
+    initPoolTypes: Record<string, InitPoolBase>;
 };
