@@ -1,5 +1,5 @@
 import { MinimalToken } from '../data';
-import { Address, Hex, PoolType } from '../types';
+import { Address, Hex } from '../types';
 import { Token } from './token';
 
 // Returned from API and used as input
