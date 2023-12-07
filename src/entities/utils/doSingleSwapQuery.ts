@@ -8,14 +8,10 @@ export type SingleSwapInput = SingleSwap & {
     chainId: ChainId;
 };
 
-export const doQuerySwap = async ({
-    poolId,
-    kind,
-    assetIn,
-    assetOut,
-    amount,
+export const doSingleSwapQuery = async ({
     rpcUrl,
     chainId,
+    ...swap
 }: SingleSwapInput): Promise<bigint> => {
     const publicClient = createPublicClient({
         transport: http(rpcUrl),
@@ -26,15 +22,6 @@ export const doQuerySwap = async ({
         abi: balancerQueriesAbi,
         publicClient,
     });
-
-    const swap: SingleSwap = {
-        poolId,
-        kind,
-        assetIn,
-        assetOut,
-        amount,
-        userData: '0x',
-    };
 
     const { result } = await queriesContract.simulate.querySwap([
         swap,
