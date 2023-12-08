@@ -12,10 +12,7 @@ import { InitPoolBuildOutput } from '../../addLiquidity';
 export class InitPoolWeighted implements InitPoolBase {
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
         const amounts = this.getAmounts(input, poolState.tokens);
-        const userData = WeightedEncoder.encodeAddLiquidityUserData(
-            input.kind,
-            amounts,
-        );
+        const userData = WeightedEncoder.encodeInitPoolUserData(amounts);
         const { args } = parseAddLiquidityArgs({
             ...input,
             poolId: poolState.id,
