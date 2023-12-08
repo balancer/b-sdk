@@ -1,13 +1,12 @@
 import { Address, encodeFunctionData } from 'viem';
 import { InitPoolAmounts, PoolState } from '../../types';
-import { InitPoolBase, InitPoolInput } from '../types';
+import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../types';
 import { BALANCER_VAULT, ZERO_ADDRESS } from '../../../utils';
 import { sortTokensByAddress } from '../../../utils/tokens';
 import { vaultAbi } from '../../../abi';
 import { getAmounts, parseAddLiquidityArgs } from '../../utils';
 import { Token } from '../../token';
 import { WeightedEncoder } from '../../encoders';
-import { InitPoolBuildOutput } from '../../addLiquidity';
 
 export class InitPoolWeighted implements InitPoolBase {
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
