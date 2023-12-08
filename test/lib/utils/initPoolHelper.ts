@@ -53,27 +53,23 @@ export async function doInitPool(txInput: InitPoolTxInput) {
     };
 }
 
-export function assertAddLiquidityInit(
+export function assertInitPool(
     initPoolInput: InitPoolInput,
     initPoolOutput: {
         txOutput: TxOutput;
         initPoolBuildOutput: InitPoolBuildOutput;
     },
 ) {
-    const { txOutput, initPoolBuildOutput } = initPoolOutput;
+    const { txOutput } = initPoolOutput;
 
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
     // Matching order of getTokens helper: [poolTokens, BPT, native]
-    const expectedDeltas = [
-        ...initPoolInput.amountsIn.map((a) => a.rawAmount),
-        initPoolBuildOutput.minBptOut.amount,
-        0n,
-    ];
+    const expectedDeltas = initPoolInput.amountsIn.map((a) => a.rawAmount);
 
     expect(
         txOutput.balanceDeltas.slice(0, initPoolInput.amountsIn.length),
-    ).to.deep.eq(expectedDeltas.slice(0, initPoolInput.amountsIn.length));
+    ).to.deep.eq(expectedDeltas);
 
     // TODO: Improve this test - BPT Amount is slightly different from calculated Bpt: expected: 200000000000000000000n, real: 199999999999994999520n,
     expect(

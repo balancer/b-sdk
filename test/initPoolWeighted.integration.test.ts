@@ -24,7 +24,7 @@ import { InitPoolDataProvider } from '../src/data/providers/initPoolDataProvider
 import { forkSetup } from './lib/utils/helper';
 import { InitPool } from '../src/entities/initPool/initPool';
 import { InitPoolInput } from '../src/entities/initPool/types';
-import { assertAddLiquidityInit, doInitPool } from './lib/utils/initPoolHelper';
+import { assertInitPool, doInitPool } from './lib/utils/initPoolHelper';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -124,6 +124,6 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             poolStateInput: poolState,
         });
 
-        assertAddLiquidityInit(initPoolInput, addLiquidityOutput);
+        assertInitPool(initPoolInput, addLiquidityOutput);
     });
 });

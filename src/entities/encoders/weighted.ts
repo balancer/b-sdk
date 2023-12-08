@@ -35,7 +35,7 @@ export class WeightedEncoder {
      */
     static encodeAddLiquidityUserData(
         kind: AddLiquidityKind,
-        amounts: AddLiquidityAmounts,
+        amounts: AddLiquidityAmounts | InitPoolAmounts,
     ) {
         switch (kind) {
             case AddLiquidityKind.Init:

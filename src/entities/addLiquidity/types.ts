@@ -93,7 +93,10 @@ export type AddLiquidityBuildOutput = {
     maxAmountsIn: TokenAmount[];
 };
 
-export type InitPoolBuildOutput = AddLiquidityBuildOutput
+export type InitPoolBuildOutput = Omit<
+    AddLiquidityBuildOutput,
+    'minBptOut' | 'maxAmountsIn'
+>;
 
 export type AddLiquidityConfig = {
     customAddLiquidityTypes: Record<string, AddLiquidityBase>;

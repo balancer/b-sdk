@@ -1,17 +1,14 @@
 import { Address } from 'viem';
 import {
     AddLiquidityBaseInput,
-    AddLiquidityBuildOutput,
+    InitPoolBuildOutput,
     AddLiquidityKind,
 } from '../addLiquidity/types';
 import { InputAmountInit } from '../../types';
 import { PoolState } from '../types';
 
 export interface InitPoolBase {
-    buildCall(
-        input: InitPoolInput,
-        poolState: PoolState,
-    ): AddLiquidityBuildOutput;
+    buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput;
 }
 
 export type InitPoolInput = AddLiquidityBaseInput & {
