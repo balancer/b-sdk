@@ -28,3 +28,7 @@ export type RemoveLiquidityAmounts = {
     tokenOutIndex: number | undefined;
     maxBptAmountIn: bigint;
 };
+
+export type InitPoolAmounts = {
+    maxAmountsIn: bigint[];
+};

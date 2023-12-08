@@ -68,3 +68,9 @@ export type InputAmount = {
     decimals: number;
     rawAmount: bigint;
 };
+
+export type InputAmountInit = InputAmount | InputAmountInitWeighted;
+
+export type InputAmountInitWeighted = InputAmount & {
+    weight: bigint;
+};

@@ -1,10 +1,15 @@
-import { CreatePoolInput } from '../types';
+import { AddLiquidityInput } from '../../addLiquidity';
+import { CreatePoolInput } from '../../createPool/types';
+import { RemoveLiquidityInput } from '../../removeLiquidity';
+import { PoolStateInput } from '../../types';
+import { InputValidatorBase } from '../types';
+import {
+    validateTokensAddLiquidity,
+    validateTokensRemoveLiquidity,
+} from '../utils/validateTokens';
 
-export function validateCreatePoolInputs(
-    poolType: string,
-    input: CreatePoolInput,
-) {
-    if (poolType.toLowerCase() === 'weighted') {
+export class InputValidatorWeighted implements InputValidatorBase {
+    validateCreatePool(input: CreatePoolInput) {
         if (input.tokens.length > 4) {
             throw new Error('Maximum of 4 tokens allowed');
         }
@@ -31,5 +36,18 @@ export function validateCreatePoolInputs(
         ) {
             throw new Error('Duplicate token addresses');
         }
+    }
+    validateAddLiquidity(
+        addLiquidityInput: AddLiquidityInput,
+        poolState: PoolStateInput,
+    ): void {
+        validateTokensAddLiquidity(addLiquidityInput, poolState);
+    }
+    
+    validateRemoveLiquidity(
+        input: RemoveLiquidityInput,
+        poolState: PoolStateInput,
+    ): void {
+        validateTokensRemoveLiquidity(input, poolState);
     }
 }

@@ -2,7 +2,6 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
 import { WeightedEncoder } from '../../encoders/weighted';
-import { Address } from '../../../types';
 import {
     BALANCER_VAULT,
     MAX_UINT256,
@@ -30,7 +29,10 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     ): Promise<RemoveLiquidityQueryOutput> {
         const amounts = this.getAmountsQuery(poolState.tokens, input);
 
-        const userData = this.encodeUserData(input.kind, amounts);
+        const userData = WeightedEncoder.encodeRemoveLiquidityUserData(
+            input.kind,
+            amounts,
+        );
 
         // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
@@ -102,7 +104,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     ): RemoveLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        const userData = this.encodeUserData(
+        const userData = WeightedEncoder.encodeRemoveLiquidityUserData(
             input.removeLiquidityKind,
             amounts,
         );
@@ -166,33 +168,6 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,
                 };
-            default:
-                throw Error('Unsupported Remove Liquidity Kind');
-        }
-    }
-
-    private encodeUserData(
-        kind: RemoveLiquidityKind,
-        amounts: RemoveLiquidityAmounts,
-    ): Address {
-        switch (kind) {
-            case RemoveLiquidityKind.Unbalanced:
-                return WeightedEncoder.removeLiquidityUnbalanced(
-                    amounts.minAmountsOut,
-                    amounts.maxBptAmountIn,
-                );
-            case RemoveLiquidityKind.SingleToken:
-                if (amounts.tokenOutIndex === undefined)
-                    throw Error('No Index');
-
-                return WeightedEncoder.removeLiquiditySingleToken(
-                    amounts.maxBptAmountIn,
-                    amounts.tokenOutIndex,
-                );
-            case RemoveLiquidityKind.Proportional:
-                return WeightedEncoder.removeLiquidityProportional(
-                    amounts.maxBptAmountIn,
-                );
             default:
                 throw Error('Unsupported Remove Liquidity Kind');
         }

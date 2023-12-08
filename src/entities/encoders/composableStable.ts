@@ -1,5 +1,8 @@
 import { encodeAbiParameters } from 'viem';
 import { Address } from '../../types';
+import { AddLiquidityKind } from '../addLiquidity';
+import { AddLiquidityAmounts, RemoveLiquidityAmounts } from '../types';
+import { RemoveLiquidityKind } from '../removeLiquidity';
 
 export enum ComposableStablePoolJoinKind {
     INIT = 0,
@@ -20,6 +23,78 @@ export class ComposableStableEncoder {
      */
     private constructor() {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
+    }
+
+    /**
+     * Encodes the User Data for adding liquidity to a ComposableStablePool
+     * @param kind Kind of the Add Liquidity operation: Init, Unbalanced, SingleToken, Proportional
+     * @param amounts Amounts of tokens to be added to the pool
+     * @returns
+     */
+    static encodeAddLiquidityUserData(
+        kind: AddLiquidityKind,
+        amounts: AddLiquidityAmounts & { maxAmountsInWithoutBpt: bigint[] },
+    ): Address {
+        switch (kind) {
+            case AddLiquidityKind.Init:
+                return ComposableStableEncoder.addLiquidityInit(
+                    amounts.maxAmountsInWithoutBpt,
+                );
+            case AddLiquidityKind.Unbalanced:
+                return ComposableStableEncoder.addLiquidityUnbalanced(
+                    amounts.maxAmountsInWithoutBpt,
+                    amounts.minimumBpt,
+                );
+            case AddLiquidityKind.SingleToken: {
+                if (amounts.tokenInIndex === undefined) throw Error('No Index');
+                return ComposableStableEncoder.addLiquiditySingleToken(
+                    amounts.minimumBpt,
+                    amounts.tokenInIndex, // Has to be index without BPT
+                );
+            }
+            case AddLiquidityKind.Proportional: {
+                return ComposableStableEncoder.addLiquidityProportional(
+                    amounts.minimumBpt,
+                );
+            }
+            default:
+                throw Error('Unsupported Add Liquidity Kind');
+        }
+    }
+
+    /**
+     * Encodes the User Data for removing liquidity to a ComposableStablePool
+     * @param kind Kind of the Remove Liquidity operation: Unbalanced, SingleToken, Proportional
+     * @param amounts Amounts of tokens to be removed from the pool
+     * @returns
+     */
+    static encodeRemoveLiquidityUserData(
+        kind: RemoveLiquidityKind,
+        amounts: RemoveLiquidityAmounts,
+    ): Address {
+        switch (kind) {
+            case RemoveLiquidityKind.Unbalanced:
+                return ComposableStableEncoder.removeLiquidityUnbalanced(
+                    amounts.minAmountsOut,
+                    amounts.maxBptAmountIn,
+                );
+            case RemoveLiquidityKind.SingleToken:
+                if (amounts.tokenOutIndex === undefined)
+                    throw new Error(
+                        'tokenOutIndex must be defined for RemoveLiquiditySingleToken',
+                    );
+
+                return ComposableStableEncoder.removeLiquiditySingleToken(
+                    amounts.maxBptAmountIn,
+                    amounts.tokenOutIndex,
+                );
+            case RemoveLiquidityKind.Proportional:
+                return ComposableStableEncoder.removeLiquidityProportional(
+                    amounts.maxBptAmountIn,
+                );
+            default:
+                throw Error('Unsupported Remove Liquidity Kind');
+        }
     }
 
     /**

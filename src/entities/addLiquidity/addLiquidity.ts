@@ -8,12 +8,13 @@ import {
 } from './types';
 import { AddLiquidityWeighted } from './weighted/addLiquidityWeighted';
 import { PoolStateInput } from '../types';
-import { validateInputs } from './utils/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
 import { AddLiquidityComposableStable } from './composable-stable/addLiquidityComposableStable';
+import { InputValidator } from '../inputValidator/inputValidator';
 
 export class AddLiquidity {
     private readonly addLiquidityTypes: Record<string, AddLiquidityBase> = {};
+    private readonly inputValidator: InputValidator = new InputValidator();
 
     constructor(config?: AddLiquidityConfig) {
         const { customAddLiquidityTypes } = config || {};
@@ -42,7 +43,7 @@ export class AddLiquidity {
         input: AddLiquidityInput,
         poolState: PoolStateInput,
     ): Promise<AddLiquidityQueryOutput> {
-        validateInputs(input, poolState);
+        this.inputValidator.validateAddLiquidity(input, poolState);
 
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const mappedPoolState = {
