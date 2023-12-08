@@ -19,6 +19,7 @@ import {
 } from 'viem';
 import { balancerQueriesAbi } from '../abi/';
 import { PriceImpactAmount } from './priceImpactAmount';
+import cloneDeep from 'lodash/cloneDeep';
 
 // A Swap can be a single or multiple paths
 export class Swap {
@@ -28,6 +29,10 @@ export class Swap {
     }: { paths: PathWithAmount[]; swapKind: SwapKind }) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
+
+        // paths with immutable pool balances
+        this.pathsImmutable = cloneDeep(paths);
+
         // Recalculate paths while mutating pool balances
         this.paths = paths.map(
             (path) =>
@@ -56,6 +61,7 @@ export class Swap {
     public readonly chainId: number;
     public readonly isBatchSwap: boolean;
     public readonly paths: PathWithAmount[];
+    public readonly pathsImmutable: PathWithAmount[];
     public readonly assets: Address[];
     public readonly swapKind: SwapKind;
     public swaps: BatchSwapStep[] | SingleSwap;
@@ -169,14 +175,7 @@ export class Swap {
     }
 
     public get priceImpact(): PriceImpactAmount {
-        const paths = this.paths.map(
-            (path) =>
-                new PathWithAmount(
-                    [...path.tokens],
-                    [...path.pools],
-                    path.swapAmount,
-                ),
-        );
+        const paths = this.pathsImmutable;
 
         const pathsReverse = paths.map(
             (path) =>

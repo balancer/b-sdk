@@ -14,11 +14,12 @@ import { MockPoolProvider } from './lib/utils/mockPoolProvider';
 import testPools from './lib/testData/testPools/weighted_17473810.json';
 import { RawWeightedPool } from '../src';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+import { PriceImpactAmount } from '../src/entities/priceImpactAmount';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 
-describe('Weighted Swap tests', () => {
+describe('Price Impact for SOR tests', () => {
     const mockPoolProvider = new MockPoolProvider(
         testPools.pools as RawWeightedPool[],
     );
@@ -43,6 +44,13 @@ describe('Weighted Swap tests', () => {
         'BAL',
     );
 
+    const DAI = new Token(
+        chainId,
+        '0x6b175474e89094c44da98b954eedeac495271d0f',
+        18,
+        'DAI',
+    );
+
     const swapOptions: SwapOptions = {
         block: ANVIL_NETWORKS.MAINNET.forkBlockNumber,
     };
@@ -54,10 +62,8 @@ describe('Weighted Swap tests', () => {
         pools = await sor.fetchAndCachePools(swapOptions.block);
     });
 
-    // ETH -> BAL swapGivenIn single hop
-    // Weighted pool
-    // 0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014
-    test('Native ETH -> Token givenIn single hop', async () => {
+    // ETH [80BAL-20WETH] BAL
+    test('givenIn single hop', async () => {
         const inputAmount = TokenAmount.fromHumanAmount(ETH, '1');
 
         const swap = await sorGetSwapsWithPools(
@@ -80,10 +86,8 @@ describe('Weighted Swap tests', () => {
         expect(priceImpactSOR.decimal).closeTo(priceImpactSDK.decimal, 1e-4);
     });
 
-    // ETH -> BAL swapGivenOut single hop
-    // Weighted pool
-    // 0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014
-    test('Native ETH -> Token givenOut single hop', async () => {
+    // ETH [80BAL-20WETH] BAL
+    test('givenOut single hop', async () => {
         const outputAmount = TokenAmount.fromHumanAmount(BAL, '100');
 
         const swap = await sorGetSwapsWithPools(
@@ -106,5 +110,47 @@ describe('Weighted Swap tests', () => {
         });
 
         expect(priceImpactSOR.decimal).closeTo(priceImpactSDK.decimal, 1e-4);
+    });
+
+    // BAL [80BAL-20WETH] WETH [60WETH->40DAI] DAI
+    test('givenIn multiple hops', async () => {
+        const inputAmount = TokenAmount.fromHumanAmount(BAL, '1000');
+
+        const swap = await sorGetSwapsWithPools(
+            BAL,
+            DAI,
+            SwapKind.GivenIn,
+            inputAmount,
+            pools,
+            swapOptions,
+        );
+
+        if (!swap) throw new Error('Swap is undefined');
+
+        const priceImpactSOR = swap.priceImpact;
+        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0261}`); // TODO: where can we find a reliable source of truth for this?
+
+        expect(priceImpactSOR.decimal).closeTo(priceImpactRef.decimal, 1e-4);
+    });
+
+    // BAL [80BAL-20WETH] WETH [60WETH->40DAI] DAI
+    test('givenOut multiple hops', async () => {
+        const outputAmount = TokenAmount.fromHumanAmount(DAI, '4142');
+
+        const swap = await sorGetSwapsWithPools(
+            BAL,
+            DAI,
+            SwapKind.GivenOut,
+            outputAmount,
+            pools,
+            swapOptions,
+        );
+
+        if (!swap) throw new Error('Swap is undefined');
+
+        const priceImpactSOR = swap.priceImpact;
+        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0285}`); // TODO: where can we find a reliable source of truth for this?
+
+        expect(priceImpactSOR.decimal).closeTo(priceImpactRef.decimal, 1e-4);
     });
 });
