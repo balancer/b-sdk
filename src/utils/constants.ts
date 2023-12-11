@@ -173,6 +173,16 @@ export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
 };
 
+export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
+    [ChainId.AVALANCHE]: '0xe42ffa682a26ef8f25891db4882932711d42e467',
+    [ChainId.GNOSIS_CHAIN]: '0x4bdcc2fb18aeb9e2d281b0278d946445070eada7',
+    [ChainId.MAINNET]: '0xdb8d758bcb971e482b2c45f7f8a7740283a1bd3a',
+    [ChainId.OPTIMISM]: '0x043a2dad730d585c44fb79d2614f295d2d625412',
+    [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
+    [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
+};
+
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(
         ChainId.MAINNET,

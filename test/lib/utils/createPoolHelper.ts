@@ -1,7 +1,8 @@
 import { CreatePoolTxInput } from './types';
-import { Address, WEIGHTED_POOL_FACTORY } from '../../../src';
+import { Address, COMPOSABLE_STABLE_POOL_FACTORY, WEIGHTED_POOL_FACTORY } from '../../../src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
 import { weightedFactoryV4Abi } from '../../../src/abi/weightedFactoryV4';
+import { composableStableFactoryV5Abi } from '../../../src/abi/composableStableFactoryV5';
 
 export async function doCreatePool(
     txInput: CreatePoolTxInput,
@@ -9,15 +10,24 @@ export async function doCreatePool(
     const { client, createPool, createPoolInput, testAddress } = txInput;
 
     const { call } = createPool.buildCreatePoolCall(
-        'WEIGHTED',
+        txInput.poolType,
         createPoolInput,
     );
     const chainId = await client.getChainId();
 
-    const weightedPoolFactoryAddress = WEIGHTED_POOL_FACTORY[chainId];
+    const factories = {
+        WEIGHTED: {
+            address: WEIGHTED_POOL_FACTORY[chainId],
+            abi: weightedFactoryV4Abi,
+        },
+        PHANTOM_STABLE: {
+            address: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
+            abi: composableStableFactoryV5Abi,
+        },
+    };
 
     const hash = await client.sendTransaction({
-        to: weightedPoolFactoryAddress,
+        to: factories[txInput.poolType].address,
         data: call,
         account: testAddress,
         chain: client.chain,
@@ -30,8 +40,8 @@ export async function doCreatePool(
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: weightedFactoryV4Abi,
-        to: weightedPoolFactoryAddress,
+        abi: factories[txInput.poolType].abi,
+        to: factories[txInput.poolType].address,
     });
 
     const {

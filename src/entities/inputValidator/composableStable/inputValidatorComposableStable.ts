@@ -1,9 +1,14 @@
 import { AddLiquidityInput } from '../../addLiquidity';
-import { CreatePoolWeightedInput } from '../../createPool/types';
+import { CreatePoolComposableStable } from '../../createPool/composableStable/createPoolComposableStable';
+import {
+    CreatePoolComposableStableInput,
+    CreatePoolWeightedInput,
+} from '../../createPool/types';
 import { RemoveLiquidityInput } from '../../removeLiquidity';
 import { PoolStateInput } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
+    validateCreatePoolTokens,
     validatePoolHasBpt,
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
@@ -26,8 +31,11 @@ export class InputValidatorComposableStable implements InputValidatorBase {
         validateTokensRemoveLiquidity(input, poolState);
     }
 
-    validateCreatePool(input: CreatePoolWeightedInput): void {
-        console.log(input);
-        throw new Error('Method not implemented.');
+    validateCreatePool(input: CreatePoolComposableStableInput): void {
+        validateCreatePoolTokens(input.tokens);
+        if (BigInt(input.amplificationParameter) <= BigInt(0)) {
+            throw new Error('Amplification parameter must be greater than 0');
+        }
+        return;
     }
 }

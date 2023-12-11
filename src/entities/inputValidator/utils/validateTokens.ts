@@ -68,3 +68,18 @@ export const validatePoolHasBpt = (poolState: PoolStateInput) => {
         );
     }
 };
+
+export const validateCreatePoolTokens = (
+    tokens: { tokenAddress: string }[],
+) => {
+    const tokenAddresses = tokens.map((t) => t.tokenAddress);
+    if (tokenAddresses.length !== new Set(tokenAddresses).size) {
+        throw new Error('Duplicate token addresses');
+    }
+    if (tokens.length > 4) {
+        throw new Error('Maximum of 4 tokens allowed');
+    }
+    if (tokens.length < 2) {
+        throw new Error('Minimum of 2 tokens required');
+    }
+};
