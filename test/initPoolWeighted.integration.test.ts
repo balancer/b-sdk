@@ -70,6 +70,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: createPoolWeightedInput,
+            poolType: 'WEIGHTED',
         };
 
         initPoolInput = {
