@@ -1,5 +1,5 @@
 import { formatUnits } from 'viem';
-import { abs, max, min } from '../../utils';
+import { MathSol, abs, max, min } from '../../utils';
 import {
     AddLiquidity,
     AddLiquidityKind,
@@ -17,9 +17,8 @@ import {
 import { TokenAmount } from '../tokenAmount';
 import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils';
-import { SwapKind } from '../../types';
-import { SingleSwapInput, doQuerySwap } from '../utils/doQuerySwap';
-import { Token } from '../token';
+import { SingleSwap, SwapKind } from '../../types';
+import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
 
 export class PriceImpact {
     static addLiquiditySingleToken = async (
@@ -152,12 +151,17 @@ export class PriceImpact {
                     resultTokenIndex = minPositiveDeltaIndex;
                 }
 
-                const resultAmount = await doQuerySwap({
+                const singleSwap: SingleSwap = {
                     poolId: poolState.id,
                     kind,
-                    tokenIn: poolTokens[minPositiveDeltaIndex].toInputToken(),
-                    tokenOut: poolTokens[minNegativeDeltaIndex].toInputToken(),
-                    givenAmount: abs(deltas[givenTokenIndex]),
+                    assetIn: poolTokens[minPositiveDeltaIndex].address,
+                    assetOut: poolTokens[minNegativeDeltaIndex].address,
+                    amount: abs(deltas[givenTokenIndex]),
+                    userData: '0x',
+                };
+
+                const resultAmount = await doSingleSwapQuery({
+                    ...singleSwap,
                     rpcUrl: input.rpcUrl,
                     chainId: input.chainId,
                 });
@@ -165,7 +169,7 @@ export class PriceImpact {
                 deltas[givenTokenIndex] = 0n;
                 deltaBPTs[givenTokenIndex] = 0n;
                 deltas[resultTokenIndex] =
-                    deltas[resultTokenIndex] + resultAmount.amount;
+                    deltas[resultTokenIndex] + resultAmount;
                 deltaBPTs[resultTokenIndex] =
                     await queryAddLiquidityForTokenDelta(resultTokenIndex);
             }
@@ -189,58 +193,6 @@ export class PriceImpact {
             const signal = deltas[tokenIndex] >= 0n ? 1n : -1n;
             return deltaBPT.amount * signal;
         }
-    };
-
-    static singleSwap = async ({
-        poolId,
-        kind,
-        tokenIn,
-        tokenOut,
-        givenAmount,
-        rpcUrl,
-        chainId,
-    }: SingleSwapInput): Promise<PriceImpactAmount> => {
-        const givenToken =
-            kind === SwapKind.GivenIn
-                ? new Token(chainId, tokenIn.address, tokenIn.decimals)
-                : new Token(chainId, tokenOut.address, tokenOut.decimals);
-        const amountInitial = TokenAmount.fromRawAmount(
-            givenToken,
-            givenAmount,
-        );
-
-        // simulate swap in original direction
-        const resultAmount = await doQuerySwap({
-            poolId,
-            kind,
-            tokenIn,
-            tokenOut,
-            givenAmount,
-            rpcUrl,
-            chainId,
-        });
-
-        // simulate swap in the reverse direction
-        const amountFinal = await doQuerySwap({
-            poolId: poolId,
-            kind: kind,
-            tokenIn: tokenOut,
-            tokenOut: tokenIn,
-            givenAmount: resultAmount.amount,
-            rpcUrl,
-            chainId,
-        });
-
-        // get relevant amounts for price impact calculation
-        const amountInitialFloat = parseFloat(amountInitial.toSignificant());
-        const amountFinalFloat = parseFloat(amountFinal.toSignificant());
-
-        // calculate price impact using ABA method
-        const priceImpact =
-            Math.abs(amountInitialFloat - amountFinalFloat) /
-            amountInitialFloat /
-            2;
-        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
     };
 
     static removeLiquidity = async (
@@ -276,5 +228,48 @@ export class PriceImpact {
         // calculate price impact using ABA method
         const priceImpact = (amountInitial - amountFinal) / amountInitial / 2;
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+    };
+
+    static singleSwap = async ({
+        poolId,
+        kind,
+        assetIn,
+        assetOut,
+        amount,
+        userData,
+        rpcUrl,
+        chainId,
+    }: SingleSwapInput): Promise<PriceImpactAmount> => {
+        // simulate swap in original direction
+        const amountResult = await doSingleSwapQuery({
+            poolId,
+            kind,
+            assetIn,
+            assetOut,
+            amount,
+            userData,
+            rpcUrl,
+            chainId,
+        });
+
+        // simulate swap in the reverse direction
+        const amountFinal = await doSingleSwapQuery({
+            poolId: poolId,
+            kind: kind,
+            assetIn: assetOut,
+            assetOut: assetIn,
+            amount: amountResult,
+            userData,
+            rpcUrl,
+            chainId,
+        });
+
+        // calculate price impact using ABA method
+        const priceImpact = MathSol.divDownFixed(
+            abs(amount - amountFinal),
+            amount * 2n,
+        );
+
+        return PriceImpactAmount.fromRawAmount(priceImpact);
     };
 }

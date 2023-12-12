@@ -21,7 +21,7 @@ import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { PriceImpact } from '../src/entities/priceImpact';
 import { PriceImpactAmount } from '../src/entities/priceImpactAmount';
 import { parseEther } from 'viem';
-import { SingleSwapInput } from '../src/entities/utils/doQuerySwap';
+import { SingleSwapInput } from '../src/entities/utils/doSingleSwapQuery';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -118,15 +118,10 @@ describe('price impact', () => {
                 input = {
                     poolId,
                     kind: SwapKind.GivenIn,
-                    tokenIn: {
-                        address: wstETH,
-                        decimals: 18,
-                    },
-                    tokenOut: {
-                        address: rETH,
-                        decimals: 18,
-                    },
-                    givenAmount: parseEther('100'),
+                    assetIn: wstETH,
+                    assetOut: rETH,
+                    amount: parseEther('100'),
+                    userData: '0x',
                     chainId,
                     rpcUrl,
                 };
@@ -148,15 +143,10 @@ describe('price impact', () => {
                 input = {
                     poolId,
                     kind: SwapKind.GivenOut,
-                    tokenIn: {
-                        address: wstETH,
-                        decimals: 18,
-                    },
-                    tokenOut: {
-                        address: rETH,
-                        decimals: 18,
-                    },
-                    givenAmount: parseEther('100'),
+                    assetIn: wstETH,
+                    assetOut: rETH,
+                    amount: parseEther('100'),
+                    userData: '0x',
                     chainId,
                     rpcUrl,
                 };
