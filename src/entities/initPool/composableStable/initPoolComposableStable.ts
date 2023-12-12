@@ -1,7 +1,6 @@
 import { Address, encodeFunctionData } from 'viem';
 import { sortTokensByAddress } from '../../../utils/tokens';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
-import { Token } from '../../token';
 import { InitPoolAmountsComposableStable, PoolState } from '../../types';
 import { getAmounts, parseAddLiquidityArgs } from '../../utils';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../types';
