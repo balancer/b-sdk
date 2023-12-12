@@ -32,3 +32,7 @@ export type RemoveLiquidityAmounts = {
 export type InitPoolAmounts = {
     maxAmountsIn: bigint[];
 };
+
+export type InitPoolAmountsComposableStable = InitPoolAmounts & {
+    amountsIn: bigint[];
+};

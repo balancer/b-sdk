@@ -113,7 +113,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         input: AddLiquidityInput,
     ): AddLiquidityAmounts {
         switch (input.kind) {
-            case AddLiquidityKind.Init:
             case AddLiquidityKind.Unbalanced: {
                 return {
                     minimumBpt: 0n,
@@ -143,7 +142,9 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                 };
             }
             default:
-                throw Error('Unsupported Add Liquidity Kind');
+                throw Error(
+                    'Unsupported Add Liquidity Kind, for Init use InitPool instead of AddLiquidity',
+                );
         }
     }
 
@@ -173,7 +174,9 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                 };
             }
             default:
-                throw Error('Unsupported Add Liquidity Kind');
+                throw Error(
+                    'Unsupported Add Liquidity Kind, for Init use InitPool instead of AddLiquidity',
+                );
         }
     }
 }

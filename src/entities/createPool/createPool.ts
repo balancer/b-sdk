@@ -23,7 +23,7 @@ export class CreatePool {
         return this.createPoolTypes[poolType];
     }
 
-    public buildCreatePoolCall(poolType: string, input: CreatePoolInput) {
+    public buildCall(poolType: string, input: CreatePoolInput) {
         this.inputValidator.validateCreatePool(poolType, input);
         return this.getCreatePool(poolType).buildCall(input);
     }

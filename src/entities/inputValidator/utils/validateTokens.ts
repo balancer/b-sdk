@@ -1,4 +1,5 @@
 import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity';
+import { InitPoolInput } from '../../initPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
@@ -7,7 +8,7 @@ import { PoolStateInput } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
 export const validateTokensAddLiquidity = (
-    addLiquidityInput: AddLiquidityInput,
+    addLiquidityInput: AddLiquidityInput | InitPoolInput,
     poolState: PoolStateInput,
 ) => {
     switch (addLiquidityInput.kind) {

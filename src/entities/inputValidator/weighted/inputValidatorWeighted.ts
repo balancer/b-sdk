@@ -1,5 +1,6 @@
 import { AddLiquidityInput } from '../../addLiquidity';
 import { CreatePoolWeightedInput } from '../../createPool/types';
+import { InitPoolInput } from '../../initPool/types';
 import { RemoveLiquidityInput } from '../../removeLiquidity';
 import { PoolStateInput } from '../../types';
 import { InputValidatorBase } from '../types';
@@ -23,9 +24,9 @@ export class InputValidatorWeighted implements InputValidatorBase {
             throw new Error('Weight cannot be 0');
         }
     }
-    
+
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput,
+        addLiquidityInput: AddLiquidityInput | InitPoolInput,
         poolState: PoolStateInput,
     ): void {
         validateTokensAddLiquidity(addLiquidityInput, poolState);

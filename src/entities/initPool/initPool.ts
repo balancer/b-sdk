@@ -1,7 +1,14 @@
+import { AddLiquidityInput } from '../addLiquidity';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils';
-import { InitPoolBase, InitPoolConfig, InitPoolInput } from './types';
+import { InitPoolComposableStable } from './composableStable/initPoolComposableStable';
+import {
+    InitPoolBase,
+    InitPoolBuildOutput,
+    InitPoolConfig,
+    InitPoolInput,
+} from './types';
 import { InitPoolWeighted } from './weighted/initPoolWeighted';
 
 export class InitPool {
@@ -13,6 +20,7 @@ export class InitPool {
         const { initPoolTypes: customAddLiquidityInitTypes } = config || {};
         this.initPoolTypes = {
             WEIGHTED: new InitPoolWeighted(),
+            PHANTOM_STABLE: new InitPoolComposableStable(),
             ...customAddLiquidityInitTypes,
         };
     }
@@ -24,7 +32,10 @@ export class InitPool {
         return this.initPoolTypes[poolType];
     }
 
-    buildCall(input: InitPoolInput, poolState: PoolStateInput): any {
+    buildCall(
+        input: InitPoolInput,
+        poolState: PoolStateInput,
+    ): InitPoolBuildOutput {
         this.inputValidator.validateAddLiquidity(input, poolState);
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const mappedPoolState = {
