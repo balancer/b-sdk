@@ -19,7 +19,7 @@ type Result =
 type Results = Result[];
 
 const abi = parseAbi([
-    'function getPoolTokens(bytes32 poolId) view returns (address[] tokens, uint256 lastChangeBlock)',
+    'function getPoolTokens(bytes32 poolId) view returns (address[] tokens, uint256[] balances, uint256 lastChangeBlock)',
     'function getSwapFeePercentage() view returns (uint256)',
     'function percentFee() view returns (uint256)',
     'function protocolPercentFee() view returns (uint256)',
