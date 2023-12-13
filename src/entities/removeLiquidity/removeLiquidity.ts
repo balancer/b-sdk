@@ -8,13 +8,15 @@ import {
 } from './types';
 import { RemoveLiquidityWeighted } from './weighted/removeLiquidityWeighted';
 import { PoolStateInput } from '../types';
-import { validateInputs } from './utils/validateInputs';
 import { getSortedTokens } from '../utils/getSortedTokens';
 import { RemoveLiquidityComposableStable } from './composable-stable/removeLiquidityComposableStable';
+import { InputValidator } from '../inputValidator/inputValidator';
 
 export class RemoveLiquidity {
     private readonly removeLiquidityTypes: Record<string, RemoveLiquidityBase> =
         {};
+
+    private readonly inputValidator: InputValidator = new InputValidator();
 
     constructor(config?: RemoveLiquidityConfig) {
         const { customRemoveLiquidityTypes } = config || {};
@@ -43,7 +45,7 @@ export class RemoveLiquidity {
         input: RemoveLiquidityInput,
         poolState: PoolStateInput,
     ): Promise<RemoveLiquidityQueryOutput> {
-        validateInputs(input, poolState);
+        this.inputValidator.validateRemoveLiquidity(input, poolState);
 
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const mappedPoolState = {

@@ -1,5 +1,19 @@
 # @balancer/sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- e7a8237: Adding InitPool Functionality for Weighted Pools;
+  Abstracting Input validation into a new class InputValidator;
+  Moving "encodeUserData" functions from other modules to encoders;
+- 7fff3d9: Adding the CreatePool class with the functionality to create weighted pools; Added integration tests for Weighted Pool Creation
+- d8dc287: Add price impact calculations for add/remove liquidity and swaps
+
+### Patch Changes
+
+- b97bff1: Discard paths with failing limits
+
 ## 0.3.1
 
 ### Patch Changes

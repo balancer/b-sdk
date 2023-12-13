@@ -34,7 +34,7 @@ import {
 } from './lib/utils/addLiquidityHelper';
 import { AddLiquidityTxInput } from './lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
-import { addLiquidityKindNotSupportedByGyro } from '../src/entities/addLiquidity/utils/validateInputs';
+import { InputValidatorGyro } from '../src/entities/inputValidator/gyro/inputValidatorGyro';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 const chainId = ChainId.POLYGON;
@@ -78,7 +78,7 @@ describe('gyroE V2 add liquidity test', () => {
                 ...txInput.poolStateInput.tokens.map((t) => t.address),
                 txInput.poolStateInput.address,
             ],
-            undefined,
+            [0, 0, 0],
             [
                 ...txInput.poolStateInput.tokens.map((t) =>
                     parseUnits('10000', t.decimals),
@@ -144,7 +144,9 @@ describe('gyroE V2 add liquidity test', () => {
                     ...txInput,
                     addLiquidityInput,
                 }),
-            ).rejects.toThrowError(addLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.addLiquidityKindNotSupportedByGyro,
+            );
         });
         //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
     });
@@ -173,7 +175,9 @@ describe('gyroE V2 add liquidity test', () => {
                     ...txInput,
                     addLiquidityInput,
                 }),
-            ).rejects.toThrowError(addLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.addLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 });

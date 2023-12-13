@@ -1,4 +1,5 @@
 import { Address } from 'viem';
+import { InputToken } from '../types';
 export class Token {
     public readonly chainId: number;
     public readonly address: Address;
@@ -36,5 +37,12 @@ export class Token {
 
     public isSameAddress(address: Address) {
         return this.address === address.toLowerCase();
+    }
+
+    public toInputToken(): InputToken {
+        return {
+            address: this.address,
+            decimals: this.decimals,
+        };
     }
 }

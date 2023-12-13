@@ -1,5 +1,12 @@
 import { encodeAbiParameters } from 'viem';
 import { Address } from '../../types';
+import { AddLiquidityKind } from '../addLiquidity';
+import {
+    AddLiquidityAmounts,
+    InitPoolAmounts,
+    RemoveLiquidityAmounts,
+} from '../types';
+import { RemoveLiquidityKind } from '../removeLiquidity';
 
 export enum WeightedPoolJoinKind {
     INIT = 0,
@@ -24,10 +31,89 @@ export class WeightedEncoder {
     }
 
     /**
+     * Encodes the User Data for initializing a WeightedPool
+     * @param amounts Amounts of tokens to be added to the pool
+     * @returns
+     */
+    static encodeInitPoolUserData(amounts: InitPoolAmounts) {
+        return WeightedEncoder.initPool(amounts.maxAmountsIn);
+    }
+
+    /**
+     * Encodes the User Data for adding liquidity to a WeightedPool
+     * @param kind Kind of the Add Liquidity operation: Init, Unbalanced, SingleToken, Proportional
+     * @param amounts Amounts of tokens to be added to the pool
+     * @returns
+     */
+    static encodeAddLiquidityUserData(
+        kind: AddLiquidityKind,
+        amounts: AddLiquidityAmounts,
+    ) {
+        switch (kind) {
+            case AddLiquidityKind.Init:
+                throw new Error(
+                    'For this kind use initPool instead of addLiquidity',
+                );
+            case AddLiquidityKind.Unbalanced:
+                return WeightedEncoder.addLiquidityUnbalanced(
+                    amounts.maxAmountsIn,
+                    amounts.minimumBpt,
+                );
+            case AddLiquidityKind.SingleToken: {
+                if (amounts.tokenInIndex === undefined) throw Error('No Index');
+                return WeightedEncoder.addLiquiditySingleToken(
+                    amounts.minimumBpt,
+                    amounts.tokenInIndex,
+                );
+            }
+            case AddLiquidityKind.Proportional: {
+                return WeightedEncoder.addLiquidityProportional(
+                    amounts.minimumBpt,
+                );
+            }
+            default:
+                throw Error('Unsupported Add Liquidity Kind');
+        }
+    }
+
+    /**
+     * Encodes the User Data for removing liquidity from a WeightedPool
+     * @param kind Kind of the Remove Liquidity operation: Unbalanced, SingleToken, Proportional
+     * @param amounts Amounts of tokens to be removed from the pool
+     * @returns
+     */
+    static encodeRemoveLiquidityUserData(
+        kind: RemoveLiquidityKind,
+        amounts: RemoveLiquidityAmounts,
+    ): Address {
+        switch (kind) {
+            case RemoveLiquidityKind.Unbalanced:
+                return WeightedEncoder.removeLiquidityUnbalanced(
+                    amounts.minAmountsOut,
+                    amounts.maxBptAmountIn,
+                );
+            case RemoveLiquidityKind.SingleToken:
+                if (amounts.tokenOutIndex === undefined)
+                    throw Error('No Index');
+
+                return WeightedEncoder.removeLiquiditySingleToken(
+                    amounts.maxBptAmountIn,
+                    amounts.tokenOutIndex,
+                );
+            case RemoveLiquidityKind.Proportional:
+                return WeightedEncoder.removeLiquidityProportional(
+                    amounts.maxBptAmountIn,
+                );
+            default:
+                throw Error('Unsupported Remove Liquidity Kind');
+        }
+    }
+
+    /**
      * Encodes the userData parameter for providing the initial liquidity to a WeightedPool
      * @param initialBalances - the amounts of tokens to send to the pool to form the initial balances
      */
-    static addLiquidityInit = (amountsIn: bigint[]): Address =>
+    static initPool = (amountsIn: bigint[]): Address =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }],
             [BigInt(WeightedPoolJoinKind.INIT), amountsIn],

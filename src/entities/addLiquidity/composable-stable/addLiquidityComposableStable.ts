@@ -1,7 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { Address } from '../../../types';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 import { vaultAbi } from '../../../abi';
 import {
@@ -24,7 +23,7 @@ import {
 import { ComposableStableEncoder } from '../../encoders/composableStable';
 
 type AddLiquidityAmounts = AddLiquidityAmountsBase & {
-    maxAmountsInNoBpt: bigint[];
+    maxAmountsInWithoutBpt: bigint[];
 };
 
 export class AddLiquidityComposableStable implements AddLiquidityBase {
@@ -37,7 +36,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         );
         const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
 
-        const userData = this.encodeUserData(input.kind, amounts);
+        const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
+            input.kind,
+            amounts,
+        );
 
         const { args, tokensIn } = parseAddLiquidityArgs({
             useNativeAssetAsWrappedAmountIn:
@@ -82,7 +84,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     ): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        const userData = this.encodeUserData(input.addLiquidityKind, amounts);
+        const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
+            input.addLiquidityKind,
+            amounts,
+        );
 
         const { args } = parseAddLiquidityArgs({
             ...input,
@@ -165,7 +170,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
 
         return {
             ...addLiquidityAmounts,
-            maxAmountsInNoBpt: [
+            maxAmountsInWithoutBpt: [
                 ...addLiquidityAmounts.maxAmountsIn.slice(0, bptIndex),
                 ...addLiquidityAmounts.maxAmountsIn.slice(bptIndex + 1),
             ],
@@ -205,41 +210,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         }
         return {
             ...addLiquidityAmounts,
-            maxAmountsInNoBpt: [
+            maxAmountsInWithoutBpt: [
                 ...addLiquidityAmounts.maxAmountsIn.slice(0, input.bptIndex),
                 ...addLiquidityAmounts.maxAmountsIn.slice(input.bptIndex + 1),
             ],
         };
-    }
-
-    private encodeUserData(
-        kind: AddLiquidityKind,
-        amounts: AddLiquidityAmounts,
-    ): Address {
-        switch (kind) {
-            case AddLiquidityKind.Init:
-                return ComposableStableEncoder.addLiquidityInit(
-                    amounts.maxAmountsInNoBpt,
-                );
-            case AddLiquidityKind.Unbalanced:
-                return ComposableStableEncoder.addLiquidityUnbalanced(
-                    amounts.maxAmountsInNoBpt,
-                    amounts.minimumBpt,
-                );
-            case AddLiquidityKind.SingleToken: {
-                if (amounts.tokenInIndex === undefined) throw Error('No Index');
-                return ComposableStableEncoder.addLiquiditySingleToken(
-                    amounts.minimumBpt,
-                    amounts.tokenInIndex, // Has to be index without BPT
-                );
-            }
-            case AddLiquidityKind.Proportional: {
-                return ComposableStableEncoder.addLiquidityProportional(
-                    amounts.minimumBpt,
-                );
-            }
-            default:
-                throw Error('Unsupported Add Liquidity Kind');
-        }
     }
 }
