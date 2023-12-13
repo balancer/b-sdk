@@ -104,6 +104,12 @@ await client.sendTransaction({
 ```
 Full working remove liquidity example: [examples/removeLiquidity.ts](./examples/removeLiquidity.ts)
 
+## Pool Creation
+Pool Creation functionality is available for the latest versions of Weighted Pools (V4) and Composable Stable Pools (V5).
+For usage check our examples:
+- Weighted Pool Creation (V4)[examples/createPoolWeighted.ts](./examples/createPoolWeighted.ts)
+- Composable Stable Pool Creation (V5)[examples/createPoolComposableStable.ts](./examples/createPoolComposableStable.ts)
+
 ## Anvil client
 To download and install the anvil client, run the following commands (MacOS):
 - `curl -L https://foundry.paradigm.xyz | bash`
@@ -112,4 +118,6 @@ To download and install the anvil client, run the following commands (MacOS):
 - `foundryup`
 
 For other SO's check https://book.getfoundry.sh/getting-started/installation
-```
+
+
+
