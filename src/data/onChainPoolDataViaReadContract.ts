@@ -3,17 +3,24 @@ import { getPoolAddress } from '../utils';
 import { OnChainPoolData } from './enrichers/onChainPoolDataEnricher';
 import { SwapOptions } from '../types';
 
-import ComposableStablePoolV5Abi from '../abi/abis/ComposableStablePoolV5Abi.json';
-import ConfigurableRightsPoolAbi from '../abi/abis/ConfigurableRightsPoolAbi.json';
-import ConvergentCurvePoolAbi from '../abi/abis/ConvergentCurvePoolAbi.json';
-import FxPoolAbi from '../abi/abis/FxPoolAbi.json';
-import GyroEV2Abi from '../abi/abis/GyroEV2Abi.json';
-import LiquidityBootstrappingPoolAbi from '../abi/abis/LiquidityBootstrappingPoolAbi.json';
-import ManagedPoolAbi from '../abi/abis/ManagedPoolAbi.json';
-import MetaStablePoolAbi from '../abi/abis/MetaStablePoolAbi.json';
-import PhantomStablePoolAbi from '../abi/abis/PhantomStablePoolAbi.json';
-import VaultAbi from '../abi/abis/VaultAbi.json';
-import WeightedPoolAbi from '../abi/abis/WeightedPoolAbi.json';
+import * as abis from '../abi';
+
+const requiredAbis = [
+    ...abis.composabableStablePoolV5Abi,
+    ...abis.fxPoolAbi,
+    ...abis.gyroEV2Abi,
+    ...abis.linearPoolAbi,
+    ...abis.liquidityBootstrappingPoolAbi,
+    ...abis.managedPoolAbi,
+    ...abis.metaStablePoolAbi,
+    ...abis.phantomStablePoolAbi,
+    ...abis.stablePoolAbi,
+    ...abis.weightedPoolAbi,
+    ...abis.vaultAbi
+]
+
+const uniqueAbiElements = new Map(requiredAbis.map(abi => [JSON.stringify(abi), abi]));
+const abi = Array.from(uniqueAbiElements.values());
 
 type Result =
     | {
@@ -29,25 +36,6 @@ type Result =
 [];
 
 type Results = Result[];
-
-const abi = parseAbi([
-    'function getPoolTokens(bytes32 poolId) view returns (address[] tokens, uint256[] balances, uint256 lastChangeBlock)',
-    'function getSwapFeePercentage() view returns (uint256)',
-    'function percentFee() view returns (uint256)',
-    'function protocolPercentFee() view returns (uint256)',
-    'function getNormalizedWeights() view returns (uint256[])',
-    'function totalSupply() view returns (uint256)',
-    'function getVirtualSupply() view returns (uint256)',
-    'function getActualSupply() view returns (uint256)',
-    'function getTargets() view returns (uint256 lowerTarget, uint256 upperTarget)',
-    'function getTokenRates() view returns (uint256, uint256)',
-    'function getWrappedTokenRate() view returns (uint256)',
-    'function getAmplificationParameter() view returns (uint256 value, bool isUpdating, uint256 precision)',
-    'function getPausedState() view returns (bool)',
-    'function inRecoveryMode() view returns (bool)',
-    'function getRate() view returns (uint256)',
-    'function getScalingFactors() view returns (uint256[] memory)',
-]);
 
 // Extract the functionName property values into a union type
 type FunctionNameUnion = typeof abi[number]['name'];
