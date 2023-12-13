@@ -29,6 +29,11 @@ export class InputValidatorComposableStable implements InputValidatorBase {
 
     validateCreatePool(input: CreatePoolComposableStableInput): void {
         validateCreatePoolTokens(input.tokens);
+        if (input.tokens.length > 5) {
+            throw new Error(
+                'Composable stable pools can have a maximum of 5 tokens',
+            );
+        }
         if (BigInt(input.amplificationParameter) <= BigInt(0)) {
             throw new Error('Amplification parameter must be greater than 0');
         } else if (BigInt(input.amplificationParameter) > BigInt(5000)) {

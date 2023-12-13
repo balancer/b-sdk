@@ -12,6 +12,9 @@ import {
 export class InputValidatorWeighted implements InputValidatorBase {
     validateCreatePool(input: CreatePoolWeightedInput) {
         validateCreatePoolTokens(input.tokens);
+        if (input.tokens.length > 8) {
+            throw new Error('Weighted pools can have a maximum of 8 tokens');
+        }
         const weightsSum = input.tokens.reduce(
             (acc, { weight }) => acc + BigInt(weight),
             0n,
@@ -23,7 +26,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
             throw new Error('Weight cannot be 0');
         }
     }
-    
+
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolStateInput,
