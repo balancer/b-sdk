@@ -120,15 +120,6 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
 };
 
-export const STELLATE_URLS = {
-    [ChainId.MAINNET]: 'https://balancer-v2.stellate.balancer.fi',
-    [ChainId.GOERLI]: 'https://balancer-goerli-v2.stellate.balancer.fi',
-    [ChainId.GNOSIS_CHAIN]:
-        'https://balancer-gnosis-chain-v2.stellate.balancer.fi',
-    [ChainId.POLYGON]: 'https://balancer-polygon-v2.stellate.balancer.fi',
-    [ChainId.ARBITRUM_ONE]: 'https://balancer-arbitrum-v2.stellate.balancer.fi',
-};
-
 export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.AVALANCHE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
@@ -213,6 +204,14 @@ export const NATIVE_ASSETS = {
         'ETH',
         'Ether',
         '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+    ),
+    [ChainId.OPTIMISM]: new Token(
+        ChainId.OPTIMISM,
+        NATIVE_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0x4200000000000000000000000000000000000006',
     ),
     [ChainId.FANTOM]: new Token(
         ChainId.FANTOM,
