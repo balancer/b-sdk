@@ -75,7 +75,7 @@ let runningForks: Record<number, Anvil> = {};
 export async function stopAnvilForks() {
     await Promise.all(
         Object.values(runningForks).map(async (anvil) => {
-            // console.log('Stopping anvil fork', anvil.options);
+            console.log('Stopping anvil fork', anvil.options);
             return anvil.stop();
         }),
     );
