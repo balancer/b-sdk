@@ -31,6 +31,8 @@ export class InputValidatorComposableStable implements InputValidatorBase {
         validateCreatePoolTokens(input.tokens);
         if (BigInt(input.amplificationParameter) <= BigInt(0)) {
             throw new Error('Amplification parameter must be greater than 0');
+else if (BigInt(input.amplificationParameter) > BigInt(5000)) {
+            throw new Error('Amplification parameter must be equal or lower than 5000');
         }
         return;
     }
