@@ -1,4 +1,4 @@
-[
+export const gyroEV2Abi = [[
     {
         "inputs": [
             {
@@ -1966,3 +1966,4 @@
         "type": "function"
     }
 ]
+] as const;
