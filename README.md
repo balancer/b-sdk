@@ -104,11 +104,15 @@ await client.sendTransaction({
 ```
 Full working remove liquidity example: [examples/removeLiquidity.ts](./examples/removeLiquidity.ts)
 
-## Pool Creation
+## Pool Creation And Initialization
 Pool Creation functionality is available for the latest versions of Weighted Pools (V4) and Composable Stable Pools (V5).
-For usage check our examples:
+For usage of Pool Creation check our examples:
 - Weighted Pool Creation (V4)[examples/createPoolWeighted.ts](./examples/createPoolWeighted.ts)
 - Composable Stable Pool Creation (V5)[examples/createPoolComposableStable.ts](./examples/createPoolComposableStable.ts)
+
+For usage of Pool Initialization check our example:
+- Pool Initialization [examples/createPoolComposableStable.ts](./examples/initPool.ts)
+
 
 ## Anvil client
 To download and install the anvil client, run the following commands (MacOS):
