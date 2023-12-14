@@ -42,7 +42,6 @@ export class InputValidator {
         );
     }
 
-
     validateCreatePool(poolType: string, input: CreatePoolInput): void {
         this.getValidator(poolType).validateCreatePool(input);
     }

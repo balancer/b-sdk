@@ -11,7 +11,6 @@ export const validateTokensAddLiquidity = (
     poolState: PoolStateInput,
 ) => {
     switch (addLiquidityInput.kind) {
-        case AddLiquidityKind.Init:
         case AddLiquidityKind.Unbalanced:
             areTokensInArray(
                 addLiquidityInput.amountsIn.map((a) => a.address),
@@ -66,5 +65,17 @@ export const validatePoolHasBpt = (poolState: PoolStateInput) => {
         throw new Error(
             'INPUT_ERROR: Pool State should have BPT token included',
         );
+    }
+};
+
+export const validateCreatePoolTokens = (
+    tokens: { tokenAddress: string }[],
+) => {
+    const tokenAddresses = tokens.map((t) => t.tokenAddress);
+    if (tokenAddresses.length !== new Set(tokenAddresses).size) {
+        throw new Error('Duplicate token addresses');
+    }
+    if (tokens.length < 2) {
+        throw new Error('Minimum of 2 tokens required');
     }
 };

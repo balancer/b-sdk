@@ -4,7 +4,9 @@ export interface CreatePoolBase {
     buildCall(input: CreatePoolInput): CreatePoolBuildCallOutput;
 }
 
-export type CreatePoolInput = CreatePoolWeightedInput;
+export type CreatePoolInput =
+    | CreatePoolWeightedInput
+    | CreatePoolComposableStableInput;
 
 export type CreatePoolWeightedInput = {
     name?: string;
@@ -14,6 +16,21 @@ export type CreatePoolWeightedInput = {
         weight: string;
         rateProvider: Address;
     }[];
+    swapFee: string;
+    poolOwnerAddress: Address;
+    salt?: Hex;
+};
+
+export type CreatePoolComposableStableInput = {
+    name?: string;
+    symbol: string;
+    tokens: {
+        tokenAddress: Address;
+        rateProvider: Address;
+        tokenRateCacheDuration: string;
+    }[];
+    amplificationParameter: string;
+    exemptFromYieldProtocolFeeFlag: boolean;
     swapFee: string;
     poolOwnerAddress: Address;
     salt?: Hex;
@@ -29,6 +46,19 @@ export type CreatePoolWeightedArgs = [
     Address[],
     bigint[],
     Address[],
+    bigint,
+    Address,
+    string,
+];
+
+export type CreatePoolComposableStableArgs = [
+    string,
+    string,
+    Address[],
+    string,
+    Address[],
+    string[],
+    boolean,
     bigint,
     Address,
     string,
