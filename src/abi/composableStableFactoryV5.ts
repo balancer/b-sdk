@@ -183,4 +183,4 @@ export const composableStableFactoryV5Abi = [
         stateMutability: 'view',
         type: 'function',
     },
-];
+] as const;

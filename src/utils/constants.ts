@@ -164,22 +164,36 @@ export const BALANCER_HELPERS: Record<number, Address> = {
 };
 
 export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/arbitrum.html
     [ChainId.ARBITRUM_ONE]: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/avalanche.html
     [ChainId.AVALANCHE]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/gnosis.html
     [ChainId.GNOSIS_CHAIN]: '0x6cad2ea22bfa7f4c14aae92e47f510cd5c509bc7',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/mainnet.html
     [ChainId.MAINNET]: '0x897888115ada5773e02aa29f775430bfb5f34c51',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/optimism.html
     [ChainId.OPTIMISM]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/polygon.html
     [ChainId.POLYGON]: '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/zkevm.html
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
 };
 
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/arbitrum.html
     [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/avalanche.html
     [ChainId.AVALANCHE]: '0xe42ffa682a26ef8f25891db4882932711d42e467',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/gnosis.html
     [ChainId.GNOSIS_CHAIN]: '0x4bdcc2fb18aeb9e2d281b0278d946445070eada7',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/mainnet.html
     [ChainId.MAINNET]: '0xdb8d758bcb971e482b2c45f7f8a7740283a1bd3a',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/optimism.html
     [ChainId.OPTIMISM]: '0x043a2dad730d585c44fb79d2614f295d2d625412',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/polygon.html
     [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
+    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/zkevm.html
     [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
 };
 
