@@ -16,10 +16,12 @@ const requiredAbis = [
     ...abis.phantomStablePoolAbi,
     ...abis.stablePoolAbi,
     ...abis.weightedPoolAbi,
-    ...abis.vaultAbi
-]
+    ...abis.vaultAbi,
+];
 
-const uniqueAbiElements = new Map(requiredAbis.map(abi => [JSON.stringify(abi), abi]));
+const uniqueAbiElements = new Map(
+    requiredAbis.map((abi) => [JSON.stringify(abi), abi])
+);
 const abi = Array.from(uniqueAbiElements.values());
 
 type Result =
@@ -38,7 +40,7 @@ type Result =
 type Results = Result[];
 
 // Extract the functionName property values into a union type
-type FunctionNameUnion = typeof abi[number]['name'];
+type FunctionNameUnion = (typeof abi)[number]['name'];
 
 type BuildReturn = {
     address: Address;
@@ -200,7 +202,7 @@ const gyroECalls = {
 const poolTypeCalls = (
     poolType: string,
     poolTypeVersion: number,
-    vault: Address,
+    vault: Address
 ) => {
     const do_nothing = {
         count: 0,
@@ -223,7 +225,7 @@ const poolTypeCalls = (
                         ...defaultCalls.parse(results, shift),
                         ...weightedCalls.parse(
                             results,
-                            shift + defaultCalls.count,
+                            shift + defaultCalls.count
                         ),
                     }),
                 };
@@ -238,7 +240,7 @@ const poolTypeCalls = (
                         ...defaultCallsAux.parse(results, shift),
                         ...weightedCalls.parse(
                             results,
-                            shift + defaultCallsAux.count,
+                            shift + defaultCallsAux.count
                         ),
                     }),
                 };
@@ -255,7 +257,7 @@ const poolTypeCalls = (
                         ...defaultCalls.parse(results, shift),
                         ...stableCalls.parse(
                             results,
-                            shift + defaultCalls.count,
+                            shift + defaultCalls.count
                         ),
                     }),
                 };
@@ -270,7 +272,7 @@ const poolTypeCalls = (
                         ...defaultCallsAux.parse(results, shift),
                         ...stableCalls.parse(
                             results,
-                            shift + defaultCallsAux.count,
+                            shift + defaultCallsAux.count
                         ),
                     }),
                 };
@@ -300,7 +302,7 @@ const poolTypeCalls = (
                     ...defaultCallsAux.parse(results, shift),
                     ...stableCalls.parse(
                         results,
-                        shift + defaultCallsAux.count,
+                        shift + defaultCallsAux.count
                     ),
                 }),
             };
@@ -319,7 +321,7 @@ const poolTypeCalls = (
                         ...defaultCalls.parse(results, shift),
                         ...gyroECalls.parse(
                             results,
-                            shift + defaultCalls.count,
+                            shift + defaultCalls.count
                         ),
                     }),
                 };
@@ -336,7 +338,7 @@ const poolTypeCalls = (
                         ...defaultCalls.parse(results, shift),
                         ...linearCalls.parse(
                             results,
-                            shift + defaultCalls.count,
+                            shift + defaultCalls.count
                         ),
                     }),
                 };
@@ -357,7 +359,7 @@ export const fetchAdditionalPoolData = async (
     }[],
     client: PublicClient,
     options: SwapOptions,
-    batchSize: number,
+    batchSize: number
 ): Promise<OnChainPoolData[]> => {
     if (pools.length === 0) {
         return [];
@@ -367,8 +369,8 @@ export const fetchAdditionalPoolData = async (
         poolTypeCalls(poolType, poolTypeVersion, vault).build(
             id,
             poolType,
-            vault,
-        ),
+            vault
+        )
     );
 
     const results = await client.multicall({
@@ -383,7 +385,7 @@ export const fetchAdditionalPoolData = async (
                 'Failed request in multicall',
                 calls[i].address,
                 calls[i].functionName,
-                r.error,
+                r.error
             );
     });
 
@@ -394,7 +396,7 @@ export const fetchAdditionalPoolData = async (
             id,
             ...poolTypeCalls(poolType, poolTypeVersion, vault).parse(
                 results,
-                shift,
+                shift
             ),
         } as OnChainPoolData;
         shift += poolTypeCalls(poolType, poolTypeVersion, vault).count;
