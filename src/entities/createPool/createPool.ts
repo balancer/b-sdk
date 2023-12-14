@@ -1,3 +1,4 @@
+import { PoolType } from '../../types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { CreatePoolComposableStable } from './composableStable/createPoolComposableStable';
 import { CreatePoolBase, CreatePoolInput } from './types';
@@ -11,8 +12,8 @@ export class CreatePool {
     constructor() {
         this.inputValidator = new InputValidator();
         this.createPoolTypes = {
-            WEIGHTED: new CreatePoolWeighted(),
-            PHANTOM_STABLE: new CreatePoolComposableStable(),
+            [PoolType.Weighted]: new CreatePoolWeighted(),
+            [PoolType.ComposableStable]: new CreatePoolComposableStable(),
         };
     }
 

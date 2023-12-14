@@ -11,6 +11,7 @@ import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils/getSortedTokens';
 import { AddLiquidityComposableStable } from './composable-stable/addLiquidityComposableStable';
 import { InputValidator } from '../inputValidator/inputValidator';
+import { PoolType } from '../../types';
 
 export class AddLiquidity {
     private readonly addLiquidityTypes: Record<string, AddLiquidityBase> = {};
@@ -20,12 +21,11 @@ export class AddLiquidity {
         const { customAddLiquidityTypes } = config || {};
         this.addLiquidityTypes = {
             //GYRO2, GYRO3, GYROE pool types only support Add Liquidity Proportional (3 - ALL_TOKENS_IN_FOR_BPT_OUT)
-            GYRO2: new AddLiquidityWeighted(),
-            GYRO3: new AddLiquidityWeighted(),
-            GYROE: new AddLiquidityWeighted(),
-            WEIGHTED: new AddLiquidityWeighted(),
-            // PHANTOM_STABLE === ComposableStables in API
-            PHANTOM_STABLE: new AddLiquidityComposableStable(),
+            [PoolType.Gyro2]: new AddLiquidityWeighted(),
+            [PoolType.Gyro3]: new AddLiquidityWeighted(),
+            [PoolType.GyroE]: new AddLiquidityWeighted(),
+            [PoolType.Weighted]: new AddLiquidityWeighted(),
+            [PoolType.ComposableStable]: new AddLiquidityComposableStable(),
             // custom add liquidity types take precedence over base types
             ...customAddLiquidityTypes,
         };

@@ -7,7 +7,7 @@ import {
     walletActions,
     zeroAddress,
 } from 'viem';
-import { CHAINS, ChainId } from '../src';
+import { CHAINS, ChainId, PoolType } from '../src';
 import { CreatePool } from '../src/entities/createPool/createPool';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { doCreatePool } from './lib/utils/createPoolHelper';
@@ -39,7 +39,7 @@ describe('Create Weighted Pool tests', () => {
             createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: {} as CreatePoolInput,
-            poolType: 'WEIGHTED',
+            poolType: PoolType.Weighted,
         };
 
         createWeightedPoolInput = {

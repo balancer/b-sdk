@@ -16,7 +16,7 @@ import {
 import { CreatePoolComposableStableInput } from '../src/entities/createPool/types';
 import { CreatePool } from '../src/entities/createPool/createPool';
 import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
-import { CHAINS, COMPOSABLE_STABLE_POOL_FACTORY, ChainId } from '../src';
+import { CHAINS, COMPOSABLE_STABLE_POOL_FACTORY, ChainId, PoolType } from '../src';
 import { findEventInReceiptLogs } from '../test/lib/utils/findEventInReceiptLogs';
 import { composableStableFactoryV5Abi } from '../src/abi/composableStableFactoryV5';
 
@@ -37,7 +37,7 @@ const createPoolComposableStable = async (): Promise<{
         .extend(walletActions);
     const signerAddress = (await client.getAddresses())[0];
     const createPool = new CreatePool();
-    const poolType = 'PHANTOM_STABLE';
+    const poolType = PoolType.ComposableStable;
     const createPoolComposableStableInput: CreatePoolComposableStableInput = {
         name: 'Test Pool',
         symbol: '50BAL-50WETH',

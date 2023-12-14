@@ -13,6 +13,7 @@ import {
     CHAINS,
     ChainId,
     PoolStateInput,
+    PoolType,
     Slippage,
 } from '../src';
 import { CreatePool } from '../src/entities/createPool/createPool';
@@ -73,7 +74,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: createPoolComposableStableInput,
-            poolType: 'PHANTOM_STABLE',
+            poolType: PoolType.ComposableStable,
         };
 
         initPoolInput = {
@@ -109,7 +110,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
 
         poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
-            'PHANTOM_STABLE',
+            PoolType.ComposableStable,
             initPoolInput.amountsIn,
         );
 

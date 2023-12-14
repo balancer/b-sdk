@@ -1,3 +1,4 @@
+import { PoolType } from '../../types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils';
@@ -18,8 +19,8 @@ export class InitPool {
     constructor(config?: InitPoolConfig) {
         const { initPoolTypes: customAddLiquidityInitTypes } = config || {};
         this.initPoolTypes = {
-            WEIGHTED: new InitPoolWeighted(),
-            PHANTOM_STABLE: new InitPoolComposableStable(),
+            [PoolType.Weighted]: new InitPoolWeighted(),
+            [PoolType.ComposableStable]: new InitPoolComposableStable(),
             ...customAddLiquidityInitTypes,
         };
     }

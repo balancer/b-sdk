@@ -16,6 +16,7 @@ import {
     RemoveLiquiditySingleTokenInput,
     RemoveLiquidityKind,
     RemoveLiquidityUnbalancedInput,
+    PoolType,
 } from '../src';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { PriceImpact } from '../src/entities/priceImpact';
@@ -257,7 +258,7 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'PHANTOM_STABLE',
+            type: PoolType.ComposableStable,
             tokens,
         };
     }

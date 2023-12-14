@@ -48,18 +48,18 @@ export type CreatePoolWeightedArgs = [
     Address[],
     bigint,
     Address,
-    string,
+    Hex,
 ];
 
 export type CreatePoolComposableStableArgs = [
     string,
     string,
     Address[],
-    string,
+    bigint,
     Address[],
-    string[],
+    bigint[],
     boolean,
     bigint,
     Address,
-    string,
+    Hex,
 ];
