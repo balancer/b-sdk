@@ -33,7 +33,7 @@ const initPool = async () => {
                 decimals: 18,
             },
         ],
-        chainId: ChainId.MAINNET,
+        chainId,
     };
     const poolState = await initPoolDataProvider.getInitPoolData(
         poolAddress,
