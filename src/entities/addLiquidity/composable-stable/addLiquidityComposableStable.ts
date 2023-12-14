@@ -27,7 +27,6 @@ type AddLiquidityAmounts = AddLiquidityAmountsBase & {
 };
 
 export class AddLiquidityComposableStable implements AddLiquidityBase {
-    
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
@@ -129,6 +128,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.kind) {
+            case AddLiquidityKind.Init:
+                throw Error(
+                    'Unsupported Add Liquidity Kind, for Init use InitPool instead of AddLiquidity',
+                );
             case AddLiquidityKind.Unbalanced: {
                 addLiquidityAmounts = {
                     minimumBpt: 0n,
@@ -182,6 +185,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {
+            case AddLiquidityKind.Init:
+                throw Error(
+                    'Unsupported Add Liquidity Kind, for Init use InitPool instead of AddLiquidity',
+                );
             case AddLiquidityKind.Unbalanced: {
                 const minimumBpt = input.slippage.removeFrom(
                     input.bptOut.amount,
@@ -205,9 +212,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                 break;
             }
             default:
-                throw Error(
-                    'Unsupported Add Liquidity Kind, for Init use InitPool instead of AddLiquidity',
-                );
+                throw Error('Unsupported Add Liquidity Kind');
         }
         return {
             ...addLiquidityAmounts,

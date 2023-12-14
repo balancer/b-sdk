@@ -5,7 +5,7 @@ import { InitPoolAmountsComposableStable, PoolState } from '../../types';
 import { getAmounts, parseAddLiquidityArgs } from '../../utils';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../types';
 import { vaultAbi } from '../../../abi';
-import { BALANCER_VAULT, ZERO_ADDRESS } from '../../../utils';
+import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 
 export class InitPoolComposableStable implements InitPoolBase {
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
@@ -52,7 +52,7 @@ export class InitPoolComposableStable implements InitPoolBase {
             {
                 address: poolState.address,
                 decimals: 18,
-                rawAmount: BigInt.asUintN(256, BigInt(-1)),
+                rawAmount: MAX_UINT256,
             },
             ...input.amountsIn.slice(bptIndex),
         ]);

@@ -52,10 +52,6 @@ export class InitPoolDataProvider {
         });
 
         const poolTokens = amounts
-            .sort((a, b) => {
-                const diff = BigInt(a.address) - BigInt(b.address);
-                return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-            })
             .map(({ address, decimals }, index) => ({
                 address: address.toLowerCase() as Address,
                 decimals,
