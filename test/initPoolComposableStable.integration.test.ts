@@ -117,7 +117,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             initPoolTxInput.client,
             initPoolTxInput.testAddress,
             [...poolState.tokens.map((t) => t.address)],
-            [0, 1, 3],
+            undefined,
             [...poolState.tokens.map((t) => parseUnits('100000', t.decimals))],
         );
     });
