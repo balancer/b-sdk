@@ -9,6 +9,7 @@ import {
 import { CHAINS } from '../../utils';
 import { InputAmountInit } from '../../types';
 import { PoolStateInput } from '../../entities';
+import { sortTokensByAddress } from '../../utils/tokens';
 
 export class InitPoolDataProvider {
     private readonly client: PublicClient;
@@ -49,22 +50,35 @@ export class InitPoolDataProvider {
             address: poolAddress,
             publicClient: this.client,
         });
+
+        const poolTokens = amounts
+            .map(({ address, decimals }, index) => ({
+                address: address.toLowerCase() as Address,
+                decimals,
+                index: index + 1,
+            }));
+
+        const poolTokensWithBpt = sortTokensByAddress([
+            {
+                address: poolAddress.toLowerCase() as Address,
+                decimals: 18,
+                index: 0,
+            },
+            ...poolTokens,
+        ]);
+
+        const tokensPerPoolType = {
+            WEIGHTED: poolTokens,
+            PHANTOM_STABLE: poolTokensWithBpt,
+        };
+
         try {
             const poolId = (await poolContract.read.getPoolId()) as Hex;
             return {
                 id: poolId,
-                address: poolAddress,
+                address: poolAddress.toLowerCase() as Address,
                 type: poolType.toUpperCase(),
-                tokens: amounts
-                    .sort((a, b) => {
-                        const diff = BigInt(a.address) - BigInt(b.address);
-                        return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-                    })
-                    .map(({ address, decimals }, index) => ({
-                        address: address.toLowerCase() as Address,
-                        decimals,
-                        index,
-                    })),
+                tokens: tokensPerPoolType[poolType.toUpperCase()],
             };
         } catch (e) {
             console.warn(e);

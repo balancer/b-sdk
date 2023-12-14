@@ -9,6 +9,7 @@ import { Token } from '../../token';
 import { WeightedEncoder } from '../../encoders';
 
 export class InitPoolWeighted implements InitPoolBase {
+    
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
         const amounts = this.getAmounts(input, poolState.tokens);
         const userData = WeightedEncoder.encodeInitPoolUserData(amounts);

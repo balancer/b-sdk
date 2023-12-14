@@ -2,6 +2,7 @@ import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { PoolState } from '../types';
 import { Address, Hex, InputAmount } from '../../types';
+import { InitPoolInput } from '../initPool/types';
 
 export enum AddLiquidityKind {
     Init = 'Init',
@@ -35,6 +36,7 @@ export type AddLiquidityProportionalInput = AddLiquidityBaseInput & {
 };
 
 export type AddLiquidityInput =
+    | InitPoolInput
     | AddLiquidityUnbalancedInput
     | AddLiquiditySingleTokenInput
     | AddLiquidityProportionalInput;

@@ -85,4 +85,4 @@ const createPool = async (stopForkAfterExecution = true) => {
     return poolAddress;
 };
 
-createPool();
+export default createPool;
