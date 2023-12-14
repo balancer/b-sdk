@@ -82,17 +82,6 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.FANTOM]: fantom,
 };
 
-export const VAULT: Record<number, Address> = {
-    [ChainId.ARBITRUM_ONE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    [ChainId.AVALANCHE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    [ChainId.GNOSIS_CHAIN]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    [ChainId.MAINNET]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    [ChainId.OPTIMISM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    [ChainId.POLYGON]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    [ChainId.ZKEVM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    [ChainId.FANTOM]: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
-};
-
 export const SUBGRAPH_URLS = {
     [ChainId.MAINNET]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
@@ -129,17 +118,6 @@ export const STELLATE_URLS = {
     [ChainId.ARBITRUM_ONE]: 'https://balancer-arbitrum-v2.stellate.balancer.fi',
 };
 
-export const BALANCER_QUERIES: Record<number, Address> = {
-    [ChainId.ARBITRUM_ONE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
-    [ChainId.AVALANCHE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
-    [ChainId.GNOSIS_CHAIN]: '0x0f3e0c4218b7b0108a3643cfe9d3ec0d4f57c54e',
-    [ChainId.MAINNET]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
-    [ChainId.OPTIMISM]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
-    [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
-    [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
-    [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
-};
-
 export const BATCHSIZE: Record<number, number> = {
     [ChainId.ARBITRUM_ONE]: 800,
     [ChainId.AVALANCHE]: 800,
@@ -153,6 +131,33 @@ export const BATCHSIZE: Record<number, number> = {
 
 export const BALANCER_VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 
+/**
+ * Deployment Addresses
+ * Source: https://docs.balancer.fi/reference/contracts
+ */
+
+export const VAULT: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.AVALANCHE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.GNOSIS_CHAIN]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.MAINNET]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.OPTIMISM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.POLYGON]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.ZKEVM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.FANTOM]: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
+};
+
+export const BALANCER_QUERIES: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.AVALANCHE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.GNOSIS_CHAIN]: '0x0f3e0c4218b7b0108a3643cfe9d3ec0d4f57c54e',
+    [ChainId.MAINNET]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.OPTIMISM]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
+    [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
+};
+
 export const BALANCER_HELPERS: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0x77d46184d22ca6a3726a2f500c776767b6a3d6ab',
     [ChainId.AVALANCHE]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
@@ -164,36 +169,22 @@ export const BALANCER_HELPERS: Record<number, Address> = {
 };
 
 export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/arbitrum.html
     [ChainId.ARBITRUM_ONE]: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/avalanche.html
     [ChainId.AVALANCHE]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/gnosis.html
     [ChainId.GNOSIS_CHAIN]: '0x6cad2ea22bfa7f4c14aae92e47f510cd5c509bc7',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/mainnet.html
     [ChainId.MAINNET]: '0x897888115ada5773e02aa29f775430bfb5f34c51',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/optimism.html
     [ChainId.OPTIMISM]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/polygon.html
     [ChainId.POLYGON]: '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/zkevm.html
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
 };
 
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/arbitrum.html
     [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/avalanche.html
     [ChainId.AVALANCHE]: '0xe42ffa682a26ef8f25891db4882932711d42e467',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/gnosis.html
     [ChainId.GNOSIS_CHAIN]: '0x4bdcc2fb18aeb9e2d281b0278d946445070eada7',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/mainnet.html
     [ChainId.MAINNET]: '0xdb8d758bcb971e482b2c45f7f8a7740283a1bd3a',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/optimism.html
     [ChainId.OPTIMISM]: '0x043a2dad730d585c44fb79d2614f295d2d625412',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/polygon.html
     [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
-    //Source: https://docs.balancer.fi/reference/contracts/deployment-addresses/zkevm.html
     [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
 };
 
