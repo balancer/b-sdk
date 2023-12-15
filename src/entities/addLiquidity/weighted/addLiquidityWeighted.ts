@@ -147,7 +147,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             }
             default:
                 throw Error(
-                    'Unsupported Add Liquidity Kind: ${input.kind}',
+                    `Unsupported Add Liquidity Kind: ${input.kind}`,
                 );
         }
     }
