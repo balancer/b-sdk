@@ -7,7 +7,7 @@ import {
     http,
 } from 'viem';
 import { CHAINS } from '../../utils';
-import { InputAmountInit } from '../../types';
+import { InputAmountInit, PoolType } from '../../types';
 import { PoolStateInput } from '../../entities';
 import { sortTokensByAddress } from '../../utils/tokens';
 
@@ -42,7 +42,7 @@ export class InitPoolDataProvider {
 
     public async getInitPoolData(
         poolAddress: Address,
-        poolType: string,
+        poolType: PoolType,
         amounts: InputAmountInit[],
     ): Promise<PoolStateInput> {
         const poolContract = getContract({
@@ -69,8 +69,8 @@ export class InitPoolDataProvider {
         }));
 
         const tokensPerPoolType = {
-            WEIGHTED: poolTokens,
-            PHANTOM_STABLE: poolTokensWithBpt,
+            [PoolType.Weighted]: poolTokens,
+            [PoolType.ComposableStable]: poolTokensWithBpt,
         };
 
         try {

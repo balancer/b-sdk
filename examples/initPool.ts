@@ -1,5 +1,5 @@
 import { parseEther, parseUnits } from 'viem';
-import { AddLiquidityKind, ChainId } from '../src';
+import { AddLiquidityKind, ChainId, PoolType } from '../src';
 import { InitPool } from '../src/entities/initPool/initPool';
 import { InitPoolInput } from '../src/entities/initPool/types';
 import { InitPoolDataProvider } from '../src/data/providers/initPoolDataProvider';
@@ -13,7 +13,7 @@ const initPool = async () => {
     const { rpcUrl, client, poolAddress } = await createPoolComposableStable();
     const chainId = ChainId.MAINNET;
     const initPool = new InitPool();
-    const poolType = 'PHANTOM_STABLE';
+    const poolType = PoolType.ComposableStable;
     const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
     const signerAddress = (await client.getAddresses())[0];
 

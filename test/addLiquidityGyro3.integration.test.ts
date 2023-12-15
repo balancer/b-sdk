@@ -26,6 +26,7 @@ import {
     getPoolAddress,
     AddLiquidityUnbalancedInput,
     AddLiquiditySingleTokenInput,
+    PoolType,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import {
@@ -189,7 +190,7 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'GYRO3',
+            type: PoolType.Gyro3,
             tokens: [
                 {
                     address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC(PoS)

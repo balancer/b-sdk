@@ -13,6 +13,7 @@ import {
     CHAINS,
     ChainId,
     PoolStateInput,
+    PoolType,
     Slippage,
 } from '../src';
 import { CreatePool } from '../src/entities/createPool/createPool';
@@ -52,12 +53,12 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             tokens: [
                 {
                     tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
-                    weight: parseEther(`${1 / 2}`).toString(),
+                    weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                 },
                 {
                     tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-                    weight: parseEther(`${1 / 2}`).toString(),
+                    weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                 },
             ],
@@ -70,7 +71,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: createPoolWeightedInput,
-            poolType: 'WEIGHTED',
+            poolType: PoolType.Weighted,
         };
 
         initPoolInput = {
@@ -92,7 +93,6 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             ],
             kind: AddLiquidityKind.Init,
             chainId,
-            rpcUrl,
         };
         poolAddress = await doCreatePool(createTxInput);
 
@@ -107,7 +107,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
 
         poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
-            'WEIGHTED',
+            PoolType.Weighted,
             initPoolInput.amountsIn,
         );
         await forkSetup(

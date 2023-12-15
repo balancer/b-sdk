@@ -31,7 +31,7 @@ export class CreatePoolWeighted implements CreatePoolBase {
         const [tokens, weights, rateProviders] = sortedTokenParams.reduce(
             (acc, curr) => {
                 acc[0].push(curr.tokenAddress);
-                acc[1].push(BigInt(curr.weight));
+                acc[1].push(curr.weight);
                 acc[2].push(curr.rateProvider);
                 return acc;
             },

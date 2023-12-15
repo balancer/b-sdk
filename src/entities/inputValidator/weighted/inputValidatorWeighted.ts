@@ -17,13 +17,13 @@ export class InputValidatorWeighted implements InputValidatorBase {
             throw new Error('Weighted pools can have a maximum of 8 tokens');
         }
         const weightsSum = input.tokens.reduce(
-            (acc, { weight }) => acc + BigInt(weight),
+            (acc, { weight }) => acc + weight,
             0n,
         );
         if (weightsSum !== BigInt(1e18)) {
             throw new Error('Weights must sum to 1e18');
         }
-        if (input.tokens.find(({ weight }) => BigInt(weight) === 0n)) {
+        if (input.tokens.find(({ weight }) => weight === 0n)) {
             throw new Error('Weight cannot be 0');
         }
     }

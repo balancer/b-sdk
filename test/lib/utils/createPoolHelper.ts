@@ -2,6 +2,7 @@ import { CreatePoolTxInput } from './types';
 import {
     Address,
     COMPOSABLE_STABLE_POOL_FACTORY,
+    PoolType,
     WEIGHTED_POOL_FACTORY,
 } from '../../../src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
@@ -17,11 +18,11 @@ export async function doCreatePool(
     const chainId = await client.getChainId();
 
     const factories = {
-        WEIGHTED: {
+        [PoolType.Weighted]: {
             address: WEIGHTED_POOL_FACTORY[chainId],
             abi: weightedFactoryV4Abi,
         },
-        PHANTOM_STABLE: {
+        [PoolType.ComposableStable]: {
             address: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
             abi: composableStableFactoryV5Abi,
         },

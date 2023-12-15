@@ -13,7 +13,7 @@ export type CreatePoolWeightedInput = {
     symbol: string;
     tokens: {
         tokenAddress: Address;
-        weight: string;
+        weight: bigint;
         rateProvider: Address;
     }[];
     swapFee: string;
@@ -27,9 +27,9 @@ export type CreatePoolComposableStableInput = {
     tokens: {
         tokenAddress: Address;
         rateProvider: Address;
-        tokenRateCacheDuration: string;
+        tokenRateCacheDuration: bigint;
     }[];
-    amplificationParameter: string;
+    amplificationParameter: bigint;
     exemptFromYieldProtocolFeeFlag: boolean;
     swapFee: string;
     poolOwnerAddress: Address;
@@ -48,18 +48,18 @@ export type CreatePoolWeightedArgs = [
     Address[],
     bigint,
     Address,
-    string,
+    Hex,
 ];
 
 export type CreatePoolComposableStableArgs = [
     string,
     string,
     Address[],
-    string,
+    bigint,
     Address[],
-    string[],
+    bigint[],
     boolean,
     bigint,
     Address,
-    string,
+    Hex,
 ];

@@ -26,6 +26,7 @@ import {
     getPoolAddress,
     RemoveLiquidityInput,
     InputAmount,
+    PoolType,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import { RemoveLiquidityTxInput } from './lib/utils/types';
@@ -270,7 +271,7 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'PHANTOM_STABLE',
+            type: PoolType.ComposableStable,
             tokens,
         };
     }

@@ -11,6 +11,7 @@ import { PoolStateInput } from '../types';
 import { getSortedTokens } from '../utils/getSortedTokens';
 import { RemoveLiquidityComposableStable } from './composable-stable/removeLiquidityComposableStable';
 import { InputValidator } from '../inputValidator/inputValidator';
+import { PoolType } from '../../types';
 
 export class RemoveLiquidity {
     private readonly removeLiquidityTypes: Record<string, RemoveLiquidityBase> =
@@ -22,12 +23,11 @@ export class RemoveLiquidity {
         const { customRemoveLiquidityTypes } = config || {};
         this.removeLiquidityTypes = {
             //GYRO2, GYRO3, GYROE only support Remove Liquidity Proportional(1 - EXACT_BPT_IN_FOR_TOKENS_OUT)
-            GYRO2: new RemoveLiquidityWeighted(),
-            GYRO3: new RemoveLiquidityWeighted(),
-            GYROE: new RemoveLiquidityWeighted(),
-            WEIGHTED: new RemoveLiquidityWeighted(),
-            // PHANTOM_STABLE === ComposableStables in API
-            PHANTOM_STABLE: new RemoveLiquidityComposableStable(),
+            [PoolType.Gyro2]: new RemoveLiquidityWeighted(),
+            [PoolType.Gyro3]: new RemoveLiquidityWeighted(),
+            [PoolType.GyroE]: new RemoveLiquidityWeighted(),
+            [PoolType.Weighted]: new RemoveLiquidityWeighted(),
+            [PoolType.ComposableStable]: new RemoveLiquidityComposableStable(),
             // custom remove liquidity types take precedence over base types
             ...customRemoveLiquidityTypes,
         };
