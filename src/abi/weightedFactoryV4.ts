@@ -270,4 +270,4 @@ export const weightedFactoryV4Abi = [
         stateMutability: 'view',
         type: 'function',
     },
-];
+] as const;

@@ -7,6 +7,12 @@ export const HUNDRED_WAD = 100000000000000000000n;
 
 export const abs = (n: bigint): bigint => (n < 0n ? -n : n);
 
+export const min = (values: bigint[]): bigint =>
+    values.reduce((a, b) => (a < b ? a : b));
+
+export const max = (values: bigint[]): bigint =>
+    values.reduce((a, b) => (a > b ? a : b));
+
 const _require = (b: boolean, message: string) => {
     if (!b) throw new Error(message);
 };
