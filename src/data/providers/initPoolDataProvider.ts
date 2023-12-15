@@ -7,7 +7,7 @@ import {
     http,
 } from 'viem';
 import { CHAINS } from '../../utils';
-import { InputAmountInit, PoolType } from '../../types';
+import { InputAmountInit } from '../../types';
 import { PoolStateInput } from '../../entities';
 import { sortTokensByAddress } from '../../utils/tokens';
 
