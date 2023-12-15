@@ -51,20 +51,22 @@ export class InitPoolDataProvider {
             publicClient: this.client,
         });
 
-        const poolTokens = amounts.map(({ address, decimals }, index) => ({
-            address: address.toLowerCase() as Address,
-            decimals,
-            index: index + 1,
-        }));
+        const poolTokens = sortTokensByAddress(amounts).map(
+            ({ address, decimals }, index) => ({
+                address: address.toLowerCase() as Address,
+                decimals,
+                index,
+            }),
+        );
 
         const poolTokensWithBpt = sortTokensByAddress([
-            {
-                address: poolAddress.toLowerCase() as Address,
-                decimals: 18,
-                index: 0,
-            },
-            ...poolTokens,
-        ]);
+            ...amounts,
+            { address: poolAddress.toLowerCase() as Address, decimals: 18 },
+        ]).map(({ address, decimals }, index) => ({
+            address: address.toLowerCase() as Address,
+            decimals,
+            index,
+        }));
 
         const tokensPerPoolType = {
             [PoolType.Weighted]: poolTokens,
