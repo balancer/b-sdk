@@ -2,6 +2,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
+    Address,
+    Client,
+    PublicActions,
+    TestActions,
+    WalletActions,
     createTestClient,
     http,
     publicActions,
@@ -10,16 +15,16 @@ import {
 } from 'viem';
 import { CreatePoolComposableStableInput } from '../src/entities/createPool/types';
 import { CreatePool } from '../src/entities/createPool/createPool';
-import {
-    ANVIL_NETWORKS,
-    startFork,
-    stopAnvilForks,
-} from '../test/anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
 import { CHAINS, COMPOSABLE_STABLE_POOL_FACTORY, ChainId } from '../src';
 import { findEventInReceiptLogs } from '../test/lib/utils/findEventInReceiptLogs';
 import { composableStableFactoryV5Abi } from '../src/abi/composableStableFactoryV5';
 
-const createPool = async (stopForkAfterExecution = true) => {
+const createPoolComposableStable = async (): Promise<{
+    poolAddress: Address;
+    rpcUrl: string;
+    client: Client & PublicActions & WalletActions & TestActions;
+}> => {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
     const chainId = ChainId.MAINNET;
 
@@ -77,11 +82,10 @@ const createPool = async (stopForkAfterExecution = true) => {
     const {
         args: { pool: poolAddress },
     } = poolCreatedEvent;
-    if (stopForkAfterExecution) {
-        await stopAnvilForks();
-    }
-    console.log('Created pool Address: ', poolAddress);
-    return poolAddress;
+
+    console.log('Created Pool Address: ', poolAddress);
+    
+    return { poolAddress, rpcUrl, client };
 };
 
-createPool();
+export default createPoolComposableStable;

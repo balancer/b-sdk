@@ -1,5 +1,9 @@
 import { Address } from 'viem';
-import { AddLiquidityBaseInput, AddLiquidityBuildOutput, AddLiquidityKind } from '../addLiquidity/types';
+import {
+    AddLiquidityBaseInput,
+    AddLiquidityBuildOutput,
+    AddLiquidityKind,
+} from '../addLiquidity/types';
 import { InputAmountInit } from '../../types';
 import { PoolState } from '../types';
 
@@ -12,7 +16,7 @@ export type InitPoolBuildOutput = Omit<
     'minBptOut' | 'maxAmountsIn'
 >;
 
-export type InitPoolInput = AddLiquidityBaseInput & {
+export type InitPoolInput = Omit<AddLiquidityBaseInput, 'rpcUrl'> & {
     sender: Address;
     recipient: Address;
     amountsIn: InputAmountInit[];
