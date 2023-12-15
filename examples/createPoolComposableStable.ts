@@ -16,7 +16,12 @@ import {
 import { CreatePoolComposableStableInput } from '../src/entities/createPool/types';
 import { CreatePool } from '../src/entities/createPool/createPool';
 import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
-import { CHAINS, COMPOSABLE_STABLE_POOL_FACTORY, ChainId, PoolType } from '../src';
+import {
+    CHAINS,
+    COMPOSABLE_STABLE_POOL_FACTORY,
+    ChainId,
+    PoolType,
+} from '../src';
 import { findEventInReceiptLogs } from '../test/lib/utils/findEventInReceiptLogs';
 import { composableStableFactoryV5Abi } from '../src/abi/composableStableFactoryV5';
 
@@ -45,15 +50,15 @@ const createPoolComposableStable = async (): Promise<{
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                 rateProvider: zeroAddress,
-                tokenRateCacheDuration: '100',
+                tokenRateCacheDuration: BigInt(100),
             },
             {
                 tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                 rateProvider: zeroAddress,
-                tokenRateCacheDuration: '100',
+                tokenRateCacheDuration: BigInt(100),
             },
         ],
-        amplificationParameter: '62',
+        amplificationParameter: BigInt(62),
         exemptFromYieldProtocolFeeFlag: false,
         swapFee: '0.01',
         poolOwnerAddress: signerAddress, // Balancer DAO Multisig
@@ -84,7 +89,7 @@ const createPoolComposableStable = async (): Promise<{
     } = poolCreatedEvent;
 
     console.log('Created Pool Address: ', poolAddress);
-    
+
     return { poolAddress, rpcUrl, client };
 };
 

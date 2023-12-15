@@ -48,20 +48,20 @@ describe('Create Composable Stable Pool tests', () => {
                 {
                     tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                     rateProvider: zeroAddress,
-                    tokenRateCacheDuration: '100',
+                    tokenRateCacheDuration: BigInt(100),
                 },
                 {
                     tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                     rateProvider: zeroAddress,
-                    tokenRateCacheDuration: '100',
+                    tokenRateCacheDuration: BigInt(100),
                 },
                 {
                     tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
                     rateProvider: zeroAddress,
-                    tokenRateCacheDuration: '100',
+                    tokenRateCacheDuration: BigInt(100),
                 },
             ],
-            amplificationParameter: '67',
+            amplificationParameter: BigInt(67),
             exemptFromYieldProtocolFeeFlag: false,
             swapFee: '0.01',
             poolOwnerAddress: txInput.testAddress, // Balancer DAO Multisig
@@ -76,7 +76,7 @@ describe('Create Composable Stable Pool tests', () => {
     });
 
     test('Amplification Parameter 0, expects error', async () => {
-        const amplificationParameter = '0';
+        const amplificationParameter = BigInt(0);
         await expect(() =>
             doCreatePool({
                 ...txInput,
@@ -94,17 +94,17 @@ describe('Create Composable Stable Pool tests', () => {
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                 rateProvider: zeroAddress,
-                tokenRateCacheDuration: '100',
+                tokenRateCacheDuration: BigInt(100),
             },
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                 rateProvider: zeroAddress,
-                tokenRateCacheDuration: '100',
+                tokenRateCacheDuration: BigInt(100),
             },
             {
                 tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
                 rateProvider: zeroAddress,
-                tokenRateCacheDuration: '100',
+                tokenRateCacheDuration: BigInt(100),
             },
         ];
         await expect(() =>

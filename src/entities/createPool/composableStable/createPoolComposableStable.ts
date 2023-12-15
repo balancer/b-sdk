@@ -39,16 +39,16 @@ export class CreatePoolComposableStable implements CreatePoolBase {
                     acc[2].push(curr.tokenRateCacheDuration);
                     return acc;
                 },
-                [[], [], []] as [Address[], Address[], string[]],
+                [[], [], []] as [Address[], Address[], bigint[]],
             );
 
         return [
             input.name || input.symbol,
             input.symbol,
             tokens,
-            BigInt(input.amplificationParameter),
+            input.amplificationParameter,
             rateProviders,
-            tokenRateCacheDurations.map(BigInt),
+            tokenRateCacheDurations,
             input.exemptFromYieldProtocolFeeFlag,
             parseEther(input.swapFee),
             input.poolOwnerAddress,

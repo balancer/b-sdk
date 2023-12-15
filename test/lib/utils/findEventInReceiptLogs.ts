@@ -8,7 +8,7 @@ export const findEventInReceiptLogs = ({
 }: {
     receipt: TransactionReceipt;
     to: Address;
-    abi: unknown[];
+    abi: readonly unknown[];
     eventName: string;
 }): { eventName: string; args: any } => {
     const event = receipt.logs
