@@ -1,5 +1,16 @@
 # @balancer/sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- b8523b1: Add create pool for composable stable pools
+- 43715b5: Add OP native asset and remove unused constant STELLATE_URL
+
+### Patch Changes
+
+- 1e3ad86: expose priceImpact amount
+
 ## 0.4.0
 
 ### Minor Changes
