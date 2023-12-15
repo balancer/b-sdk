@@ -7,7 +7,7 @@ import {
     http,
 } from 'viem';
 import { CHAINS } from '../../utils';
-import { InputAmountInit } from '../../types';
+import { InputAmountInit, PoolType } from '../../types';
 import { PoolStateInput } from '../../entities';
 import { sortTokensByAddress } from '../../utils/tokens';
 
@@ -42,7 +42,7 @@ export class InitPoolDataProvider {
 
     public async getInitPoolData(
         poolAddress: Address,
-        poolType: string,
+        poolType: PoolType,
         amounts: InputAmountInit[],
     ): Promise<PoolStateInput> {
         const poolContract = getContract({
@@ -51,25 +51,26 @@ export class InitPoolDataProvider {
             publicClient: this.client,
         });
 
-        const poolTokens = amounts
-            .map(({ address, decimals }, index) => ({
+        const poolTokens = sortTokensByAddress(amounts).map(
+            ({ address, decimals }, index) => ({
                 address: address.toLowerCase() as Address,
                 decimals,
-                index: index + 1,
-            }));
+                index,
+            }),
+        );
 
         const poolTokensWithBpt = sortTokensByAddress([
-            {
-                address: poolAddress.toLowerCase() as Address,
-                decimals: 18,
-                index: 0,
-            },
-            ...poolTokens,
-        ]);
+            ...amounts,
+            { address: poolAddress.toLowerCase() as Address, decimals: 18 },
+        ]).map(({ address, decimals }, index) => ({
+            address: address.toLowerCase() as Address,
+            decimals,
+            index,
+        }));
 
         const tokensPerPoolType = {
-            WEIGHTED: poolTokens,
-            PHANTOM_STABLE: poolTokensWithBpt,
+            [PoolType.Weighted]: poolTokens,
+            [PoolType.ComposableStable]: poolTokensWithBpt,
         };
 
         try {
@@ -77,8 +78,8 @@ export class InitPoolDataProvider {
             return {
                 id: poolId,
                 address: poolAddress.toLowerCase() as Address,
-                type: poolType.toUpperCase(),
-                tokens: tokensPerPoolType[poolType.toUpperCase()],
+                type: poolType,
+                tokens: tokensPerPoolType[poolType],
             };
         } catch (e) {
             console.warn(e);
