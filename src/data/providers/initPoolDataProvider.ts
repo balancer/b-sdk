@@ -42,7 +42,7 @@ export class InitPoolDataProvider {
 
     public async getInitPoolData(
         poolAddress: Address,
-        poolType: PoolType,
+        poolType: string,
         amounts: InputAmountInit[],
     ): Promise<PoolStateInput> {
         const poolContract = getContract({
@@ -69,8 +69,8 @@ export class InitPoolDataProvider {
         }));
 
         const tokensPerPoolType = {
-            [PoolType.Weighted]: poolTokens,
-            [PoolType.ComposableStable]: poolTokensWithBpt,
+            WEIGHTED: poolTokens,
+            PHANTOM_STABLE: poolTokensWithBpt,
         };
 
         try {
