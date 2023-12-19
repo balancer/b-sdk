@@ -19,7 +19,7 @@ import {
     Slippage,
     Address,
     Hex,
-    PoolStateInput,
+    PoolState,
     CHAINS,
     ChainId,
     getPoolAddress,
@@ -45,14 +45,14 @@ const poolId =
 
 describe('add liquidity weighted test', () => {
     let txInput: AddLiquidityTxInput;
-    let poolStateInput: PoolStateInput;
+    let poolState: PoolState;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolStateInput = await api.getPool(poolId);
+        poolState = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -66,7 +66,7 @@ describe('add liquidity weighted test', () => {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateInput,
+            poolState,
             testAddress: '0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f', // Balancer DAO Multisig
             addLiquidityInput: {} as AddLiquidityInput,
         };
@@ -77,12 +77,12 @@ describe('add liquidity weighted test', () => {
             txInput.client,
             txInput.testAddress,
             [
-                ...txInput.poolStateInput.tokens.map((t) => t.address),
-                txInput.poolStateInput.address,
+                ...txInput.poolState.tokens.map((t) => t.address),
+                txInput.poolState.address,
             ],
             undefined, // TODO: hardcode these values to improve test performance
             [
-                ...txInput.poolStateInput.tokens.map((t) =>
+                ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
                 ),
                 parseUnits('100', 18),
@@ -94,7 +94,7 @@ describe('add liquidity weighted test', () => {
         let input: Omit<AddLiquidityUnbalancedInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
-            amountsIn = txInput.poolStateInput.tokens.map((t) => ({
+            amountsIn = txInput.poolState.tokens.map((t) => ({
                 rawAmount: parseUnits('0.001', t.decimals),
                 decimals: t.decimals,
                 address: t.address,
@@ -117,7 +117,7 @@ describe('add liquidity weighted test', () => {
             });
             assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -136,7 +136,7 @@ describe('add liquidity weighted test', () => {
             });
             assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -150,7 +150,7 @@ describe('add liquidity weighted test', () => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolStateInput.address,
+                address: poolState.address,
             };
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
             addLiquidityInput = {
@@ -170,7 +170,7 @@ describe('add liquidity weighted test', () => {
 
             assertAddLiquiditySingleToken(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -188,7 +188,7 @@ describe('add liquidity weighted test', () => {
 
             assertAddLiquiditySingleToken(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 {
                     ...addLiquidityInput,
                     useNativeAssetAsWrappedAmountIn: true,
@@ -205,7 +205,7 @@ describe('add liquidity weighted test', () => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolStateInput.address,
+                address: poolState.address,
             };
             addLiquidityInput = {
                 bptOut,
@@ -222,7 +222,7 @@ describe('add liquidity weighted test', () => {
 
             assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -239,7 +239,7 @@ describe('add liquidity weighted test', () => {
 
             assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 {
                     ...addLiquidityInput,
                     useNativeAssetAsWrappedAmountIn: true,
@@ -254,7 +254,7 @@ describe('add liquidity weighted test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolStateInput> {
+    public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
                 address:

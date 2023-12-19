@@ -16,7 +16,7 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
     Slippage,
-    PoolStateInput,
+    PoolState,
     RemoveLiquidity,
     Address,
     Hex,
@@ -43,7 +43,7 @@ const poolId =
 
 describe('GyroE V2 remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
-    let poolInput: PoolStateInput;
+    let poolInput: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
@@ -63,7 +63,7 @@ describe('GyroE V2 remove liquidity test', () => {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateInput: poolInput,
+            poolState: poolInput,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
@@ -73,7 +73,7 @@ describe('GyroE V2 remove liquidity test', () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [txInput.poolStateInput.address],
+            [txInput.poolState.address],
             [0],
             [parseUnits('1000', 18)],
         );
@@ -102,7 +102,7 @@ describe('GyroE V2 remove liquidity test', () => {
 
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -119,7 +119,7 @@ describe('GyroE V2 remove liquidity test', () => {
             });
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -184,7 +184,7 @@ describe('GyroE V2 remove liquidity test', () => {
 
 /*********************** Mock To Represent API Requirements **********************/
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolStateInput> {
+    public async getPool(id: Hex): Promise<PoolState> {
         return {
             id,
             address: getPoolAddress(id) as Address,

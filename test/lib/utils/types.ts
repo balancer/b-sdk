@@ -5,7 +5,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidity,
     AddLiquidity,
-    PoolStateInput,
+    PoolState,
     Slippage,
 } from '../../../src';
 import { CreatePool } from '../../../src/entities/createPool/createPool';
@@ -19,7 +19,7 @@ export type AddLiquidityTxInput = {
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
     slippage: Slippage;
-    poolStateInput: PoolStateInput;
+    poolState: PoolState;
     testAddress: Address;
 };
 
@@ -36,7 +36,7 @@ export type RemoveLiquidityTxInput = {
     removeLiquidity: RemoveLiquidity;
     removeLiquidityInput: RemoveLiquidityInput;
     slippage: Slippage;
-    poolStateInput: PoolStateInput;
+    poolState: PoolState;
     testAddress: Address;
 };
 

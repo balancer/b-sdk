@@ -2,7 +2,7 @@ import { AddLiquidityInput } from '../../addLiquidity';
 import { CreatePoolComposableStableInput } from '../../createPool/types';
 import { InitPoolInput } from '../../initPool/types';
 import { RemoveLiquidityInput } from '../../removeLiquidity';
-import { PoolStateInput } from '../../types';
+import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
     validateCreatePoolTokens,
@@ -14,7 +14,7 @@ import {
 export class InputValidatorComposableStable implements InputValidatorBase {
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput | InitPoolInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): void {
         validatePoolHasBpt(poolState);
         validateTokensAddLiquidity(addLiquidityInput, poolState);
@@ -22,7 +22,7 @@ export class InputValidatorComposableStable implements InputValidatorBase {
 
     validateRemoveLiquidity(
         input: RemoveLiquidityInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): void {
         validatePoolHasBpt(poolState);
         validateTokensRemoveLiquidity(input, poolState);

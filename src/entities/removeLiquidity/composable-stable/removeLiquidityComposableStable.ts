@@ -19,17 +19,18 @@ import {
 import { RemoveLiquidityAmounts, PoolState } from '../../types';
 import { doRemoveLiquidityQuery } from '../../utils/doRemoveLiquidityQuery';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
-import { getAmounts } from '../../utils';
+import { getAmounts, getSortedTokens } from '../../utils';
 
 export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
         );
-        const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
+        const amounts = this.getAmountsQuery(sortedTokens, input, bptIndex);
         const amountsWithoutBpt = {
             ...amounts,
             minAmountsOut: [
@@ -47,7 +48,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             chainId: input.chainId,
             toNativeAsset: !!input.toNativeAsset,
             poolId: poolState.id,
-            sortedTokens: poolState.tokens,
+            sortedTokens,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,

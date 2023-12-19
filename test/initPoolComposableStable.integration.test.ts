@@ -12,7 +12,7 @@ import {
     Address,
     CHAINS,
     ChainId,
-    PoolStateInput,
+    PoolState,
     PoolType,
     Slippage,
 } from '../src';
@@ -36,7 +36,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
     let createTxInput: CreatePoolTxInput;
     let initPoolTxInput: InitPoolTxInput;
     let initPoolInput: InitPoolInput;
-    let poolState: PoolStateInput;
+    let poolState: PoolState;
     beforeAll(async () => {
         const client = createTestClient({
             mode: 'anvil',
@@ -105,7 +105,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             testAddress: signerAddress,
             initPoolInput: {} as InitPoolInput,
             slippage: Slippage.fromPercentage('0.01'),
-            poolStateInput: {} as PoolStateInput,
+            poolState: {} as PoolState,
         };
 
         poolState = await initPoolDataProvider.getInitPoolData(
@@ -126,7 +126,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
         const addLiquidityOutput = await doInitPool({
             ...initPoolTxInput,
             initPoolInput,
-            poolStateInput: poolState,
+            poolState: poolState,
         });
 
         assertInitPool(initPoolInput, addLiquidityOutput);

@@ -17,7 +17,7 @@ import {
     AddLiquidityKind,
     Slippage,
     Hex,
-    PoolStateInput,
+    PoolState,
     CHAINS,
     ChainId,
     AddLiquidity,
@@ -44,14 +44,14 @@ const poolId =
 
 describe('Gyro3 add liquidity test', () => {
     let txInput: AddLiquidityTxInput;
-    let poolStateInput: PoolStateInput;
+    let poolState: PoolState;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolStateInput = await api.getPool(poolId);
+        poolState = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -65,7 +65,7 @@ describe('Gyro3 add liquidity test', () => {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateInput,
+            poolState,
             testAddress: '0xe84f75fc9caa49876d0ba18d309da4231d44e94d', // MATIC Holder Wallet, must hold amount of matic to approve tokens
             addLiquidityInput: {} as AddLiquidityInput,
         };
@@ -76,12 +76,12 @@ describe('Gyro3 add liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [
-                ...txInput.poolStateInput.tokens.map((t) => t.address),
-                txInput.poolStateInput.address,
+                ...txInput.poolState.tokens.map((t) => t.address),
+                txInput.poolState.address,
             ],
             [0, 51, 0, 0],
             [
-                ...txInput.poolStateInput.tokens.map((t) =>
+                ...txInput.poolState.tokens.map((t) =>
                     parseUnits('10000', t.decimals),
                 ),
                 parseUnits('10000', 18),
@@ -95,7 +95,7 @@ describe('Gyro3 add liquidity test', () => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolStateInput.address,
+                address: poolState.address,
             };
             addLiquidityInput = {
                 bptOut,
@@ -112,7 +112,7 @@ describe('Gyro3 add liquidity test', () => {
 
             assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -125,7 +125,7 @@ describe('Gyro3 add liquidity test', () => {
         let input: Omit<AddLiquidityUnbalancedInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
-            amountsIn = txInput.poolStateInput.tokens.map((t) => ({
+            amountsIn = txInput.poolState.tokens.map((t) => ({
                 rawAmount: parseUnits('1', t.decimals),
                 decimals: t.decimals,
                 address: t.address,
@@ -158,7 +158,7 @@ describe('Gyro3 add liquidity test', () => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolStateInput.address,
+                address: poolState.address,
             };
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
             addLiquidityInput = {
@@ -186,7 +186,7 @@ describe('Gyro3 add liquidity test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolStateInput> {
+    public async getPool(id: Hex): Promise<PoolState> {
         return {
             id,
             address: getPoolAddress(id) as Address,

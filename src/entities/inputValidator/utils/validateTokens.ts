@@ -4,12 +4,12 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
 } from '../../removeLiquidity';
-import { PoolStateInput } from '../../types';
+import { PoolState } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
 export const validateTokensAddLiquidity = (
     addLiquidityInput: AddLiquidityInput | InitPoolInput,
-    poolState: PoolStateInput,
+    poolState: PoolState,
 ) => {
     switch (addLiquidityInput.kind) {
         case AddLiquidityKind.Unbalanced:
@@ -35,7 +35,7 @@ export const validateTokensAddLiquidity = (
 
 export const validateTokensRemoveLiquidity = (
     removeLiquidityInput: RemoveLiquidityInput,
-    poolState: PoolStateInput,
+    poolState: PoolState,
 ) => {
     switch (removeLiquidityInput.kind) {
         case RemoveLiquidityKind.Unbalanced:
@@ -59,7 +59,7 @@ export const validateTokensRemoveLiquidity = (
     }
 };
 
-export const validatePoolHasBpt = (poolState: PoolStateInput) => {
+export const validatePoolHasBpt = (poolState: PoolState) => {
     const { tokens, address } = poolState;
     const bptIndex = tokens.findIndex((t) => t.address === address);
     if (bptIndex < 0) {

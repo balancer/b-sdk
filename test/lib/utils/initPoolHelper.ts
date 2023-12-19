@@ -1,4 +1,4 @@
-import { InitPoolBuildOutput, PoolStateInput } from '../../../src';
+import { InitPoolBuildOutput, PoolState } from '../../../src';
 import { InitPool } from '../../../src/entities/initPool/initPool';
 import { InitPoolInput } from '../../../src/entities/initPool/types';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
@@ -8,17 +8,17 @@ import { InitPoolTxInput } from './types';
 function sdkInitPool({
     initPool,
     initPoolInput: addLiquidityInput,
-    poolStateInput,
+    poolState,
 }: {
     initPool: InitPool;
     initPoolInput: InitPoolInput;
-    poolStateInput: PoolStateInput;
+    poolState: PoolState;
 }): {
     initPoolBuildOutput: InitPoolBuildOutput;
 } {
     const initPoolBuildOutput = initPool.buildCall(
         addLiquidityInput,
-        poolStateInput,
+        poolState,
     );
 
     return {
@@ -27,16 +27,15 @@ function sdkInitPool({
 }
 
 export async function doInitPool(txInput: InitPoolTxInput) {
-    const { initPool, poolStateInput, initPoolInput, testAddress, client } =
-        txInput;
+    const { initPool, poolState, initPoolInput, testAddress, client } = txInput;
 
     const { initPoolBuildOutput } = sdkInitPool({
         initPool,
         initPoolInput,
-        poolStateInput,
+        poolState,
     });
 
-    const tokens = getTokensForBalanceCheck(poolStateInput);
+    const tokens = getTokensForBalanceCheck(poolState);
 
     // send transaction and calculate balance changes
     const txOutput = await sendTransactionGetBalances(

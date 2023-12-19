@@ -16,6 +16,7 @@ import { AddLiquidityAmounts, PoolState } from '../../types';
 import {
     doAddLiquidityQuery,
     getAmounts,
+    getSortedTokens,
     parseAddLiquidityArgs,
 } from '../../utils';
 
@@ -24,7 +25,8 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<AddLiquidityWeightedQueryOutput> {
-        const amounts = this.getAmountsQuery(poolState.tokens, input);
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        const amounts = this.getAmountsQuery(sortedTokens, input);
 
         const userData = WeightedEncoder.encodeAddLiquidityUserData(
             input.kind,
@@ -35,7 +37,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             useNativeAssetAsWrappedAmountIn:
                 !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
-            sortedTokens: poolState.tokens,
+            sortedTokens,
             poolId: poolState.id,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,

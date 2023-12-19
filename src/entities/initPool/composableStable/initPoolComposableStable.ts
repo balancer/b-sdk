@@ -2,13 +2,18 @@ import { Address, encodeFunctionData } from 'viem';
 import { sortTokensByAddress } from '../../../utils/tokens';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
 import { InitPoolAmountsComposableStable, PoolState } from '../../types';
-import { getAmounts, parseAddLiquidityArgs } from '../../utils';
+import {
+    getAmounts,
+    getSortedTokens,
+    parseAddLiquidityArgs,
+} from '../../utils';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../types';
 import { vaultAbi } from '../../../abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
 
 export class InitPoolComposableStable implements InitPoolBase {
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = this.getAmounts(input, poolState);
 
         const userData =
@@ -17,7 +22,7 @@ export class InitPoolComposableStable implements InitPoolBase {
         const { args } = parseAddLiquidityArgs({
             ...input,
             poolId: poolState.id,
-            sortedTokens: sortTokensByAddress(poolState.tokens),
+            sortedTokens,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
             fromInternalBalance: input.fromInternalBalance ?? false,

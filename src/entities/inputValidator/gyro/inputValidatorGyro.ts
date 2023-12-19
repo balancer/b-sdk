@@ -4,7 +4,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
 } from '../../removeLiquidity';
-import { PoolStateInput } from '../../types';
+import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
     validateTokensAddLiquidity,
@@ -20,7 +20,7 @@ export class InputValidatorGyro implements InputValidatorBase {
 
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): void {
         if (addLiquidityInput.kind !== AddLiquidityKind.Proportional) {
             throw new Error(
@@ -32,7 +32,7 @@ export class InputValidatorGyro implements InputValidatorBase {
 
     validateRemoveLiquidity(
         removeLiquidityInput: RemoveLiquidityInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): void {
         if (removeLiquidityInput.kind !== RemoveLiquidityKind.Proportional) {
             throw new Error(

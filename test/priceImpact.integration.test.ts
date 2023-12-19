@@ -7,7 +7,7 @@ import {
     AddLiquidityKind,
     Address,
     Hex,
-    PoolStateInput,
+    PoolState,
     ChainId,
     getPoolAddress,
     InputAmount,
@@ -33,14 +33,14 @@ const sfrxETH = '0xac3e018457b222d93114458476f3e3416abbe38f' as Address;
 const rETH = '0xae78736cd615f374d3085123a210448e74fc6393' as Address;
 
 describe('price impact', () => {
-    let poolStateInput: PoolStateInput;
+    let poolState: PoolState;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolStateInput = await api.getPool(poolId);
+        poolState = await api.getPool(poolId);
     });
 
     describe('add liquidity single token', () => {
@@ -50,7 +50,7 @@ describe('price impact', () => {
             bptOut = {
                 rawAmount: 113693119026587239920n,
                 decimals: 18,
-                address: poolStateInput.address,
+                address: poolState.address,
             };
             input = {
                 chainId,
@@ -63,7 +63,7 @@ describe('price impact', () => {
         test('ABA close to Spot Price', async () => {
             const priceImpactABA = await PriceImpact.addLiquiditySingleToken(
                 input,
-                poolStateInput,
+                poolState,
             );
             const priceImpactSpot = PriceImpactAmount.fromDecimal(
                 '0.000315905711879544', // from previous SDK/SOR
@@ -79,7 +79,7 @@ describe('price impact', () => {
         let amountsIn: InputAmount[];
         let input: AddLiquidityUnbalancedInput;
         beforeAll(() => {
-            amountsIn = poolStateInput.tokens.map((t, i) => {
+            amountsIn = poolState.tokens.map((t, i) => {
                 return {
                     rawAmount:
                         i === 0
@@ -100,7 +100,7 @@ describe('price impact', () => {
         test('ABA close to Spot Price', async () => {
             const priceImpactABA = await PriceImpact.addLiquidityUnbalanced(
                 input,
-                poolStateInput,
+                poolState,
             );
             const priceImpactSpot = PriceImpactAmount.fromDecimal(
                 '0.001395038034686279', // from previous SDK/SOR
@@ -174,7 +174,7 @@ describe('price impact', () => {
                 bptIn: {
                     rawAmount: parseEther('100'),
                     decimals: 18,
-                    address: poolStateInput.address,
+                    address: poolState.address,
                 },
                 tokenOut: wstETH,
                 kind: RemoveLiquidityKind.SingleToken,
@@ -183,7 +183,7 @@ describe('price impact', () => {
         test('ABA close to Spot Price', async () => {
             const priceImpactABA = await PriceImpact.removeLiquidity(
                 input,
-                poolStateInput,
+                poolState,
             );
             const priceImpactSpot = PriceImpactAmount.fromDecimal(
                 '0.000314661068454677', // from previous SDK/SOR
@@ -202,7 +202,7 @@ describe('price impact', () => {
             input = {
                 chainId,
                 rpcUrl,
-                amountsOut: poolStateInput.tokens.map((t, i) => {
+                amountsOut: poolState.tokens.map((t, i) => {
                     return {
                         rawAmount: parseEther(amounts[i]),
                         decimals: t.decimals,
@@ -215,7 +215,7 @@ describe('price impact', () => {
         test('ABA close to Spot Price', async () => {
             const priceImpactABA = await PriceImpact.removeLiquidity(
                 input,
-                poolStateInput,
+                poolState,
             );
             const priceImpactSpot = PriceImpactAmount.fromDecimal(
                 '0.000478949021982815', // from previous SDK/SOR
@@ -231,7 +231,7 @@ describe('price impact', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolStateInput> {
+    public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
                 address: getPoolAddress(id) as Address,

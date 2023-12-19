@@ -19,7 +19,7 @@ import {
     Slippage,
     Address,
     Hex,
-    PoolStateInput,
+    PoolState,
     CHAINS,
     ChainId,
     getPoolAddress,
@@ -45,14 +45,14 @@ const poolId =
 
 describe('add liquidity composable stable test', () => {
     let txInput: AddLiquidityTxInput;
-    let poolStateInput: PoolStateInput;
+    let poolState: PoolState;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolStateInput = await api.getPool(poolId);
+        poolState = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -66,7 +66,7 @@ describe('add liquidity composable stable test', () => {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateInput: poolStateInput,
+            poolState: poolState,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             addLiquidityInput: {} as AddLiquidityInput,
         };
@@ -76,10 +76,10 @@ describe('add liquidity composable stable test', () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [...txInput.poolStateInput.tokens.map((t) => t.address)],
+            [...txInput.poolState.tokens.map((t) => t.address)],
             [0, 0, 3],
             [
-                ...txInput.poolStateInput.tokens.map((t) =>
+                ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
                 ),
             ],
@@ -90,10 +90,10 @@ describe('add liquidity composable stable test', () => {
         let input: Omit<AddLiquidityUnbalancedInput, 'amountsIn'>;
         let amountsIn: InputAmount[];
         beforeAll(() => {
-            const bptIndex = txInput.poolStateInput.tokens.findIndex(
-                (t) => t.address === txInput.poolStateInput.address,
+            const bptIndex = txInput.poolState.tokens.findIndex(
+                (t) => t.address === txInput.poolState.address,
             );
-            amountsIn = txInput.poolStateInput.tokens
+            amountsIn = txInput.poolState.tokens
                 .map((t) => ({
                     rawAmount: parseUnits('1', t.decimals),
                     decimals: t.decimals,
@@ -117,7 +117,7 @@ describe('add liquidity composable stable test', () => {
             });
             assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -136,7 +136,7 @@ describe('add liquidity composable stable test', () => {
             });
             assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -150,7 +150,7 @@ describe('add liquidity composable stable test', () => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolStateInput.address,
+                address: poolState.address,
             };
             const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
             input = {
@@ -169,7 +169,7 @@ describe('add liquidity composable stable test', () => {
 
             assertAddLiquiditySingleToken(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 input,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -188,7 +188,7 @@ describe('add liquidity composable stable test', () => {
 
             assertAddLiquiditySingleToken(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -202,7 +202,7 @@ describe('add liquidity composable stable test', () => {
             const bptOut: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolStateInput.address,
+                address: poolState.address,
             };
             input = {
                 bptOut,
@@ -219,7 +219,7 @@ describe('add liquidity composable stable test', () => {
 
             assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 input,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -236,7 +236,7 @@ describe('add liquidity composable stable test', () => {
             });
             assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
@@ -248,7 +248,7 @@ describe('add liquidity composable stable test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolStateInput> {
+    public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
                 address:

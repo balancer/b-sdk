@@ -16,7 +16,7 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
     Slippage,
-    PoolStateInput,
+    PoolState,
     RemoveLiquidity,
     Address,
     Hex,
@@ -43,7 +43,7 @@ const poolId =
 
 describe('GyroE V1 remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
-    let poolInput: PoolStateInput;
+    let poolInput: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
@@ -63,7 +63,7 @@ describe('GyroE V1 remove liquidity test', () => {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateInput: poolInput,
+            poolState: poolInput,
             testAddress: '0xe84f75fc9caa49876d0ba18d309da4231d44e94d', // MATIC Holder Wallet, must hold amount of matic to approve tokens
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
@@ -73,7 +73,7 @@ describe('GyroE V1 remove liquidity test', () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [txInput.poolStateInput.address],
+            [txInput.poolState.address],
             [0],
             [parseUnits('1000', 18)],
         );
@@ -102,7 +102,7 @@ describe('GyroE V1 remove liquidity test', () => {
 
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -133,7 +133,9 @@ describe('GyroE V1 remove liquidity test', () => {
             };
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
-            ).rejects.toThrowError(InputValidatorGyro.removeLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 
@@ -157,7 +159,9 @@ describe('GyroE V1 remove liquidity test', () => {
         test('must throw remove liquidity kind not supported error', async () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput: input }),
-            ).rejects.toThrowError(InputValidatorGyro.removeLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 });
@@ -165,7 +169,7 @@ describe('GyroE V1 remove liquidity test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolStateInput> {
+    public async getPool(id: Hex): Promise<PoolState> {
         return {
             id,
             address: getPoolAddress(id) as Address,

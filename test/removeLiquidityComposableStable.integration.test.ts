@@ -17,7 +17,7 @@ import {
     RemoveLiquidityKind,
     Slippage,
     Token,
-    PoolStateInput,
+    PoolState,
     RemoveLiquidity,
     Address,
     Hex,
@@ -46,7 +46,7 @@ const poolId =
 describe('composable stable remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
     let bptToken: Token;
-    let poolInput: PoolStateInput;
+    let poolInput: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
@@ -66,7 +66,7 @@ describe('composable stable remove liquidity test', () => {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateInput: poolInput,
+            poolState: poolInput,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
@@ -77,7 +77,7 @@ describe('composable stable remove liquidity test', () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [txInput.poolStateInput.address],
+            [txInput.poolState.address],
             [0], // TODO: hardcode these values to improve test performance
             [parseUnits('1000', 18)],
         );
@@ -87,10 +87,10 @@ describe('composable stable remove liquidity test', () => {
         let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
         let amountsOut: InputAmount[];
         beforeAll(() => {
-            const bptIndex = txInput.poolStateInput.tokens.findIndex(
-                (t) => t.address === txInput.poolStateInput.address,
+            const bptIndex = txInput.poolState.tokens.findIndex(
+                (t) => t.address === txInput.poolState.address,
             );
-            const poolTokensWithoutBpt = txInput.poolStateInput.tokens
+            const poolTokensWithoutBpt = txInput.poolState.tokens
                 .map((t) => new Token(chainId, t.address, t.decimals))
                 .filter((_, index) => index !== bptIndex);
 
@@ -116,7 +116,7 @@ describe('composable stable remove liquidity test', () => {
             });
             assertRemoveLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -134,7 +134,7 @@ describe('composable stable remove liquidity test', () => {
             });
             assertRemoveLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -167,7 +167,7 @@ describe('composable stable remove liquidity test', () => {
 
             assertRemoveLiquiditySingleToken(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -186,7 +186,7 @@ describe('composable stable remove liquidity test', () => {
 
             assertRemoveLiquiditySingleToken(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -217,7 +217,7 @@ describe('composable stable remove liquidity test', () => {
 
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -234,7 +234,7 @@ describe('composable stable remove liquidity test', () => {
             });
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
-                txInput.poolStateInput,
+                txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -246,7 +246,7 @@ describe('composable stable remove liquidity test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 export class MockApi {
-    public async getPool(id: Hex): Promise<PoolStateInput> {
+    public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
                 address:

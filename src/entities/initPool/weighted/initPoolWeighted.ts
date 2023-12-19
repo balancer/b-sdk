@@ -4,14 +4,18 @@ import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../types';
 import { BALANCER_VAULT, ZERO_ADDRESS } from '../../../utils';
 import { sortTokensByAddress } from '../../../utils/tokens';
 import { vaultAbi } from '../../../abi';
-import { getAmounts, parseAddLiquidityArgs } from '../../utils';
+import {
+    getAmounts,
+    getSortedTokens,
+    parseAddLiquidityArgs,
+} from '../../utils';
 import { Token } from '../../token';
 import { WeightedEncoder } from '../../encoders';
 
 export class InitPoolWeighted implements InitPoolBase {
-    
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
-        const amounts = this.getAmounts(input, poolState.tokens);
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        const amounts = this.getAmounts(input, sortedTokens);
         const userData = WeightedEncoder.encodeInitPoolUserData(amounts);
         const { args } = parseAddLiquidityArgs({
             ...input,

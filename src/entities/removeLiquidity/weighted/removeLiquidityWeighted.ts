@@ -20,14 +20,15 @@ import {
 } from '../types';
 import { RemoveLiquidityAmounts, PoolState } from '../../types';
 import { doRemoveLiquidityQuery } from '../../utils/doRemoveLiquidityQuery';
-import { getAmounts } from '../../utils';
+import { getAmounts, getSortedTokens } from '../../utils';
 
 export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
-        const amounts = this.getAmountsQuery(poolState.tokens, input);
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        const amounts = this.getAmountsQuery(sortedTokens, input);
 
         const userData = WeightedEncoder.encodeRemoveLiquidityUserData(
             input.kind,
@@ -39,7 +40,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             chainId: input.chainId,
             toNativeAsset: !!input.toNativeAsset,
             poolId: poolState.id,
-            sortedTokens: poolState.tokens,
+            sortedTokens,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,

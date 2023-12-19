@@ -18,6 +18,7 @@ import {
 import {
     doAddLiquidityQuery,
     getAmounts,
+    getSortedTokens,
     parseAddLiquidityArgs,
 } from '../../utils';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
@@ -31,10 +32,11 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<AddLiquidityComposableStableQueryOutput> {
-        const bptIndex = poolState.tokens.findIndex(
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        const bptIndex = sortedTokens.findIndex(
             (t) => t.address === poolState.address,
         );
-        const amounts = this.getAmountsQuery(poolState.tokens, input, bptIndex);
+        const amounts = this.getAmountsQuery(sortedTokens, input, bptIndex);
 
         const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
             input.kind,
@@ -45,7 +47,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             useNativeAssetAsWrappedAmountIn:
                 !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
-            sortedTokens: poolState.tokens,
+            sortedTokens,
             poolId: poolState.id,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,

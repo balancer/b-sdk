@@ -15,7 +15,7 @@ import {
     RemoveLiquidityUnbalancedInput,
 } from '../removeLiquidity';
 import { TokenAmount } from '../tokenAmount';
-import { PoolStateInput } from '../types';
+import { PoolState } from '../types';
 import { getSortedTokens } from '../utils';
 import { SingleSwap, SwapKind } from '../../types';
 import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
@@ -23,7 +23,7 @@ import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
 export class PriceImpact {
     static addLiquiditySingleToken = async (
         input: AddLiquiditySingleTokenInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within AddLiquidity
 
@@ -60,7 +60,7 @@ export class PriceImpact {
 
     static addLiquidityUnbalanced = async (
         input: AddLiquidityUnbalancedInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within AddLiquidity
 
@@ -197,7 +197,7 @@ export class PriceImpact {
 
     static removeLiquidity = async (
         input: RemoveLiquiditySingleTokenInput | RemoveLiquidityUnbalancedInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within RemoveLiquidity
 

@@ -1,16 +1,8 @@
 import { MinimalToken } from '../data';
 import { Address, Hex } from '../types';
-import { Token } from './token';
 
 // Returned from API and used as input
 export type PoolState = {
-    id: Hex;
-    address: Address;
-    type: string;
-    tokens: Token[];
-};
-
-export type PoolStateInput = {
     id: Hex;
     address: Address;
     type: string;

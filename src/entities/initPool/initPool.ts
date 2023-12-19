@@ -1,7 +1,6 @@
 import { PoolType } from '../../types';
 import { InputValidator } from '../inputValidator/inputValidator';
-import { PoolStateInput } from '../types';
-import { getSortedTokens } from '../utils';
+import { PoolState } from '../types';
 import { InitPoolComposableStable } from './composableStable/initPoolComposableStable';
 import {
     InitPoolBase,
@@ -32,19 +31,8 @@ export class InitPool {
         return this.initPoolTypes[poolType];
     }
 
-    buildCall(
-        input: InitPoolInput,
-        poolState: PoolStateInput,
-    ): InitPoolBuildOutput {
+    buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
         this.inputValidator.validateAddLiquidity(input, poolState);
-        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const mappedPoolState = {
-            ...poolState,
-            tokens: sortedTokens,
-        };
-        return this.getInitPool(poolState.type).buildCall(
-            input,
-            mappedPoolState,
-        );
+        return this.getInitPool(poolState.type).buildCall(input, poolState);
     }
 }
