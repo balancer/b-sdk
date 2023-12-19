@@ -29,7 +29,7 @@ export class Pools {
           }
         }
       }
-      ... on GqlPoolPhantomStable {
+      ... on GqlPoolComposableStable {
         tokens {
           ... on GqlPoolTokenBase {
             address
