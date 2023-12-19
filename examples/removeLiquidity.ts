@@ -103,4 +103,4 @@ const removeLiquidity = async () => {
     );
 };
 
-removeLiquidity();
+export default removeLiquidity;

@@ -1,7 +1,11 @@
 import { encodeAbiParameters } from 'viem';
 import { Address } from '../../types';
 import { AddLiquidityKind } from '../addLiquidity';
-import { AddLiquidityAmounts, RemoveLiquidityAmounts } from '../types';
+import {
+    AddLiquidityAmounts,
+    InitPoolAmountsComposableStable,
+    RemoveLiquidityAmounts,
+} from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity';
 
 export enum ComposableStablePoolJoinKind {
@@ -26,6 +30,15 @@ export class ComposableStableEncoder {
     }
 
     /**
+     * Encodes the User Data for initializing a WeightedPool
+     * @param amounts Amounts of tokens to be added to the pool
+     * @returns
+     */
+    static encodeInitPoolUserData(amounts: InitPoolAmountsComposableStable) {
+        return ComposableStableEncoder.initPool(amounts.amountsIn);
+    }
+
+    /**
      * Encodes the User Data for adding liquidity to a ComposableStablePool
      * @param kind Kind of the Add Liquidity operation: Init, Unbalanced, SingleToken, Proportional
      * @param amounts Amounts of tokens to be added to the pool
@@ -37,8 +50,8 @@ export class ComposableStableEncoder {
     ): Address {
         switch (kind) {
             case AddLiquidityKind.Init:
-                return ComposableStableEncoder.addLiquidityInit(
-                    amounts.maxAmountsInWithoutBpt,
+                throw new Error(
+                    'For this kind use initPool instead of addLiquidity',
                 );
             case AddLiquidityKind.Unbalanced:
                 return ComposableStableEncoder.addLiquidityUnbalanced(
@@ -101,7 +114,7 @@ export class ComposableStableEncoder {
      * Encodes the userData parameter for providing the initial liquidity to a ComposableStablePool
      * @param initialBalances - the amounts of tokens to send to the pool to form the initial balances
      */
-    static addLiquidityInit = (amountsIn: bigint[]): Address =>
+    static initPool = (amountsIn: bigint[]): Address =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }],
             [BigInt(ComposableStablePoolJoinKind.INIT), amountsIn],

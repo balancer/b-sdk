@@ -3,6 +3,7 @@ export * from './encoders';
 export * from './path';
 export * from './pools/';
 export * from './priceImpact/';
+export * from './priceImpactAmount';
 export * from './removeLiquidity';
 export * from './swap';
 export * from './slippage';

@@ -1,5 +1,7 @@
 import { BalancerApiClient } from '../../client';
 import { PoolStateInput } from '../../../../../entities';
+import { poolTypeFromApi } from '../../../../../utils/poolTypeMapper';
+import { PoolType } from '../../../../../types';
 
 export class Pools {
     readonly poolStateQuery = `query GetPool($id: String!){
@@ -27,7 +29,7 @@ export class Pools {
           }
         }
       }
-      ... on GqlPoolPhantomStable {
+      ... on GqlPoolComposableStable {
         tokens {
           ... on GqlPoolTokenBase {
             address
@@ -86,7 +88,7 @@ export class Pools {
         });
         const poolGetPool: PoolStateInput = data.poolGetPool;
 
-        if (poolGetPool.type === 'PHANTOM_STABLE') {
+        if (poolTypeFromApi[poolGetPool.type] === PoolType.ComposableStable) {
             if (
                 !poolGetPool.tokens.some(
                     (t) => t.address === poolGetPool.address,
@@ -117,6 +119,6 @@ export class Pools {
                 });
             }
         }
-        return poolGetPool;
+        return { ...poolGetPool, type: poolTypeFromApi[poolGetPool.type] };
     }
 }

@@ -17,7 +17,7 @@ import {
     Slippage,
 } from '../src';
 import { CreatePool } from '../src/entities/createPool/createPool';
-import { CreatePoolWeightedInput } from '../src/entities/createPool/types';
+import { CreatePoolComposableStableInput } from '../src/entities/createPool/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 import { InitPoolTxInput, CreatePoolTxInput } from './lib/utils/types';
 import { doCreatePool } from './lib/utils/createPoolHelper';
@@ -30,9 +30,9 @@ import { assertInitPool, doInitPool } from './lib/utils/initPoolHelper';
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
 
-describe('Add Liquidity Init - Weighted Pool', async () => {
+describe('Composable Stable Pool - Init Pool tests', async () => {
     let poolAddress: Address;
-    let createPoolWeightedInput: CreatePoolWeightedInput;
+    let createPoolComposableStableInput: CreatePoolComposableStableInput;
     let createTxInput: CreatePoolTxInput;
     let initPoolTxInput: InitPoolTxInput;
     let initPoolInput: InitPoolInput;
@@ -45,23 +45,26 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
         })
             .extend(publicActions)
             .extend(walletActions);
+
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
         const signerAddress = (await client.getAddresses())[0];
-        createPoolWeightedInput = {
+        createPoolComposableStableInput = {
             name: 'Test Pool',
             symbol: '50BAL-50WETH',
             tokens: [
                 {
                     tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
-                    weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
+                    tokenRateCacheDuration: '100',
                 },
                 {
                     tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-                    weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
+                    tokenRateCacheDuration: '100',
                 },
             ],
+            amplificationParameter: '62',
+            exemptFromYieldProtocolFeeFlag: false,
             swapFee: '0.01',
             poolOwnerAddress: signerAddress, // Balancer DAO Multisig
         };
@@ -70,8 +73,8 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             client,
             createPool: new CreatePool(),
             testAddress: signerAddress,
-            createPoolInput: createPoolWeightedInput,
-            poolType: PoolType.Weighted,
+            createPoolInput: createPoolComposableStableInput,
+            poolType: PoolType.ComposableStable,
         };
 
         initPoolInput = {
@@ -79,16 +82,16 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             recipient: signerAddress,
             amountsIn: [
                 {
-                    address: createPoolWeightedInput.tokens[0].tokenAddress,
+                    address:
+                        createPoolComposableStableInput.tokens[0].tokenAddress,
                     rawAmount: parseEther('100'),
                     decimals: 18,
-                    weight: parseEther(`${1 / 2}`),
                 },
                 {
-                    address: createPoolWeightedInput.tokens[1].tokenAddress,
+                    address:
+                        createPoolComposableStableInput.tokens[1].tokenAddress,
                     rawAmount: parseEther('100'),
                     decimals: 18,
-                    weight: parseEther(`${1 / 2}`),
                 },
             ],
             kind: AddLiquidityKind.Init,
@@ -107,18 +110,19 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
 
         poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
-            PoolType.Weighted,
+            PoolType.ComposableStable,
             initPoolInput.amountsIn,
         );
+
         await forkSetup(
             initPoolTxInput.client,
             initPoolTxInput.testAddress,
             [...poolState.tokens.map((t) => t.address)],
-            [1, 3],
-            [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
+            undefined,
+            [...poolState.tokens.map((t) => parseUnits('100000', t.decimals))],
         );
     });
-    test('Add Liquidity Init - Weighted Pool', async () => {
+    test('Add Liquidity Init - Composable Stable Pool', async () => {
         const addLiquidityOutput = await doInitPool({
             ...initPoolTxInput,
             initPoolInput,

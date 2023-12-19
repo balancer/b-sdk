@@ -42,6 +42,7 @@ export type RemoveLiquidityTxInput = {
 
 export type CreatePoolTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
+    poolType: PoolType;
     createPool: CreatePool;
     createPoolInput: CreatePoolInput;
     testAddress: Address;

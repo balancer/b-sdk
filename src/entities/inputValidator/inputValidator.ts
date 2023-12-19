@@ -1,5 +1,7 @@
+import { PoolType } from '../../types';
 import { AddLiquidityInput } from '../addLiquidity';
 import { CreatePoolInput } from '../createPool/types';
+import { InitPoolInput } from '../initPool/types';
 import { PoolStateInput } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
@@ -11,11 +13,11 @@ export class InputValidator {
 
     constructor() {
         this.validators = {
-            WEIGHTED: new InputValidatorWeighted(),
-            GYRO2: new InputValidatorGyro(),
-            GYRO3: new InputValidatorGyro(),
-            GYROE: new InputValidatorGyro(),
-            PHANTOM_STABLE: new InputValidatorComposableStable(),
+            [PoolType.Weighted]: new InputValidatorWeighted(),
+            [PoolType.Gyro2]: new InputValidatorGyro(),
+            [PoolType.Gyro3]: new InputValidatorGyro(),
+            [PoolType.GyroE]: new InputValidatorGyro(),
+            [PoolType.ComposableStable]: new InputValidatorComposableStable(),
         };
     }
 
@@ -26,7 +28,7 @@ export class InputValidator {
     }
 
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput,
+        addLiquidityInput: AddLiquidityInput | InitPoolInput,
         poolState: PoolStateInput,
     ): void {
         this.getValidator(poolState.type).validateAddLiquidity(
@@ -41,7 +43,6 @@ export class InputValidator {
             poolState,
         );
     }
-
 
     validateCreatePool(poolType: string, input: CreatePoolInput): void {
         this.getValidator(poolType).validateCreatePool(input);

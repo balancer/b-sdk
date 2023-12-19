@@ -100,7 +100,6 @@ export async function sendTransactionGetBalances(
         client,
         clientAddress,
     );
-
     // Send transaction to local fork
     const hash = await client.sendTransaction({
         account: clientAddress,
@@ -109,9 +108,11 @@ export async function sendTransactionGetBalances(
         to,
         value,
     });
+
     const transactionReceipt = await client.waitForTransactionReceipt({
         hash,
     });
+
     const { gasUsed, effectiveGasPrice } = transactionReceipt;
     const gasPrice = gasUsed * effectiveGasPrice;
 
@@ -299,4 +300,3 @@ export const forkSetup = async (
         await approveToken(client, accountAddress, tokens[i]);
     }
 };
-

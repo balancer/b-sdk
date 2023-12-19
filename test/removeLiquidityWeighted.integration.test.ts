@@ -25,6 +25,7 @@ import {
     getPoolAddress,
     RemoveLiquidityInput,
     InputAmount,
+    PoolType,
 } from '../src';
 import { forkSetup } from './lib/utils/helper';
 import {
@@ -274,7 +275,7 @@ export class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: 'WEIGHTED',
+            type: PoolType.Weighted,
             tokens,
         };
     }

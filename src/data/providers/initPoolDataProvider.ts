@@ -7,8 +7,9 @@ import {
     http,
 } from 'viem';
 import { CHAINS } from '../../utils';
-import { InputAmountInit } from '../../types';
+import { InputAmountInit, PoolType } from '../../types';
 import { PoolStateInput } from '../../entities';
+import { sortTokensByAddress } from '../../utils/tokens';
 
 export class InitPoolDataProvider {
     private readonly client: PublicClient;
@@ -41,7 +42,7 @@ export class InitPoolDataProvider {
 
     public async getInitPoolData(
         poolAddress: Address,
-        poolType: string,
+        poolType: PoolType,
         amounts: InputAmountInit[],
     ): Promise<PoolStateInput> {
         const poolContract = getContract({
@@ -49,22 +50,36 @@ export class InitPoolDataProvider {
             address: poolAddress,
             publicClient: this.client,
         });
+
+        const poolTokens = sortTokensByAddress(amounts).map(
+            ({ address, decimals }, index) => ({
+                address: address.toLowerCase() as Address,
+                decimals,
+                index,
+            }),
+        );
+
+        const poolTokensWithBpt = sortTokensByAddress([
+            ...amounts,
+            { address: poolAddress.toLowerCase() as Address, decimals: 18 },
+        ]).map(({ address, decimals }, index) => ({
+            address: address.toLowerCase() as Address,
+            decimals,
+            index,
+        }));
+
+        const tokensPerPoolType = {
+            [PoolType.Weighted]: poolTokens,
+            [PoolType.ComposableStable]: poolTokensWithBpt,
+        };
+
         try {
             const poolId = (await poolContract.read.getPoolId()) as Hex;
             return {
                 id: poolId,
-                address: poolAddress,
-                type: poolType.toUpperCase(),
-                tokens: amounts
-                    .sort((a, b) => {
-                        const diff = BigInt(a.address) - BigInt(b.address);
-                        return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-                    })
-                    .map(({ address, decimals }, index) => ({
-                        address: address.toLowerCase() as Address,
-                        decimals,
-                        index,
-                    })),
+                address: poolAddress.toLowerCase() as Address,
+                type: poolType,
+                tokens: tokensPerPoolType[poolType],
             };
         } catch (e) {
             console.warn(e);
