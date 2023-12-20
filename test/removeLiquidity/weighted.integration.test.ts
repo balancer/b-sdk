@@ -277,6 +277,7 @@ export class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.Weighted,
             tokens,
+            balancerVersion: 2,
         };
     }
 }

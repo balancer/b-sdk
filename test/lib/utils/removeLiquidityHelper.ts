@@ -175,6 +175,7 @@ export function assertRemoveLiquidityUnbalanced(
         poolType: poolState.type,
         toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, false);
@@ -235,6 +236,7 @@ export function assertRemoveLiquiditySingleToken(
         poolType: poolState.type,
         toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);
@@ -300,6 +302,7 @@ export function assertRemoveLiquidityProportional(
         poolType: poolState.type,
         toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);

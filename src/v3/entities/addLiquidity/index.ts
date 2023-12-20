@@ -5,7 +5,7 @@ import {
     AddLiquidityInput,
     AddLiquidityQueryOutput,
     PoolState,
-} from '../../../entities';
+} from '@/entities';
 
 export class AddLiquidity implements AddLiquidityBase {
     query(
