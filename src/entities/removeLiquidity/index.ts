@@ -8,8 +8,8 @@ import {
 } from './types';
 import { PoolState } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
-import { RemoveLiquidity as RemoveLiquidityV2 } from '../../v2/entities/removeLiquidity';
-import { RemoveLiquidity as RemoveLiquidityV3 } from '../../v3/entities/removeLiquidity';
+import { RemoveLiquidityV2 } from './removeLiquidityV2';
+import { RemoveLiquidityV3 } from './removeLiquidityV3';
 
 export * from './types';
 

@@ -7,8 +7,8 @@ import {
     AddLiquidityConfig,
 } from './types';
 import { PoolState } from '../types';
-import { AddLiquidity as AddLiquidityV2 } from '../../v2/entities/addLiquidity';
-import { AddLiquidity as AddLiquidityV3 } from '../../v3/entities/addLiquidity';
+import { AddLiquidityV2 } from './addLiquidityV2';
+import { AddLiquidityV3 } from './addLiquidityV3';
 import { InputValidator } from '../inputValidator/inputValidator';
 
 export * from './types';
