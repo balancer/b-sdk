@@ -8,7 +8,7 @@ import {
     Token,
     TokenAmount,
 } from '../../../src';
-import { Gyro3Pool } from '../../../src/entities/pools/gyro3';
+import { Gyro3Pool } from '../../../src/entities/swap/pools/gyro3';
 
 describe('Gyro3Pool tests USDC > DAI', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro3Pool;

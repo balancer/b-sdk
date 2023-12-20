@@ -6,8 +6,8 @@ import {
     CurveMathRevert,
     FxPool,
     FxPoolToken,
-} from '../../../src/entities/pools/fx';
-import { parseFixedCurveParam } from '../../../src/entities/pools/fx/helpers';
+} from '../../../src/entities/swap/pools/fx';
+import { parseFixedCurveParam } from '../../../src/entities/swap/pools/fx/helpers';
 import { parseUnits } from 'viem';
 
 describe('xaveFxPool: fxPools stub test', () => {

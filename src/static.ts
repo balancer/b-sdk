@@ -6,7 +6,7 @@ import {
     Token,
     TokenAmount,
 } from './entities';
-import { PoolParser } from './entities/pools/parser';
+import { PoolParser } from './entities/swap/pools/parser';
 import { SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { ChainId, checkInputs } from './utils';
 import { Router } from './router';

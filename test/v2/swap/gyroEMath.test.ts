@@ -3,14 +3,14 @@
 import testPools from '../../lib/testData/testPools/gyroE_44215395.json';
 import { RawGyroEPool } from '../../../src/data/types';
 import { ChainId } from '../../../src/utils';
-import { GyroEPool } from '../../../src/entities/pools/gyroE/gyroEPool';
-import { Vector2 } from '../../../src/entities/pools/gyroE/types';
+import { GyroEPool } from '../../../src/entities/swap/pools/gyroE/gyroEPool';
+import { Vector2 } from '../../../src/entities/swap/pools/gyroE/types';
 import { Token, TokenAmount } from '../../../src/entities';
-import { calculateInvariantWithError } from '../../../src/entities/pools/gyroE/gyroEMath';
+import { calculateInvariantWithError } from '../../../src/entities/swap/pools/gyroE/gyroEMath';
 import {
     virtualOffset0,
     virtualOffset1,
-} from '../../../src/entities/pools/gyroE/gyroEMathHelpers';
+} from '../../../src/entities/swap/pools/gyroE/gyroEMathHelpers';
 
 describe('gyroEMath tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyroEPool;

@@ -7,7 +7,7 @@ import {
     Token,
     TokenAmount,
 } from '../../../src';
-import { GyroEPool } from '../../../src/entities/pools/gyroE';
+import { GyroEPool } from '../../../src/entities/swap/pools/gyroE';
 import testPools from '../../lib/testData/testPools/gyroE_44215395.json';
 
 describe('gyroEPool tests', () => {

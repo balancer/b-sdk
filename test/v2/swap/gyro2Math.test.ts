@@ -5,8 +5,8 @@ import {
     _calculateQuadratic,
     _calculateQuadraticTerms,
     _findVirtualParams,
-} from '../../../src/entities/pools/gyro2/gyro2Math';
-import { Gyro2Pool } from '../../../src/entities/pools/gyro2/gyro2Pool';
+} from '../../../src/entities/swap/pools/gyro2/gyro2Math';
+import { Gyro2Pool } from '../../../src/entities/swap/pools/gyro2/gyro2Pool';
 
 describe('gyro2Math tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;

@@ -3,7 +3,7 @@
 import testPools from '../../lib/testData/testPools/gyroE_44215395.json';
 import { ChainId, SwapKind, Token, TokenAmount } from '../../../src';
 import { RawGyroEPool } from '../../../src/data/types';
-import { GyroEPool } from '../../../src/entities/pools/gyroE';
+import { GyroEPool } from '../../../src/entities/swap/pools/gyroE';
 
 describe('gyroEPool tests', () => {
     const testPool = { ...testPools }.pools[0] as RawGyroEPool;

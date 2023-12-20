@@ -17,7 +17,7 @@ import {
     TokenAmount,
     Token,
 } from '../../../src';
-import { Gyro2Pool } from '../../../src/entities/pools/gyro2';
+import { Gyro2Pool } from '../../../src/entities/swap/pools/gyro2';
 
 describe('Gyro2Pool tests USDC > DAI', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;

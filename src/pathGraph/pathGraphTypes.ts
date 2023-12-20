@@ -1,5 +1,5 @@
 import { Token } from '../entities/token';
-import { BasePool } from '../entities/pools/index';
+import { BasePool } from '../entities/swap/pools/index';
 
 export interface PoolTokenPair {
     id: string;

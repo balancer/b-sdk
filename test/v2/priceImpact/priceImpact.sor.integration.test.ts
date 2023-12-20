@@ -9,7 +9,7 @@ import { ChainId, ETH, BATCHSIZE, VAULT } from '../../../src/utils';
 import { PriceImpact, Token, TokenAmount } from '../../../src/entities';
 import { OnChainPoolDataEnricher } from '../../../src/data/enrichers/onChainPoolDataEnricher';
 import { SingleSwap, SwapKind, SwapOptions } from '../../../src/types';
-import { BasePool } from '../../../src/entities/pools';
+import { BasePool } from '../../../src/entities/swap/pools';
 import { MockPoolProvider } from '../../lib/utils/mockPoolProvider';
 
 import testPools from '../../lib/testData/testPools/weighted_17473810.json';
