@@ -20,5 +20,10 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "types": ["vitest/globals", "vite/client"],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"],
+            "@balancer/sdk": ["src/index.ts"]
+        },
     }
 }

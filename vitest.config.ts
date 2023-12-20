@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { loadEnv } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
@@ -25,5 +26,6 @@ export default defineConfig(({ mode }) => {
             // Uncomment to run integration tests sequentially
             // threads: false,
         },
+        plugins: [tsconfigPaths()],
     };
 });
