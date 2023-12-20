@@ -51,6 +51,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
         const signerAddress = (await client.getAddresses())[0];
         createPoolWeightedInput = {
             name: 'Test Pool',
+            poolType: PoolType.Weighted,
             symbol: '50BAL-50WETH',
             tokens: [
                 {
@@ -66,6 +67,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             ],
             swapFee: '0.01',
             poolOwnerAddress: signerAddress, // Balancer DAO Multisig
+            balancerVersion: 2,
         };
 
         createTxInput = {
@@ -73,7 +75,6 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: createPoolWeightedInput,
-            poolType: PoolType.Weighted,
         };
 
         initPoolInput = {
