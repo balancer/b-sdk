@@ -10,7 +10,6 @@ import {
 } from '../../../src';
 import { CreatePool } from '../../../src/entities/createPool';
 import { CreatePoolInput } from '../../../src/entities/createPool/types';
-s;
 import { InitPool } from '../../../src/entities/initPool';
 import { InitPoolInput } from '../../../src/entities/initPool/types';
 
@@ -42,7 +41,6 @@ export type RemoveLiquidityTxInput = {
 
 export type CreatePoolTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
-    poolType: PoolType;
     createPool: CreatePool;
     createPoolInput: CreatePoolInput;
     testAddress: Address;

@@ -1,29 +1,30 @@
+import { PoolType } from '@/types';
 import { Address, Hex } from 'viem';
 
 export interface CreatePoolBase {
     buildCall(input: CreatePoolInput): CreatePoolBuildCallOutput;
 }
 
-export type CreatePoolInput =
-    | CreatePoolWeightedInput
-    | CreatePoolComposableStableInput;
-
-export type CreatePoolWeightedInput = {
+export type CreatePoolBaseInput = {
     name?: string;
     symbol: string;
-    tokens: {
-        tokenAddress: Address;
-        weight: bigint;
-        rateProvider: Address;
-    }[];
     swapFee: string;
     poolOwnerAddress: Address;
     salt?: Hex;
+    balancerVersion: 2 | 3;
 };
 
-export type CreatePoolComposableStableInput = {
-    name?: string;
-    symbol: string;
+export type CreatePoolWeightedInput = CreatePoolBaseInput & {
+    poolType: PoolType.Weighted;
+    tokens: {
+        tokenAddress: Address;
+        rateProvider: Address;
+        weight: bigint;
+    }[];
+};
+
+export type CreatePoolComposableStableInput = CreatePoolBaseInput & {
+    poolType: PoolType.ComposableStable;
     tokens: {
         tokenAddress: Address;
         rateProvider: Address;
@@ -31,10 +32,11 @@ export type CreatePoolComposableStableInput = {
     }[];
     amplificationParameter: bigint;
     exemptFromYieldProtocolFeeFlag: boolean;
-    swapFee: string;
-    poolOwnerAddress: Address;
-    salt?: Hex;
 };
+
+export type CreatePoolInput =
+    | CreatePoolWeightedInput
+    | CreatePoolComposableStableInput;
 
 export type CreatePoolBuildCallOutput = {
     call: Hex;

@@ -40,11 +40,11 @@ describe('Create Composable Stable Pool tests', () => {
             createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: {} as CreatePoolInput,
-            poolType: PoolType.ComposableStable,
         };
 
         createPoolComposableStableInput = {
             name: 'Test Pool',
+            poolType: PoolType.ComposableStable,
             symbol: '50BAL-25WETH-25DAI',
             tokens: [
                 {
@@ -67,6 +67,7 @@ describe('Create Composable Stable Pool tests', () => {
             exemptFromYieldProtocolFeeFlag: false,
             swapFee: '0.01',
             poolOwnerAddress: txInput.testAddress, // Balancer DAO Multisig
+            balancerVersion: 2,
         };
     });
     test('Create Composable Stable Pool', async () => {

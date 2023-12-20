@@ -41,11 +41,11 @@ describe('Create Weighted Pool tests', () => {
             createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: {} as CreatePoolInput,
-            poolType: PoolType.Weighted,
         };
 
         createWeightedPoolInput = {
             name: 'Test Pool',
+            poolType: PoolType.Weighted,
             symbol: '50BAL-25WETH-25DAI',
             tokens: [
                 {
@@ -66,6 +66,7 @@ describe('Create Weighted Pool tests', () => {
             ],
             swapFee: '0.01',
             poolOwnerAddress: txInput.testAddress, // Balancer DAO Multisig
+            balancerVersion: 2,
         };
     });
     test('Create Weighted Pool', async () => {
