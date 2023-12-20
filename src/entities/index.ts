@@ -1,5 +1,7 @@
 export * from './addLiquidity';
+export * from './createPool';
 export * from './encoders';
+export * from './initPool';
 export * from './path';
 export * from './pools/';
 export * from './priceImpact/';

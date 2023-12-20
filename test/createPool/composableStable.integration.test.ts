@@ -9,7 +9,7 @@ import {
     zeroAddress,
 } from 'viem';
 import { CHAINS, ChainId, PoolType } from '../../src';
-import { CreatePool } from '../../src/entities/createPool/createPool';
+import { CreatePool } from '../../src/entities/createPool';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { doCreatePool } from '../lib/utils/createPoolHelper';
 import { CreatePoolTxInput } from '../lib/utils/types';

@@ -4,6 +4,8 @@ import { CreatePoolComposableStable } from './composableStable/createPoolComposa
 import { CreatePoolBase, CreatePoolInput } from './types';
 import { CreatePoolWeighted } from './weighted/createPoolWeighted';
 
+export * from './types';
+
 export class CreatePool {
     private readonly createPoolTypes: Record<string, CreatePoolBase> = {};
 

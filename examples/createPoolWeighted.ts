@@ -9,7 +9,7 @@ import {
     walletActions,
     zeroAddress,
 } from 'viem';
-import { CreatePool } from '../src/entities/createPool/createPool';
+import { CreatePool } from '../src/entities/createPool';
 import {
     ANVIL_NETWORKS,
     startFork,

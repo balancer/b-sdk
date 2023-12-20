@@ -10,6 +10,8 @@ import {
 } from './types';
 import { InitPoolWeighted } from './weighted/initPoolWeighted';
 
+export * from './types';
+
 export class InitPool {
     initPoolTypes: Record<string, InitPoolBase> = {};
 

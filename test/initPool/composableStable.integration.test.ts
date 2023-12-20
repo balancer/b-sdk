@@ -18,14 +18,14 @@ import {
     PoolType,
     Slippage,
 } from '../../src';
-import { CreatePool } from '../../src/entities/createPool/createPool';
+import { CreatePool } from '../../src/entities/createPool';
 import { CreatePoolComposableStableInput } from '../../src/entities/createPool/types';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { InitPoolTxInput, CreatePoolTxInput } from '../lib/utils/types';
 import { doCreatePool } from '../lib/utils/createPoolHelper';
 import { InitPoolDataProvider } from '../../src/data/providers/initPoolDataProvider';
 import { forkSetup } from '../lib/utils/helper';
-import { InitPool } from '../../src/entities/initPool/initPool';
+import { InitPool } from '../../src/entities/initPool';
 import { InitPoolInput } from '../../src/entities/initPool/types';
 import { assertInitPool, doInitPool } from '../lib/utils/initPoolHelper';
 

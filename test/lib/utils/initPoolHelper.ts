@@ -1,5 +1,5 @@
 import { InitPoolBuildOutput, PoolState } from '../../../src';
-import { InitPool } from '../../../src/entities/initPool/initPool';
+import { InitPool } from '../../../src/entities/initPool';
 import { InitPoolInput } from '../../../src/entities/initPool/types';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
