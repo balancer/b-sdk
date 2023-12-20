@@ -1,5 +1,4 @@
 import { Address, encodeFunctionData } from 'viem';
-import { sortTokensByAddress } from '../../../utils/tokens';
 import { ComposableStableEncoder } from '../../encoders/composableStable';
 import { InitPoolAmountsComposableStable, PoolState } from '../../types';
 import {
@@ -10,11 +9,12 @@ import {
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../types';
 import { vaultAbi } from '../../../abi';
 import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
+import { Token } from '@/entities/token';
 
 export class InitPoolComposableStable implements InitPoolBase {
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const amounts = this.getAmounts(input, poolState);
+        const amounts = this.getAmounts(input, poolState.address, sortedTokens);
 
         const userData =
             ComposableStableEncoder.encodeInitPoolUserData(amounts);
@@ -46,25 +46,23 @@ export class InitPoolComposableStable implements InitPoolBase {
 
     private getAmounts(
         input: InitPoolInput,
-        poolState: PoolState,
+        poolAddress: Address,
+        poolTokens: Token[],
     ): InitPoolAmountsComposableStable {
-        const sortedTokens = sortTokensByAddress(poolState.tokens);
-        const bptIndex = sortedTokens.findIndex(
-            (t) => t.address === poolState.address,
-        );
-        const maxAmountsIn = getAmounts(sortedTokens, [
+        const bptIndex = poolTokens.findIndex((t) => t.address === poolAddress);
+        const maxAmountsIn = getAmounts(poolTokens, [
             ...input.amountsIn.slice(0, bptIndex),
             {
-                address: poolState.address,
+                address: poolAddress,
                 decimals: 18,
                 rawAmount: MAX_UINT256,
             },
             ...input.amountsIn.slice(bptIndex),
         ]);
-        const amountsIn = getAmounts(sortedTokens, [
+        const amountsIn = getAmounts(poolTokens, [
             ...input.amountsIn.slice(0, bptIndex),
             {
-                address: poolState.address,
+                address: poolAddress,
                 decimals: 18,
                 rawAmount: BigInt(0),
             },

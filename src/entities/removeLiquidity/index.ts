@@ -8,7 +8,7 @@ import {
 } from './types';
 import { RemoveLiquidityWeighted } from './weighted/removeLiquidityWeighted';
 import { PoolState } from '../types';
-import { RemoveLiquidityComposableStable } from './composable-stable/removeLiquidityComposableStable';
+import { RemoveLiquidityComposableStable } from './composableStable/removeLiquidityComposableStable';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { PoolType } from '../../types';
 

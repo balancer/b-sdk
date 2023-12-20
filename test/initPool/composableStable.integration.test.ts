@@ -124,7 +124,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             [...poolState.tokens.map((t) => parseUnits('100000', t.decimals))],
         );
     });
-    test('Add Liquidity Init - Composable Stable Pool', async () => {
+    test('Init Pool - Composable Stable Pool', async () => {
         const addLiquidityOutput = await doInitPool({
             ...initPoolTxInput,
             initPoolInput,

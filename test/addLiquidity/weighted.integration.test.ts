@@ -81,7 +81,7 @@ describe('add liquidity weighted test', () => {
                 ...txInput.poolState.tokens.map((t) => t.address),
                 txInput.poolState.address,
             ],
-            undefined, // TODO: hardcode these values to improve test performance
+            [0, 3, 0],
             [
                 ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
@@ -276,6 +276,7 @@ export class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.Weighted,
             tokens,
+            balancerVersion: 2,
         };
     }
 }

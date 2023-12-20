@@ -1,44 +1,34 @@
 import { encodeFunctionData } from 'viem';
-import { Token } from '../../token';
-import { TokenAmount } from '../../tokenAmount';
-import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../utils';
-import { vaultAbi } from '../../../abi';
+import { Token } from '@/entities/token';
+import { TokenAmount } from '@/entities/tokenAmount';
+import { WeightedEncoder } from '@/entities/encoders/weighted';
+import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
+import { vaultAbi } from '@/abi';
 import {
     AddLiquidityBase,
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityComposableStableQueryOutput,
-    AddLiquidityComposableStableCall,
-} from '../types';
-import {
-    AddLiquidityAmounts as AddLiquidityAmountsBase,
-    PoolState,
-} from '../../types';
+    AddLiquidityWeightedQueryOutput,
+    AddLiquidityWeightedCall,
+} from '@/entities/addLiquidity/types';
+import { AddLiquidityAmounts, PoolState } from '@/entities/types';
 import {
     doAddLiquidityQuery,
     getAmounts,
     getSortedTokens,
     parseAddLiquidityArgs,
-} from '../../utils';
-import { ComposableStableEncoder } from '../../encoders/composableStable';
+} from '@/entities/utils';
 
-type AddLiquidityAmounts = AddLiquidityAmountsBase & {
-    maxAmountsInWithoutBpt: bigint[];
-};
-
-export class AddLiquidityComposableStable implements AddLiquidityBase {
+export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityComposableStableQueryOutput> {
+    ): Promise<AddLiquidityWeightedQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const bptIndex = sortedTokens.findIndex(
-            (t) => t.address === poolState.address,
-        );
-        const amounts = this.getAmountsQuery(sortedTokens, input, bptIndex);
+        const amounts = this.getAmountsQuery(sortedTokens, input);
 
-        const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
+        const userData = WeightedEncoder.encodeAddLiquidityUserData(
             input.kind,
             amounts,
         );
@@ -77,16 +67,14 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
             fromInternalBalance: !!input.fromInternalBalance,
-            bptIndex,
+            balancerVersion: 2,
         };
     }
 
-    public buildCall(
-        input: AddLiquidityComposableStableCall,
-    ): AddLiquidityBuildOutput {
+    public buildCall(input: AddLiquidityWeightedCall): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
-        const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
+        const userData = WeightedEncoder.encodeAddLiquidityUserData(
             input.addLiquidityKind,
             amounts,
         );
@@ -126,96 +114,67 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     private getAmountsQuery(
         poolTokens: Token[],
         input: AddLiquidityInput,
-        bptIndex: number,
     ): AddLiquidityAmounts {
-        let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
-                addLiquidityAmounts = {
+                return {
                     minimumBpt: 0n,
-                    maxAmountsIn: getAmounts(
-                        poolTokens,
-                        input.amountsIn,
-                        BigInt(0),
-                    ),
+                    maxAmountsIn: getAmounts(poolTokens, input.amountsIn),
                     tokenInIndex: undefined,
                 };
-                break;
             }
             case AddLiquidityKind.SingleToken: {
-                const tokenInIndex = poolTokens
-                    .filter((_, index) => index !== bptIndex) // Need to remove Bpt
-                    .findIndex((t) => t.isSameAddress(input.tokenIn));
+                const tokenInIndex = poolTokens.findIndex((t) =>
+                    t.isSameAddress(input.tokenIn),
+                );
                 if (tokenInIndex === -1)
                     throw Error("Can't find index of SingleToken");
                 const maxAmountsIn = Array(poolTokens.length).fill(0n);
                 maxAmountsIn[tokenInIndex] = MAX_UINT256;
-                addLiquidityAmounts = {
+                return {
                     minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn,
                     tokenInIndex,
                 };
-                break;
             }
             case AddLiquidityKind.Proportional: {
-                addLiquidityAmounts = {
+                return {
                     minimumBpt: input.bptOut.rawAmount,
                     maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
                     tokenInIndex: undefined,
                 };
-                break;
             }
         }
-
-        return {
-            ...addLiquidityAmounts,
-            maxAmountsInWithoutBpt: [
-                ...addLiquidityAmounts.maxAmountsIn.slice(0, bptIndex),
-                ...addLiquidityAmounts.maxAmountsIn.slice(bptIndex + 1),
-            ],
-        };
     }
 
     private getAmountsCall(
-        input: AddLiquidityComposableStableCall,
+        input: AddLiquidityWeightedCall,
     ): AddLiquidityAmounts {
-        let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Init:
-                throw Error(
-                    'Unsupported Add Liquidity Kind, for Init use InitPool instead of AddLiquidity',
-                );
+                throw Error('Unsupported Add Liquidity Kind');
             case AddLiquidityKind.Unbalanced: {
                 const minimumBpt = input.slippage.removeFrom(
                     input.bptOut.amount,
                 );
-                addLiquidityAmounts = {
+                return {
                     minimumBpt,
                     maxAmountsIn: input.amountsIn.map((a) => a.amount),
                     tokenInIndex: input.tokenInIndex,
                 };
-                break;
             }
             case AddLiquidityKind.SingleToken:
             case AddLiquidityKind.Proportional: {
-                addLiquidityAmounts = {
+                return {
                     minimumBpt: input.bptOut.amount,
                     maxAmountsIn: input.amountsIn.map((a) =>
                         input.slippage.applyTo(a.amount),
                     ),
                     tokenInIndex: input.tokenInIndex,
                 };
-                break;
             }
             default:
                 throw Error('Unsupported Add Liquidity Kind');
         }
-        return {
-            ...addLiquidityAmounts,
-            maxAmountsInWithoutBpt: [
-                ...addLiquidityAmounts.maxAmountsIn.slice(0, input.bptIndex),
-                ...addLiquidityAmounts.maxAmountsIn.slice(input.bptIndex + 1),
-            ],
-        };
     }
 }

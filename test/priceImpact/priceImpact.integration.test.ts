@@ -261,6 +261,7 @@ export class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.ComposableStable,
             tokens,
+            balancerVersion: 2,
         };
     }
 }
