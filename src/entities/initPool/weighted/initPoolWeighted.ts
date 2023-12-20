@@ -2,7 +2,6 @@ import { Address, encodeFunctionData } from 'viem';
 import { InitPoolAmounts, PoolState } from '../../types';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../types';
 import { BALANCER_VAULT, ZERO_ADDRESS } from '../../../utils';
-import { sortTokensByAddress } from '../../../utils/tokens';
 import { vaultAbi } from '../../../abi';
 import {
     getAmounts,
@@ -20,7 +19,7 @@ export class InitPoolWeighted implements InitPoolBase {
         const { args } = parseAddLiquidityArgs({
             ...input,
             poolId: poolState.id,
-            sortedTokens: sortTokensByAddress(poolState.tokens),
+            sortedTokens,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
             fromInternalBalance: input.fromInternalBalance ?? false,
@@ -48,10 +47,7 @@ export class InitPoolWeighted implements InitPoolBase {
         poolTokens: Token[],
     ): InitPoolAmounts {
         return {
-            maxAmountsIn: getAmounts(
-                sortTokensByAddress(poolTokens),
-                input.amountsIn,
-            ),
+            maxAmountsIn: getAmounts(poolTokens, input.amountsIn),
         };
     }
 }
