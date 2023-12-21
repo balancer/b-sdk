@@ -1,7 +1,7 @@
 import { PoolDataEnricher, PoolDataProvider } from './data/types';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { BigintIsh } from './entities/tokenAmount';
-import { BasePoolFactory } from './entities/swap/pools/index';
+import { BasePoolFactory } from './entities/pools/index';
 
 export type Address = `0x${string}`;
 export type Hex = `0x${string}`;

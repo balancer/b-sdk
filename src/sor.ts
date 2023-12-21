@@ -2,7 +2,7 @@ import { Router } from './router';
 import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
 import { ChainId, checkInputs, SUBGRAPH_URLS, BATCHSIZE, VAULT } from './utils';
 import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
-import { PoolParser } from './entities/swap/pools/parser';
+import { PoolParser } from './entities/pools/parser';
 import { OnChainPoolDataEnricher, SubgraphPoolProvider } from './data';
 import { PoolDataService } from './data/poolDataService';
 import { GetPoolsResponse } from './data/types';

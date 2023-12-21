@@ -16,10 +16,7 @@ import {
     sorGetSwapsWithPools,
 } from '../../../src';
 import { parseEther } from 'viem';
-import {
-    GyroEPool,
-    GyroEPoolToken,
-} from '../../../src/entities/swap/pools/gyroE';
+import { GyroEPool, GyroEPoolToken } from '../../../src/entities/pools/gyroE';
 import { MockPoolProvider } from '../../lib/utils/mockPoolProvider';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 

@@ -160,6 +160,11 @@ export class PriceImpact {
                     userData: '0x',
                 };
 
+                /**
+                 * TODO V3: right now swap exists only as part of the SOR.
+                 * We could make it a proper entity with v2/v3 variations and
+                 * consume it here as a higher level abstraction.
+                 */
                 const resultAmount = await doSingleSwapQuery({
                     ...singleSwap,
                     rpcUrl: input.rpcUrl,

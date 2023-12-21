@@ -1,4 +1,4 @@
-import { BasePool } from './swap/pools';
+import { BasePool } from './pools';
 import { Token } from './token';
 import { TokenAmount } from './tokenAmount';
 import { SwapKind } from '../types';
