@@ -111,7 +111,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 const swapKind = SwapKind.GivenIn;
                 const swapAmt = TokenAmount.fromHumanAmount(tokenIn, '13.5');
 
-                const rpcUrl = process.env['ETHEREUM_RPC_URL'] || '';
+                const rpcUrl = process.env.ETHEREUM_RPC_URL || '';
                 const mockPoolProvider = new MockPoolProvider(pools);
                 const mockPoolDataEnricher = new MockPoolDataEnricher();
 

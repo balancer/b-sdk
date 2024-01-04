@@ -65,27 +65,24 @@ function getCheck(result: RemoveLiquidityQueryOutput, isExactIn: boolean) {
     if (isRemoveLiquidityComposableStableQueryOutput(result)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+            // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { amountsOut, bptIndex, ...check } =
                 result as RemoveLiquidityComposableStableQueryOutput;
             return check;
-        } else {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { bptIn, bptIndex, ...check } =
-                result as RemoveLiquidityComposableStableQueryOutput;
-            return check;
         }
-    } else {
-        if (isExactIn) {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { amountsOut, ...check } = result;
-            return check;
-        } else {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { bptIn, ...check } = result;
-            return check;
-        }
+        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+        const { bptIn, bptIndex, ...check } =
+            result as RemoveLiquidityComposableStableQueryOutput;
+        return check;
     }
+    if (isExactIn) {
+        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+        const { amountsOut, ...check } = result;
+        return check;
+    }
+    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+    const { bptIn, ...check } = result;
+    return check;
 }
 
 /**
@@ -160,7 +157,7 @@ export function assertRemoveLiquidityUnbalanced(
             (a) => a.address === t.address,
         );
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
-        else return TokenAmount.fromRawAmount(token, input.rawAmount);
+        return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
     const expectedQueryOutput: Omit<
@@ -391,7 +388,7 @@ function assertRemoveLiquidityBuildOutput(
         value: 0n, // Value should always be 0 when removing liquidity
     };
 
-    // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { call, ...buildCheck } = RemoveLiquidityBuildOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

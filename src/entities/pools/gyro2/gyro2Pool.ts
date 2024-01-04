@@ -225,9 +225,8 @@ export class Gyro2Pool implements BasePool {
                 limitAmountInPlusSwapFee,
                 SWAP_LIMIT_FACTOR,
             );
-        } else {
-            return MathSol.mulDownFixed(tOut.amount, SWAP_LIMIT_FACTOR);
         }
+        return MathSol.mulDownFixed(tOut.amount, SWAP_LIMIT_FACTOR);
     }
 
     public subtractSwapFeeAmount(amount: TokenAmount): TokenAmount {

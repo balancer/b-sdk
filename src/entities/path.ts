@@ -12,7 +12,8 @@ export class Path {
             throw new Error(
                 'Invalid path: must contain at least 1 pool and 2 tokens.',
             );
-        } else if (tokens.length !== pools.length + 1) {
+        }
+        if (tokens.length !== pools.length + 1) {
             throw new Error(
                 'Invalid path: tokens length must equal pools length + 1',
             );
@@ -31,7 +32,6 @@ export class PathWithAmount extends Path {
     private readonly mutateBalances: boolean;
     private readonly printPath: any = [];
 
-    // rome-ignore lint/correctness/noUnreachableSuper: bug in rome
     public constructor(
         tokens: Token[],
         pools: BasePool[],

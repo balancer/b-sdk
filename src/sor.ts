@@ -67,9 +67,10 @@ export class SmartOrderRouter {
 
         const providerOptions = {
             block: blockNumber,
-            timestamp: await this.poolDataService.getTimestampForBlockNumber(
-                blockNumber,
-            ),
+            timestamp:
+                await this.poolDataService.getTimestampForBlockNumber(
+                    blockNumber,
+                ),
         };
 
         const enriched = await this.poolDataService.enrichPools(

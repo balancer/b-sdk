@@ -2,14 +2,14 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { OnChainPoolDataEnricher } from '../../../src/data/enrichers/onChainPoolDataEnricher';
+import { Token, TokenAmount } from '../../../src/entities';
+import { BasePool } from '../../../src/entities/pools';
 import { SmartOrderRouter } from '../../../src/sor';
 import { sorGetSwapsWithPools } from '../../../src/static';
-import { ChainId, NATIVE_ASSETS, BATCHSIZE, VAULT } from '../../../src/utils';
-import { Token, TokenAmount } from '../../../src/entities';
-import { OnChainPoolDataEnricher } from '../../../src/data/enrichers/onChainPoolDataEnricher';
 import { SwapKind, SwapOptions } from '../../../src/types';
-import { BasePool } from '../../../src/entities/pools';
 import { MockPoolProvider } from '../../lib/utils/mockPoolProvider';
+import { BATCHSIZE, ChainId, NATIVE_ASSETS, VAULT } from '../../../src/utils';
 
 import testPools from '../../lib/testData/testPools/fantom_65313450.json';
 import { RawBasePool } from '../../../src';
