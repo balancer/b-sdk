@@ -1,7 +1,7 @@
-import { AddLiquidityInput } from '../../addLiquidity';
+import { AddLiquidityInput } from '../../addLiquidity/types';
 import { CreatePoolComposableStableInput } from '../../createPool/types';
 import { InitPoolInput } from '../../initPool/types';
-import { RemoveLiquidityInput } from '../../removeLiquidity';
+import { RemoveLiquidityInput } from '../../removeLiquidity/types';
 import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
 import {

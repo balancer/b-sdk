@@ -1,7 +1,7 @@
-import { AddLiquidityInput } from '../addLiquidity';
+import { AddLiquidityInput } from '../addLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput } from '../initPool/types';
-import { RemoveLiquidityInput } from '../removeLiquidity';
+import { RemoveLiquidityInput } from '../removeLiquidity/types';
 import { PoolState } from '../types';
 
 export interface InputValidatorBase {
