@@ -11,8 +11,6 @@ import { AddLiquidityV2 } from './addLiquidityV2';
 import { AddLiquidityV3 } from './addLiquidityV3';
 import { InputValidator } from '../inputValidator/inputValidator';
 
-export * from './types';
-
 export class AddLiquidity implements AddLiquidityBase {
     constructor(public config?: AddLiquidityConfig) {}
     private readonly inputValidator: InputValidator = new InputValidator();

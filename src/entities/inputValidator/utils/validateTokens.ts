@@ -1,9 +1,9 @@
-import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity';
+import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
 import { InitPoolInput } from '../../initPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-} from '../../removeLiquidity';
+} from '../../removeLiquidity/types';
 import { PoolState } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 

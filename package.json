@@ -20,7 +20,7 @@
     "scripts": {
         "build": "tsup",
         "format": "biome format --write .",
-        "lint": "biome check .",
+        "lint": "dpdm -T ./src && biome check .",
         "test": "vitest dev",
         "test:ci": "vitest run",
         "changeset": "changeset",
@@ -42,6 +42,7 @@
         "@types/node": "^18.11.18",
         "@viem/anvil": "^0.0.6",
         "dotenv": "^16.0.3",
+        "dpdm": "^3.14.0",
         "pino-pretty": "^10.0.0",
         "ts-node": "^10.9.1",
         "tsup": "^6.6.0",
