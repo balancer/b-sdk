@@ -133,7 +133,9 @@ describe('GyroE V1 remove liquidity test', () => {
             };
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
-            ).rejects.toThrowError(InputValidatorGyro.removeLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 
@@ -157,7 +159,9 @@ describe('GyroE V1 remove liquidity test', () => {
         test('must throw remove liquidity kind not supported error', async () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput: input }),
-            ).rejects.toThrowError(InputValidatorGyro.removeLiquidityKindNotSupportedByGyro);
+            ).rejects.toThrowError(
+                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+            );
         });
     });
 });

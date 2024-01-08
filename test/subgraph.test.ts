@@ -13,9 +13,8 @@ describe(
                 timestamp: BigInt(Math.floor(new Date().getTime() / 1000)),
             };
 
-            const { pools } = await subgraphPoolDataService.getPools(
-                providerOptions,
-            );
+            const { pools } =
+                await subgraphPoolDataService.getPools(providerOptions);
             expect(pools.length).toBeGreaterThan(0);
         });
         test('getPools fantom', async () => {
@@ -26,9 +25,8 @@ describe(
                 timestamp: BigInt(Math.floor(new Date().getTime() / 1000)),
             };
 
-            const { pools } = await subgraphPoolDataService.getPools(
-                providerOptions,
-            );
+            const { pools } =
+                await subgraphPoolDataService.getPools(providerOptions);
             expect(pools.length).toBeGreaterThan(0);
         });
     },

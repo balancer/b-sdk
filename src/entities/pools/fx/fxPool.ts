@@ -209,10 +209,9 @@ export class FxPool implements BasePool {
         if (swapKind === SwapKind.GivenIn) {
             const maxAmount = maxLimit - tIn.numeraire;
             return FxPoolToken.fromNumeraire(tIn, maxAmount).amount;
-        } else {
-            const maxAmount = maxLimit - tOut.numeraire;
-            return FxPoolToken.fromNumeraire(tOut, maxAmount).amount;
         }
+        const maxAmount = maxLimit - tOut.numeraire;
+        return FxPoolToken.fromNumeraire(tOut, maxAmount).amount;
     }
 
     public getPoolPairData(

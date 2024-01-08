@@ -45,7 +45,7 @@ type Result =
 type Results = Result[];
 
 // Extract the functionName property values into a union type
-type FunctionNameUnion = typeof abi[number]['name'];
+type FunctionNameUnion = (typeof abi)[number]['name'];
 
 type BuildReturn = {
     address: Address;
@@ -57,21 +57,21 @@ type BuildReturn = {
 const getTotalSupplyFn = (poolType: string) => {
     if (poolType.includes('Linear') || ['StablePhantom'].includes(poolType)) {
         return 'getVirtualSupply';
-    } else if (poolType === 'ComposableStable') {
-        return 'getActualSupply';
-    } else {
-        return 'totalSupply';
     }
+    if (poolType === 'ComposableStable') {
+        return 'getActualSupply';
+    }
+    return 'totalSupply';
 };
 
 const getSwapFeeFn = (poolType: string) => {
     if (poolType === 'Element') {
         return 'percentFee';
-    } else if (poolType === 'FX') {
-        return 'protocolPercentFee';
-    } else {
-        return 'getSwapFeePercentage';
     }
+    if (poolType === 'FX') {
+        return 'protocolPercentFee';
+    }
+    return 'getSwapFeePercentage';
 };
 
 const defaultCalls = {
@@ -234,21 +234,21 @@ const poolTypeCalls = (
                         ),
                     }),
                 };
-            } else
-                return {
-                    count: defaultCallsAux.count + weightedCalls.count,
-                    build: (id: string) => [
-                        ...defaultCallsAux.build(id, poolType, vault),
-                        ...weightedCalls.build(id),
-                    ],
-                    parse: (results: Results, shift: number) => ({
-                        ...defaultCallsAux.parse(results, shift),
-                        ...weightedCalls.parse(
-                            results,
-                            shift + defaultCallsAux.count,
-                        ),
-                    }),
-                };
+            }
+            return {
+                count: defaultCallsAux.count + weightedCalls.count,
+                build: (id: string) => [
+                    ...defaultCallsAux.build(id, poolType, vault),
+                    ...weightedCalls.build(id),
+                ],
+                parse: (results: Results, shift: number) => ({
+                    ...defaultCallsAux.parse(results, shift),
+                    ...weightedCalls.parse(
+                        results,
+                        shift + defaultCallsAux.count,
+                    ),
+                }),
+            };
         }
         case 'Stable': {
             if (poolTypeVersion === 1) {
@@ -266,22 +266,21 @@ const poolTypeCalls = (
                         ),
                     }),
                 };
-            } else {
-                return {
-                    count: defaultCallsAux.count + stableCalls.count,
-                    build: (id: string) => [
-                        ...defaultCallsAux.build(id, poolType, vault),
-                        ...stableCalls.build(id),
-                    ],
-                    parse: (results: Results, shift: number) => ({
-                        ...defaultCallsAux.parse(results, shift),
-                        ...stableCalls.parse(
-                            results,
-                            shift + defaultCallsAux.count,
-                        ),
-                    }),
-                };
             }
+            return {
+                count: defaultCallsAux.count + stableCalls.count,
+                build: (id: string) => [
+                    ...defaultCallsAux.build(id, poolType, vault),
+                    ...stableCalls.build(id),
+                ],
+                parse: (results: Results, shift: number) => ({
+                    ...defaultCallsAux.parse(results, shift),
+                    ...stableCalls.parse(
+                        results,
+                        shift + defaultCallsAux.count,
+                    ),
+                }),
+            };
         }
         case 'StablePhantom':
         case 'MetaStable':
@@ -315,22 +314,19 @@ const poolTypeCalls = (
         case 'GyroE':
             if (poolTypeVersion === 1) {
                 return defaultCalls;
-            } else {
-                return {
-                    count: defaultCalls.count + gyroECalls.count,
-                    build: (id: string) => [
-                        ...defaultCalls.build(id, poolType, vault),
-                        ...gyroECalls.build(id),
-                    ],
-                    parse: (results: Results, shift: number) => ({
-                        ...defaultCalls.parse(results, shift),
-                        ...gyroECalls.parse(
-                            results,
-                            shift + defaultCalls.count,
-                        ),
-                    }),
-                };
             }
+            return {
+                count: defaultCalls.count + gyroECalls.count,
+                build: (id: string) => [
+                    ...defaultCalls.build(id, poolType, vault),
+                    ...gyroECalls.build(id),
+                ],
+                parse: (results: Results, shift: number) => ({
+                    ...defaultCalls.parse(results, shift),
+                    ...gyroECalls.parse(results, shift + defaultCalls.count),
+                }),
+            };
+
         case 'AaveLinear':
             if (poolTypeVersion === 1) {
                 return {
@@ -347,9 +343,9 @@ const poolTypeCalls = (
                         ),
                     }),
                 };
-            } else {
-                return defaultCallsAux;
             }
+            return defaultCallsAux;
+
         default:
             return do_nothing;
     }

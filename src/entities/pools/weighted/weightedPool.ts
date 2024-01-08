@@ -115,9 +115,8 @@ export class WeightedPool implements BasePool {
 
         if (swapKind === SwapKind.GivenIn) {
             return (tIn.amount * this.MAX_IN_RATIO) / WAD;
-        } else {
-            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
         }
+        return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
     }
 
     public swapGivenIn(

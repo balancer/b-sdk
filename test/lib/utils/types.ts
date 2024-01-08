@@ -7,10 +7,10 @@ import {
     AddLiquidity,
     PoolStateInput,
     Slippage,
+    PoolType,
 } from '../../../src';
 import { CreatePool } from '../../../src/entities/createPool/createPool';
 import { CreatePoolInput } from '../../../src/entities/createPool/types';
-s;
 import { InitPool } from '../../../src/entities/initPool/initPool';
 import { InitPoolInput } from '../../../src/entities/initPool/types';
 

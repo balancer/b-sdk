@@ -160,9 +160,8 @@ export function _calcBptOutGivenExactTokensIn(
 
     if (invariantRatio > WAD) {
         return MathSol.mulDownFixed(bptTotalSupply, invariantRatio - WAD);
-    } else {
-        return 0n;
     }
+    return 0n;
 }
 
 export function _calcTokenInGivenExactBptOut(

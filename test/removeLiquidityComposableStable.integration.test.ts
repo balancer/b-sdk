@@ -45,7 +45,6 @@ const poolId =
 
 describe('composable stable remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
-    let bptToken: Token;
     let poolInput: PoolStateInput;
     beforeAll(async () => {
         // setup mock api
@@ -70,7 +69,6 @@ describe('composable stable remove liquidity test', () => {
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
-        bptToken = new Token(chainId, poolInput.address, 18, 'BPT');
     });
 
     beforeEach(async () => {

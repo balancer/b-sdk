@@ -100,4 +100,4 @@ const addLiquidity = async () => {
     );
 };
 
-export default addLiquidity
+export default addLiquidity;

@@ -1,11 +1,15 @@
 {
+    "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
     "files": {
-        "ignore": ["./node_modules", "dist", "pnpm-lock.yaml", "./local"]
+        "ignore": ["./dist", "./local", "./node_modules", "./pnpm-lock.yaml"]
+    },
+    "organizeImports": {
+        "enabled": false
     },
     "formatter": {
         "enabled": true,
         "indentStyle": "space",
-        "indentSize": 4,
+        "indentWidth": 4,
         "lineWidth": 80
     },
     "linter": {
@@ -14,6 +18,10 @@
             "recommended": true,
             "correctness": {
                 "noUnusedVariables": "error"
+            },
+            "complexity": {
+                "noForEach": "off",
+                "noStaticOnlyClass": "off"
             },
             "performance": {
                 "noDelete": "off"

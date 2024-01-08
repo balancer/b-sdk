@@ -109,18 +109,15 @@ export class Router {
                 path50up.outputAmount.amount + path50down.outputAmount.amount
             ) {
                 return orderedQuotePaths.slice(0, 1);
-            } else {
-                return [path50up, path50down];
             }
-        } else {
-            if (
-                orderedQuotePaths[0].inputAmount.amount <
-                path50up.inputAmount.amount + path50down.inputAmount.amount
-            ) {
-                return orderedQuotePaths.slice(0, 1);
-            } else {
-                return [path50up, path50down];
-            }
+            return [path50up, path50down];
         }
+        if (
+            orderedQuotePaths[0].inputAmount.amount <
+            path50up.inputAmount.amount + path50down.inputAmount.amount
+        ) {
+            return orderedQuotePaths.slice(0, 1);
+        }
+        return [path50up, path50down];
     }
 }

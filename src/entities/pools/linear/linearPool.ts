@@ -296,18 +296,15 @@ export class LinearPool implements BasePool {
             if (tokenOut.isEqual(this.bptToken.token)) {
                 // Swapping to BPT allows for a very large amount so using pre-minted amount as estimation
                 return MAX_TOKEN_BALANCE;
-            } else {
-                const amount = TokenAmount.fromRawAmount(tokenOut, tOut.amount);
+            }
+            const amount = TokenAmount.fromRawAmount(tokenOut, tOut.amount);
 
-                return this.swapGivenOut(tokenIn, tokenOut, amount).amount;
-            }
-        } else {
-            if (tokenOut.isEqual(this.bptToken.token)) {
-                return (tOut.amount * MAX_RATIO) / WAD;
-            } else {
-                return tOut.amount;
-            }
+            return this.swapGivenOut(tokenIn, tokenOut, amount).amount;
         }
+        if (tokenOut.isEqual(this.bptToken.token)) {
+            return (tOut.amount * MAX_RATIO) / WAD;
+        }
+        return tOut.amount;
     }
 
     private _exactMainTokenInForWrappedOut(

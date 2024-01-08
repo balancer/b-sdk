@@ -33,6 +33,7 @@
         "viem": "^1.9.3"
     },
     "devDependencies": {
+        "@biomejs/biome": "^1.4.1",
         "@changesets/cli": "^2.26.1",
         "@types/async-retry": "^1.4.4",
         "@types/lodash": "^4.14.202",
