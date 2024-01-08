@@ -17,8 +17,8 @@
     "files": ["dist/"],
     "scripts": {
         "build": "tsup",
-        "format": "rome format .",
-        "lint": "rome check .",
+        "format": "biome format --write .",
+        "lint": "biome check .",
         "test": "vitest dev",
         "test:ci": "vitest run",
         "changeset": "changeset",
