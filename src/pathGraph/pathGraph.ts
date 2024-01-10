@@ -137,11 +137,17 @@ export class PathGraph {
                     );
                     return { path, limit };
                 } catch (_e) {
-                    console.error('Error getting limit for path', path.map(p => p.pool.id).join(' -> '));
+                    console.error(
+                        'Error getting limit for path',
+                        path.map((p) => p.pool.id).join(' -> '),
+                    );
                     return undefined;
                 }
             })
-            .filter((path): path is { path: PathGraphEdgeData[], limit: bigint } => !!path)
+            .filter(
+                (path): path is { path: PathGraphEdgeData[]; limit: bigint } =>
+                    !!path,
+            )
             .sort((a, b) => (a.limit < b.limit ? 1 : -1));
 
         const filtered: PathGraphEdgeData[][] = [];

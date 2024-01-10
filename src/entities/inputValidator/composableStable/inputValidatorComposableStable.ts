@@ -1,8 +1,8 @@
-import { AddLiquidityInput } from '../../addLiquidity';
+import { AddLiquidityInput } from '../../addLiquidity/types';
 import { CreatePoolComposableStableInput } from '../../createPool/types';
 import { InitPoolInput } from '../../initPool/types';
-import { RemoveLiquidityInput } from '../../removeLiquidity';
-import { PoolStateInput } from '../../types';
+import { RemoveLiquidityInput } from '../../removeLiquidity/types';
+import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
     validateCreatePoolTokens,
@@ -14,7 +14,7 @@ import {
 export class InputValidatorComposableStable implements InputValidatorBase {
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput | InitPoolInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): void {
         validatePoolHasBpt(poolState);
         validateTokensAddLiquidity(addLiquidityInput, poolState);
@@ -22,7 +22,7 @@ export class InputValidatorComposableStable implements InputValidatorBase {
 
     validateRemoveLiquidity(
         input: RemoveLiquidityInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): void {
         validatePoolHasBpt(poolState);
         validateTokensRemoveLiquidity(input, poolState);
@@ -37,7 +37,8 @@ export class InputValidatorComposableStable implements InputValidatorBase {
         }
         if (input.amplificationParameter <= BigInt(0)) {
             throw new Error('Amplification parameter must be greater than 0');
-        } else if (input.amplificationParameter > BigInt(5000)) {
+        }
+        if (input.amplificationParameter > BigInt(5000)) {
             throw new Error(
                 'Amplification parameter must be equal or lower than 5000',
             );

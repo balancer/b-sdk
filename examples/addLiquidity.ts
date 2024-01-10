@@ -36,10 +36,10 @@ const addLiquidity = async () => {
         'https://backend-v3-canary.beets-ftm-node.com/graphql',
         chainId,
     );
-    const poolStateInput = await balancerApi.pools.fetchPoolState(poolId);
+    const poolState = await balancerApi.pools.fetchPoolState(poolId);
 
     // We create arbitrary amounts in but these would usually be set by user
-    const amountsIn = poolStateInput.tokens.map((t) => ({
+    const amountsIn = poolState.tokens.map((t) => ({
         rawAmount: parseUnits('1', t.decimals),
         decimals: t.decimals,
         address: t.address,
@@ -55,10 +55,7 @@ const addLiquidity = async () => {
 
     // Simulate addLiquidity to get the amount of BPT out
     const addLiquidity = new AddLiquidity();
-    const queryOutput = await addLiquidity.query(
-        addLiquidityInput,
-        poolStateInput,
-    );
+    const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
 
     console.log('Add Liquidity Query Output:');
     console.log('Tokens In:');
@@ -96,8 +93,8 @@ const addLiquidity = async () => {
                 rawBalance: a.rawAmount,
             })),
         },
-        poolStateInput,
+        poolState,
     );
 };
 
-export default addLiquidity
+export default addLiquidity;

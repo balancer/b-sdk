@@ -1,8 +1,8 @@
 import { PoolType } from '../../types';
-import { AddLiquidityInput } from '../addLiquidity';
+import { AddLiquidityInput } from '../addLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput } from '../initPool/types';
-import { PoolStateInput } from '../types';
+import { PoolState } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
 import { InputValidatorBase } from './types';
@@ -29,7 +29,7 @@ export class InputValidator {
 
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput | InitPoolInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): void {
         this.getValidator(poolState.type).validateAddLiquidity(
             addLiquidityInput,
@@ -44,7 +44,7 @@ export class InputValidator {
         );
     }
 
-    validateCreatePool(poolType: string, input: CreatePoolInput): void {
-        this.getValidator(poolType).validateCreatePool(input);
+    validateCreatePool(input: CreatePoolInput): void {
+        this.getValidator(input.poolType).validateCreatePool(input);
     }
 }

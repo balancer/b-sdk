@@ -2,7 +2,7 @@ import { Hex, parseEther } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
 import { Token } from '../../token';
 import { TokenAmount, BigintIsh } from '../../tokenAmount';
-import { BasePool } from '../';
+import { BasePool } from '..';
 import { MathSol, WAD, getPoolAddress } from '../../../utils';
 import { _calcOutGivenIn, _calcInGivenOut } from './weightedMath';
 import { RawWeightedPool } from '../../../data/types';
@@ -115,9 +115,8 @@ export class WeightedPool implements BasePool {
 
         if (swapKind === SwapKind.GivenIn) {
             return (tIn.amount * this.MAX_IN_RATIO) / WAD;
-        } else {
-            return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
         }
+        return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
     }
 
     public swapGivenIn(

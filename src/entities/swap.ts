@@ -17,7 +17,7 @@ import {
     getContract,
     http,
 } from 'viem';
-import { balancerQueriesAbi } from '../abi/';
+import { balancerQueriesAbi } from '../abi';
 import { PriceImpactAmount } from './priceImpactAmount';
 import cloneDeep from 'lodash/cloneDeep';
 

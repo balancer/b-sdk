@@ -1,5 +1,6 @@
-import { defineConfig } from 'vitest/config';
 import { loadEnv } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
@@ -20,10 +21,12 @@ export default defineConfig(({ mode }) => {
             hookTimeout: 30_000,
             setupFiles: ['/test/vitest-setup.ts'],
             globals: true,
+            pool: 'forks',
             // Uncomment to debug suite excluding some tests
             // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
             // Uncomment to run integration tests sequentially
             // threads: false,
         },
+        plugins: [tsconfigPaths()],
     };
 });

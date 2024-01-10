@@ -5,8 +5,7 @@ export function replaceWrapped(tokens: Token[], chainId: number): Token[] {
     return tokens.map((token) => {
         if (token.isUnderlyingEqual(NATIVE_ASSETS[chainId])) {
             return new Token(chainId, ZERO_ADDRESS, 18);
-        } else {
-            return token;
         }
+        return token;
     });
 }

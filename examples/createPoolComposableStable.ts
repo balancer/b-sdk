@@ -14,7 +14,7 @@ import {
     zeroAddress,
 } from 'viem';
 import { CreatePoolComposableStableInput } from '../src/entities/createPool/types';
-import { CreatePool } from '../src/entities/createPool/createPool';
+import { CreatePool } from '../src/entities/createPool';
 import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
 import {
     CHAINS,

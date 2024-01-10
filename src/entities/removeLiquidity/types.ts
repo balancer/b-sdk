@@ -51,6 +51,7 @@ export type RemoveLiquidityBaseQueryOutput = {
     amountsOut: TokenAmount[];
     tokenOutIndex?: number;
     toInternalBalance: boolean;
+    balancerVersion: 2 | 3;
 };
 
 export type RemoveLiquidityComposableStableQueryOutput =

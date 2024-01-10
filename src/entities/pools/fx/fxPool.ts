@@ -2,7 +2,7 @@ import { Hex, parseEther, parseUnits } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
-import { BasePool } from '../../pools';
+import { BasePool } from '..';
 import { RAY, getPoolAddress } from '../../../utils';
 import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
 import { RawFxPool } from '../../../data/types';
@@ -209,10 +209,9 @@ export class FxPool implements BasePool {
         if (swapKind === SwapKind.GivenIn) {
             const maxAmount = maxLimit - tIn.numeraire;
             return FxPoolToken.fromNumeraire(tIn, maxAmount).amount;
-        } else {
-            const maxAmount = maxLimit - tOut.numeraire;
-            return FxPoolToken.fromNumeraire(tOut, maxAmount).amount;
         }
+        const maxAmount = maxLimit - tOut.numeraire;
+        return FxPoolToken.fromNumeraire(tOut, maxAmount).amount;
     }
 
     public getPoolPairData(

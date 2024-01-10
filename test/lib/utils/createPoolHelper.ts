@@ -14,7 +14,7 @@ export async function doCreatePool(
 ): Promise<Address> {
     const { client, createPool, createPoolInput, testAddress } = txInput;
 
-    const { call } = createPool.buildCall(txInput.poolType, createPoolInput);
+    const { call } = createPool.buildCall(createPoolInput);
     const chainId = await client.getChainId();
 
     const factories = {
@@ -29,7 +29,7 @@ export async function doCreatePool(
     };
 
     const hash = await client.sendTransaction({
-        to: factories[txInput.poolType].address,
+        to: factories[createPoolInput.poolType].address,
         data: call,
         account: testAddress,
         chain: client.chain,
@@ -42,8 +42,8 @@ export async function doCreatePool(
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: factories[txInput.poolType].abi,
-        to: factories[txInput.poolType].address,
+        abi: factories[createPoolInput.poolType].abi,
+        to: factories[createPoolInput.poolType].address,
     });
 
     const {

@@ -8,7 +8,7 @@ import {
 } from 'viem';
 import { CHAINS } from '../../utils';
 import { InputAmountInit, PoolType } from '../../types';
-import { PoolStateInput } from '../../entities';
+import { PoolState } from '../../entities';
 import { sortTokensByAddress } from '../../utils/tokens';
 
 export class InitPoolDataProvider {
@@ -44,7 +44,7 @@ export class InitPoolDataProvider {
         poolAddress: Address,
         poolType: PoolType,
         amounts: InputAmountInit[],
-    ): Promise<PoolStateInput> {
+    ): Promise<PoolState> {
         const poolContract = getContract({
             abi: this.simplePoolAbi,
             address: poolAddress,
@@ -80,6 +80,7 @@ export class InitPoolDataProvider {
                 address: poolAddress.toLowerCase() as Address,
                 type: poolType,
                 tokens: tokensPerPoolType[poolType],
+                balancerVersion: 2, // TODO V3: instantiate a different provider for V3? Or add a config/input to this one? Will the interface be the same?
             };
         } catch (e) {
             console.warn(e);

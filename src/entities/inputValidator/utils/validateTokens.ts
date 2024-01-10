@@ -1,15 +1,15 @@
-import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity';
+import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
 import { InitPoolInput } from '../../initPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-} from '../../removeLiquidity';
-import { PoolStateInput } from '../../types';
+} from '../../removeLiquidity/types';
+import { PoolState } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
 export const validateTokensAddLiquidity = (
     addLiquidityInput: AddLiquidityInput | InitPoolInput,
-    poolState: PoolStateInput,
+    poolState: PoolState,
 ) => {
     switch (addLiquidityInput.kind) {
         case AddLiquidityKind.Unbalanced:
@@ -23,11 +23,13 @@ export const validateTokensAddLiquidity = (
                 [addLiquidityInput.tokenIn],
                 poolState.tokens.map((t) => t.address),
             );
+            break;
         case AddLiquidityKind.Proportional:
             areTokensInArray(
                 [addLiquidityInput.bptOut.address],
                 [poolState.address],
             );
+            break;
         default:
             break;
     }
@@ -35,7 +37,7 @@ export const validateTokensAddLiquidity = (
 
 export const validateTokensRemoveLiquidity = (
     removeLiquidityInput: RemoveLiquidityInput,
-    poolState: PoolStateInput,
+    poolState: PoolState,
 ) => {
     switch (removeLiquidityInput.kind) {
         case RemoveLiquidityKind.Unbalanced:
@@ -49,17 +51,19 @@ export const validateTokensRemoveLiquidity = (
                 [removeLiquidityInput.tokenOut],
                 poolState.tokens.map((t) => t.address),
             );
+            break;
         case RemoveLiquidityKind.Proportional:
             areTokensInArray(
                 [removeLiquidityInput.bptIn.address],
                 [poolState.address],
             );
+            break;
         default:
             break;
     }
 };
 
-export const validatePoolHasBpt = (poolState: PoolStateInput) => {
+export const validatePoolHasBpt = (poolState: PoolState) => {
     const { tokens, address } = poolState;
     const bptIndex = tokens.findIndex((t) => t.address === address);
     if (bptIndex < 0) {

@@ -1,4 +1,4 @@
-import { BasePool, BasePoolFactory } from './';
+import { BasePool, BasePoolFactory } from '.';
 import { WeightedPoolFactory } from './weighted';
 import { StablePoolFactory } from './stable';
 import { MetaStablePoolFactory } from './metastable';

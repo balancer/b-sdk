@@ -1,21 +1,21 @@
 import { formatUnits } from 'viem';
 import { MathSol, abs, max, min } from '../../utils';
+import { AddLiquidity } from '../addLiquidity';
 import {
-    AddLiquidity,
     AddLiquidityKind,
     AddLiquiditySingleTokenInput,
     AddLiquidityUnbalancedInput,
-} from '../addLiquidity';
+} from '../addLiquidity/types';
 import { PriceImpactAmount } from '../priceImpactAmount';
+import { RemoveLiquidity } from '../removeLiquidity';
 import {
-    RemoveLiquidity,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquiditySingleTokenInput,
     RemoveLiquidityUnbalancedInput,
-} from '../removeLiquidity';
+} from '../removeLiquidity/types';
 import { TokenAmount } from '../tokenAmount';
-import { PoolStateInput } from '../types';
+import { PoolState } from '../types';
 import { getSortedTokens } from '../utils';
 import { SingleSwap, SwapKind } from '../../types';
 import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
@@ -23,7 +23,7 @@ import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
 export class PriceImpact {
     static addLiquiditySingleToken = async (
         input: AddLiquiditySingleTokenInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within AddLiquidity
 
@@ -60,7 +60,7 @@ export class PriceImpact {
 
     static addLiquidityUnbalanced = async (
         input: AddLiquidityUnbalancedInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within AddLiquidity
 
@@ -160,6 +160,11 @@ export class PriceImpact {
                     userData: '0x',
                 };
 
+                /**
+                 * TODO V3: right now swap exists only as part of the SOR.
+                 * We could make it a proper entity with v2/v3 variations and
+                 * consume it here as a higher level abstraction.
+                 */
                 const resultAmount = await doSingleSwapQuery({
                     ...singleSwap,
                     rpcUrl: input.rpcUrl,
@@ -197,7 +202,7 @@ export class PriceImpact {
 
     static removeLiquidity = async (
         input: RemoveLiquiditySingleTokenInput | RemoveLiquidityUnbalancedInput,
-        poolState: PoolStateInput,
+        poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within RemoveLiquidity
 

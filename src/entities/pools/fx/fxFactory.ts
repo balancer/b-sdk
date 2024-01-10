@@ -1,4 +1,4 @@
-import { BasePool, BasePoolFactory } from '../';
+import { BasePool, BasePoolFactory } from '..';
 import { FxPool } from './fxPool';
 import { RawFxPool, RawPool } from '../../../data/types';
 
