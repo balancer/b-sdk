@@ -15,6 +15,7 @@ export enum PoolType {
     AaveLinear = 'AaveLinear',
     Fx = 'FX',
     Gyro2 = 'Gyro2',
+    Gyro3 = 'Gyro3',
     GyroE = 'GyroE',
 }
 
@@ -63,8 +64,17 @@ export interface BatchSwapStep {
     userData: Hex;
 }
 
-export type InputAmount = {
+export type InputToken = {
     address: Address;
     decimals: number;
+};
+
+export type InputAmount = InputToken & {
     rawAmount: bigint;
+};
+
+export type InputAmountInit = InputAmount | InputAmountInitWeighted;
+
+export type InputAmountInitWeighted = InputAmount & {
+    weight: bigint;
 };

@@ -65,8 +65,8 @@ export class MathGyro {
     static mulUpMagU(a: bigint, b: bigint): bigint {
         const product = a * b;
         if (product > 0n) return (product - 1n) / WAD + 1n;
-        else if (product < 0n) return (product + 1n) / WAD - 1n;
-        else return 0n;
+        if (product < 0n) return (product + 1n) / WAD - 1n;
+        return 0n;
     }
 
     static divUpMagU(a: bigint, b: bigint): bigint {
@@ -113,7 +113,7 @@ export class MathGyro {
         if (input === 0n) {
             return 0n;
         }
-        let guess = this.makeInitialGuess(input);
+        let guess = MathGyro.makeInitialGuess(input);
 
         // 7 iterations
         for (let i = 0; i < 7; i++) {
@@ -124,8 +124,8 @@ export class MathGyro {
         const guessSquared = (guess * guess) / WAD;
         if (
             !(
-                guessSquared <= input + this.mulUp(guess, tolerance) &&
-                guessSquared >= input - this.mulUp(guess, tolerance)
+                guessSquared <= input + MathGyro.mulUp(guess, tolerance) &&
+                guessSquared >= input - MathGyro.mulUp(guess, tolerance)
             )
         )
             throw new Error('GyroEPool: sqrt failed');
@@ -135,61 +135,60 @@ export class MathGyro {
 
     static makeInitialGuess(input: bigint) {
         if (input > WAD) {
-            return 2n ** this.intLog2Halved(input / WAD) * WAD;
-        } else {
-            if (input <= 10n) {
-                return SQRT_1E_NEG_17;
-            }
-            if (input <= 100n) {
-                return 10000000000n;
-            }
-            if (input <= 1000n) {
-                return SQRT_1E_NEG_15;
-            }
-            if (input <= 10000n) {
-                return 100000000000n;
-            }
-            if (input <= 100000n) {
-                return SQRT_1E_NEG_13;
-            }
-            if (input <= 1000000n) {
-                return 1000000000000n;
-            }
-            if (input <= 10000000n) {
-                return SQRT_1E_NEG_11;
-            }
-            if (input <= 100000000n) {
-                return 10000000000000n;
-            }
-            if (input <= 1000000000n) {
-                return SQRT_1E_NEG_9;
-            }
-            if (input <= 10000000000n) {
-                return 100000000000000n;
-            }
-            if (input <= 100000000000n) {
-                return SQRT_1E_NEG_7;
-            }
-            if (input <= 1000000000000n) {
-                return 1000000000000000n;
-            }
-            if (input <= 10000000000000n) {
-                return SQRT_1E_NEG_5;
-            }
-            if (input <= 100000000000000n) {
-                return 10000000000000000n;
-            }
-            if (input <= 1000000000000000n) {
-                return SQRT_1E_NEG_3;
-            }
-            if (input <= 10000000000000000n) {
-                return 100000000000000000n;
-            }
-            if (input <= 100000000000000000n) {
-                return SQRT_1E_NEG_1;
-            }
-            return input;
+            return 2n ** MathGyro.intLog2Halved(input / WAD) * WAD;
         }
+        if (input <= 10n) {
+            return SQRT_1E_NEG_17;
+        }
+        if (input <= 100n) {
+            return 10000000000n;
+        }
+        if (input <= 1000n) {
+            return SQRT_1E_NEG_15;
+        }
+        if (input <= 10000n) {
+            return 100000000000n;
+        }
+        if (input <= 100000n) {
+            return SQRT_1E_NEG_13;
+        }
+        if (input <= 1000000n) {
+            return 1000000000000n;
+        }
+        if (input <= 10000000n) {
+            return SQRT_1E_NEG_11;
+        }
+        if (input <= 100000000n) {
+            return 10000000000000n;
+        }
+        if (input <= 1000000000n) {
+            return SQRT_1E_NEG_9;
+        }
+        if (input <= 10000000000n) {
+            return 100000000000000n;
+        }
+        if (input <= 100000000000n) {
+            return SQRT_1E_NEG_7;
+        }
+        if (input <= 1000000000000n) {
+            return 1000000000000000n;
+        }
+        if (input <= 10000000000000n) {
+            return SQRT_1E_NEG_5;
+        }
+        if (input <= 100000000000000n) {
+            return 10000000000000000n;
+        }
+        if (input <= 1000000000000000n) {
+            return SQRT_1E_NEG_3;
+        }
+        if (input <= 10000000000000000n) {
+            return 100000000000000000n;
+        }
+        if (input <= 100000000000000000n) {
+            return SQRT_1E_NEG_1;
+        }
+        return input;
     }
 
     static intLog2Halved(x: bigint) {

@@ -230,9 +230,8 @@ export class MetaStablePool implements BasePool {
             // Return max valid amount of tokenIn
             // As an approx - use almost the total balance of token out as we can add any amount of tokenIn and expect some back
             return (tIn.amount * WAD) / tIn.rate;
-        } else {
-            // Return max amount of tokenOut - approx is almost all balance
-            return (tOut.amount * WAD) / tOut.rate;
         }
+        // Return max amount of tokenOut - approx is almost all balance
+        return (tOut.amount * WAD) / tOut.rate;
     }
 }

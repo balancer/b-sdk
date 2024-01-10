@@ -11,16 +11,11 @@ export enum AddLiquidityKind {
 }
 
 // This will be extended for each pools specific input requirements
-type AddLiquidityBaseInput = {
+export type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
     useNativeAssetAsWrappedAmountIn?: boolean;
     fromInternalBalance?: boolean;
-};
-
-export type AddLiquidityInitInput = AddLiquidityBaseInput & {
-    amountsIn: InputAmount[];
-    kind: AddLiquidityKind.Init;
 };
 
 export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {
@@ -40,7 +35,6 @@ export type AddLiquidityProportionalInput = AddLiquidityBaseInput & {
 };
 
 export type AddLiquidityInput =
-    | AddLiquidityInitInput
     | AddLiquidityUnbalancedInput
     | AddLiquiditySingleTokenInput
     | AddLiquidityProportionalInput;
@@ -53,6 +47,7 @@ type AddLiquidityBaseQueryOutput = {
     amountsIn: TokenAmount[];
     fromInternalBalance: boolean;
     tokenInIndex?: number;
+    balancerVersion: 2 | 3;
 };
 
 export type AddLiquidityWeightedQueryOutput = AddLiquidityBaseQueryOutput;
@@ -86,13 +81,7 @@ export interface AddLiquidityBase {
         input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<AddLiquidityQueryOutput>;
-    buildCall(input: AddLiquidityCall): {
-        call: Hex;
-        to: Address;
-        value: bigint;
-        minBptOut: TokenAmount;
-        maxAmountsIn: TokenAmount[];
-    };
+    buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput;
 }
 
 export type AddLiquidityBuildOutput = {

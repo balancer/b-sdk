@@ -6,15 +6,9 @@ import { Token } from './token';
 export type PoolState = {
     id: Hex;
     address: Address;
-    type: string; // TODO: refactor this to PoolType on a separate PR
-    tokens: Token[];
-};
-
-export type PoolStateInput = {
-    id: Hex;
-    address: Address;
     type: string;
     tokens: MinimalToken[];
+    balancerVersion: 2 | 3;
 };
 
 export type AddLiquidityAmounts = {
@@ -52,3 +46,10 @@ export enum PoolKind {
     COMPOSABLE_STABLE_V2 = 3,
     // (note only Weighted and COMPOSABLE_STABLE_V2 will support proportional exits)
 }
+export type InitPoolAmounts = {
+    maxAmountsIn: bigint[];
+};
+
+export type InitPoolAmountsComposableStable = InitPoolAmounts & {
+    amountsIn: bigint[];
+};

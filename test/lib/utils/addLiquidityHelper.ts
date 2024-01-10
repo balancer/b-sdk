@@ -1,7 +1,7 @@
 import {
     AddLiquidity,
     AddLiquidityInput,
-    PoolStateInput,
+    PoolState,
     Slippage,
     Address,
     AddLiquidityBuildOutput,
@@ -30,13 +30,13 @@ type AddLiquidityOutput = {
 async function sdkAddLiquidity({
     addLiquidity,
     addLiquidityInput,
-    poolStateInput,
+    poolState,
     slippage,
     testAddress,
 }: {
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
-    poolStateInput: PoolStateInput;
+    poolState: PoolState;
     slippage: Slippage;
     testAddress: Address;
 }): Promise<{
@@ -45,7 +45,7 @@ async function sdkAddLiquidity({
 }> {
     const addLiquidityQueryOutput = await addLiquidity.query(
         addLiquidityInput,
-        poolStateInput,
+        poolState,
     );
     const addLiquidityBuildOutput = addLiquidity.buildCall({
         ...addLiquidityQueryOutput,
@@ -73,34 +73,31 @@ function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
     if (isAddLiquidityComposableStableQueryOutput(output)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+            // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { bptOut, bptIndex, ...check } =
                 output as AddLiquidityComposableStableQueryOutput;
             return check;
-        } else {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { amountsIn, bptIndex, ...check } =
-                output as AddLiquidityComposableStableQueryOutput;
-            return check;
         }
-    } else {
-        if (isExactIn) {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { bptOut, ...check } = output;
-            return check;
-        } else {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { amountsIn, ...check } = output;
-            return check;
-        }
+        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+        const { amountsIn, bptIndex, ...check } =
+        output as AddLiquidityComposableStableQueryOutput;
+        return check;
     }
+    if (isExactIn) {
+        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+        const { bptOut, ...check } = output;
+        return check;
+    }
+    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+    const { amountsIn, ...check } = output;
+    return check;
 }
 
 /**
  * Create and submit add liquidity transaction.
  * @param txInput
  *      @param addLiquidity: AddLiquidity - The add liquidity class, used to query outputs and build transaction call
- *      @param poolInput: PoolStateInput - The state of the pool
+ *      @param poolInput: PoolState - The state of the pool
  *      @param addLiquidityInput: AddLiquidityInput - The parameters of the transaction, example: bptOut, amountsIn, etc.
  *      @param testAddress: Address - The address to send the transaction from
  *      @param client: Client & PublicActions & WalletActions - The RPC client
@@ -109,7 +106,7 @@ function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
 export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
     const {
         addLiquidity,
-        poolStateInput,
+        poolState,
         addLiquidityInput,
         testAddress,
         client,
@@ -120,12 +117,12 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
         await sdkAddLiquidity({
             addLiquidity,
             addLiquidityInput,
-            poolStateInput,
+            poolState,
             slippage,
             testAddress,
         });
 
-    const tokens = getTokensForBalanceCheck(poolStateInput);
+    const tokens = getTokensForBalanceCheck(poolState);
 
     // send transaction and calculate balance changes
     const txOutput = await sendTransactionGetBalances(
@@ -146,7 +143,7 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
 
 export function assertAddLiquidityUnbalanced(
     chainId: ChainId,
-    poolStateInput: PoolStateInput,
+    poolState: PoolState,
     addLiquidityInput: AddLiquidityUnbalancedInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
@@ -155,8 +152,8 @@ export function assertAddLiquidityUnbalanced(
         addLiquidityOutput;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
-    const expectedAmountsIn = poolStateInput.tokens.map((t) => {
-        let token;
+    const expectedAmountsIn = poolState.tokens.map((t) => {
+        let token: Token;
         if (
             addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             t.address === NATIVE_ASSETS[chainId].wrapped
@@ -167,7 +164,7 @@ export function assertAddLiquidityUnbalanced(
             (a) => a.address === t.address,
         );
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
-        else return TokenAmount.fromRawAmount(token, input.rawAmount);
+        return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
     const expectedQueryOutput: Omit<
@@ -178,10 +175,11 @@ export function assertAddLiquidityUnbalanced(
         amountsIn: expectedAmountsIn,
         tokenInIndex: undefined,
         // Should match inputs
-        poolId: poolStateInput.id,
-        poolType: poolStateInput.type,
+        poolId: poolState.id,
+        poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, true);
@@ -200,7 +198,7 @@ export function assertAddLiquidityUnbalanced(
     );
 
     assertTokenDeltas(
-        poolStateInput,
+        poolState,
         addLiquidityInput,
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
@@ -210,7 +208,7 @@ export function assertAddLiquidityUnbalanced(
 
 export function assertAddLiquiditySingleToken(
     chainId: ChainId,
-    poolStateInput: PoolStateInput,
+    poolState: PoolState,
     addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
@@ -221,10 +219,10 @@ export function assertAddLiquiditySingleToken(
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
         throw Error('No index');
 
-    const bptToken = new Token(chainId, poolStateInput.address, 18);
+    const bptToken = new Token(chainId, poolState.address, 18);
 
-    const tokensWithoutBpt = poolStateInput.tokens.filter(
-        (t) => t.address !== poolStateInput.address,
+    const tokensWithoutBpt = poolState.tokens.filter(
+        (t) => t.address !== poolState.address,
     );
 
     const expectedQueryOutput: Omit<
@@ -240,10 +238,11 @@ export function assertAddLiquiditySingleToken(
             (t) => t.address === addLiquidityInput.tokenIn,
         ),
         // Should match inputs
-        poolId: poolStateInput.id,
-        poolType: poolStateInput.type,
+        poolId: poolState.id,
+        poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, false);
@@ -275,7 +274,7 @@ export function assertAddLiquiditySingleToken(
     );
 
     assertTokenDeltas(
-        poolStateInput,
+        poolState,
         addLiquidityInput,
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
@@ -285,7 +284,7 @@ export function assertAddLiquiditySingleToken(
 
 export function assertAddLiquidityProportional(
     chainId: ChainId,
-    poolStateInput: PoolStateInput,
+    poolState: PoolState,
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
@@ -293,7 +292,7 @@ export function assertAddLiquidityProportional(
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         addLiquidityOutput;
 
-    const bptToken = new Token(chainId, poolStateInput.address, 18);
+    const bptToken = new Token(chainId, poolState.address, 18);
 
     const expectedQueryOutput: Omit<
         AddLiquidityQueryOutput,
@@ -307,10 +306,11 @@ export function assertAddLiquidityProportional(
         // Only expect tokenInIndex for AddLiquiditySingleToken
         tokenInIndex: undefined,
         // Should match inputs
-        poolId: poolStateInput.id,
-        poolType: poolStateInput.type,
+        poolId: poolState.id,
+        poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, false);
@@ -319,8 +319,7 @@ export function assertAddLiquidityProportional(
 
     // Expect all assets in to have an amount > 0 apart from BPT if it exists
     addLiquidityQueryOutput.amountsIn.forEach((a) => {
-        if (a.token.address === poolStateInput.address)
-            expect(a.amount).toEqual(0n);
+        if (a.token.address === poolState.address) expect(a.amount).toEqual(0n);
         else expect(a.amount > 0n).to.be.true;
     });
 
@@ -333,7 +332,7 @@ export function assertAddLiquidityProportional(
     );
 
     assertTokenDeltas(
-        poolStateInput,
+        poolState,
         addLiquidityInput,
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
@@ -342,7 +341,7 @@ export function assertAddLiquidityProportional(
 }
 
 function assertTokenDeltas(
-    poolStateInput: PoolStateInput,
+    poolState: PoolState,
     addLiquidityInput: AddLiquidityInput,
     addLiquidityQueryOutput: AddLiquidityQueryOutput,
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
@@ -352,7 +351,7 @@ function assertTokenDeltas(
 
     // addLiquidityQueryOutput amountsIn will have a value for the BPT token if it is a pre-minted pool
     const amountsWithoutBpt = [...addLiquidityQueryOutput.amountsIn].filter(
-        (t) => t.token.address !== poolStateInput.address,
+        (t) => t.token.address !== poolState.address,
     );
 
     // Matching order of getTokens helper: [poolTokens, BPT, native]
@@ -409,7 +408,7 @@ function assertAddLiquidityBuildOutput(
             : 0n,
     };
 
-    // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { call, ...buildCheck } = addLiquidityBuildOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

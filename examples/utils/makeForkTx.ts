@@ -1,4 +1,4 @@
-import { CHAINS, PoolStateInput } from '../../src';
+import { CHAINS, PoolState } from '../../src';
 import {
     createTestClient,
     http,
@@ -29,7 +29,7 @@ type ForkToken = {
  * @param tx
  * @param impersonateAccount
  * @param rpcUrl
- * @param poolStateInput
+ * @param poolState
  * @param forkTokens
  */
 export async function makeForkTx(
@@ -40,7 +40,7 @@ export async function makeForkTx(
         impersonateAccount: Address;
         forkTokens: ForkToken[];
     },
-    poolStateInput: PoolStateInput,
+    poolState: PoolState,
 ) {
     const client = createTestClient({
         mode: 'anvil',
@@ -61,8 +61,8 @@ export async function makeForkTx(
     console.log('\nSending tx...');
 
     const tokensForBalanceCheck = [
-        ...poolStateInput.tokens.map(({ address }) => address),
-        poolStateInput.address,
+        ...poolState.tokens.map(({ address }) => address),
+        poolState.address,
     ];
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(

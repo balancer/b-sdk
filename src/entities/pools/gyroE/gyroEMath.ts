@@ -24,9 +24,8 @@ export function calculateNormalizedLiquidity(
 ): bigint {
     if (tokenInIsToken0) {
         return normalizedLiquidityXIn(balances, params, derived, fee, r);
-    } else {
-        return normalizedLiquidityYIn(balances, params, derived, fee, r);
     }
+    return normalizedLiquidityYIn(balances, params, derived, fee, r);
 }
 
 export function calculateInvariantWithError(

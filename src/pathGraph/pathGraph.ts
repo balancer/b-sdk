@@ -130,12 +130,24 @@ export class PathGraph {
     ): PathGraphEdgeData[][] {
         const pathsWithLimits = paths
             .map((path) => {
-                const limit = this.getLimitAmountSwapForPath(
-                    path,
-                    SwapKind.GivenIn,
-                );
-                return { path, limit };
+                try {
+                    const limit = this.getLimitAmountSwapForPath(
+                        path,
+                        SwapKind.GivenIn,
+                    );
+                    return { path, limit };
+                } catch (_e) {
+                    console.error(
+                        'Error getting limit for path',
+                        path.map((p) => p.pool.id).join(' -> '),
+                    );
+                    return undefined;
+                }
             })
+            .filter(
+                (path): path is { path: PathGraphEdgeData[]; limit: bigint } =>
+                    !!path,
+            )
             .sort((a, b) => (a.limit < b.limit ? 1 : -1));
 
         const filtered: PathGraphEdgeData[][] = [];

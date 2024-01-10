@@ -1,6 +1,6 @@
 import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
-import { sleep } from '../lib/utils/promises';
 import { ChainId } from '../../src/utils/constants';
+import { sleep } from '../lib/utils/promises';
 
 type NetworkSetup = {
     rpcEnv: string;
