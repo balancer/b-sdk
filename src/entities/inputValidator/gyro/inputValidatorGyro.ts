@@ -1,9 +1,9 @@
-import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity';
+import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
 import { CreatePoolWeightedInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-} from '../../removeLiquidity';
+} from '../../removeLiquidity/types';
 import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
 import {

@@ -11,8 +11,6 @@ import { InputValidator } from '../inputValidator/inputValidator';
 import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
 
-export * from './types';
-
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
 

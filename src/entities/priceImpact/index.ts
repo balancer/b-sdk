@@ -1,19 +1,19 @@
 import { formatUnits } from 'viem';
 import { MathSol, abs, max, min } from '../../utils';
+import { AddLiquidity } from '../addLiquidity';
 import {
-    AddLiquidity,
     AddLiquidityKind,
     AddLiquiditySingleTokenInput,
     AddLiquidityUnbalancedInput,
-} from '../addLiquidity';
+} from '../addLiquidity/types';
 import { PriceImpactAmount } from '../priceImpactAmount';
+import { RemoveLiquidity } from '../removeLiquidity';
 import {
-    RemoveLiquidity,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquiditySingleTokenInput,
     RemoveLiquidityUnbalancedInput,
-} from '../removeLiquidity';
+} from '../removeLiquidity/types';
 import { TokenAmount } from '../tokenAmount';
 import { PoolState } from '../types';
 import { getSortedTokens } from '../utils';

@@ -45,7 +45,7 @@ type Result =
 type Results = Result[];
 
 // Extract the functionName property values into a union type
-type FunctionNameUnion = (typeof abi)[number]['name'];
+type FunctionNameUnion = string;
 
 type BuildReturn = {
     address: Address;
