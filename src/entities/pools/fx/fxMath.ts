@@ -39,8 +39,8 @@ const calculateMicroFee = (
     _beta: bigint,
     _delta: bigint,
 ): bigint => {
-    let _threshold;
-    let _feeMargin;
+    let _threshold: bigint;
+    let _feeMargin: bigint;
     let fee_ = 0n;
 
     if (_bal < _ideal) {

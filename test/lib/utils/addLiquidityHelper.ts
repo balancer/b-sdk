@@ -153,7 +153,7 @@ export function assertAddLiquidityUnbalanced(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsIn = poolState.tokens.map((t) => {
-        let token;
+        let token: Token;
         if (
             addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             t.address === NATIVE_ASSETS[chainId].wrapped

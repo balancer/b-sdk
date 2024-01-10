@@ -146,7 +146,7 @@ export function assertRemoveLiquidityUnbalanced(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsOut = poolState.tokens.map((t) => {
-        let token;
+        let token: Token;
         if (
             removeLiquidityInput.toNativeAsset &&
             t.address === NATIVE_ASSETS[chainId].wrapped

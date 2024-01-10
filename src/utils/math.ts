@@ -192,7 +192,7 @@ class LogExpMath {
         _require(y < LogExpMath.MILD_EXPONENT_BOUND, 'Errors.Y_OUT_OF_BOUNDS');
         const y_int256 = y;
 
-        let logx_times_y;
+        let logx_times_y: bigint;
         if (
             LogExpMath.LN_36_LOWER_BOUND < x_int256 &&
             x_int256 < LogExpMath.LN_36_UPPER_BOUND
@@ -311,7 +311,7 @@ class LogExpMath {
         // expansion for e^x: 1 + x + (x^2 / 2!) + (x^3 / 3!) + ... + (x^n / n!).
 
         let seriesSum = HUNDRED_WAD; // The initial one in the sum, with 20 decimal places.
-        let term; // Each term in the sum, where the nth term is (x^n / n!).
+        let term: bigint; // Each term in the sum, where the nth term is (x^n / n!).
 
         // The first term is simply x.
         term = x;
