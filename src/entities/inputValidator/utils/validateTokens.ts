@@ -1,9 +1,9 @@
-import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity';
+import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
 import { InitPoolInput } from '../../initPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-} from '../../removeLiquidity';
+} from '../../removeLiquidity/types';
 import { PoolState } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
@@ -23,11 +23,13 @@ export const validateTokensAddLiquidity = (
                 [addLiquidityInput.tokenIn],
                 poolState.tokens.map((t) => t.address),
             );
+            break;
         case AddLiquidityKind.Proportional:
             areTokensInArray(
                 [addLiquidityInput.bptOut.address],
                 [poolState.address],
             );
+            break;
         default:
             break;
     }
@@ -49,11 +51,13 @@ export const validateTokensRemoveLiquidity = (
                 [removeLiquidityInput.tokenOut],
                 poolState.tokens.map((t) => t.address),
             );
+            break;
         case RemoveLiquidityKind.Proportional:
             areTokensInArray(
                 [removeLiquidityInput.bptIn.address],
                 [poolState.address],
             );
+            break;
         default:
             break;
     }

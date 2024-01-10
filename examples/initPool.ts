@@ -1,8 +1,8 @@
 import { parseEther, parseUnits } from 'viem';
 import { AddLiquidityKind, ChainId, PoolType } from '../src';
+import { InitPoolDataProvider } from '../src/data/providers/initPoolDataProvider';
 import { InitPool } from '../src/entities/initPool';
 import { InitPoolInput } from '../src/entities/initPool/types';
-import { InitPoolDataProvider } from '../src/data/providers/initPoolDataProvider';
 import {
     forkSetup,
     sendTransactionGetBalances,

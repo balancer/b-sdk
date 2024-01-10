@@ -1,5 +1,5 @@
 const AMP_PRECISION = 1000n;
-import { MathSol, WAD } from '../../../utils/';
+import { MathSol, WAD } from '../../../utils';
 
 export function _calculateInvariant(
     amplificationParameter: bigint,
@@ -160,9 +160,8 @@ export function _calcBptOutGivenExactTokensIn(
 
     if (invariantRatio > WAD) {
         return MathSol.mulDownFixed(bptTotalSupply, invariantRatio - WAD);
-    } else {
-        return 0n;
     }
+    return 0n;
 }
 
 export function _calcTokenInGivenExactBptOut(

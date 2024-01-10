@@ -5,7 +5,7 @@ import {
     ProviderSwapOptions,
     VAULT,
 } from '../src';
-// rome-ignore lint/correctness/noUnusedVariables: <this is a test file>
+// biome-ignore lint/correctness/noUnusedVariables: <this is a test file>
 import { mainnet, polygonZkEvm } from 'viem/chains';
 
 const chain = polygonZkEvm;

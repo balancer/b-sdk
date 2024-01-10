@@ -1,19 +1,19 @@
 import { formatUnits } from 'viem';
 import { MathSol, abs, max, min } from '../../utils';
+import { AddLiquidity } from '../addLiquidity';
 import {
-    AddLiquidity,
     AddLiquidityKind,
     AddLiquiditySingleTokenInput,
     AddLiquidityUnbalancedInput,
-} from '../addLiquidity';
+} from '../addLiquidity/types';
 import { PriceImpactAmount } from '../priceImpactAmount';
+import { RemoveLiquidity } from '../removeLiquidity';
 import {
-    RemoveLiquidity,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquiditySingleTokenInput,
     RemoveLiquidityUnbalancedInput,
-} from '../removeLiquidity';
+} from '../removeLiquidity/types';
 import { TokenAmount } from '../tokenAmount';
 import { PoolState } from '../types';
 import { getSortedTokens } from '../utils';
@@ -160,6 +160,11 @@ export class PriceImpact {
                     userData: '0x',
                 };
 
+                /**
+                 * TODO V3: right now swap exists only as part of the SOR.
+                 * We could make it a proper entity with v2/v3 variations and
+                 * consume it here as a higher level abstraction.
+                 */
                 const resultAmount = await doSingleSwapQuery({
                     ...singleSwap,
                     rpcUrl: input.rpcUrl,

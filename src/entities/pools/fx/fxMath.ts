@@ -39,8 +39,8 @@ const calculateMicroFee = (
     _beta: bigint,
     _delta: bigint,
 ): bigint => {
-    let _threshold;
-    let _feeMargin;
+    let _threshold: bigint;
+    let _feeMargin: bigint;
     let fee_ = 0n;
 
     if (_bal < _ideal) {
@@ -150,10 +150,9 @@ export const calculateTrade = (
             enforceHalts(_oGLiq, _nGLiq_, _oBals, _nBals, weights_, alpha);
             enforceSwapInvariant(_oGLiq, omega, _nGLiq_, psi);
             return [outputAmt_, _nGLiq_];
-        } else {
-            _nGLiq_ = _oGLiq + _inputAmt + outputAmt_;
-            _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
         }
+        _nGLiq_ = _oGLiq + _inputAmt + outputAmt_;
+        _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
     }
 
     throw new Error(CurveMathRevert.SwapConvergenceFailed);
@@ -225,7 +224,6 @@ const enforceSwapInvariant = (
     // from int128 private constant MAX_DIFF = -0x10C6F7A0B5EE converted to plain decimals
     if (_diff > 0 || _diff >= CURVEMATH_MAX_DIFF) {
         return true;
-    } else {
-        throw new Error(CurveMathRevert.SwapInvariantViolation);
     }
+    throw new Error(CurveMathRevert.SwapInvariantViolation);
 };

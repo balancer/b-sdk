@@ -101,8 +101,8 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 amp: data?.amp
                     ? formatUnits(data.amp, 3)
                     : 'amp' in pool
-                    ? pool.amp
-                    : undefined,
+                      ? pool.amp
+                      : undefined,
                 swapFee: data?.swapFee
                     ? (formatUnits(data.swapFee, 18) as HumanAmount)
                     : pool.swapFee,
@@ -115,13 +115,13 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
                 lowerTarget: data?.linearTargets
                     ? (formatUnits(data.linearTargets[0], 18) as HumanAmount)
                     : 'lowerTarget' in pool
-                    ? pool.lowerTarget
-                    : undefined,
+                      ? pool.lowerTarget
+                      : undefined,
                 upperTarget: data?.linearTargets
                     ? (formatUnits(data.linearTargets[1], 18) as HumanAmount)
                     : 'upperTarget' in pool
-                    ? pool.upperTarget
-                    : undefined,
+                      ? pool.upperTarget
+                      : undefined,
                 inRecoveryMode: data?.inRecoveryMode || false,
                 isPaused: data?.isPaused || false,
             };

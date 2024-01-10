@@ -1,12 +1,12 @@
 import { encodeAbiParameters } from 'viem';
 import { Address } from '../../types';
-import { AddLiquidityKind } from '../addLiquidity';
+import { AddLiquidityKind } from '../addLiquidity/types';
 import {
     AddLiquidityAmounts,
     InitPoolAmounts,
     RemoveLiquidityAmounts,
 } from '../types';
-import { RemoveLiquidityKind } from '../removeLiquidity';
+import { RemoveLiquidityKind } from '../removeLiquidity/types';
 
 export enum WeightedPoolJoinKind {
     INIT = 0,

@@ -73,27 +73,24 @@ function getCheck(result: AddLiquidityQueryOutput, isExactIn: boolean) {
     if (isAddLiquidityComposableStableQueryOutput(result)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+            // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { bptOut, bptIndex, ...check } =
                 result as AddLiquidityComposableStableQueryOutput;
             return check;
-        } else {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { amountsIn, bptIndex, ...check } =
-                result as AddLiquidityComposableStableQueryOutput;
-            return check;
         }
-    } else {
-        if (isExactIn) {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { bptOut, ...check } = result;
-            return check;
-        } else {
-            // rome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { amountsIn, ...check } = result;
-            return check;
-        }
+        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+        const { amountsIn, bptIndex, ...check } =
+            result as AddLiquidityComposableStableQueryOutput;
+        return check;
     }
+    if (isExactIn) {
+        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+        const { bptOut, ...check } = result;
+        return check;
+    }
+    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+    const { amountsIn, ...check } = result;
+    return check;
 }
 
 /**
@@ -156,7 +153,7 @@ export function assertAddLiquidityUnbalanced(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsIn = poolState.tokens.map((t) => {
-        let token;
+        let token: Token;
         if (
             addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             t.address === NATIVE_ASSETS[chainId].wrapped
@@ -167,7 +164,7 @@ export function assertAddLiquidityUnbalanced(
             (a) => a.address === t.address,
         );
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
-        else return TokenAmount.fromRawAmount(token, input.rawAmount);
+        return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
     const expectedQueryOutput: Omit<
@@ -182,6 +179,7 @@ export function assertAddLiquidityUnbalanced(
         poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, true);
@@ -244,6 +242,7 @@ export function assertAddLiquiditySingleToken(
         poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, false);
@@ -311,6 +310,7 @@ export function assertAddLiquidityProportional(
         poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, false);
@@ -408,7 +408,7 @@ function assertAddLiquidityBuildOutput(
             : 0n,
     };
 
-    // rome-ignore lint/correctness/noUnusedVariables: <explanation>
+    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { call, ...buildCheck } = addLiquidityBuildOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

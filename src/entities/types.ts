@@ -7,6 +7,7 @@ export type PoolState = {
     address: Address;
     type: string;
     tokens: MinimalToken[];
+    balancerVersion: 2 | 3;
 };
 
 export type AddLiquidityAmounts = {

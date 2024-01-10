@@ -80,6 +80,7 @@ export class InitPoolDataProvider {
                 address: poolAddress.toLowerCase() as Address,
                 type: poolType,
                 tokens: tokensPerPoolType[poolType],
+                balancerVersion: 2, // TODO V3: instantiate a different provider for V3? Or add a config/input to this one? Will the interface be the same?
             };
         } catch (e) {
             console.warn(e);

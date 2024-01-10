@@ -7,6 +7,7 @@ import {
 import { fetchWithRetry } from '../../utils/fetch';
 import { SUBGRAPH_URLS, brickedPools } from '../../utils';
 
+// biome-ignore lint/complexity/useLiteralKeys: BigInt prototype type doesn't have a toJSON method, which causes error for string literals
 BigInt.prototype['toJSON'] = function () {
     return this.toString();
 };
