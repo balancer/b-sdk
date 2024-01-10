@@ -1,5 +1,5 @@
 import { PoolType } from '../../types';
-import { AddLiquidityInput } from '../addLiquidity';
+import { AddLiquidityInput } from '../addLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput } from '../initPool/types';
 import { PoolState } from '../types';

@@ -1,70 +1,70 @@
 {
-  "pools": [
-    {
-      "id": "0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec",
-      "address": "0x9e4341acef4147196e99d648c5e43b3fc9d02678",
-      "poolType": "Weighted",
-      "poolTypeVersion": 2,
-      "name": "Fresh BEETS",
-      "tokens": [
+    "pools": [
         {
-          "address": "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
-          "balance": "1529628.909214834943938725",
-          "weight": "0.2",
-          "priceRate": "1",
-          "decimals": 18,
-          "name": "Wrapped Fantom",
-          "index": 0,
-          "symbol": "WFTM",
-          "token": { "latestFXPrice": null }
-        },
-        {
-          "address": "0xf24bcf4d1e507740041c9cfd2dddb29585adce1e",
-          "balance": "81750834.894524234143091925",
-          "weight": "0.8",
-          "priceRate": "1",
-          "decimals": 18,
-          "name": "BeethovenxToken",
-          "index": 1,
-          "symbol": "BEETS",
-          "token": { "latestFXPrice": null }
+            "id": "0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec",
+            "address": "0x9e4341acef4147196e99d648c5e43b3fc9d02678",
+            "poolType": "Weighted",
+            "poolTypeVersion": 2,
+            "name": "Fresh BEETS",
+            "tokens": [
+                {
+                    "address": "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
+                    "balance": "1529628.909214834943938725",
+                    "weight": "0.2",
+                    "priceRate": "1",
+                    "decimals": 18,
+                    "name": "Wrapped Fantom",
+                    "index": 0,
+                    "symbol": "WFTM",
+                    "token": { "latestFXPrice": null }
+                },
+                {
+                    "address": "0xf24bcf4d1e507740041c9cfd2dddb29585adce1e",
+                    "balance": "81750834.894524234143091925",
+                    "weight": "0.8",
+                    "priceRate": "1",
+                    "decimals": 18,
+                    "name": "BeethovenxToken",
+                    "index": 1,
+                    "symbol": "BEETS",
+                    "token": { "latestFXPrice": null }
+                }
+            ],
+            "tokensList": [
+                "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
+                "0xf24bcf4d1e507740041c9cfd2dddb29585adce1e"
+            ],
+            "swapEnabled": true,
+            "swapFee": "0.01",
+            "amp": null,
+            "totalLiquidity": "2679688.778562431478805364412296083",
+            "totalShares": "72890712.800024961804215653",
+            "mainIndex": null,
+            "wrappedIndex": null,
+            "lowerTarget": null,
+            "upperTarget": null,
+            "alpha": null,
+            "beta": null,
+            "c": null,
+            "delta": null,
+            "dSq": null,
+            "epsilon": null,
+            "lambda": null,
+            "root3Alpha": null,
+            "s": null,
+            "sqrtAlpha": null,
+            "sqrtBeta": null,
+            "tauAlphaX": null,
+            "tauAlphaY": null,
+            "tauBetaX": null,
+            "tauBetaY": null,
+            "u": null,
+            "v": null,
+            "w": null,
+            "z": null,
+            "inRecoveryMode": true,
+            "isPaused": false,
+            "liquidity": "0"
         }
-      ],
-      "tokensList": [
-        "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
-        "0xf24bcf4d1e507740041c9cfd2dddb29585adce1e"
-      ],
-      "swapEnabled": true,
-      "swapFee": "0.01",
-      "amp": null,
-      "totalLiquidity": "2679688.778562431478805364412296083",
-      "totalShares": "72890712.800024961804215653",
-      "mainIndex": null,
-      "wrappedIndex": null,
-      "lowerTarget": null,
-      "upperTarget": null,
-      "alpha": null,
-      "beta": null,
-      "c": null,
-      "delta": null,
-      "dSq": null,
-      "epsilon": null,
-      "lambda": null,
-      "root3Alpha": null,
-      "s": null,
-      "sqrtAlpha": null,
-      "sqrtBeta": null,
-      "tauAlphaX": null,
-      "tauAlphaY": null,
-      "tauBetaX": null,
-      "tauBetaY": null,
-      "u": null,
-      "v": null,
-      "w": null,
-      "z": null,
-      "inRecoveryMode": true,
-      "isPaused": false,
-      "liquidity": "0"
-    }
-  ]
+    ]
 }

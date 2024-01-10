@@ -79,8 +79,7 @@ export class PoolDataService {
             });
 
             return (await client.getBlock({ blockNumber })).timestamp;
-        } else {
-            return BigInt(Math.floor(new Date().getTime() / 1000));
         }
+        return BigInt(Math.floor(new Date().getTime() / 1000));
     }
 }

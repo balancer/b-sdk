@@ -1,5 +1,5 @@
 // pnpm test -- balancerApi.test.ts
-import { BalancerApi, PoolState, ChainId } from '../../../src';
+import { BalancerApi, ChainId, PoolState } from '../../../src';
 
 // Placeholder test to help validate the impact of API updates
 // Note: should not be included to CI checks

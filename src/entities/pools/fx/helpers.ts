@@ -12,27 +12,24 @@ export class MathFx {
 
         if (product === 0n) {
             return 0n;
-        } else {
-            return (product - 1n) / 10n ** BigInt(decimals) + 1n;
         }
+        return (product - 1n) / 10n ** BigInt(decimals) + 1n;
     }
 
     static divDownFixed(a: bigint, b: bigint, decimals = 36): bigint {
         if (a === 0n) {
             return 0n;
-        } else {
-            const aInflated = a * 10n ** BigInt(decimals);
-            return aInflated / b;
         }
+        const aInflated = a * 10n ** BigInt(decimals);
+        return aInflated / b;
     }
 
     static divUpFixed(a: bigint, b: bigint, decimals = 36): bigint {
         if (a === 0n) {
             return 0n;
-        } else {
-            const aInflated = a * 10n ** BigInt(decimals);
-            return (aInflated - 1n) / b + 1n;
         }
+        const aInflated = a * 10n ** BigInt(decimals);
+        return (aInflated - 1n) / b + 1n;
     }
 }
 

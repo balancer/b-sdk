@@ -1,6 +1,6 @@
 // pnpm test -- swap/fxPool.test.ts
 
-import { ChainId, RawFxPool, SwapKind, Token } from '../../../src';
+import { ChainId, RawFxPool, SwapKind, Token, TokenAmount } from '../../../src';
 import testPools from '../../lib/testData/testPools/fx_43667355.json';
 import {
     CurveMathRevert,
@@ -112,7 +112,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                 parseUnits(givenAmount, tokenIn.decimals),
                 swapKind,
             );
-            let result;
+            let result: TokenAmount;
             if (swapKind === SwapKind.GivenIn) {
                 result = newPool.swapGivenIn(tIn.token, tOut.token, givenToken);
             } else {

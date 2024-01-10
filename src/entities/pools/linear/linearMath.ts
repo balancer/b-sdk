@@ -208,15 +208,12 @@ function _toNominal(real: bigint, params: Params): bigint {
             params.fee,
         );
         return real - fees;
-    } else if (real <= params.upperTarget) {
-        return real;
-    } else {
-        const fees = MathSol.mulDownFixed(
-            real - params.upperTarget,
-            params.fee,
-        );
-        return real - fees;
     }
+    if (real <= params.upperTarget) {
+        return real;
+    }
+    const fees = MathSol.mulDownFixed(real - params.upperTarget, params.fee);
+    return real - fees;
 }
 
 function _fromNominal(nominal: bigint, params: Params): bigint {
@@ -226,12 +223,12 @@ function _fromNominal(nominal: bigint, params: Params): bigint {
             nominal + MathSol.mulDownFixed(params.fee, params.lowerTarget),
             WAD + params.fee,
         );
-    } else if (nominal <= params.upperTarget) {
-        return nominal;
-    } else {
-        return MathSol.divDownFixed(
-            nominal - MathSol.mulDownFixed(params.fee, params.upperTarget),
-            WAD - params.fee,
-        );
     }
+    if (nominal <= params.upperTarget) {
+        return nominal;
+    }
+    return MathSol.divDownFixed(
+        nominal - MathSol.mulDownFixed(params.fee, params.upperTarget),
+        WAD - params.fee,
+    );
 }
