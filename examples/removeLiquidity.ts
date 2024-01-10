@@ -74,6 +74,7 @@ const removeLiquidity = async () => {
         slippage,
         sender: userAccount,
         recipient: userAccount,
+        chainId
     });
 
     console.log('\nWith slippage applied:');

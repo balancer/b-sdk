@@ -119,9 +119,6 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.ZKEVM]: 128,
     [ChainId.FANTOM]: 128,
 };
-
-export const BALANCER_VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
-
 /**
  * Deployment Addresses
  * Source: https://docs.balancer.fi/reference/contracts

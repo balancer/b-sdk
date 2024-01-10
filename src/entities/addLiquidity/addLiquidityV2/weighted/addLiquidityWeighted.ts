@@ -2,7 +2,7 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { WeightedEncoder } from '@/entities/encoders/weighted';
-import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
+import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultAbi } from '@/abi';
 import {
     AddLiquidityBase,
@@ -99,7 +99,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
 
         return {
             call,
-            to: BALANCER_VAULT,
+            to: VAULT[input.chainId],
             value: value === undefined ? 0n : value,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,

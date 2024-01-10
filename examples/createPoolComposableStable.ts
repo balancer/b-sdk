@@ -61,7 +61,8 @@ const createPoolComposableStable = async (): Promise<{
         amplificationParameter: BigInt(62),
         exemptFromYieldProtocolFeeFlag: false,
         swapFee: '0.01',
-        poolOwnerAddress: signerAddress, // Balancer DAO Multisig
+        poolOwnerAddress: signerAddress, // Balancer DAO Multisig,
+        balancerVersion: 2
     };
     const { call } = createPool.buildCall(
         poolType,

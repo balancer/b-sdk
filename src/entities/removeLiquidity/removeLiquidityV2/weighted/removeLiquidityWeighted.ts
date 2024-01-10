@@ -3,7 +3,7 @@ import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
 import { WeightedEncoder } from '../../../encoders/weighted';
 import {
-    BALANCER_VAULT,
+    VAULT,
     MAX_UINT256,
     ZERO_ADDRESS,
 } from '../../../../utils/constants';
@@ -129,7 +129,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
 
         return {
             call,
-            to: BALANCER_VAULT,
+            to: VAULT[input.chainId],
             value: 0n,
             maxBptIn: TokenAmount.fromRawAmount(
                 input.bptIn.token,

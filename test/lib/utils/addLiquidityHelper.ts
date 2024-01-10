@@ -7,7 +7,7 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityQueryOutput,
     AddLiquidityUnbalancedInput,
-    BALANCER_VAULT,
+    VAULT,
     AddLiquiditySingleTokenInput,
     AddLiquidityProportionalInput,
     Token,
@@ -52,6 +52,7 @@ async function sdkAddLiquidity({
         slippage,
         sender: testAddress,
         recipient: testAddress,
+        chainId: addLiquidityInput.chainId
     });
 
     return {
@@ -399,7 +400,7 @@ function assertAddLiquidityBuildOutput(
     const expectedBuildOutput: Omit<AddLiquidityBuildOutput, 'call'> = {
         maxAmountsIn,
         minBptOut,
-        to: BALANCER_VAULT,
+        to: VAULT[addLiquidityInput.chainId],
         // Value should equal value of any wrapped asset if using native
         value: addLiquidityInput.useNativeAssetAsWrappedAmountIn
             ? (addLiquidityQueryOutput.amountsIn.find(
