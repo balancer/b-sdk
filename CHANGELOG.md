@@ -1,5 +1,17 @@
 # @balancer/sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- 48d14de: Adapting pool type from API to PoolType, so we can generally use PoolType instead of string in the whole project.
+- 60eebf8: Adding InitPool functionality for Composable Stable Pools
+
+### Patch Changes
+
+- 38c3aa2: Replace shared human readable abi with abis from ts files
+- ae7b19e: Update api client to match pool type changes
+
 ## 0.5.0
 
 ### Minor Changes
