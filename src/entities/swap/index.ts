@@ -1,32 +1,26 @@
-import { PathWithAmount } from './path';
-import { TokenAmount } from './tokenAmount';
-import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
-import {
-    abs,
-    BALANCER_QUERIES,
-    DEFAULT_USERDATA,
-    DEFAULT_FUND_MANAGMENT,
-    ZERO_ADDRESS,
-    NATIVE_ADDRESS,
-    MathSol,
-} from '../utils';
-import {
-    Address,
-    createPublicClient,
-    encodeFunctionData,
-    getContract,
-    http,
-} from 'viem';
-import { balancerQueriesAbi } from '../abi';
-import { PriceImpactAmount } from './priceImpactAmount';
+import { PathWithAmount } from '../path';
+import { TokenAmount } from '../tokenAmount';
+import { SingleSwap, SwapKind, BatchSwapStep } from '../../types';
+import { abs, DEFAULT_USERDATA, MathSol } from '../../utils';
+import { Address } from 'viem';
+import { PriceImpactAmount } from '../priceImpactAmount';
 import cloneDeep from 'lodash/cloneDeep';
+import { convertNativeAddressToZero } from '../utils/convertNativeAddressToZero';
+
+export interface SwapBase {
+    query(rpcUrl?: string, block?: bigint): Promise<TokenAmount>;
+    queryCallData(): string;
+}
 
 // A Swap can be a single or multiple paths
-export class Swap {
+export class Swap implements SwapBase {
     public constructor({
         paths,
         swapKind,
-    }: { paths: PathWithAmount[]; swapKind: SwapKind }) {
+    }: {
+        paths: PathWithAmount[];
+        swapKind: SwapKind;
+    }) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
@@ -52,7 +46,7 @@ export class Swap {
         const swaps = this.getSwaps(this.paths);
 
         this.assets = this.assets.map((a) => {
-            return this.convertNativeAddressToZero(a);
+            return convertNativeAddressToZero(a);
         });
 
         this.swaps = swaps;
@@ -80,98 +74,13 @@ export class Swap {
         return this.getOutputAmount(this.paths);
     }
 
-    // rpcUrl is optional, but recommended to prevent rate limiting
-    public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
-        const publicClient = createPublicClient({
-            transport: http(rpcUrl),
-        });
-
-        const queriesContract = getContract({
-            address: BALANCER_QUERIES[this.chainId],
-            abi: balancerQueriesAbi,
-            publicClient,
-        });
-
-        let amount: TokenAmount;
-        if (this.isBatchSwap) {
-            const { result } = await queriesContract.simulate.queryBatchSwap(
-                [
-                    this.swapKind,
-                    this.swaps as BatchSwapStep[],
-                    this.assets,
-                    DEFAULT_FUND_MANAGMENT,
-                ],
-                {
-                    blockNumber: block,
-                },
-            );
-
-            amount =
-                this.swapKind === SwapKind.GivenIn
-                    ? TokenAmount.fromRawAmount(
-                          this.outputAmount.token,
-                          abs(
-                              result[
-                                  this.assets.indexOf(
-                                      this.convertNativeAddressToZero(
-                                          this.outputAmount.token.address,
-                                      ),
-                                  )
-                              ],
-                          ),
-                      )
-                    : TokenAmount.fromRawAmount(
-                          this.inputAmount.token,
-                          abs(
-                              result[
-                                  this.assets.indexOf(
-                                      this.convertNativeAddressToZero(
-                                          this.inputAmount.token.address,
-                                      ),
-                                  )
-                              ],
-                          ),
-                      );
-        } else {
-            const { result } = await queriesContract.simulate.querySwap(
-                [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
-                { blockNumber: block },
-            );
-
-            amount =
-                this.swapKind === SwapKind.GivenIn
-                    ? TokenAmount.fromRawAmount(this.outputAmount.token, result)
-                    : TokenAmount.fromRawAmount(this.inputAmount.token, result);
-        }
-
-        return amount;
+    // biome-ignore lint/correctness/noUnusedVariables: <placeholder method that needs to be overriden>
+    async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
+        throw new Error('Use swapV2 or swapV3 instead.');
     }
 
-    private convertNativeAddressToZero(address: Address): Address {
-        return address === NATIVE_ADDRESS ? ZERO_ADDRESS : address;
-    }
-
-    public queryCallData(): string {
-        let callData: string;
-        if (this.isBatchSwap) {
-            callData = encodeFunctionData({
-                abi: balancerQueriesAbi,
-                functionName: 'queryBatchSwap',
-                args: [
-                    this.swapKind,
-                    this.swaps as BatchSwapStep[],
-                    this.assets,
-                    DEFAULT_FUND_MANAGMENT,
-                ],
-            });
-        } else {
-            callData = encodeFunctionData({
-                abi: balancerQueriesAbi,
-                functionName: 'querySwap',
-                args: [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
-            });
-        }
-        return callData;
+    queryCallData(): string {
+        throw new Error('Use swapV2 or swapV3 instead.');
     }
 
     public get priceImpact(): PriceImpactAmount {
@@ -254,12 +163,8 @@ export class Swap {
         } else {
             const path = this.paths[0];
             const pool = path.pools[0];
-            const assetIn = this.convertNativeAddressToZero(
-                path.tokens[0].address,
-            );
-            const assetOut = this.convertNativeAddressToZero(
-                path.tokens[1].address,
-            );
+            const assetIn = convertNativeAddressToZero(path.tokens[0].address);
+            const assetOut = convertNativeAddressToZero(path.tokens[1].address);
             swaps = {
                 poolId: pool.id,
                 kind: this.swapKind,

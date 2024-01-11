@@ -7,7 +7,7 @@ import { SmartOrderRouter } from '../../../src/sor';
 import { sorGetSwapsWithPools } from '../../../src/static';
 import { ChainId, ETH, BATCHSIZE, VAULT } from '../../../src/utils';
 import { PriceImpact, Token, TokenAmount } from '../../../src/entities';
-import { OnChainPoolDataEnricher } from '../../../src/data/enrichers/onChainPoolDataEnricher';
+import { OnChainPoolDataEnricherV2 } from '../../../src/data/enrichers/onChainPoolDataEnricherV2';
 import { SingleSwap, SwapKind, SwapOptions } from '../../../src/types';
 import { BasePool } from '../../../src/entities/pools';
 import { MockPoolProvider } from '../../lib/utils/mockPoolProvider';
@@ -24,7 +24,7 @@ describe('Price Impact for SOR tests', () => {
     const mockPoolProvider = new MockPoolProvider(
         testPools.pools as RawWeightedPool[],
     );
-    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+    const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
         chainId,
         rpcUrl,
         BATCHSIZE[chainId],
@@ -36,6 +36,7 @@ describe('Price Impact for SOR tests', () => {
         poolDataProviders: mockPoolProvider,
         poolDataEnrichers: onChainPoolDataEnricher,
         rpcUrl: rpcUrl,
+        balancerVersion: 2,
     });
 
     const BAL = new Token(
@@ -73,6 +74,7 @@ describe('Price Impact for SOR tests', () => {
             SwapKind.GivenIn,
             inputAmount,
             pools,
+            2,
             swapOptions,
         );
 
@@ -97,6 +99,7 @@ describe('Price Impact for SOR tests', () => {
             SwapKind.GivenOut,
             outputAmount,
             pools,
+            2,
             swapOptions,
         );
 
@@ -123,6 +126,7 @@ describe('Price Impact for SOR tests', () => {
             SwapKind.GivenIn,
             inputAmount,
             pools,
+            2,
             swapOptions,
         );
 
@@ -144,6 +148,7 @@ describe('Price Impact for SOR tests', () => {
             SwapKind.GivenOut,
             outputAmount,
             pools,
+            2,
             swapOptions,
         );
 

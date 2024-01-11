@@ -41,7 +41,7 @@ interface SubgraphPoolProviderConfig {
     gqlAdditionalPoolQueryFields?: string;
 }
 
-export class SubgraphPoolProvider implements PoolDataProvider {
+export class SubgraphPoolProviderV2 implements PoolDataProvider {
     private readonly url: string;
     private readonly config: SubgraphPoolProviderConfig;
 

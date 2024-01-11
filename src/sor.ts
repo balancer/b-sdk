@@ -3,9 +3,16 @@ import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
 import { ChainId, checkInputs, SUBGRAPH_URLS, BATCHSIZE, VAULT } from './utils';
 import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
-import { OnChainPoolDataEnricher, SubgraphPoolProvider } from './data';
+import {
+    OnChainPoolDataEnricherV2,
+    OnChainPoolDataEnricherV3,
+    SubgraphPoolProviderV2,
+    SubgraphPoolProviderV3,
+} from './data';
 import { PoolDataService } from './data/poolDataService';
 import { GetPoolsResponse } from './data/types';
+import { SwapV2 } from './entities/swap/swapV2';
+import { SwapV3 } from './entities/swap/swapV3';
 
 export class SmartOrderRouter {
     private readonly chainId: ChainId;
@@ -15,6 +22,7 @@ export class SmartOrderRouter {
     private pools: BasePool[] = [];
     private blockNumber: bigint | null = null;
     private poolsProviderData: GetPoolsResponse | null = null;
+    private readonly balancerVersion: 2 | 3;
 
     constructor({
         chainId,
@@ -22,21 +30,32 @@ export class SmartOrderRouter {
         poolDataProviders,
         poolDataEnrichers,
         customPoolFactories = [],
+        balancerVersion,
     }: SorConfig) {
         this.chainId = chainId;
         this.router = new Router();
         this.poolParser = new PoolParser(chainId, customPoolFactories);
         poolDataProviders =
             poolDataProviders ||
-            new SubgraphPoolProvider(chainId, SUBGRAPH_URLS[chainId]);
+            (balancerVersion === 2
+                ? new SubgraphPoolProviderV2(chainId, SUBGRAPH_URLS[chainId])
+                : new SubgraphPoolProviderV3(chainId, SUBGRAPH_URLS[chainId]));
+
         poolDataEnrichers =
             poolDataEnrichers ||
-            new OnChainPoolDataEnricher(
-                chainId,
-                rpcUrl,
-                BATCHSIZE[chainId],
-                VAULT[chainId],
-            );
+            (balancerVersion === 2
+                ? new OnChainPoolDataEnricherV2(
+                      chainId,
+                      rpcUrl,
+                      BATCHSIZE[chainId],
+                      VAULT[chainId],
+                  )
+                : new OnChainPoolDataEnricherV3(
+                      chainId,
+                      rpcUrl,
+                      BATCHSIZE[chainId],
+                      VAULT[chainId],
+                  ));
         this.poolDataService = new PoolDataService(
             Array.isArray(poolDataProviders)
                 ? poolDataProviders
@@ -46,6 +65,7 @@ export class SmartOrderRouter {
                 : [poolDataEnrichers],
             rpcUrl,
         );
+        this.balancerVersion = balancerVersion;
     }
 
     public async fetchAndCachePools(blockNumber?: bigint): Promise<BasePool[]> {
@@ -111,7 +131,18 @@ export class SmartOrderRouter {
 
         if (!bestPaths) return null;
 
-        return new Swap({ paths: bestPaths, swapKind });
+        switch (this.balancerVersion) {
+            case 2:
+                return new SwapV2({
+                    paths: bestPaths,
+                    swapKind,
+                });
+            case 3:
+                return new SwapV3({
+                    paths: bestPaths,
+                    swapKind,
+                });
+        }
     }
 
     public async getCandidatePaths(

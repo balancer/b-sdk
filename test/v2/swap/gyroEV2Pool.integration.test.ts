@@ -7,7 +7,7 @@ import testPools from '../../lib/testData/testPools/gyroE_44215395.json';
 import { BATCHSIZE, ChainId, VAULT } from '../../../src/utils';
 import {
     BasePool,
-    OnChainPoolDataEnricher,
+    OnChainPoolDataEnricherV2,
     RawGyroEPool,
     SmartOrderRouter,
     SwapKind,
@@ -20,6 +20,7 @@ import { GyroEPool, GyroEPoolToken } from '../../../src/entities/pools/gyroE';
 import { MockPoolProvider } from '../../lib/utils/mockPoolProvider';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
+const BALANCER_VERSION = 2;
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 
@@ -44,7 +45,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     beforeAll(() => {
         const pools = [{ ...testPools }.pools[2]] as RawGyroEPool[];
         const mockPoolProvider = new MockPoolProvider(pools);
-        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
             chainId,
             rpcUrl,
             BATCHSIZE[chainId],
@@ -56,6 +57,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             poolDataProviders: mockPoolProvider,
             poolDataEnrichers: onChainPoolDataEnricher,
             rpcUrl: rpcUrl,
+            balancerVersion: BALANCER_VERSION,
         });
     });
 
@@ -76,6 +78,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -98,6 +101,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -122,6 +126,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -144,6 +149,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -166,6 +172,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -190,6 +197,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 

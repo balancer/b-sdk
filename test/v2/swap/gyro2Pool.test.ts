@@ -19,6 +19,8 @@ import {
 } from '../../../src';
 import { Gyro2Pool } from '../../../src/entities/pools/gyro2';
 
+const BALANCER_VERSION = 2;
+
 describe('Gyro2Pool tests USDC > DAI', () => {
     const testPool = { ...testPools }.pools[0] as RawGyro2Pool;
     const chainId = ChainId.MAINNET;
@@ -120,6 +122,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                     rpcUrl,
                     poolDataProviders: mockPoolProvider,
                     poolDataEnrichers: mockPoolDataEnricher,
+                    balancerVersion: BALANCER_VERSION,
                 });
 
                 const fetchSuccess = await sor.fetchAndCachePools();

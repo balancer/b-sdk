@@ -6,7 +6,7 @@ import { SmartOrderRouter } from '../../../src/sor';
 import { sorGetSwapsWithPools } from '../../../src/static';
 import { ChainId, BATCHSIZE, VAULT } from '../../../src/utils';
 import { Token, TokenAmount } from '../../../src/entities';
-import { OnChainPoolDataEnricher } from '../../../src/data/enrichers/onChainPoolDataEnricher';
+import { OnChainPoolDataEnricherV2 } from '../../../src/data/enrichers/onChainPoolDataEnricherV2';
 import { SwapKind, SwapOptions } from '../../../src/types';
 import { BasePool } from '../../../src/entities/pools';
 import { MockPoolProvider } from '../../lib/utils/mockPoolProvider';
@@ -16,13 +16,14 @@ import { RawStablePool } from '../../../src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const BALANCER_VERSION = 2;
 
 describe('ComposableStable Swap tests', () => {
     const chainId = ChainId.MAINNET;
     const mockPoolProvider = new MockPoolProvider(
         testPools.pools as RawStablePool[],
     );
-    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+    const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
         chainId,
         rpcUrl,
         BATCHSIZE[chainId],
@@ -34,6 +35,7 @@ describe('ComposableStable Swap tests', () => {
         poolDataProviders: mockPoolProvider,
         poolDataEnrichers: onChainPoolDataEnricher,
         rpcUrl: rpcUrl,
+        balancerVersion: BALANCER_VERSION,
     });
 
     const USDC = new Token(
@@ -75,6 +77,7 @@ describe('ComposableStable Swap tests', () => {
             SwapKind.GivenIn,
             inputAmount,
             pools,
+            BALANCER_VERSION,
             swapOptions,
         );
 
@@ -97,6 +100,7 @@ describe('ComposableStable Swap tests', () => {
             SwapKind.GivenOut,
             outputAmount,
             pools,
+            BALANCER_VERSION,
             swapOptions,
         );
 

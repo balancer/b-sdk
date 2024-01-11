@@ -45,6 +45,7 @@ export type SorConfig = {
     poolDataProviders?: PoolDataProvider | PoolDataProvider[];
     poolDataEnrichers?: PoolDataEnricher | PoolDataEnricher[];
     customPoolFactories?: BasePoolFactory[];
+    balancerVersion: 2 | 3;
 };
 
 export interface SingleSwap {

@@ -5,7 +5,7 @@ dotenv.config();
 import { BATCHSIZE, ChainId, VAULT } from '../../../src/utils';
 import {
     BasePool,
-    OnChainPoolDataEnricher,
+    OnChainPoolDataEnricherV2,
     RawFxPool,
     SmartOrderRouter,
     SwapKind,
@@ -18,6 +18,7 @@ import { MockPoolProvider } from '../../lib/utils/mockPoolProvider';
 import testPools from '../../lib/testData/testPools/fx_43667355.json';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
+const BALANCER_VERSION = 2;
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 
@@ -44,7 +45,7 @@ describe('fx integration tests', () => {
         const pools = testPools.pools as RawFxPool[];
         const mockPoolProvider = new MockPoolProvider(pools);
 
-        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
             chainId,
             rpcUrl,
             BATCHSIZE[chainId],
@@ -56,6 +57,7 @@ describe('fx integration tests', () => {
             poolDataProviders: mockPoolProvider,
             poolDataEnrichers: onChainPoolDataEnricher,
             rpcUrl: rpcUrl,
+            balancerVersion: BALANCER_VERSION,
         });
     });
 
@@ -76,6 +78,7 @@ describe('fx integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -91,6 +94,7 @@ describe('fx integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -108,6 +112,7 @@ describe('fx integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -130,6 +135,7 @@ describe('fx integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -145,6 +151,7 @@ describe('fx integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -162,6 +169,7 @@ describe('fx integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 

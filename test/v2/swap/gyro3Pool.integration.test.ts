@@ -17,6 +17,7 @@ import {
 } from '../../../src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
+const BALANCER_VERSION = 2;
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 
@@ -55,6 +56,7 @@ describe('gyro3 integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -70,6 +72,7 @@ describe('gyro3 integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -87,6 +90,7 @@ describe('gyro3 integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -109,6 +113,7 @@ describe('gyro3 integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -124,6 +129,7 @@ describe('gyro3 integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -140,6 +146,7 @@ describe('gyro3 integration tests', () => {
                 swapKind,
                 swapAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 

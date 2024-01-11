@@ -17,7 +17,7 @@ import { CHAINS } from '../../utils';
 import { SwapOptions } from '../../types';
 import { fetchAdditionalPoolData } from '../onChainPoolDataViaReadContract';
 
-export interface OnChainPoolData {
+export interface OnChainPoolDataV2 {
     id: string;
     balances: readonly bigint[];
     totalSupply: bigint;
@@ -35,7 +35,7 @@ export interface OnChainPoolData {
     inRecoveryMode: boolean;
 }
 
-export class OnChainPoolDataEnricher implements PoolDataEnricher {
+export class OnChainPoolDataEnricherV2 implements PoolDataEnricher {
     private readonly client: PublicClient;
 
     constructor(
@@ -53,7 +53,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
     public async fetchAdditionalPoolData(
         data: GetPoolsResponse,
         options: SwapOptions,
-    ): Promise<OnChainPoolData[]> {
+    ): Promise<OnChainPoolDataV2[]> {
         return fetchAdditionalPoolData(
             this.vault,
             data.pools,
@@ -65,7 +65,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
 
     public enrichPoolsWithData(
         pools: RawPool[],
-        additionalPoolData: OnChainPoolData[],
+        additionalPoolData: OnChainPoolDataV2[],
     ): RawPool[] {
         return pools.map((pool) => {
             const data = additionalPoolData.find((item) => item.id === pool.id);
@@ -136,7 +136,7 @@ export class OnChainPoolDataEnricher implements PoolDataEnricher {
     }: {
         pool: RawPool;
         token: RawPoolTokenWithRate;
-        data?: OnChainPoolData;
+        data?: OnChainPoolDataV2;
         index: number;
     }): string {
         if (

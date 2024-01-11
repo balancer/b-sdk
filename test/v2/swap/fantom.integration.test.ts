@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { OnChainPoolDataEnricher } from '../../../src/data/enrichers/onChainPoolDataEnricher';
+import { OnChainPoolDataEnricherV2 } from '../../../src/data/enrichers/onChainPoolDataEnricherV2';
 import { Token, TokenAmount } from '../../../src/entities';
 import { BasePool } from '../../../src/entities/pools';
 import { SmartOrderRouter } from '../../../src/sor';
@@ -15,6 +15,8 @@ import testPools from '../../lib/testData/testPools/fantom_65313450.json';
 import { RawBasePool } from '../../../src';
 
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+
+const BALANCER_VERSION = 2;
 
 describe.skip('Fantom SOR', () => {
     let pools: BasePool[];
@@ -32,7 +34,7 @@ describe.skip('Fantom SOR', () => {
         const mockPoolProvider = new MockPoolProvider(
             testPools.pools as RawBasePool[],
         );
-        const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+        const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
             chainId,
             rpcUrl,
             BATCHSIZE[chainId],
@@ -44,6 +46,7 @@ describe.skip('Fantom SOR', () => {
             poolDataProviders: mockPoolProvider,
             poolDataEnrichers: onChainPoolDataEnricher,
             rpcUrl,
+            balancerVersion: BALANCER_VERSION,
         });
 
         BEETS = new Token(
@@ -74,6 +77,7 @@ describe.skip('Fantom SOR', () => {
                 SwapKind.GivenIn,
                 inputAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 
@@ -95,6 +99,7 @@ describe.skip('Fantom SOR', () => {
                 SwapKind.GivenOut,
                 outputAmount,
                 pools,
+                BALANCER_VERSION,
                 swapOptions,
             );
 

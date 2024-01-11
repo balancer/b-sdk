@@ -7,7 +7,7 @@ import { SmartOrderRouter } from '../../../src/sor';
 import { sorGetSwapsWithPools } from '../../../src/static';
 import { ChainId, ETH, BATCHSIZE, VAULT } from '../../../src/utils';
 import { Token, TokenAmount } from '../../../src/entities';
-import { OnChainPoolDataEnricher } from '../../../src/data/enrichers/onChainPoolDataEnricher';
+import { OnChainPoolDataEnricherV2 } from '../../../src/data/enrichers/onChainPoolDataEnricherV2';
 import { SwapKind, SwapOptions } from '../../../src/types';
 import { BasePool } from '../../../src/entities/pools';
 import { MockPoolProvider } from '../../lib/utils/mockPoolProvider';
@@ -16,6 +16,7 @@ import testPools from '../../lib/testData/testPools/weighted_17473810.json';
 import { RawWeightedPool } from '../../../src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
+const BALANCER_VERSION = 2;
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 
@@ -23,7 +24,7 @@ describe('Weighted Swap tests', () => {
     const mockPoolProvider = new MockPoolProvider(
         testPools.pools as RawWeightedPool[],
     );
-    const onChainPoolDataEnricher = new OnChainPoolDataEnricher(
+    const onChainPoolDataEnricher = new OnChainPoolDataEnricherV2(
         chainId,
         rpcUrl,
         BATCHSIZE[chainId],
@@ -35,6 +36,7 @@ describe('Weighted Swap tests', () => {
         poolDataProviders: mockPoolProvider,
         poolDataEnrichers: onChainPoolDataEnricher,
         rpcUrl: rpcUrl,
+        balancerVersion: BALANCER_VERSION,
     });
 
     const BAL = new Token(
@@ -67,6 +69,7 @@ describe('Weighted Swap tests', () => {
             SwapKind.GivenIn,
             inputAmount,
             pools,
+            BALANCER_VERSION,
             swapOptions,
         );
 
@@ -95,6 +98,7 @@ describe('Weighted Swap tests', () => {
             SwapKind.GivenOut,
             outputAmount,
             pools,
+            BALANCER_VERSION,
             swapOptions,
         );
 
