@@ -123,9 +123,8 @@ const exampleSetup = async (): Promise<{
 }> => {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
     const balancerApi = new BalancerApi(balancerApiUrl, chainId);
-    const nestedPoolState = await balancerApi.nestedPools.fetchNestedPoolState(
-        poolId,
-    );
+    const nestedPoolState =
+        await balancerApi.nestedPools.fetchNestedPoolState(poolId);
 
     const client: Client & PublicActions & TestActions & WalletActions =
         createTestClient({

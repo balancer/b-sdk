@@ -80,7 +80,7 @@ function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
         }
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { amountsIn, bptIndex, ...check } =
-        output as AddLiquidityComposableStableQueryOutput;
+            output as AddLiquidityComposableStableQueryOutput;
         return check;
     }
     if (isExactIn) {

@@ -72,7 +72,7 @@ function getCheck(output: RemoveLiquidityQueryOutput, isExactIn: boolean) {
         }
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { bptIn, bptIndex, ...check } =
-        output as RemoveLiquidityComposableStableQueryOutput;
+            output as RemoveLiquidityComposableStableQueryOutput;
         return check;
     }
     if (isExactIn) {
