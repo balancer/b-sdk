@@ -7,7 +7,7 @@ import {
     http,
 } from 'viem';
 import { CHAINS } from '../../utils';
-import { InputAmountInit, PoolType } from '../../types';
+import { InputAmountInit } from '../../types';
 import { PoolState } from '../../entities';
 import { sortTokensByAddress } from '../../utils/tokens';
 
@@ -42,8 +42,9 @@ export class InitPoolDataProvider {
 
     public async getInitPoolData(
         poolAddress: Address,
-        poolType: PoolType,
+        poolType: string,
         amounts: InputAmountInit[],
+        hasBPT: boolean
     ): Promise<PoolState> {
         const poolContract = getContract({
             abi: this.simplePoolAbi,
@@ -68,18 +69,13 @@ export class InitPoolDataProvider {
             index,
         }));
 
-        const tokensPerPoolType = {
-            [PoolType.Weighted]: poolTokens,
-            [PoolType.ComposableStable]: poolTokensWithBpt,
-        };
-
         try {
             const poolId = (await poolContract.read.getPoolId()) as Hex;
             return {
                 id: poolId,
                 address: poolAddress.toLowerCase() as Address,
                 type: poolType,
-                tokens: tokensPerPoolType[poolType],
+                tokens: hasBPT ? poolTokensWithBpt : poolTokens,
                 balancerVersion: 2, // TODO V3: instantiate a different provider for V3? Or add a config/input to this one? Will the interface be the same?
             };
         } catch (e) {
