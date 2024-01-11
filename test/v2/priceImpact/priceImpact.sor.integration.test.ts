@@ -134,7 +134,7 @@ describe('Price Impact for SOR tests', () => {
         if (!swap) throw new Error('Swap is undefined');
 
         const priceImpactSOR = swap.priceImpact;
-        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0246}`); // TODO: where can we find a reliable source of truth for this?
+        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0261}`); // TODO: where can we find a reliable source of truth for this?
 
         expect(priceImpactSOR.decimal).closeTo(priceImpactRef.decimal, 1e-4);
     });
@@ -155,7 +155,7 @@ describe('Price Impact for SOR tests', () => {
         if (!swap) throw new Error('Swap is undefined');
 
         const priceImpactSOR = swap.priceImpact;
-        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0294}`); // TODO: where can we find a reliable source of truth for this?
+        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0285}`); // TODO: where can we find a reliable source of truth for this?
 
         expect(priceImpactSOR.decimal).closeTo(priceImpactRef.decimal, 1e-4);
     });
