@@ -27,32 +27,13 @@ import { Address, Hex, PoolType } from '../src/types';
 
 import { BALANCER_RELAYER, CHAINS, ChainId } from '../src/utils';
 
-import {
-    approveToken,
-    sendTransactionGetBalances,
-    setTokenBalance,
-} from './lib/utils/helper';
+import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
 import { Relayer } from '../src/entities/relayer';
 import {
     RemoveLiquidityNestedProportionalInput,
     RemoveLiquidityNestedSingleTokenInput,
 } from '../src/entities/removeLiquidityNested/types';
-import { grantRoles } from './lib/utils/relayerHelper';
-
-/**
- * Deploy the new relayer contract with the new helper address:
- *
- * in the mono repo:
- * cd pkg/standalone-utils
- * forge create --rpc-url http://0.0.0.0:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 contracts/BatchRelayerQueryLibrary.sol:BatchRelayerQueryLibrary --constructor-args "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
- *
- * [take the address]
- *
- * forge create --rpc-url http://0.0.0.0:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 contracts/relayer/BalancerRelayer.sol:BalancerRelayer --constructor-args "0xBA12222222228d8Ba445958a75a0704d566BF2C8" "0xf77018c0d817da22cadbdf504c00c0d32ce1e5c2" "[paste the address]" "5"
- *
- * update `BALANCER_RELAYER` on constants.ts
- *
- */
+import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
 
 type TxInput = {
     poolId: Hex;
@@ -65,7 +46,7 @@ type TxInput = {
     useNativeAssetAsWrappedAmountOut?: boolean;
 };
 
-describe.skip('remove liquidity nested test', () => {
+describe('remove liquidity nested test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
@@ -75,7 +56,8 @@ describe.skip('remove liquidity nested test', () => {
     beforeAll(async () => {
         // setup chain and test client
         chainId = ChainId.MAINNET;
-        rpcUrl = 'http://127.0.0.1:8545/';
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET));
+
         client = createTestClient({
             mode: 'hardhat',
             chain: CHAINS[chainId],
@@ -88,23 +70,15 @@ describe.skip('remove liquidity nested test', () => {
 
         poolId =
             '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0'; // WETH-3POOL-BPT
+    });
 
-        // Fork setup - done only once per fork reset
-        // Governance grant roles to the relayer
-        await grantRoles(client);
-
-        // User approve vault to spend their tokens and update user balance
-        await approveToken(
+    beforeEach(async () => {
+        await forkSetup(
             client,
             testAddress,
-            '0x08775ccb6674d6bdceb0797c364c2653ed84f384',
-        );
-        await setTokenBalance(
-            client,
-            testAddress,
-            '0x08775ccb6674d6bdceb0797c364c2653ed84f384',
-            0,
-            parseUnits('1000', 18),
+            ['0x08775ccb6674d6bdceb0797c364c2653ed84f384'],
+            [0],
+            [parseUnits('1000', 18)],
         );
     });
 

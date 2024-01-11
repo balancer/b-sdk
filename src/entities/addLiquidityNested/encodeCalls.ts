@@ -83,12 +83,12 @@ const getUserData = (
 ) => {
     switch (poolType) {
         case PoolType.Weighted:
-            return WeightedEncoder.joinUnbalanced(
+            return WeightedEncoder.addLiquidityUnbalanced(
                 amountsInWithoutBpt,
                 minBptOut,
             );
         case PoolType.ComposableStable:
-            return ComposableStableEncoder.joinUnbalanced(
+            return ComposableStableEncoder.addLiquidityUnbalanced(
                 amountsInWithoutBpt,
                 minBptOut,
             );

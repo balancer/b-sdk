@@ -124,7 +124,7 @@ export const BALANCER_VAULT: Address =
     '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 
 export const BALANCER_RELAYER: Record<number, Address> = {
-    [ChainId.MAINNET]: '0xc775bF567D67018dfFac4E89a7Cf10f0EDd0Be93',
+    [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
 };
 
 /**
