@@ -18,7 +18,7 @@ import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { PriceImpactAmount } from '../../../src/entities/priceImpactAmount';
 
 const chainId = ChainId.MAINNET;
-const blockNumber = 18621981n;
+const blockNumber = 18559730n;
 const { rpcUrl } = await startFork(
     ANVIL_NETWORKS.MAINNET,
     undefined,

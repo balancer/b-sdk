@@ -28,7 +28,7 @@ import { SingleSwapInput } from '../../../src/entities/utils/doSingleSwapQuery';
 const { rpcUrl } = await startFork(
     ANVIL_NETWORKS.MAINNET,
     undefined,
-    18621981n,
+    18559730n,
 );
 const chainId = ChainId.MAINNET;
 const poolId =
@@ -112,7 +112,7 @@ describe('price impact', () => {
             );
             expect(priceImpactABA.decimal).closeTo(
                 priceImpactSpot.decimal,
-                1e-2, // 100 bps
+                1e-3, // 100 bps
             );
         });
     });
