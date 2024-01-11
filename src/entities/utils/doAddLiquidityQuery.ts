@@ -1,7 +1,7 @@
 import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
-import { BALANCER_HELPERS, CHAINS } from '../../utils';
-import { balancerHelpersAbi } from '../../abi';
+import { BALANCER_QUERIES, CHAINS } from '../../utils';
+import { balancerQueriesAbi } from '../../abi';
 
 export async function doAddLiquidityQuery(
     rpcUrl: string,
@@ -29,8 +29,8 @@ export async function doAddLiquidityQuery(
     const {
         result: [bptOut, amountsIn],
     } = await client.simulateContract({
-        address: BALANCER_HELPERS[chainId],
-        abi: balancerHelpersAbi,
+        address: BALANCER_QUERIES[chainId],
+        abi: balancerQueriesAbi,
         functionName: 'queryJoin',
         args,
     });
