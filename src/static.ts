@@ -46,6 +46,9 @@ export async function sorGetSwapsWithPools(
         pools,
         swapOptions?.graphTraversalConfig,
     );
+
+    if(candidatePaths.length === 0) return null;
+
     const bestPaths = router.getBestPaths(
         candidatePaths,
         swapKind,

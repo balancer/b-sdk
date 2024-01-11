@@ -149,16 +149,6 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
 };
 
-export const BALANCER_HELPERS: Record<number, Address> = {
-    [ChainId.ARBITRUM_ONE]: '0x77d46184d22ca6a3726a2f500c776767b6a3d6ab',
-    [ChainId.AVALANCHE]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
-    [ChainId.GNOSIS_CHAIN]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
-    [ChainId.MAINNET]: '0x5addcca35b7a0d07c74063c48700c8590e87864e',
-    [ChainId.OPTIMISM]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
-    [ChainId.POLYGON]: '0x239e55f427d44c3cc793f49bfb507ebe76638a2b',
-    [ChainId.ZKEVM]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
-};
-
 export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
     [ChainId.AVALANCHE]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
