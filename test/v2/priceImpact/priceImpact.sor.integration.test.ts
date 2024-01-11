@@ -18,7 +18,12 @@ import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { PriceImpactAmount } from '../../../src/entities/priceImpactAmount';
 
 const chainId = ChainId.MAINNET;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const blockNumber = 18621981n;
+const { rpcUrl } = await startFork(
+    ANVIL_NETWORKS.MAINNET,
+    undefined,
+    blockNumber,
+);
 
 describe('Price Impact for SOR tests', () => {
     const mockPoolProvider = new MockPoolProvider(
@@ -53,7 +58,7 @@ describe('Price Impact for SOR tests', () => {
     );
 
     const swapOptions: SwapOptions = {
-        block: ANVIL_NETWORKS.MAINNET.forkBlockNumber,
+        block: blockNumber,
     };
 
     let pools: BasePool[];
@@ -129,7 +134,7 @@ describe('Price Impact for SOR tests', () => {
         if (!swap) throw new Error('Swap is undefined');
 
         const priceImpactSOR = swap.priceImpact;
-        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0261}`); // TODO: where can we find a reliable source of truth for this?
+        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0246}`); // TODO: where can we find a reliable source of truth for this?
 
         expect(priceImpactSOR.decimal).closeTo(priceImpactRef.decimal, 1e-4);
     });
@@ -150,7 +155,7 @@ describe('Price Impact for SOR tests', () => {
         if (!swap) throw new Error('Swap is undefined');
 
         const priceImpactSOR = swap.priceImpact;
-        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0285}`); // TODO: where can we find a reliable source of truth for this?
+        const priceImpactRef = PriceImpactAmount.fromDecimal(`${0.0294}`); // TODO: where can we find a reliable source of truth for this?
 
         expect(priceImpactSOR.decimal).closeTo(priceImpactRef.decimal, 1e-4);
     });
