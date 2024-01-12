@@ -6,10 +6,10 @@ import {
     getContract,
     http,
 } from 'viem';
-import { CHAINS } from '../../utils';
-import { InputAmountInit } from '../../types';
+import { CHAINS, VAULT } from '../../utils';
 import { PoolState } from '../../entities';
-import { sortTokensByAddress } from '../../utils/tokens';
+import { getTokenDecimals } from '../../utils/tokens';
+import { vaultAbi } from '@/abi';
 
 export class InitPoolDataProvider {
     private readonly client: PublicClient;
@@ -43,39 +43,43 @@ export class InitPoolDataProvider {
     public async getInitPoolData(
         poolAddress: Address,
         poolType: string,
-        amounts: InputAmountInit[],
-        hasBPT: boolean
     ): Promise<PoolState> {
+        const chainId = await this.client.getChainId();
         const poolContract = getContract({
             abi: this.simplePoolAbi,
             address: poolAddress,
             publicClient: this.client,
         });
 
-        const poolTokens = sortTokensByAddress(amounts).map(
-            ({ address, decimals }, index) => ({
-                address: address.toLowerCase() as Address,
-                decimals,
-                index,
-            }),
-        );
-
-        const poolTokensWithBpt = sortTokensByAddress([
-            ...amounts,
-            { address: poolAddress.toLowerCase() as Address, decimals: 18 },
-        ]).map(({ address, decimals }, index) => ({
-            address: address.toLowerCase() as Address,
-            decimals,
-            index,
-        }));
+        const vaultContract = getContract({
+            abi: vaultAbi,
+            address: VAULT[chainId],
+            publicClient: this.client,
+        });
 
         try {
             const poolId = (await poolContract.read.getPoolId()) as Hex;
+            const poolTokensFromVault = await vaultContract.read.getPoolTokens([
+                poolId,
+            ]);
+            const poolTokens = await Promise.all(
+                poolTokensFromVault[0].map(async (address, index) => {
+                    const decimals = await getTokenDecimals(
+                        address,
+                        this.client,
+                    );
+                    return {
+                        address: address.toLowerCase() as Address,
+                        index,
+                        decimals,
+                    };
+                }),
+            );
             return {
                 id: poolId,
                 address: poolAddress.toLowerCase() as Address,
                 type: poolType,
-                tokens: hasBPT ? poolTokensWithBpt : poolTokens,
+                tokens: poolTokens,
                 balancerVersion: 2, // TODO V3: instantiate a different provider for V3? Or add a config/input to this one? Will the interface be the same?
             };
         } catch (e) {

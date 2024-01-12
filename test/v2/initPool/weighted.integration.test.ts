@@ -111,8 +111,6 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
         poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
             PoolType.Weighted,
-            initPoolInput.amountsIn,
-            false
         );
         await forkSetup(
             initPoolTxInput.client,
