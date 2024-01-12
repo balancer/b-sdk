@@ -15,7 +15,7 @@ import {
 } from '../types';
 import { CHAINS } from '../../utils';
 import { SwapOptions } from '../../types';
-import { fetchAdditionalPoolData } from '../onChainPoolDataViaReadContract';
+import { onChainPoolDataCallsV3 } from '../helpers/onChainPoolDataCallsV3';
 
 export interface OnChainPoolDataV3 {
     id: string;
@@ -55,13 +55,52 @@ export class OnChainPoolDataEnricherV3 implements PoolDataEnricher {
         data: GetPoolsResponse,
         options: SwapOptions,
     ): Promise<OnChainPoolDataV3[]> {
-        return fetchAdditionalPoolData(
-            this.vault,
-            data.pools,
-            this.client,
-            options,
-            this.batchSize,
+        if (data.pools.length === 0) {
+            return [];
+        }
+
+        const calls = data.pools.flatMap(({ id, poolType, poolTypeVersion }) =>
+            onChainPoolDataCallsV3(poolType, poolTypeVersion, this.vault).build(
+                id,
+                poolType,
+                this.vault,
+            ),
         );
+
+        const results = await this.client.multicall({
+            contracts: calls,
+            batchSize: this.batchSize,
+            blockNumber: options.block,
+        });
+
+        results.forEach((r, i) => {
+            if (r.status === 'failure')
+                console.error(
+                    'Failed request in multicall',
+                    calls[i].address,
+                    calls[i].functionName,
+                    r.error,
+                );
+        });
+
+        let shift = 0;
+
+        return data.pools.map(({ id, poolType, poolTypeVersion }) => {
+            const result = {
+                id,
+                ...onChainPoolDataCallsV3(
+                    poolType,
+                    poolTypeVersion,
+                    this.vault,
+                ).parse(results, shift),
+            } as OnChainPoolDataV3;
+            shift += onChainPoolDataCallsV3(
+                poolType,
+                poolTypeVersion,
+                this.vault,
+            ).count;
+            return result;
+        });
     }
 
     public enrichPoolsWithData(

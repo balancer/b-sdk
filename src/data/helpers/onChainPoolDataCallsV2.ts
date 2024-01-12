@@ -1,9 +1,8 @@
-import { PublicClient, Address, Abi, Hex } from 'viem';
-import { getPoolAddress } from '../utils';
-import { OnChainPoolData } from './enrichers/onChainPoolDataEnricherV2';
-import { SwapOptions } from '../types';
+import { getPoolAddress } from '../../utils';
 
-import * as abis from '../abi';
+import * as abis from '../../abi';
+import { Abi } from 'viem';
+import { Address, Hex } from '../..';
 
 const requiredAbis = [
     ...abis.composabableStablePoolV5Abi,
@@ -42,12 +41,12 @@ type Result =
       };
 [];
 
-type Results = Result[];
+export type Results = Result[];
 
 // Extract the functionName property values into a union type
 type FunctionNameUnion = string;
 
-type BuildReturn = {
+export type BuildReturn = {
     address: Address;
     abi: Abi;
     functionName: FunctionNameUnion;
@@ -204,11 +203,15 @@ const gyroECalls = {
     }),
 };
 
-const poolTypeCalls = (
+export const onChainPoolDataCallsV2 = (
     poolType: string,
     poolTypeVersion: number,
     vault: Address,
-) => {
+): {
+    count: number;
+    build: (id: string, poolType: string, vault: Address) => BuildReturn[];
+    parse: (results: Results, shift: number) => any;
+} => {
     const do_nothing = {
         count: 0,
         build: () => [],
@@ -348,58 +351,4 @@ const poolTypeCalls = (
         default:
             return do_nothing;
     }
-};
-
-export const fetchAdditionalPoolData = async (
-    vault: Address,
-    pools: {
-        id: string;
-        poolType: string;
-        poolTypeVersion: number;
-    }[],
-    client: PublicClient,
-    options: SwapOptions,
-    batchSize: number,
-): Promise<OnChainPoolData[]> => {
-    if (pools.length === 0) {
-        return [];
-    }
-
-    const calls = pools.flatMap(({ id, poolType, poolTypeVersion }) =>
-        poolTypeCalls(poolType, poolTypeVersion, vault).build(
-            id,
-            poolType,
-            vault,
-        ),
-    );
-
-    const results = await client.multicall({
-        contracts: calls,
-        batchSize: batchSize,
-        blockNumber: options.block,
-    });
-
-    results.forEach((r, i) => {
-        if (r.status === 'failure')
-            console.error(
-                'Failed request in multicall',
-                calls[i].address,
-                calls[i].functionName,
-                r.error,
-            );
-    });
-
-    let shift = 0;
-
-    return pools.map(({ id, poolType, poolTypeVersion }) => {
-        const result = {
-            id,
-            ...poolTypeCalls(poolType, poolTypeVersion, vault).parse(
-                results,
-                shift,
-            ),
-        } as OnChainPoolData;
-        shift += poolTypeCalls(poolType, poolTypeVersion, vault).count;
-        return result;
-    });
 };
