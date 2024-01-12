@@ -1,5 +1,5 @@
 import { Router } from './router';
-import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
+import { BasePool, Path, Token, TokenAmount, SwapV2, SwapV3 } from './entities';
 import { ChainId, checkInputs, SUBGRAPH_URLS, BATCHSIZE, VAULT } from './utils';
 import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
@@ -11,8 +11,6 @@ import {
 } from './data';
 import { PoolDataService } from './data/poolDataService';
 import { GetPoolsResponse } from './data/types';
-import { SwapV2 } from './entities/swap/swapV2';
-import { SwapV3 } from './entities/swap/swapV3';
 
 export class SmartOrderRouter {
     private readonly chainId: ChainId;
@@ -110,7 +108,7 @@ export class SmartOrderRouter {
         swapKind: SwapKind,
         swapAmount: SwapInputRawAmount | TokenAmount,
         swapOptions?: SwapOptions,
-    ): Promise<Swap | null> {
+    ): Promise<SwapV2 | SwapV3 | null> {
         const checkedSwapAmount = checkInputs(
             tokenIn,
             tokenOut,
@@ -123,7 +121,7 @@ export class SmartOrderRouter {
             swapOptions,
         );
 
-        if(candidatePaths.length === 0) return null;
+        if (candidatePaths.length === 0) return null;
 
         const bestPaths = this.router.getBestPaths(
             candidatePaths,

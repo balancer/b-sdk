@@ -10,8 +10,8 @@ import { PoolParser } from './entities/pools/parser';
 import { SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { ChainId, checkInputs } from './utils';
 import { Router } from './router';
-import { SwapV2 } from './entities/swap/swapV2';
-import { SwapV3 } from './entities/swap/swapV3';
+import { SwapV2 } from './entities/swapV2';
+import { SwapV3 } from './entities/swapV3';
 
 export function sorParseRawPools(
     chainId: ChainId,
@@ -47,7 +47,7 @@ export async function sorGetSwapsWithPools(
         swapOptions?.graphTraversalConfig,
     );
 
-    if(candidatePaths.length === 0) return null;
+    if (candidatePaths.length === 0) return null;
 
     const bestPaths = router.getBestPaths(
         candidatePaths,
