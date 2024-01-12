@@ -1,6 +1,6 @@
 import { PathWithAmount } from './path';
 import { TokenAmount } from './tokenAmount';
-import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
+import { SingleSwap, SwapKind, BatchSwapStep, Address } from '../types';
 import {
     abs,
     BALANCER_QUERIES,
@@ -9,7 +9,6 @@ import {
     MathSol,
 } from '../utils';
 import {
-    Address,
     createPublicClient,
     encodeFunctionData,
     getContract,
