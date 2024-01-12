@@ -1,5 +1,4 @@
 export * from './authorizer';
-export * from './balancerHelpers';
 export * from './balancerQueries';
 export * from './balancerRelayer';
 export * from './batchRelayerLibrary';

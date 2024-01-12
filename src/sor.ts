@@ -103,6 +103,8 @@ export class SmartOrderRouter {
             swapOptions,
         );
 
+        if(candidatePaths.length === 0) return null;
+
         const bestPaths = this.router.getBestPaths(
             candidatePaths,
             swapKind,
