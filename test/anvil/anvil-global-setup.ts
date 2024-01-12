@@ -90,7 +90,7 @@ export async function stopAnvilForks() {
 */
 export async function startFork(
     network: NetworkSetup,
-    jobId = Number(process.env.VITEST_POOL_ID) || 0,
+    jobId = Number(process.env.VITEST_WORKER_ID) || 0,
 ) {
     const anvilOptions = getAnvilOptions(network);
 
