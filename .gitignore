@@ -2,7 +2,7 @@
 local
 
 # build output
-dist
+# dist // comented to push and link from FE v3
 
 # Logs
 logs
