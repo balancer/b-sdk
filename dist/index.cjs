@@ -17524,7 +17524,7 @@ __publicField(PriceImpact, "singleSwap", async ({
 
 
 
-var _cloneDeep = require('lodash/cloneDeep'); var _cloneDeep2 = _interopRequireDefault(_cloneDeep);
+var _lodash = require('lodash');
 var Swap = class {
   constructor({
     paths,
@@ -17539,7 +17539,7 @@ var Swap = class {
     __publicField(this, "swaps");
     if (paths.length === 0)
       throw new Error("Invalid swap: must contain at least 1 path.");
-    this.pathsImmutable = _cloneDeep2.default.call(void 0, paths);
+    this.pathsImmutable = _lodash.cloneDeep.call(void 0, paths);
     this.paths = paths.map(
       (path) => new PathWithAmount(
         path.tokens,
