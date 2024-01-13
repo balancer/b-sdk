@@ -17524,7 +17524,7 @@ import {
   getContract as getContract2,
   http as http7
 } from "viem";
-import { cloneDeep } from "lodash";
+var cloneDeep = (foo) => foo;
 var Swap = class {
   constructor({
     paths,
