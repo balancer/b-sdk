@@ -114,6 +114,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
         poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
             PoolType.ComposableStable,
+            2
         );
 
         await forkSetup(
