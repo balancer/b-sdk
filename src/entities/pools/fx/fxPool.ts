@@ -108,7 +108,7 @@ export class FxPool implements BasePool {
 
         if (!tIn || !tOut)
             throw new Error('Pool does not contain the tokens provided');
-        // TODO: Fix fx normalized liquidity calc
+        
         return tOut.amount;
     }
 

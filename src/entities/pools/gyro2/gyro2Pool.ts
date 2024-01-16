@@ -103,7 +103,7 @@ export class Gyro2Pool implements BasePool {
 
         if (!tIn || !tOut)
             throw new Error('Pool does not contain the tokens provided');
-        // TODO: Fix gyro normalized liquidity calc
+        
         return tOut.amount;
     }
 

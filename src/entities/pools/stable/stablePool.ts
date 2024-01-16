@@ -137,7 +137,7 @@ export class StablePool implements BasePool {
 
         if (!tIn || !tOut)
             throw new Error('Pool does not contain the tokens provided');
-        // TODO: Fix stable normalized liquidity calc
+        
         return tOut.amount * this.amp;
     }
 

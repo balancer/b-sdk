@@ -102,7 +102,6 @@ export class WeightedPool implements BasePool {
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
-
         return (tIn.amount * tOut.weight) / (tIn.weight + tOut.weight);
     }
 
