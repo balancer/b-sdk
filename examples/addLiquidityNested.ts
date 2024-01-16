@@ -37,11 +37,6 @@ const poolId =
     '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0'; // WETH-3POOL
 const chainId = ChainId.MAINNET;
 
-/**
- * FIXME: the example will work properly only once we release relayer v6
- * containing relayer queries - at that moment, we should update blockNumber on
- * global anvil setup to after the relayer release
- */
 const addLiquidityNested = async () => {
     // User approve vault to spend their tokens and update user balance
     const { client, accountAddress, nestedPoolState, rpcUrl } =
@@ -176,4 +171,4 @@ const exampleSetup = async (): Promise<{
     };
 };
 
-addLiquidityNested().then(() => {});
+export default addLiquidityNested;

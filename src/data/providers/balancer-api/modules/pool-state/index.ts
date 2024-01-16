@@ -14,7 +14,7 @@ export class Pools {
         tokens {
           ... on GqlPoolTokenBase {
             address
-             decimals
+            decimals
             index
           }
         }
@@ -23,7 +23,7 @@ export class Pools {
         tokens {
           ... on GqlPoolTokenBase {
             address
-             decimals
+            decimals
             index
           }
         }
@@ -32,7 +32,7 @@ export class Pools {
         tokens {
           ... on GqlPoolTokenBase {
             address
-             decimals
+            decimals
             index
           }
         }
@@ -41,7 +41,7 @@ export class Pools {
         tokens {
           ... on GqlPoolTokenBase {
             address
-             decimals
+            decimals
             index
           }
         }
@@ -50,7 +50,7 @@ export class Pools {
         tokens {
           ... on GqlPoolTokenBase {
             address
-             decimals
+            decimals
             index
           }
         }
@@ -59,7 +59,7 @@ export class Pools {
         tokens {
           ... on GqlPoolTokenBase {
             address
-             decimals
+            decimals
             index
           }
         }
@@ -68,7 +68,7 @@ export class Pools {
         tokens {
           ... on GqlPoolTokenBase {
             address
-             decimals
+            decimals
             index
           }
         }

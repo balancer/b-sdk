@@ -133,7 +133,7 @@ export class NestedPools {
         }
       }
     }
-
+    
     fragment GqlPoolTokenComposableStable on GqlPoolTokenComposableStable {
       index
       name
