@@ -1,5 +1,7 @@
 export * from './addLiquidityNested';
+export * from './addLiquidityNested/types';
 export * from './removeLiquidityNested';
+export * from './removeLiquidityNested/types';
 export * from './addLiquidity';
 export * from './addLiquidity/types';
 export * from './createPool';
