@@ -56,7 +56,7 @@ export class InitPoolDataProvider {
         const poolContract = getContract({
             abi: this.simplePoolAbi,
             address: poolAddress,
-            publicClient: this.client,
+            client: this.client,
         });
 
         const vaultV2 = getContract({

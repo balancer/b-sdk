@@ -15,7 +15,7 @@ import {
     startFork,
     stopAnvilForks,
 } from '../test/anvil/anvil-global-setup';
-import { CHAINS, ChainId, WEIGHTED_POOL_FACTORY } from '../src';
+import { CHAINS, ChainId, PoolType, WEIGHTED_POOL_FACTORY } from '../src';
 import { findEventInReceiptLogs } from '../test/lib/utils/findEventInReceiptLogs';
 import { weightedFactoryV4Abi } from '../src/abi/weightedFactoryV4';
 import { CreatePoolWeightedInput } from '../src/entities/createPool/types';
@@ -33,10 +33,11 @@ const createPool = async (stopForkAfterExecution = true) => {
         .extend(walletActions);
     const signerAddress = (await client.getAddresses())[0];
     const createPool = new CreatePool();
-    const poolType = 'WEIGHTED';
+    const poolType = PoolType.Weighted;
     const createWeightedPoolInput: CreatePoolWeightedInput = {
         name: 'Test Pool',
         symbol: '50BAL-25WETH-25DAI',
+        poolType,
         tokens: [
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
@@ -56,8 +57,9 @@ const createPool = async (stopForkAfterExecution = true) => {
         ],
         swapFee: '0.01',
         poolOwnerAddress: signerAddress, // Balancer DAO Multisig
+        balancerVersion: 2,
     };
-    const { call } = createPool.buildCall(poolType, createWeightedPoolInput);
+    const { call } = createPool.buildCall(createWeightedPoolInput);
     const hash = await client.sendTransaction({
         to: WEIGHTED_POOL_FACTORY[chainId],
         data: call,

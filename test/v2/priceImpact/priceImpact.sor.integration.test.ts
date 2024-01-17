@@ -18,7 +18,12 @@ import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { PriceImpactAmount } from '../../../src/entities/priceImpactAmount';
 
 const chainId = ChainId.MAINNET;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const blockNumber = 18559730n;
+const { rpcUrl } = await startFork(
+    ANVIL_NETWORKS.MAINNET,
+    undefined,
+    blockNumber,
+);
 
 describe('Price Impact for SOR tests', () => {
     const mockPoolProvider = new MockPoolProvider(
@@ -53,7 +58,7 @@ describe('Price Impact for SOR tests', () => {
     );
 
     const swapOptions: SwapOptions = {
-        block: ANVIL_NETWORKS.MAINNET.forkBlockNumber,
+        block: blockNumber,
     };
 
     let pools: BasePool[];

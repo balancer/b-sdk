@@ -27,6 +27,5 @@ export async function getTokenDecimals(tokenAddress, client) {
         publicClient: client,
     });
     const decimals = await tokenContract.read.decimals();
-    console.log(decimals);
     return decimals;
 }
