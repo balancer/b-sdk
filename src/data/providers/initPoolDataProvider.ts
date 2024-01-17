@@ -9,7 +9,7 @@ import {
 import { CHAINS, VAULT } from '../../utils';
 import { PoolState } from '../../entities';
 import { getTokenDecimals } from '../../utils/tokens';
-import { vaultAbi } from '@/abi';
+import { vaultV2Abi } from '@/abi';
 
 export class InitPoolDataProvider {
     private readonly client: PublicClient;
@@ -43,6 +43,17 @@ export class InitPoolDataProvider {
     public async getInitPoolData(
         poolAddress: Address,
         poolType: string,
+        balancerVersion: 2 | 3,
+    ): Promise<PoolState> {
+        if (balancerVersion === 2) {
+            return this.getInitPoolDataV2(poolAddress, poolType);
+        }
+        return this.getInitPoolDataV3(poolAddress, poolType);
+    }
+
+    private async getInitPoolDataV2(
+        poolAddress: Address,
+        poolType: string,
     ): Promise<PoolState> {
         const chainId = await this.client.getChainId();
         const poolContract = getContract({
@@ -51,15 +62,15 @@ export class InitPoolDataProvider {
             client: this.client,
         });
 
-        const vaultContract = getContract({
-            abi: vaultAbi,
+        const vaultV2 = getContract({
+            abi: vaultV2Abi,
             address: VAULT[chainId],
-            publicClient: this.client,
+            client: this.client,
         });
 
         try {
             const poolId = (await poolContract.read.getPoolId()) as Hex;
-            const poolTokensFromVault = await vaultContract.read.getPoolTokens([
+            const poolTokensFromVault = await vaultV2.read.getPoolTokens([
                 poolId,
             ]);
             const poolTokens = await Promise.all(
@@ -80,13 +91,23 @@ export class InitPoolDataProvider {
                 address: poolAddress.toLowerCase() as Address,
                 type: poolType,
                 tokens: poolTokens,
-                balancerVersion: 2, // TODO V3: instantiate a different provider for V3? Or add a config/input to this one? Will the interface be the same?
+                balancerVersion: 2,
             };
         } catch (e) {
             console.warn(e);
             throw new Error(
-                'Invalid address, not possible to retrieve Pool Id',
+                'Invalid pool address, not possible to retrieve Pool Id',
             );
         }
+    }
+
+    private async getInitPoolDataV3(
+        poolAddress: Address,
+        poolType: string,
+    ): Promise<PoolState> {
+        console.log(poolAddress, poolType);
+        throw new Error(
+            'InitPoolData fetcher not implemented for Balancer V3 yet',
+        );
     }
 }

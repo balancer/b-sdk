@@ -9,7 +9,7 @@ import {
 } from 'viem';
 import { BALANCER_VAULT, MAX_UINT256 } from '../../utils';
 import { Address, Hex } from '../../types';
-import { vaultAbi } from '../../abi';
+import { vaultV2Abi } from '../../abi';
 
 export enum RelayerAction {
     JoinPool = 'JoinPool',
@@ -167,7 +167,7 @@ export class RelayerAuthorization {
         let _nonce = nonce;
         if (_nonce === undefined) {
             _nonce = await client.readContract({
-                abi: vaultAbi,
+                abi: vaultV2Abi,
                 address: verifyingContract,
                 functionName: 'getNextNonce',
                 args: [allowedSender],
