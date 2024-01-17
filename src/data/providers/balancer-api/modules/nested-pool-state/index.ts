@@ -160,14 +160,14 @@ export class NestedPools {
     constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
     fetchNestedPoolState = async (id: string): Promise<NestedPoolState> => {
-      const {
-        data: { poolGetPool },
-    } = await this.balancerApiClient.fetch({
-        query: this.nestedPoolStateQuery,
-        variables: {
-            id,
-        },
-    });
+        const {
+            data: { poolGetPool },
+        } = await this.balancerApiClient.fetch({
+            query: this.nestedPoolStateQuery,
+            variables: {
+                id,
+            },
+        });
 
         const nestedPoolState = this.mapPoolToNestedPoolState(
             poolGetPool as PoolGetPool,
@@ -231,13 +231,13 @@ export class NestedPools {
     };
 
     mapPoolType = (type: string): PoolType => {
-      switch (type) {
-          case 'WEIGHTED':
-              return PoolType.Weighted;
-          case 'COMPOSABLE_STABLE':
-              return PoolType.ComposableStable;
-          default:
-              throw new Error(`Unsupported pool type ${type}`);
-      }
+        switch (type) {
+            case 'WEIGHTED':
+                return PoolType.Weighted;
+            case 'COMPOSABLE_STABLE':
+                return PoolType.ComposableStable;
+            default:
+                throw new Error(`Unsupported pool type ${type}`);
+        }
     };
 }

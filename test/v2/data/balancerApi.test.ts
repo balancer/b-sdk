@@ -50,10 +50,7 @@ describe(
             const nestedPoolState: NestedPoolState =
                 await balancerApi.nestedPools.fetchNestedPoolState(poolId);
 
-
-
             expect(nestedPoolState.mainTokens).toHaveLength(4);
-
         });
     },
     {

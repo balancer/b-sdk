@@ -126,9 +126,9 @@ export async function sendTransactionGetBalances(
         value,
     });
 
-    const transactionReceipt = await client.waitForTransactionReceipt({
+    const transactionReceipt = (await client.waitForTransactionReceipt({
         hash,
-    });
+    })) as TransactionReceipt;
 
     const { gasUsed, effectiveGasPrice } = transactionReceipt;
     const gasPrice = gasUsed * effectiveGasPrice;

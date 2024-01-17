@@ -65,9 +65,7 @@ const createPoolComposableStable = async (): Promise<{
         poolOwnerAddress: signerAddress, // Balancer DAO Multisig
         balancerVersion: 2,
     };
-    const { call } = createPool.buildCall(
-        createPoolComposableStableInput,
-    );
+    const { call } = createPool.buildCall(createPoolComposableStableInput);
     const hash = await client.sendTransaction({
         to: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
         data: call,
