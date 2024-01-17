@@ -3,7 +3,7 @@ import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { WeightedEncoder } from '@/entities/encoders/weighted';
 import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
-import { vaultAbi } from '@/abi';
+import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
     AddLiquidityBuildOutput,
@@ -88,7 +88,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         });
 
         const call = encodeFunctionData({
-            abi: vaultAbi,
+            abi: vaultV2Abi,
             functionName: 'joinPool',
             args,
         });

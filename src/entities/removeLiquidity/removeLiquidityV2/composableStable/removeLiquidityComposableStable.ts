@@ -6,7 +6,7 @@ import {
     MAX_UINT256,
     ZERO_ADDRESS,
 } from '../../../../utils/constants';
-import { vaultAbi } from '../../../../abi';
+import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
@@ -135,7 +135,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             toInternalBalance: !!input.toInternalBalance,
         });
         const call = encodeFunctionData({
-            abi: vaultAbi,
+            abi: vaultV2Abi,
             functionName: 'exitPool',
             args,
         });
