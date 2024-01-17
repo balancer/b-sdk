@@ -44,19 +44,22 @@ export class InitPoolDataProvider {
         poolAddress: Address,
         poolType: string,
         balancerVersion: 2 | 3,
-        ): Promise<PoolState> {
-            if(balancerVersion === 2){
-                return this.getInitPoolDataV2(poolAddress, poolType);
-            }
-            return this.getInitPoolDataV3(poolAddress, poolType);
+    ): Promise<PoolState> {
+        if (balancerVersion === 2) {
+            return this.getInitPoolDataV2(poolAddress, poolType);
+        }
+        return this.getInitPoolDataV3(poolAddress, poolType);
     }
 
-    private async getInitPoolDataV2(poolAddress: Address, poolType: string): Promise<PoolState>{
+    private async getInitPoolDataV2(
+        poolAddress: Address,
+        poolType: string,
+    ): Promise<PoolState> {
         const chainId = await this.client.getChainId();
         const poolContract = getContract({
             abi: this.simplePoolAbi,
             address: poolAddress,
-            client: this.client,
+            publicClient: this.client,
         });
 
         const vaultV2 = getContract({
@@ -98,8 +101,13 @@ export class InitPoolDataProvider {
         }
     }
 
-    private async getInitPoolDataV3(poolAddress: Address, poolType: string): Promise<PoolState> {
+    private async getInitPoolDataV3(
+        poolAddress: Address,
+        poolType: string,
+    ): Promise<PoolState> {
         console.log(poolAddress, poolType);
-        throw new Error('InitPoolData fetcher not implemented for Balancer V3 yet');
+        throw new Error(
+            'InitPoolData fetcher not implemented for Balancer V3 yet',
+        );
     }
 }
