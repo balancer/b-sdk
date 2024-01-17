@@ -2,7 +2,7 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
 import {
-    BALANCER_VAULT,
+    VAULT,
     MAX_UINT256,
     ZERO_ADDRESS,
 } from '../../../../utils/constants';
@@ -142,7 +142,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
 
         return {
             call,
-            to: BALANCER_VAULT,
+            to: VAULT[input.chainId],
             value: 0n,
             maxBptIn: TokenAmount.fromRawAmount(
                 input.bptIn.token,
