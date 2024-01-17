@@ -1,5 +1,5 @@
 import { Client, TestActions, WalletActions } from 'viem';
-import { authorizerAbi, vaultAbi } from '../../../src/abi';
+import { authorizerAbi, vaultV2Abi } from '../../../src/abi';
 import { Address } from '../../../src/types';
 import { BALANCER_RELAYER, BALANCER_VAULT } from '../../../src/utils';
 
@@ -57,7 +57,7 @@ export const approveRelayer = async (
         account,
         address: BALANCER_VAULT,
         chain: client.chain,
-        abi: vaultAbi,
+        abi: vaultV2Abi,
         functionName: 'setRelayerApproval',
         args: [account, BALANCER_RELAYER[chainId], true],
     });

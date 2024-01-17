@@ -38,7 +38,7 @@ const initPool = async () => {
     const poolState = await initPoolDataProvider.getInitPoolData(
         poolAddress,
         poolType,
-        initPoolInput.amountsIn,
+        2,
     );
 
     // Making the setup so the user wallet have enough balance to do the transaction
