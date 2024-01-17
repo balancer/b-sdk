@@ -119,6 +119,11 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.ZKEVM]: 128,
     [ChainId.FANTOM]: 128,
 };
+
+export const BALANCER_RELAYER: Record<number, Address> = {
+    [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
+};
+
 /**
  * Deployment Addresses
  * Source: https://docs.balancer.fi/reference/contracts
