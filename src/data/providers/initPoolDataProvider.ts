@@ -59,13 +59,13 @@ export class InitPoolDataProvider {
         const poolContract = getContract({
             abi: this.simplePoolAbi,
             address: poolAddress,
-            publicClient: this.client,
+            client: this.client,
         });
 
         const vaultV2 = getContract({
             abi: vaultV2Abi,
             address: VAULT[chainId],
-            publicClient: this.client,
+            client: this.client,
         });
 
         try {
