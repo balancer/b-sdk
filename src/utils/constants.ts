@@ -120,7 +120,12 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.FANTOM]: 128,
 };
 
-export const BALANCER_VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+export const BALANCER_VAULT: Address =
+    '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+
+export const BALANCER_RELAYER: Record<number, Address> = {
+    [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
+};
 
 /**
  * Deployment Addresses
@@ -147,16 +152,6 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
     [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
-};
-
-export const BALANCER_HELPERS: Record<number, Address> = {
-    [ChainId.ARBITRUM_ONE]: '0x77d46184d22ca6a3726a2f500c776767b6a3d6ab',
-    [ChainId.AVALANCHE]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
-    [ChainId.GNOSIS_CHAIN]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
-    [ChainId.MAINNET]: '0x5addcca35b7a0d07c74063c48700c8590e87864e',
-    [ChainId.OPTIMISM]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
-    [ChainId.POLYGON]: '0x239e55f427d44c3cc793f49bfb507ebe76638a2b',
-    [ChainId.ZKEVM]: '0x8e9aa87e45e92bad84d5f8dd1bff34fb92637de9',
 };
 
 export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {

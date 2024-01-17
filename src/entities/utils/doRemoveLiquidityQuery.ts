@@ -1,7 +1,7 @@
 import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
-import { BALANCER_HELPERS, CHAINS } from '../../utils/constants';
-import { balancerHelpersAbi } from '../../abi';
+import { BALANCER_QUERIES, CHAINS } from '../../utils/constants';
+import { balancerQueriesAbi } from '../../abi';
 import { ExitPoolRequest } from '../removeLiquidity/types';
 
 export async function doRemoveLiquidityQuery(
@@ -20,8 +20,8 @@ export async function doRemoveLiquidityQuery(
     const {
         result: [bptIn, amountsOut],
     } = await client.simulateContract({
-        address: BALANCER_HELPERS[chainId],
-        abi: balancerHelpersAbi,
+        address: BALANCER_QUERIES[chainId],
+        abi: balancerQueriesAbi,
         functionName: 'queryExit',
         args,
     });

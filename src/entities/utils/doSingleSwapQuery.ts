@@ -13,14 +13,14 @@ export const doSingleSwapQuery = async ({
     chainId,
     ...swap
 }: SingleSwapInput): Promise<bigint> => {
-    const publicClient = createPublicClient({
+    const client = createPublicClient({
         transport: http(rpcUrl),
     });
 
     const queriesContract = getContract({
         address: BALANCER_QUERIES[chainId],
         abi: balancerQueriesAbi,
-        publicClient,
+        client,
     });
 
     const { result } = await queriesContract.simulate.querySwap([
