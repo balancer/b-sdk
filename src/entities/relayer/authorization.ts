@@ -7,7 +7,7 @@ import {
     toHex,
     WalletActions,
 } from 'viem';
-import { BALANCER_VAULT, MAX_UINT256 } from '../../utils';
+import { MAX_UINT256, VAULT } from '../../utils';
 import { Address, Hex } from '../../types';
 import { vaultAbi } from '../../abi';
 
@@ -146,7 +146,7 @@ export class RelayerAuthorization {
         nonce?: bigint,
     ): Promise<Hex> => {
         const chainId = await client.getChainId();
-        const verifyingContract = BALANCER_VAULT;
+        const verifyingContract = VAULT[chainId];
 
         const domain = {
             name: 'Balancer V2 Vault',

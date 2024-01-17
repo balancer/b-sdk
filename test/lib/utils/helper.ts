@@ -30,11 +30,12 @@ export const hasApprovedToken = async (
     token: Address,
     amount = MAX_UINT256,
 ): Promise<boolean> => {
+    const chainId = await client.getChainId();
     const allowance = await client.readContract({
         address: token,
         abi: erc20Abi,
         functionName: 'allowance',
-        args: [account, BALANCER_VAULT],
+        args: [account, VAULT[chainId]],
     });
 
     const hasApproved = allowance >= amount;
