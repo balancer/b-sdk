@@ -1,7 +1,7 @@
 import { BalancerApiClient } from '../../client';
 import { NestedPool, NestedPoolState } from '../../../../../entities';
 import { MinimalToken } from '../../../../types';
-import { Address, Hex, PoolType } from '../../../../../types';
+import { Address, Hex } from '../../../../../types';
 import { mapPoolType } from '@/utils/poolTypeMapper';
 
 type PoolGetPool = {
@@ -229,16 +229,5 @@ export class NestedPools {
             pools,
             mainTokens,
         } as NestedPoolState;
-    };
-
-    mapPoolType = (type: string): PoolType => {
-        switch (type) {
-            case 'WEIGHTED':
-                return PoolType.Weighted;
-            case 'COMPOSABLE_STABLE':
-                return PoolType.ComposableStable;
-            default:
-                throw new Error(`Unsupported pool type ${type}`);
-        }
     };
 }
