@@ -2,6 +2,7 @@ import { BalancerApiClient } from '../../client';
 import { NestedPool, NestedPoolState } from '../../../../../entities';
 import { MinimalToken } from '../../../../types';
 import { Address, Hex, PoolType } from '../../../../../types';
+import { mapPoolType } from '@/utils/poolTypeMapper';
 
 type PoolGetPool = {
     id: Hex;
@@ -181,7 +182,7 @@ export class NestedPools {
             {
                 id: pool.id,
                 address: pool.address,
-                type: this.mapPoolType(pool.type),
+                type: mapPoolType(pool.type),
                 level: 1,
                 tokens: pool.tokens.map((t) => {
                     const minimalToken: MinimalToken = {
@@ -203,7 +204,7 @@ export class NestedPools {
                 id: token.pool.id,
                 address: token.pool.address,
                 level: 0,
-                type: this.mapPoolType(token.pool.type),
+                type: mapPoolType(token.pool.type),
                 tokens: token.pool.tokens.map((t) => {
                     const minimalToken: MinimalToken = {
                         address: t.address,

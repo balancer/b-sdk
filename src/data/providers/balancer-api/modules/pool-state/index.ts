@@ -1,6 +1,6 @@
 import { BalancerApiClient } from '../../client';
 import { PoolState } from '../../../../../entities';
-import { poolTypeFromApi } from '../../../../../utils/poolTypeMapper';
+import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 
 export class Pools {
     readonly poolStateQuery = `query GetPool($id: String!){
@@ -86,6 +86,6 @@ export class Pools {
             },
         });
         const poolGetPool: PoolState = data.poolGetPool;
-        return { ...poolGetPool, type: poolTypeFromApi[poolGetPool.type] };
+        return { ...poolGetPool, type: mapPoolType(poolGetPool.type) };
     }
 }

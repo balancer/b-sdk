@@ -3,7 +3,7 @@ import { BalancerApi, ChainId, NestedPoolState, PoolState } from '../../../src';
 
 // Placeholder test to help validate the impact of API updates
 // Note: should not be included to CI checks
-describe.skip(
+describe(
     'BalancerApi Provider',
     () => {
         test('CS Pool - Should add BPT to tokens', async () => {
