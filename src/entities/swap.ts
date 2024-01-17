@@ -82,14 +82,14 @@ export class Swap {
 
     // rpcUrl is optional, but recommended to prevent rate limiting
     public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
-        const publicClient = createPublicClient({
+        const client = createPublicClient({
             transport: http(rpcUrl),
         });
 
         const queriesContract = getContract({
             address: BALANCER_QUERIES[this.chainId],
             abi: balancerQueriesAbi,
-            publicClient,
+            client,
         });
 
         let amount: TokenAmount;
