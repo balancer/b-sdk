@@ -24,6 +24,23 @@ export type TxOutput = {
     gasUsed: bigint;
 };
 
+export const hasApprovedToken = async (
+    client: Client & PublicActions & WalletActions,
+    account: Address,
+    token: Address,
+    amount = MAX_UINT256,
+): Promise<boolean> => {
+    const allowance = await client.readContract({
+        address: token,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [account, BALANCER_VAULT],
+    });
+
+    const hasApproved = allowance >= amount;
+    return hasApproved;
+};
+
 export const approveToken = async (
     client: Client & PublicActions & WalletActions,
     account: Address,
@@ -109,9 +126,9 @@ export async function sendTransactionGetBalances(
         value,
     });
 
-    const transactionReceipt = await client.waitForTransactionReceipt({
+    const transactionReceipt = (await client.waitForTransactionReceipt({
         hash,
-    });
+    })) as TransactionReceipt;
 
     const { gasUsed, effectiveGasPrice } = transactionReceipt;
     const gasPrice = gasUsed * effectiveGasPrice;

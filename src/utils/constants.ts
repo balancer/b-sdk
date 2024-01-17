@@ -120,7 +120,12 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.FANTOM]: 128,
 };
 
-export const BALANCER_VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+export const BALANCER_VAULT: Address =
+    '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+
+export const BALANCER_RELAYER: Record<number, Address> = {
+    [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
+};
 
 /**
  * Deployment Addresses
