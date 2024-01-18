@@ -52,7 +52,7 @@ async function sdkAddLiquidity({
         slippage,
         sender: testAddress,
         recipient: testAddress,
-        chainId: addLiquidityInput.chainId
+        chainId: addLiquidityInput.chainId,
     });
 
     return {

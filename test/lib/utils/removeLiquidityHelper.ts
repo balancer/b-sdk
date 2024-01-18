@@ -44,7 +44,7 @@ export const sdkRemoveLiquidity = async ({
         slippage,
         sender: testAddress,
         recipient: testAddress,
-        chainId: removeLiquidityInput.chainId
+        chainId: removeLiquidityInput.chainId,
     });
 
     return {
@@ -188,7 +188,7 @@ export function assertRemoveLiquidityUnbalanced(
         removeLiquidityBuildOutput,
         false,
         slippage,
-        chainId
+        chainId,
     );
 
     assertTokenDeltas(
@@ -263,7 +263,7 @@ export function assertRemoveLiquiditySingleToken(
         removeLiquidityBuildOutput,
         true,
         slippage,
-        chainId
+        chainId,
     );
 
     assertTokenDeltas(
@@ -320,7 +320,7 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityBuildOutput,
         true,
         slippage,
-        chainId
+        chainId,
     );
 
     assertTokenDeltas(
