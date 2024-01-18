@@ -1,5 +1,26 @@
 # @balancer/sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- 5cac427: Safe updating all packages; Hard updating viem from v1 to v2;
+- a126243: return null when there are no candidatePaths when using `sorGetSwapsWithPools` so `getBestPaaths` doesnt throw
+- 79e9e81: Add dpdm as circular dependency linter
+- 584914b: - Add AddLiquidityNested
+  - Add RemoveLiquidityNestedProportional
+  - Add RemoveLiquidityNestedSingleToken
+- 79e9e81: Replace rome with biome
+- ffed733: Add v3 scaffold implementation
+
+### Patch Changes
+
+- 54c8925: Fixing InitPoolDataProvider to work with other poolTypes and with less input parameters;
+- 16a7cce: Adding balancer v3 scaffold for init pool data provider;
+- fc21f1e: Minor refactors and lint fixes
+- e59f1b2: Removing duplicated constant BALANCER_VAULT and replacing by VAULT[chainId]
+- 4bdc6f0: Removing BalancerHelpers contract and replacing it by BalancerQueries;
+
 ## 0.6.0
 
 ### Minor Changes

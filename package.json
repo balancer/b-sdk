@@ -9,13 +9,15 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "0.6.0",
+    "version": "0.7.0",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "type": "module",
     "types": "dist/index.d.ts",
     "typings": "dist/index.d.ts",
-    "files": ["dist/"],
+    "files": [
+        "dist/"
+    ],
     "scripts": {
         "build": "tsup",
         "format": "biome format --write .",
