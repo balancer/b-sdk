@@ -15,7 +15,7 @@ const requiredAbis = [
     ...abis.phantomStablePoolAbi,
     ...abis.stablePoolAbi,
     ...abis.weightedPoolAbi,
-    ...abis.vaultAbi,
+    ...abis.vaultV2Abi,
 ];
 
 // remove duplicate abi elements

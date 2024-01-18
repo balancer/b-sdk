@@ -46,6 +46,7 @@ const createPoolComposableStable = async (): Promise<{
     const createPoolComposableStableInput: CreatePoolComposableStableInput = {
         name: 'Test Pool',
         symbol: '50BAL-50WETH',
+        poolType,
         tokens: [
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
@@ -61,12 +62,10 @@ const createPoolComposableStable = async (): Promise<{
         amplificationParameter: BigInt(62),
         exemptFromYieldProtocolFeeFlag: false,
         swapFee: '0.01',
-        poolOwnerAddress: signerAddress, // Balancer DAO Multisig
+        poolOwnerAddress: signerAddress, // Balancer DAO Multisig,
+        balancerVersion: 2,
     };
-    const { call } = createPool.buildCall(
-        poolType,
-        createPoolComposableStableInput,
-    );
+    const { call } = createPool.buildCall(createPoolComposableStableInput);
     const hash = await client.sendTransaction({
         to: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
         data: call,

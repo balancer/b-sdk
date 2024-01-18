@@ -7,7 +7,7 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityQueryOutput,
     AddLiquidityUnbalancedInput,
-    BALANCER_VAULT,
+    VAULT,
     AddLiquiditySingleTokenInput,
     AddLiquidityProportionalInput,
     Token,
@@ -52,6 +52,7 @@ async function sdkAddLiquidity({
         slippage,
         sender: testAddress,
         recipient: testAddress,
+        chainId: addLiquidityInput.chainId
     });
 
     return {
@@ -61,35 +62,35 @@ async function sdkAddLiquidity({
 }
 
 function isAddLiquidityComposableStableQueryOutput(
-    result: AddLiquidityQueryOutput,
+    output: AddLiquidityQueryOutput,
 ): boolean {
     return (
-        (result as AddLiquidityComposableStableQueryOutput).bptIndex !==
+        (output as AddLiquidityComposableStableQueryOutput).bptIndex !==
         undefined
     );
 }
 
-function getCheck(result: AddLiquidityQueryOutput, isExactIn: boolean) {
-    if (isAddLiquidityComposableStableQueryOutput(result)) {
+function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
+    if (isAddLiquidityComposableStableQueryOutput(output)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
             // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { bptOut, bptIndex, ...check } =
-                result as AddLiquidityComposableStableQueryOutput;
+                output as AddLiquidityComposableStableQueryOutput;
             return check;
         }
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { amountsIn, bptIndex, ...check } =
-            result as AddLiquidityComposableStableQueryOutput;
+            output as AddLiquidityComposableStableQueryOutput;
         return check;
     }
     if (isExactIn) {
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-        const { bptOut, ...check } = result;
+        const { bptOut, ...check } = output;
         return check;
     }
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { amountsIn, ...check } = result;
+    const { amountsIn, ...check } = output;
     return check;
 }
 
@@ -399,7 +400,7 @@ function assertAddLiquidityBuildOutput(
     const expectedBuildOutput: Omit<AddLiquidityBuildOutput, 'call'> = {
         maxAmountsIn,
         minBptOut,
-        to: BALANCER_VAULT,
+        to: VAULT[addLiquidityInput.chainId],
         // Value should equal value of any wrapped asset if using native
         value: addLiquidityInput.useNativeAssetAsWrappedAmountIn
             ? (addLiquidityQueryOutput.amountsIn.find(

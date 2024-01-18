@@ -11,7 +11,7 @@ import {
     Token,
     RemoveLiquidityUnbalancedInput,
     RemoveLiquiditySingleTokenInput,
-    BALANCER_VAULT,
+    VAULT,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
 } from '../../../src';
@@ -44,6 +44,7 @@ export const sdkRemoveLiquidity = async ({
         slippage,
         sender: testAddress,
         recipient: testAddress,
+        chainId: removeLiquidityInput.chainId
     });
 
     return {
@@ -53,35 +54,35 @@ export const sdkRemoveLiquidity = async ({
 };
 
 function isRemoveLiquidityComposableStableQueryOutput(
-    result: RemoveLiquidityQueryOutput,
+    output: RemoveLiquidityQueryOutput,
 ): boolean {
     return (
-        (result as RemoveLiquidityComposableStableQueryOutput).bptIndex !==
+        (output as RemoveLiquidityComposableStableQueryOutput).bptIndex !==
         undefined
     );
 }
 
-function getCheck(result: RemoveLiquidityQueryOutput, isExactIn: boolean) {
-    if (isRemoveLiquidityComposableStableQueryOutput(result)) {
+function getCheck(output: RemoveLiquidityQueryOutput, isExactIn: boolean) {
+    if (isRemoveLiquidityComposableStableQueryOutput(output)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
             // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { amountsOut, bptIndex, ...check } =
-                result as RemoveLiquidityComposableStableQueryOutput;
+                output as RemoveLiquidityComposableStableQueryOutput;
             return check;
         }
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { bptIn, bptIndex, ...check } =
-            result as RemoveLiquidityComposableStableQueryOutput;
+            output as RemoveLiquidityComposableStableQueryOutput;
         return check;
     }
     if (isExactIn) {
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-        const { amountsOut, ...check } = result;
+        const { amountsOut, ...check } = output;
         return check;
     }
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { bptIn, ...check } = result;
+    const { bptIn, ...check } = output;
     return check;
 }
 
@@ -187,6 +188,7 @@ export function assertRemoveLiquidityUnbalanced(
         removeLiquidityBuildOutput,
         false,
         slippage,
+        chainId
     );
 
     assertTokenDeltas(
@@ -261,6 +263,7 @@ export function assertRemoveLiquiditySingleToken(
         removeLiquidityBuildOutput,
         true,
         slippage,
+        chainId
     );
 
     assertTokenDeltas(
@@ -317,6 +320,7 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityBuildOutput,
         true,
         slippage,
+        chainId
     );
 
     assertTokenDeltas(
@@ -364,6 +368,7 @@ function assertRemoveLiquidityBuildOutput(
     RemoveLiquidityBuildOutput: RemoveLiquidityBuildOutput,
     isExactIn: boolean,
     slippage: Slippage,
+    chainId: number,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
     // slippage.removeFrom(a.amount)
@@ -384,7 +389,7 @@ function assertRemoveLiquidityBuildOutput(
     const expectedBuildOutput: Omit<RemoveLiquidityBuildOutput, 'call'> = {
         minAmountsOut,
         maxBptIn,
-        to: BALANCER_VAULT,
+        to: VAULT[chainId],
         value: 0n, // Value should always be 0 when removing liquidity
     };
 

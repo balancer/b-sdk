@@ -25,7 +25,11 @@ import { PriceImpactAmount } from '../../../src/entities/priceImpactAmount';
 import { parseEther } from 'viem';
 import { SingleSwapInput } from '../../../src/entities/utils/doSingleSwapQuery';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const { rpcUrl } = await startFork(
+    ANVIL_NETWORKS.MAINNET,
+    undefined,
+    18559730n,
+);
 const chainId = ChainId.MAINNET;
 const poolId =
     '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b'; // wstETH-rETH-sfrxETH
@@ -108,7 +112,7 @@ describe('price impact', () => {
             );
             expect(priceImpactABA.decimal).closeTo(
                 priceImpactSpot.decimal,
-                1e-3, // 10 bps
+                1e-3, // 100 bps
             );
         });
     });

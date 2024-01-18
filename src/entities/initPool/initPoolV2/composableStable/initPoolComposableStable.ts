@@ -7,8 +7,8 @@ import {
     parseAddLiquidityArgs,
 } from '../../../utils';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../../types';
-import { vaultAbi } from '../../../../abi';
-import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../../utils';
+import { vaultV2Abi } from '../../../../abi';
+import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../../utils';
 import { Token } from '@/entities/token';
 
 export class InitPoolComposableStable implements InitPoolBase {
@@ -28,7 +28,7 @@ export class InitPoolComposableStable implements InitPoolBase {
             fromInternalBalance: input.fromInternalBalance ?? false,
         });
         const call = encodeFunctionData({
-            abi: vaultAbi,
+            abi: vaultV2Abi,
             functionName: 'joinPool',
             args,
         });
@@ -39,7 +39,7 @@ export class InitPoolComposableStable implements InitPoolBase {
 
         return {
             call,
-            to: BALANCER_VAULT as Address,
+            to: VAULT[input.chainId] as Address,
             value: value === undefined ? 0n : value,
         };
     }

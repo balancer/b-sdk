@@ -20,6 +20,7 @@ export type InitPoolInput = Omit<AddLiquidityBaseInput, 'rpcUrl'> & {
     sender: Address;
     recipient: Address;
     amountsIn: InputAmountInit[];
+    chainId: number;
     kind: AddLiquidityKind.Init;
 };
 

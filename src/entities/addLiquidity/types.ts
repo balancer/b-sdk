@@ -65,6 +65,7 @@ type AddLiquidityBaseCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
+    chainId: number
 };
 
 export type AddLiquidityComposableStableCall = AddLiquidityBaseCall &

@@ -1,8 +1,8 @@
 import { Address, encodeFunctionData } from 'viem';
 import { InitPoolAmounts, PoolState } from '../../../types';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../../types';
-import { BALANCER_VAULT, ZERO_ADDRESS } from '../../../../utils';
-import { vaultAbi } from '../../../../abi';
+import { VAULT, ZERO_ADDRESS } from '../../../../utils';
+import { vaultV2Abi } from '../../../../abi';
 import {
     getAmounts,
     getSortedTokens,
@@ -26,7 +26,7 @@ export class InitPoolWeighted implements InitPoolBase {
         });
 
         const call = encodeFunctionData({
-            abi: vaultAbi,
+            abi: vaultV2Abi,
             functionName: 'joinPool',
             args,
         });
@@ -37,7 +37,7 @@ export class InitPoolWeighted implements InitPoolBase {
 
         return {
             call,
-            to: BALANCER_VAULT as Address,
+            to: VAULT[input.chainId] as Address,
             value: value === undefined ? 0n : value,
         };
     }

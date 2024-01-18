@@ -2,8 +2,8 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { WeightedEncoder } from '@/entities/encoders/weighted';
-import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
-import { vaultAbi } from '@/abi';
+import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
+import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
     AddLiquidityBuildOutput,
@@ -88,7 +88,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         });
 
         const call = encodeFunctionData({
-            abi: vaultAbi,
+            abi: vaultV2Abi,
             functionName: 'joinPool',
             args,
         });
@@ -99,7 +99,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
 
         return {
             call,
-            to: BALANCER_VAULT,
+            to: VAULT[input.chainId],
             value: value === undefined ? 0n : value,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,

@@ -16,12 +16,30 @@ import {
     trim,
 } from 'viem';
 import { erc20Abi } from '../../../src/abi';
-import { BALANCER_VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
+import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;
     balanceDeltas: bigint[];
     gasUsed: bigint;
+};
+
+export const hasApprovedToken = async (
+    client: Client & PublicActions & WalletActions,
+    account: Address,
+    token: Address,
+    amount = MAX_UINT256,
+): Promise<boolean> => {
+    const chainId = await client.getChainId();
+    const allowance = await client.readContract({
+        address: token,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [account, VAULT[chainId]],
+    });
+
+    const hasApproved = allowance >= amount;
+    return hasApproved;
 };
 
 export const approveToken = async (
@@ -30,6 +48,7 @@ export const approveToken = async (
     token: Address,
     amount = MAX_UINT256, // approve max by default
 ): Promise<boolean> => {
+    const chainId = await client.getChainId();
     // approve token on the vault
     const hash = await client.writeContract({
         account,
@@ -37,7 +56,7 @@ export const approveToken = async (
         address: token,
         abi: erc20Abi,
         functionName: 'approve',
-        args: [BALANCER_VAULT, amount],
+        args: [VAULT[chainId], amount],
     });
 
     const txReceipt = await client.waitForTransactionReceipt({
@@ -109,9 +128,9 @@ export async function sendTransactionGetBalances(
         value,
     });
 
-    const transactionReceipt = await client.waitForTransactionReceipt({
+    const transactionReceipt = (await client.waitForTransactionReceipt({
         hash,
-    });
+    })) as TransactionReceipt;
 
     const { gasUsed, effectiveGasPrice } = transactionReceipt;
     const gasPrice = gasUsed * effectiveGasPrice;
