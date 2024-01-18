@@ -2,11 +2,7 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
 import { WeightedEncoder } from '../../../encoders/weighted';
-import {
-    VAULT,
-    MAX_UINT256,
-    ZERO_ADDRESS,
-} from '../../../../utils/constants';
+import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../../utils/constants';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
