@@ -2,11 +2,11 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
 import {
-    BALANCER_VAULT,
+    VAULT,
     MAX_UINT256,
     ZERO_ADDRESS,
 } from '../../../../utils/constants';
-import { vaultAbi } from '../../../../abi';
+import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
@@ -135,14 +135,14 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             toInternalBalance: !!input.toInternalBalance,
         });
         const call = encodeFunctionData({
-            abi: vaultAbi,
+            abi: vaultV2Abi,
             functionName: 'exitPool',
             args,
         });
 
         return {
             call,
-            to: BALANCER_VAULT,
+            to: VAULT[input.chainId],
             value: 0n,
             maxBptIn: TokenAmount.fromRawAmount(
                 input.bptIn.token,

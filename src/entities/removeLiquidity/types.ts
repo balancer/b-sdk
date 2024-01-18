@@ -63,6 +63,7 @@ type RemoveLiquidityBaseCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
+    chainId: number;
 };
 export type RemoveLiquidityComposableStableCall = RemoveLiquidityBaseCall &
     RemoveLiquidityComposableStableQueryOutput;

@@ -26,7 +26,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'ETHEREUM_RPC_URL',
         fallBackRpc: 'https://cloudflare-eth.com',
         port: ANVIL_PORTS.MAINNET,
-        forkBlockNumber: 18559730n,
+        forkBlockNumber: 18980070n,
     },
     POLYGON: {
         rpcEnv: 'POLYGON_RPC_URL',
@@ -45,7 +45,10 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     },
 };
 
-function getAnvilOptions(network: NetworkSetup): CreateAnvilOptions {
+function getAnvilOptions(
+    network: NetworkSetup,
+    blockNumber?: bigint,
+): CreateAnvilOptions {
     let forkUrl: string;
     if (process.env[network.rpcEnv] !== 'undefined') {
         forkUrl = process.env[network.rpcEnv] as string;
@@ -60,7 +63,7 @@ function getAnvilOptions(network: NetworkSetup): CreateAnvilOptions {
         );
     }
     const port = network.port;
-    const forkBlockNumber = network.forkBlockNumber;
+    const forkBlockNumber = blockNumber ?? network.forkBlockNumber;
     return {
         forkUrl,
         port,
@@ -90,9 +93,10 @@ export async function stopAnvilForks() {
 */
 export async function startFork(
     network: NetworkSetup,
-    jobId = Number(process.env.VITEST_POOL_ID) || 0,
+    jobId = Number(process.env.VITEST_WORKER_ID) || 0,
+    blockNumber?: bigint, // If not provided, the fork will start from the network's forkBlockNumber
 ) {
-    const anvilOptions = getAnvilOptions(network);
+    const anvilOptions = getAnvilOptions(network, blockNumber);
 
     const defaultAnvilPort = 8545;
     const port = (anvilOptions.port || defaultAnvilPort) + jobId;
@@ -123,7 +127,7 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
     }
     console.log('🛠️  Starting anvil', {
         port,
-        forkBlockNumber: anvilOptions.forkBlockNumber,
+        forkBlockNumber: blockNumber ?? anvilOptions.forkBlockNumber,
     });
     await anvil.start();
     return {
