@@ -31,6 +31,7 @@ import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
 import { Relayer } from '../src/entities/relayer';
 import { AddLiquidityNestedInput } from '../src/entities/addLiquidityNested/types';
 import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+import { daiAddress, usdcAddress, usdtAddress, wethAddress } from './lib/utils/tokenAddresses';
 
 type TxInput = {
     poolId: Hex;
@@ -78,26 +79,22 @@ describe('add liquidity nested test', () => {
         // User approve vault to spend their tokens and update user balance
         mainTokens = [
             {
-                address:
-                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
+                address: wethAddress,
                 balance: parseUnits('1000', 18),
                 slot: 3,
             },
             {
-                address:
-                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+                address: daiAddress,
                 balance: parseUnits('1000', 18),
                 slot: 2,
             },
             {
-                address:
-                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+                address: usdcAddress,
                 balance: parseUnits('1000', 6),
                 slot: 9,
             },
             {
-                address:
-                    '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
+                address: usdtAddress,
                 balance: parseUnits('1000', 6),
                 slot: 2,
             },
@@ -114,11 +111,10 @@ describe('add liquidity nested test', () => {
         );
     });
 
-    test('single token', async () => {
+    test.only('single token', async () => {
         const amountsIn = [
             {
-                address:
-                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+                address: daiAddress,
                 rawAmount: parseUnits('1', 18),
             },
         ];
@@ -150,26 +146,44 @@ describe('add liquidity nested test', () => {
         );
     });
 
+    test.only('single Token WETH', async () => {
+        const amountsIn = [
+            {
+                address: wethAddress,
+                rawAmount: parseUnits('1', 18),
+            },
+        ];
+
+        const balance = await client.getBalance({address: wethAddress })
+        expect(balance).toBeGreaterThan(0n)
+
+        await doTransaction({
+            poolId,
+            amountsIn,
+            chainId,
+            rpcUrl,
+            testAddress,
+            client,
+            useNativeAssetAsWrappedAmountIn: false,
+        });
+    });
+
     test('all tokens', async () => {
         const amountsIn = [
             {
-                address:
-                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
+                address: wethAddress,
                 rawAmount: parseUnits('1', 18),
             },
             {
-                address:
-                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+                address: daiAddress,
                 rawAmount: parseUnits('1', 18),
             },
             {
-                address:
-                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+                address: usdcAddress,
                 rawAmount: parseUnits('1', 6),
             },
             {
-                address:
-                    '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
+                address: usdtAddress,
                 rawAmount: parseUnits('1', 6),
             },
         ];
@@ -204,23 +218,19 @@ describe('add liquidity nested test', () => {
     test('native asset', async () => {
         const amountsIn = [
             {
-                address:
-                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
+                address: wethAddress,
                 rawAmount: parseUnits('1', 18),
             },
             {
-                address:
-                    '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+                address: daiAddress,
                 rawAmount: parseUnits('1', 18),
             },
             {
-                address:
-                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+                address: usdcAddress,
                 rawAmount: parseUnits('1', 6),
             },
             {
-                address:
-                    '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address, // USDT
+                address: usdtAddress,
                 rawAmount: parseUnits('1', 6),
             },
         ];
@@ -259,8 +269,7 @@ describe('add liquidity nested test', () => {
     test('native asset - invalid input', async () => {
         const amountsIn = [
             {
-                address:
-                    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+                address: usdcAddress,
                 rawAmount: parseUnits('1', 6),
             },
         ];
