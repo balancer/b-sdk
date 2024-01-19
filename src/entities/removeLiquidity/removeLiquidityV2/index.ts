@@ -31,7 +31,7 @@ export class RemoveLiquidityV2 implements RemoveLiquidityBase {
 
     public getRemoveLiquidity(poolType: string): RemoveLiquidityBase {
         if (!this.removeLiquidityTypes[poolType]) {
-            throw new Error('Unsupported pool type');
+            throw new Error(`Unsupported pool type ${poolType}`);
         }
 
         return this.removeLiquidityTypes[poolType];

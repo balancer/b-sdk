@@ -30,7 +30,7 @@ export class AddLiquidityV2 implements AddLiquidityBase {
 
     public getAddLiquidity(poolType: string): AddLiquidityBase {
         if (!this.addLiquidityTypes[poolType]) {
-            throw new Error('Unsupported pool type');
+            throw new Error(`Unsupported pool type ${poolType}`);
         }
         return this.addLiquidityTypes[poolType];
     }
