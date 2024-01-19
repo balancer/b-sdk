@@ -111,7 +111,7 @@ describe('add liquidity nested test', () => {
         );
     });
 
-    test.only('single token', async () => {
+    test('single token', async () => {
         const amountsIn = [
             {
                 address: daiAddress,
@@ -146,7 +146,7 @@ describe('add liquidity nested test', () => {
         );
     });
 
-    test.only('single Token WETH', async () => {
+    test('single Token WETH', async () => {
         const amountsIn = [
             {
                 address: wethAddress,
