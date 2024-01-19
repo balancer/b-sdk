@@ -23,7 +23,7 @@ export class InputValidator {
 
     getValidator(poolType: string): InputValidatorBase {
         if (!this.validators[poolType])
-            throw new Error('This Pool type does not have a validator');
+            throw new Error(`Pool type ${poolType} does not have a validator`);
         return this.validators[poolType];
     }
 
