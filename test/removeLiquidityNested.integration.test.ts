@@ -59,7 +59,7 @@ describe('remove liquidity nested test', () => {
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET));
 
         client = createTestClient({
-            mode: 'hardhat',
+            mode: 'anvil',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
         })
