@@ -19,7 +19,8 @@ import {
 } from 'viem';
 import { balancerQueriesAbi } from '../abi';
 import { PriceImpactAmount } from './priceImpactAmount';
-import cloneDeep from 'lodash/cloneDeep';
+import cloneDeep from 'lodash.clonedeep'
+
 
 // A Swap can be a single or multiple paths
 export class Swap {
