@@ -27,7 +27,9 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         const amounts = this.getAmountsQuery(sortedTokens, input);
 
         const userData = WeightedEncoder.encodeRemoveLiquidityUserData(
-            input.kind,
+            input.kind !== RemoveLiquidityKind.Recovery
+                ? input.kind
+                : RemoveLiquidityKind.Proportional,
             amounts,
         );
 
@@ -88,6 +90,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
                     ),
                     maxBptAmountIn: input.bptIn.rawAmount,
                 };
+            case RemoveLiquidityKind.Recovery:
             case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
@@ -158,6 +161,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,
                 };
+            case RemoveLiquidityKind.Recovery:
             case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
