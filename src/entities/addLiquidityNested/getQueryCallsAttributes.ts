@@ -33,6 +33,9 @@ export const getQueryCallsAttributes = (
             .sort((a, b) => a.index - b.index)
             .map((t) => new Token(chainId, t.address, t.decimals));
         const maxAmountsIn = getMaxAmountsIn(sortedTokens, amountsIn, calls);
+        if (maxAmountsIn.every((a) => a.amount === 0n && !a.isRef)) {
+            continue;
+        }
         calls.push({
             chainId: chainId,
             useNativeAssetAsWrappedAmountIn:
