@@ -1,6 +1,6 @@
 import { Hex, parseEther } from 'viem';
 import { PoolType, SwapKind } from '../../../types';
-import { Token, TokenAmount } from '../..';
+import { PriceImpactAmount, Token, TokenAmount } from '../..';
 import { BasePool } from '..';
 import { getPoolAddress, MathSol, WAD } from '../../../utils';
 import {
@@ -88,14 +88,87 @@ export class MetaStablePool implements BasePool {
         );
     }
 
-    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.address);
-        const tOut = this.tokenMap.get(tokenOut.address);
+    public spotPrice(tokenIn: Token, tokenOut: Token): bigint {
+        const { tIn } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        if (!tIn || !tOut)
-            throw new Error('Pool does not contain the tokens provided');
-        
-        return tOut.amount * this.amp;
+        const amountAInitial = TokenAmount.fromRawAmount(
+            tokenIn,
+            tIn.amount / 10000n,
+        );
+
+        const amountB = this.swapGivenIn(
+            tokenIn,
+            tokenOut,
+            amountAInitial,
+            false,
+        );
+
+        const priceAtoB = MathSol.divDownFixed(
+            amountAInitial.amount,
+            amountB.amount,
+        );
+
+        const amountAFinal = this.swapGivenIn(
+            tokenOut,
+            tokenIn,
+            amountB,
+            false,
+        );
+
+        const priceBtoA = MathSol.divDownFixed(
+            amountB.amount,
+            amountAFinal.amount,
+        );
+
+        return MathSol.powDownFixed(
+            MathSol.divDownFixed(priceAtoB, priceBtoA),
+            WAD / 2n,
+        );
+    }
+
+    public priceImpact(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+    ): PriceImpactAmount {
+        let effectivePrice: bigint;
+        if (swapAmount.token.isSameAddress(tokenIn.address)) {
+            const swapResult = this.swapGivenIn(
+                tokenIn,
+                tokenOut,
+                swapAmount,
+                false,
+            );
+            effectivePrice = MathSol.divDownFixed(
+                swapAmount.amount,
+                swapResult.amount,
+            );
+        } else {
+            const swapResult = this.swapGivenOut(
+                tokenIn,
+                tokenOut,
+                swapAmount,
+                false,
+            );
+            effectivePrice = MathSol.divDownFixed(
+                swapResult.amount,
+                swapAmount.amount,
+            );
+        }
+        const spotPrice = this.spotPrice(tokenIn, tokenOut);
+        const priceRatio = MathSol.divDownFixed(spotPrice, effectivePrice);
+        const priceImpact = PriceImpactAmount.fromRawAmount(WAD - priceRatio);
+        return priceImpact;
+    }
+
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
+        const amount = TokenAmount.fromHumanAmount(tokenOut, `${1}`); // TODO: fill with fixed amount equivalent to 100 USD
+        const priceImpact = this.priceImpact(tokenIn, tokenOut, amount);
+        const normalizedLiquidity = MathSol.divDownFixed(
+            WAD,
+            priceImpact.amount,
+        );
+        return normalizedLiquidity;
     }
 
     public swapGivenIn(
@@ -233,5 +306,19 @@ export class MetaStablePool implements BasePool {
         }
         // Return max amount of tokenOut - approx is almost all balance
         return (tOut.amount * WAD) / tOut.rate;
+    }
+
+    private getRequiredTokenPair(
+        tokenIn: Token,
+        tokenOut: Token,
+    ): { tIn: StablePoolToken; tOut: StablePoolToken } {
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
+
+        if (!tIn || !tOut) {
+            throw new Error('Pool does not contain the tokens provided');
+        }
+
+        return { tIn, tOut };
     }
 }

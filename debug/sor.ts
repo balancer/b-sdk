@@ -1,20 +1,23 @@
 // bun run debug/sor.ts
+import { parseEther } from 'viem';
 import { SmartOrderRouter, SwapKind, Token } from '../src';
-import { optimism } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 
-async function swap() {
-    const chainId = optimism.id;
-    const rpcUrl = 'https://mainnet.optimism.io';
+export const swap = async () => {
+    const chainId = mainnet.id;
+    const rpcUrl = process.env.ETHEREUM_RPC_URL as string;
     const swapKind = SwapKind.GivenIn;
-    const tokenIn = new Token(
+    const BAL = new Token(
         chainId,
-        '0x4200000000000000000000000000000000000006',
+        '0xba100000625a3754423978a60c9317c58a424e3d',
         18,
+        'BAL',
     );
-    const tokenOut = new Token(
+    const DAI = new Token(
         chainId,
-        '0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb',
+        '0x6b175474e89094c44da98b954eedeac495271d0f',
         18,
+        'DAI',
     );
 
     const sor = new SmartOrderRouter({
@@ -22,15 +25,10 @@ async function swap() {
         rpcUrl: rpcUrl,
     });
 
-    const swap = await sor.getSwaps(
-        tokenIn,
-        tokenOut,
-        swapKind,
-        '1000000000000000000',
-    );
+    const swap = await sor.getSwaps(BAL, DAI, swapKind, parseEther('1000'));
 
     console.log(swap?.outputAmount.amount);
     console.log(swap?.swaps);
-}
+};
 
-swap();
+export default swap;

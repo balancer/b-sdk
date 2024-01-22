@@ -113,6 +113,10 @@ export class SmartOrderRouter {
 
         if (!bestPaths) return null;
 
+        bestPaths.forEach((path) => {
+            path.print();
+        });
+
         return new Swap({ paths: bestPaths, swapKind });
     }
 

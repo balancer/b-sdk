@@ -6,6 +6,7 @@ import { BasePool } from '..';
 import { MathSol, WAD, getPoolAddress } from '../../../utils';
 import { _calcOutGivenIn, _calcInGivenOut } from './weightedMath';
 import { RawWeightedPool } from '../../../data/types';
+import { PriceImpactAmount } from '@/entities/priceImpactAmount';
 
 class WeightedPoolToken extends TokenAmount {
     public readonly weight: bigint;
@@ -100,9 +101,87 @@ export class WeightedPool implements BasePool {
         );
     }
 
+    public spotPrice(tokenIn: Token, tokenOut: Token): bigint {
+        const { tIn } = this.getRequiredTokenPair(tokenIn, tokenOut);
+
+        const amountAInitial = TokenAmount.fromRawAmount(
+            tokenIn,
+            tIn.amount / 10000n,
+        );
+
+        const amountB = this.swapGivenIn(
+            tokenIn,
+            tokenOut,
+            amountAInitial,
+            false,
+        );
+
+        const priceAtoB = MathSol.divDownFixed(
+            amountAInitial.amount,
+            amountB.amount,
+        );
+
+        const amountAFinal = this.swapGivenIn(
+            tokenOut,
+            tokenIn,
+            amountB,
+            false,
+        );
+
+        const priceBtoA = MathSol.divDownFixed(
+            amountB.amount,
+            amountAFinal.amount,
+        );
+
+        return MathSol.powDownFixed(
+            MathSol.divDownFixed(priceAtoB, priceBtoA),
+            WAD / 2n,
+        );
+    }
+
+    public priceImpact(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+    ): PriceImpactAmount {
+        let effectivePrice: bigint;
+        if (swapAmount.token.isSameAddress(tokenIn.address)) {
+            const swapResult = this.swapGivenIn(
+                tokenIn,
+                tokenOut,
+                swapAmount,
+                false,
+            );
+            effectivePrice = MathSol.divDownFixed(
+                swapAmount.amount,
+                swapResult.amount,
+            );
+        } else {
+            const swapResult = this.swapGivenOut(
+                tokenIn,
+                tokenOut,
+                swapAmount,
+                false,
+            );
+            effectivePrice = MathSol.divDownFixed(
+                swapResult.amount,
+                swapAmount.amount,
+            );
+        }
+        const spotPrice = this.spotPrice(tokenIn, tokenOut);
+        const priceRatio = MathSol.divDownFixed(spotPrice, effectivePrice);
+        const priceImpact = PriceImpactAmount.fromRawAmount(WAD - priceRatio);
+        return priceImpact;
+    }
+
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const { tIn, tOut } = this.getRequiredTokenPair(tokenIn, tokenOut);
-        return (tIn.amount * tOut.weight) / (tIn.weight + tOut.weight);
+        const amount = TokenAmount.fromHumanAmount(tokenOut, `${1}`); // TODO: fill with fixed amount equivalent to 100 USD
+        const priceImpact = this.priceImpact(tokenIn, tokenOut, amount);
+        const normalizedLiquidity = MathSol.divDownFixed(
+            WAD,
+            priceImpact.amount,
+        );
+        return normalizedLiquidity;
     }
 
     public getLimitAmountSwap(

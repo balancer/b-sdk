@@ -12,6 +12,7 @@ import { RawGyro3Pool } from '../../../data/types';
 import { PoolType, SwapKind } from '../../../types';
 import { getPoolAddress, MathSol, WAD } from '../../../utils';
 import { MathGyro, SWAP_LIMIT_FACTOR } from '../../../utils/gyroHelpers/math';
+import { PriceImpactAmount } from '@/entities/priceImpactAmount';
 
 export class Gyro3PoolToken extends TokenAmount {
     public readonly index: number;
@@ -92,14 +93,87 @@ export class Gyro3Pool implements BasePool {
         );
     }
 
-    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+    public spotPrice(tokenIn: Token, tokenOut: Token): bigint {
+        const { tIn } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        if (!tIn || !tOut)
-            throw new Error('Pool does not contain the tokens provided');
-        
-        return tOut.amount;
+        const amountAInitial = TokenAmount.fromRawAmount(
+            tokenIn,
+            tIn.amount / 10000n,
+        );
+
+        const amountB = this.swapGivenIn(
+            tokenIn,
+            tokenOut,
+            amountAInitial,
+            false,
+        );
+
+        const priceAtoB = MathSol.divDownFixed(
+            amountAInitial.amount,
+            amountB.amount,
+        );
+
+        const amountAFinal = this.swapGivenIn(
+            tokenOut,
+            tokenIn,
+            amountB,
+            false,
+        );
+
+        const priceBtoA = MathSol.divDownFixed(
+            amountB.amount,
+            amountAFinal.amount,
+        );
+
+        return MathSol.powDownFixed(
+            MathSol.divDownFixed(priceAtoB, priceBtoA),
+            WAD / 2n,
+        );
+    }
+
+    public priceImpact(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+    ): PriceImpactAmount {
+        let effectivePrice: bigint;
+        if (swapAmount.token.isSameAddress(tokenIn.address)) {
+            const swapResult = this.swapGivenIn(
+                tokenIn,
+                tokenOut,
+                swapAmount,
+                false,
+            );
+            effectivePrice = MathSol.divDownFixed(
+                swapAmount.amount,
+                swapResult.amount,
+            );
+        } else {
+            const swapResult = this.swapGivenOut(
+                tokenIn,
+                tokenOut,
+                swapAmount,
+                false,
+            );
+            effectivePrice = MathSol.divDownFixed(
+                swapResult.amount,
+                swapAmount.amount,
+            );
+        }
+        const spotPrice = this.spotPrice(tokenIn, tokenOut);
+        const priceRatio = MathSol.divDownFixed(spotPrice, effectivePrice);
+        const priceImpact = PriceImpactAmount.fromRawAmount(WAD - priceRatio);
+        return priceImpact;
+    }
+
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
+        const amount = TokenAmount.fromHumanAmount(tokenOut, `${1}`); // TODO: fill with fixed amount equivalent to 100 USD
+        const priceImpact = this.priceImpact(tokenIn, tokenOut, amount);
+        const normalizedLiquidity = MathSol.divDownFixed(
+            WAD,
+            priceImpact.amount,
+        );
+        return normalizedLiquidity;
     }
 
     public swapGivenIn(
@@ -197,10 +271,11 @@ export class Gyro3Pool implements BasePool {
                 limitAmountIn,
                 WAD - this.swapFee,
             );
-            return MathGyro.mulDown(
+            const limit = TokenAmount.fromScale18Amount(
+                tIn.token,
                 limitAmountInPlusSwapFee,
-                SWAP_LIMIT_FACTOR,
             );
+            return MathGyro.mulDown(limit.amount, SWAP_LIMIT_FACTOR);
         }
         return MathGyro.mulDown(tOut.amount, SWAP_LIMIT_FACTOR);
     }
@@ -235,5 +310,19 @@ export class Gyro3Pool implements BasePool {
         }
 
         return { tIn, tOut, tertiary };
+    }
+
+    private getRequiredTokenPair(
+        tokenIn: Token,
+        tokenOut: Token,
+    ): { tIn: Gyro3PoolToken; tOut: Gyro3PoolToken } {
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
+
+        if (!tIn || !tOut) {
+            throw new Error('Pool does not contain the tokens provided');
+        }
+
+        return { tIn, tOut };
     }
 }

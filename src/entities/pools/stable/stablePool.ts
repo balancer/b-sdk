@@ -1,5 +1,5 @@
 import { Hex, parseEther, parseUnits } from 'viem';
-import { PoolType, SwapKind } from '../../../types';
+import { Address, PoolType, SwapKind } from '../../../types';
 import { Token } from '../../token';
 import { TokenAmount, BigintIsh } from '../../tokenAmount';
 import { BasePool } from '..';
@@ -14,6 +14,7 @@ import {
     _calculateInvariant,
 } from './stableMath';
 import { RawComposableStablePool } from '../../../data/types';
+import { PriceImpactAmount } from '@/entities/priceImpactAmount';
 
 export class StablePoolToken extends TokenAmount {
     public readonly rate: bigint;
@@ -131,14 +132,91 @@ export class StablePool implements BasePool {
         );
     }
 
-    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+    public spotPrice(tokenIn: Token, tokenOut: Token): bigint {
+        const { tIn } = this.getRequiredTokenPair(tokenIn, tokenOut);
 
-        if (!tIn || !tOut)
-            throw new Error('Pool does not contain the tokens provided');
-        
-        return tOut.amount * this.amp;
+        const amount = tIn.token.isSameAddress(this.address as Address)
+            ? this.totalShares
+            : tIn.amount;
+
+        const amountAInitial = TokenAmount.fromRawAmount(
+            tokenIn,
+            amount / 10000n,
+        );
+
+        const amountB = this.swapGivenIn(
+            tokenIn,
+            tokenOut,
+            amountAInitial,
+            false,
+        );
+
+        const priceAtoB = MathSol.divDownFixed(
+            amountAInitial.amount,
+            amountB.amount,
+        );
+
+        const amountAFinal = this.swapGivenIn(
+            tokenOut,
+            tokenIn,
+            amountB,
+            false,
+        );
+
+        const priceBtoA = MathSol.divDownFixed(
+            amountB.amount,
+            amountAFinal.amount,
+        );
+
+        return MathSol.powDownFixed(
+            MathSol.divDownFixed(priceAtoB, priceBtoA),
+            WAD / 2n,
+        );
+    }
+
+    public priceImpact(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+    ): PriceImpactAmount {
+        let effectivePrice: bigint;
+        if (swapAmount.token.isSameAddress(tokenIn.address)) {
+            const swapResult = this.swapGivenIn(
+                tokenIn,
+                tokenOut,
+                swapAmount,
+                false,
+            );
+            effectivePrice = MathSol.divDownFixed(
+                swapAmount.amount,
+                swapResult.amount,
+            );
+        } else {
+            const swapResult = this.swapGivenOut(
+                tokenIn,
+                tokenOut,
+                swapAmount,
+                false,
+            );
+            effectivePrice = MathSol.divDownFixed(
+                swapResult.amount,
+                swapAmount.amount,
+            );
+        }
+        const spotPrice = this.spotPrice(tokenIn, tokenOut);
+        const priceRatio = MathSol.divDownFixed(spotPrice, effectivePrice);
+        const priceImpact = PriceImpactAmount.fromRawAmount(WAD - priceRatio);
+        return priceImpact;
+    }
+
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
+        const amount = TokenAmount.fromHumanAmount(tokenOut, `${1}`); // TODO: fill with fixed amount equivalent to 100 USD
+        const priceImpact = this.priceImpact(tokenIn, tokenOut, amount);
+        const normalizedLiquidity = MathSol.divDownFixed(
+            WAD,
+            priceImpact.amount,
+        );
+        return normalizedLiquidity;
     }
 
     public swapGivenIn(
@@ -380,5 +458,19 @@ export class StablePool implements BasePool {
             amountsWithoutBpt[i] = amounts[i < this.bptIndex ? i : i + 1];
         }
         return amountsWithoutBpt;
+    }
+
+    private getRequiredTokenPair(
+        tokenIn: Token,
+        tokenOut: Token,
+    ): { tIn: StablePoolToken; tOut: StablePoolToken } {
+        const tIn = this.tokenMap.get(tokenIn.wrapped);
+        const tOut = this.tokenMap.get(tokenOut.wrapped);
+
+        if (!tIn || !tOut) {
+            throw new Error('Pool does not contain the tokens provided');
+        }
+
+        return { tIn, tOut };
     }
 }
