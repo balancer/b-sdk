@@ -10,7 +10,6 @@ import {
     zeroAddress,
 } from 'viem';
 import {
-    AddLiquidityKind,
     Address,
     CHAINS,
     ChainId,
@@ -94,7 +93,6 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
                     weight: parseEther(`${1 / 2}`),
                 },
             ],
-            kind: AddLiquidityKind.Init,
             chainId,
         };
         poolAddress = await doCreatePool(createTxInput);

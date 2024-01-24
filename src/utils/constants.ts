@@ -14,6 +14,7 @@ import {
     zkSync,
     zkSyncTestnet,
     fantom,
+    sepolia,
 } from 'viem/chains';
 
 export const ZERO_ADDRESS: Address =
@@ -58,12 +59,13 @@ export enum ChainId {
     GNOSIS_CHAIN = 100,
     POLYGON = 137,
     ZKSYNC_TESTNET = 280,
+    FANTOM = 250,
     ZKSYNC = 324,
     ZKEVM = 1101,
     ARBITRUM_ONE = 42161,
     AVALANCHE = 43114,
     BASE_GOERLI = 84531,
-    FANTOM = 250,
+    SEPOLIA = 11155111,
 }
 
 export const CHAINS: Record<number, Chain> = {
@@ -80,6 +82,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.AVALANCHE]: avalanche,
     [ChainId.BASE_GOERLI]: baseGoerli,
     [ChainId.FANTOM]: fantom,
+    [ChainId.SEPOLIA]: sepolia,
 };
 
 export const SUBGRAPH_URLS = {
@@ -140,6 +143,10 @@ export const VAULT: Record<number, Address> = {
     [ChainId.FANTOM]: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
 };
 
+export const VAULT_V3: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x816e90DC85bF016455017a76Bc09CC0451Eeb308',
+};
+
 export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.AVALANCHE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
@@ -169,6 +176,10 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.OPTIMISM]: '0x043a2dad730d585c44fb79d2614f295d2d625412',
     [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
     [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
+};
+
+export const BALANCER_ROUTER: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x9958317b80ee5f10457017d54c2484D722059157',
 };
 
 export const NATIVE_ASSETS = {

@@ -10,7 +10,6 @@ import {
     zeroAddress,
 } from 'viem';
 import {
-    AddLiquidityKind,
     Address,
     CHAINS,
     ChainId,
@@ -97,7 +96,6 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
                     decimals: 18,
                 },
             ],
-            kind: AddLiquidityKind.Init,
             chainId,
         };
         poolAddress = await doCreatePool(createTxInput);

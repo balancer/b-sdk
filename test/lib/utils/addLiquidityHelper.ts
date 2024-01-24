@@ -20,6 +20,7 @@ import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { zeroAddress } from 'viem';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
+import { addLiquiditySingleTokenShouldHaveTokenInIndexError } from '../../../src/utils/errors';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -53,6 +54,7 @@ async function sdkAddLiquidity({
         sender: testAddress,
         recipient: testAddress,
         chainId: addLiquidityInput.chainId,
+        wethIsEth: addLiquidityInput.useNativeAssetAsWrappedAmountIn ?? false,
     });
 
     return {
@@ -218,7 +220,7 @@ export function assertAddLiquiditySingleToken(
         addLiquidityOutput;
 
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
-        throw Error('No index');
+        throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
 
     const bptToken = new Token(chainId, poolState.address, 18);
 
