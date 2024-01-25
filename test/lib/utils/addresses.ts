@@ -26,6 +26,18 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 2,
         },
     },
+    [ChainId.SEPOLIA]: {
+        BAL: {
+            address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',
+            decimals: 18,
+            slot: 1,
+        },
+        WETH: {
+            address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+            decimals: 18,
+            slot: 3,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };

@@ -284,6 +284,7 @@ export const forkSetup = async (
     slots: number[] | undefined,
     balances: bigint[],
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
+    balancerVersion: 2 | 3 = 2,
 ): Promise<void> => {
     await client.impersonateAccount({ address: accountAddress });
 
@@ -316,6 +317,7 @@ export const forkSetup = async (
         );
 
         // Approve appropriate allowances so that vault contract can move tokens
-        await approveToken(client, accountAddress, tokens[i]);
+        if (balancerVersion === 2)
+            await approveToken(client, accountAddress, tokens[i]);
     }
 };

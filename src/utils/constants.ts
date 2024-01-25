@@ -239,6 +239,14 @@ export const NATIVE_ASSETS = {
         'Fantom',
         '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
     ),
+    [ChainId.SEPOLIA]: new Token(
+        ChainId.SEPOLIA,
+        NATIVE_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+    ),
 };
 
 export const ETH = NATIVE_ASSETS[ChainId.MAINNET];
