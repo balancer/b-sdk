@@ -1,5 +1,14 @@
 # @balancer/sdk
 
+## 0.7.1
+
+### Patch Changes
+
+- dec468a: Fix Add/Remove Liquidity Nested with zero amounts in
+- 37f89a4: Bump tsup version
+- 6c12bab: Expose Relayer class
+- 69521d0: Fix cloneDeep import
+
 ## 0.7.0
 
 ### Minor Changes
