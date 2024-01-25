@@ -6,11 +6,10 @@ import {
     RemoveLiquidityRecoveryInput,
     Slippage,
 } from '@/entities';
-import { CHAINS, ChainId, getPoolAddress } from '@/utils';
+import { CHAINS, ChainId } from '@/utils';
 import { forkSetup } from 'test/lib/utils/helper';
 import { RemoveLiquidityTxInput } from 'test/lib/utils/types';
 import {
-    Address,
     Hex,
     createTestClient,
     http,
@@ -20,17 +19,18 @@ import {
     walletActions,
 } from 'viem';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
-import { InputAmount, PoolType } from '@/types';
+import { InputAmount } from '@/types';
 import {
     doRemoveLiquidity,
     assertRemoveLiquidityRecovery,
 } from 'test/lib/utils/removeLiquidityHelper';
 import { test } from 'vitest';
+import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
-const poolId =
-    '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76000000000000000000000570'; // swETH-bb-a-WETH-BPT
+const TOKENS_MAINNET = TOKENS[chainId];
+const POOLS_MAINNET = POOLS[chainId];
 
 describe('composable stable remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
@@ -40,7 +40,7 @@ describe('composable stable remove liquidity test', () => {
         const api = new MockApi();
 
         // get pool state from api
-        poolInput = await api.getPool(poolId);
+        poolInput = await api.getPool(POOLS_MAINNET.swETH_bb_a_WETH_BPT.id);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -65,7 +65,7 @@ describe('composable stable remove liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [txInput.poolState.address],
-            [0], // TODO: hardcode these values to improve test performance
+            [POOLS_MAINNET.swETH_bb_a_WETH_BPT.slot as number],
             [parseUnits('1000', 18)],
         );
     });
@@ -105,29 +105,22 @@ export class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                address:
-                    '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76' as Address, // swETH-bb-a-WETH-BPT
-                decimals: 18,
+                ...TOKENS_MAINNET.swETH_bb_a_WETH_BPT,
                 index: 0,
             },
             {
-                address:
-                    '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f' as Address, // bb-a-WETH
-                decimals: 18,
+                ...TOKENS_MAINNET.bb_a_WETH,
                 index: 1,
             },
             {
-                address:
-                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // swETH
-                decimals: 18,
+                ...TOKENS_MAINNET.swETH,
                 index: 2,
             },
         ];
 
         return {
+            ...POOLS[chainId].swETH_bb_a_WETH_BPT,
             id,
-            address: getPoolAddress(id) as Address,
-            type: PoolType.ComposableStable,
             tokens,
             balancerVersion: 2,
         };

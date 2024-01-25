@@ -15,14 +15,11 @@ import {
     Slippage,
     PoolState,
     RemoveLiquidity,
-    Address,
     Hex,
     CHAINS,
     ChainId,
-    getPoolAddress,
     RemoveLiquidityInput,
     InputAmount,
-    PoolType,
     RemoveLiquidityRecoveryInput,
 } from '../../../src';
 import { forkSetup } from '../../lib/utils/helper';
@@ -32,12 +29,13 @@ import {
 } from '../../lib/utils/removeLiquidityHelper';
 import { RemoveLiquidityTxInput } from '../../lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
-const poolId =
-    '0x0da692ac0611397027c91e559cfd482c4197e4030002000000000000000005c9'; // 80BAL-20WETH
 
+const POOLS_MAINNET = POOLS[chainId];
+const TOKENS_MAINNET = TOKENS[chainId];
 describe('weighted remove liquidity recovery test', () => {
     let txInput: RemoveLiquidityTxInput;
     let poolInput: PoolState;
@@ -46,7 +44,9 @@ describe('weighted remove liquidity recovery test', () => {
         const api = new MockApi();
 
         // get pool state from api
-        poolInput = await api.getPool(poolId);
+        poolInput = await api.getPool(
+            POOLS_MAINNET['50bb_sDAI_50bb_a_USDC'].id,
+        );
 
         const client = createTestClient({
             mode: 'anvil',
@@ -71,7 +71,7 @@ describe('weighted remove liquidity recovery test', () => {
             txInput.client,
             txInput.testAddress,
             [txInput.poolState.address],
-            [0], // TODO: hardcode these values to improve test performance
+            [POOLS_MAINNET['50bb_sDAI_50bb_a_USDC'].slot as number],
             [parseUnits('1000', 18)],
         );
     });
@@ -114,22 +114,17 @@ export class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                address:
-                    '0x2b218683178d029bab6c9789b1073aa6c96e5176' as Address, // BAL
-                decimals: 18,
+                ...TOKENS_MAINNET.bb_s_DAI,
                 index: 0,
             },
             {
-                address:
-                    '0x82698aecc9e28e9bb27608bd52cf57f704bd1b83' as Address, // wETH
-                decimals: 18,
+                ...TOKENS_MAINNET.bb_a_USDC,
                 index: 1,
             },
         ];
         return {
+            ...POOLS_MAINNET['50bb_sDAI_50bb_a_USDC'],
             id,
-            address: getPoolAddress(id) as Address,
-            type: PoolType.Weighted,
             tokens,
             balancerVersion: 2,
         };
