@@ -35,9 +35,9 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             ],
         };
         const userData = ComposableStableEncoder.encodeRemoveLiquidityUserData(
-            input.kind !== RemoveLiquidityKind.Recovery
-                ? input.kind
-                : RemoveLiquidityKind.Proportional,
+            input.kind === RemoveLiquidityKind.Recovery
+                ? RemoveLiquidityKind.Proportional
+                : input.kind,
             amountsWithoutBpt,
         );
 
