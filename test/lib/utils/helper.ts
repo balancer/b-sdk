@@ -320,7 +320,12 @@ export const forkSetup = async (
         );
 
         // Approve appropriate allowances so that vault contract can move tokens
-        if (balancerVersion === 2)
-            await approveToken(client, accountAddress, tokens[i]);
+        await approveToken(
+            client,
+            accountAddress,
+            tokens[i],
+            undefined,
+            balancerVersion,
+        );
     }
 };

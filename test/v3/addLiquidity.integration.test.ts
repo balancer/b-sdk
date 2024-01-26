@@ -36,6 +36,8 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 
+const balancerVersion = 3;
+
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const chainId = ChainId.SEPOLIA;
 const poolId = POOLS[chainId].MOCK_WEIGHTED_POOL.id;
@@ -62,12 +64,14 @@ describe('add liquidity test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
+        const testAddress = (await client.getAddresses())[0];
+
         txInput = {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolState: poolState,
-            testAddress: '0x027917095a4d4964eFF7280676F405126BF9A6b5', // test account
+            testAddress,
             addLiquidityInput: {} as AddLiquidityInput,
         };
     });
@@ -84,7 +88,7 @@ describe('add liquidity test', () => {
                 ),
             ],
             undefined,
-            3,
+            balancerVersion,
         );
     });
 
@@ -118,6 +122,7 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
 
@@ -137,6 +142,7 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
     });
@@ -170,6 +176,7 @@ describe('add liquidity test', () => {
                 input,
                 addLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
 
@@ -189,6 +196,7 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
     });

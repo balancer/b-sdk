@@ -48,7 +48,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'SEPOLIA_RPC_URL',
         fallBackRpc: undefined,
         port: ANVIL_PORTS.SEPOLIA,
-        forkBlockNumber: 5153005n,
+        forkBlockNumber: 5158611n,
     },
 };
 

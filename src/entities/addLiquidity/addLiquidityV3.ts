@@ -8,9 +8,8 @@ import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
     CHAINS,
-    MAX_UINT256,
+    MAX_UINT112,
     NATIVE_ASSETS,
-    VAULT_V3,
     addLiquidityProportionalUnavailableError,
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
 } from '@/utils';
@@ -77,7 +76,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     args: [
                         poolState.address,
                         input.tokenIn,
-                        MAX_UINT256, // maxAmountIn set to max value when querying
+                        MAX_UINT112, // maxAmountIn set to max value when querying
                         bptOut.amount,
                         '0x',
                     ],
@@ -149,14 +148,18 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                 break;
         }
 
-        const value = input.amountsIn.find(
-            (a) => a.token.address === NATIVE_ASSETS[input.chainId].wrapped,
-        )?.amount;
+        let value = 0n;
+        if (input.wethIsEth) {
+            const wethInput = input.amountsIn.find(
+                (a) => a.token.address === NATIVE_ASSETS[input.chainId].wrapped,
+            );
+            value = wethInput?.amount ?? 0n;
+        }
 
         return {
             call,
-            to: VAULT_V3[input.chainId],
-            value: value === undefined ? 0n : value,
+            to: BALANCER_ROUTER[input.chainId],
+            value,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,
