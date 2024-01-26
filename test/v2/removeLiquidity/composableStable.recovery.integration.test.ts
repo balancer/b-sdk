@@ -105,7 +105,8 @@ export class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                ...TOKENS_MAINNET.swETH_bb_a_WETH_BPT,
+                address: TOKENS_MAINNET.swETH_bb_a_WETH_BPT.address,
+                decimals: TOKENS_MAINNET.swETH_bb_a_WETH_BPT.decimals,
                 index: 0,
             },
             {
