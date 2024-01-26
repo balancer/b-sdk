@@ -423,20 +423,15 @@ function assertAddLiquidityBuildOutput(
 
     let value = 0n;
     if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
-        if (balancerVersion === 2) {
-            // Value should equal value of any wrapped asset if using native
-            value =
-                addLiquidityQueryOutput.amountsIn.find(
-                    (a) => a.token.address === zeroAddress,
-                )?.amount ?? 0n;
-        } else {
-            value =
-                addLiquidityQueryOutput.amountsIn.find(
-                    (a) =>
-                        a.token.address ===
-                        NATIVE_ASSETS[addLiquidityInput.chainId].wrapped,
-                )?.amount ?? 0n;
-        }
+        // v2 uses zero address for native asset, while v3 uses wethIsEth flag only
+        const nativeAsset =
+            balancerVersion === 2
+                ? zeroAddress
+                : NATIVE_ASSETS[addLiquidityInput.chainId].wrapped;
+        value =
+            addLiquidityQueryOutput.amountsIn.find(
+                (a) => a.token.address === nativeAsset,
+            )?.amount ?? 0n;
     }
 
     const expectedBuildOutput: Omit<AddLiquidityBuildOutput, 'call'> = {
