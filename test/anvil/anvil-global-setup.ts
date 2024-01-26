@@ -46,10 +46,9 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     },
     SEPOLIA: {
         rpcEnv: 'SEPOLIA_RPC_URL',
-        // Public Fantom RPCs are usually unreliable
         fallBackRpc: undefined,
         port: ANVIL_PORTS.SEPOLIA,
-        forkBlockNumber: 5148026n,
+        forkBlockNumber: 5153005n,
     },
 };
 

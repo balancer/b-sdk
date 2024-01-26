@@ -34,11 +34,11 @@ import {
     assertAddLiquiditySingleToken,
 } from '../lib/utils/addLiquidityHelper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
-import { TOKENS } from 'test/lib/utils/addresses';
+import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const chainId = ChainId.SEPOLIA;
-const poolId = '0x5939ab16fDf1991B0EF603c639B6b501A7841fAB'; // MockWeightedPool
+const poolId = POOLS[chainId].MOCK_WEIGHTED_POOL.id;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
@@ -77,7 +77,7 @@ describe('add liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [...txInput.poolState.tokens.map((t) => t.address)],
-            [1, 3],
+            [3, 1],
             [
                 ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
@@ -202,13 +202,13 @@ export class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                address: BAL.address,
-                decimals: BAL.decimals,
+                address: WETH.address,
+                decimals: WETH.decimals,
                 index: 0,
             },
             {
-                address: WETH.address,
-                decimals: WETH.decimals,
+                address: BAL.address,
+                decimals: BAL.decimals,
                 index: 1,
             },
         ];

@@ -16,7 +16,7 @@ import {
     trim,
 } from 'viem';
 import { erc20Abi } from '../../../src/abi';
-import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../src/utils';
+import { VAULT, MAX_UINT256, ZERO_ADDRESS, VAULT_V3 } from '../../../src/utils';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;
@@ -47,8 +47,11 @@ export const approveToken = async (
     account: Address,
     token: Address,
     amount = MAX_UINT256, // approve max by default
+    balancerVersion: 2 | 3 = 2,
 ): Promise<boolean> => {
     const chainId = await client.getChainId();
+    const vaultAddress =
+        balancerVersion === 2 ? VAULT[chainId] : VAULT_V3[chainId];
     // approve token on the vault
     const hash = await client.writeContract({
         account,
@@ -56,7 +59,7 @@ export const approveToken = async (
         address: token,
         abi: erc20Abi,
         functionName: 'approve',
-        args: [VAULT[chainId], amount],
+        args: [vaultAddress, amount],
     });
 
     const txReceipt = await client.waitForTransactionReceipt({
