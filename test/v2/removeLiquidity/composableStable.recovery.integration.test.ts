@@ -30,7 +30,7 @@ import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const TOKENS_MAINNET = TOKENS[chainId];
-const POOLS_MAINNET = POOLS[chainId];
+const testPool = POOLS[chainId].swETH_bb_a_WETH_BPT;
 
 describe('composable stable remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
@@ -40,7 +40,7 @@ describe('composable stable remove liquidity test', () => {
         const api = new MockApi();
 
         // get pool state from api
-        poolInput = await api.getPool(POOLS_MAINNET.swETH_bb_a_WETH_BPT.id);
+        poolInput = await api.getPool(testPool.id);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -65,7 +65,7 @@ describe('composable stable remove liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [txInput.poolState.address],
-            [POOLS_MAINNET.swETH_bb_a_WETH_BPT.slot as number],
+            [testPool.slot as number],
             [parseUnits('1000', 18)],
         );
     });
@@ -105,23 +105,26 @@ export class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                address: TOKENS_MAINNET.swETH_bb_a_WETH_BPT.address,
-                decimals: TOKENS_MAINNET.swETH_bb_a_WETH_BPT.decimals,
+                address: testPool.address,
+                decimals: testPool.decimals,
                 index: 0,
             },
             {
-                ...TOKENS_MAINNET.bb_a_WETH,
+                address: TOKENS_MAINNET.bb_a_WETH.address,
+                decimals: TOKENS_MAINNET.bb_a_WETH.decimals,
                 index: 1,
             },
             {
-                ...TOKENS_MAINNET.swETH,
+                address: TOKENS_MAINNET.swETH.address,
+                decimals: TOKENS_MAINNET.swETH.decimals,
                 index: 2,
             },
         ];
 
         return {
-            ...POOLS[chainId].swETH_bb_a_WETH_BPT,
             id,
+            address: testPool.address,
+            type: testPool.type,
             tokens,
             balancerVersion: 2,
         };

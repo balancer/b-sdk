@@ -34,7 +34,7 @@ import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 
-const POOLS_MAINNET = POOLS[chainId];
+const testPool = POOLS[chainId]['50bb_sDAI_50bb_a_USDC'];
 const TOKENS_MAINNET = TOKENS[chainId];
 describe('weighted remove liquidity recovery test', () => {
     let txInput: RemoveLiquidityTxInput;
@@ -45,7 +45,7 @@ describe('weighted remove liquidity recovery test', () => {
 
         // get pool state from api
         poolInput = await api.getPool(
-            POOLS_MAINNET['50bb_sDAI_50bb_a_USDC'].id,
+            testPool.id,
         );
 
         const client = createTestClient({
@@ -71,7 +71,7 @@ describe('weighted remove liquidity recovery test', () => {
             txInput.client,
             txInput.testAddress,
             [txInput.poolState.address],
-            [POOLS_MAINNET['50bb_sDAI_50bb_a_USDC'].slot as number],
+            [testPool.slot as number],
             [parseUnits('1000', 18)],
         );
     });
@@ -114,17 +114,20 @@ export class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                ...TOKENS_MAINNET.bb_s_DAI,
+                address: TOKENS_MAINNET.bb_s_DAI.address,
+                decimals: TOKENS_MAINNET.bb_s_DAI.decimals,
                 index: 0,
             },
             {
-                ...TOKENS_MAINNET.bb_a_USDC,
+                address: TOKENS_MAINNET.bb_a_USDC.address,
+                decimals: TOKENS_MAINNET.bb_a_USDC.decimals,
                 index: 1,
             },
         ];
         return {
-            ...POOLS_MAINNET['50bb_sDAI_50bb_a_USDC'],
             id,
+            address:testPool.address,
+            type: testPool.type,
             tokens,
             balancerVersion: 2,
         };

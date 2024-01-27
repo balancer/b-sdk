@@ -25,11 +25,6 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 6,
             slot: 2,
         },
-        swETH_bb_a_WETH_BPT: {
-            address: '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76',
-            decimals: 18,
-            slot: 0,
-        },
         bb_a_WETH: {
             address: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f',
             decimals: 18,
