@@ -44,9 +44,7 @@ describe('weighted remove liquidity recovery test', () => {
         const api = new MockApi();
 
         // get pool state from api
-        poolInput = await api.getPool(
-            testPool.id,
-        );
+        poolInput = await api.getPool(testPool.id);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -126,7 +124,7 @@ export class MockApi {
         ];
         return {
             id,
-            address:testPool.address,
+            address: testPool.address,
             type: testPool.type,
             tokens,
             balancerVersion: 2,
