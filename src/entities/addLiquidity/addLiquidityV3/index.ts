@@ -1,4 +1,4 @@
-import { createPublicClient, encodeFunctionData, http } from 'viem';
+import { encodeFunctionData } from 'viem';
 import { balancerRouterAbi } from '@/abi';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
@@ -7,14 +7,12 @@ import { getAmounts, getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
-    CHAINS,
-    MAX_UINT112,
     NATIVE_ASSETS,
     addLiquidityProportionalUnavailableError,
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
 } from '@/utils';
 
-import { getAmountsCall } from './helpers';
+import { getAmountsCall } from '../helpers';
 import {
     AddLiquidityBase,
     AddLiquidityBaseCall,
@@ -22,7 +20,9 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-} from './types';
+} from '../types';
+import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
+import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -31,11 +31,6 @@ export class AddLiquidityV3 implements AddLiquidityBase {
     ): Promise<AddLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const bptToken = new Token(input.chainId, poolState.address, 18);
-
-        const client = createPublicClient({
-            transport: http(input.rpcUrl),
-            chain: CHAINS[input.chainId],
-        });
 
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
@@ -46,17 +41,11 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                 throw addLiquidityProportionalUnavailableError;
             case AddLiquidityKind.Unbalanced: {
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
-                const { result: bptAmountOut } = await client.simulateContract({
-                    address: BALANCER_ROUTER[input.chainId],
-                    abi: balancerRouterAbi,
-                    functionName: 'queryAddLiquidityUnbalanced',
-                    args: [
-                        poolState.address,
-                        maxAmountsIn,
-                        0n, // minBptOut set to 0 when querying
-                        '0x',
-                    ],
-                });
+                const bptAmountOut = await doAddLiquidityUnbalancedQuery(
+                    input,
+                    poolState.address,
+                    maxAmountsIn,
+                );
                 bptOut = TokenAmount.fromRawAmount(bptToken, bptAmountOut);
                 amountsIn = sortedTokens.map((t, i) =>
                     TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
@@ -69,18 +58,11 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     bptToken,
                     input.bptOut.rawAmount,
                 );
-                const { result: maxAmountsIn } = await client.simulateContract({
-                    address: BALANCER_ROUTER[input.chainId],
-                    abi: balancerRouterAbi,
-                    functionName: 'queryAddLiquiditySingleTokenExactOut',
-                    args: [
-                        poolState.address,
-                        input.tokenIn,
-                        MAX_UINT112, // maxAmountIn set to max value when querying
-                        bptOut.amount,
-                        '0x',
-                    ],
-                });
+                const maxAmountsIn = await doAddLiquiditySingleTokenQuery(
+                    input,
+                    poolState.address,
+                    input.bptOut.rawAmount,
+                );
                 amountsIn = sortedTokens.map((t, i) =>
                     TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
                 );
