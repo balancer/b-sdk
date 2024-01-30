@@ -376,13 +376,19 @@ function assertTokenDeltas(
         0n,
     ];
 
-    // If input is wrapped native we must replace it with 0 and update native value instead
+    /**
+     * Since native asset was moved to an extra index, we need to identify its
+     * respective amount within the amounts array and move it to that index.
+     * - Balancer V2: zero address represents the native asset
+     * - Balancer V3: WETH address represents the native asset (in combination with wethIsEth flag)
+     */
     if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
-        const nativeAssetIndex = amountsWithoutBpt.findIndex((a) =>
+        const respectiveNativeAddress =
             balancerVersion === 2
-                ? a.token.address === zeroAddress
-                : a.token.address ===
-                  NATIVE_ASSETS[addLiquidityInput.chainId].wrapped,
+                ? zeroAddress
+                : NATIVE_ASSETS[addLiquidityInput.chainId].wrapped;
+        const nativeAssetIndex = amountsWithoutBpt.findIndex(
+            (a) => a.token.address === respectiveNativeAddress,
         );
         expectedDeltas[nativeAssetIndex] = 0n;
         expectedDeltas[expectedDeltas.length - 1] =

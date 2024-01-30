@@ -81,7 +81,7 @@ describe('add liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [...txInput.poolState.tokens.map((t) => t.address)],
-            [3, 1],
+            [WETH.slot, BAL.slot],
             [
                 ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
@@ -200,8 +200,6 @@ describe('add liquidity test', () => {
             );
         });
     });
-
-    // TODO: test add liquidity proportional after ProportionalAmountsHelper is implemented
 });
 
 /*********************** Mock To Represent API Requirements **********************/
