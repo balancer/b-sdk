@@ -35,7 +35,9 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             ],
         };
         const userData = ComposableStableEncoder.encodeRemoveLiquidityUserData(
-            input.kind,
+            input.kind === RemoveLiquidityKind.Recovery
+                ? RemoveLiquidityKind.Proportional
+                : input.kind,
             amountsWithoutBpt,
         );
 
@@ -96,6 +98,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                         .findIndex((t) => t.isSameAddress(input.tokenOut)),
                     maxBptAmountIn: input.bptIn.rawAmount,
                 };
+            case RemoveLiquidityKind.Recovery:
             case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
@@ -173,6 +176,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,
                 };
+            case RemoveLiquidityKind.Recovery:
             case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
