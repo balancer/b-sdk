@@ -30,7 +30,7 @@ import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const TOKENS_MAINNET = TOKENS[chainId];
-const testPool = POOLS[chainId].swETH_bb_a_WETH_BPT;
+const testPool = POOLS[chainId].vETH_WETH;
 
 describe('composable stable remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
@@ -110,13 +110,13 @@ export class MockApi {
                 index: 0,
             },
             {
-                address: TOKENS_MAINNET.bb_a_WETH.address,
-                decimals: TOKENS_MAINNET.bb_a_WETH.decimals,
+                address: TOKENS_MAINNET.vETH.address,
+                decimals: TOKENS_MAINNET.vETH.decimals,
                 index: 1,
             },
             {
-                address: TOKENS_MAINNET.swETH.address,
-                decimals: TOKENS_MAINNET.swETH.decimals,
+                address: TOKENS_MAINNET.WETH.address,
+                decimals: TOKENS_MAINNET.WETH.decimals,
                 index: 2,
             },
         ];
