@@ -5,6 +5,7 @@ import { RemoveLiquidityNestedCallAttributes } from './types';
 import { replaceWrapped } from '../utils/replaceWrapped';
 import { batchRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
+import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
 
 export const encodeCalls = (
     callsAttributes: RemoveLiquidityNestedCallAttributes[],
@@ -90,9 +91,7 @@ const getUserDataSingleToken = (
     bptAmountIn: bigint,
 ) => {
     if (tokenOutIndex === undefined) {
-        throw new Error(
-            "tokenOutIndex can't be undefined for removing liquidity to single token",
-        );
+        throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
     }
     switch (poolType) {
         case PoolType.Weighted:

@@ -14,6 +14,8 @@ import {
     VAULT,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
+    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+    BALANCER_ROUTER,
 } from '../../../src';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import { zeroAddress } from 'viem';
@@ -45,6 +47,7 @@ export const sdkRemoveLiquidity = async ({
         sender: testAddress,
         recipient: testAddress,
         chainId: removeLiquidityInput.chainId,
+        wethIsEth: !!removeLiquidityInput.toNativeAsset,
     });
 
     return {
@@ -205,12 +208,13 @@ export function assertRemoveLiquiditySingleToken(
     removeLiquidityInput: RemoveLiquiditySingleTokenInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    balancerVersion: 2 | 3 = 2,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
 
     if (removeLiquidityQueryOutput.tokenOutIndex === undefined)
-        throw Error('No index');
+        throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
 
     const bptToken = new Token(chainId, poolState.address, 18);
 
@@ -246,16 +250,16 @@ export function assertRemoveLiquiditySingleToken(
     // (Note removeLiquidityQueryOutput also has value for bpt if pre-minted)
     removeLiquidityQueryOutput.amountsOut.forEach((a) => {
         if (
-            !removeLiquidityInput.toNativeAsset &&
-            a.token.address === removeLiquidityInput.tokenOut
-        )
-            expect(a.amount > 0n).to.be.true;
-        else if (
+            balancerVersion === 2 &&
             removeLiquidityInput.toNativeAsset &&
             a.token.address === zeroAddress
-        )
+        ) {
             expect(a.amount > 0n).to.be.true;
-        else expect(a.amount).toEqual(0n);
+        } else if (a.token.address === removeLiquidityInput.tokenOut) {
+            expect(a.amount > 0n).to.be.true;
+        } else {
+            expect(a.amount).toEqual(0n);
+        }
     });
 
     assertRemoveLiquidityBuildOutput(
@@ -264,6 +268,7 @@ export function assertRemoveLiquiditySingleToken(
         true,
         slippage,
         chainId,
+        balancerVersion,
     );
 
     assertTokenDeltas(
@@ -271,6 +276,7 @@ export function assertRemoveLiquiditySingleToken(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
+        balancerVersion,
     );
 }
 
@@ -280,6 +286,7 @@ export function assertRemoveLiquidityProportional(
     removeLiquidityInput: RemoveLiquidityProportionalInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    balancerVersion: 2 | 3 = 2,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -321,6 +328,7 @@ export function assertRemoveLiquidityProportional(
         true,
         slippage,
         chainId,
+        balancerVersion,
     );
 
     assertTokenDeltas(
@@ -328,6 +336,7 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
+        balancerVersion,
     );
 }
 
@@ -336,6 +345,7 @@ function assertTokenDeltas(
     removeLiquidityInput: RemoveLiquidityInput,
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
     txOutput: TxOutput,
+    balancerVersion: 2 | 3 = 2,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
@@ -353,11 +363,16 @@ function assertTokenDeltas(
 
     // If removing liquidity to native asset we must replace it with 0 and update native value instead
     if (removeLiquidityInput.toNativeAsset) {
-        const index = amountsWithoutBpt.findIndex(
-            (a) => a.token.address === zeroAddress,
+        const respectiveNativeAddress =
+            balancerVersion === 2
+                ? zeroAddress
+                : NATIVE_ASSETS[removeLiquidityInput.chainId].wrapped;
+        const nativeAssetIndex = amountsWithoutBpt.findIndex(
+            (a) => a.token.address === respectiveNativeAddress,
         );
-        expectedDeltas[expectedDeltas.length - 1] = expectedDeltas[index];
-        expectedDeltas[index] = 0n;
+        expectedDeltas[expectedDeltas.length - 1] =
+            expectedDeltas[nativeAssetIndex];
+        expectedDeltas[nativeAssetIndex] = 0n;
     }
 
     expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
@@ -369,6 +384,7 @@ function assertRemoveLiquidityBuildOutput(
     isExactIn: boolean,
     slippage: Slippage,
     chainId: number,
+    balancerVersion: 2 | 3 = 2,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
     // slippage.removeFrom(a.amount)
@@ -386,10 +402,13 @@ function assertRemoveLiquidityBuildOutput(
               slippage.applyTo(removeLiquidityQueryOutput.bptIn.amount),
           );
 
+    const to =
+        balancerVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId];
+
     const expectedBuildOutput: Omit<RemoveLiquidityBuildOutput, 'call'> = {
         minAmountsOut,
         maxBptIn,
-        to: VAULT[chainId],
+        to,
         value: 0n, // Value should always be 0 when removing liquidity
     };
 

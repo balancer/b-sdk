@@ -59,18 +59,20 @@ export type RemoveLiquidityComposableStableQueryOutput =
         bptIndex: number;
     };
 
-type RemoveLiquidityBaseCall = {
+export type RemoveLiquidityBaseCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
     chainId: number;
-};
+    wethIsEth: boolean;
+} & RemoveLiquidityBaseQueryOutput;
+
+export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall;
 export type RemoveLiquidityComposableStableCall = RemoveLiquidityBaseCall &
     RemoveLiquidityComposableStableQueryOutput;
-export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall &
-    RemoveLiquidityBaseQueryOutput;
 
 export type RemoveLiquidityCall =
+    | RemoveLiquidityBaseCall
     | RemoveLiquidityComposableStableCall
     | RemoveLiquidityWeightedCall;
 

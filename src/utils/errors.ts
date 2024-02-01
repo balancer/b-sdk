@@ -5,3 +5,6 @@ export const addLiquiditySingleTokenShouldHaveTokenInIndexError = Error(
 export const addLiquidityProportionalUnavailableError = new Error(
     'AddLiquidityKind.Proportional is not available for V3. Please use ProportionalAmountsHelper to calculate proportional amountsIn and use AddLiquidityKind.Unbalanced instead.',
 );
+
+export const removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError =
+    Error('RemoveLiquidityKind.SingleTokenExactIn should have tokenOutIndex');

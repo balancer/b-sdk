@@ -75,7 +75,7 @@ describe('weighted remove liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [txInput.poolState.address],
-            [0], // TODO: hardcode these values to improve test performance
+            [0],
             [parseUnits('1000', 18)],
         );
     });
@@ -216,7 +216,7 @@ describe('weighted remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                useNativeAssetAsWrappedAmountIn: true,
+                toNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,

@@ -16,6 +16,7 @@ import { RemoveLiquidityAmounts, PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { ComposableStableEncoder } from '../../../encoders/composableStable';
 import { getAmounts, getSortedTokens } from '../../../utils';
+import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
 
 export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
@@ -162,9 +163,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                 };
             case RemoveLiquidityKind.SingleToken:
                 if (input.tokenOutIndex === undefined) {
-                    throw new Error(
-                        'tokenOutIndex must be defined for RemoveLiquiditySingleToken',
-                    );
+                    throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
                 }
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
