@@ -187,8 +187,9 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
                     'Unsupported Add Liquidity Kind, for Init use InitPool instead of AddLiquidity',
                 );
             case AddLiquidityKind.Unbalanced: {
-                const minimumBpt = input.slippage.removeFrom(
+                const minimumBpt = input.slippage.applyTo(
                     input.bptOut.amount,
+                    -1,
                 );
                 addLiquidityAmounts = {
                     minimumBpt,
