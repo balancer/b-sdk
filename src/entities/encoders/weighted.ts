@@ -8,6 +8,7 @@ import {
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import { addLiquiditySingleTokenShouldHaveTokenInIndexError } from '@/utils/errors';
+import { encodeRemoveLiquidityRecovery } from '.';
 
 export enum WeightedPoolJoinKind {
     INIT = 0,
@@ -102,6 +103,8 @@ export class WeightedEncoder {
                 return WeightedEncoder.removeLiquidityProportional(
                     amounts.maxBptAmountIn,
                 );
+            case RemoveLiquidityKind.Recovery:
+                return encodeRemoveLiquidityRecovery(amounts.maxBptAmountIn);
             default:
                 throw Error('Unsupported Remove Liquidity Kind');
         }
