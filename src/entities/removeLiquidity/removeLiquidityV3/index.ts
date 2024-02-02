@@ -1,24 +1,26 @@
+import { createPublicClient, encodeFunctionData, http } from 'viem';
+
+import { balancerRouterAbi } from '@/abi';
+import { Token } from '@/entities/token';
+import { TokenAmount } from '@/entities/tokenAmount';
+import { PoolState } from '@/entities/types';
+import { getSortedTokens } from '@/entities/utils';
+import { Hex } from '@/types';
 import {
-    PoolState,
+    BALANCER_ROUTER,
+    CHAINS,
+    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+} from '@/utils';
+
+import { getAmountsCall } from '../helper';
+import {
     RemoveLiquidityBase,
     RemoveLiquidityBaseCall,
     RemoveLiquidityBaseQueryOutput,
     RemoveLiquidityBuildOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-    Token,
-    TokenAmount,
-    getSortedTokens,
-} from '@/entities';
-import { createPublicClient, encodeFunctionData, http } from 'viem';
-import {
-    BALANCER_ROUTER,
-    CHAINS,
-    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
-} from '@/utils';
-import { balancerRouterAbi } from '@/abi';
-import { Hex } from '@/types';
-import { getAmountsCall } from '../helper';
+} from '../types';
 
 export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
