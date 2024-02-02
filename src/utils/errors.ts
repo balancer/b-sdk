@@ -8,3 +8,7 @@ export const addLiquidityProportionalUnavailableError = new Error(
 
 export const removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError =
     Error('RemoveLiquidityKind.SingleTokenExactIn should have tokenOutIndex');
+
+export const removeLiquidityUnbalancedNotSupportedOnV3 = Error(
+    'Unbalanced remove liquidity not supported on V3',
+);

@@ -27,6 +27,8 @@ import {
     AddLiquidityKind,
     AddLiquidityUnbalancedInput,
     RemoveLiquiditySingleTokenExactOutInput,
+    RemoveLiquidityUnbalancedInput,
+    removeLiquidityUnbalancedNotSupportedOnV3,
 } from '../../src';
 import { forkSetup } from '../lib/utils/helper';
 import {
@@ -52,7 +54,7 @@ const poolId = POOLS[chainId].MOCK_WEIGHTED_POOL.address;
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
 
-describe('weighted remove liquidity test', () => {
+describe('remove liquidity test', () => {
     let prepTxInput: AddLiquidityTxInput;
     let txInput: RemoveLiquidityTxInput;
     let poolState: PoolState;
@@ -123,9 +125,33 @@ describe('weighted remove liquidity test', () => {
         await doAddLiquidity(prepTxInput);
     });
 
-    // TODO: unbalanced should throw an error
+    describe('unbalanced', async () => {
+        let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
+        let amountsOut: InputAmount[];
+        beforeAll(() => {
+            amountsOut = poolState.tokens.map((t) => ({
+                rawAmount: parseUnits('1', t.decimals),
+                decimals: t.decimals,
+                address: t.address,
+            }));
+            input = {
+                chainId,
+                rpcUrl,
+                kind: RemoveLiquidityKind.Unbalanced,
+            };
+        });
+        test('must throw remove liquidity kind not supported error', async () => {
+            const removeLiquidityInput = {
+                ...input,
+                amountsOut: amountsOut.slice(0, 1),
+            };
+            await expect(() =>
+                doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
+            ).rejects.toThrowError(removeLiquidityUnbalancedNotSupportedOnV3);
+        });
+    });
 
-    describe('remove liquidity single token exact out', () => {
+    describe('single token exact out', () => {
         let input: RemoveLiquiditySingleTokenExactOutInput;
         beforeAll(() => {
             const amountOut: InputAmount = {
@@ -177,7 +203,7 @@ describe('weighted remove liquidity test', () => {
         });
     });
 
-    describe('remove liquidity single token exact in', () => {
+    describe('single token exact in', () => {
         let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
@@ -231,7 +257,7 @@ describe('weighted remove liquidity test', () => {
         });
     });
 
-    describe('remove liquidity proportional', () => {
+    describe('proportional', () => {
         let input: RemoveLiquidityProportionalInput;
         beforeAll(() => {
             const bptIn: InputAmount = {

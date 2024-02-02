@@ -11,6 +11,7 @@ import {
     CHAINS,
     MAX_UINT112,
     removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+    removeLiquidityUnbalancedNotSupportedOnV3,
 } from '@/utils';
 
 import { getAmountsCall } from '../helper';
@@ -42,9 +43,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
 
         switch (input.kind) {
             case RemoveLiquidityKind.Unbalanced:
-                throw new Error(
-                    'Unbalanced remove liquidity not supported on V3',
-                );
+                throw removeLiquidityUnbalancedNotSupportedOnV3;
             case RemoveLiquidityKind.SingleTokenExactOut:
                 {
                     amountsOut = sortedTokens.map((t) =>
@@ -154,9 +153,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         let call: Hex;
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:
-                throw new Error(
-                    'Unbalanced remove liquidity not supported on V3',
-                );
+                throw removeLiquidityUnbalancedNotSupportedOnV3;
             case RemoveLiquidityKind.SingleTokenExactOut:
                 {
                     // just a sanity check as this is already checked in InputValidator
