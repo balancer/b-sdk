@@ -39,7 +39,7 @@ export const encodeCalls = (
         if (isProportional) {
             userData = getUserDataProportional(poolType, bptAmountIn.amount);
         } else {
-            userData = getUserDataSingleToken(
+            userData = getUserDataSingleTokenExactIn(
                 tokenOutIndex,
                 poolType,
                 bptAmountIn.amount,
@@ -85,7 +85,7 @@ const getUserDataProportional = (poolType: PoolType, bptAmountIn: bigint) => {
     }
 };
 
-const getUserDataSingleToken = (
+const getUserDataSingleTokenExactIn = (
     tokenOutIndex: number | undefined,
     poolType: PoolType,
     bptAmountIn: bigint,
@@ -95,12 +95,12 @@ const getUserDataSingleToken = (
     }
     switch (poolType) {
         case PoolType.Weighted:
-            return WeightedEncoder.removeLiquiditySingleToken(
+            return WeightedEncoder.removeLiquiditySingleTokenExactIn(
                 bptAmountIn,
                 tokenOutIndex,
             );
         case PoolType.ComposableStable:
-            return ComposableStableEncoder.removeLiquiditySingleToken(
+            return ComposableStableEncoder.removeLiquiditySingleTokenExactIn(
                 bptAmountIn,
                 tokenOutIndex,
             );

@@ -11,7 +11,7 @@ import {
     walletActions,
 } from 'viem';
 import {
-    RemoveLiquiditySingleTokenInput,
+    RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityProportionalInput,
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
@@ -32,7 +32,7 @@ import { forkSetup } from '../../lib/utils/helper';
 import { RemoveLiquidityTxInput } from '../../lib/utils/types';
 import {
     assertRemoveLiquidityProportional,
-    assertRemoveLiquiditySingleToken,
+    assertRemoveLiquiditySingleTokenExactIn,
     assertRemoveLiquidityUnbalanced,
     doRemoveLiquidity,
 } from '../../lib/utils/removeLiquidityHelper';
@@ -141,7 +141,7 @@ describe('composable stable remove liquidity test', () => {
     });
 
     describe('remove liquidity single token', () => {
-        let input: RemoveLiquiditySingleTokenInput;
+        let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -154,7 +154,7 @@ describe('composable stable remove liquidity test', () => {
                 rpcUrl,
                 bptIn,
                 tokenOut,
-                kind: RemoveLiquidityKind.SingleToken,
+                kind: RemoveLiquidityKind.SingleTokenExactIn,
             };
         });
         test('with wrapped', async () => {
@@ -163,7 +163,7 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput: input,
             });
 
-            assertRemoveLiquiditySingleToken(
+            assertRemoveLiquiditySingleTokenExactIn(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
@@ -182,7 +182,7 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
             });
 
-            assertRemoveLiquiditySingleToken(
+            assertRemoveLiquiditySingleTokenExactIn(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,

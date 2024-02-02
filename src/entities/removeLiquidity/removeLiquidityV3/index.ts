@@ -67,7 +67,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 throw new Error(
                     'Unbalanced remove liquidity not supported on V3',
                 );
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 {
                     bptIn = TokenAmount.fromRawAmount(
                         bptToken,
@@ -139,7 +139,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 throw new Error(
                     'Unbalanced remove liquidity not supported on V3',
                 );
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 {
                     // just a sanity check as this is already checked in InputValidator
                     if (input.tokenOutIndex === undefined) {

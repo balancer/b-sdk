@@ -41,7 +41,7 @@ const removeLiquidity = async () => {
     );
     const poolState: PoolState = await balancerApi.pools.fetchPoolState(poolId);
 
-    // Construct the RemoveLiquidityInput, in this case a RemoveLiquiditySingleToken
+    // Construct the RemoveLiquidityInput, in this case a RemoveLiquiditySingleTokenExactIn
     const bptIn: InputAmount = {
         rawAmount: parseEther('1'),
         decimals: 18,
@@ -52,7 +52,7 @@ const removeLiquidity = async () => {
         rpcUrl,
         bptIn,
         tokenOut,
-        kind: RemoveLiquidityKind.SingleToken,
+        kind: RemoveLiquidityKind.SingleTokenExactIn,
     };
 
     // Simulate removing liquidity to get the tokens out
@@ -75,6 +75,7 @@ const removeLiquidity = async () => {
         sender: userAccount,
         recipient: userAccount,
         chainId,
+        wethIsEth: !!removeLiquidityInput.toNativeAsset,
     });
 
     console.log('\nWith slippage applied:');

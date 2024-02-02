@@ -93,11 +93,11 @@ export class WeightedEncoder {
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
                     throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
 
-                return WeightedEncoder.removeLiquiditySingleToken(
+                return WeightedEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
@@ -177,7 +177,7 @@ export class WeightedEncoder {
      * @param bptAmountIn - the amount of BPT to be burned
      * @param tokenIndex - the index of the token to removed from the pool
      */
-    static removeLiquiditySingleToken = (
+    static removeLiquiditySingleTokenExactIn = (
         bptAmountIn: bigint,
         tokenIndex: number,
     ): Address => {

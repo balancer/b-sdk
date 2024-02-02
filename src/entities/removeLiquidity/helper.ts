@@ -22,7 +22,7 @@ export const getAmountsQuery = (
                 tokenOutIndex: undefined,
                 maxBptAmountIn: MAX_UINT256,
             };
-        case RemoveLiquidityKind.SingleToken:
+        case RemoveLiquidityKind.SingleTokenExactIn:
             return {
                 minAmountsOut: Array(tokens.length).fill(0n),
                 tokenOutIndex: tokens.findIndex((t) =>
@@ -49,7 +49,7 @@ export const getAmountsCall = (
                 tokenOutIndex: input.tokenOutIndex,
                 maxBptAmountIn: input.slippage.applyTo(input.bptIn.amount),
             };
-        case RemoveLiquidityKind.SingleToken:
+        case RemoveLiquidityKind.SingleTokenExactIn:
             if (input.tokenOutIndex === undefined) {
                 throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
             }

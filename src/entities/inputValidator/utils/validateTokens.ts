@@ -46,7 +46,7 @@ export const validateTokensRemoveLiquidity = (
                 poolState.tokens.map((t) => t.address),
             );
             break;
-        case RemoveLiquidityKind.SingleToken:
+        case RemoveLiquidityKind.SingleTokenExactIn:
             areTokensInArray(
                 [removeLiquidityInput.tokenOut],
                 poolState.tokens.map((t) => t.address),

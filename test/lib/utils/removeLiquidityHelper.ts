@@ -10,7 +10,7 @@ import {
     Slippage,
     Token,
     RemoveLiquidityUnbalancedInput,
-    RemoveLiquiditySingleTokenInput,
+    RemoveLiquiditySingleTokenExactInInput,
     VAULT,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
@@ -202,10 +202,10 @@ export function assertRemoveLiquidityUnbalanced(
     );
 }
 
-export function assertRemoveLiquiditySingleToken(
+export function assertRemoveLiquiditySingleTokenExactIn(
     chainId: ChainId,
     poolState: PoolState,
-    removeLiquidityInput: RemoveLiquiditySingleTokenInput,
+    removeLiquidityInput: RemoveLiquiditySingleTokenExactInInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
     balancerVersion: 2 | 3 = 2,

@@ -78,7 +78,7 @@ export class ComposableStableEncoder {
 
     /**
      * Encodes the User Data for removing liquidity to a ComposableStablePool
-     * @param kind Kind of the Remove Liquidity operation: Unbalanced, SingleToken, Proportional
+     * @param kind Kind of the Remove Liquidity operation: Unbalanced, SingleTokenExactIn, Proportional
      * @param amounts Amounts of tokens to be removed from the pool
      * @returns
      */
@@ -92,11 +92,11 @@ export class ComposableStableEncoder {
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
                     throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
 
-                return ComposableStableEncoder.removeLiquiditySingleToken(
+                return ComposableStableEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
@@ -179,7 +179,7 @@ export class ComposableStableEncoder {
      * @param bptAmountIn - the amount of BPT to be burned
      * @param tokenIndex - the index of the token to be removed from the pool
      */
-    static removeLiquiditySingleToken = (
+    static removeLiquiditySingleTokenExactIn = (
         bptAmountIn: bigint,
         tokenIndex: number,
     ): Address => {

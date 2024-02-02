@@ -11,7 +11,7 @@ import {
     walletActions,
 } from 'viem';
 import {
-    RemoveLiquiditySingleTokenInput,
+    RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityProportionalInput,
     RemoveLiquidityKind,
     Slippage,
@@ -30,7 +30,7 @@ import {
 import { forkSetup } from '../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
-    assertRemoveLiquiditySingleToken,
+    assertRemoveLiquiditySingleTokenExactIn,
     doRemoveLiquidity,
 } from '../lib/utils/removeLiquidityHelper';
 import {
@@ -124,7 +124,7 @@ describe('weighted remove liquidity test', () => {
     // TODO: unbalanced should throw an error
 
     describe('remove liquidity single asset', () => {
-        let input: RemoveLiquiditySingleTokenInput;
+        let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -137,7 +137,7 @@ describe('weighted remove liquidity test', () => {
                 rpcUrl,
                 bptIn,
                 tokenOut,
-                kind: RemoveLiquidityKind.SingleToken,
+                kind: RemoveLiquidityKind.SingleTokenExactIn,
             };
         });
         test('with wrapped', async () => {
@@ -146,7 +146,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput: input,
             });
 
-            assertRemoveLiquiditySingleToken(
+            assertRemoveLiquiditySingleTokenExactIn(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
@@ -166,7 +166,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
             });
 
-            assertRemoveLiquiditySingleToken(
+            assertRemoveLiquiditySingleTokenExactIn(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,

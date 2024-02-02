@@ -89,7 +89,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                     tokenOutIndex: undefined,
                     maxBptAmountIn: MAX_UINT256,
                 };
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: tokens
@@ -161,7 +161,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.slippage.applyTo(input.bptIn.amount),
                 };
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 if (input.tokenOutIndex === undefined) {
                     throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
                 }

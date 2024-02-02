@@ -5,7 +5,7 @@ import { PoolState } from '../types';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
-    SingleToken = 'SingleToken', // exact in (single token out)
+    SingleTokenExactIn = 'SingleTokenExactIn', // exact in (single token out)
     Proportional = 'Proportional', // exact in (all tokens out)
 }
 
@@ -22,11 +22,12 @@ export type RemoveLiquidityUnbalancedInput = RemoveLiquidityBaseInput & {
     kind: RemoveLiquidityKind.Unbalanced;
 };
 
-export type RemoveLiquiditySingleTokenInput = RemoveLiquidityBaseInput & {
-    bptIn: InputAmount;
-    tokenOut: Address;
-    kind: RemoveLiquidityKind.SingleToken;
-};
+export type RemoveLiquiditySingleTokenExactInInput =
+    RemoveLiquidityBaseInput & {
+        bptIn: InputAmount;
+        tokenOut: Address;
+        kind: RemoveLiquidityKind.SingleTokenExactIn;
+    };
 
 export type RemoveLiquidityProportionalInput = RemoveLiquidityBaseInput & {
     bptIn: InputAmount;
@@ -35,7 +36,7 @@ export type RemoveLiquidityProportionalInput = RemoveLiquidityBaseInput & {
 
 export type RemoveLiquidityInput =
     | RemoveLiquidityUnbalancedInput
-    | RemoveLiquiditySingleTokenInput
+    | RemoveLiquiditySingleTokenExactInInput
     | RemoveLiquidityProportionalInput;
 
 export type RemoveLiquidityQueryOutput =

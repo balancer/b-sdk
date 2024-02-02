@@ -11,7 +11,7 @@ import {
     walletActions,
 } from 'viem';
 import {
-    RemoveLiquiditySingleTokenInput,
+    RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityProportionalInput,
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
@@ -140,7 +140,7 @@ describe('Gyro3 remove liquidity test', () => {
     });
 
     describe('single token', () => {
-        let input: RemoveLiquiditySingleTokenInput;
+        let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -153,7 +153,7 @@ describe('Gyro3 remove liquidity test', () => {
                 rpcUrl,
                 bptIn,
                 tokenOut,
-                kind: RemoveLiquidityKind.SingleToken,
+                kind: RemoveLiquidityKind.SingleTokenExactIn,
             };
         });
         test('must throw remove liquidity kind not supported error', async () => {
