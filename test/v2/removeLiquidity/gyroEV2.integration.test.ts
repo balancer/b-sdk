@@ -26,6 +26,7 @@ import {
     RemoveLiquidityInput,
     InputAmount,
     PoolType,
+    RemoveLiquiditySingleTokenExactOutInput,
 } from '../../../src';
 import { forkSetup } from '../../lib/utils/helper';
 import {
@@ -35,11 +36,14 @@ import {
 import { RemoveLiquidityTxInput } from '../../lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { InputValidatorGyro } from '../../../src/entities/inputValidator/gyro/inputValidatorGyro';
+import { TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const poolId =
     '0xf01b0684c98cd7ada480bfdf6e43876422fa1fc10002000000000000000005de'; // ECLP-wstETH-wETH
+
+const wETH = TOKENS[chainId].WETH;
 
 describe('GyroE V2 remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
@@ -155,7 +159,35 @@ describe('GyroE V2 remove liquidity test', () => {
         });
     });
 
-    describe('single token', () => {
+    describe('single token exact out', async () => {
+        let input: Omit<RemoveLiquiditySingleTokenExactOutInput, 'amountOut'>;
+        let amountOut: InputAmount;
+        beforeAll(() => {
+            amountOut = {
+                rawAmount: parseUnits('0.001', wETH.decimals),
+                decimals: wETH.decimals,
+                address: wETH.address,
+            };
+            input = {
+                chainId,
+                rpcUrl,
+                kind: RemoveLiquidityKind.SingleTokenExactOut,
+            };
+        });
+        test('must throw remove liquidity kind not supported error', async () => {
+            const removeLiquidityInput = {
+                ...input,
+                amountOut,
+            };
+            await expect(() =>
+                doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
+            ).rejects.toThrowError(
+                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+            );
+        });
+    });
+
+    describe('single token exact in', () => {
         let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {

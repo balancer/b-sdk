@@ -1,7 +1,7 @@
 import { Address, Hex, PoolType } from '@/types';
 import { ChainId } from '@/utils';
 
-export type TestToken = { address: Address; decimals: number; slot: number };
+export type TestToken = { address: Address; decimals: number; slot?: number };
 
 export const TOKENS: Record<number, Record<string, TestToken>> = {
     [ChainId.MAINNET]: {
@@ -24,6 +24,12 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
             decimals: 6,
             slot: 2,
+        },
+    },
+    [ChainId.POLYGON]: {
+        USDC: {
+            address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+            decimals: 6,
         },
     },
     [ChainId.SEPOLIA]: {

@@ -88,6 +88,7 @@ export class ComposableStableEncoder {
     ): Address {
         switch (kind) {
             case RemoveLiquidityKind.Unbalanced:
+            case RemoveLiquidityKind.SingleTokenExactOut:
                 return ComposableStableEncoder.removeLiquidityUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
@@ -104,8 +105,6 @@ export class ComposableStableEncoder {
                 return ComposableStableEncoder.removeLiquidityProportional(
                     amounts.maxBptAmountIn,
                 );
-            default:
-                throw Error('Unsupported Remove Liquidity Kind');
         }
     }
 

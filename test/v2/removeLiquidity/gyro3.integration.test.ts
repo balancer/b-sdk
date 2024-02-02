@@ -26,6 +26,7 @@ import {
     RemoveLiquidityInput,
     InputAmount,
     PoolType,
+    RemoveLiquiditySingleTokenExactOutInput,
 } from '../../../src';
 import { forkSetup } from '../../lib/utils/helper';
 import {
@@ -35,11 +36,14 @@ import {
 import { RemoveLiquidityTxInput } from '../../lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { InputValidatorGyro } from '../../../src/entities/inputValidator/gyro/inputValidatorGyro';
+import { TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
 const poolId =
     '0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799'; // 3CLP-BUSD-USDC-USDT
+
+const USDC = TOKENS[chainId].USDC;
 
 describe('Gyro3 remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
@@ -139,7 +143,35 @@ describe('Gyro3 remove liquidity test', () => {
         });
     });
 
-    describe('single token', () => {
+    describe('single token exact out', async () => {
+        let input: Omit<RemoveLiquiditySingleTokenExactOutInput, 'amountOut'>;
+        let amountOut: InputAmount;
+        beforeAll(() => {
+            amountOut = {
+                rawAmount: parseUnits('0.001', USDC.decimals),
+                decimals: USDC.decimals,
+                address: USDC.address,
+            };
+            input = {
+                chainId,
+                rpcUrl,
+                kind: RemoveLiquidityKind.SingleTokenExactOut,
+            };
+        });
+        test('must throw remove liquidity kind not supported error', async () => {
+            const removeLiquidityInput = {
+                ...input,
+                amountOut,
+            };
+            await expect(() =>
+                doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
+            ).rejects.toThrowError(
+                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+            );
+        });
+    });
+
+    describe('single token exact in', () => {
         let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {

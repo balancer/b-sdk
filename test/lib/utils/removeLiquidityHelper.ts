@@ -16,6 +16,7 @@ import {
     RemoveLiquidityProportionalInput,
     removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
     BALANCER_ROUTER,
+    RemoveLiquiditySingleTokenExactOutInput,
 } from '../../../src';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import { zeroAddress } from 'viem';
@@ -161,6 +162,72 @@ export function assertRemoveLiquidityUnbalanced(
             (a) => a.address === t.address,
         );
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
+        return TokenAmount.fromRawAmount(token, input.rawAmount);
+    });
+
+    const expectedQueryOutput: Omit<
+        RemoveLiquidityQueryOutput,
+        'bptIn' | 'bptIndex'
+    > = {
+        // Query should use same amountsOut as input
+        amountsOut: expectedAmountsOut,
+        tokenOutIndex: undefined,
+        // Should match inputs
+        poolId: poolState.id,
+        poolType: poolState.type,
+        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
+        removeLiquidityKind: removeLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
+    };
+
+    const queryCheck = getCheck(removeLiquidityQueryOutput, false);
+
+    expect(queryCheck).to.deep.eq(expectedQueryOutput);
+
+    // Expect some bpt amount
+    expect(removeLiquidityQueryOutput.bptIn.amount > 0n).to.be.true;
+
+    assertRemoveLiquidityBuildOutput(
+        removeLiquidityQueryOutput,
+        removeLiquidityBuildOutput,
+        false,
+        slippage,
+        chainId,
+    );
+
+    assertTokenDeltas(
+        poolState,
+        removeLiquidityInput,
+        removeLiquidityQueryOutput,
+        txOutput,
+    );
+}
+
+export function assertRemoveLiquiditySingleTokenExactOut(
+    chainId: ChainId,
+    poolState: PoolState,
+    removeLiquidityInput: RemoveLiquiditySingleTokenExactOutInput,
+    removeLiquidityOutput: RemoveLiquidityOutput,
+    slippage: Slippage,
+) {
+    const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
+        removeLiquidityOutput;
+
+    // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
+    const expectedAmountsOut = poolState.tokens.map((t) => {
+        let token: Token;
+        if (
+            removeLiquidityInput.toNativeAsset &&
+            t.address === NATIVE_ASSETS[chainId].wrapped
+        ) {
+            token = new Token(chainId, zeroAddress, t.decimals);
+        } else {
+            token = new Token(chainId, t.address, t.decimals);
+        }
+        const input = removeLiquidityInput.amountOut;
+        if (input.address !== t.address) {
+            return TokenAmount.fromRawAmount(token, 0n);
+        }
         return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 

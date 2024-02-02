@@ -1,5 +1,5 @@
 import { encodeAbiParameters } from 'viem';
-import { Address } from '../../types';
+import { Address, Hex } from '../../types';
 import { AddLiquidityKind } from '../addLiquidity/types';
 import {
     AddLiquidityAmounts,
@@ -49,10 +49,10 @@ export class WeightedEncoder {
      * @param amounts Amounts of tokens to be added to the pool
      * @returns
      */
-    static encodeAddLiquidityUserData(
+    static encodeAddLiquidityUserData = (
         kind: AddLiquidityKind,
         amounts: AddLiquidityAmounts,
-    ) {
+    ): Hex => {
         switch (kind) {
             case AddLiquidityKind.Unbalanced:
                 return WeightedEncoder.addLiquidityUnbalanced(
@@ -75,7 +75,7 @@ export class WeightedEncoder {
                 );
             }
         }
-    }
+    };
 
     /**
      * Encodes the User Data for removing liquidity from a WeightedPool
@@ -83,12 +83,13 @@ export class WeightedEncoder {
      * @param amounts Amounts of tokens to be removed from the pool
      * @returns
      */
-    static encodeRemoveLiquidityUserData(
+    static encodeRemoveLiquidityUserData = (
         kind: RemoveLiquidityKind,
         amounts: RemoveLiquidityAmounts,
-    ): Address {
+    ): Hex => {
         switch (kind) {
             case RemoveLiquidityKind.Unbalanced:
+            case RemoveLiquidityKind.SingleTokenExactOut:
                 return WeightedEncoder.removeLiquidityUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
@@ -105,16 +106,14 @@ export class WeightedEncoder {
                 return WeightedEncoder.removeLiquidityProportional(
                     amounts.maxBptAmountIn,
                 );
-            default:
-                throw Error('Unsupported Remove Liquidity Kind');
         }
-    }
+    };
 
     /**
      * Encodes the userData parameter for providing the initial liquidity to a WeightedPool
      * @param initialBalances - the amounts of tokens to send to the pool to form the initial balances
      */
-    static initPool = (amountsIn: bigint[]): Address =>
+    static initPool = (amountsIn: bigint[]): Hex =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }],
             [BigInt(WeightedPoolJoinKind.INIT), amountsIn],
@@ -128,7 +127,7 @@ export class WeightedEncoder {
     static addLiquidityUnbalanced = (
         amountsIn: bigint[],
         minimumBPT: bigint,
-    ): Address =>
+    ): Hex =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }, { type: 'uint256' }],
             [
@@ -146,7 +145,7 @@ export class WeightedEncoder {
     static addLiquiditySingleToken = (
         bptAmountOut: bigint,
         tokenIndex: number,
-    ): Address => {
+    ): Hex => {
         // if tokenIndex is provided, it's assumed to be an allTokensIn
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
@@ -162,7 +161,7 @@ export class WeightedEncoder {
      * Encodes the userData parameter for adding liquidity to a WeightedPool proportionally to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
      */
-    static addLiquidityProportional = (bptAmountOut: bigint): Address => {
+    static addLiquidityProportional = (bptAmountOut: bigint): Hex => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [
@@ -180,7 +179,7 @@ export class WeightedEncoder {
     static removeLiquiditySingleTokenExactIn = (
         bptAmountIn: bigint,
         tokenIndex: number,
-    ): Address => {
+    ): Hex => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
             [
@@ -195,7 +194,7 @@ export class WeightedEncoder {
      * Encodes the userData parameter for removing liquidity from a WeightedPool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
      */
-    static removeLiquidityProportional = (bptAmountIn: bigint): Address => {
+    static removeLiquidityProportional = (bptAmountIn: bigint): Hex => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [
@@ -213,7 +212,7 @@ export class WeightedEncoder {
     static removeLiquidityUnbalanced = (
         amountsOut: bigint[],
         maxBPTAmountIn: bigint,
-    ): Address =>
+    ): Hex =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }, { type: 'uint256' }],
             [

@@ -40,35 +40,12 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         let tokenOutIndex: number | undefined;
 
         switch (input.kind) {
-            case RemoveLiquidityKind.Proportional:
-                {
-                    bptIn = TokenAmount.fromRawAmount(
-                        bptToken,
-                        input.bptIn.rawAmount,
-                    );
-
-                    const { result: minAmountsOut } =
-                        await client.simulateContract({
-                            address: BALANCER_ROUTER[input.chainId],
-                            abi: balancerRouterAbi,
-                            functionName: 'queryRemoveLiquidityProportional',
-                            args: [
-                                poolState.address,
-                                input.bptIn.rawAmount,
-                                Array(sortedTokens.length).fill(1n), // minAmountsOut set to 0 when querying
-                                '0x',
-                            ],
-                        });
-                    amountsOut = sortedTokens.map((t, i) =>
-                        TokenAmount.fromRawAmount(t, minAmountsOut[i]),
-                    );
-                    tokenOutIndex = undefined;
-                }
-                break;
             case RemoveLiquidityKind.Unbalanced:
                 throw new Error(
                     'Unbalanced remove liquidity not supported on V3',
                 );
+            case RemoveLiquidityKind.SingleTokenExactOut:
+                throw new Error('Not implemented');
             case RemoveLiquidityKind.SingleTokenExactIn:
                 {
                     bptIn = TokenAmount.fromRawAmount(
@@ -99,7 +76,31 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     );
                 }
                 break;
-            // TODO: case for remove liquidity single token exact out
+            case RemoveLiquidityKind.Proportional:
+                {
+                    bptIn = TokenAmount.fromRawAmount(
+                        bptToken,
+                        input.bptIn.rawAmount,
+                    );
+
+                    const { result: minAmountsOut } =
+                        await client.simulateContract({
+                            address: BALANCER_ROUTER[input.chainId],
+                            abi: balancerRouterAbi,
+                            functionName: 'queryRemoveLiquidityProportional',
+                            args: [
+                                poolState.address,
+                                input.bptIn.rawAmount,
+                                Array(sortedTokens.length).fill(1n), // minAmountsOut set to 0 when querying
+                                '0x',
+                            ],
+                        });
+                    amountsOut = sortedTokens.map((t, i) =>
+                        TokenAmount.fromRawAmount(t, minAmountsOut[i]),
+                    );
+                    tokenOutIndex = undefined;
+                }
+                break;
         }
 
         const output: RemoveLiquidityBaseQueryOutput = {
@@ -122,25 +123,12 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         const amounts = getAmountsCall(input);
         let call: Hex;
         switch (input.removeLiquidityKind) {
-            case RemoveLiquidityKind.Proportional:
-                {
-                    call = encodeFunctionData({
-                        abi: balancerRouterAbi,
-                        functionName: 'removeLiquidityProportional',
-                        args: [
-                            input.poolId,
-                            input.bptIn.amount,
-                            amounts.minAmountsOut,
-                            input.wethIsEth,
-                            '0x',
-                        ],
-                    });
-                }
-                break;
             case RemoveLiquidityKind.Unbalanced:
                 throw new Error(
                     'Unbalanced remove liquidity not supported on V3',
                 );
+            case RemoveLiquidityKind.SingleTokenExactOut:
+                throw new Error('Not implemented');
             case RemoveLiquidityKind.SingleTokenExactIn:
                 {
                     // just a sanity check as this is already checked in InputValidator
@@ -155,6 +143,21 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                             input.bptIn.amount,
                             input.amountsOut[input.tokenOutIndex].token.address,
                             amounts.minAmountsOut[input.tokenOutIndex],
+                            input.wethIsEth,
+                            '0x',
+                        ],
+                    });
+                }
+                break;
+            case RemoveLiquidityKind.Proportional:
+                {
+                    call = encodeFunctionData({
+                        abi: balancerRouterAbi,
+                        functionName: 'removeLiquidityProportional',
+                        args: [
+                            input.poolId,
+                            input.bptIn.amount,
+                            amounts.minAmountsOut,
                             input.wethIsEth,
                             '0x',
                         ],
