@@ -66,7 +66,7 @@ export class AddLiquidityNested {
         minBptOut: bigint;
     } {
         // apply slippage to bptOut
-        const minBptOut = input.slippage.removeFrom(input.bptOut.amount);
+        const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
 
         // update last call with minBptOut limit in place
         input.callsAttributes[input.callsAttributes.length - 1] = {

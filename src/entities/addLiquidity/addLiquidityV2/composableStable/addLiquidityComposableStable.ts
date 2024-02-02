@@ -183,8 +183,9 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Unbalanced: {
-                const minimumBpt = input.slippage.removeFrom(
+                const minimumBpt = input.slippage.applyTo(
                     input.bptOut.amount,
+                    -1,
                 );
                 addLiquidityAmounts = {
                     minimumBpt,

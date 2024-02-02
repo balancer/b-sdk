@@ -408,7 +408,7 @@ function assertResults(
     amountsOut.map((amountOut) => expect(amountOut.amount > 0n).to.be.true);
     expect(expectedDeltas).to.deep.eq(balanceDeltas);
     const expectedMinAmountsOut = amountsOut.map((amountOut) =>
-        slippage.removeFrom(amountOut.amount),
+        slippage.applyTo(amountOut.amount, -1),
     );
     expect(expectedMinAmountsOut).to.deep.eq(
         minAmountsOut.map((a) => a.amount),

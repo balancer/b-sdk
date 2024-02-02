@@ -181,7 +181,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                 }
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
-                        input.slippage.removeFrom(a.amount),
+                        input.slippage.applyTo(a.amount, -1),
                     ),
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,
@@ -190,7 +190,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             case RemoveLiquidityKind.Proportional:
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
-                        input.slippage.removeFrom(a.amount),
+                        input.slippage.applyTo(a.amount, -1),
                     ),
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,

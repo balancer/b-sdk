@@ -74,7 +74,7 @@ export class RemoveLiquidityNested {
         const minAmountsOut = input.amountsOut.map((amountOut) =>
             TokenAmount.fromRawAmount(
                 amountOut.token,
-                input.slippage.removeFrom(amountOut.amount),
+                input.slippage.applyTo(amountOut.amount, -1),
             ),
         );
 
