@@ -7,7 +7,7 @@ export function calculateAddLiquidityProportionalAmounts(
         tokens: { address: Address; balance: string; decimals: number }[];
     },
     inputAmount: InputAmount,
-) {
+): InputAmount[] {
     const tokensWithoutBpt = pool.tokens.filter(
         (t) => !pool.id.toLowerCase().includes(t.address.toLowerCase()),
     );
@@ -27,8 +27,9 @@ export function calculateAddLiquidityProportionalAmounts(
         (b) => (b * inputAmount.rawAmount) / balances[referenceTokenIndex],
     );
 
-    return {
-        tokens: tokensWithoutBpt.map((t) => t.address),
-        amounts: proportionalAmounts.map((a) => a.toString()),
-    };
+    return tokensWithoutBpt.map(({ address, decimals }, index) => ({
+        address,
+        decimals,
+        rawAmount: proportionalAmounts[index],
+    }));
 }

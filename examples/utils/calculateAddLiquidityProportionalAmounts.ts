@@ -21,6 +21,8 @@ export default async function calculateProportionalAmountsForAddLiquidity() {
         decimals: wETH.decimals,
     };
     const result = calculateAddLiquidityProportionalAmounts(pool, inputAmount);
-    console.log(`Token Addresses:     ${result.tokens}`);
-    console.log(`Proportional Amounts:${result.amounts}`);
+    console.log(`Token Addresses:     ${result.map(({ address }) => address)}`);
+    console.log(
+        `Proportional Amounts:${result.map(({ rawAmount }) => rawAmount)}`,
+    );
 }
