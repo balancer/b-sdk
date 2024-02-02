@@ -47,10 +47,10 @@ export class Slippage {
      * @param direction +1 adds the slippage to the amount, and -1 will remove the slippage from the amount
      * @returns
      */
-    public applyTo(amount: bigint, direction = 1): bigint {
+    public applyTo(amount: bigint, direction: 1 | -1 = 1): bigint {
         return MathSol.mulDownFixed(
             amount,
-            BigInt(direction >= 0 ? 1 : -1) * this.amount + WAD,
+            BigInt(direction) * this.amount + WAD,
         );
     }
 }
