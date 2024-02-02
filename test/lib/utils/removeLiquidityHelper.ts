@@ -17,6 +17,7 @@ import {
     removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
     BALANCER_ROUTER,
     RemoveLiquiditySingleTokenExactOutInput,
+    RemoveLiquidityRecoveryInput,
 } from '../../../src';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import { zeroAddress } from 'viem';
@@ -417,6 +418,63 @@ export function assertRemoveLiquidityProportional(
     );
 }
 
+export function assertRemoveLiquidityRecovery(
+    chainId: ChainId,
+    poolState: PoolState,
+    removeLiquidityInput: RemoveLiquidityRecoveryInput,
+    removeLiquidityOutput: RemoveLiquidityOutput,
+    slippage: Slippage,
+) {
+    const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
+        removeLiquidityOutput;
+
+    const bptToken = new Token(chainId, poolState.address, 18);
+
+    const expectedQueryOutput: Omit<
+        RemoveLiquidityQueryOutput,
+        'amountsOut' | 'bptIndex'
+    > = {
+        // Query should use same bpt out as user sets
+        bptIn: TokenAmount.fromRawAmount(
+            bptToken,
+            removeLiquidityInput.bptIn.rawAmount,
+        ),
+        // Only expect tokenInIndex for AddLiquiditySingleToken
+        tokenOutIndex: undefined,
+        // Should match inputs
+        poolId: poolState.id,
+        poolType: poolState.type,
+        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
+        removeLiquidityKind: removeLiquidityInput.kind,
+        balancerVersion: poolState.balancerVersion,
+    };
+
+    const queryCheck = getCheck(removeLiquidityQueryOutput, true);
+
+    expect(queryCheck).to.deep.eq(expectedQueryOutput);
+
+    // Expect all assets in to have an amount > 0 apart from BPT if it exists
+    removeLiquidityQueryOutput.amountsOut.forEach((a) => {
+        if (a.token.address === poolState.address) expect(a.amount).toEqual(0n);
+        else expect(a.amount > 0n).to.be.true;
+    });
+
+    assertRemoveLiquidityBuildOutput(
+        removeLiquidityQueryOutput,
+        removeLiquidityBuildOutput,
+        true,
+        slippage,
+        chainId,
+    );
+
+    assertTokenDeltas(
+        poolState,
+        removeLiquidityInput,
+        removeLiquidityQueryOutput,
+        txOutput,
+    );
+}
+
 function assertTokenDeltas(
     poolState: PoolState,
     removeLiquidityInput: RemoveLiquidityInput,
@@ -451,8 +509,16 @@ function assertTokenDeltas(
             expectedDeltas[nativeAssetIndex];
         expectedDeltas[nativeAssetIndex] = 0n;
     }
-
-    expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
+    const balanceVsExpectedDeltas = txOutput.balanceDeltas.map(
+        (balanceDelta, index) => {
+            const delta = balanceDelta - expectedDeltas[index];
+            return Math.abs(parseInt(delta.toString()));
+        },
+    );
+    //The Balance Delta for Recovery Exits has rounding errors, since the query is done for proportional exits
+    balanceVsExpectedDeltas.forEach((value) => {
+        expect(value).to.be.lessThanOrEqual(1);
+    });
 }
 
 function assertRemoveLiquidityBuildOutput(

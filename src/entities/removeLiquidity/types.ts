@@ -8,6 +8,7 @@ export enum RemoveLiquidityKind {
     SingleTokenExactOut = 'SingleTokenExactOut', // exact out (single token out)
     SingleTokenExactIn = 'SingleTokenExactIn', // exact in (single token out)
     Proportional = 'Proportional', // exact in (all tokens out)
+    Recovery = 'Recovery', // exact in (all tokens out) - Pool in recovery mode
 }
 
 // This will be extended for each pools specific output requirements
@@ -41,11 +42,17 @@ export type RemoveLiquidityProportionalInput = RemoveLiquidityBaseInput & {
     kind: RemoveLiquidityKind.Proportional;
 };
 
+export type RemoveLiquidityRecoveryInput = RemoveLiquidityBaseInput & {
+    bptIn: InputAmount;
+    kind: RemoveLiquidityKind.Recovery;
+};
+
 export type RemoveLiquidityInput =
     | RemoveLiquidityUnbalancedInput
     | RemoveLiquiditySingleTokenExactOutInput
     | RemoveLiquiditySingleTokenExactInInput
-    | RemoveLiquidityProportionalInput;
+    | RemoveLiquidityProportionalInput
+    | RemoveLiquidityRecoveryInput;
 
 export type RemoveLiquidityQueryOutput =
     | RemoveLiquidityBaseQueryOutput

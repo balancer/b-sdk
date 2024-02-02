@@ -11,6 +11,7 @@ import {
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
     removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
 } from '@/utils/errors';
+import { encodeRemoveLiquidityRecovery } from '.';
 
 export enum ComposableStablePoolJoinKind {
     INIT = 0,
@@ -105,6 +106,8 @@ export class ComposableStableEncoder {
                 return ComposableStableEncoder.removeLiquidityProportional(
                     amounts.maxBptAmountIn,
                 );
+            case RemoveLiquidityKind.Recovery:
+                return encodeRemoveLiquidityRecovery(amounts.maxBptAmountIn);
         }
     }
 

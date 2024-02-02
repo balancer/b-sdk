@@ -1,5 +1,5 @@
 import { encodeAbiParameters } from 'viem';
-import { Address, Hex } from '../../types';
+import { Hex } from '../../types';
 import { AddLiquidityKind } from '../addLiquidity/types';
 import {
     AddLiquidityAmounts,
@@ -11,6 +11,7 @@ import {
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
     removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
 } from '@/utils/errors';
+import { encodeRemoveLiquidityRecovery } from '.';
 
 export enum WeightedPoolJoinKind {
     INIT = 0,
@@ -106,6 +107,8 @@ export class WeightedEncoder {
                 return WeightedEncoder.removeLiquidityProportional(
                     amounts.maxBptAmountIn,
                 );
+            case RemoveLiquidityKind.Recovery:
+                return encodeRemoveLiquidityRecovery(amounts.maxBptAmountIn);
         }
     };
 

@@ -88,7 +88,7 @@ describe('add liquidity nested test', () => {
             client,
             testAddress,
             mainTokens.map((t) => t.address),
-            mainTokens.map((t) => t.slot),
+            mainTokens.map((t) => t.slot) as number[],
             initialBalances,
         );
     });

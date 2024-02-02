@@ -26,7 +26,9 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         const amounts = getAmountsQuery(sortedTokens, input);
 
         const userData = WeightedEncoder.encodeRemoveLiquidityUserData(
-            input.kind,
+            input.kind === RemoveLiquidityKind.Recovery
+                ? RemoveLiquidityKind.Proportional
+                : input.kind,
             amounts,
         );
 

@@ -39,6 +39,7 @@ export const getAmountsQuery = (
                 maxBptAmountIn: input.bptIn.rawAmount,
             };
         case RemoveLiquidityKind.Proportional:
+        case RemoveLiquidityKind.Recovery:
             return {
                 minAmountsOut: Array(tokens.length).fill(0n),
                 tokenOutIndex: undefined,
@@ -70,6 +71,7 @@ export const getAmountsCall = (
                 maxBptAmountIn: input.bptIn.amount,
             };
         case RemoveLiquidityKind.Proportional:
+        case RemoveLiquidityKind.Recovery:
             return {
                 minAmountsOut: input.amountsOut.map((a) =>
                     input.slippage.removeFrom(a.amount),
