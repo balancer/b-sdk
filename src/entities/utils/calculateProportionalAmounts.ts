@@ -1,15 +1,15 @@
-import { Hex, Address, parseUnits } from 'viem';
+import { Address, parseUnits } from 'viem';
 import { InputAmount } from '@/types';
 
-export function calculateAddLiquidityProportionalAmounts(
+export function calculateProportionalAmounts(
     pool: {
-        id: Hex;
+        address: Address;
         tokens: { address: Address; balance: string; decimals: number }[];
     },
     inputAmount: InputAmount,
 ): InputAmount[] {
     const tokensWithoutBpt = pool.tokens.filter(
-        (t) => !pool.id.toLowerCase().includes(t.address.toLowerCase()),
+        (t) => !pool.address.toLowerCase().includes(t.address.toLowerCase()),
     );
     const referenceTokenIndex = tokensWithoutBpt.findIndex(
         (t) => t.address.toLowerCase() === inputAmount.address.toLowerCase(),

@@ -1,10 +1,10 @@
 import { BalancerApi } from '@/data';
-import { calculateAddLiquidityProportionalAmounts } from '@/entities/utils/calculateProportionalAmounts';
+import { calculateProportionalAmounts } from '@/entities/utils/calculateProportionalAmounts';
 import { InputAmount } from '@/types';
 import { ChainId } from '@/utils';
 import { TOKENS } from 'test/lib/utils/addresses';
 
-export default async function calculateProportionalAmountsForAddLiquidity() {
+export default async function calculateProportionalAmountsExample() {
     const chainId = ChainId.MAINNET;
     const poolDataProvider = new BalancerApi(
         'https://api-v3.balancer.fi/',
@@ -20,7 +20,7 @@ export default async function calculateProportionalAmountsForAddLiquidity() {
         address: wETH.address,
         decimals: wETH.decimals,
     };
-    const result = calculateAddLiquidityProportionalAmounts(pool, inputAmount);
+    const result = calculateProportionalAmounts(pool, inputAmount);
     console.log(`Token Addresses:     ${result.map(({ address }) => address)}`);
     console.log(
         `Proportional Amounts:${result.map(({ rawAmount }) => rawAmount)}`,
