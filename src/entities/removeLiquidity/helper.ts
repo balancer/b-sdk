@@ -25,7 +25,9 @@ export const getAmountsQuery = (
         case RemoveLiquidityKind.SingleTokenExactOut:
             return {
                 minAmountsOut: getAmounts(tokens, [input.amountOut]),
-                tokenOutIndex: undefined,
+                tokenOutIndex: tokens.findIndex((t) =>
+                    t.isSameAddress(input.amountOut.address),
+                ),
                 maxBptAmountIn: MAX_UINT256,
             };
         case RemoveLiquidityKind.SingleTokenExactIn:

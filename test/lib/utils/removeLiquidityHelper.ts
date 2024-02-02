@@ -209,6 +209,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
     removeLiquidityInput: RemoveLiquiditySingleTokenExactOutInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    balancerVersion: 2 | 3 = 2,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -218,7 +219,8 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         let token: Token;
         if (
             removeLiquidityInput.toNativeAsset &&
-            t.address === NATIVE_ASSETS[chainId].wrapped
+            t.address === NATIVE_ASSETS[chainId].wrapped &&
+            balancerVersion === 2
         ) {
             token = new Token(chainId, zeroAddress, t.decimals);
         } else {
@@ -231,13 +233,19 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
+    const tokensWithoutBpt = poolState.tokens.filter(
+        (t) => t.address !== poolState.address,
+    );
+
     const expectedQueryOutput: Omit<
         RemoveLiquidityQueryOutput,
         'bptIn' | 'bptIndex'
     > = {
         // Query should use same amountsOut as input
         amountsOut: expectedAmountsOut,
-        tokenOutIndex: undefined,
+        tokenOutIndex: tokensWithoutBpt.findIndex(
+            (t) => t.address === removeLiquidityInput.amountOut.address,
+        ),
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
@@ -259,6 +267,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         false,
         slippage,
         chainId,
+        balancerVersion,
     );
 
     assertTokenDeltas(
@@ -266,6 +275,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
+        balancerVersion,
     );
 }
 

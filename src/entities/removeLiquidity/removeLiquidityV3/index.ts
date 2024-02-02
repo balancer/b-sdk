@@ -9,6 +9,7 @@ import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
     CHAINS,
+    MAX_UINT112,
     removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
 } from '@/utils';
 
@@ -45,7 +46,36 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     'Unbalanced remove liquidity not supported on V3',
                 );
             case RemoveLiquidityKind.SingleTokenExactOut:
-                throw new Error('Not implemented');
+                {
+                    amountsOut = sortedTokens.map((t) =>
+                        TokenAmount.fromRawAmount(
+                            t,
+                            t.isSameAddress(input.amountOut.address)
+                                ? input.amountOut.rawAmount
+                                : 0n,
+                        ),
+                    );
+
+                    const { result: maxBptIn } = await client.simulateContract({
+                        address: BALANCER_ROUTER[input.chainId],
+                        abi: balancerRouterAbi,
+                        functionName: 'queryRemoveLiquiditySingleTokenExactOut',
+                        args: [
+                            poolState.address,
+                            MAX_UINT112, // maxAmountIn set to max when querying
+                            input.amountOut.address,
+                            input.amountOut.rawAmount,
+                            '0x',
+                        ],
+                    });
+
+                    bptIn = TokenAmount.fromRawAmount(bptToken, maxBptIn);
+
+                    tokenOutIndex = sortedTokens.findIndex((t) =>
+                        t.isSameAddress(input.amountOut.address),
+                    );
+                }
+                break;
             case RemoveLiquidityKind.SingleTokenExactIn:
                 {
                     bptIn = TokenAmount.fromRawAmount(
@@ -128,12 +158,32 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     'Unbalanced remove liquidity not supported on V3',
                 );
             case RemoveLiquidityKind.SingleTokenExactOut:
-                throw new Error('Not implemented');
-            case RemoveLiquidityKind.SingleTokenExactIn:
                 {
                     // just a sanity check as this is already checked in InputValidator
                     if (input.tokenOutIndex === undefined) {
                         throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+                    }
+                    call = encodeFunctionData({
+                        abi: balancerRouterAbi,
+                        functionName: 'removeLiquiditySingleTokenExactOut',
+                        args: [
+                            input.poolId,
+                            input.bptIn.amount,
+                            input.amountsOut[input.tokenOutIndex].token.address,
+                            input.amountsOut[input.tokenOutIndex].amount,
+                            input.wethIsEth,
+                            '0x',
+                        ],
+                    });
+                }
+                break;
+            case RemoveLiquidityKind.SingleTokenExactIn:
+                {
+                    // just a sanity check as this is already checked in InputValidator
+                    if (input.tokenOutIndex === undefined) {
+                        throw new Error(
+                            'RemoveLiquidityKind.SingleTokenExactOut should have tokenOutIndex',
+                        );
                     }
                     call = encodeFunctionData({
                         abi: balancerRouterAbi,

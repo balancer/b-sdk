@@ -92,7 +92,11 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             case RemoveLiquidityKind.SingleTokenExactOut:
                 return {
                     minAmountsOut: getAmounts(tokens, [input.amountOut]),
-                    tokenOutIndex: undefined,
+                    tokenOutIndex: tokens
+                        .filter((_, index) => index !== bptIndex)
+                        .findIndex((t) =>
+                            t.isSameAddress(input.amountOut.address),
+                        ),
                     maxBptAmountIn: MAX_UINT256,
                 };
             case RemoveLiquidityKind.SingleTokenExactIn:

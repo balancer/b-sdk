@@ -26,11 +26,13 @@ import {
     AddLiquidity,
     AddLiquidityKind,
     AddLiquidityUnbalancedInput,
+    RemoveLiquiditySingleTokenExactOutInput,
 } from '../../src';
 import { forkSetup } from '../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
     assertRemoveLiquiditySingleTokenExactIn,
+    assertRemoveLiquiditySingleTokenExactOut,
     doRemoveLiquidity,
 } from '../lib/utils/removeLiquidityHelper';
 import {
@@ -109,7 +111,7 @@ describe('weighted remove liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [...txInput.poolState.tokens.map((t) => t.address)],
-            [WETH.slot, BAL.slot],
+            [WETH.slot, BAL.slot] as number[],
             [
                 ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
@@ -123,7 +125,59 @@ describe('weighted remove liquidity test', () => {
 
     // TODO: unbalanced should throw an error
 
-    describe('remove liquidity single asset', () => {
+    describe('remove liquidity single token exact out', () => {
+        let input: RemoveLiquiditySingleTokenExactOutInput;
+        beforeAll(() => {
+            const amountOut: InputAmount = {
+                rawAmount: parseUnits('1', WETH.decimals),
+                decimals: WETH.decimals,
+                address: WETH.address,
+            };
+            input = {
+                chainId,
+                rpcUrl,
+                amountOut,
+                kind: RemoveLiquidityKind.SingleTokenExactOut,
+            };
+        });
+        test('with wrapped', async () => {
+            const removeLiquidityOutput = await doRemoveLiquidity({
+                ...txInput,
+                removeLiquidityInput: input,
+            });
+
+            assertRemoveLiquiditySingleTokenExactOut(
+                txInput.client.chain?.id as number,
+                txInput.poolState,
+                input,
+                removeLiquidityOutput,
+                txInput.slippage,
+                balancerVersion,
+            );
+        });
+
+        test('with native', async () => {
+            const removeLiquidityInput = {
+                ...input,
+                toNativeAsset: true,
+            };
+            const removeLiquidityOutput = await doRemoveLiquidity({
+                ...txInput,
+                removeLiquidityInput,
+            });
+
+            assertRemoveLiquiditySingleTokenExactOut(
+                txInput.client.chain?.id as number,
+                txInput.poolState,
+                removeLiquidityInput,
+                removeLiquidityOutput,
+                txInput.slippage,
+                balancerVersion,
+            );
+        });
+    });
+
+    describe('remove liquidity single token exact in', () => {
         let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
