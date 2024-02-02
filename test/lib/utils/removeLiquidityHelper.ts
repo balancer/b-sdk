@@ -437,10 +437,13 @@ function assertRemoveLiquidityBuildOutput(
     chainId: number,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
-    // slippage.removeFrom(a.amount)
+    // slippage.applyTo(a.amount, -1)
     const minAmountsOut = isExactIn
         ? removeLiquidityQueryOutput.amountsOut.map((a) =>
-              TokenAmount.fromRawAmount(a.token, slippage.removeFrom(a.amount)),
+              TokenAmount.fromRawAmount(
+                  a.token,
+                  slippage.applyTo(a.amount, -1),
+              ),
           )
         : [...removeLiquidityQueryOutput.amountsOut];
 

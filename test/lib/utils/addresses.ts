@@ -25,12 +25,8 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 6,
             slot: 2,
         },
-        bb_a_WETH: {
+        vETH: {
             address: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f',
-            decimals: 18,
-        },
-        swETH: {
-            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             decimals: 18,
         },
         bb_s_DAI: {
@@ -74,7 +70,7 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
-        swETH_bb_a_WETH_BPT: {
+        vETH_WETH: {
             id: '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76000000000000000000000570',
             address: '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76',
             type: PoolType.ComposableStable,
