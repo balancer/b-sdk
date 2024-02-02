@@ -27,18 +27,30 @@ export class Slippage {
         return Slippage.fromDecimal(`${decimalAmount}`);
     }
 
+    /**
+     * Creates a new slippage object
+     *
+     * @param amount amount of slippage, always positive
+     */
     protected constructor(amount: BigintIsh) {
-        this.amount = BigInt(amount);
+        this.amount =
+            BigInt(amount) > 0n ? BigInt(amount) : -1n * BigInt(amount);
         this.decimal = parseFloat(formatEther(this.amount));
         this.percentage = this.decimal * 100;
         this.bps = this.decimal * 10000;
     }
 
-    public applyTo(amount: bigint): bigint {
-        return MathSol.mulDownFixed(amount, this.amount + WAD);
-    }
-
-    public removeFrom(amount: bigint): bigint {
-        return MathSol.divDownFixed(amount, this.amount + WAD);
+    /**
+     * Applies slippage to an amount in a given direction
+     *
+     * @param amount amout to apply slippage to
+     * @param direction +1 adds the slippage to the amount, and -1 will remove the slippage from the amount
+     * @returns
+     */
+    public applyTo(amount: bigint, direction = 1): bigint {
+        return MathSol.mulDownFixed(
+            amount,
+            BigInt(direction >= 0 ? 1 : -1) * this.amount + WAD,
+        );
     }
 }

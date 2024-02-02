@@ -317,7 +317,7 @@ const assertResults = (
         bptOut.amount,
     ];
     expect(expectedDeltas).to.deep.eq(balanceDeltas);
-    const expectedMinBpt = slippage.removeFrom(bptOut.amount);
+    const expectedMinBpt = slippage.applyTo(bptOut.amount, -1);
     expect(expectedMinBpt).to.deep.eq(minBptOut);
 
     const weth = amountsIn.find(

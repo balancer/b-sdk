@@ -154,8 +154,9 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             case AddLiquidityKind.Init:
                 throw Error('Unsupported Add Liquidity Kind');
             case AddLiquidityKind.Unbalanced: {
-                const minimumBpt = input.slippage.removeFrom(
+                const minimumBpt = input.slippage.applyTo(
                     input.bptOut.amount,
+                    -1,
                 );
                 return {
                     minimumBpt,

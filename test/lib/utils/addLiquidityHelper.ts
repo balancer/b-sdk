@@ -393,7 +393,7 @@ function assertAddLiquidityBuildOutput(
     const minBptOut = isExactIn
         ? TokenAmount.fromRawAmount(
               addLiquidityQueryOutput.bptOut.token,
-              slippage.removeFrom(addLiquidityQueryOutput.bptOut.amount),
+              slippage.applyTo(addLiquidityQueryOutput.bptOut.amount, -1),
           )
         : ({ ...addLiquidityQueryOutput.bptOut } as TokenAmount);
 
