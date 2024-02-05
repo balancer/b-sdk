@@ -9,6 +9,7 @@ import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildOutput,
     RemoveLiquidityInput,
+    RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityWeightedCall,
 } from '../../types';

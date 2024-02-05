@@ -65,7 +65,7 @@ export const getAmountsCall = (
             }
             return {
                 minAmountsOut: input.amountsOut.map((a) =>
-                    input.slippage.removeFrom(a.amount),
+                    input.slippage.applyTo(a.amount, -1),
                 ),
                 tokenOutIndex: input.tokenOutIndex,
                 maxBptAmountIn: input.bptIn.amount,
@@ -74,7 +74,7 @@ export const getAmountsCall = (
         case RemoveLiquidityKind.Recovery:
             return {
                 minAmountsOut: input.amountsOut.map((a) =>
-                    input.slippage.removeFrom(a.amount),
+                    input.slippage.applyTo(a.amount, -1),
                 ),
                 tokenOutIndex: input.tokenOutIndex,
                 maxBptAmountIn: input.bptIn.amount,
