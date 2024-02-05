@@ -1,7 +1,6 @@
 import { BalancerApiClient } from '../../client';
 import { PoolState, PoolStateWithBalances } from '../../../../../entities';
 import { mapPoolType } from '../../../../../utils/poolTypeMapper';
-import { type } from 'os';
 import { HumanAmount } from '@/data/types';
 
 export class Pools {
@@ -189,7 +188,7 @@ export class Pools {
         return { ...poolGetPool, type: mapPoolType(poolGetPool.type) };
     }
 
-    async fetchPoolStateWithRawTokens(
+    async fetchPoolStateWithBalances(
         id: string,
     ): Promise<PoolStateWithBalances> {
         const { data } = await this.balancerApiClient.fetch({
