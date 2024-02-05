@@ -1,6 +1,8 @@
 import { BalancerApiClient } from '../../client';
-import { PoolState, PoolStateWithRawTokens } from '../../../../../entities';
+import { PoolState, PoolStateWithBalances } from '../../../../../entities';
 import { mapPoolType } from '../../../../../utils/poolTypeMapper';
+import { type } from 'os';
+import { HumanAmount } from '@/data/types';
 
 export class Pools {
     readonly poolStateQuery = `query GetPool($id: String!){
@@ -85,6 +87,8 @@ export class Pools {
         name
         type
         version
+        balancerVersion:vaultVersion
+        dynamicData {totalShares}
         ... on GqlPoolWeighted {
           tokens {
             ... on GqlPoolTokenBase {
@@ -187,14 +191,25 @@ export class Pools {
 
     async fetchPoolStateWithRawTokens(
         id: string,
-    ): Promise<PoolStateWithRawTokens> {
+    ): Promise<PoolStateWithBalances> {
         const { data } = await this.balancerApiClient.fetch({
             query: this.poolStateWithRawTokensQuery,
             variables: {
                 id,
             },
         });
-        const poolGetPool: PoolStateWithRawTokens = data.poolGetPool;
-        return { ...poolGetPool, type: mapPoolType(poolGetPool.type) };
+        const poolGetPool: PoolStateWithBalancesFromApi = data.poolGetPool;
+        return {
+            ...poolGetPool,
+            type: mapPoolType(poolGetPool.type),
+            totalShares: poolGetPool.dynamicData.totalShares,
+        };
     }
 }
+
+type PoolStateWithBalancesFromApi = Omit<
+    PoolStateWithBalances,
+    'totalShares'
+> & {
+    dynamicData: { totalShares: HumanAmount };
+};

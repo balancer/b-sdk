@@ -11,18 +11,23 @@ export default async function calculateProportionalAmountsExample() {
         chainId,
     );
     const poolId =
-        '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76000000000000000000000570'; // Balancer vETH/WETH StablePool
+        '0xf01b0684c98cd7ada480bfdf6e43876422fa1fc10002000000000000000005de'; // Gyroscope ECLP wstETH/wETH
     const pool =
         await poolDataProvider.pools.fetchPoolStateWithRawTokens(poolId);
-    const wETH = TOKENS[chainId].WETH;
     const inputAmount: InputAmount = {
-        rawAmount: BigInt(1e18),
-        address: wETH.address,
-        decimals: wETH.decimals,
+        rawAmount: BigInt(149277708680793000),
+        address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', // wstETH
+        decimals: 18,
     };
-    const result = calculateProportionalAmounts(pool, inputAmount);
-    console.log(`Token Addresses:     ${result.map(({ address }) => address)}`);
-    console.log(
-        `Proportional Amounts:${result.map(({ rawAmount }) => rawAmount)}`,
+    const { amountsIn, bptOut } = calculateProportionalAmounts(
+        pool,
+        inputAmount,
     );
+    console.log(
+        `Token Addresses:     ${amountsIn.map(({ address }) => address)}`,
+    );
+    console.log(
+        `Proportional Amounts:${amountsIn.map(({ rawAmount }) => rawAmount)}`,
+    );
+    console.log(`BPT Out:             ${bptOut.rawAmount}`);
 }
