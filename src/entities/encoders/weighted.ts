@@ -8,7 +8,7 @@ import {
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import { addLiquiditySingleTokenShouldHaveTokenInIndexError } from '@/utils/errors';
-import { encodeRemoveLiquidityRecovery } from '.';
+import { encodeRemoveLiquidityRecovery } from './base';
 
 export enum WeightedPoolJoinKind {
     INIT = 0,
