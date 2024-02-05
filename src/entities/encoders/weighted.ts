@@ -11,7 +11,7 @@ import {
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
     removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
 } from '@/utils/errors';
-import { encodeRemoveLiquidityRecovery } from '.';
+import { encodeRemoveLiquidityRecovery } from './base';
 
 export enum WeightedPoolJoinKind {
     INIT = 0,

@@ -6,7 +6,7 @@ export const getAmountsCall = (
 ): AddLiquidityAmounts => {
     switch (input.addLiquidityKind) {
         case AddLiquidityKind.Unbalanced: {
-            const minimumBpt = input.slippage.removeFrom(input.bptOut.amount);
+            const minimumBpt = input.slippage.applyTo(input.bptOut.amount, -1);
             return {
                 minimumBpt,
                 maxAmountsIn: input.amountsIn.map((a) => a.amount),
