@@ -15,7 +15,6 @@ import {
     Hex,
     createTestClient,
     http,
-    parseEther,
     parseUnits,
     publicActions,
     walletActions,
@@ -23,11 +22,7 @@ import {
 
 import { forkSetup } from 'test/lib/utils/helper';
 import { InputAmount, PoolType } from '@/types';
-import {
-    doAddLiquidity,
-    assertAddLiquidityUnbalanced,
-    assertAddLiquidityProportional,
-} from 'test/lib/utils/addLiquidityHelper';
+import { doAddLiquidity } from 'test/lib/utils/addLiquidityHelper';
 import { HumanAmount } from '@/data';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { calculateProportionalAmounts } from '@/entities/utils/calculateProportionalAmounts';
