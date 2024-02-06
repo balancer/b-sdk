@@ -130,7 +130,6 @@ describe('add liquidity composable stable test', () => {
                     const signedDelta =
                         amount - functionOutput.amountsIn[index].rawAmount;
                     const delta = signedDelta < 0 ? -signedDelta : signedDelta;
-                    console.log(delta);
                     expect(delta < 10n).to.be.true; // 10n of tolerance
                 });
         });
