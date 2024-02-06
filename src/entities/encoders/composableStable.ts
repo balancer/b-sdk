@@ -66,7 +66,7 @@ export class ComposableStableEncoder {
                 }
                 return ComposableStableEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
-                    amounts.tokenInIndex, // Has to be index without BPT
+                    amounts.tokenInIndex,
                 );
             }
             case AddLiquidityKind.Proportional: {
@@ -144,7 +144,7 @@ export class ComposableStableEncoder {
     /**
      * Encodes the userData parameter for adding liquidity to a ComposableStablePool with a single token to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
-     * @param tokenIndex - the index of the token to be provided as liquidity
+     * @param tokenIndex - the index of the token to be provided as liquidity. This index should consider tokens array without BPT.
      */
     static addLiquiditySingleToken = (
         bptAmountOut: bigint,

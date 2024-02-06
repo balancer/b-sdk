@@ -20,7 +20,7 @@ export const getAmountsQuery = (
             return {
                 minAmountsOut: getAmounts(tokens, input.amountsOut),
                 tokenOutIndex: undefined,
-                maxBptAmountIn: MAX_UINT256,
+                maxBptAmountIn: MAX_UINT256, // maxAmountIn set to max when querying
             };
         case RemoveLiquidityKind.SingleTokenExactOut:
             return {
@@ -28,11 +28,11 @@ export const getAmountsQuery = (
                 tokenOutIndex: tokens.findIndex((t) =>
                     t.isSameAddress(input.amountOut.address),
                 ),
-                maxBptAmountIn: MAX_UINT256,
+                maxBptAmountIn: MAX_UINT256, // maxAmountIn set to max when querying
             };
         case RemoveLiquidityKind.SingleTokenExactIn:
             return {
-                minAmountsOut: Array(tokens.length).fill(0n),
+                minAmountsOut: Array(tokens.length).fill(1n), // minAmountsOut set to 1 wei when querying
                 tokenOutIndex: tokens.findIndex((t) =>
                     t.isSameAddress(input.tokenOut),
                 ),
@@ -41,7 +41,7 @@ export const getAmountsQuery = (
         case RemoveLiquidityKind.Proportional:
         case RemoveLiquidityKind.Recovery:
             return {
-                minAmountsOut: Array(tokens.length).fill(0n),
+                minAmountsOut: Array(tokens.length).fill(1n), // minAmountsOut set to 1 wei when querying
                 tokenOutIndex: undefined,
                 maxBptAmountIn: input.bptIn.rawAmount,
             };

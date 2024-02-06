@@ -9,12 +9,11 @@ import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
     CHAINS,
-    MAX_UINT112,
     removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
     removeLiquidityUnbalancedNotSupportedOnV3,
 } from '@/utils';
 
-import { getAmountsCall } from '../helper';
+import { getAmountsCall, getAmountsQuery } from '../helper';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBaseCall,
@@ -30,115 +29,93 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         poolState: PoolState,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const bptToken = new Token(input.chainId, poolState.address, 18);
+        const amounts = getAmountsQuery(sortedTokens, input);
 
         const client = createPublicClient({
             transport: http(input.rpcUrl),
             chain: CHAINS[input.chainId],
         });
 
-        let bptIn: TokenAmount;
-        let amountsOut: TokenAmount[];
-        let tokenOutIndex: number | undefined;
+        let maxBptAmountIn: bigint;
+        let minAmountsOut: readonly bigint[];
 
         switch (input.kind) {
             case RemoveLiquidityKind.Unbalanced:
                 throw removeLiquidityUnbalancedNotSupportedOnV3;
             case RemoveLiquidityKind.SingleTokenExactOut:
                 {
-                    amountsOut = sortedTokens.map((t) =>
-                        TokenAmount.fromRawAmount(
-                            t,
-                            t.isSameAddress(input.amountOut.address)
-                                ? input.amountOut.rawAmount
-                                : 0n,
-                        ),
-                    );
-
-                    const { result: maxBptIn } = await client.simulateContract({
-                        address: BALANCER_ROUTER[input.chainId],
-                        abi: balancerRouterAbi,
-                        functionName: 'queryRemoveLiquiditySingleTokenExactOut',
-                        args: [
-                            poolState.address,
-                            MAX_UINT112, // maxAmountIn set to max when querying
-                            input.amountOut.address,
-                            input.amountOut.rawAmount,
-                            '0x',
-                        ],
-                    });
-
-                    bptIn = TokenAmount.fromRawAmount(bptToken, maxBptIn);
-
-                    tokenOutIndex = sortedTokens.findIndex((t) =>
-                        t.isSameAddress(input.amountOut.address),
-                    );
+                    minAmountsOut = amounts.minAmountsOut;
+                    ({ result: maxBptAmountIn } = await client.simulateContract(
+                        {
+                            address: BALANCER_ROUTER[input.chainId],
+                            abi: balancerRouterAbi,
+                            functionName:
+                                'queryRemoveLiquiditySingleTokenExactOut',
+                            args: [
+                                poolState.address,
+                                amounts.maxBptAmountIn,
+                                input.amountOut.address,
+                                input.amountOut.rawAmount,
+                                '0x',
+                            ],
+                        },
+                    ));
                 }
                 break;
             case RemoveLiquidityKind.SingleTokenExactIn:
                 {
-                    bptIn = TokenAmount.fromRawAmount(
-                        bptToken,
-                        input.bptIn.rawAmount,
-                    );
-
-                    const { result: minAmountsOut } =
-                        await client.simulateContract({
-                            address: BALANCER_ROUTER[input.chainId],
-                            abi: balancerRouterAbi,
-                            functionName:
-                                'queryRemoveLiquiditySingleTokenExactIn',
-                            args: [
-                                poolState.address,
-                                input.bptIn.rawAmount,
-                                input.tokenOut,
-                                1n, // minAmountOut set to 0 when querying - SC needs it to be > 0 for now - suggested they fix this
-                                '0x',
+                    maxBptAmountIn = amounts.maxBptAmountIn;
+                    ({ result: minAmountsOut } = await client.simulateContract({
+                        address: BALANCER_ROUTER[input.chainId],
+                        abi: balancerRouterAbi,
+                        functionName: 'queryRemoveLiquiditySingleTokenExactIn',
+                        args: [
+                            poolState.address,
+                            amounts.maxBptAmountIn,
+                            input.tokenOut,
+                            amounts.minAmountsOut[
+                                sortedTokens.findIndex((t) =>
+                                    t.isSameAddress(input.tokenOut),
+                                )
                             ],
-                        });
-
-                    amountsOut = sortedTokens.map((t, i) =>
-                        TokenAmount.fromRawAmount(t, minAmountsOut[i]),
-                    );
-                    tokenOutIndex = sortedTokens.findIndex((t) =>
-                        t.isSameAddress(input.tokenOut),
-                    );
+                            '0x',
+                        ],
+                    }));
                 }
                 break;
             case RemoveLiquidityKind.Proportional:
                 {
-                    bptIn = TokenAmount.fromRawAmount(
-                        bptToken,
-                        input.bptIn.rawAmount,
-                    );
-
-                    const { result: minAmountsOut } =
-                        await client.simulateContract({
-                            address: BALANCER_ROUTER[input.chainId],
-                            abi: balancerRouterAbi,
-                            functionName: 'queryRemoveLiquidityProportional',
-                            args: [
-                                poolState.address,
-                                input.bptIn.rawAmount,
-                                Array(sortedTokens.length).fill(1n), // minAmountsOut set to 0 when querying
-                                '0x',
-                            ],
-                        });
-                    amountsOut = sortedTokens.map((t, i) =>
-                        TokenAmount.fromRawAmount(t, minAmountsOut[i]),
-                    );
-                    tokenOutIndex = undefined;
+                    maxBptAmountIn = amounts.maxBptAmountIn;
+                    ({ result: minAmountsOut } = await client.simulateContract({
+                        address: BALANCER_ROUTER[input.chainId],
+                        abi: balancerRouterAbi,
+                        functionName: 'queryRemoveLiquidityProportional',
+                        args: [
+                            poolState.address,
+                            input.bptIn.rawAmount,
+                            amounts.minAmountsOut,
+                            '0x',
+                        ],
+                    }));
                 }
                 break;
+            case RemoveLiquidityKind.Recovery:
+                throw new Error(
+                    'Pending smart contract implementation and Router ABI update',
+                );
         }
+
+        const bptToken = new Token(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBaseQueryOutput = {
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
-            bptIn,
-            amountsOut,
-            tokenOutIndex,
+            bptIn: TokenAmount.fromRawAmount(bptToken, maxBptAmountIn),
+            amountsOut: sortedTokens.map((t, i) =>
+                TokenAmount.fromRawAmount(t, minAmountsOut[i]),
+            ),
+            tokenOutIndex: amounts.tokenOutIndex,
             toInternalBalance: !!input.toInternalBalance,
             balancerVersion: poolState.balancerVersion,
         };
@@ -150,6 +127,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         input: RemoveLiquidityBaseCall,
     ): RemoveLiquidityBuildOutput {
         const amounts = getAmountsCall(input);
+
         let call: Hex;
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:
@@ -211,7 +189,12 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     });
                 }
                 break;
+            case RemoveLiquidityKind.Recovery:
+                throw new Error(
+                    'Pending smart contract implementation and Router ABI update',
+                );
         }
+
         return {
             call,
             to: BALANCER_ROUTER[input.chainId],
