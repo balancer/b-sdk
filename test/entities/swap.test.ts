@@ -105,9 +105,9 @@ describe('Swap', () => {
             });
 
             const slippage = Slippage.fromPercentage('1');
-            const limits = swap.limits(slippage, amountOut);
+            const limits = swap.limits(slippage, swap.inputAmount);
 
-            expect(limits[0]).toEqual(1010000n);
+            expect(limits[0]).toEqual(swap.inputAmount.mulDownFixed(parseUnits('1.01',18)).amount);
         });
 
         test('amountOut to be maximally 1% less then expected', () => {
