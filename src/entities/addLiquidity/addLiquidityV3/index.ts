@@ -135,7 +135,10 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             const wethInput = input.amountsIn.find(
                 (a) => a.token.address === NATIVE_ASSETS[input.chainId].wrapped,
             );
-            value = wethInput?.amount ?? 0n;
+            if (wethInput === undefined) {
+                throw new Error('wethIsEth is true but no WETH input found');
+            }
+            value = wethInput.amount;
         }
 
         return {
