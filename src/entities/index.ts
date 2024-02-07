@@ -15,7 +15,7 @@ export * from './removeLiquidity/types';
 export * from './removeLiquidityNested';
 export * from './removeLiquidityNested/types';
 export * from './slippage';
-export * from './swap';
+export * from './swapLocal';
 export * from './token';
 export * from './tokenAmount';
 export * from './types';
