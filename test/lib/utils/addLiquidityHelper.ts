@@ -15,11 +15,13 @@ import {
     TokenAmount,
     AddLiquidityComposableStableQueryOutput,
     NATIVE_ASSETS,
+    BALANCER_ROUTER,
 } from '../../../src';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { zeroAddress } from 'viem';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
+import { addLiquiditySingleTokenShouldHaveTokenInIndexError } from '../../../src/utils/errors';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -53,6 +55,7 @@ async function sdkAddLiquidity({
         sender: testAddress,
         recipient: testAddress,
         chainId: addLiquidityInput.chainId,
+        wethIsEth: addLiquidityInput.useNativeAssetAsWrappedAmountIn ?? false,
     });
 
     return {
@@ -148,6 +151,7 @@ export function assertAddLiquidityUnbalanced(
     addLiquidityInput: AddLiquidityUnbalancedInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    balancerVersion: 2 | 3 = 2,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         addLiquidityOutput;
@@ -157,7 +161,8 @@ export function assertAddLiquidityUnbalanced(
         let token: Token;
         if (
             addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
-            t.address === NATIVE_ASSETS[chainId].wrapped
+            t.address === NATIVE_ASSETS[chainId].wrapped &&
+            balancerVersion === 2
         )
             token = new Token(chainId, zeroAddress, t.decimals);
         else token = new Token(chainId, t.address, t.decimals);
@@ -196,6 +201,7 @@ export function assertAddLiquidityUnbalanced(
         addLiquidityBuildOutput,
         true,
         slippage,
+        balancerVersion,
     );
 
     assertTokenDeltas(
@@ -204,6 +210,7 @@ export function assertAddLiquidityUnbalanced(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
+        balancerVersion,
     );
 }
 
@@ -213,12 +220,13 @@ export function assertAddLiquiditySingleToken(
     addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    balancerVersion: 2 | 3 = 2,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         addLiquidityOutput;
 
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
-        throw Error('No index');
+        throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
 
     const bptToken = new Token(chainId, poolState.address, 18);
 
@@ -254,16 +262,16 @@ export function assertAddLiquiditySingleToken(
     // (Note addLiquidityQueryOutput also has value for bpt if pre-minted)
     addLiquidityQueryOutput.amountsIn.forEach((a) => {
         if (
-            !addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
-            a.token.address === addLiquidityInput.tokenIn
-        )
-            expect(a.amount > 0n).to.be.true;
-        else if (
+            balancerVersion === 2 &&
             addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             a.token.address === zeroAddress
-        )
+        ) {
             expect(a.amount > 0n).to.be.true;
-        else expect(a.amount).toEqual(0n);
+        } else if (a.token.address === addLiquidityInput.tokenIn) {
+            expect(a.amount > 0n).to.be.true;
+        } else {
+            expect(a.amount).toEqual(0n);
+        }
     });
 
     assertAddLiquidityBuildOutput(
@@ -272,6 +280,7 @@ export function assertAddLiquiditySingleToken(
         addLiquidityBuildOutput,
         false,
         slippage,
+        balancerVersion,
     );
 
     assertTokenDeltas(
@@ -280,6 +289,7 @@ export function assertAddLiquiditySingleToken(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
+        balancerVersion,
     );
 }
 
@@ -289,6 +299,7 @@ export function assertAddLiquidityProportional(
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    balancerVersion: 2 | 3 = 2,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         addLiquidityOutput;
@@ -330,6 +341,7 @@ export function assertAddLiquidityProportional(
         addLiquidityBuildOutput,
         false,
         slippage,
+        balancerVersion,
     );
 
     assertTokenDeltas(
@@ -338,6 +350,7 @@ export function assertAddLiquidityProportional(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
+        balancerVersion,
     );
 }
 
@@ -347,6 +360,7 @@ function assertTokenDeltas(
     addLiquidityQueryOutput: AddLiquidityQueryOutput,
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
     txOutput: TxOutput,
+    balancerVersion: 2 | 3 = 2,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
@@ -362,12 +376,21 @@ function assertTokenDeltas(
         0n,
     ];
 
-    // If input is wrapped native we must replace it with 0 and update native value instead
+    /**
+     * Since native asset was moved to an extra index, we need to identify its
+     * respective amount within the amounts array and move it to that index.
+     * - Balancer V2: zero address represents the native asset
+     * - Balancer V3: WETH address represents the native asset (in combination with wethIsEth flag)
+     */
     if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
-        const index = amountsWithoutBpt.findIndex(
-            (a) => a.token.address === zeroAddress,
+        const respectiveNativeAddress =
+            balancerVersion === 2
+                ? zeroAddress
+                : NATIVE_ASSETS[addLiquidityInput.chainId].wrapped;
+        const nativeAssetIndex = amountsWithoutBpt.findIndex(
+            (a) => a.token.address === respectiveNativeAddress,
         );
-        expectedDeltas[index] = 0n;
+        expectedDeltas[nativeAssetIndex] = 0n;
         expectedDeltas[expectedDeltas.length - 1] =
             addLiquidityBuildOutput.value;
     }
@@ -381,6 +404,7 @@ function assertAddLiquidityBuildOutput(
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
     isExactIn: boolean,
     slippage: Slippage,
+    balancerVersion: 2 | 3 = 2,
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
     const maxAmountsIn = isExactIn
@@ -397,16 +421,30 @@ function assertAddLiquidityBuildOutput(
           )
         : ({ ...addLiquidityQueryOutput.bptOut } as TokenAmount);
 
+    // user interacts with the router on balancer v3
+    const to =
+        balancerVersion === 2
+            ? VAULT[addLiquidityInput.chainId]
+            : BALANCER_ROUTER[addLiquidityInput.chainId];
+
+    let value = 0n;
+    if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
+        // v2 uses zero address for native asset, while v3 uses wethIsEth flag only
+        const nativeAsset =
+            balancerVersion === 2
+                ? zeroAddress
+                : NATIVE_ASSETS[addLiquidityInput.chainId].wrapped;
+        value =
+            addLiquidityQueryOutput.amountsIn.find(
+                (a) => a.token.address === nativeAsset,
+            )?.amount ?? 0n;
+    }
+
     const expectedBuildOutput: Omit<AddLiquidityBuildOutput, 'call'> = {
         maxAmountsIn,
         minBptOut,
-        to: VAULT[addLiquidityInput.chainId],
-        // Value should equal value of any wrapped asset if using native
-        value: addLiquidityInput.useNativeAssetAsWrappedAmountIn
-            ? (addLiquidityQueryOutput.amountsIn.find(
-                  (a) => a.token.address === zeroAddress,
-              )?.amount as bigint)
-            : 0n,
+        to,
+        value,
     };
 
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>

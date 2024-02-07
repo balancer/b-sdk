@@ -7,7 +7,8 @@ import {
     RemoveLiquidityAmounts,
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
-import { encodeRemoveLiquidityRecovery } from '.';
+import { addLiquiditySingleTokenShouldHaveTokenInIndexError } from '@/utils/errors';
+import { encodeRemoveLiquidityRecovery } from './base';
 
 export enum WeightedPoolJoinKind {
     INIT = 0,
@@ -51,17 +52,16 @@ export class WeightedEncoder {
         amounts: AddLiquidityAmounts,
     ) {
         switch (kind) {
-            case AddLiquidityKind.Init:
-                throw new Error(
-                    'For this kind use initPool instead of addLiquidity',
-                );
             case AddLiquidityKind.Unbalanced:
                 return WeightedEncoder.addLiquidityUnbalanced(
                     amounts.maxAmountsIn,
                     amounts.minimumBpt,
                 );
             case AddLiquidityKind.SingleToken: {
-                if (amounts.tokenInIndex === undefined) throw Error('No Index');
+                // just a sanity check as this is already checked in InputValidator
+                if (amounts.tokenInIndex === undefined) {
+                    throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                }
                 return WeightedEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
                     amounts.tokenInIndex,
@@ -72,8 +72,6 @@ export class WeightedEncoder {
                     amounts.minimumBpt,
                 );
             }
-            default:
-                throw Error('Unsupported Add Liquidity Kind');
         }
     }
 

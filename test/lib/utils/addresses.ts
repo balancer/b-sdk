@@ -38,6 +38,18 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
         },
     },
+    [ChainId.SEPOLIA]: {
+        BAL: {
+            address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',
+            decimals: 18,
+            slot: 1,
+        },
+        WETH: {
+            address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+            decimals: 18,
+            slot: 3,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };
@@ -68,6 +80,15 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         '50bb_sDAI_50bb_a_USDC': {
             id: '0x0da692ac0611397027c91e559cfd482c4197e4030002000000000000000005c9',
             address: '0x0da692ac0611397027c91e559cfd482c4197e403',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.SEPOLIA]: {
+        MOCK_WEIGHTED_POOL: {
+            address: '0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83',
+            id: '0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,

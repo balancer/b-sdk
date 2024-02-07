@@ -7,7 +7,8 @@ import {
     RemoveLiquidityAmounts,
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
-import { encodeRemoveLiquidityRecovery } from '.';
+import { addLiquiditySingleTokenShouldHaveTokenInIndexError } from '@/utils/errors';
+import { encodeRemoveLiquidityRecovery } from './base';
 
 export enum ComposableStablePoolJoinKind {
     INIT = 0,
@@ -50,17 +51,16 @@ export class ComposableStableEncoder {
         amounts: AddLiquidityAmounts & { maxAmountsInWithoutBpt: bigint[] },
     ): Address {
         switch (kind) {
-            case AddLiquidityKind.Init:
-                throw new Error(
-                    'For this kind use initPool instead of addLiquidity',
-                );
             case AddLiquidityKind.Unbalanced:
                 return ComposableStableEncoder.addLiquidityUnbalanced(
                     amounts.maxAmountsInWithoutBpt,
                     amounts.minimumBpt,
                 );
             case AddLiquidityKind.SingleToken: {
-                if (amounts.tokenInIndex === undefined) throw Error('No Index');
+                // just a sanity check as this is already checked in InputValidator
+                if (amounts.tokenInIndex === undefined) {
+                    throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                }
                 return ComposableStableEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
                     amounts.tokenInIndex, // Has to be index without BPT
@@ -71,8 +71,6 @@ export class ComposableStableEncoder {
                     amounts.minimumBpt,
                 );
             }
-            default:
-                throw Error('Unsupported Add Liquidity Kind');
         }
     }
 

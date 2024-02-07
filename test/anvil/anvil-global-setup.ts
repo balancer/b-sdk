@@ -11,7 +11,7 @@ type NetworkSetup = {
 
 type NetworksWithFork = Extract<
     keyof typeof ChainId,
-    'MAINNET' | 'POLYGON' | 'FANTOM'
+    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -19,6 +19,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     MAINNET: 8645,
     POLYGON: 8745,
     FANTOM: 8845,
+    SEPOLIA: 8945,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -42,6 +43,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: undefined,
         port: ANVIL_PORTS.FANTOM,
         forkBlockNumber: 65313450n,
+    },
+    SEPOLIA: {
+        rpcEnv: 'SEPOLIA_RPC_URL',
+        fallBackRpc: undefined,
+        port: ANVIL_PORTS.SEPOLIA,
+        forkBlockNumber: 5158611n,
     },
 };
 
