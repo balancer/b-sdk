@@ -96,3 +96,10 @@ export type AddLiquidityBuildOutput = {
 export type AddLiquidityConfig = {
     customAddLiquidityTypes: Record<string, AddLiquidityBase>;
 };
+
+export type JoinPoolRequest = {
+    assets: Address[];
+    maxAmountsIn: bigint[];
+    userData: Hex;
+    fromInternalBalance: boolean;
+};
