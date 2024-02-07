@@ -210,7 +210,7 @@ export class Swap {
     /**
      * Takes a slippage acceptable by the user and returns the limits for a swap to be executed
      *
-     * @param slippage percentage: 5 for 5%
+     * @param slippage slippage tolerance accepted by the user. Can be built using Slippage.fromPercentage() or any of its variations.
      * @param expectedAmount is the amount that the user expects to receive or send, can be obtained from swap.query()
      * @returns
      */
