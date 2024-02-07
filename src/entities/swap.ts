@@ -1,4 +1,3 @@
-import { PathWithAmount } from './path';
 import { TokenAmount } from './tokenAmount';
 import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../types';
 import {
@@ -21,31 +20,88 @@ import {
 import { balancerQueriesAbi, vaultV2Abi } from '../abi';
 import { PriceImpactAmount } from './priceImpactAmount';
 import cloneDeep from 'lodash.clonedeep';
+import { Token } from './token';
+import { MinimalToken } from '..';
 import { Slippage } from './slippage';
+
+export type TokenApi = Omit<MinimalToken, 'index'>;
+
+export type Path = {
+    pools: Address[];
+    tokens: TokenApi[];
+    outputAmountRaw: bigint;
+    inputAmountRaw: bigint;
+    balancerVersion: 2 | 3;
+};
+
+class PathWithAmount {
+    public readonly pools: Address[];
+    public readonly tokens: TokenApi[];
+    public readonly outputAmount: TokenAmount;
+    public readonly inputAmount: TokenAmount;
+
+    public constructor(
+        chainId: number,
+        tokens: TokenApi[],
+        pools: Address[],
+        inputAmountRaw: bigint,
+        outputAmountRaw: bigint,
+    ) {
+        if (pools.length === 0 || tokens.length < 2) {
+            throw new Error(
+                'Invalid path: must contain at least 1 pool and 2 tokens.',
+            );
+        }
+        if (tokens.length !== pools.length + 1) {
+            throw new Error(
+                'Invalid path: tokens length must equal pools length + 1',
+            );
+        }
+
+        const tokenIn = new Token(
+            chainId,
+            tokens[0].address,
+            tokens[0].decimals,
+        );
+        const tokenOut = new Token(
+            chainId,
+            tokens[tokens.length - 1].address,
+            tokens[tokens.length - 1].decimals,
+        );
+        this.pools = pools;
+        this.tokens = tokens;
+        this.inputAmount = TokenAmount.fromRawAmount(tokenIn, inputAmountRaw);
+        this.outputAmount = TokenAmount.fromRawAmount(
+            tokenOut,
+            outputAmountRaw,
+        );
+    }
+}
 
 // A Swap can be a single or multiple paths
 export class Swap {
     public constructor({
+        chainId,
         paths,
         swapKind,
-    }: { paths: PathWithAmount[]; swapKind: SwapKind }) {
+    }: { chainId: number; paths: Path[]; swapKind: SwapKind }) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
-        // paths with immutable pool balances
-        this.pathsImmutable = cloneDeep(paths);
-
-        // Recalculate paths while mutating pool balances
         this.paths = paths.map(
-            (path) =>
+            (p) =>
                 new PathWithAmount(
-                    path.tokens,
-                    path.pools,
-                    path.swapAmount,
-                    true,
+                    chainId,
+                    p.tokens,
+                    p.pools,
+                    p.inputAmountRaw,
+                    p.outputAmountRaw,
                 ),
         );
-        this.chainId = paths[0].tokens[0].chainId;
+
+        // paths with immutable pool balances
+        this.pathsImmutable = cloneDeep(this.paths);
+        this.chainId = chainId;
         this.swapKind = swapKind;
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
         this.assets = [
@@ -182,11 +238,11 @@ export class Swap {
         const pathsReverse = paths.map(
             (path) =>
                 new PathWithAmount(
+                    this.chainId,
                     [...path.tokens].reverse(),
                     [...path.pools].reverse(),
-                    this.swapKind === SwapKind.GivenIn
-                        ? path.outputAmount
-                        : path.inputAmount,
+                    path.outputAmount.amount,
+                    path.inputAmount.amount,
                 ),
         );
 
@@ -348,8 +404,6 @@ export class Swap {
         return callData;
     }
 
-    // public get executionPrice(): Price {}
-
     // helper methods
 
     private getSwaps(paths: PathWithAmount[]) {
@@ -360,7 +414,7 @@ export class Swap {
                 paths.map((p) => {
                     p.pools.map((pool, i) => {
                         (swaps as BatchSwapStep[]).push({
-                            poolId: pool.id,
+                            poolId: pool,
                             assetInIndex: BigInt(
                                 this.assets.indexOf(p.tokens[i].address),
                             ),
@@ -379,7 +433,7 @@ export class Swap {
                     const reversedTokens = [...p.tokens].reverse();
                     reversedPools.map((pool, i) => {
                         (swaps as BatchSwapStep[]).push({
-                            poolId: pool.id,
+                            poolId: pool,
                             assetInIndex: BigInt(
                                 this.assets.indexOf(
                                     reversedTokens[i + 1].address,
@@ -404,11 +458,14 @@ export class Swap {
                 path.tokens[1].address,
             );
             swaps = {
-                poolId: pool.id,
+                poolId: pool,
                 kind: this.swapKind,
                 assetIn,
                 assetOut,
-                amount: path.swapAmount.amount,
+                amount:
+                    this.swapKind === SwapKind.GivenIn
+                        ? path.inputAmount.amount
+                        : path.outputAmount.amount,
                 userData: DEFAULT_USERDATA,
             } as SingleSwap;
         }
