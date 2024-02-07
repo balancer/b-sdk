@@ -11,7 +11,7 @@ import { RemoveLiquidity } from '../removeLiquidity';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-    RemoveLiquiditySingleTokenInput,
+    RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityUnbalancedInput,
 } from '../removeLiquidity/types';
 import { TokenAmount } from '../tokenAmount';
@@ -38,7 +38,7 @@ export class PriceImpact {
             rpcUrl: input.rpcUrl,
             bptIn: input.bptOut,
             tokenOut: input.tokenIn,
-            kind: RemoveLiquidityKind.SingleToken,
+            kind: RemoveLiquidityKind.SingleTokenExactIn,
         };
         const { amountsOut } = await removeLiquidity.query(
             removeLiquidityInput,
@@ -201,7 +201,9 @@ export class PriceImpact {
     };
 
     static removeLiquidity = async (
-        input: RemoveLiquiditySingleTokenInput | RemoveLiquidityUnbalancedInput,
+        input:
+            | RemoveLiquiditySingleTokenExactInInput
+            | RemoveLiquidityUnbalancedInput,
         poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within RemoveLiquidity

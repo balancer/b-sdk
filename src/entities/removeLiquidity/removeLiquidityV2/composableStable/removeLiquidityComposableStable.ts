@@ -16,6 +16,7 @@ import { RemoveLiquidityAmounts, PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { ComposableStableEncoder } from '../../../encoders/composableStable';
 import { getAmounts, getSortedTokens } from '../../../utils';
+import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
 
 export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
@@ -90,7 +91,17 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                     tokenOutIndex: undefined,
                     maxBptAmountIn: MAX_UINT256,
                 };
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactOut:
+                return {
+                    minAmountsOut: getAmounts(tokens, [input.amountOut]),
+                    tokenOutIndex: tokens
+                        .filter((_, index) => index !== bptIndex)
+                        .findIndex((t) =>
+                            t.isSameAddress(input.amountOut.address),
+                        ),
+                    maxBptAmountIn: MAX_UINT256,
+                };
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 return {
                     minAmountsOut: Array(tokens.length).fill(0n),
                     tokenOutIndex: tokens
@@ -158,16 +169,15 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     ): RemoveLiquidityAmounts {
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:
+            case RemoveLiquidityKind.SingleTokenExactOut:
                 return {
                     minAmountsOut: input.amountsOut.map((a) => a.amount),
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.slippage.applyTo(input.bptIn.amount),
                 };
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 if (input.tokenOutIndex === undefined) {
-                    throw new Error(
-                        'tokenOutIndex must be defined for RemoveLiquiditySingleToken',
-                    );
+                    throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
                 }
                 return {
                     minAmountsOut: input.amountsOut.map((a) =>
@@ -185,8 +195,6 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                     tokenOutIndex: input.tokenOutIndex,
                     maxBptAmountIn: input.bptIn.amount,
                 };
-            default:
-                throw Error('Unsupported Remove Liquidity Kind');
         }
     }
 }

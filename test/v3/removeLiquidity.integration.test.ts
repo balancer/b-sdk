@@ -1,4 +1,4 @@
-// pnpm test -- removeLiquidity/composableStable.integration.test.ts
+// pnpm test -- removeLiquidity.integration.test.ts
 import { config } from 'dotenv';
 config();
 
@@ -13,50 +13,57 @@ import {
 import {
     RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityProportionalInput,
-    RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
     Slippage,
-    Token,
     PoolState,
     RemoveLiquidity,
-    Address,
     Hex,
     CHAINS,
     ChainId,
-    getPoolAddress,
     RemoveLiquidityInput,
     InputAmount,
     PoolType,
+    AddLiquidity,
+    AddLiquidityKind,
+    AddLiquidityUnbalancedInput,
     RemoveLiquiditySingleTokenExactOutInput,
-} from '../../../src';
-import { forkSetup } from '../../lib/utils/helper';
-import { RemoveLiquidityTxInput } from '../../lib/utils/types';
+    RemoveLiquidityUnbalancedInput,
+    removeLiquidityUnbalancedNotSupportedOnV3,
+} from '../../src';
+import { forkSetup } from '../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
     assertRemoveLiquiditySingleTokenExactIn,
     assertRemoveLiquiditySingleTokenExactOut,
-    assertRemoveLiquidityUnbalanced,
     doRemoveLiquidity,
-} from '../../lib/utils/removeLiquidityHelper';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
-import { TOKENS } from 'test/lib/utils/addresses';
+} from '../lib/utils/removeLiquidityHelper';
+import {
+    AddLiquidityTxInput,
+    RemoveLiquidityTxInput,
+} from '../lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
+import { POOLS, TOKENS } from 'test/lib/utils/addresses';
+import { doAddLiquidity } from 'test/lib/utils/addLiquidityHelper';
 
-const chainId = ChainId.MAINNET;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
-const poolId =
-    '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d000000000000000000000051b'; // baoETH-ETH StablePool
+const balancerVersion = 3;
 
-const wETH = TOKENS[chainId].WETH;
+const chainId = ChainId.SEPOLIA;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
+const poolId = POOLS[chainId].MOCK_WEIGHTED_POOL.address;
 
-describe('composable stable remove liquidity test', () => {
+const WETH = TOKENS[chainId].WETH;
+const BAL = TOKENS[chainId].BAL;
+
+describe('remove liquidity test', () => {
+    let prepTxInput: AddLiquidityTxInput;
     let txInput: RemoveLiquidityTxInput;
-    let poolInput: PoolState;
+    let poolState: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolInput = await api.getPool(poolId);
+        poolState = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -66,39 +73,64 @@ describe('composable stable remove liquidity test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
+        const testAddress = (await client.getAddresses())[0];
+
+        const addLiquidityInput: AddLiquidityUnbalancedInput = {
+            chainId,
+            rpcUrl,
+            kind: AddLiquidityKind.Unbalanced,
+            amountsIn: poolState.tokens.map((t) => {
+                return {
+                    rawAmount: parseUnits('10', t.decimals),
+                    decimals: t.decimals,
+                    address: t.address,
+                };
+            }),
+        };
+
+        prepTxInput = {
+            client,
+            addLiquidity: new AddLiquidity(),
+            slippage: Slippage.fromPercentage('1'), // 1%
+            poolState,
+            testAddress,
+            addLiquidityInput,
+        };
+
         txInput = {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolState: poolInput,
-            testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
+            poolState,
+            testAddress,
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
     });
 
     beforeEach(async () => {
+        // setup by performing an add liquidity so it's possible to remove after that
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [txInput.poolState.address],
-            [0],
-            [parseUnits('1000', 18)],
+            [...txInput.poolState.tokens.map((t) => t.address)],
+            [WETH.slot, BAL.slot] as number[],
+            [
+                ...txInput.poolState.tokens.map((t) =>
+                    parseUnits('100', t.decimals),
+                ),
+            ],
+            undefined,
+            balancerVersion,
         );
+        await doAddLiquidity(prepTxInput);
     });
 
-    describe('remove liquidity unbalanced', async () => {
+    describe('unbalanced', async () => {
         let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
         let amountsOut: InputAmount[];
         beforeAll(() => {
-            const bptIndex = txInput.poolState.tokens.findIndex(
-                (t) => t.address === txInput.poolState.address,
-            );
-            const poolTokensWithoutBpt = txInput.poolState.tokens
-                .map((t) => new Token(chainId, t.address, t.decimals))
-                .filter((_, index) => index !== bptIndex);
-
-            amountsOut = poolTokensWithoutBpt.map((t) => ({
-                rawAmount: parseUnits('20', t.decimals),
+            amountsOut = poolState.tokens.map((t) => ({
+                rawAmount: parseUnits('1', t.decimals),
                 decimals: t.decimals,
                 address: t.address,
             }));
@@ -108,104 +140,78 @@ describe('composable stable remove liquidity test', () => {
                 kind: RemoveLiquidityKind.Unbalanced,
             };
         });
-        test('with wrapped', async () => {
+        test('must throw remove liquidity kind not supported error', async () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
             };
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...txInput,
-                removeLiquidityInput,
-            });
-            assertRemoveLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
-                txInput.poolState,
-                removeLiquidityInput,
-                removeLiquidityOutput,
-                txInput.slippage,
-            );
-        });
-        test('with native', async () => {
-            const removeLiquidityInput = {
-                ...input,
-                amountsOut: amountsOut.slice(0, 1),
-                toNativeAsset: true,
-            };
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...txInput,
-                removeLiquidityInput,
-            });
-            assertRemoveLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
-                txInput.poolState,
-                removeLiquidityInput,
-                removeLiquidityOutput,
-                txInput.slippage,
-            );
+            await expect(() =>
+                doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
+            ).rejects.toThrowError(removeLiquidityUnbalancedNotSupportedOnV3);
         });
     });
 
-    describe('remove liquidity single token exact out', async () => {
-        let input: Omit<RemoveLiquiditySingleTokenExactOutInput, 'amountOut'>;
-        let amountOut: InputAmount;
+    describe('single token exact out', () => {
+        let input: RemoveLiquiditySingleTokenExactOutInput;
         beforeAll(() => {
-            amountOut = {
-                rawAmount: parseUnits('20', wETH.decimals),
-                decimals: wETH.decimals,
-                address: wETH.address,
+            const amountOut: InputAmount = {
+                rawAmount: parseUnits('1', WETH.decimals),
+                decimals: WETH.decimals,
+                address: WETH.address,
             };
             input = {
                 chainId,
                 rpcUrl,
+                amountOut,
                 kind: RemoveLiquidityKind.SingleTokenExactOut,
             };
         });
         test('with wrapped', async () => {
-            const removeLiquidityInput = {
-                ...input,
-                amountOut,
-            };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
-                removeLiquidityInput,
+                removeLiquidityInput: input,
             });
+
             assertRemoveLiquiditySingleTokenExactOut(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
-                removeLiquidityInput,
+                input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
+
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                amountOut,
                 toNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
             });
+
             assertRemoveLiquiditySingleTokenExactOut(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
     });
 
-    describe('remove liquidity single token exact in', () => {
+    describe('single token exact in', () => {
         let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolInput.address,
+                address: poolState.address,
             };
-            const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
+            const tokenOut = WETH.address;
             input = {
                 chainId,
                 rpcUrl,
@@ -226,6 +232,7 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
 
@@ -245,17 +252,18 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
     });
 
-    describe('remove liquidity proportional', () => {
+    describe('proportional', () => {
         let input: RemoveLiquidityProportionalInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolInput.address,
+                address: poolState.address,
             };
             input = {
                 bptIn,
@@ -276,12 +284,13 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                useNativeAssetAsWrappedAmountIn: true,
+                toNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -293,6 +302,7 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                balancerVersion,
             );
         });
     });
@@ -304,31 +314,23 @@ export class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                address:
-                    '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d0' as Address, // B-baoETH-ETH-BPT
-                decimals: 18,
+                address: WETH.address,
+                decimals: WETH.decimals,
                 index: 0,
             },
             {
-                address:
-                    '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
-                decimals: 18,
+                address: BAL.address,
+                decimals: BAL.decimals,
                 index: 1,
-            },
-            {
-                address:
-                    '0xf4edfad26ee0d23b69ca93112ecce52704e0006f' as Address, // baoETH
-                decimals: 18,
-                index: 2,
             },
         ];
 
         return {
             id,
-            address: getPoolAddress(id) as Address,
-            type: PoolType.ComposableStable,
+            address: id,
+            type: PoolType.Weighted,
             tokens,
-            balancerVersion: 2,
+            balancerVersion,
         };
     }
 }

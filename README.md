@@ -71,12 +71,12 @@ Full working add liquidity example: [examples/addLiquidity.ts](./examples/addLiq
 ```ts
 import { BalancerApi, RemoveLiquidity } from "@balancer/sdk";
 ...
-const removeLiquidityInput: RemoveLiquiditySingleTokenInput = {
+const removeLiquidityInput: RemoveLiquiditySingleTokenExactInInput = {
   chainId,
   rpcUrl,
   bptIn,
   tokenOut,
-  kind: RemoveLiquidityKind.SingleToken,
+  kind: RemoveLiquidityKind.SingleTokenExactIn,
 };
 
 const balancerApi = new BalancerApi('https://backend-v3-canary.beets-ftm-node.com/graphql', 1);

@@ -70,7 +70,7 @@ describe('add liquidity test', () => {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolState: poolState,
+            poolState,
             testAddress,
             addLiquidityInput: {} as AddLiquidityInput,
         };
@@ -224,7 +224,7 @@ export class MockApi {
             address: id,
             type: PoolType.Weighted,
             tokens,
-            balancerVersion: 3,
+            balancerVersion,
         };
     }
 }

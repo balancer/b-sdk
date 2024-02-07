@@ -14,7 +14,7 @@ import {
     InputAmount,
     AddLiquidityUnbalancedInput,
     SwapKind,
-    RemoveLiquiditySingleTokenInput,
+    RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityKind,
     RemoveLiquidityUnbalancedInput,
     PoolType,
@@ -171,7 +171,7 @@ describe('price impact', () => {
     });
 
     describe('remove liquidity single token', () => {
-        let input: RemoveLiquiditySingleTokenInput;
+        let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             input = {
                 chainId,
@@ -182,7 +182,7 @@ describe('price impact', () => {
                     address: poolState.address,
                 },
                 tokenOut: wstETH,
-                kind: RemoveLiquidityKind.SingleToken,
+                kind: RemoveLiquidityKind.SingleTokenExactIn,
             };
         });
         test('ABA close to Spot Price', async () => {

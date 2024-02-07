@@ -38,6 +38,12 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
         },
     },
+    [ChainId.POLYGON]: {
+        USDC: {
+            address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+            decimals: 6,
+        },
+    },
     [ChainId.SEPOLIA]: {
         BAL: {
             address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',
