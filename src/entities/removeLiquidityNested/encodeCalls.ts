@@ -5,6 +5,7 @@ import { RemoveLiquidityNestedCallAttributes } from './types';
 import { replaceWrapped } from '../utils/replaceWrapped';
 import { batchRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
+import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
 
 export const encodeCalls = (
     callsAttributes: RemoveLiquidityNestedCallAttributes[],
@@ -38,7 +39,7 @@ export const encodeCalls = (
         if (isProportional) {
             userData = getUserDataProportional(poolType, bptAmountIn.amount);
         } else {
-            userData = getUserDataSingleToken(
+            userData = getUserDataSingleTokenExactIn(
                 tokenOutIndex,
                 poolType,
                 bptAmountIn.amount,
@@ -84,24 +85,22 @@ const getUserDataProportional = (poolType: PoolType, bptAmountIn: bigint) => {
     }
 };
 
-const getUserDataSingleToken = (
+const getUserDataSingleTokenExactIn = (
     tokenOutIndex: number | undefined,
     poolType: PoolType,
     bptAmountIn: bigint,
 ) => {
     if (tokenOutIndex === undefined) {
-        throw new Error(
-            "tokenOutIndex can't be undefined for removing liquidity to single token",
-        );
+        throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
     }
     switch (poolType) {
         case PoolType.Weighted:
-            return WeightedEncoder.removeLiquiditySingleToken(
+            return WeightedEncoder.removeLiquiditySingleTokenExactIn(
                 bptAmountIn,
                 tokenOutIndex,
             );
         case PoolType.ComposableStable:
-            return ComposableStableEncoder.removeLiquiditySingleToken(
+            return ComposableStableEncoder.removeLiquiditySingleTokenExactIn(
                 bptAmountIn,
                 tokenOutIndex,
             );

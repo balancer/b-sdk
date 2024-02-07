@@ -46,7 +46,13 @@ export const validateTokensRemoveLiquidity = (
                 poolState.tokens.map((t) => t.address),
             );
             break;
-        case RemoveLiquidityKind.SingleToken:
+        case RemoveLiquidityKind.SingleTokenExactOut:
+            areTokensInArray(
+                [removeLiquidityInput.amountOut.address],
+                poolState.tokens.map((t) => t.address),
+            );
+            break;
+        case RemoveLiquidityKind.SingleTokenExactIn:
             areTokensInArray(
                 [removeLiquidityInput.tokenOut],
                 poolState.tokens.map((t) => t.address),
@@ -57,8 +63,6 @@ export const validateTokensRemoveLiquidity = (
                 [removeLiquidityInput.bptIn.address],
                 [poolState.address],
             );
-            break;
-        default:
             break;
     }
 };

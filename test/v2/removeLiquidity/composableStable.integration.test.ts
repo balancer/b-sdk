@@ -11,7 +11,7 @@ import {
     walletActions,
 } from 'viem';
 import {
-    RemoveLiquiditySingleTokenInput,
+    RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityProportionalInput,
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
@@ -27,21 +27,26 @@ import {
     RemoveLiquidityInput,
     InputAmount,
     PoolType,
+    RemoveLiquiditySingleTokenExactOutInput,
 } from '../../../src';
 import { forkSetup } from '../../lib/utils/helper';
 import { RemoveLiquidityTxInput } from '../../lib/utils/types';
 import {
     assertRemoveLiquidityProportional,
-    assertRemoveLiquiditySingleToken,
+    assertRemoveLiquiditySingleTokenExactIn,
+    assertRemoveLiquiditySingleTokenExactOut,
     assertRemoveLiquidityUnbalanced,
     doRemoveLiquidity,
 } from '../../lib/utils/removeLiquidityHelper';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+import { TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const poolId =
     '0x1a44e35d5451e0b78621a1b3e7a53dfaa306b1d000000000000000000000051b'; // baoETH-ETH StablePool
+
+const wETH = TOKENS[chainId].WETH;
 
 describe('composable stable remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
@@ -76,7 +81,7 @@ describe('composable stable remove liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [txInput.poolState.address],
-            [0], // TODO: hardcode these values to improve test performance
+            [0],
             [parseUnits('1000', 18)],
         );
     });
@@ -140,8 +145,60 @@ describe('composable stable remove liquidity test', () => {
         });
     });
 
-    describe('remove liquidity single token', () => {
-        let input: RemoveLiquiditySingleTokenInput;
+    describe('remove liquidity single token exact out', async () => {
+        let input: Omit<RemoveLiquiditySingleTokenExactOutInput, 'amountOut'>;
+        let amountOut: InputAmount;
+        beforeAll(() => {
+            amountOut = {
+                rawAmount: parseUnits('20', wETH.decimals),
+                decimals: wETH.decimals,
+                address: wETH.address,
+            };
+            input = {
+                chainId,
+                rpcUrl,
+                kind: RemoveLiquidityKind.SingleTokenExactOut,
+            };
+        });
+        test('with wrapped', async () => {
+            const removeLiquidityInput = {
+                ...input,
+                amountOut,
+            };
+            const removeLiquidityOutput = await doRemoveLiquidity({
+                ...txInput,
+                removeLiquidityInput,
+            });
+            assertRemoveLiquiditySingleTokenExactOut(
+                txInput.client.chain?.id as number,
+                txInput.poolState,
+                removeLiquidityInput,
+                removeLiquidityOutput,
+                txInput.slippage,
+            );
+        });
+        test('with native', async () => {
+            const removeLiquidityInput = {
+                ...input,
+                amountOut,
+                toNativeAsset: true,
+            };
+            const removeLiquidityOutput = await doRemoveLiquidity({
+                ...txInput,
+                removeLiquidityInput,
+            });
+            assertRemoveLiquiditySingleTokenExactOut(
+                txInput.client.chain?.id as number,
+                txInput.poolState,
+                removeLiquidityInput,
+                removeLiquidityOutput,
+                txInput.slippage,
+            );
+        });
+    });
+
+    describe('remove liquidity single token exact in', () => {
+        let input: RemoveLiquiditySingleTokenExactInInput;
         beforeAll(() => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
@@ -154,7 +211,7 @@ describe('composable stable remove liquidity test', () => {
                 rpcUrl,
                 bptIn,
                 tokenOut,
-                kind: RemoveLiquidityKind.SingleToken,
+                kind: RemoveLiquidityKind.SingleTokenExactIn,
             };
         });
         test('with wrapped', async () => {
@@ -163,7 +220,7 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput: input,
             });
 
-            assertRemoveLiquiditySingleToken(
+            assertRemoveLiquiditySingleTokenExactIn(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
@@ -182,7 +239,7 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
             });
 
-            assertRemoveLiquiditySingleToken(
+            assertRemoveLiquiditySingleTokenExactIn(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,

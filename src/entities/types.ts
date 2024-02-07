@@ -1,4 +1,4 @@
-import { MinimalToken, RawPoolToken } from '../data';
+import { HumanAmount, MinimalToken, RawPoolToken } from '../data';
 import { Address, Hex, PoolType } from '../types';
 
 // Returned from API and used as input
@@ -10,11 +10,12 @@ export type PoolState = {
     balancerVersion: 2 | 3;
 };
 
-export type PoolStateWithRawTokens = {
+export type PoolStateWithBalances = {
     id: Hex;
     address: Address;
     type: string;
     tokens: RawPoolToken[];
+    totalShares: HumanAmount;
     balancerVersion: 2 | 3;
 };
 

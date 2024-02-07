@@ -1,5 +1,5 @@
 import { parseEther, parseUnits } from 'viem';
-import { AddLiquidityKind, ChainId, PoolType } from '../src';
+import { ChainId, PoolType } from '../src';
 import { InitPoolDataProvider } from '../src/data/providers/initPoolDataProvider';
 import { InitPool } from '../src/entities/initPool';
 import { InitPoolInput } from '../src/entities/initPool/types';
@@ -18,7 +18,6 @@ const initPool = async () => {
     const signerAddress = (await client.getAddresses())[0];
 
     const initPoolInput: InitPoolInput = {
-        kind: AddLiquidityKind.Init,
         sender: signerAddress,
         recipient: signerAddress,
         amountsIn: [

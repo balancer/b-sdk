@@ -1,13 +1,18 @@
 import { Address, parseUnits } from 'viem';
 import { InputAmount } from '@/types';
+import { HumanAmount } from '@/data';
 
 export function calculateProportionalAmounts(
     pool: {
         address: Address;
-        tokens: { address: Address; balance: string; decimals: number }[];
+        totalShares: HumanAmount;
+        tokens: { address: Address; balance: HumanAmount; decimals: number }[];
     },
     inputAmount: InputAmount,
-): InputAmount[] {
+): {
+    amountsIn: InputAmount[];
+    bptOut: InputAmount;
+} {
     const tokensWithoutBpt = pool.tokens.filter(
         (t) => !pool.address.toLowerCase().includes(t.address.toLowerCase()),
     );
@@ -23,13 +28,26 @@ export function calculateProportionalAmounts(
         parseUnits(t.balance, t.decimals),
     );
 
+    const totalSharesBigInt = parseUnits(pool.totalShares, 18);
+
     const proportionalAmounts = balances.map(
         (b) => (b * inputAmount.rawAmount) / balances[referenceTokenIndex],
     );
 
-    return tokensWithoutBpt.map(({ address, decimals }, index) => ({
-        address,
-        decimals,
-        rawAmount: proportionalAmounts[index],
-    }));
+    const bptOut =
+        (totalSharesBigInt * inputAmount.rawAmount) /
+        balances[referenceTokenIndex];
+
+    return {
+        bptOut: {
+            address: pool.address,
+            rawAmount: bptOut,
+            decimals: 18,
+        },
+        amountsIn: tokensWithoutBpt.map(({ address, decimals }, index) => ({
+            address,
+            decimals,
+            rawAmount: proportionalAmounts[index],
+        })),
+    };
 }

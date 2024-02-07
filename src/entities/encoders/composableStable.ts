@@ -7,7 +7,11 @@ import {
     RemoveLiquidityAmounts,
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
-import { encodeRemoveLiquidityRecovery } from '.';
+import {
+    addLiquiditySingleTokenShouldHaveTokenInIndexError,
+    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+} from '@/utils/errors';
+import { encodeRemoveLiquidityRecovery } from './base';
 
 export enum ComposableStablePoolJoinKind {
     INIT = 0,
@@ -50,20 +54,19 @@ export class ComposableStableEncoder {
         amounts: AddLiquidityAmounts & { maxAmountsInWithoutBpt: bigint[] },
     ): Address {
         switch (kind) {
-            case AddLiquidityKind.Init:
-                throw new Error(
-                    'For this kind use initPool instead of addLiquidity',
-                );
             case AddLiquidityKind.Unbalanced:
                 return ComposableStableEncoder.addLiquidityUnbalanced(
                     amounts.maxAmountsInWithoutBpt,
                     amounts.minimumBpt,
                 );
             case AddLiquidityKind.SingleToken: {
-                if (amounts.tokenInIndex === undefined) throw Error('No Index');
+                // just a sanity check as this is already checked in InputValidator
+                if (amounts.tokenInIndex === undefined) {
+                    throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                }
                 return ComposableStableEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
-                    amounts.tokenInIndex, // Has to be index without BPT
+                    amounts.tokenInIndex,
                 );
             }
             case AddLiquidityKind.Proportional: {
@@ -71,14 +74,12 @@ export class ComposableStableEncoder {
                     amounts.minimumBpt,
                 );
             }
-            default:
-                throw Error('Unsupported Add Liquidity Kind');
         }
     }
 
     /**
      * Encodes the User Data for removing liquidity to a ComposableStablePool
-     * @param kind Kind of the Remove Liquidity operation: Unbalanced, SingleToken, Proportional
+     * @param kind Kind of the Remove Liquidity operation: Unbalanced, SingleTokenExactIn, Proportional
      * @param amounts Amounts of tokens to be removed from the pool
      * @returns
      */
@@ -88,17 +89,16 @@ export class ComposableStableEncoder {
     ): Address {
         switch (kind) {
             case RemoveLiquidityKind.Unbalanced:
+            case RemoveLiquidityKind.SingleTokenExactOut:
                 return ComposableStableEncoder.removeLiquidityUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
-                    throw new Error(
-                        'tokenOutIndex must be defined for RemoveLiquiditySingleToken',
-                    );
+                    throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
 
-                return ComposableStableEncoder.removeLiquiditySingleToken(
+                return ComposableStableEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
@@ -108,8 +108,6 @@ export class ComposableStableEncoder {
                 );
             case RemoveLiquidityKind.Recovery:
                 return encodeRemoveLiquidityRecovery(amounts.maxBptAmountIn);
-            default:
-                throw Error('Unsupported Remove Liquidity Kind');
         }
     }
 
@@ -146,7 +144,7 @@ export class ComposableStableEncoder {
     /**
      * Encodes the userData parameter for adding liquidity to a ComposableStablePool with a single token to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
-     * @param tokenIndex - the index of the token to be provided as liquidity
+     * @param tokenIndex - the index of the token to be provided as liquidity. This index should consider tokens array without BPT.
      */
     static addLiquiditySingleToken = (
         bptAmountOut: bigint,
@@ -183,7 +181,7 @@ export class ComposableStableEncoder {
      * @param bptAmountIn - the amount of BPT to be burned
      * @param tokenIndex - the index of the token to be removed from the pool
      */
-    static removeLiquiditySingleToken = (
+    static removeLiquiditySingleTokenExactIn = (
         bptAmountIn: bigint,
         tokenIndex: number,
     ): Address => {

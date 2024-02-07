@@ -1,5 +1,5 @@
 import { encodeAbiParameters } from 'viem';
-import { Address } from '../../types';
+import { Hex } from '../../types';
 import { AddLiquidityKind } from '../addLiquidity/types';
 import {
     AddLiquidityAmounts,
@@ -7,7 +7,11 @@ import {
     RemoveLiquidityAmounts,
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
-import { encodeRemoveLiquidityRecovery } from '.';
+import {
+    addLiquiditySingleTokenShouldHaveTokenInIndexError,
+    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+} from '@/utils/errors';
+import { encodeRemoveLiquidityRecovery } from './base';
 
 export enum WeightedPoolJoinKind {
     INIT = 0,
@@ -46,22 +50,21 @@ export class WeightedEncoder {
      * @param amounts Amounts of tokens to be added to the pool
      * @returns
      */
-    static encodeAddLiquidityUserData(
+    static encodeAddLiquidityUserData = (
         kind: AddLiquidityKind,
         amounts: AddLiquidityAmounts,
-    ) {
+    ): Hex => {
         switch (kind) {
-            case AddLiquidityKind.Init:
-                throw new Error(
-                    'For this kind use initPool instead of addLiquidity',
-                );
             case AddLiquidityKind.Unbalanced:
                 return WeightedEncoder.addLiquidityUnbalanced(
                     amounts.maxAmountsIn,
                     amounts.minimumBpt,
                 );
             case AddLiquidityKind.SingleToken: {
-                if (amounts.tokenInIndex === undefined) throw Error('No Index');
+                // just a sanity check as this is already checked in InputValidator
+                if (amounts.tokenInIndex === undefined) {
+                    throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                }
                 return WeightedEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
                     amounts.tokenInIndex,
@@ -72,10 +75,8 @@ export class WeightedEncoder {
                     amounts.minimumBpt,
                 );
             }
-            default:
-                throw Error('Unsupported Add Liquidity Kind');
         }
-    }
+    };
 
     /**
      * Encodes the User Data for removing liquidity from a WeightedPool
@@ -83,21 +84,22 @@ export class WeightedEncoder {
      * @param amounts Amounts of tokens to be removed from the pool
      * @returns
      */
-    static encodeRemoveLiquidityUserData(
+    static encodeRemoveLiquidityUserData = (
         kind: RemoveLiquidityKind,
         amounts: RemoveLiquidityAmounts,
-    ): Address {
+    ): Hex => {
         switch (kind) {
             case RemoveLiquidityKind.Unbalanced:
+            case RemoveLiquidityKind.SingleTokenExactOut:
                 return WeightedEncoder.removeLiquidityUnbalanced(
                     amounts.minAmountsOut,
                     amounts.maxBptAmountIn,
                 );
-            case RemoveLiquidityKind.SingleToken:
+            case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
-                    throw Error('No Index');
+                    throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
 
-                return WeightedEncoder.removeLiquiditySingleToken(
+                return WeightedEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,
                     amounts.tokenOutIndex,
                 );
@@ -107,16 +109,14 @@ export class WeightedEncoder {
                 );
             case RemoveLiquidityKind.Recovery:
                 return encodeRemoveLiquidityRecovery(amounts.maxBptAmountIn);
-            default:
-                throw Error('Unsupported Remove Liquidity Kind');
         }
-    }
+    };
 
     /**
      * Encodes the userData parameter for providing the initial liquidity to a WeightedPool
      * @param initialBalances - the amounts of tokens to send to the pool to form the initial balances
      */
-    static initPool = (amountsIn: bigint[]): Address =>
+    static initPool = (amountsIn: bigint[]): Hex =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }],
             [BigInt(WeightedPoolJoinKind.INIT), amountsIn],
@@ -130,7 +130,7 @@ export class WeightedEncoder {
     static addLiquidityUnbalanced = (
         amountsIn: bigint[],
         minimumBPT: bigint,
-    ): Address =>
+    ): Hex =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }, { type: 'uint256' }],
             [
@@ -148,7 +148,7 @@ export class WeightedEncoder {
     static addLiquiditySingleToken = (
         bptAmountOut: bigint,
         tokenIndex: number,
-    ): Address => {
+    ): Hex => {
         // if tokenIndex is provided, it's assumed to be an allTokensIn
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
@@ -164,7 +164,7 @@ export class WeightedEncoder {
      * Encodes the userData parameter for adding liquidity to a WeightedPool proportionally to receive an exact amount of BPT
      * @param bptAmountOut - the amount of BPT to be minted
      */
-    static addLiquidityProportional = (bptAmountOut: bigint): Address => {
+    static addLiquidityProportional = (bptAmountOut: bigint): Hex => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [
@@ -179,10 +179,10 @@ export class WeightedEncoder {
      * @param bptAmountIn - the amount of BPT to be burned
      * @param tokenIndex - the index of the token to removed from the pool
      */
-    static removeLiquiditySingleToken = (
+    static removeLiquiditySingleTokenExactIn = (
         bptAmountIn: bigint,
         tokenIndex: number,
-    ): Address => {
+    ): Hex => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
             [
@@ -197,7 +197,7 @@ export class WeightedEncoder {
      * Encodes the userData parameter for removing liquidity from a WeightedPool by removing tokens in return for an exact amount of BPT
      * @param bptAmountIn - the amount of BPT to be burned
      */
-    static removeLiquidityProportional = (bptAmountIn: bigint): Address => {
+    static removeLiquidityProportional = (bptAmountIn: bigint): Hex => {
         return encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256' }],
             [
@@ -215,7 +215,7 @@ export class WeightedEncoder {
     static removeLiquidityUnbalanced = (
         amountsOut: bigint[],
         maxBPTAmountIn: bigint,
-    ): Address =>
+    ): Hex =>
         encodeAbiParameters(
             [{ type: 'uint256' }, { type: 'uint256[]' }, { type: 'uint256' }],
             [

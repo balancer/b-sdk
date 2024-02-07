@@ -2,7 +2,6 @@ import { Address } from 'viem';
 import {
     AddLiquidityBaseInput,
     AddLiquidityBuildOutput,
-    AddLiquidityKind,
 } from '../addLiquidity/types';
 import { InputAmountInit } from '../../types';
 import { PoolState } from '../types';
@@ -21,7 +20,6 @@ export type InitPoolInput = Omit<AddLiquidityBaseInput, 'rpcUrl'> & {
     recipient: Address;
     amountsIn: InputAmountInit[];
     chainId: number;
-    kind: AddLiquidityKind.Init;
 };
 
 export type InitPoolConfig = {

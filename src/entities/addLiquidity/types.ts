@@ -4,7 +4,6 @@ import { PoolState } from '../types';
 import { Address, Hex, InputAmount } from '../../types';
 
 export enum AddLiquidityKind {
-    Init = 'Init',
     Unbalanced = 'Unbalanced',
     SingleToken = 'SingleToken',
     Proportional = 'Proportional',
@@ -39,7 +38,7 @@ export type AddLiquidityInput =
     | AddLiquiditySingleTokenInput
     | AddLiquidityProportionalInput;
 
-type AddLiquidityBaseQueryOutput = {
+export type AddLiquidityBaseQueryOutput = {
     poolType: string;
     poolId: Hex;
     addLiquidityKind: AddLiquidityKind;
@@ -58,22 +57,24 @@ export type AddLiquidityComposableStableQueryOutput =
     };
 
 export type AddLiquidityQueryOutput =
+    | AddLiquidityBaseQueryOutput
     | AddLiquidityWeightedQueryOutput
     | AddLiquidityComposableStableQueryOutput;
 
-type AddLiquidityBaseCall = {
+export type AddLiquidityBaseCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
     chainId: number;
-};
+    wethIsEth: boolean;
+} & AddLiquidityBaseQueryOutput;
 
+export type AddLiquidityWeightedCall = AddLiquidityBaseCall;
 export type AddLiquidityComposableStableCall = AddLiquidityBaseCall &
     AddLiquidityComposableStableQueryOutput;
-export type AddLiquidityWeightedCall = AddLiquidityBaseCall &
-    AddLiquidityBaseQueryOutput;
 
 export type AddLiquidityCall =
+    | AddLiquidityBaseCall
     | AddLiquidityWeightedCall
     | AddLiquidityComposableStableCall;
 
@@ -95,4 +96,11 @@ export type AddLiquidityBuildOutput = {
 
 export type AddLiquidityConfig = {
     customAddLiquidityTypes: Record<string, AddLiquidityBase>;
+};
+
+export type JoinPoolRequest = {
+    assets: Address[];
+    maxAmountsIn: bigint[];
+    userData: Hex;
+    fromInternalBalance: boolean;
 };

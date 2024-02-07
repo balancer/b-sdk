@@ -2,21 +2,12 @@ import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
 import { BALANCER_QUERIES, CHAINS } from '../../utils';
 import { balancerQueriesAbi } from '../../abi';
+import { JoinPoolRequest } from '../addLiquidity/types';
 
 export async function doAddLiquidityQuery(
     rpcUrl: string,
     chainId: number,
-    args: readonly [
-        Address,
-        Address,
-        Address,
-        {
-            assets: readonly Address[];
-            maxAmountsIn: readonly bigint[];
-            userData: Address;
-            fromInternalBalance: boolean;
-        },
-    ],
+    args: readonly [Address, Address, Address, JoinPoolRequest],
 ): Promise<{
     bptOut: bigint;
     amountsIn: readonly bigint[];

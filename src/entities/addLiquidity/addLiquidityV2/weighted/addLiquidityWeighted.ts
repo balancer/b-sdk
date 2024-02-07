@@ -19,6 +19,7 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '@/entities/utils';
+import { getAmountsCall } from '../../helpers';
 
 export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
@@ -72,7 +73,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
     }
 
     public buildCall(input: AddLiquidityWeightedCall): AddLiquidityBuildOutput {
-        const amounts = this.getAmountsCall(input);
+        const amounts = getAmountsCall(input);
 
         const userData = WeightedEncoder.encodeAddLiquidityUserData(
             input.addLiquidityKind,
@@ -144,38 +145,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
                     tokenInIndex: undefined,
                 };
             }
-        }
-    }
-
-    private getAmountsCall(
-        input: AddLiquidityWeightedCall,
-    ): AddLiquidityAmounts {
-        switch (input.addLiquidityKind) {
-            case AddLiquidityKind.Init:
-                throw Error('Unsupported Add Liquidity Kind');
-            case AddLiquidityKind.Unbalanced: {
-                const minimumBpt = input.slippage.applyTo(
-                    input.bptOut.amount,
-                    -1,
-                );
-                return {
-                    minimumBpt,
-                    maxAmountsIn: input.amountsIn.map((a) => a.amount),
-                    tokenInIndex: input.tokenInIndex,
-                };
-            }
-            case AddLiquidityKind.SingleToken:
-            case AddLiquidityKind.Proportional: {
-                return {
-                    minimumBpt: input.bptOut.amount,
-                    maxAmountsIn: input.amountsIn.map((a) =>
-                        input.slippage.applyTo(a.amount),
-                    ),
-                    tokenInIndex: input.tokenInIndex,
-                };
-            }
-            default:
-                throw Error('Unsupported Add Liquidity Kind');
         }
     }
 }

@@ -5,7 +5,8 @@ import { PoolState } from '../types';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
-    SingleToken = 'SingleToken', // exact in (single token out)
+    SingleTokenExactOut = 'SingleTokenExactOut', // exact out (single token out)
+    SingleTokenExactIn = 'SingleTokenExactIn', // exact in (single token out)
     Proportional = 'Proportional', // exact in (all tokens out)
     Recovery = 'Recovery', // exact in (all tokens out) - Pool in recovery mode
 }
@@ -23,11 +24,18 @@ export type RemoveLiquidityUnbalancedInput = RemoveLiquidityBaseInput & {
     kind: RemoveLiquidityKind.Unbalanced;
 };
 
-export type RemoveLiquiditySingleTokenInput = RemoveLiquidityBaseInput & {
-    bptIn: InputAmount;
-    tokenOut: Address;
-    kind: RemoveLiquidityKind.SingleToken;
-};
+export type RemoveLiquiditySingleTokenExactOutInput =
+    RemoveLiquidityBaseInput & {
+        amountOut: InputAmount;
+        kind: RemoveLiquidityKind.SingleTokenExactOut;
+    };
+
+export type RemoveLiquiditySingleTokenExactInInput =
+    RemoveLiquidityBaseInput & {
+        bptIn: InputAmount;
+        tokenOut: Address;
+        kind: RemoveLiquidityKind.SingleTokenExactIn;
+    };
 
 export type RemoveLiquidityProportionalInput = RemoveLiquidityBaseInput & {
     bptIn: InputAmount;
@@ -41,7 +49,8 @@ export type RemoveLiquidityRecoveryInput = RemoveLiquidityBaseInput & {
 
 export type RemoveLiquidityInput =
     | RemoveLiquidityUnbalancedInput
-    | RemoveLiquiditySingleTokenInput
+    | RemoveLiquiditySingleTokenExactOutInput
+    | RemoveLiquiditySingleTokenExactInInput
     | RemoveLiquidityProportionalInput
     | RemoveLiquidityRecoveryInput;
 
@@ -66,18 +75,20 @@ export type RemoveLiquidityComposableStableQueryOutput =
         bptIndex: number;
     };
 
-type RemoveLiquidityBaseCall = {
+export type RemoveLiquidityBaseCall = {
     slippage: Slippage;
     sender: Address;
     recipient: Address;
     chainId: number;
-};
+    wethIsEth: boolean;
+} & RemoveLiquidityBaseQueryOutput;
+
+export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall;
 export type RemoveLiquidityComposableStableCall = RemoveLiquidityBaseCall &
     RemoveLiquidityComposableStableQueryOutput;
-export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall &
-    RemoveLiquidityBaseQueryOutput;
 
 export type RemoveLiquidityCall =
+    | RemoveLiquidityBaseCall
     | RemoveLiquidityComposableStableCall
     | RemoveLiquidityWeightedCall;
 
