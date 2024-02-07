@@ -1,6 +1,18 @@
 import { Path } from '@/entities/swap';
 import { BalancerApiClient } from '../../client';
+import { ChainId } from '@/utils';
+import { Address } from 'viem';
+import { SwapKind } from '@/types';
+import { TokenAmount } from '@/entities';
 
+export type GetQuoteInput = {
+    chainId: ChainId;
+    tokenIn: Address;
+    tokenOut: Address;
+    swapKind: SwapKind;
+    swapAmount: TokenAmount; // API expects input in human readable form
+    queryBatchSwap: boolean; // run queryBatchSwap to update with onchain values
+};
 export class SorGetQuote {
     // TODO - Update with real query
     readonly sorGetQuoteQuery = `query GetPool($id: String!){
@@ -96,7 +108,7 @@ export class SorGetQuote {
 
     type GqlSorPath {
       balancerVersion: Int!
-      pools: [String]! --- note can this be address?
+      pools: [String]!
       tokens: [Token]!
       outputAmountRaw: String!
       inputAmountRaw: String!
@@ -107,7 +119,8 @@ export class SorGetQuote {
         decimals: Int!
     }
     */
-    async fetchSorGetQuote(): Promise<Path[]> {
+    async fetchSorGetQuote(quoteInput: GetQuoteInput): Promise<Path[]> {
+        // TODO - swapAmount should be passed to API in human readable. Can also run check that token matches swap type
         return [
             {
                 balancerVersion: 2,

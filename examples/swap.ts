@@ -8,27 +8,53 @@
 import { config } from 'dotenv';
 config();
 
-import { BalancerApi, ChainId, Slippage, SwapKind } from '../src';
+import {
+    BalancerApi,
+    ChainId,
+    GetQuoteInput,
+    Slippage,
+    SwapKind,
+    Token,
+    TokenAmount,
+} from '../src';
 // TODO - Move these to src import once old SOR removed
 import { Swap } from '@/entities/swap';
 
 const addLiquidity = async () => {
     // User defined
     const chainId = ChainId.MAINNET;
+    const swapKind = SwapKind.GivenIn;
 
     // API is used to fetch best path from available liquidity
     const balancerApi = new BalancerApi(
         'https://backend-v3-canary.beets-ftm-node.com/graphql',
         chainId,
     );
+
+    const tokenIn = new Token(
+        chainId,
+        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        6,
+    );
+
+    const swapAmount = TokenAmount.fromHumanAmount(tokenIn, '1');
+
     // TODO - Add input params
-    const sorPaths = await balancerApi.sorGetQuote.fetchSorGetQuote();
+    const quoteInput: GetQuoteInput = {
+        chainId,
+        tokenIn: tokenIn.address,
+        tokenOut: '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
+        swapKind,
+        swapAmount,
+        queryBatchSwap: false,
+    };
+    const sorPaths = await balancerApi.sorGetQuote.fetchSorGetQuote(quoteInput);
 
     // Swap object provides useful helpers for re-querying, building call, etc
     const swap = new Swap({
         chainId,
         paths: sorPaths,
-        swapKind: SwapKind.GivenIn,
+        swapKind,
     });
 
     console.log(
