@@ -19,9 +19,7 @@ const pools = () => [
             {
                 address: tokens[0].address,
                 weight: '0.5',
-                balance: String(
-                    parseUnits('100000', tokens[0].decimals),
-                ) as `${number}`,
+                balance: '100000',
                 decimals: tokens[0].decimals,
                 symbol: 'XXX',
                 name: 'XXX Coin',
@@ -30,9 +28,7 @@ const pools = () => [
             {
                 address: tokens[1].address,
                 weight: '0.5',
-                balance: String(
-                    parseUnits('100000', tokens[1].decimals),
-                ) as `${number}`,
+                balance: '100000',
                 decimals: tokens[1].decimals,
                 symbol: 'XXX',
                 name: 'XXX Coin',
@@ -46,9 +42,7 @@ const pools = () => [
             {
                 address: tokens[1].address,
                 weight: '0.5',
-                balance: String(
-                    parseUnits('100000', tokens[1].decimals),
-                ) as `${number}`,
+                balance: '100000',
                 decimals: tokens[1].decimals,
                 symbol: 'XXX',
                 name: 'XXX Coin',
@@ -57,9 +51,7 @@ const pools = () => [
             {
                 address: tokens[2].address,
                 weight: '0.5',
-                balance: String(
-                    parseUnits('100000', tokens[2].decimals),
-                ) as `${number}`,
+                balance: '100000',
                 decimals: tokens[2].decimals,
                 symbol: 'XXX',
                 name: 'XXX Coin',
@@ -73,9 +65,7 @@ const pools = () => [
             {
                 address: tokens[2].address,
                 weight: '0.5',
-                balance: String(
-                    parseUnits('100000', tokens[2].decimals),
-                ) as `${number}`,
+                balance: '100000',
                 decimals: tokens[2].decimals,
                 symbol: 'XXX',
                 name: 'XXX Coin',
@@ -84,9 +74,7 @@ const pools = () => [
             {
                 address: tokens[3].address,
                 weight: '0.5',
-                balance: String(
-                    parseUnits('100000', tokens[3].decimals),
-                ) as `${number}`,
+                balance: '100000',
                 decimals: tokens[3].decimals,
                 symbol: 'XXX',
                 name: 'XXX Coin',
@@ -126,9 +114,10 @@ describe('Swap', () => {
             const amountOut = swap.outputAmount; // In production code, this would be the expected amountOut returned from the query
             const slippage = Slippage.fromPercentage('1');
             const limits = swap.limits(slippage, amountOut);
-            const expected = amountOut.mulDownFixed(
-                parseUnits(`${1 - slippage.decimal}`, 18),
-            ).amount;
+            const expected =
+                amountOut.mulDownFixed(
+                    parseUnits(`${1 - slippage.decimal}`, 18),
+                ).amount * -1n;
 
             expect(amountOut.amount).not.toEqual(0n);
             expect(limits[3]).toEqual(expected);
