@@ -1,5 +1,5 @@
-import { TokenAmount } from './tokenAmount';
-import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../types';
+import { TokenAmount } from '../../tokenAmount';
+import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../../../types';
 import {
     abs,
     BALANCER_QUERIES,
@@ -7,9 +7,8 @@ import {
     DEFAULT_FUND_MANAGMENT,
     ZERO_ADDRESS,
     NATIVE_ADDRESS,
-    MathSol,
     VAULT,
-} from '../utils';
+} from '../../../utils';
 import {
     Address,
     createPublicClient,
@@ -17,69 +16,14 @@ import {
     getContract,
     http,
 } from 'viem';
-import { balancerQueriesAbi, vaultV2Abi } from '../abi';
-import { PriceImpactAmount } from './priceImpactAmount';
+import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
 import cloneDeep from 'lodash.clonedeep';
-import { Token } from './token';
-import { MinimalToken } from '..';
-import { Slippage } from './slippage';
-
-export type TokenApi = Omit<MinimalToken, 'index'>;
-
-export type Path = {
-    pools: Address[];
-    tokens: TokenApi[];
-    outputAmountRaw: bigint;
-    inputAmountRaw: bigint;
-    balancerVersion: 2 | 3;
-};
-
-class PathWithAmount {
-    public readonly pools: Address[];
-    public readonly tokens: TokenApi[];
-    public readonly outputAmount: TokenAmount;
-    public readonly inputAmount: TokenAmount;
-
-    public constructor(
-        chainId: number,
-        tokens: TokenApi[],
-        pools: Address[],
-        inputAmountRaw: bigint,
-        outputAmountRaw: bigint,
-    ) {
-        if (pools.length === 0 || tokens.length < 2) {
-            throw new Error(
-                'Invalid path: must contain at least 1 pool and 2 tokens.',
-            );
-        }
-        if (tokens.length !== pools.length + 1) {
-            throw new Error(
-                'Invalid path: tokens length must equal pools length + 1',
-            );
-        }
-
-        const tokenIn = new Token(
-            chainId,
-            tokens[0].address,
-            tokens[0].decimals,
-        );
-        const tokenOut = new Token(
-            chainId,
-            tokens[tokens.length - 1].address,
-            tokens[tokens.length - 1].decimals,
-        );
-        this.pools = pools;
-        this.tokens = tokens;
-        this.inputAmount = TokenAmount.fromRawAmount(tokenIn, inputAmountRaw);
-        this.outputAmount = TokenAmount.fromRawAmount(
-            tokenOut,
-            outputAmountRaw,
-        );
-    }
-}
+import { Path } from '../types';
+import { PathWithAmount } from '../pathWithAmount';
+import { getInputAmount, getOutputAmount } from '../pathHelpers';
 
 // A Swap can be a single or multiple paths
-export class Swap {
+export class SwapV2 {
     public constructor({
         chainId,
         paths,
@@ -131,11 +75,11 @@ export class Swap {
     }
 
     public get inputAmount(): TokenAmount {
-        return this.getInputAmount(this.paths);
+        return getInputAmount(this.paths);
     }
 
     public get outputAmount(): TokenAmount {
-        return this.getOutputAmount(this.paths);
+        return getOutputAmount(this.paths);
     }
 
     // rpcUrl is optional, but recommended to prevent rate limiting
@@ -230,85 +174,6 @@ export class Swap {
             });
         }
         return callData;
-    }
-
-    public get priceImpact(): PriceImpactAmount {
-        const paths = this.pathsImmutable;
-
-        const pathsReverse = paths.map(
-            (path) =>
-                new PathWithAmount(
-                    this.chainId,
-                    [...path.tokens].reverse(),
-                    [...path.pools].reverse(),
-                    path.outputAmount.amount,
-                    path.inputAmount.amount,
-                ),
-        );
-
-        const amountInitial =
-            this.swapKind === SwapKind.GivenIn
-                ? this.getInputAmount(paths).amount
-                : this.getOutputAmount(paths).amount;
-
-        const amountFinal =
-            this.swapKind === SwapKind.GivenIn
-                ? this.getOutputAmount(pathsReverse).amount
-                : this.getInputAmount(pathsReverse).amount;
-
-        const priceImpact = MathSol.divDownFixed(
-            abs(amountInitial - amountFinal),
-            amountInitial * 2n,
-        );
-        return PriceImpactAmount.fromRawAmount(priceImpact);
-    }
-
-    /**
-     * Takes a slippage acceptable by the user and returns the limits for a swap to be executed
-     *
-     * @param slippage percentage: 5 for 5%
-     * @param expectedAmount is the amount that the user expects to receive or send, can be obtained from swap.query()
-     * @returns
-     */
-    limits(slippage: Slippage, expectedAmount: TokenAmount): bigint[] {
-        const limits = new Array(this.assets.length).fill(0n);
-        let limitAmount: bigint;
-        if (this.swapKind === SwapKind.GivenIn) {
-            limitAmount = slippage.applyTo(expectedAmount.amount, -1);
-        } else {
-            limitAmount = slippage.applyTo(expectedAmount.amount);
-        }
-
-        if (!this.isBatchSwap) {
-            return [limitAmount];
-        }
-
-        for (let i = 0; i < this.assets.length; i++) {
-            if (
-                this.assets[i] === this.inputAmount.token.address ||
-                (this.assets[i] === ZERO_ADDRESS &&
-                    this.inputAmount.token.address === NATIVE_ADDRESS)
-            ) {
-                if (this.swapKind === SwapKind.GivenIn) {
-                    limits[i] = this.inputAmount.amount;
-                } else {
-                    limits[i] = limitAmount;
-                }
-            }
-            if (
-                this.assets[i] === this.outputAmount.token.address ||
-                (this.assets[i] === ZERO_ADDRESS &&
-                    this.outputAmount.token.address === NATIVE_ADDRESS)
-            ) {
-                if (this.swapKind === SwapKind.GivenIn) {
-                    limits[i] = -1n * limitAmount;
-                } else {
-                    limits[i] = -1n * this.outputAmount.amount;
-                }
-            }
-        }
-
-        return limits;
     }
 
     /**
@@ -470,33 +335,5 @@ export class Swap {
             } as SingleSwap;
         }
         return swaps;
-    }
-
-    private getInputAmount(paths: PathWithAmount[]): TokenAmount {
-        if (
-            !paths.every((p) =>
-                p.inputAmount.token.isEqual(paths[0].inputAmount.token),
-            )
-        ) {
-            throw new Error(
-                'Input amount can only be calculated if all paths have the same input token',
-            );
-        }
-        const amounts = paths.map((path) => path.inputAmount);
-        return amounts.reduce((a, b) => a.add(b));
-    }
-
-    private getOutputAmount(paths: PathWithAmount[]): TokenAmount {
-        if (
-            !paths.every((p) =>
-                p.outputAmount.token.isEqual(paths[0].outputAmount.token),
-            )
-        ) {
-            throw new Error(
-                'Output amount can only be calculated if all paths have the same output token',
-            );
-        }
-        const amounts = paths.map((path) => path.outputAmount);
-        return amounts.reduce((a, b) => a.add(b));
     }
 }
