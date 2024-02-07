@@ -1,6 +1,6 @@
 import { PathWithAmount } from './path';
 import { TokenAmount } from './tokenAmount';
-import { SingleSwap, SwapKind, BatchSwapStep } from '../types';
+import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../types';
 import {
     abs,
     BALANCER_QUERIES,
@@ -9,6 +9,7 @@ import {
     ZERO_ADDRESS,
     NATIVE_ADDRESS,
     MathSol,
+    VAULT,
 } from '../utils';
 import {
     Address,
@@ -17,9 +18,10 @@ import {
     getContract,
     http,
 } from 'viem';
-import { balancerQueriesAbi } from '../abi';
+import { balancerQueriesAbi, vaultV2Abi } from '../abi';
 import { PriceImpactAmount } from './priceImpactAmount';
 import cloneDeep from 'lodash.clonedeep';
+import { Slippage } from './slippage';
 
 // A Swap can be a single or multiple paths
 export class Swap {
@@ -203,6 +205,147 @@ export class Swap {
             amountInitial * 2n,
         );
         return PriceImpactAmount.fromRawAmount(priceImpact);
+    }
+
+    /**
+     * Takes a slippage acceptable by the user and returns the limits for a swap to be executed
+     *
+     * @param slippage slippage tolerance accepted by the user. Can be built using Slippage.fromPercentage() or any of its variations.
+     * @param expectedAmount is the amount that the user expects to receive or send, can be obtained from swap.query()
+     * @returns
+     */
+    limits(slippage: Slippage, expectedAmount: TokenAmount): bigint[] {
+        const limits = new Array(this.assets.length).fill(0n);
+        let limitAmount: bigint;
+        if (this.swapKind === SwapKind.GivenIn) {
+            limitAmount = slippage.applyTo(expectedAmount.amount, -1);
+        } else {
+            limitAmount = slippage.applyTo(expectedAmount.amount);
+        }
+
+        if (!this.isBatchSwap) {
+            return [limitAmount];
+        }
+
+        for (let i = 0; i < this.assets.length; i++) {
+            if (
+                this.assets[i] === this.inputAmount.token.address ||
+                (this.assets[i] === ZERO_ADDRESS &&
+                    this.inputAmount.token.address === NATIVE_ADDRESS)
+            ) {
+                if (this.swapKind === SwapKind.GivenIn) {
+                    limits[i] = this.inputAmount.amount;
+                } else {
+                    limits[i] = limitAmount;
+                }
+            }
+            if (
+                this.assets[i] === this.outputAmount.token.address ||
+                (this.assets[i] === ZERO_ADDRESS &&
+                    this.outputAmount.token.address === NATIVE_ADDRESS)
+            ) {
+                if (this.swapKind === SwapKind.GivenIn) {
+                    limits[i] = -1n * limitAmount;
+                } else {
+                    limits[i] = -1n * this.outputAmount.amount;
+                }
+            }
+        }
+
+        return limits;
+    }
+
+    /**
+     * Returns the transaction data to be sent to the vault contract
+     *
+     * @param limits calculated from swap.limits()
+     * @param deadline unix timestamp
+     * @param sender address of the sender
+     * @param recipient defaults to sender
+     * @returns
+     */
+    transactionData(
+        limits: bigint[],
+        deadline: bigint,
+        sender: Address,
+        recipient = sender,
+    ) {
+        return {
+            to: this.to(),
+            data: this.callData(limits, deadline, sender, recipient),
+            value: this.value(limits),
+        };
+    }
+
+    /**
+     * Returns the native assset value to be sent to the vault contract based on the swap kind and the limit amounts
+     *
+     * @param limits calculated from swap.limits()
+     * @returns
+     */
+    private value(limits: bigint[]): bigint {
+        let value = 0n;
+        if (this.inputAmount.token.address === NATIVE_ADDRESS) {
+            const idx = this.assets.indexOf(ZERO_ADDRESS);
+            value = limits[idx];
+        }
+        return value;
+    }
+
+    private to(): Address {
+        return VAULT[this.chainId];
+    }
+
+    /**
+     * Returns the call data to be sent to the vault contract for the swap execution.
+     *
+     * @param limits calculated from swap.limits()
+     * @param deadline unix timestamp
+     * @param sender address of the sender
+     * @param recipient defaults to sender
+     * @returns
+     */
+    private callData(
+        limits: bigint[],
+        deadline: bigint,
+        sender: Address,
+        recipient = sender,
+        internalBalances = {
+            to: false,
+            from: false,
+        },
+    ): Hex {
+        let callData: Hex;
+
+        const funds = {
+            sender,
+            recipient,
+            fromInternalBalance: internalBalances.from,
+            toInternalBalance: internalBalances.to,
+        };
+
+        if (this.isBatchSwap) {
+            callData = encodeFunctionData({
+                abi: vaultV2Abi,
+                functionName: 'batchSwap',
+                args: [
+                    this.swapKind,
+                    this.swaps as BatchSwapStep[],
+                    this.assets,
+                    funds,
+                    limits,
+                    deadline,
+                ],
+            });
+        } else {
+            callData = encodeFunctionData({
+                abi: vaultV2Abi,
+                functionName: 'swap',
+                args: [this.swaps as SingleSwap, funds, limits[0], deadline],
+            });
+        }
+
+        return callData;
     }
 
     // public get executionPrice(): Price {}
