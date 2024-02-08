@@ -16,9 +16,8 @@ import {
     SwapKind,
     Token,
     TokenAmount,
+    Swap,
 } from '../src';
-// TODO - Move these to src import once old SOR removed
-import { Swap } from '@/entities/swap';
 
 const addLiquidity = async () => {
     // User defined
@@ -39,7 +38,6 @@ const addLiquidity = async () => {
 
     const swapAmount = TokenAmount.fromHumanAmount(tokenIn, '1');
 
-    // TODO - Add input params
     const quoteInput: GetQuoteInput = {
         chainId,
         tokenIn: tokenIn.address,
