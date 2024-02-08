@@ -5,6 +5,7 @@ import {
     NestedPool,
     constraintValidation,
 } from '../src/entities';
+import { PoolType } from '@/types';
 
 describe('constraint validations', () => {
     describe('happy case', () => {
@@ -55,7 +56,7 @@ const happyPools: NestedPool[] = [
     {
         id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',
         address: '0x08775ccb6674d6bdceb0797c364c2653ed84f384',
-        type: 'Weighted',
+        type: PoolType.Weighted,
         level: 1,
         tokens: [
             {
@@ -78,7 +79,7 @@ const happyPools: NestedPool[] = [
     {
         id: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
         address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
-        type: 'ComposableStable',
+        type: PoolType.ComposableStable,
         level: 0,
         tokens: [
             {
@@ -106,7 +107,7 @@ const happyPools: NestedPool[] = [
     {
         id: '0x3dd0843a028c86e0b760b1a76929d1c5ef93a2dd000200000000000000000249',
         address: '0x3dd0843A028C86e0b760b1A76929d1C5Ef93a2dd',
-        type: 'ComposableStable',
+        type: PoolType.ComposableStable,
         level: 0,
         tokens: [
             {
@@ -136,7 +137,7 @@ const deepPools: NestedPool[] = [
     {
         id: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
         address: '0x5c6Ee304399DBdB9C8Ef030aB642B10820DB8F56',
-        type: 'Weighted',
+        type: PoolType.Weighted,
         level: 0,
         tokens: [
             {

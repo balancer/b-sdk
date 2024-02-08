@@ -15,10 +15,14 @@ import {
     RemoveLiquidityUnbalancedInput,
 } from '../removeLiquidity/types';
 import { TokenAmount } from '../tokenAmount';
-import { PoolState } from '../types';
+import { NestedPoolState, PoolState } from '../types';
 import { getSortedTokens } from '../utils';
 import { SingleSwap, SwapKind } from '../../types';
 import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
+import { RemoveLiquidityNestedSingleTokenInput } from '../removeLiquidityNested/types';
+import { RemoveLiquidityNested } from '../removeLiquidityNested';
+import { AddLiquidityNested } from '../addLiquidityNested';
+import { AddLiquidityNestedInput } from '../addLiquidityNested/types';
 
 export class PriceImpact {
     static addLiquiditySingleToken = async (
@@ -230,6 +234,44 @@ export class PriceImpact {
 
         // get relevant amounts for price impact calculation
         const amountInitial = parseFloat(bptIn.toSignificant());
+        const amountFinal = parseFloat(bptOut.toSignificant());
+
+        // calculate price impact using ABA method
+        const priceImpact = (amountInitial - amountFinal) / amountInitial / 2;
+        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+    };
+
+    static removeLiquidityNested = async (
+        input: RemoveLiquidityNestedSingleTokenInput,
+        nestedPoolState: NestedPoolState,
+    ): Promise<PriceImpactAmount> => {
+        // inputs are being validated within RemoveLiquidity
+
+        // simulate removing liquidity to get amounts out
+        const removeLiquidityNested = new RemoveLiquidityNested();
+        const { bptAmountIn, amountsOut } = await removeLiquidityNested.query(
+            input,
+            nestedPoolState,
+        );
+
+        // simulate adding liquidity to get amounts in
+        const addLiquidityNested = new AddLiquidityNested();
+        const addLiquidityNestedInput: AddLiquidityNestedInput = {
+            accountAddress: input.accountAddress,
+            chainId: input.chainId,
+            rpcUrl: input.rpcUrl,
+            useNativeAssetAsWrappedAmountIn:
+                input.useNativeAssetAsWrappedAmountOut,
+            fromInternalBalance: input.toInternalBalance,
+            amountsIn: amountsOut.map((a) => a.toInputAmount()),
+        };
+        const { bptOut } = await addLiquidityNested.query(
+            addLiquidityNestedInput,
+            nestedPoolState,
+        );
+
+        // get relevant amounts for price impact calculation
+        const amountInitial = parseFloat(bptAmountIn.toSignificant());
         const amountFinal = parseFloat(bptOut.toSignificant());
 
         // calculate price impact using ABA method

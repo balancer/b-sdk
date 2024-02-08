@@ -22,18 +22,18 @@ import {
     replaceWrapped,
     NestedPoolState,
     TokenAmount,
-} from '../src/entities';
-import { Address, Hex, PoolType } from '../src/types';
+} from '../../../src/entities';
+import { Address, Hex, PoolType } from '../../../src/types';
 
-import { BALANCER_RELAYER, CHAINS, ChainId } from '../src/utils';
+import { BALANCER_RELAYER, CHAINS, ChainId } from '../../../src/utils';
 
-import { forkSetup, sendTransactionGetBalances } from './lib/utils/helper';
-import { Relayer } from '../src/entities/relayer';
+import { forkSetup, sendTransactionGetBalances } from '../../lib/utils/helper';
+import { Relayer } from '../../../src/entities/relayer';
 import {
     RemoveLiquidityNestedProportionalInput,
     RemoveLiquidityNestedSingleTokenInput,
-} from '../src/entities/removeLiquidityNested/types';
-import { ANVIL_NETWORKS, startFork } from './anvil/anvil-global-setup';
+} from '../../../src/entities/removeLiquidityNested/types';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
 type TxInput = {
     poolId: Hex;
