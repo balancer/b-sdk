@@ -119,7 +119,7 @@ export class SorGetQuote {
         decimals: Int!
     }
     */
-    async fetchSorGetQuote(quoteInput: GetQuoteInput): Promise<Path[]> {
+    async fetchSorGetQuote(_quoteInput: GetQuoteInput): Promise<Path[]> {
         // TODO - swapAmount should be passed to API in human readable. Can also run check that token matches swap type
         return [
             {
