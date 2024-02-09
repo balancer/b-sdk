@@ -2,7 +2,7 @@ import { RawPool } from './data';
 import {
     BasePool,
     BasePoolFactory,
-    Swap,
+    SwapLocal,
     Token,
     TokenAmount,
 } from './entities';
@@ -28,7 +28,7 @@ export async function sorGetSwapsWithPools(
     swapAmount: SwapInputRawAmount | TokenAmount,
     pools: BasePool[],
     swapOptions?: Omit<SwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
-): Promise<Swap | null> {
+): Promise<SwapLocal | null> {
     const checkedSwapAmount = checkInputs(
         tokenIn,
         tokenOut,
@@ -54,5 +54,5 @@ export async function sorGetSwapsWithPools(
 
     if (!bestPaths) return null;
 
-    return new Swap({ paths: bestPaths, swapKind });
+    return new SwapLocal({ paths: bestPaths, swapKind });
 }

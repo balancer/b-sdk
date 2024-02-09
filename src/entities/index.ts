@@ -20,3 +20,4 @@ export * from './token';
 export * from './tokenAmount';
 export * from './types';
 export * from './utils';
+export * from './swap';

@@ -24,7 +24,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { Slippage } from './slippage';
 
 // A Swap can be a single or multiple paths
-export class Swap {
+export class SwapLocal {
     public constructor({
         paths,
         swapKind,

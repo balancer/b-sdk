@@ -3,7 +3,7 @@ import { Token } from './token';
 import { TokenAmount } from './tokenAmount';
 import { SwapKind } from '../types';
 
-export class Path {
+export class PathLocal {
     public readonly pools: BasePool[];
     public readonly tokens: Token[];
 
@@ -24,7 +24,7 @@ export class Path {
     }
 }
 
-export class PathWithAmount extends Path {
+export class PathWithAmount extends PathLocal {
     public readonly swapAmount: TokenAmount;
     public readonly swapKind: SwapKind;
     public readonly outputAmount: TokenAmount;

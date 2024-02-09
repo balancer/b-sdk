@@ -1,7 +1,13 @@
 import { SwapKind } from './types';
 import { logger } from './utils/logger';
 import { WAD } from './utils/math';
-import { BasePool, Path, PathWithAmount, Token, TokenAmount } from './entities';
+import {
+    BasePool,
+    PathLocal,
+    PathWithAmount,
+    Token,
+    TokenAmount,
+} from './entities';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 
@@ -17,7 +23,7 @@ export class Router {
         tokenOut: Token,
         pools: BasePool[],
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
-    ): Path[] {
+    ): PathLocal[] {
         this.pathGraph.buildGraph({ pools });
 
         const candidatePaths = this.pathGraph.getCandidatePaths({
@@ -30,7 +36,7 @@ export class Router {
     }
 
     public getBestPaths(
-        paths: Path[],
+        paths: PathLocal[],
         swapKind: SwapKind,
         swapAmount: TokenAmount,
     ): PathWithAmount[] | null {

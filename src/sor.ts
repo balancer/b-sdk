@@ -1,5 +1,5 @@
 import { Router } from './router';
-import { BasePool, Path, Token, TokenAmount, Swap } from './entities';
+import { BasePool, PathLocal, Token, TokenAmount, SwapLocal } from './entities';
 import { ChainId, checkInputs, SUBGRAPH_URLS, BATCHSIZE, VAULT } from './utils';
 import { SorConfig, SwapInputRawAmount, SwapKind, SwapOptions } from './types';
 import { PoolParser } from './entities/pools/parser';
@@ -90,7 +90,7 @@ export class SmartOrderRouter {
         swapKind: SwapKind,
         swapAmount: SwapInputRawAmount | TokenAmount,
         swapOptions?: SwapOptions,
-    ): Promise<Swap | null> {
+    ): Promise<SwapLocal | null> {
         const checkedSwapAmount = checkInputs(
             tokenIn,
             tokenOut,
@@ -113,14 +113,14 @@ export class SmartOrderRouter {
 
         if (!bestPaths) return null;
 
-        return new Swap({ paths: bestPaths, swapKind });
+        return new SwapLocal({ paths: bestPaths, swapKind });
     }
 
     public async getCandidatePaths(
         tokenIn: Token,
         tokenOut: Token,
         options?: Pick<SwapOptions, 'block' | 'graphTraversalConfig'>,
-    ): Promise<Path[]> {
+    ): Promise<PathLocal[]> {
         // fetch pools if we haven't yet, or if a block number is provided that doesn't match the existing.
         if (
             !this.isInitialized ||

@@ -1,4 +1,4 @@
-import { BasePool, Path, Token, TokenAmount } from '../entities';
+import { BasePool, PathLocal, Token, TokenAmount } from '../entities';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { PoolType, SwapKind } from '../types';
 
@@ -62,7 +62,7 @@ export class PathGraph {
         tokenIn: Token;
         tokenOut: Token;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
-    }): Path[] {
+    }): PathLocal[] {
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
             maxDepth: 6,
