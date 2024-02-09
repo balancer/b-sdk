@@ -1,7 +1,7 @@
 ---
 "@balancer/sdk": minor
 ---
-
+nt
 Adds Balancer's V3 CreatePool functionality for Weighted Pools;
 Adds tests for the V3's Create Weighted Pool;
 Adds example for V3's Create Weighted Pool;

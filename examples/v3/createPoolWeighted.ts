@@ -3,12 +3,7 @@ dotenv.config();
 
 import { CreatePool, CreatePoolV3WeightedInput } from '@/entities';
 import { PoolType, TokenType } from '@/types';
-import {
-    ChainId,
-    CHAINS,
-    WEIGHTED_POOL_FACTORY_BALANCER_V2,
-    WEIGHTED_POOL_FACTORY_BALANCER_V3,
-} from '@/utils';
+import { ChainId, CHAINS, WEIGHTED_POOL_FACTORY_BALANCER_V3 } from '@/utils';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import {
