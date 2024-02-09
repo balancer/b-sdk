@@ -20,7 +20,7 @@ import {
 // TODO - Move these to src import once old SOR removed
 import { Swap } from '@/entities/swap';
 
-const addLiquidity = async () => {
+const swap = async () => {
     // User defined
     const chainId = ChainId.MAINNET;
     const swapKind = SwapKind.GivenIn;
@@ -73,15 +73,15 @@ const addLiquidity = async () => {
     const slippage = Slippage.fromPercentage('0.1');
     const limits = swap.limits(slippage, updated);
     console.log('Limits:', limits);
-    const transactionData = swap.transactionData(
+    const callData = swap.buildCall(
         limits,
         999999999999999999n, // Infinity
         '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
         '0x76fd639005b09140a8616f036B64DaCefe93617B',
     );
     console.log(
-        `Tx:\nTo: ${transactionData.to}\nCallData: ${transactionData.data}\nValue: ${transactionData.value}`,
+        `Tx:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
     );
 };
 
-export default addLiquidity;
+export default swap;

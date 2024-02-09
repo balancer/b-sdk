@@ -17,13 +17,12 @@ import {
     http,
 } from 'viem';
 import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
-import cloneDeep from 'lodash.clonedeep';
-import { Path } from '../types';
+import { Path, SwapBuildOutput, SwapBase } from '../types';
 import { PathWithAmount } from '../pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../pathHelpers';
 
 // A Swap can be a single or multiple paths
-export class SwapV2 {
+export class SwapV2 implements SwapBase {
     public constructor({
         chainId,
         paths,
@@ -43,8 +42,6 @@ export class SwapV2 {
                 ),
         );
 
-        // paths with immutable pool balances
-        this.pathsImmutable = cloneDeep(this.paths);
         this.chainId = chainId;
         this.swapKind = swapKind;
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
@@ -63,7 +60,6 @@ export class SwapV2 {
     public readonly chainId: number;
     public readonly isBatchSwap: boolean;
     public readonly paths: PathWithAmount[];
-    public readonly pathsImmutable: PathWithAmount[];
     public readonly assets: Address[];
     public readonly swapKind: SwapKind;
     public swaps: BatchSwapStep[] | SingleSwap;
@@ -185,15 +181,15 @@ export class SwapV2 {
      * @param recipient defaults to sender
      * @returns
      */
-    transactionData(
+    buildCall(
         limits: bigint[],
         deadline: bigint,
         sender: Address,
         recipient = sender,
-    ) {
+    ): SwapBuildOutput {
         return {
             to: this.to(),
-            data: this.callData(limits, deadline, sender, recipient),
+            callData: this.callData(limits, deadline, sender, recipient),
             value: this.value(limits),
         };
     }
