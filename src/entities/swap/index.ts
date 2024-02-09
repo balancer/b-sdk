@@ -4,7 +4,7 @@ import { abs, ZERO_ADDRESS, NATIVE_ADDRESS, MathSol } from '../../utils';
 import { Address } from 'viem';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import { Slippage } from '../slippage';
-import { Path } from './types';
+import { Path, SwapBuildOutput, SwapBase } from './types';
 import { PathWithAmount } from './pathWithAmount';
 import { SwapV2 } from './swapV2';
 import { getInputAmount, getOutputAmount } from './pathHelpers';
@@ -13,7 +13,7 @@ export * from './types';
 
 // A Swap can be a single or multiple paths
 export class Swap {
-    private readonly swap: SwapV2;
+    private readonly swap: SwapBase;
 
     public constructor({
         chainId,
@@ -56,9 +56,7 @@ export class Swap {
     }
 
     public get priceImpact(): PriceImpactAmount {
-        const paths = this.swap.pathsImmutable;
-
-        const pathsReverse = paths.map(
+        const pathsReverse = this.swap.paths.map(
             (path) =>
                 new PathWithAmount(
                     this.swap.chainId,
@@ -71,8 +69,8 @@ export class Swap {
 
         const amountInitial =
             this.swap.swapKind === SwapKind.GivenIn
-                ? getInputAmount(paths).amount
-                : getOutputAmount(paths).amount;
+                ? getInputAmount(this.swap.paths).amount
+                : getOutputAmount(this.swap.paths).amount;
 
         const amountFinal =
             this.swap.swapKind === SwapKind.GivenIn
@@ -143,12 +141,12 @@ export class Swap {
      * @param recipient defaults to sender
      * @returns
      */
-    transactionData(
+    buildCall(
         limits: bigint[],
         deadline: bigint,
         sender: Address,
         recipient = sender,
-    ) {
-        return this.swap.transactionData(limits, deadline, sender, recipient);
+    ): SwapBuildOutput {
+        return this.swap.buildCall(limits, deadline, sender, recipient);
     }
 }
