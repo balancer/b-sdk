@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.8.1
+
+### Patch Changes
+
+- 579600a: Expose proportional amounts helper
+
 ## 0.8.0
 
 ### Minor Changes
