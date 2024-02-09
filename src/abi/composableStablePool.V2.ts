@@ -1,8 +1,13 @@
-export const weightedPoolAbi = [
+export const composabableStablePoolV2Abi = [
     {
         inputs: [
             {
                 components: [
+                    {
+                        internalType: 'contract IVault',
+                        name: 'vault',
+                        type: 'address',
+                    },
                     {
                         internalType: 'string',
                         name: 'name',
@@ -14,57 +19,55 @@ export const weightedPoolAbi = [
                         type: 'string',
                     },
                     {
-                        internalType: 'contract IERC20[]',
-                        name: 'tokens',
-                        type: 'address[]',
+                        internalType: 'contract IERC20',
+                        name: 'mainToken',
+                        type: 'address',
                     },
                     {
-                        internalType: 'uint256[]',
-                        name: 'normalizedWeights',
-                        type: 'uint256[]',
+                        internalType: 'contract IERC20',
+                        name: 'wrappedToken',
+                        type: 'address',
                     },
                     {
-                        internalType: 'contract IRateProvider[]',
-                        name: 'rateProviders',
-                        type: 'address[]',
+                        internalType: 'address',
+                        name: 'assetManager',
+                        type: 'address',
                     },
                     {
-                        internalType: 'address[]',
-                        name: 'assetManagers',
-                        type: 'address[]',
+                        internalType: 'uint256',
+                        name: 'upperTarget',
+                        type: 'uint256',
                     },
                     {
                         internalType: 'uint256',
                         name: 'swapFeePercentage',
                         type: 'uint256',
                     },
+                    {
+                        internalType: 'uint256',
+                        name: 'pauseWindowDuration',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'bufferPeriodDuration',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'owner',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'string',
+                        name: 'version',
+                        type: 'string',
+                    },
                 ],
-                internalType: 'struct WeightedPool.NewPoolParams',
-                name: 'params',
+                internalType: 'struct AaveLinearPool.ConstructorArgs',
+                name: 'args',
                 type: 'tuple',
             },
-            {
-                internalType: 'contract IVault',
-                name: 'vault',
-                type: 'address',
-            },
-            {
-                internalType: 'contract IProtocolFeePercentagesProvider',
-                name: 'protocolFeeProvider',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'pauseWindowDuration',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'bufferPeriodDuration',
-                type: 'uint256',
-            },
-            { internalType: 'address', name: 'owner', type: 'address' },
-            { internalType: 'string', name: 'version', type: 'string' },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -111,25 +114,6 @@ export const weightedPoolAbi = [
         anonymous: false,
         inputs: [
             {
-                indexed: true,
-                internalType: 'uint256',
-                name: 'feeType',
-                type: 'uint256',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'protocolFeePercentage',
-                type: 'uint256',
-            },
-        ],
-        name: 'ProtocolFeePercentageCacheUpdated',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
                 indexed: false,
                 internalType: 'bool',
                 name: 'enabled',
@@ -157,6 +141,31 @@ export const weightedPoolAbi = [
         inputs: [
             {
                 indexed: true,
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'lowerTarget',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'upperTarget',
+                type: 'uint256',
+            },
+        ],
+        name: 'TargetsSet',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
                 internalType: 'address',
                 name: 'from',
                 type: 'address',
@@ -176,13 +185,6 @@ export const weightedPoolAbi = [
         ],
         name: 'Transfer',
         type: 'event',
-    },
-    {
-        inputs: [],
-        name: 'DELEGATE_PROTOCOL_SWAP_FEES_SENTINEL',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
     },
     {
         inputs: [],
@@ -250,23 +252,9 @@ export const weightedPoolAbi = [
         type: 'function',
     },
     {
-        inputs: [],
-        name: 'getATHRateProduct',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
         inputs: [{ internalType: 'bytes4', name: 'selector', type: 'bytes4' }],
         name: 'getActionId',
         outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getActualSupply',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -285,6 +273,13 @@ export const weightedPoolAbi = [
     },
     {
         inputs: [],
+        name: 'getBptIndex',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'pure',
+        type: 'function',
+    },
+    {
+        inputs: [],
         name: 'getDomainSeparator',
         outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
         stateMutability: 'view',
@@ -292,15 +287,17 @@ export const weightedPoolAbi = [
     },
     {
         inputs: [],
-        name: 'getInvariant',
+        name: 'getMainIndex',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'getLastPostJoinExitInvariant',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        name: 'getMainToken',
+        outputs: [
+            { internalType: 'contract IERC20', name: '', type: 'address' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -308,13 +305,6 @@ export const weightedPoolAbi = [
         inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
         name: 'getNextNonce',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getNormalizedWeights',
-        outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -352,13 +342,6 @@ export const weightedPoolAbi = [
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'uint256', name: 'feeType', type: 'uint256' }],
-        name: 'getProtocolFeePercentageCache',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
         inputs: [],
         name: 'getProtocolFeesCollector',
         outputs: [
@@ -373,21 +356,8 @@ export const weightedPoolAbi = [
     },
     {
         inputs: [],
-        name: 'getProtocolSwapFeeDelegation',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getRateProviders',
-        outputs: [
-            {
-                internalType: 'contract IRateProvider[]',
-                name: '',
-                type: 'address[]',
-            },
-        ],
+        name: 'getRate',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -407,10 +377,58 @@ export const weightedPoolAbi = [
     },
     {
         inputs: [],
+        name: 'getTargets',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: 'lowerTarget',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'upperTarget',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
         name: 'getVault',
         outputs: [
             { internalType: 'contract IVault', name: '', type: 'address' },
         ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getVirtualSupply',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getWrappedIndex',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getWrappedToken',
+        outputs: [
+            { internalType: 'contract IERC20', name: '', type: 'address' },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getWrappedTokenRate',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -437,6 +455,13 @@ export const weightedPoolAbi = [
     },
     {
         inputs: [],
+        name: 'initialize',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
         name: 'name',
         outputs: [{ internalType: 'string', name: '', type: 'string' }],
         stateMutability: 'view',
@@ -453,32 +478,28 @@ export const weightedPoolAbi = [
         inputs: [
             { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
+            { internalType: 'address', name: '', type: 'address' },
             {
                 internalType: 'uint256[]',
                 name: 'balances',
                 type: 'uint256[]',
             },
-            {
-                internalType: 'uint256',
-                name: 'lastChangeBlock',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'protocolSwapFeePercentage',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'onExitPool',
         outputs: [
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsOut',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'dueProtocolFees',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -487,33 +508,96 @@ export const weightedPoolAbi = [
         inputs: [
             { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
             {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
+                internalType: 'uint256[]',
+                name: 'balances',
+                type: 'uint256[]',
+            },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+        ],
+        name: 'onJoinPool',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'dueProtocolFees',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    {
+                        internalType: 'enum IVault.SwapKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'contract IERC20',
+                        name: 'tokenIn',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'contract IERC20',
+                        name: 'tokenOut',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'bytes32',
+                        name: 'poolId',
+                        type: 'bytes32',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'lastChangeBlock',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'from',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'to',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
+                ],
+                internalType: 'struct IPoolSwapStructs.SwapRequest',
+                name: 'request',
+                type: 'tuple',
             },
             {
                 internalType: 'uint256[]',
                 name: 'balances',
                 type: 'uint256[]',
             },
-            {
-                internalType: 'uint256',
-                name: 'lastChangeBlock',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'protocolSwapFeePercentage',
-                type: 'uint256',
-            },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            { internalType: 'uint256', name: 'indexIn', type: 'uint256' },
+            { internalType: 'uint256', name: 'indexOut', type: 'uint256' },
         ],
-        name: 'onJoinPool',
-        outputs: [
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
-        ],
+        name: 'onSwap',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -599,11 +683,7 @@ export const weightedPoolAbi = [
             { internalType: 'address', name: 'owner', type: 'address' },
             { internalType: 'address', name: 'spender', type: 'address' },
             { internalType: 'uint256', name: 'value', type: 'uint256' },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
             { internalType: 'uint8', name: 'v', type: 'uint8' },
             { internalType: 'bytes32', name: 'r', type: 'bytes32' },
             { internalType: 'bytes32', name: 's', type: 'bytes32' },
@@ -615,28 +695,16 @@ export const weightedPoolAbi = [
     },
     {
         inputs: [
-            { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
+            { internalType: 'bytes32', name: '', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
+            { internalType: 'address', name: '', type: 'address' },
             {
                 internalType: 'uint256[]',
                 name: 'balances',
                 type: 'uint256[]',
             },
-            {
-                internalType: 'uint256',
-                name: 'lastChangeBlock',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'protocolSwapFeePercentage',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryExit',
@@ -653,28 +721,16 @@ export const weightedPoolAbi = [
     },
     {
         inputs: [
-            { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
+            { internalType: 'bytes32', name: '', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
+            { internalType: 'address', name: '', type: 'address' },
             {
                 internalType: 'uint256[]',
                 name: 'balances',
                 type: 'uint256[]',
             },
-            {
-                internalType: 'uint256',
-                name: 'lastChangeBlock',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'protocolSwapFeePercentage',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryJoin',
@@ -692,13 +748,12 @@ export const weightedPoolAbi = [
     {
         inputs: [
             {
-                internalType: 'contract IERC20',
-                name: 'token',
-                type: 'address',
+                internalType: 'uint256',
+                name: 'swapFeePercentage',
+                type: 'uint256',
             },
-            { internalType: 'bytes', name: 'poolConfig', type: 'bytes' },
         ],
-        name: 'setAssetManagerPoolConfig',
+        name: 'setSwapFeePercentage',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -707,11 +762,16 @@ export const weightedPoolAbi = [
         inputs: [
             {
                 internalType: 'uint256',
-                name: 'swapFeePercentage',
+                name: 'newLowerTarget',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'newUpperTarget',
                 type: 'uint256',
             },
         ],
-        name: 'setSwapFeePercentage',
+        name: 'setTargets',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -732,11 +792,7 @@ export const weightedPoolAbi = [
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
+            { internalType: 'address', name: 'recipient', type: 'address' },
             { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'transfer',
@@ -747,11 +803,7 @@ export const weightedPoolAbi = [
     {
         inputs: [
             { internalType: 'address', name: 'sender', type: 'address' },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
+            { internalType: 'address', name: 'recipient', type: 'address' },
             { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'transferFrom',
@@ -762,13 +814,6 @@ export const weightedPoolAbi = [
     {
         inputs: [],
         name: 'unpause',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'updateProtocolFeePercentageCache',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',

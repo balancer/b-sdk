@@ -1,29 +1,24 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { composableStableFactoryV2Abi } from '@/abi/composableStableFactory.V2';
+import { CreatePool, CreatePoolV2ComposableStableInput } from '@/entities';
+import { PoolType } from '@/types';
+import { ChainId, CHAINS, COMPOSABLE_STABLE_POOL_FACTORY } from '@/utils';
+import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
+import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import {
     Address,
     Client,
     PublicActions,
-    TestActions,
     WalletActions,
+    TestActions,
     createTestClient,
     http,
     publicActions,
     walletActions,
     zeroAddress,
 } from 'viem';
-import { CreatePoolComposableStableInput } from '../src/entities/createPool/types';
-import { CreatePool } from '../src/entities/createPool';
-import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
-import {
-    CHAINS,
-    COMPOSABLE_STABLE_POOL_FACTORY,
-    ChainId,
-    PoolType,
-} from '../src';
-import { findEventInReceiptLogs } from '../test/lib/utils/findEventInReceiptLogs';
-import { composableStableFactoryV5Abi } from '../src/abi/composableStableFactoryV5';
 
 const createPoolComposableStable = async (): Promise<{
     poolAddress: Address;
@@ -43,7 +38,7 @@ const createPoolComposableStable = async (): Promise<{
     const signerAddress = (await client.getAddresses())[0];
     const createPool = new CreatePool();
     const poolType = PoolType.ComposableStable;
-    const createPoolComposableStableInput: CreatePoolComposableStableInput = {
+    const createPoolComposableStableInput: CreatePoolV2ComposableStableInput = {
         name: 'Test Pool',
         symbol: '50BAL-50WETH',
         poolType,
@@ -79,7 +74,7 @@ const createPoolComposableStable = async (): Promise<{
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: composableStableFactoryV5Abi,
+        abi: composableStableFactoryV2Abi,
         to: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
     });
 

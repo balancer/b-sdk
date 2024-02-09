@@ -1,20 +1,20 @@
 import { Address, encodeFunctionData, parseEther } from 'viem';
-import { composableStableFactoryV5Abi } from '../../../../abi/composableStableFactoryV5';
+import { composableStableFactoryV2Abi } from '../../../../abi/composableStableFactory.V2';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
-    CreatePoolComposableStableArgs,
-    CreatePoolComposableStableInput,
+    CreatePoolV2ComposableStableArgs,
+    CreatePoolV2ComposableStableInput,
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
 
-export class CreatePoolComposableStable implements CreatePoolBase {
+export class CreatePoolComposableStableV2 implements CreatePoolBase {
     buildCall(
-        input: CreatePoolComposableStableInput,
+        input: CreatePoolV2ComposableStableInput,
     ): CreatePoolBuildCallOutput {
         const args = this.parseCreateFunctionArgs(input);
         const encodedCall = encodeFunctionData({
-            abi: composableStableFactoryV5Abi,
+            abi: composableStableFactoryV2Abi,
             functionName: 'create',
             args,
         });
@@ -22,8 +22,8 @@ export class CreatePoolComposableStable implements CreatePoolBase {
     }
 
     private parseCreateFunctionArgs(
-        input: CreatePoolComposableStableInput,
-    ): CreatePoolComposableStableArgs {
+        input: CreatePoolV2ComposableStableInput,
+    ): CreatePoolV2ComposableStableArgs {
         const sortedTokenParams = input.tokens.sort(
             ({ tokenAddress: address1 }, { tokenAddress: address2 }) => {
                 const diff = BigInt(address1) - BigInt(address2);

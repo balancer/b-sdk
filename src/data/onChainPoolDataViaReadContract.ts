@@ -6,7 +6,7 @@ import { SwapOptions } from '../types';
 import * as abis from '../abi';
 
 const requiredAbis = [
-    ...abis.composabableStablePoolV5Abi,
+    ...abis.composabableStablePoolV2Abi,
     ...abis.fxPoolAbi,
     ...abis.gyroEV2Abi,
     ...abis.linearPoolAbi,
@@ -15,7 +15,7 @@ const requiredAbis = [
     ...abis.metaStablePoolAbi,
     ...abis.phantomStablePoolAbi,
     ...abis.stablePoolAbi,
-    ...abis.weightedPoolAbi,
+    ...abis.weightedPoolV2Abi,
     ...abis.vaultV2Abi,
 ];
 

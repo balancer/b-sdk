@@ -3,11 +3,13 @@ import {
     Address,
     COMPOSABLE_STABLE_POOL_FACTORY,
     PoolType,
-    WEIGHTED_POOL_FACTORY,
+    WEIGHTED_POOL_FACTORY_BALANCER_V2,
+    WEIGHTED_POOL_FACTORY_BALANCER_V3,
 } from '../../../src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
-import { weightedFactoryV4Abi } from '../../../src/abi/weightedFactoryV4';
-import { composableStableFactoryV5Abi } from '../../../src/abi/composableStableFactoryV5';
+import { weightedPoolFactoryV2Abi } from '../../../src/abi/weightedPoolFactory.V2';
+import { composableStableFactoryV2Abi } from '../../../src/abi/composableStableFactory.V2';
+import { weightedPoolFactoryV3Abi } from '@/abi/weightedPoolFactory.V3';
 
 export async function doCreatePool(
     txInput: CreatePoolTxInput,
@@ -18,18 +20,27 @@ export async function doCreatePool(
     const chainId = await client.getChainId();
 
     const factories = {
-        [PoolType.Weighted]: {
-            address: WEIGHTED_POOL_FACTORY[chainId],
-            abi: weightedFactoryV4Abi,
+        2: {
+            [PoolType.Weighted]: {
+                address: WEIGHTED_POOL_FACTORY_BALANCER_V2[chainId],
+                abi: weightedPoolFactoryV2Abi,
+            },
+            [PoolType.ComposableStable]: {
+                address: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
+                abi: composableStableFactoryV2Abi,
+            },
         },
-        [PoolType.ComposableStable]: {
-            address: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
-            abi: composableStableFactoryV5Abi,
+        3: {
+            [PoolType.Weighted]: {
+                address: WEIGHTED_POOL_FACTORY_BALANCER_V3[chainId],
+                abi: weightedPoolFactoryV3Abi,
+            },
         },
     };
 
     const hash = await client.sendTransaction({
-        to: factories[createPoolInput.poolType].address,
+        to: factories[createPoolInput.balancerVersion][createPoolInput.poolType]
+            .address,
         data: call,
         account: testAddress,
         chain: client.chain,
@@ -38,12 +49,14 @@ export async function doCreatePool(
     const transactionReceipt = await client.waitForTransactionReceipt({
         hash,
     });
-
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: factories[createPoolInput.poolType].abi,
-        to: factories[createPoolInput.poolType].address,
+        abi: factories[createPoolInput.balancerVersion][
+            createPoolInput.poolType
+        ].abi,
+        to: factories[createPoolInput.balancerVersion][createPoolInput.poolType]
+            .address,
     });
 
     const {

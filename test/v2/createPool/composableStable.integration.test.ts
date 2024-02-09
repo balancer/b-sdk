@@ -14,7 +14,7 @@ import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
 import { CreatePoolTxInput } from '../../lib/utils/types';
 import {
-    CreatePoolComposableStableInput,
+    CreatePoolV2ComposableStableInput,
     CreatePoolInput,
 } from '../../../src/entities/createPool/types';
 
@@ -24,7 +24,7 @@ describe('Create Composable Stable Pool tests', () => {
     const chainId = ChainId.MAINNET;
     let txInput: CreatePoolTxInput;
     let poolAddress: Address;
-    let createPoolComposableStableInput: CreatePoolComposableStableInput;
+    let createPoolComposableStableInput: CreatePoolV2ComposableStableInput;
     beforeAll(async () => {
         const client = createTestClient({
             mode: 'anvil',
@@ -93,7 +93,7 @@ describe('Create Composable Stable Pool tests', () => {
         );
     });
     test('Duplicate token addresses, expects error', async () => {
-        const tokens: CreatePoolComposableStableInput['tokens'] = [
+        const tokens: CreatePoolV2ComposableStableInput['tokens'] = [
             {
                 tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
                 rateProvider: zeroAddress,

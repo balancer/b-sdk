@@ -1,26 +1,22 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { CreatePool, CreatePoolV2WeightedInput } from '@/entities';
+import { PoolType } from '@/types';
+import { ChainId, CHAINS, WEIGHTED_POOL_FACTORY_BALANCER_V2 } from '@/utils';
+import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
+import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import {
     createTestClient,
     http,
-    parseEther,
     publicActions,
     walletActions,
+    parseEther,
     zeroAddress,
 } from 'viem';
-import { CreatePool } from '../src/entities/createPool';
-import {
-    ANVIL_NETWORKS,
-    startFork,
-    stopAnvilForks,
-} from '../test/anvil/anvil-global-setup';
-import { CHAINS, ChainId, PoolType, WEIGHTED_POOL_FACTORY } from '../src';
-import { findEventInReceiptLogs } from '../test/lib/utils/findEventInReceiptLogs';
-import { weightedFactoryV4Abi } from '../src/abi/weightedFactoryV4';
-import { CreatePoolWeightedInput } from '../src/entities/createPool/types';
+import { weightedPoolFactoryV2Abi } from '@/abi';
 
-const createPool = async (stopForkAfterExecution = true) => {
+const createPool = async () => {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
     const chainId = ChainId.MAINNET;
 
@@ -34,7 +30,7 @@ const createPool = async (stopForkAfterExecution = true) => {
     const signerAddress = (await client.getAddresses())[0];
     const createPool = new CreatePool();
     const poolType = PoolType.Weighted;
-    const createWeightedPoolInput: CreatePoolWeightedInput = {
+    const createWeightedPoolInput: CreatePoolV2WeightedInput = {
         name: 'Test Pool',
         symbol: '50BAL-25WETH-25DAI',
         poolType,
@@ -61,7 +57,7 @@ const createPool = async (stopForkAfterExecution = true) => {
     };
     const { call } = createPool.buildCall(createWeightedPoolInput);
     const hash = await client.sendTransaction({
-        to: WEIGHTED_POOL_FACTORY[chainId],
+        to: WEIGHTED_POOL_FACTORY_BALANCER_V2[chainId],
         data: call,
         account: signerAddress,
         chain: client.chain,
@@ -73,17 +69,14 @@ const createPool = async (stopForkAfterExecution = true) => {
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: weightedFactoryV4Abi,
-        to: WEIGHTED_POOL_FACTORY[chainId],
+        abi: weightedPoolFactoryV2Abi,
+        to: WEIGHTED_POOL_FACTORY_BALANCER_V2[chainId],
     });
 
     const {
         args: { pool: poolAddress },
     } = poolCreatedEvent;
     console.log('Created pool Address: ', poolAddress);
-    if (stopForkAfterExecution) {
-        await stopAnvilForks();
-    }
     return poolAddress;
 };
 

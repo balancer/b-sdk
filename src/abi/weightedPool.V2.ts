@@ -1,13 +1,8 @@
-export const composabableStablePoolV5Abi = [
+export const weightedPoolV2Abi = [
     {
         inputs: [
             {
                 components: [
-                    {
-                        internalType: 'contract IVault',
-                        name: 'vault',
-                        type: 'address',
-                    },
                     {
                         internalType: 'string',
                         name: 'name',
@@ -19,55 +14,57 @@ export const composabableStablePoolV5Abi = [
                         type: 'string',
                     },
                     {
-                        internalType: 'contract IERC20',
-                        name: 'mainToken',
-                        type: 'address',
+                        internalType: 'contract IERC20[]',
+                        name: 'tokens',
+                        type: 'address[]',
                     },
                     {
-                        internalType: 'contract IERC20',
-                        name: 'wrappedToken',
-                        type: 'address',
+                        internalType: 'uint256[]',
+                        name: 'normalizedWeights',
+                        type: 'uint256[]',
                     },
                     {
-                        internalType: 'address',
-                        name: 'assetManager',
-                        type: 'address',
+                        internalType: 'contract IRateProvider[]',
+                        name: 'rateProviders',
+                        type: 'address[]',
                     },
                     {
-                        internalType: 'uint256',
-                        name: 'upperTarget',
-                        type: 'uint256',
+                        internalType: 'address[]',
+                        name: 'assetManagers',
+                        type: 'address[]',
                     },
                     {
                         internalType: 'uint256',
                         name: 'swapFeePercentage',
                         type: 'uint256',
                     },
-                    {
-                        internalType: 'uint256',
-                        name: 'pauseWindowDuration',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'bufferPeriodDuration',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'owner',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'string',
-                        name: 'version',
-                        type: 'string',
-                    },
                 ],
-                internalType: 'struct AaveLinearPool.ConstructorArgs',
-                name: 'args',
+                internalType: 'struct WeightedPool.NewPoolParams',
+                name: 'params',
                 type: 'tuple',
             },
+            {
+                internalType: 'contract IVault',
+                name: 'vault',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IProtocolFeePercentagesProvider',
+                name: 'protocolFeeProvider',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'pauseWindowDuration',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'bufferPeriodDuration',
+                type: 'uint256',
+            },
+            { internalType: 'address', name: 'owner', type: 'address' },
+            { internalType: 'string', name: 'version', type: 'string' },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -114,6 +111,25 @@ export const composabableStablePoolV5Abi = [
         anonymous: false,
         inputs: [
             {
+                indexed: true,
+                internalType: 'uint256',
+                name: 'feeType',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'protocolFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'ProtocolFeePercentageCacheUpdated',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
                 indexed: false,
                 internalType: 'bool',
                 name: 'enabled',
@@ -141,31 +157,6 @@ export const composabableStablePoolV5Abi = [
         inputs: [
             {
                 indexed: true,
-                internalType: 'contract IERC20',
-                name: 'token',
-                type: 'address',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'lowerTarget',
-                type: 'uint256',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'upperTarget',
-                type: 'uint256',
-            },
-        ],
-        name: 'TargetsSet',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
                 internalType: 'address',
                 name: 'from',
                 type: 'address',
@@ -185,6 +176,13 @@ export const composabableStablePoolV5Abi = [
         ],
         name: 'Transfer',
         type: 'event',
+    },
+    {
+        inputs: [],
+        name: 'DELEGATE_PROTOCOL_SWAP_FEES_SENTINEL',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
     },
     {
         inputs: [],
@@ -252,9 +250,23 @@ export const composabableStablePoolV5Abi = [
         type: 'function',
     },
     {
+        inputs: [],
+        name: 'getATHRateProduct',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
         inputs: [{ internalType: 'bytes4', name: 'selector', type: 'bytes4' }],
         name: 'getActionId',
         outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getActualSupply',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -273,13 +285,6 @@ export const composabableStablePoolV5Abi = [
     },
     {
         inputs: [],
-        name: 'getBptIndex',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'pure',
-        type: 'function',
-    },
-    {
-        inputs: [],
         name: 'getDomainSeparator',
         outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
         stateMutability: 'view',
@@ -287,17 +292,15 @@ export const composabableStablePoolV5Abi = [
     },
     {
         inputs: [],
-        name: 'getMainIndex',
+        name: 'getInvariant',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'getMainToken',
-        outputs: [
-            { internalType: 'contract IERC20', name: '', type: 'address' },
-        ],
+        name: 'getLastPostJoinExitInvariant',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -305,6 +308,13 @@ export const composabableStablePoolV5Abi = [
         inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
         name: 'getNextNonce',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getNormalizedWeights',
+        outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -342,6 +352,13 @@ export const composabableStablePoolV5Abi = [
         type: 'function',
     },
     {
+        inputs: [{ internalType: 'uint256', name: 'feeType', type: 'uint256' }],
+        name: 'getProtocolFeePercentageCache',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
         inputs: [],
         name: 'getProtocolFeesCollector',
         outputs: [
@@ -356,8 +373,21 @@ export const composabableStablePoolV5Abi = [
     },
     {
         inputs: [],
-        name: 'getRate',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        name: 'getProtocolSwapFeeDelegation',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getRateProviders',
+        outputs: [
+            {
+                internalType: 'contract IRateProvider[]',
+                name: '',
+                type: 'address[]',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -377,58 +407,10 @@ export const composabableStablePoolV5Abi = [
     },
     {
         inputs: [],
-        name: 'getTargets',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: 'lowerTarget',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'upperTarget',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
         name: 'getVault',
         outputs: [
             { internalType: 'contract IVault', name: '', type: 'address' },
         ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getVirtualSupply',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getWrappedIndex',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getWrappedToken',
-        outputs: [
-            { internalType: 'contract IERC20', name: '', type: 'address' },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getWrappedTokenRate',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -455,13 +437,6 @@ export const composabableStablePoolV5Abi = [
     },
     {
         inputs: [],
-        name: 'initialize',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
         name: 'name',
         outputs: [{ internalType: 'string', name: '', type: 'string' }],
         stateMutability: 'view',
@@ -478,28 +453,32 @@ export const composabableStablePoolV5Abi = [
         inputs: [
             { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'recipient',
+                type: 'address',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'balances',
                 type: 'uint256[]',
             },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'lastChangeBlock',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'protocolSwapFeePercentage',
+                type: 'uint256',
+            },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'onExitPool',
         outputs: [
-            {
-                internalType: 'uint256[]',
-                name: 'amountsOut',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'uint256[]',
-                name: 'dueProtocolFees',
-                type: 'uint256[]',
-            },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -508,96 +487,33 @@ export const composabableStablePoolV5Abi = [
         inputs: [
             { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
-            { internalType: 'address', name: 'recipient', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'recipient',
+                type: 'address',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'balances',
                 type: 'uint256[]',
             },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'lastChangeBlock',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'protocolSwapFeePercentage',
+                type: 'uint256',
+            },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'onJoinPool',
         outputs: [
-            {
-                internalType: 'uint256[]',
-                name: 'amountsIn',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'uint256[]',
-                name: 'dueProtocolFees',
-                type: 'uint256[]',
-            },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
         ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    {
-                        internalType: 'enum IVault.SwapKind',
-                        name: 'kind',
-                        type: 'uint8',
-                    },
-                    {
-                        internalType: 'contract IERC20',
-                        name: 'tokenIn',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'contract IERC20',
-                        name: 'tokenOut',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'amount',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'bytes32',
-                        name: 'poolId',
-                        type: 'bytes32',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'lastChangeBlock',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'from',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'to',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
-                ],
-                internalType: 'struct IPoolSwapStructs.SwapRequest',
-                name: 'request',
-                type: 'tuple',
-            },
-            {
-                internalType: 'uint256[]',
-                name: 'balances',
-                type: 'uint256[]',
-            },
-            { internalType: 'uint256', name: 'indexIn', type: 'uint256' },
-            { internalType: 'uint256', name: 'indexOut', type: 'uint256' },
-        ],
-        name: 'onSwap',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -683,7 +599,11 @@ export const composabableStablePoolV5Abi = [
             { internalType: 'address', name: 'owner', type: 'address' },
             { internalType: 'address', name: 'spender', type: 'address' },
             { internalType: 'uint256', name: 'value', type: 'uint256' },
-            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'deadline',
+                type: 'uint256',
+            },
             { internalType: 'uint8', name: 'v', type: 'uint8' },
             { internalType: 'bytes32', name: 'r', type: 'bytes32' },
             { internalType: 'bytes32', name: 's', type: 'bytes32' },
@@ -695,16 +615,28 @@ export const composabableStablePoolV5Abi = [
     },
     {
         inputs: [
-            { internalType: 'bytes32', name: '', type: 'bytes32' },
+            { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'recipient',
+                type: 'address',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'balances',
                 type: 'uint256[]',
             },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'lastChangeBlock',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'protocolSwapFeePercentage',
+                type: 'uint256',
+            },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryExit',
@@ -721,16 +653,28 @@ export const composabableStablePoolV5Abi = [
     },
     {
         inputs: [
-            { internalType: 'bytes32', name: '', type: 'bytes32' },
+            { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             { internalType: 'address', name: 'sender', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'recipient',
+                type: 'address',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'balances',
                 type: 'uint256[]',
             },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'lastChangeBlock',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'protocolSwapFeePercentage',
+                type: 'uint256',
+            },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryJoin',
@@ -748,12 +692,13 @@ export const composabableStablePoolV5Abi = [
     {
         inputs: [
             {
-                internalType: 'uint256',
-                name: 'swapFeePercentage',
-                type: 'uint256',
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
             },
+            { internalType: 'bytes', name: 'poolConfig', type: 'bytes' },
         ],
-        name: 'setSwapFeePercentage',
+        name: 'setAssetManagerPoolConfig',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -762,16 +707,11 @@ export const composabableStablePoolV5Abi = [
         inputs: [
             {
                 internalType: 'uint256',
-                name: 'newLowerTarget',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'newUpperTarget',
+                name: 'swapFeePercentage',
                 type: 'uint256',
             },
         ],
-        name: 'setTargets',
+        name: 'setSwapFeePercentage',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -792,7 +732,11 @@ export const composabableStablePoolV5Abi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'recipient', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'recipient',
+                type: 'address',
+            },
             { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'transfer',
@@ -803,7 +747,11 @@ export const composabableStablePoolV5Abi = [
     {
         inputs: [
             { internalType: 'address', name: 'sender', type: 'address' },
-            { internalType: 'address', name: 'recipient', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'recipient',
+                type: 'address',
+            },
             { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'transferFrom',
@@ -814,6 +762,13 @@ export const composabableStablePoolV5Abi = [
     {
         inputs: [],
         name: 'unpause',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'updateProtocolFeePercentageCache',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',

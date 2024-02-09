@@ -78,3 +78,9 @@ export type InputAmountInit = InputAmount | InputAmountInitWeighted;
 export type InputAmountInitWeighted = InputAmount & {
     weight: bigint;
 };
+
+export enum TokenType {
+    STANDARD = 0,
+    TOKEN_WITH_RATE = 1,
+    ERC4626_TOKEN = 2,
+}

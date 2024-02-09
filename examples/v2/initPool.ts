@@ -1,12 +1,9 @@
+import { InitPoolDataProvider } from '@/data/providers/initPoolDataProvider';
+import { InitPool, InitPoolInput } from '@/entities';
+import { PoolType } from '@/types';
+import { ChainId } from '@/utils';
+import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils/helper';
 import { parseEther, parseUnits } from 'viem';
-import { ChainId, PoolType } from '../src';
-import { InitPoolDataProvider } from '../src/data/providers/initPoolDataProvider';
-import { InitPool } from '../src/entities/initPool';
-import { InitPoolInput } from '../src/entities/initPool/types';
-import {
-    forkSetup,
-    sendTransactionGetBalances,
-} from '../test/lib/utils/helper';
 import createPoolComposableStable from './createPoolComposableStable';
 
 const initPool = async () => {

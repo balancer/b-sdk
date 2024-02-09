@@ -1,4 +1,4 @@
-export const weightedFactoryV4Abi = [
+export const weightedPoolFactoryV3Abi = [
     {
         inputs: [
             {
@@ -7,23 +7,28 @@ export const weightedFactoryV4Abi = [
                 type: 'address',
             },
             {
-                internalType: 'contract IProtocolFeePercentagesProvider',
-                name: 'protocolFeeProvider',
-                type: 'address',
-            },
-            {
-                internalType: 'string',
-                name: 'factoryVersion',
-                type: 'string',
-            },
-            {
-                internalType: 'string',
-                name: 'poolVersion',
-                type: 'string',
+                internalType: 'uint256',
+                name: 'pauseWindowDuration',
+                type: 'uint256',
             },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
+    },
+    {
+        inputs: [],
+        name: 'Disabled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'PoolPauseWindowDurationOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'SenderNotAllowed',
+        type: 'error',
     },
     {
         anonymous: false,
@@ -57,29 +62,36 @@ export const weightedFactoryV4Abi = [
                 type: 'string',
             },
             {
-                internalType: 'contract IERC20[]',
+                components: [
+                    {
+                        internalType: 'contract IERC20',
+                        name: 'token',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'enum TokenType',
+                        name: 'tokenType',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'contract IRateProvider',
+                        name: 'rateProvider',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'yieldFeeExempt',
+                        type: 'bool',
+                    },
+                ],
+                internalType: 'struct TokenConfig[]',
                 name: 'tokens',
-                type: 'address[]',
+                type: 'tuple[]',
             },
             {
                 internalType: 'uint256[]',
                 name: 'normalizedWeights',
                 type: 'uint256[]',
-            },
-            {
-                internalType: 'contract IRateProvider[]',
-                name: 'rateProviders',
-                type: 'address[]',
-            },
-            {
-                internalType: 'uint256',
-                name: 'swapFeePercentage',
-                type: 'uint256',
-            },
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
             },
             {
                 internalType: 'bytes32',
@@ -91,7 +103,7 @@ export const weightedFactoryV4Abi = [
         outputs: [
             {
                 internalType: 'address',
-                name: '',
+                name: 'pool',
                 type: 'address',
             },
         ],
@@ -138,30 +150,18 @@ export const weightedFactoryV4Abi = [
         type: 'function',
     },
     {
-        inputs: [],
-        name: 'getCreationCode',
+        inputs: [
+            {
+                internalType: 'bytes32',
+                name: 'salt',
+                type: 'bytes32',
+            },
+        ],
+        name: 'getDeploymentAddress',
         outputs: [
             {
-                internalType: 'bytes',
+                internalType: 'address',
                 name: '',
-                type: 'bytes',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getCreationCodeContracts',
-        outputs: [
-            {
-                internalType: 'address',
-                name: 'contractA',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'contractB',
                 type: 'address',
             },
         ],
@@ -170,16 +170,11 @@ export const weightedFactoryV4Abi = [
     },
     {
         inputs: [],
-        name: 'getPauseConfiguration',
+        name: 'getNewPoolPauseWindowEndTime',
         outputs: [
             {
                 internalType: 'uint256',
-                name: 'pauseWindowDuration',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'bufferPeriodDuration',
+                name: '',
                 type: 'uint256',
             },
         ],
@@ -188,12 +183,12 @@ export const weightedFactoryV4Abi = [
     },
     {
         inputs: [],
-        name: 'getPoolVersion',
+        name: 'getOriginalPauseWindowEndTime',
         outputs: [
             {
-                internalType: 'string',
+                internalType: 'uint256',
                 name: '',
-                type: 'string',
+                type: 'uint256',
             },
         ],
         stateMutability: 'view',
@@ -201,12 +196,12 @@ export const weightedFactoryV4Abi = [
     },
     {
         inputs: [],
-        name: 'getProtocolFeePercentagesProvider',
+        name: 'getPauseWindowDuration',
         outputs: [
             {
-                internalType: 'contract IProtocolFeePercentagesProvider',
+                internalType: 'uint256',
                 name: '',
-                type: 'address',
+                type: 'uint256',
             },
         ],
         stateMutability: 'view',
@@ -257,17 +252,4 @@ export const weightedFactoryV4Abi = [
         stateMutability: 'view',
         type: 'function',
     },
-    {
-        inputs: [],
-        name: 'version',
-        outputs: [
-            {
-                internalType: 'string',
-                name: '',
-                type: 'string',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-] as const;
+];
