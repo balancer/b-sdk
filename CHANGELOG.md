@@ -1,5 +1,27 @@
 # @balancer/sdk
 
+## 0.8.1
+
+### Patch Changes
+
+- 579600a: Expose proportional amounts helper
+
+## 0.8.0
+
+### Minor Changes
+
+- 8bd2454: Add Basic Remove Liquidity for v3
+- 69d6567: Add limits calculation and data encoding in the swap
+- 4c8114d: Add Basic Add Liquidity for v3
+
+### Patch Changes
+
+- 2593e8a: Expose JoinPoolRequest type
+- dc09bf7: Remove type module from package.json
+- c7c318a: Adding a function to calculate proportional amounts; Adding balancerVersion to the API Pools and Nested Pools data provider
+- a1d52dc: Remove ambiguity from slippage interface
+- 651e976: Add proportional amounts helper
+
 ## 0.7.1
 
 ### Patch Changes
