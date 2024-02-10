@@ -49,7 +49,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     },
     SEPOLIA: {
         rpcEnv: 'SEPOLIA_RPC_URL',
-        fallBackRpc: undefined,
+        fallBackRpc: 'https://sepolia.gateway.tenderly.co',
         port: ANVIL_PORTS.SEPOLIA,
         forkBlockNumber: 5158611n,
     },
@@ -60,7 +60,7 @@ function getAnvilOptions(
     blockNumber?: bigint,
 ): CreateAnvilOptions {
     let forkUrl: string;
-    if (process.env[network.rpcEnv] !== 'undefined') {
+    if (process.env[network.rpcEnv] !== undefined) {
         forkUrl = process.env[network.rpcEnv] as string;
     } else {
         if (!network.fallBackRpc)
