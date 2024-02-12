@@ -44,6 +44,8 @@ export class SwapV2 implements SwapBase {
 
         this.chainId = chainId;
         this.swapKind = swapKind;
+        this.inputAmount = getInputAmount(this.paths);
+        this.outputAmount = getOutputAmount(this.paths);
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
         this.assets = [
             ...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address)),
@@ -63,19 +65,13 @@ export class SwapV2 implements SwapBase {
     public readonly assets: Address[];
     public readonly swapKind: SwapKind;
     public swaps: BatchSwapStep[] | SingleSwap;
+    public readonly inputAmount: TokenAmount;
+    public readonly outputAmount: TokenAmount;
 
     public get quote(): TokenAmount {
         return this.swapKind === SwapKind.GivenIn
             ? this.outputAmount
             : this.inputAmount;
-    }
-
-    public get inputAmount(): TokenAmount {
-        return getInputAmount(this.paths);
-    }
-
-    public get outputAmount(): TokenAmount {
-        return getOutputAmount(this.paths);
     }
 
     // rpcUrl is optional, but recommended to prevent rate limiting

@@ -63,7 +63,6 @@ const swap = async () => {
     console.log(
         `Output token: ${swap.outputAmount.token.address}, Amount: ${swap.outputAmount.amount}`,
     );
-    console.log(`Price Impact: ${swap.priceImpact.percentage}%`);
 
     // Get up to date swap result by querying onchain
     const updated = await swap.query(process.env.ETHEREUM_RPC_URL);
