@@ -31,6 +31,65 @@ describe('Swap', () => {
         outputAmountRaw: 1000000000000000000n,
     };
 
+    describe('path validation', () => {
+        const pathWethDai: Path = {
+            balancerVersion: 2,
+            tokens: [tokens[0], tokens[1]],
+            pools: [
+                '0xc2aa60465bffa1a88f5ba471a59ca0435c3ec5c100020000000000000000062c',
+            ],
+            inputAmountRaw: 1000000000000000000n,
+            outputAmountRaw: 1000000n,
+        };
+        test('should throw if paths are not all same Balancer version', () => {
+            expect(() => {
+                const pathV3: Path = {
+                    ...pathWethDai,
+                    balancerVersion: 3,
+                };
+                new Swap({
+                    chainId: ChainId.MAINNET,
+                    paths: [pathWethDai, pathV3],
+                    swapKind: SwapKind.GivenIn,
+                });
+            }).toThrowError(
+                'Unsupported swap: all paths must use same Balancer version.',
+            );
+        });
+        describe('path inputs show all start/end with same token', () => {
+            test('should throw if paths start with different token', () => {
+                expect(() => {
+                    const pathUsdcDai: Path = {
+                        ...pathWethDai,
+                        tokens: [tokens[2], tokens[1]],
+                    };
+                    new Swap({
+                        chainId: ChainId.MAINNET,
+                        paths: [pathWethDai, pathUsdcDai],
+                        swapKind: SwapKind.GivenIn,
+                    });
+                }).toThrowError(
+                    'Unsupported swap: all paths must start/end with same token.',
+                );
+            });
+            test('should throw if paths end with different token', () => {
+                expect(() => {
+                    const pathWethUsdc: Path = {
+                        ...pathWethDai,
+                        tokens: [tokens[0], tokens[2]],
+                    };
+                    new Swap({
+                        chainId: ChainId.MAINNET,
+                        paths: [pathWethDai, pathWethUsdc],
+                        swapKind: SwapKind.GivenIn,
+                    });
+                }).toThrowError(
+                    'Unsupported swap: all paths must start/end with same token.',
+                );
+            });
+        });
+    });
+
     describe('limits', () => {
         describe('GivenIn', () => {
             test('18decimals>6decimals: amountOut to be maximally 1% less then expected', () => {

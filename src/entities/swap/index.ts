@@ -6,6 +6,7 @@ import { PriceImpactAmount } from '../priceImpactAmount';
 import { Slippage } from '../slippage';
 import { Path, SwapBuildOutput, SwapBase } from './types';
 import { SwapV2 } from './swapV2';
+import { validatePaths } from './pathHelpers';
 
 export * from './types';
 
@@ -18,8 +19,7 @@ export class Swap {
         paths,
         swapKind,
     }: { chainId: number; paths: Path[]; swapKind: SwapKind }) {
-        if (paths.length === 0)
-            throw new Error('Invalid swap: must contain at least 1 path.');
+        validatePaths(paths);
 
         switch (paths[0].balancerVersion) {
             case 2:
