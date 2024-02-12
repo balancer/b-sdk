@@ -1,13 +1,11 @@
 import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
-import { abs, ZERO_ADDRESS, NATIVE_ADDRESS, MathSol } from '../../utils';
+import { ZERO_ADDRESS, NATIVE_ADDRESS } from '../../utils';
 import { Address } from 'viem';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import { Slippage } from '../slippage';
 import { Path, SwapBuildOutput, SwapBase } from './types';
-import { PathWithAmount } from './pathWithAmount';
 import { SwapV2 } from './swapV2';
-import { getInputAmount, getOutputAmount } from './pathHelpers';
 
 export * from './types';
 
@@ -56,32 +54,7 @@ export class Swap {
     }
 
     public get priceImpact(): PriceImpactAmount {
-        const pathsReverse = this.swap.paths.map(
-            (path) =>
-                new PathWithAmount(
-                    this.swap.chainId,
-                    [...path.tokens].reverse(),
-                    [...path.pools].reverse(),
-                    path.outputAmount.amount,
-                    path.inputAmount.amount,
-                ),
-        );
-
-        const amountInitial =
-            this.swap.swapKind === SwapKind.GivenIn
-                ? getInputAmount(this.swap.paths).amount
-                : getOutputAmount(this.swap.paths).amount;
-
-        const amountFinal =
-            this.swap.swapKind === SwapKind.GivenIn
-                ? getOutputAmount(pathsReverse).amount
-                : getInputAmount(pathsReverse).amount;
-
-        const priceImpact = MathSol.divDownFixed(
-            abs(amountInitial - amountFinal),
-            amountInitial * 2n,
-        );
-        return PriceImpactAmount.fromRawAmount(priceImpact);
+        throw new Error('Price Impact still to be implemented');
     }
 
     /**
