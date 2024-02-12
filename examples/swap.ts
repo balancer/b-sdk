@@ -18,7 +18,7 @@ import {
     TokenAmount,
 } from '../src';
 // TODO - Move these to src import once old SOR removed
-import { Swap } from '@/entities/swap';
+import { Swap, SwapBuildOutputExactIn } from '@/entities/swap';
 
 const swap = async () => {
     // User defined
@@ -66,20 +66,19 @@ const swap = async () => {
 
     // Get up to date swap result by querying onchain
     const updated = await swap.query(process.env.ETHEREUM_RPC_URL);
-    console.log(updated.amount);
+    console.log(`Updated amount: ${updated.amount}`);
 
     // Construct transaction to make swap
     const slippage = Slippage.fromPercentage('0.1');
-    const limits = swap.limits(slippage, updated);
-    console.log('Limits:', limits);
-    const callData = swap.buildCall(
-        limits,
-        999999999999999999n, // Infinity
-        '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-        '0x76fd639005b09140a8616f036B64DaCefe93617B',
-    );
+    const callData = swap.buildCall({
+        slippage,
+        deadline: 999999999999999999n, // Infinity
+        sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+        recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
+        expectedAmountOut: updated,
+    }) as SwapBuildOutputExactIn;
     console.log(
-        `Tx:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
+        `Expected Amount After Slippage: ${callData.minAmountOut.amount}\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
     );
 };
 

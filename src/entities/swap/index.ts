@@ -1,12 +1,17 @@
 import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
-import { ZERO_ADDRESS, NATIVE_ADDRESS } from '../../utils';
-import { Address } from 'viem';
 import { PriceImpactAmount } from '../priceImpactAmount';
-import { Slippage } from '../slippage';
-import { Path, SwapBuildOutput, SwapBase } from './types';
+import {
+    Path,
+    SwapBase,
+    SwapCallExactIn,
+    SwapCallExactOut,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
+} from './types';
 import { SwapV2 } from './swapV2';
 import { validatePaths } from './pathHelpers';
+import { Slippage } from '../slippage';
 
 export * from './types';
 
@@ -58,68 +63,55 @@ export class Swap {
     }
 
     /**
-     * Takes a slippage acceptable by the user and returns the limits for a swap to be executed
+     * Returns the transaction data to be sent to the vault contract
      *
-     * @param slippage percentage: 5 for 5%
-     * @param expectedAmount is the amount that the user expects to receive or send, can be obtained from swap.query()
+     * @param swapCall
      * @returns
      */
-    limits(slippage: Slippage, expectedAmount: TokenAmount): bigint[] {
-        const limits = new Array(this.swap.assets.length).fill(0n);
+    buildCall(
+        swapCall: SwapCallExactIn | SwapCallExactOut,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        let limitAmount: TokenAmount;
+        if ('expectedAmountOut' in swapCall) {
+            limitAmount = this.limitAmount(
+                swapCall.slippage,
+                SwapKind.GivenIn,
+                swapCall.expectedAmountOut,
+            );
+            return {
+                ...this.swap.buildCall({ ...swapCall, limitAmount }),
+                minAmountOut: limitAmount,
+            };
+        }
+        limitAmount = this.limitAmount(
+            swapCall.slippage,
+            SwapKind.GivenOut,
+            swapCall.expectedAmountIn,
+        );
+        return {
+            ...this.swap.buildCall({ ...swapCall, limitAmount }),
+            maxAmountIn: limitAmount,
+        };
+    }
+
+    /**
+     * Apply slippage to expectedAmount. GivenIn: Remove to give minOut. GivenOut: Add to give maxIn.
+     * @param slippage
+     * @param swapKind
+     * @param expectedAmount
+     * @returns
+     */
+    private limitAmount(
+        slippage: Slippage,
+        swapKind: SwapKind,
+        expectedAmount: TokenAmount,
+    ): TokenAmount {
         let limitAmount: bigint;
-        if (this.swap.swapKind === SwapKind.GivenIn) {
+        if (swapKind === SwapKind.GivenIn) {
             limitAmount = slippage.applyTo(expectedAmount.amount, -1);
         } else {
             limitAmount = slippage.applyTo(expectedAmount.amount);
         }
-
-        if (!this.swap.isBatchSwap) {
-            return [limitAmount];
-        }
-
-        for (let i = 0; i < this.swap.assets.length; i++) {
-            if (
-                this.swap.assets[i] === this.inputAmount.token.address ||
-                (this.swap.assets[i] === ZERO_ADDRESS &&
-                    this.inputAmount.token.address === NATIVE_ADDRESS)
-            ) {
-                if (this.swap.swapKind === SwapKind.GivenIn) {
-                    limits[i] = this.inputAmount.amount;
-                } else {
-                    limits[i] = limitAmount;
-                }
-            }
-            if (
-                this.swap.assets[i] === this.outputAmount.token.address ||
-                (this.swap.assets[i] === ZERO_ADDRESS &&
-                    this.outputAmount.token.address === NATIVE_ADDRESS)
-            ) {
-                if (this.swap.swapKind === SwapKind.GivenIn) {
-                    limits[i] = -1n * limitAmount;
-                } else {
-                    limits[i] = -1n * this.outputAmount.amount;
-                }
-            }
-        }
-
-        return limits;
-    }
-
-    /**
-     * Returns the transaction data to be sent to the vault contract
-     *
-     * @param limits calculated from swap.limits()
-     * @param deadline unix timestamp
-     * @param sender address of the sender
-     * @param recipient defaults to sender
-     * @returns
-     */
-    buildCall(
-        limits: bigint[],
-        deadline: bigint,
-        sender: Address,
-        recipient = sender,
-    ): SwapBuildOutput {
-        return this.swap.buildCall(limits, deadline, sender, recipient);
+        return TokenAmount.fromRawAmount(expectedAmount.token, limitAmount);
     }
 }

@@ -1,7 +1,15 @@
 // pnpm test -- swap.test.ts
-import { ChainId } from '../../src';
+import { ChainId, Slippage } from '../../src';
 import { SwapKind } from '@/types';
-import { Swap, Path, Slippage, TokenApi } from '@/entities';
+import {
+    Swap,
+    Path,
+    TokenApi,
+    Token,
+    TokenAmount,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
+} from '@/entities';
 import { TOKENS } from '../lib/utils/addresses';
 
 describe('Swap', () => {
@@ -90,58 +98,131 @@ describe('Swap', () => {
         });
     });
 
-    describe('limits', () => {
+    describe('buildCall max/min amounts', () => {
         describe('GivenIn', () => {
-            test('18decimals>6decimals: amountOut to be maximally 1% less then expected', () => {
+            test('18decimals>6decimals: minAmountOut to be 0.1% less then expected', () => {
                 const swap = new Swap({
                     chainId: ChainId.MAINNET,
                     paths: [pathTo6Decimals],
                     swapKind: SwapKind.GivenIn,
                 });
-                const amountOut = swap.outputAmount; // In production code, this would be the expected amountOut returned from the query
-                const slippage = Slippage.fromPercentage('1');
-                const limits = swap.limits(slippage, amountOut);
-                const expected = [1000000000000000000n, 0n, 0n, -990000n];
-                expect(limits).to.deep.eq(expected);
+                const slippage = Slippage.fromPercentage('0.1');
+                const tokenOut = new Token(
+                    1,
+                    pathTo6Decimals.tokens[pathTo6Decimals.tokens.length - 1]
+                        .address,
+                    pathTo6Decimals.tokens[pathTo6Decimals.tokens.length - 1]
+                        .decimals,
+                );
+                const expectedAmountOut = TokenAmount.fromHumanAmount(
+                    tokenOut,
+                    '1',
+                );
+
+                const callInfo = swap.buildCall({
+                    slippage,
+                    deadline: 999999999999999999n, // Infinity
+                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
+                    expectedAmountOut,
+                }) as SwapBuildOutputExactIn;
+                expect(tokenOut.decimals).to.eq(6);
+                expect(callInfo.minAmountOut).to.deep.eq(
+                    TokenAmount.fromHumanAmount(tokenOut, '0.999'),
+                );
             });
-            test('6decimals>18decimals: amountOut to be maximally 1% less then expected', () => {
+            test('6decimals>18decimals: minAmountOut to be 0.1% less then expected', () => {
                 const swap = new Swap({
                     chainId: ChainId.MAINNET,
                     paths: [pathFrom6Decimals],
                     swapKind: SwapKind.GivenIn,
                 });
-                const amountOut = swap.outputAmount; // In production code, this would be the expected amountOut returned from the query
-                const slippage = Slippage.fromPercentage('1');
-                const limits = swap.limits(slippage, amountOut);
-                const expected = [1000000n, 0n, 0n, -990000000000000000n];
-                expect(limits).to.deep.eq(expected);
+                const slippage = Slippage.fromPercentage('0.1');
+                const tokenOut = new Token(
+                    1,
+                    pathFrom6Decimals.tokens[
+                        pathFrom6Decimals.tokens.length - 1
+                    ].address,
+                    pathFrom6Decimals.tokens[
+                        pathFrom6Decimals.tokens.length - 1
+                    ].decimals,
+                );
+                const expectedAmountOut = TokenAmount.fromHumanAmount(
+                    tokenOut,
+                    '1',
+                );
+
+                const callInfo = swap.buildCall({
+                    slippage,
+                    deadline: 999999999999999999n, // Infinity
+                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
+                    expectedAmountOut,
+                }) as SwapBuildOutputExactIn;
+                expect(tokenOut.decimals).to.eq(18);
+                expect(callInfo.minAmountOut).to.deep.eq(
+                    TokenAmount.fromHumanAmount(tokenOut, '0.999'),
+                );
             });
         });
         describe('GivenOut', () => {
-            test('18decimals>6decimals: amountIn to be maximally 1% more then expected', () => {
+            test('18decimals>6decimals: maxAmountIn to be 0.1% more then expected', () => {
                 const swap = new Swap({
                     chainId: ChainId.MAINNET,
                     paths: [pathTo6Decimals],
                     swapKind: SwapKind.GivenOut,
                 });
-                const amountIn = swap.inputAmount; // In production code, this would be the expected amountIn returned from the query
-                const slippage = Slippage.fromPercentage('1');
-                const limits = swap.limits(slippage, amountIn);
-                const expected = [1010000000000000000n, 0n, 0n, -1000000n];
-                expect(limits).to.deep.eq(expected);
-            });
+                const slippage = Slippage.fromPercentage('0.1');
+                const tokenIn = new Token(
+                    1,
+                    pathTo6Decimals.tokens[0].address,
+                    pathTo6Decimals.tokens[0].decimals,
+                );
+                const expectedAmountIn = TokenAmount.fromHumanAmount(
+                    tokenIn,
+                    '1',
+                );
 
-            test('6decimals>18decimals: amountIn to be maximally 1% more then expected', () => {
+                const callInfo = swap.buildCall({
+                    slippage,
+                    deadline: 999999999999999999n, // Infinity
+                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
+                    expectedAmountIn,
+                }) as SwapBuildOutputExactOut;
+                expect(tokenIn.decimals).to.eq(18);
+                expect(callInfo.maxAmountIn).to.deep.eq(
+                    TokenAmount.fromHumanAmount(tokenIn, '1.001'),
+                );
+            });
+            test('6decimals>18decimals: maxAmountIn to be 0.1% more then expected', () => {
                 const swap = new Swap({
                     chainId: ChainId.MAINNET,
                     paths: [pathFrom6Decimals],
                     swapKind: SwapKind.GivenOut,
                 });
-                const amountIn = swap.inputAmount; // In production code, this would be the expected amountIn returned from the query
-                const slippage = Slippage.fromPercentage('1');
-                const limits = swap.limits(slippage, amountIn);
-                const expected = [1010000n, 0n, 0n, -1000000000000000000n];
-                expect(limits).to.deep.eq(expected);
+                const slippage = Slippage.fromPercentage('0.1');
+                const tokenIn = new Token(
+                    1,
+                    pathFrom6Decimals.tokens[0].address,
+                    pathFrom6Decimals.tokens[0].decimals,
+                );
+                const expectedAmountIn = TokenAmount.fromHumanAmount(
+                    tokenIn,
+                    '1',
+                );
+
+                const callInfo = swap.buildCall({
+                    slippage,
+                    deadline: 999999999999999999n, // Infinity
+                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
+                    expectedAmountIn,
+                }) as SwapBuildOutputExactOut;
+                expect(tokenIn.decimals).to.eq(6);
+                expect(callInfo.maxAmountIn).to.deep.eq(
+                    TokenAmount.fromHumanAmount(tokenIn, '1.001'),
+                );
             });
         });
     });

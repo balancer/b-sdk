@@ -17,7 +17,7 @@ import {
     http,
 } from 'viem';
 import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
-import { Path, SwapBuildOutput, SwapBase } from '../types';
+import { Path, SwapBase, SwapBuildOutputBase, SwapCallBuild } from '../types';
 import { PathWithAmount } from '../pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../pathHelpers';
 
@@ -169,23 +169,62 @@ export class SwapV2 implements SwapBase {
     }
 
     /**
-     * Returns the transaction data to be sent to the vault contract
+     * Returns the limits for a swap to be executed
      *
-     * @param limits calculated from swap.limits()
-     * @param deadline unix timestamp
-     * @param sender address of the sender
-     * @param recipient defaults to sender
+     * @param limitAmount maxAmountIn/minAmountOut depending on swap kind
      * @returns
      */
-    buildCall(
-        limits: bigint[],
-        deadline: bigint,
-        sender: Address,
-        recipient = sender,
-    ): SwapBuildOutput {
+    limits(limitAmount: TokenAmount): bigint[] {
+        const limits = new Array(this.assets.length).fill(0n);
+
+        if (!this.isBatchSwap) {
+            return [limitAmount.amount];
+        }
+
+        for (let i = 0; i < this.assets.length; i++) {
+            if (
+                this.assets[i] === this.inputAmount.token.address ||
+                (this.assets[i] === ZERO_ADDRESS &&
+                    this.inputAmount.token.address === NATIVE_ADDRESS)
+            ) {
+                if (this.swapKind === SwapKind.GivenIn) {
+                    limits[i] = this.inputAmount.amount;
+                } else {
+                    limits[i] = limitAmount.amount;
+                }
+            }
+            if (
+                this.assets[i] === this.outputAmount.token.address ||
+                (this.assets[i] === ZERO_ADDRESS &&
+                    this.outputAmount.token.address === NATIVE_ADDRESS)
+            ) {
+                if (this.swapKind === SwapKind.GivenIn) {
+                    limits[i] = -1n * limitAmount.amount;
+                } else {
+                    limits[i] = -1n * this.outputAmount.amount;
+                }
+            }
+        }
+
+        return limits;
+    }
+
+    /**
+     * Returns the transaction data to be sent to the vault contract
+     *
+     * @param swapCall
+     * @returns
+     */
+    buildCall(swapCall: SwapCallBuild): SwapBuildOutputBase {
+        const limits = this.limits(swapCall.limitAmount);
         return {
             to: this.to(),
-            callData: this.callData(limits, deadline, sender, recipient),
+            callData: this.callData(
+                limits,
+                swapCall.deadline,
+                swapCall.sender,
+                swapCall.recipient,
+            ),
             value: this.value(limits),
         };
     }
