@@ -2,9 +2,9 @@ import { Pools } from './modules/pool-state';
 import { BalancerApiClient } from './client';
 import { ChainId } from '../../../utils';
 import { NestedPools } from './modules/nested-pool-state';
-import { SorSwapPaths } from './modules/sorGetQuote';
+import { SorSwapPaths } from './modules/sorSwapPaths';
 
-export { SorInput as GetQuoteInput } from './modules/sorGetQuote';
+export { SorInput as GetQuoteInput } from './modules/sorSwapPaths';
 
 export class BalancerApi {
     balancerApiClient: BalancerApiClient;
