@@ -2,20 +2,20 @@ import { Pools } from './modules/pool-state';
 import { BalancerApiClient } from './client';
 import { ChainId } from '../../../utils';
 import { NestedPools } from './modules/nested-pool-state';
-import { SorGetQuote } from './modules/sorGetQuote';
+import { SorSwapPaths } from './modules/sorGetQuote';
 
-export { GetQuoteInput } from './modules/sorGetQuote';
+export { SorInput as GetQuoteInput } from './modules/sorGetQuote';
 
 export class BalancerApi {
     balancerApiClient: BalancerApiClient;
     pools: Pools;
     nestedPools: NestedPools;
-    sorGetQuote: SorGetQuote;
+    sorSwapPaths: SorSwapPaths;
 
     constructor(balancerApiUrl: string, chainId: ChainId) {
         this.balancerApiClient = new BalancerApiClient(balancerApiUrl, chainId);
         this.pools = new Pools(this.balancerApiClient);
         this.nestedPools = new NestedPools(this.balancerApiClient);
-        this.sorGetQuote = new SorGetQuote(this.balancerApiClient);
+        this.sorSwapPaths = new SorSwapPaths(this.balancerApiClient);
     }
 }
