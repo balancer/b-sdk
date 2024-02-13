@@ -11,19 +11,40 @@ config();
 import {
     BalancerApi,
     ChainId,
-    GetQuoteInput,
     Slippage,
     SwapKind,
     Token,
     TokenAmount,
 } from '../src';
 // TODO - Move these to src import once old SOR removed
-import { Swap, SwapBuildOutputExactIn } from '@/entities/swap';
+import {
+    Swap,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
+} from '@/entities/swap';
 
 const swap = async () => {
     // User defined
     const chainId = ChainId.MAINNET;
-    const swapKind = SwapKind.GivenIn;
+    const swapKind = SwapKind.GivenOut;
+    const tokenIn = new Token(
+        chainId,
+        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        6,
+    );
+    const tokenOut = new Token(
+        chainId,
+        '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
+        18,
+    );
+    const slippage = Slippage.fromPercentage('0.1');
+    const swapAmount =
+        swapKind === SwapKind.GivenOut
+            ? TokenAmount.fromHumanAmount(tokenIn, '1.2345678910')
+            : TokenAmount.fromHumanAmount(tokenOut, '1.2345678910');
+    const sender = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+    const recipient = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+    const deadline = 999999999999999999n; // Infinity
 
     // API is used to fetch best path from available liquidity
     const balancerApi = new BalancerApi(
@@ -31,24 +52,13 @@ const swap = async () => {
         chainId,
     );
 
-    const tokenIn = new Token(
-        chainId,
-        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        6,
-    );
-
-    const swapAmount = TokenAmount.fromHumanAmount(tokenIn, '1');
-
-    // TODO - Add input params
-    const quoteInput: GetQuoteInput = {
+    const sorPaths = await balancerApi.sorSwapPaths.fetchSorSwapPaths({
         chainId,
         tokenIn: tokenIn.address,
-        tokenOut: '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
+        tokenOut: tokenOut.address,
         swapKind,
         swapAmount,
-        queryBatchSwap: false,
-    };
-    const sorPaths = await balancerApi.sorGetQuote.fetchSorGetQuote(quoteInput);
+    });
 
     // Swap object provides useful helpers for re-querying, building call, etc
     const swap = new Swap({
@@ -69,17 +79,29 @@ const swap = async () => {
     console.log(`Updated amount: ${updated.amount}`);
 
     // Construct transaction to make swap
-    const slippage = Slippage.fromPercentage('0.1');
-    const callData = swap.buildCall({
-        slippage,
-        deadline: 999999999999999999n, // Infinity
-        sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-        recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
-        expectedAmountOut: updated,
-    }) as SwapBuildOutputExactIn;
-    console.log(
-        `Expected Amount After Slippage: ${callData.minAmountOut.amount}\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
-    );
+    if (swapKind === SwapKind.GivenIn) {
+        const callData = swap.buildCall({
+            slippage,
+            deadline,
+            sender,
+            recipient,
+            expectedAmountOut: updated,
+        }) as SwapBuildOutputExactIn;
+        console.log(
+            `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
+        );
+    } else {
+        const callData = swap.buildCall({
+            slippage,
+            deadline,
+            sender,
+            recipient,
+            expectedAmountIn: updated,
+        }) as SwapBuildOutputExactOut;
+        console.log(
+            `Max Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
+        );
+    }
 };
 
 export default swap;
