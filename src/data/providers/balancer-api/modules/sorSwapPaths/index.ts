@@ -94,10 +94,7 @@ export class SorSwapPaths {
                 ? { ...variables, useVaultVersion: sorInput.useVaultVersion }
                 : variables,
         });
-        console.log(data);
         const poolGetPool: Path[] = data.sorGetSwapPaths.paths;
-        console.log('Paths:');
-        console.log(poolGetPool);
         return poolGetPool;
     }
 
