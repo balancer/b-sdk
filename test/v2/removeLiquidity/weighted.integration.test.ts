@@ -292,7 +292,7 @@ describe('weighted remove liquidity test', () => {
 
 /*********************** Mock To Represent API Requirements **********************/
 
-export class MockApi {
+class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         let tokens: { address: Address; decimals: number; index: number }[] =
             [];

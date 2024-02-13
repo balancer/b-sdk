@@ -11,7 +11,7 @@ import { MAX_UINT256, VAULT } from '../../utils';
 import { Address, Hex } from '../../types';
 import { vaultV2Abi } from '../../abi';
 
-export enum RelayerAction {
+enum RelayerAction {
     JoinPool = 'JoinPool',
     ExitPool = 'ExitPool',
     Swap = 'Swap',
