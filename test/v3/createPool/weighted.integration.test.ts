@@ -20,7 +20,7 @@ import {
 } from '../../../src/entities/createPool/types';
 import { TOKENS } from 'test/lib/utils/addresses';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, 5247812n);
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 
 describe('Create Weighted Pool tests', () => {
     const chainId = ChainId.SEPOLIA;
