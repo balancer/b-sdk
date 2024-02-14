@@ -18,7 +18,7 @@ import {
     Slippage,
 } from '../../../src';
 import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolWeightedInput } from '../../../src/entities/createPool/types';
+import { CreatePoolV2WeightedInput } from '../../../src/entities/createPool/types';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { InitPoolTxInput, CreatePoolTxInput } from '../../lib/utils/types';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
@@ -33,7 +33,7 @@ const chainId = ChainId.MAINNET;
 
 describe('Add Liquidity Init - Weighted Pool', async () => {
     let poolAddress: Address;
-    let createPoolWeightedInput: CreatePoolWeightedInput;
+    let createPoolWeightedInput: CreatePoolV2WeightedInput;
     let createTxInput: CreatePoolTxInput;
     let initPoolTxInput: InitPoolTxInput;
     let initPoolInput: InitPoolInput;
@@ -66,6 +66,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             ],
             swapFee: '0.01',
             poolOwnerAddress: signerAddress, // Balancer DAO Multisig
+            chainId,
             balancerVersion: 2,
         };
 

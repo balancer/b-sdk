@@ -69,6 +69,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             exemptFromYieldProtocolFeeFlag: false,
             swapFee: '0.01',
             poolOwnerAddress: signerAddress, // Balancer DAO Multisig
+            chainId,
             balancerVersion: 2,
         };
 
