@@ -36,17 +36,17 @@ const createPool = async () => {
         poolType,
         tokens: [
             {
-                tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
+                address: '0xba100000625a3754423978a60c9317c58a424e3d',
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
             },
             {
-                tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                 weight: parseEther(`${1 / 4}`),
                 rateProvider: zeroAddress,
             },
             {
-                tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
+                address: '0x6b175474e89094c44da98b954eedeac495271d0f',
                 weight: parseEther(`${1 / 4}`),
                 rateProvider: zeroAddress,
             },

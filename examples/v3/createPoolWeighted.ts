@@ -36,13 +36,13 @@ const createPool = async () => {
         symbol: '50BAL-50WETH',
         tokens: [
             {
-                tokenAddress: TOKENS[chainId].BAL.address, // BAL
+                address: TOKENS[chainId].BAL.address, // BAL
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
             },
             {
-                tokenAddress: TOKENS[chainId].WETH.address, // WETH
+                address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,

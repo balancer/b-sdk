@@ -27,18 +27,13 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
     private parseCreateFunctionArgs(
         input: CreatePoolV3WeightedInput,
     ): CreatePoolV3WeightedArgs {
-        const sortedTokenParams = input.tokens.sort(
-            ({ tokenAddress: address1 }, { tokenAddress: address2 }) => {
-                const diff = BigInt(address1) - BigInt(address2);
-                return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-            },
-        );
+        const sortedTokenParams = sortByAddress(input.tokens);
 
         const [tokenConfigs, normalizedWeights] = sortedTokenParams.reduce(
             (
                 acc,
                 {
-                    tokenAddress,
+                    address: tokenAddress,
                     rateProvider,
                     weight,
                     tokenType,

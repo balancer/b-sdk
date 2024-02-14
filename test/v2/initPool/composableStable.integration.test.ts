@@ -55,12 +55,12 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             poolType: PoolType.ComposableStable,
             tokens: [
                 {
-                    tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
+                    address: '0xba100000625a3754423978a60c9317c58a424e3d',
                     rateProvider: zeroAddress,
                     tokenRateCacheDuration: 100n,
                 },
                 {
-                    tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                     rateProvider: zeroAddress,
                     tokenRateCacheDuration: 100n,
                 },
@@ -85,14 +85,12 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             recipient: signerAddress,
             amountsIn: [
                 {
-                    address:
-                        createPoolComposableStableInput.tokens[0].tokenAddress,
+                    address: createPoolComposableStableInput.tokens[0].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                 },
                 {
-                    address:
-                        createPoolComposableStableInput.tokens[1].tokenAddress,
+                    address: createPoolComposableStableInput.tokens[1].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                 },

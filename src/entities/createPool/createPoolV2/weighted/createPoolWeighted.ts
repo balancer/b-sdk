@@ -8,6 +8,7 @@ import {
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
 import { weightedPoolFactoryV2Abi } from '../../../../abi/weightedPoolFactory.V2';
 import { WEIGHTED_POOL_FACTORY_BALANCER_V2 } from '@/utils';
+import { sortByAddress } from '@/utils/sortByAddress';
 
 export class CreatePoolWeightedV2 implements CreatePoolBase {
     buildCall(input: CreatePoolV2WeightedInput): CreatePoolBuildCallOutput {
@@ -26,16 +27,11 @@ export class CreatePoolWeightedV2 implements CreatePoolBase {
     private parseCreateFunctionArgs(
         input: CreatePoolV2WeightedInput,
     ): CreatePoolV2WeightedArgs {
-        const sortedTokenParams = input.tokens.sort(
-            ({ tokenAddress: address1 }, { tokenAddress: address2 }) => {
-                const diff = BigInt(address1) - BigInt(address2);
-                return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-            },
-        );
+        const sortedTokenParams = sortByAddress(input.tokens);
 
         const [tokens, weights, rateProviders] = sortedTokenParams.reduce(
             (acc, curr) => {
-                acc[0].push(curr.tokenAddress);
+                acc[0].push(curr.address);
                 acc[1].push(curr.weight);
                 acc[2].push(curr.rateProvider);
                 return acc;

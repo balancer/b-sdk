@@ -49,13 +49,13 @@ describe('Create Weighted Pool tests', () => {
             symbol: '50BAL-50WETH',
             tokens: [
                 {
-                    tokenAddress: TOKENS[chainId].BAL.address, // BAL
+                    address: TOKENS[chainId].BAL.address, // BAL
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                 },
                 {
-                    tokenAddress: TOKENS[chainId].WETH.address, // WETH
+                    address: TOKENS[chainId].WETH.address, // WETH
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
@@ -76,13 +76,13 @@ describe('Create Weighted Pool tests', () => {
     test('Wrong weights, expects error', async () => {
         const tokens: CreatePoolV3WeightedInput['tokens'] = [
             {
-                tokenAddress: TOKENS[chainId].BAL.address, // BAL
+                address: TOKENS[chainId].BAL.address, // BAL
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
             },
             {
-                tokenAddress: TOKENS[chainId].WETH.address, // WETH
+                address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther(`${1 / 4}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
@@ -99,13 +99,13 @@ describe('Create Weighted Pool tests', () => {
     test('Weight value 0, expects error', async () => {
         const tokens: CreatePoolV3WeightedInput['tokens'] = [
             {
-                tokenAddress: TOKENS[chainId].BAL.address, // BAL
+                address: TOKENS[chainId].BAL.address, // BAL
                 weight: parseEther('0'),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
             },
             {
-                tokenAddress: TOKENS[chainId].WETH.address, // WETH
+                address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther('1'),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
@@ -121,19 +121,19 @@ describe('Create Weighted Pool tests', () => {
     test('Duplicate token addresses, expects error', async () => {
         const tokens: CreatePoolV3WeightedInput['tokens'] = [
             {
-                tokenAddress: TOKENS[chainId].BAL.address, // BAL
+                address: TOKENS[chainId].BAL.address, // BAL
                 weight: parseEther(`${1 / 4}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
             },
             {
-                tokenAddress: TOKENS[chainId].BAL.address, // BAL
+                address: TOKENS[chainId].BAL.address, // BAL
                 weight: parseEther(`${1 / 4}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
             },
             {
-                tokenAddress: TOKENS[chainId].WETH.address, // WETH
+                address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
@@ -149,13 +149,13 @@ describe('Create Weighted Pool tests', () => {
     test('Allowing only TokenType.STANDARD to have address zero as rateProvider', async () => {
         const tokens: CreatePoolV3WeightedInput['tokens'] = [
             {
-                tokenAddress: TOKENS[chainId].BAL.address, // BAL
+                address: TOKENS[chainId].BAL.address, // BAL
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
             },
             {
-                tokenAddress: TOKENS[chainId].WETH.address, // WETH
+                address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.ERC4626_TOKEN,

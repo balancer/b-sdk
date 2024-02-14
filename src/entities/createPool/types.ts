@@ -22,7 +22,7 @@ export type CreatePoolV2BaseInput = CreatePoolBaseInput & {
 export type CreatePoolV2WeightedInput = CreatePoolV2BaseInput & {
     poolType: PoolType.Weighted;
     tokens: {
-        tokenAddress: Address;
+        address: Address;
         rateProvider: Address;
         weight: bigint;
     }[];
@@ -31,7 +31,7 @@ export type CreatePoolV2WeightedInput = CreatePoolV2BaseInput & {
 export type CreatePoolV2ComposableStableInput = CreatePoolV2BaseInput & {
     poolType: PoolType.ComposableStable;
     tokens: {
-        tokenAddress: Address;
+        address: Address;
         rateProvider: Address;
         tokenRateCacheDuration: bigint;
     }[];
@@ -46,7 +46,7 @@ export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
 export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Weighted;
     tokens: {
-        tokenAddress: Address;
+        address: Address;
         rateProvider: Address;
         weight: bigint;
         tokenType: TokenType;

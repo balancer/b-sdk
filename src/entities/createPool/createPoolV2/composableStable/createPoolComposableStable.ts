@@ -8,6 +8,7 @@ import {
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
 import { COMPOSABLE_STABLE_POOL_FACTORY } from '@/utils';
+import { sortByAddress } from '@/utils/sortByAddress';
 
 export class CreatePoolComposableStableV2 implements CreatePoolBase {
     buildCall(
@@ -28,17 +29,12 @@ export class CreatePoolComposableStableV2 implements CreatePoolBase {
     private parseCreateFunctionArgs(
         input: CreatePoolV2ComposableStableInput,
     ): CreatePoolV2ComposableStableArgs {
-        const sortedTokenParams = input.tokens.sort(
-            ({ tokenAddress: address1 }, { tokenAddress: address2 }) => {
-                const diff = BigInt(address1) - BigInt(address2);
-                return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-            },
-        );
+        const sortedTokenParams = sortByAddress(input.tokens);
 
         const [tokens, rateProviders, tokenRateCacheDurations] =
             sortedTokenParams.reduce(
                 (acc, curr) => {
-                    acc[0].push(curr.tokenAddress);
+                    acc[0].push(curr.address);
                     acc[1].push(curr.rateProvider);
                     acc[2].push(curr.tokenRateCacheDuration);
                     return acc;
