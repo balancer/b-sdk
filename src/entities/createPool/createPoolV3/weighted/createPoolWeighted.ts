@@ -41,12 +41,12 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
                     yieldFeeExempt,
                 },
             ) => {
-                acc[0].push([
-                    tokenAddress,
+                acc[0].push({
+                    token: tokenAddress,
                     tokenType,
                     rateProvider,
-                    yieldFeeExempt ?? false,
-                ]);
+                    yieldFeeExempt: yieldFeeExempt ?? false,
+                });
                 acc[1].push(weight);
                 return acc;
             },

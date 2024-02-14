@@ -94,4 +94,9 @@ export type CreatePoolV3WeightedArgs = [
     Hex,
 ];
 
-export type TokenConfig = [Address, TokenType, Address | 0, boolean];
+export type TokenConfig = {
+    token: Address;
+    tokenType: TokenType;
+    rateProvider: Address;
+    yieldFeeExempt: boolean;
+};
