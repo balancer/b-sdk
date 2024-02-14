@@ -1,11 +1,5 @@
 import { CreatePoolTxInput } from './types';
-import {
-    Address,
-    COMPOSABLE_STABLE_POOL_FACTORY,
-    PoolType,
-    WEIGHTED_POOL_FACTORY_BALANCER_V2,
-    WEIGHTED_POOL_FACTORY_BALANCER_V3,
-} from '../../../src';
+import { Address, PoolType } from '../../../src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
 import { weightedPoolFactoryV2Abi } from '../../../src/abi/weightedPoolFactory.V2';
 import { composableStableFactoryV2Abi } from '../../../src/abi/composableStableFactory.V2';

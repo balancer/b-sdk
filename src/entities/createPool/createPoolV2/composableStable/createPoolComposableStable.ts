@@ -19,7 +19,10 @@ export class CreatePoolComposableStableV2 implements CreatePoolBase {
             functionName: 'create',
             args,
         });
-        return { call: encodedCall, to: COMPOSABLE_STABLE_POOL_FACTORY[input.chainId] };
+        return {
+            call: encodedCall,
+            to: COMPOSABLE_STABLE_POOL_FACTORY[input.chainId],
+        };
     }
 
     private parseCreateFunctionArgs(
