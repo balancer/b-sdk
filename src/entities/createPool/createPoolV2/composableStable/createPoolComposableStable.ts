@@ -7,6 +7,7 @@ import {
     CreatePoolV2ComposableStableInput,
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
+import { COMPOSABLE_STABLE_POOL_FACTORY } from '@/utils';
 
 export class CreatePoolComposableStableV2 implements CreatePoolBase {
     buildCall(
@@ -18,7 +19,7 @@ export class CreatePoolComposableStableV2 implements CreatePoolBase {
             functionName: 'create',
             args,
         });
-        return { call: encodedCall };
+        return { call: encodedCall, to: COMPOSABLE_STABLE_POOL_FACTORY[input.chainId] };
     }
 
     private parseCreateFunctionArgs(

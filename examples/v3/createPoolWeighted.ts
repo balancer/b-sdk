@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { CreatePool, CreatePoolV3WeightedInput } from '@/entities';
+import { CreatePool, CreatePoolV3WeightedInput } from '../../src';
 import { PoolType, TokenType } from '@/types';
 import { ChainId, CHAINS, WEIGHTED_POOL_FACTORY_BALANCER_V3 } from '@/utils';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';

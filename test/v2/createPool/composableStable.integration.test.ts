@@ -67,6 +67,7 @@ describe('Create Composable Stable Pool tests', () => {
             exemptFromYieldProtocolFeeFlag: false,
             swapFee: '0.01',
             poolOwnerAddress: txInput.testAddress, // Balancer DAO Multisig
+            chainId,
             balancerVersion: 2,
         };
     });

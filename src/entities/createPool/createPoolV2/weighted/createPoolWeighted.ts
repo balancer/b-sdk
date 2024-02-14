@@ -7,6 +7,7 @@ import {
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
 import { weightedPoolFactoryV2Abi } from '../../../../abi/weightedPoolFactory.V2';
+import { WEIGHTED_POOL_FACTORY_BALANCER_V2 } from '@/utils';
 
 export class CreatePoolWeightedV2 implements CreatePoolBase {
     buildCall(input: CreatePoolV2WeightedInput): CreatePoolBuildCallOutput {
@@ -16,7 +17,10 @@ export class CreatePoolWeightedV2 implements CreatePoolBase {
             functionName: 'create',
             args,
         });
-        return { call: encodedCall };
+        return {
+            call: encodedCall,
+            to: WEIGHTED_POOL_FACTORY_BALANCER_V2[input.chainId],
+        };
     }
 
     private parseCreateFunctionArgs(

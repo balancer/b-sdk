@@ -61,6 +61,7 @@ describe('Create Weighted Pool tests', () => {
                     tokenType: TokenType.STANDARD,
                 },
             ],
+            chainId,
             balancerVersion: 3,
         };
     });

@@ -30,7 +30,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'ETHEREUM_RPC_URL',
         fallBackRpc: 'https://cloudflare-eth.com',
         port: ANVIL_PORTS.MAINNET,
-        forkBlockNumber: 18980070n,
+        forkBlockNumber: 18980070n, // 19228917
     },
     POLYGON: {
         rpcEnv: 'POLYGON_RPC_URL',

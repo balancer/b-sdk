@@ -9,6 +9,7 @@ export type CreatePoolBaseInput = {
     name?: string;
     symbol: string;
     salt?: Hex;
+    chainId: number;
     balancerVersion: 2 | 3;
 };
 
@@ -60,6 +61,7 @@ export type CreatePoolInput =
 
 export type CreatePoolBuildCallOutput = {
     call: Hex;
+    to: Address;
 };
 
 export type CreatePoolV2WeightedArgs = [
