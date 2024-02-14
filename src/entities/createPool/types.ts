@@ -46,7 +46,7 @@ export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Weighted;
     tokens: {
         tokenAddress: Address;
-        rateProvider: Address | 0;
+        rateProvider: Address;
         weight: bigint;
         tokenType: TokenType;
         yieldFeeExempt?: boolean;
