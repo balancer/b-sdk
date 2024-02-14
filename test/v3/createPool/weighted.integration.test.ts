@@ -70,7 +70,7 @@ describe('Create Weighted Pool tests', () => {
             createPoolInput: createWeightedPoolInput,
         });
         expect(poolAddress).to.not.be.undefined;
-    }, 20_000);
+    });
 
     test('Wrong weights, expects error', async () => {
         const tokens: CreatePoolV3WeightedInput['tokens'] = [

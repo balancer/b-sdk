@@ -22,7 +22,7 @@
         "format": "biome format --write .",
         "lint": "dpdm -T ./src && biome check .",
         "test": "vitest dev",
-        "test:ci": "vitest run",
+        "test:ci": "vitest run --test-timeout 20000",
         "changeset": "changeset",
         "changeset:release": "pnpm build && changeset publish",
         "example": "npx tsx ./examples/executeExample.ts"
