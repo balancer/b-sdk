@@ -252,4 +252,4 @@ export const weightedPoolFactoryV3Abi = [
         stateMutability: 'view',
         type: 'function',
     },
-];
+] as const;
