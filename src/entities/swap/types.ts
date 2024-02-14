@@ -3,6 +3,7 @@ import { MinimalToken, Slippage } from '../..';
 import { SingleSwap, SwapKind, BatchSwapStep } from '../../types';
 import { PathWithAmount } from './pathWithAmount';
 import { Address, Hex } from 'viem';
+import { SingleTokenExactIn, SingleTokenExactOut } from './swapV3';
 
 export type SwapBuildOutputBase = {
     to: Address;
@@ -32,9 +33,12 @@ export interface SwapBase {
     chainId: number;
     isBatchSwap: boolean;
     paths: PathWithAmount[];
-    assets: Address[];
     swapKind: SwapKind;
-    swaps: BatchSwapStep[] | SingleSwap;
+    swaps:
+        | BatchSwapStep[]
+        | SingleSwap
+        | SingleTokenExactIn
+        | SingleTokenExactOut;
     quote: TokenAmount;
     inputAmount: TokenAmount;
     outputAmount: TokenAmount;

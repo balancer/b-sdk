@@ -345,7 +345,7 @@ export class SwapV2 implements SwapBase {
                 });
             }
         } else {
-            const path = this.paths[0];
+            const path = paths[0];
             const pool = path.pools[0];
             const assetIn = this.convertNativeAddressToZero(
                 path.tokens[0].address,
