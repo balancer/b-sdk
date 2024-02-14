@@ -9,6 +9,7 @@ import {
 } from '../../types';
 import { weightedPoolFactoryV3Abi } from '@/abi/weightedPoolFactory.V3';
 import { WEIGHTED_POOL_FACTORY_BALANCER_V3 } from '@/utils';
+import { sortByAddress } from '@/utils/sortByAddress';
 
 export class CreatePoolWeightedV3 implements CreatePoolBase {
     buildCall(input: CreatePoolV3WeightedInput): CreatePoolBuildCallOutput {
