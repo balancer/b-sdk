@@ -25,6 +25,12 @@ import { AddLiquidityNested } from '../addLiquidityNested';
 import { AddLiquidityNestedInput } from '../addLiquidityNested/types';
 
 export class PriceImpact {
+    /**
+     * Calculate price impact on add liquidity single token operations
+     * @param input same input used in the corresponding add liquidity operation
+     * @param poolState same pool state used in the corresponding add liquidity operation
+     * @returns price impact amount
+     */
     static addLiquiditySingleToken = async (
         input: AddLiquiditySingleTokenInput,
         poolState: PoolState,
@@ -62,6 +68,14 @@ export class PriceImpact {
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
     };
 
+    /**
+     * Calculate price impact on add liquidity unbalanced operations
+     *
+     * Note: works on both balancer v2 and v3
+     * @param input same input used in the corresponding add liquidity operation
+     * @param poolState same pool state used in the corresponding add liquidity operation
+     * @returns price impact amount
+     */
     static addLiquidityUnbalanced = async (
         input: AddLiquidityUnbalancedInput,
         poolState: PoolState,
@@ -204,6 +218,14 @@ export class PriceImpact {
         }
     };
 
+    /**
+     * Alternative for calculating price impact on add liquidity unbalanced operations
+     *
+     * Note: works on balancer v2 only because it relies on Remove Liquidity Unbalanced
+     * @param input same input used in the corresponding add liquidity operation
+     * @param poolState same pool state used in the corresponding add liquidity operation
+     * @returns price impact amount
+     */
     static addLiquidityUnbalancedAlternative = async (
         input: AddLiquidityUnbalancedInput,
         poolState: PoolState,
@@ -211,18 +233,18 @@ export class PriceImpact {
         // inputs are being validated within AddLiquidity
         if (poolState.balancerVersion !== 2) {
             throw new Error(
-                'This method relies on Remove Liquidity Unbalanced, which is only available for balancer V2.',
+                'This alternative method relies on Remove Liquidity Unbalanced, which is only available for balancer V2.',
             );
         }
 
-        // simulate adding liquidity to get amounts in
+        // simulate adding liquidity to get amounts in and bptOut
         const addLiquidity = new AddLiquidity();
         const { amountsIn, bptOut } = await addLiquidity.query(
             input,
             poolState,
         );
 
-        // simulate removing liquidity to get amounts out
+        // simulate removing liquidity exact out to get bptIn
         const removeLiquidity = new RemoveLiquidity();
         const removeLiquidityInput: RemoveLiquidityInput = {
             chainId: input.chainId,
@@ -248,8 +270,14 @@ export class PriceImpact {
     };
 
     /**
-     * Price impact on adding liquidity for nested pools is the sum of the
-     * price impacts of each add liquidity operation in the nested pools.
+     * Calculate price impact on adding liquidity for nested pools.
+     *
+     * Note: is based on the premise that the price impact on adding liquidity
+     * for nested pools is the sum of the price impacts of each add liquidity
+     * operation in the nested pools.
+     * @param input same input used in the corresponding add liquidity nested operation
+     * @param nestedPoolState same nested pool state used in the corresponding add liquidity nested operation
+     * @returns price impact amount
      */
     static addLiquidityNested = async (
         input: AddLiquidityNestedInput,
@@ -320,6 +348,12 @@ export class PriceImpact {
         return PriceImpactAmount.fromRawAmount(priceImpactSum);
     };
 
+    /**
+     * Calculate price impact on remove liquidity operations
+     * @param input same input used in the corresponding remove liquidity operation
+     * @param poolState same pool state used in the corresponding remove liquidity operation
+     * @returns price impact amount
+     */
     static removeLiquidity = async (
         input:
             | RemoveLiquiditySingleTokenExactInInput
@@ -357,6 +391,16 @@ export class PriceImpact {
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
     };
 
+    /**
+     * Calculate price impact on removing liquidity for nested pools.
+     *
+     * Note: is based on the premise that the price impact on removing liquidity
+     * for nested pools is the sum of the price impacts of each remove liquidity
+     * operation in the nested pools.
+     * @param input same input used in the corresponding remove liquidity nested operation
+     * @param nestedPoolState same nested pool state used in the corresponding remove liquidity nested operation
+     * @returns price impact amount
+     */
     static removeLiquidityNested = async (
         input: RemoveLiquidityNestedSingleTokenInput,
         nestedPoolState: NestedPoolState,
@@ -395,6 +439,11 @@ export class PriceImpact {
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
     };
 
+    /**
+     * Calculate price impact on single swap operations
+     * @param input same input used in the corresponding single swap operation
+     * @returns price impact amount
+     */
     static singleSwap = async ({
         poolId,
         kind,
