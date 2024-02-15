@@ -7,11 +7,14 @@ import {
     AddLiquidity,
     PoolState,
     Slippage,
-} from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolInput } from '../../../src/entities/createPool/types';
-import { InitPool } from '../../../src/entities/initPool';
-import { InitPoolInput } from '../../../src/entities/initPool/types';
+    Hex,
+    ChainId,
+    NestedPoolState,
+} from '@/.';
+import { CreatePool } from '@/entities/createPool';
+import { CreatePoolInput } from '@/entities/createPool/types';
+import { InitPool } from '@/entities/initPool';
+import { InitPoolInput } from '@/entities/initPool/types';
 
 export type AddLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
@@ -44,4 +47,17 @@ export type CreatePoolTxInput = {
     createPool: CreatePool;
     createPoolInput: CreatePoolInput;
     testAddress: Address;
+};
+
+export type AddLiquidityNestedTxInput = {
+    nestedPoolState: NestedPoolState;
+    amountsIn: {
+        address: Address; // DAI
+        rawAmount: bigint;
+    }[];
+    chainId: ChainId;
+    rpcUrl: string;
+    testAddress: Address;
+    client: Client & PublicActions & TestActions & WalletActions;
+    useNativeAssetAsWrappedAmountIn?: boolean;
 };
