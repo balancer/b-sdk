@@ -13,16 +13,31 @@ import {
     TestActions,
     WalletActions,
 } from 'viem';
-import { CHAINS, ChainId, SwapKind, Path, Token } from '../../src';
-import { forkSetup } from '../lib/utils/helper';
+import {
+    CHAINS,
+    ChainId,
+    SwapKind,
+    Path,
+    Token,
+    Slippage,
+    Swap,
+    BALANCER_ROUTER,
+    ZERO_ADDRESS,
+    SwapBuildOutputExactOut,
+    NATIVE_ASSETS,
+    SwapBuildOutputExactIn,
+} from '../../src';
+import { forkSetup, sendTransactionGetBalances } from '../lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { SwapV3 } from '@/entities/swap/swapV3';
 
 const balancerVersion = 3;
 const chainId = ChainId.SEPOLIA;
+// blockNo with guaranteed liquidity
+const blockNo = 5287755n;
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, 5287755n);
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, blockNo);
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
@@ -43,8 +58,8 @@ describe('SwapV3', () => {
             },
         ],
         pools: ['0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83'],
-        inputAmountRaw: 1n,
-        outputAmountRaw: 1n,
+        inputAmountRaw: 100000000000n,
+        outputAmountRaw: 100000000000n,
     };
 
     beforeAll(async () => {
@@ -71,16 +86,16 @@ describe('SwapV3', () => {
         );
     });
 
-    describe('query method should return updated', () => {
+    describe('query method should return correct updated', () => {
         test('GivenIn', async () => {
             const swap = new SwapV3({
-                chainId: ChainId.MAINNET,
+                chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenIn,
                 wethIsEth: false,
             });
 
-            const updated = await swap.query(rpcUrl, 5287754n);
+            const updated = await swap.query(rpcUrl);
 
             const wethToken = new Token(
                 chainId,
@@ -88,11 +103,11 @@ describe('SwapV3', () => {
                 TOKENS[chainId].WETH.decimals,
             );
             expect(updated.token).to.deep.eq(wethToken);
-            console.log(updated.amount);
+            expect(updated.amount).to.eq(25115489n);
         });
-        test.skip('GivenOut', async () => {
+        test('GivenOut', async () => {
             const swap = new SwapV3({
-                chainId: ChainId.MAINNET,
+                chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenOut,
                 wethIsEth: false,
@@ -106,7 +121,215 @@ describe('SwapV3', () => {
                 TOKENS[chainId].BAL.decimals,
             );
             expect(updated.token).to.deep.eq(balToken);
-            console.log(updated.amount);
+            expect(updated.amount).to.eq(398002113381361n);
+        });
+    });
+    describe('swap should be executed correcly', () => {
+        describe('wethIsEth: false', () => {
+            const swapParams = {
+                chainId,
+                paths: [pathBalWeth],
+                wethIsEth: false,
+            };
+            test('GivenIn', async () => {
+                const swap = new Swap({
+                    ...swapParams,
+                    swapKind: SwapKind.GivenIn,
+                });
+                await assertSwapExactIn(client, chainId, swap, false);
+            });
+            test('GivenOut', async () => {
+                const swap = new Swap({
+                    ...swapParams,
+                    swapKind: SwapKind.GivenOut,
+                });
+                await assertSwapExactOut(client, chainId, swap, false);
+            });
+        });
+        describe('wethIsEth: true', () => {
+            describe('eth out', async () => {
+                test('GivenIn', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathBalWeth],
+                        swapKind: SwapKind.GivenIn,
+                        wethIsEth: true,
+                    });
+                    await assertSwapExactIn(client, chainId, swap, true);
+                });
+                test('GivenOut', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathBalWeth],
+                        swapKind: SwapKind.GivenOut,
+                        wethIsEth: true,
+                    });
+                    await assertSwapExactOut(client, chainId, swap, true);
+                });
+            });
+            describe('eth in', () => {
+                test('GivenIn', async () => {
+                    const pathWethBal = {
+                        ...pathBalWeth,
+                        tokens: [...pathBalWeth.tokens].reverse(),
+                    };
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathWethBal],
+                        swapKind: SwapKind.GivenIn,
+                        wethIsEth: true,
+                    });
+                    await assertSwapExactIn(client, chainId, swap, true);
+                });
+                test('GivenOut', async () => {
+                    const pathWethBal = {
+                        ...pathBalWeth,
+                        tokens: [...pathBalWeth.tokens].reverse(),
+                    };
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathWethBal],
+                        swapKind: SwapKind.GivenOut,
+                        wethIsEth: true,
+                    });
+                    await assertSwapExactOut(client, chainId, swap, true);
+                });
+            });
         });
     });
 });
+
+async function assertSwapExactIn(
+    client: Client & PublicActions & TestActions & WalletActions,
+    chainId: ChainId,
+    swap: Swap,
+    wethIsEth: boolean,
+) {
+    const testAddress = (await client.getAddresses())[0];
+    const slippage = Slippage.fromPercentage('0.1');
+    const deadline = 999999999999999999n;
+
+    const expectedAmountOut = await swap.query(rpcUrl);
+    expect(expectedAmountOut.amount > 0n).to.be.true;
+    const call = swap.buildCall({
+        slippage,
+        deadline,
+        expectedAmountOut,
+    }) as SwapBuildOutputExactIn;
+
+    const isEthInput =
+        wethIsEth &&
+        swap.inputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
+
+    const expectedValue = isEthInput ? swap.inputAmount.amount : 0n;
+
+    expect(call.to).to.eq(BALANCER_ROUTER[chainId]);
+    expect(call.value).to.eq(expectedValue);
+    // send swap transaction and check balance changes
+    const { transactionReceipt, balanceDeltas } =
+        await sendTransactionGetBalances(
+            [
+                ZERO_ADDRESS,
+                swap.inputAmount.token.address,
+                swap.outputAmount.token.address,
+            ],
+            client,
+            testAddress,
+            call.to,
+            call.callData,
+            call.value,
+        );
+
+    expect(transactionReceipt.status).to.eq('success');
+
+    const isEthOutput =
+        wethIsEth &&
+        swap.outputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
+    let expectedEthDelta = 0n;
+    let expectedTokenInDelta = swap.inputAmount.amount;
+    let expectedTokenOutDelta = expectedAmountOut.amount;
+    if (isEthInput) {
+        // Should send eth instead of tokenIn (weth)
+        expectedEthDelta = swap.inputAmount.amount;
+        expectedTokenInDelta = 0n;
+    }
+    if (isEthOutput) {
+        // should receive eth instead of tokenOut (weth)
+        expectedEthDelta = expectedAmountOut.amount;
+        expectedTokenOutDelta = 0n;
+    }
+
+    expect(balanceDeltas).to.deep.eq([
+        expectedEthDelta,
+        expectedTokenInDelta,
+        expectedTokenOutDelta,
+    ]);
+}
+
+async function assertSwapExactOut(
+    client: Client & PublicActions & TestActions & WalletActions,
+    chainId: ChainId,
+    swap: Swap,
+    wethIsEth: boolean,
+) {
+    const testAddress = (await client.getAddresses())[0];
+    const slippage = Slippage.fromPercentage('0.1');
+    const deadline = 999999999999999999n;
+
+    const expectedAmountIn = await swap.query(rpcUrl);
+    expect(expectedAmountIn.amount > 0n).to.be.true;
+    const call = swap.buildCall({
+        slippage,
+        deadline,
+        expectedAmountIn,
+    }) as SwapBuildOutputExactOut;
+
+    const isEthInput =
+        wethIsEth &&
+        swap.inputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
+
+    // Caller must send amountIn + slippage if ETH
+    const expectedValue = isEthInput ? call.maxAmountIn.amount : 0n;
+
+    expect(call.to).to.eq(BALANCER_ROUTER[chainId]);
+    expect(call.value).to.eq(expectedValue);
+    // send swap transaction and check balance changes
+    const { transactionReceipt, balanceDeltas } =
+        await sendTransactionGetBalances(
+            [
+                ZERO_ADDRESS,
+                swap.inputAmount.token.address,
+                swap.outputAmount.token.address,
+            ],
+            client,
+            testAddress,
+            call.to,
+            call.callData,
+            call.value,
+        );
+
+    expect(transactionReceipt.status).to.eq('success');
+
+    const isEthOutput =
+        wethIsEth &&
+        swap.outputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
+    let expectedEthDelta = 0n;
+    let expectedTokenInDelta = expectedAmountIn.amount;
+    let expectedTokenOutDelta = swap.outputAmount.amount;
+    if (isEthInput) {
+        // Should send eth instead of tokenIn (weth)
+        expectedEthDelta = expectedAmountIn.amount;
+        expectedTokenInDelta = 0n;
+    }
+    if (isEthOutput) {
+        // should receive eth instead of tokenOut (weth)
+        expectedEthDelta = swap.outputAmount.amount;
+        expectedTokenOutDelta = 0n;
+    }
+
+    expect(balanceDeltas).to.deep.eq([
+        expectedEthDelta,
+        expectedTokenInDelta,
+        expectedTokenOutDelta,
+    ]);
+}
