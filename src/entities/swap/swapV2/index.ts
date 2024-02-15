@@ -17,7 +17,12 @@ import {
     http,
 } from 'viem';
 import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
-import { Path, SwapBase, SwapBuildOutputBase, SwapCallBuild } from '../types';
+import {
+    SwapBase,
+    SwapBuildOutputBase,
+    SwapCallBuild,
+    SwapInputV2,
+} from '../types';
 import { PathWithAmount } from '../pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../pathHelpers';
 
@@ -27,7 +32,9 @@ export class SwapV2 implements SwapBase {
         chainId,
         paths,
         swapKind,
-    }: { chainId: number; paths: Path[]; swapKind: SwapKind }) {
+        sender,
+        recipient,
+    }: SwapInputV2) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
@@ -57,6 +64,8 @@ export class SwapV2 implements SwapBase {
         });
 
         this.swaps = swaps;
+        this.sender = sender;
+        this.recipient = recipient;
     }
 
     public readonly chainId: number;
@@ -67,6 +76,8 @@ export class SwapV2 implements SwapBase {
     public swaps: BatchSwapStep[] | SingleSwap;
     public readonly inputAmount: TokenAmount;
     public readonly outputAmount: TokenAmount;
+    public readonly sender: Address;
+    public readonly recipient: Address;
 
     public get quote(): TokenAmount {
         return this.swapKind === SwapKind.GivenIn
@@ -222,8 +233,8 @@ export class SwapV2 implements SwapBase {
             callData: this.callData(
                 limits,
                 swapCall.deadline,
-                swapCall.sender,
-                swapCall.recipient,
+                this.sender,
+                this.recipient,
             ),
             value: this.value(limits),
         };

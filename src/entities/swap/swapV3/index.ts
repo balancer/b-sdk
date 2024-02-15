@@ -7,9 +7,18 @@ import {
 } from 'viem';
 import { TokenAmount } from '../../tokenAmount';
 import { SwapKind, Hex } from '../../../types';
-import { DEFAULT_USERDATA, BALANCER_ROUTER, VAULT_V3 } from '../../../utils';
+import {
+    DEFAULT_USERDATA,
+    BALANCER_ROUTER,
+    NATIVE_ASSETS,
+} from '../../../utils';
 import { balancerRouterAbi } from '../../../abi';
-import { Path, SwapBase, SwapBuildOutputBase, SwapCallBuild } from '../types';
+import {
+    SwapBase,
+    SwapBuildOutputBase,
+    SwapCallBuild,
+    SwapInputV3,
+} from '../types';
 import { PathWithAmount } from '../pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../pathHelpers';
 import { SingleTokenExactIn, SingleTokenExactOut } from './types';
@@ -18,17 +27,7 @@ export * from './types';
 
 // A Swap can be a single or multiple paths
 export class SwapV3 implements SwapBase {
-    public constructor({
-        chainId,
-        paths,
-        swapKind,
-        wethIsEth,
-    }: {
-        chainId: number;
-        paths: Path[];
-        swapKind: SwapKind;
-        wethIsEth: boolean;
-    }) {
+    public constructor({ chainId, paths, swapKind, wethIsEth }: SwapInputV3) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
@@ -177,15 +176,25 @@ export class SwapV3 implements SwapBase {
     /**
      * Returns the native assset value to be sent to the vault contract based on the swap kind and the limit amounts
      *
-     * @param limits calculated from swap.limits()
+     * @param limit
      * @returns
      */
-    private value(limits: TokenAmount): bigint {
-        return this.wethIsEth ? limits.amount : 0n;
+    private value(limit: TokenAmount): bigint {
+        let value = 0n;
+        if (
+            this.wethIsEth &&
+            this.inputAmount.token.address ===
+                NATIVE_ASSETS[this.chainId].wrapped
+        ) {
+            if ('exactAmountIn' in this.swaps) value = this.swaps.exactAmountIn;
+            else if ('exactAmountOut' in this.swaps) value = limit.amount;
+            else throw new Error('Incorrect V3 Swap');
+        }
+        return value;
     }
 
     private to(): Address {
-        return VAULT_V3[this.chainId];
+        return BALANCER_ROUTER[this.chainId];
     }
 
     /**
@@ -235,7 +244,6 @@ export class SwapV3 implements SwapBase {
                 });
             } else throw new Error('Incorrect V3 Swap');
         }
-        callData = '0x';
         return callData;
     }
 

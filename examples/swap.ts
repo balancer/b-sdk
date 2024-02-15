@@ -1,6 +1,5 @@
 /**
  * Example showing how to find swap information for a token pair.
- * (Runs against a local Anvil fork)
  *
  * Run with:
  * pnpm example ./examples/swap.ts
@@ -62,6 +61,8 @@ const swap = async () => {
         chainId,
         paths: sorPaths,
         swapKind,
+        sender,
+        recipient,
     });
 
     console.log(
@@ -80,8 +81,6 @@ const swap = async () => {
         const callData = swap.buildCall({
             slippage,
             deadline,
-            sender,
-            recipient,
             expectedAmountOut: updated,
         }) as SwapBuildOutputExactIn;
         console.log(
@@ -91,8 +90,6 @@ const swap = async () => {
         const callData = swap.buildCall({
             slippage,
             deadline,
-            sender,
-            recipient,
             expectedAmountIn: updated,
         }) as SwapBuildOutputExactOut;
         console.log(

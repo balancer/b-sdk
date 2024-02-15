@@ -29,6 +29,23 @@ export type Path = {
     balancerVersion: 2 | 3;
 };
 
+export type SwapInputBase = {
+    chainId: number;
+    paths: Path[];
+    swapKind: SwapKind;
+};
+
+export type SwapInputV2 = SwapInputBase & {
+    sender: Address;
+    recipient: Address;
+};
+
+export type SwapInputV3 = SwapInputBase & {
+    wethIsEth: boolean;
+};
+
+export type SwapInput = SwapInputV2 | SwapInputV3;
+
 export interface SwapBase {
     chainId: number;
     isBatchSwap: boolean;
@@ -49,8 +66,6 @@ export interface SwapBase {
 
 type BaseSwapCall = {
     deadline: bigint;
-    sender: Address;
-    recipient: Address;
 };
 
 export type SwapCallExactIn = BaseSwapCall & {

@@ -59,6 +59,8 @@ describe('Swap', () => {
                     chainId: ChainId.MAINNET,
                     paths: [pathWethDai, pathV3],
                     swapKind: SwapKind.GivenIn,
+                    sender: '0x',
+                    recipient: '0x',
                 });
             }).toThrowError(
                 'Unsupported swap: all paths must use same Balancer version.',
@@ -75,6 +77,8 @@ describe('Swap', () => {
                         chainId: ChainId.MAINNET,
                         paths: [pathWethDai, pathUsdcDai],
                         swapKind: SwapKind.GivenIn,
+                        sender: '0x',
+                        recipient: '0x',
                     });
                 }).toThrowError(
                     'Unsupported swap: all paths must start/end with same token.',
@@ -90,6 +94,8 @@ describe('Swap', () => {
                         chainId: ChainId.MAINNET,
                         paths: [pathWethDai, pathWethUsdc],
                         swapKind: SwapKind.GivenIn,
+                        sender: '0x',
+                        recipient: '0x',
                     });
                 }).toThrowError(
                     'Unsupported swap: all paths must start/end with same token.',
@@ -105,6 +111,8 @@ describe('Swap', () => {
                     chainId: ChainId.MAINNET,
                     paths: [pathTo6Decimals],
                     swapKind: SwapKind.GivenIn,
+                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                 });
                 const slippage = Slippage.fromPercentage('0.1');
                 const tokenOut = new Token(
@@ -122,8 +130,6 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                     expectedAmountOut,
                 }) as SwapBuildOutputExactIn;
                 expect(tokenOut.decimals).to.eq(6);
@@ -136,6 +142,8 @@ describe('Swap', () => {
                     chainId: ChainId.MAINNET,
                     paths: [pathFrom6Decimals],
                     swapKind: SwapKind.GivenIn,
+                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                 });
                 const slippage = Slippage.fromPercentage('0.1');
                 const tokenOut = new Token(
@@ -155,8 +163,6 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                     expectedAmountOut,
                 }) as SwapBuildOutputExactIn;
                 expect(tokenOut.decimals).to.eq(18);
@@ -171,6 +177,8 @@ describe('Swap', () => {
                     chainId: ChainId.MAINNET,
                     paths: [pathTo6Decimals],
                     swapKind: SwapKind.GivenOut,
+                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                 });
                 const slippage = Slippage.fromPercentage('0.1');
                 const tokenIn = new Token(
@@ -186,8 +194,6 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                     expectedAmountIn,
                 }) as SwapBuildOutputExactOut;
                 expect(tokenIn.decimals).to.eq(18);
@@ -200,6 +206,8 @@ describe('Swap', () => {
                     chainId: ChainId.MAINNET,
                     paths: [pathFrom6Decimals],
                     swapKind: SwapKind.GivenOut,
+                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                 });
                 const slippage = Slippage.fromPercentage('0.1');
                 const tokenIn = new Token(
@@ -215,8 +223,6 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-                    recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                     expectedAmountIn,
                 }) as SwapBuildOutputExactOut;
                 expect(tokenIn.decimals).to.eq(6);
