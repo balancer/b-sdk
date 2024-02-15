@@ -7,7 +7,6 @@ import {
 import { CreatePoolWeightedV3 } from './weighted/createPoolWeighted';
 
 export class CreatePoolV3 implements CreatePoolBase {
-    // TODO: should we allow for custom create pool types?
     private readonly createPoolTypes: Record<string, CreatePoolBase> = {};
 
     constructor() {
