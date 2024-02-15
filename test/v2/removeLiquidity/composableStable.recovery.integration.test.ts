@@ -101,7 +101,7 @@ describe('composable stable remove liquidity test', () => {
     });
 });
 
-export class MockApi {
+class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
