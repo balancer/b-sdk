@@ -1,9 +1,5 @@
 import { getContract } from 'viem';
 
-export function sortTokensByAddress(tokens: (any & { address: string })[]) {
-    return tokens.sort((a, b) => a.address.localeCompare(b.address));
-}
-
 export async function getTokenDecimals(tokenAddress, client) {
     const abi = [
         {
