@@ -15,13 +15,10 @@ import {
     SwapKind,
     Token,
     TokenAmount,
-} from '../src';
-// TODO - Move these to src import once old SOR removed
-import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
-} from '@/entities/swap';
+} from '../src';
 
 const swap = async () => {
     // User defined
