@@ -21,11 +21,12 @@ import {
     RemoveLiquidityNestedSingleTokenInput,
     NestedPoolState,
     ZERO_ADDRESS,
+    AddLiquidityNestedInput,
 } from '../../../src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { PriceImpact } from '../../../src/entities/priceImpact';
 import { PriceImpactAmount } from '../../../src/entities/priceImpactAmount';
-import { parseEther } from 'viem';
+import { parseEther, parseUnits } from 'viem';
 import { SingleSwapInput } from '../../../src/entities/utils/doSingleSwapQuery';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 
@@ -35,12 +36,14 @@ const { rpcUrl } = await startFork(
     18559730n,
 );
 const chainId = ChainId.MAINNET;
-const poolId =
-    '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b'; // wstETH-rETH-sfrxETH
-const wstETH = '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0' as Address;
-const sfrxETH = '0xac3e018457b222d93114458476f3e3416abbe38f' as Address;
-const rETH = '0xae78736cd615f374d3085123a210448e74fc6393' as Address;
 
+// pool and tokenn
+const wstETH = TOKENS[chainId].wstETH;
+const rETH = TOKENS[chainId].rETH;
+const sfrxETH = TOKENS[chainId].sfrxETH;
+const wstETH_rETH_sfrxETH = POOLS[chainId].wstETH_rETH_sfrxETH;
+
+// nested pool and tokens
 const DAI = TOKENS[chainId].DAI;
 const WETH = TOKENS[chainId].WETH;
 const USDC = TOKENS[chainId].USDC;
@@ -57,7 +60,7 @@ describe('price impact', () => {
         const api = new MockApi();
 
         // get pool state from api
-        poolState = await api.getPool(poolId);
+        poolState = await api.getPool(wstETH_rETH_sfrxETH.id);
         nestedPoolState = await api.getNestedPool(BPT_WETH_3POOL.id);
     });
 
@@ -75,7 +78,7 @@ describe('price impact', () => {
                 rpcUrl,
                 kind: AddLiquidityKind.SingleToken,
                 bptOut,
-                tokenIn: wstETH,
+                tokenIn: wstETH.address,
             };
         });
         test('ABA close to Spot Price', async () => {
@@ -102,7 +105,10 @@ describe('price impact', () => {
                     rawAmount:
                         i === 0
                             ? 0n
-                            : parseEther((10n ** BigInt(i)).toString()),
+                            : parseUnits(
+                                  (10n ** BigInt(i)).toString(),
+                                  t.decimals,
+                              ),
                     decimals: t.decimals,
                     address: t.address,
                 };
@@ -130,16 +136,62 @@ describe('price impact', () => {
         });
     });
 
+    describe('add liquidity nested - unbalanced', () => {
+        let input: AddLiquidityNestedInput;
+        beforeAll(() => {
+            input = {
+                chainId,
+                rpcUrl,
+                accountAddress: ZERO_ADDRESS,
+                amountsIn: [
+                    {
+                        address: DAI.address,
+                        rawAmount: parseUnits('100000', DAI.decimals),
+                        decimals: DAI.decimals,
+                    },
+                    {
+                        address: USDC.address,
+                        rawAmount: parseUnits('1000', USDC.decimals),
+                        decimals: USDC.decimals,
+                    },
+                    {
+                        address: USDT.address,
+                        rawAmount: parseUnits('10', USDT.decimals),
+                        decimals: USDT.decimals,
+                    },
+                    {
+                        address: WETH.address,
+                        rawAmount: parseUnits('0.1', WETH.decimals),
+                        decimals: WETH.decimals,
+                    },
+                ],
+            };
+        });
+        test('ABA close to Spot Price', async () => {
+            const priceImpactABA = await PriceImpact.addLiquidityNested(
+                input,
+                nestedPoolState,
+            );
+            const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                '0.0472', // TODO: find a way to validate this result
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                priceImpactSpot.decimal,
+                1e-4, // 1 bps
+            );
+        });
+    });
+
     describe('swap', () => {
         let input: SingleSwapInput;
         describe('given in', () => {
             beforeAll(() => {
                 input = {
-                    poolId,
+                    poolId: wstETH_rETH_sfrxETH.id,
                     kind: SwapKind.GivenIn,
-                    assetIn: wstETH,
-                    assetOut: rETH,
-                    amount: parseEther('100'),
+                    assetIn: wstETH.address,
+                    assetOut: rETH.address,
+                    amount: parseUnits('100', wstETH.decimals),
                     userData: '0x',
                     chainId,
                     rpcUrl,
@@ -160,11 +212,11 @@ describe('price impact', () => {
         describe('given out', () => {
             beforeAll(() => {
                 input = {
-                    poolId,
+                    poolId: wstETH_rETH_sfrxETH.id,
                     kind: SwapKind.GivenOut,
-                    assetIn: wstETH,
-                    assetOut: rETH,
-                    amount: parseEther('100'),
+                    assetIn: wstETH.address,
+                    assetOut: rETH.address,
+                    amount: parseUnits('100', wstETH.decimals),
                     userData: '0x',
                     chainId,
                     rpcUrl,
@@ -194,7 +246,7 @@ describe('price impact', () => {
                     decimals: 18,
                     address: poolState.address,
                 },
-                tokenOut: wstETH,
+                tokenOut: wstETH.address,
                 kind: RemoveLiquidityKind.SingleTokenExactIn,
             };
         });
@@ -283,18 +335,18 @@ class MockApi {
                 index: 0,
             },
             {
-                address: wstETH,
-                decimals: 18,
+                address: wstETH.address,
+                decimals: wstETH.decimals,
                 index: 1,
             },
             {
-                address: sfrxETH,
-                decimals: 18,
+                address: sfrxETH.address,
+                decimals: sfrxETH.decimals,
                 index: 2,
             },
             {
-                address: rETH,
-                decimals: 18,
+                address: rETH.address,
+                decimals: rETH.decimals,
                 index: 2,
             },
         ];

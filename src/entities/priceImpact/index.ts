@@ -17,7 +17,7 @@ import {
 import { TokenAmount } from '../tokenAmount';
 import { NestedPoolState, PoolState } from '../types';
 import { getSortedTokens } from '../utils';
-import { SingleSwap, SwapKind } from '../../types';
+import { InputAmount, SingleSwap, SwapKind } from '../../types';
 import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
 import { RemoveLiquidityNestedSingleTokenInput } from '../removeLiquidityNested/types';
 import { RemoveLiquidityNested } from '../removeLiquidityNested';
@@ -202,6 +202,122 @@ export class PriceImpact {
             const signal = deltas[tokenIndex] >= 0n ? 1n : -1n;
             return deltaBPT.amount * signal;
         }
+    };
+
+    static addLiquidityUnbalancedAlternative = async (
+        input: AddLiquidityUnbalancedInput,
+        poolState: PoolState,
+    ): Promise<PriceImpactAmount> => {
+        // inputs are being validated within AddLiquidity
+        if (poolState.balancerVersion !== 2) {
+            throw new Error(
+                'This method relies on Remove Liquidity Unbalanced, which is only available for balancer V2.',
+            );
+        }
+
+        // simulate adding liquidity to get amounts in
+        const addLiquidity = new AddLiquidity();
+        const { amountsIn, bptOut } = await addLiquidity.query(
+            input,
+            poolState,
+        );
+
+        // simulate removing liquidity to get amounts out
+        const removeLiquidity = new RemoveLiquidity();
+        const removeLiquidityInput: RemoveLiquidityInput = {
+            chainId: input.chainId,
+            rpcUrl: input.rpcUrl,
+            amountsOut: amountsIn.map((a) => a.toInputAmount()),
+            kind: RemoveLiquidityKind.Unbalanced,
+        };
+        const { bptIn } = await removeLiquidity.query(
+            removeLiquidityInput,
+            poolState,
+        );
+
+        // get relevant amounts for price impact calculation
+        const amountInitial = parseFloat(formatUnits(bptOut.amount, 18));
+        const amountDelta = parseFloat(
+            formatUnits(bptIn.amount - bptOut.amount, 18),
+        );
+
+        // calculate price impact using ABA method
+        const priceImpact = amountDelta / amountInitial / 2;
+
+        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+    };
+
+    /**
+     * Price impact on adding liquidity for nested pools is the sum of the
+     * price impacts of each add liquidity operation in the nested pools.
+     */
+    static addLiquidityNested = async (
+        input: AddLiquidityNestedInput,
+        nestedPoolState: NestedPoolState,
+    ): Promise<PriceImpactAmount> => {
+        // inputs are being validated within AddLiquidityNested
+
+        let amountsIn: InputAmount[] = [];
+        const addLiquidity = new AddLiquidity();
+        const sortedPools = nestedPoolState.pools.sort(
+            (a, b) => a.level - b.level,
+        );
+        const priceImpactAmounts: PriceImpactAmount[] = [];
+        const bptOuts: InputAmount[] = [];
+        for (const pool of sortedPools) {
+            if (pool.level === 0) {
+                amountsIn = input.amountsIn.filter((a) =>
+                    pool.tokens.some(
+                        (t) =>
+                            t.address.toLowerCase() === a.address.toLowerCase(),
+                    ),
+                );
+                // skip pool if no relevant amountsIn
+                if (amountsIn.length === 0) {
+                    continue;
+                }
+            } else {
+                amountsIn = [...bptOuts, ...input.amountsIn].filter((a) =>
+                    pool.tokens.some(
+                        (t) =>
+                            t.address.toLowerCase() === a.address.toLowerCase(),
+                    ),
+                );
+            }
+
+            // build addLiquidityInput
+            const addLiquidityInput: AddLiquidityUnbalancedInput = {
+                chainId: input.chainId,
+                rpcUrl: input.rpcUrl,
+                amountsIn,
+                kind: AddLiquidityKind.Unbalanced,
+            };
+            const poolState: PoolState = {
+                ...pool,
+                balancerVersion: 2, // TODO: refactor to allow v3 on a separate PR
+            };
+
+            // calculate individual price impact
+            const poolPriceImpact = await PriceImpact.addLiquidityUnbalanced(
+                addLiquidityInput,
+                poolState,
+            );
+            priceImpactAmounts.push(poolPriceImpact);
+
+            // get bptOut so it can be used as amountsIn for the next pool
+            const { bptOut } = await addLiquidity.query(
+                addLiquidityInput,
+                poolState,
+            );
+            bptOuts.push(bptOut.toInputAmount());
+        }
+
+        const priceImpactSum = priceImpactAmounts.reduce(
+            (acc, cur) => acc + cur.amount,
+            0n,
+        );
+
+        return PriceImpactAmount.fromRawAmount(priceImpactSum);
     };
 
     static removeLiquidity = async (

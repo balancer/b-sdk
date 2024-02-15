@@ -23,7 +23,7 @@ import {
     TokenAmount,
     NestedPoolState,
 } from '../../../src/entities';
-import { Address, Hex } from '../../../src/types';
+import { Address, Hex, InputAmount } from '../../../src/types';
 
 import { BALANCER_RELAYER, CHAINS, ChainId } from '../../../src/utils';
 
@@ -35,10 +35,7 @@ import { POOLS, TestToken, TOKENS } from '../../lib/utils/addresses';
 
 type TxInput = {
     poolId: Hex;
-    amountsIn: {
-        address: Address; // DAI
-        rawAmount: bigint;
-    }[];
+    amountsIn: InputAmount[];
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
@@ -98,6 +95,7 @@ describe('add liquidity nested test', () => {
             {
                 address: WETH.address,
                 rawAmount: parseUnits('1', WETH.decimals),
+                decimals: WETH.decimals,
             },
         ];
 
@@ -132,6 +130,7 @@ describe('add liquidity nested test', () => {
         const amountsIn = mainTokens.map((t) => ({
             address: t.address,
             rawAmount: parseUnits('1', t.decimals),
+            decimals: t.decimals,
         }));
 
         const {
@@ -165,6 +164,7 @@ describe('add liquidity nested test', () => {
         const amountsIn = mainTokens.map((t) => ({
             address: t.address,
             rawAmount: parseUnits('1', t.decimals),
+            decimals: t.decimals,
         }));
 
         const useNativeAssetAsWrappedAmountIn = true;
@@ -203,6 +203,7 @@ describe('add liquidity nested test', () => {
             {
                 address: USDC.address,
                 rawAmount: parseUnits('1', USDC.decimals),
+                decimals: USDC.decimals,
             },
         ];
 
