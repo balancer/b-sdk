@@ -7,7 +7,6 @@ import {
     AddLiquidity,
     PoolState,
     Slippage,
-    Hex,
     ChainId,
     NestedPoolState,
 } from '@/.';

@@ -20,7 +20,7 @@ import { Address, Hex, PoolType } from '@/types';
 import { CHAINS, ChainId } from '@/utils';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
-import { TestToken, TOKENS } from 'test/lib/utils/addresses';
+import { POOLS, TestToken, TOKENS } from 'test/lib/utils/addresses';
 import {
     assertResults,
     doAddLiquidityNested,
@@ -29,14 +29,12 @@ import { forkSetup } from 'test/lib/utils/helper';
 import { AddLiquidityNestedTxInput } from 'test/lib/utils/types';
 
 const chainId = ChainId.POLYGON;
-const DAO_st_WMATIC_POOL_ID =
-    '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9000200000000000000000cc4' as const;
 const WMATIC = TOKENS[chainId].WMATIC;
+const DAO_st_WMATIC = POOLS[chainId].DAO_st_WMATIC;
 
 describe('add liquidity nested test', () => {
     let rpcUrl: string;
     let client: Client & PublicActions & TestActions & WalletActions;
-    let poolId: Hex;
     let testAddress: Address;
     let mainTokens: TestToken[];
     let initialBalances: bigint[];
@@ -60,12 +58,10 @@ describe('add liquidity nested test', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        poolId = DAO_st_WMATIC_POOL_ID;
-
         // setup mock api
         const api = new MockApi();
         // get pool state from api
-        const nestedPoolState = await api.getNestedPool(poolId);
+        const nestedPoolState = await api.getNestedPool(DAO_st_WMATIC.id);
 
         mainTokens = [WMATIC];
         initialBalances = mainTokens.map((t) => parseUnits('1000', t.decimals));
@@ -130,13 +126,13 @@ describe('add liquidity nested test', () => {
 
 export class MockApi {
     public async getNestedPool(poolId: Hex): Promise<NestedPoolState> {
-        if (poolId !== DAO_st_WMATIC_POOL_ID) throw Error();
+        if (poolId !== DAO_st_WMATIC.id) throw Error();
         return {
             pools: [
                 {
-                    id: '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9000200000000000000000cc4',
-                    address: '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9',
-                    type: PoolType.Weighted,
+                    id: DAO_st_WMATIC.id,
+                    address: DAO_st_WMATIC.address,
+                    type: DAO_st_WMATIC.type,
                     level: 1,
                     tokens: [
                         {

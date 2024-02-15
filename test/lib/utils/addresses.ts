@@ -96,6 +96,15 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             slot: 0,
         },
     },
+    [ChainId.POLYGON]: {
+        DAO_st_WMATIC: {
+            id: '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9000200000000000000000cc4',
+            address: '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+    },
     [ChainId.SEPOLIA]: {
         MOCK_WEIGHTED_POOL: {
             address: '0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83',
