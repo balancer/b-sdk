@@ -78,4 +78,44 @@ describe('Create Composable Stable Pool tests', () => {
         });
         expect(poolAddress).to.not.be.undefined;
     });
+
+    test('Amplification Parameter 0, expects error', async () => {
+        const amplificationParameter = BigInt(0);
+        await expect(() =>
+            doCreatePool({
+                ...txInput,
+                createPoolInput: {
+                    ...createPoolComposableStableInput,
+                    amplificationParameter,
+                },
+            }),
+        ).rejects.toThrowError(
+            'Amplification parameter must be greater than 0',
+        );
+    });
+    test('Duplicate token addresses, expects error', async () => {
+        const tokens: CreatePoolV2ComposableStableInput['tokens'] = [
+            {
+                address: '0xba100000625a3754423978a60c9317c58a424e3d',
+                rateProvider: zeroAddress,
+                tokenRateCacheDuration: BigInt(100),
+            },
+            {
+                address: '0xba100000625a3754423978a60c9317c58a424e3d',
+                rateProvider: zeroAddress,
+                tokenRateCacheDuration: BigInt(100),
+            },
+            {
+                address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+                rateProvider: zeroAddress,
+                tokenRateCacheDuration: BigInt(100),
+            },
+        ];
+        await expect(() =>
+            doCreatePool({
+                ...txInput,
+                createPoolInput: { ...createPoolComposableStableInput, tokens },
+            }),
+        ).rejects.toThrowError('Duplicate token addresses');
+    });
 });
