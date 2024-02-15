@@ -1,4 +1,4 @@
-// pnpm test -- test/createPool/composableStable.integration.test.ts
+// pnpm test -- test/createPool/composableStable.test.ts
 
 import { zeroAddress } from 'viem';
 import { ChainId, PoolType } from '../../../src';
