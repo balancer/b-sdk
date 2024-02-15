@@ -11,6 +11,16 @@ export const balancerRelayerAbi = [
                 name: 'libraryAddress',
                 type: 'address',
             },
+            {
+                internalType: 'address',
+                name: 'queryLibrary',
+                type: 'address',
+            },
+            {
+                internalType: 'string',
+                name: 'version',
+                type: 'string',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -18,6 +28,19 @@ export const balancerRelayerAbi = [
     {
         inputs: [],
         name: 'getLibrary',
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getQueryLibrary',
         outputs: [
             {
                 internalType: 'address',
@@ -77,6 +100,19 @@ export const balancerRelayerAbi = [
             },
         ],
         stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'version',
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
     },
     {

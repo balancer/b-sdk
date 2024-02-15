@@ -123,14 +123,23 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.FANTOM]: 128,
 };
 
-export const BALANCER_RELAYER: Record<number, Address> = {
-    [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
-};
-
 /**
  * Deployment Addresses
  * Source: https://docs.balancer.fi/reference/contracts
  */
+
+export const BALANCER_RELAYER: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0x9B892E515D2Ab8869F17488d64B3b918731cc70d',
+    [ChainId.AVALANCHE]: '0xA084c11cb55e67C9becf9607f1DBB20ec4D5E7b2',
+    [ChainId.BSC]: '0xf41D6De4bbE9919d87BC1E5cc3335549e2A1A6c0',
+    [ChainId.GNOSIS_CHAIN]: '0x2163c2FcD0940e84B8a68991bF926eDfB0Cd926C',
+    [ChainId.GOERLI]: '0x7f36A11750F225De646b0de7b26BC74e797c310B',
+    [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
+    [ChainId.OPTIMISM]: '0x015ACA20a1422F3c729086c17f15F10e0CfbC75A',
+    [ChainId.POLYGON]: '0xB1ED8d3b5059b3281D43306cC9D043cE8B22599b',
+    [ChainId.SEPOLIA]: '0x7852fB9d0895e6e8b3EedA553c03F6e2F9124dF9',
+    [ChainId.ZKEVM]: '0x8e620FfCa2580ed87241D7e10F85EE75d0a906F5',
+};
 
 export const VAULT: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',

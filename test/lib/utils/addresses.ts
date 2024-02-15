@@ -46,6 +46,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         WMATIC: {
             address: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
             decimals: 18,
+            slot: 3,
         },
     },
     [ChainId.SEPOLIA]: {
