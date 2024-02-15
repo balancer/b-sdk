@@ -245,7 +245,7 @@ describe('price impact', () => {
         });
     });
 
-    describe.only('remove liquidity nested - single token', () => {
+    describe('remove liquidity nested - single token', () => {
         let input: RemoveLiquidityNestedSingleTokenInput;
         beforeAll(() => {
             input = {
