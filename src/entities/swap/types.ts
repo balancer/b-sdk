@@ -43,22 +43,22 @@ export interface SwapBase {
     buildCall(swapCall: SwapCallBuild): SwapBuildOutputBase;
 }
 
-type BaseSwapCall = {
+type SwapCallBase = {
     deadline: bigint;
     sender: Address;
     recipient: Address;
 };
 
-export type SwapCallExactIn = BaseSwapCall & {
+export type SwapCallExactIn = SwapCallBase & {
     slippage: Slippage;
     expectedAmountOut: TokenAmount;
 };
 
-export type SwapCallExactOut = BaseSwapCall & {
+export type SwapCallExactOut = SwapCallBase & {
     slippage: Slippage;
     expectedAmountIn: TokenAmount;
 };
 
-export type SwapCallBuild = BaseSwapCall & {
+export type SwapCallBuild = SwapCallBase & {
     limitAmount: TokenAmount;
 };
