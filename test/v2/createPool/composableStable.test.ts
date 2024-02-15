@@ -1,23 +1,12 @@
 // pnpm test -- test/createPool/composableStable.integration.test.ts
 
-import {
-    Address,
-    createTestClient,
-    http,
-    publicActions,
-    walletActions,
-    zeroAddress,
-} from 'viem';
-import { CHAINS, ChainId, PoolType } from '../../../src';
+import { zeroAddress } from 'viem';
+import { ChainId, PoolType } from '../../../src';
 import { CreatePool } from '../../../src/entities/createPool';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
-import { doCreatePool } from '../../lib/utils/createPoolHelper';
-import { CreatePoolTxInput } from '../../lib/utils/types';
 import { CreatePoolV2ComposableStableInput } from '../../../src/entities/createPool/types';
 
 describe('Create Composable Stable Pool tests', () => {
     const chainId = ChainId.MAINNET;
-    let txInput: CreatePoolTxInput;
     let createPoolComposableStableInput: CreatePoolV2ComposableStableInput;
     const createPool = new CreatePool();
     beforeAll(async () => {
