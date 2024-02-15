@@ -12,12 +12,26 @@ import {
 } from '@/entities';
 import { TOKENS } from '../lib/utils/addresses';
 
+const chainId = ChainId.MAINNET;
+
 describe('Swap', () => {
     const tokens: TokenApi[] = [
-        { address: TOKENS[1].WETH.address, decimals: TOKENS[1].WETH.decimals },
-        { address: TOKENS[1].DAI.address, decimals: TOKENS[1].DAI.decimals },
-        { address: TOKENS[1].USDC.address, decimals: TOKENS[1].USDC.decimals },
-        { address: TOKENS[1].USDT.address, decimals: TOKENS[1].USDT.decimals },
+        {
+            address: TOKENS[chainId].WETH.address,
+            decimals: TOKENS[chainId].WETH.decimals,
+        },
+        {
+            address: TOKENS[chainId].DAI.address,
+            decimals: TOKENS[chainId].DAI.decimals,
+        },
+        {
+            address: TOKENS[chainId].USDC.address,
+            decimals: TOKENS[chainId].USDC.decimals,
+        },
+        {
+            address: TOKENS[chainId].USDT.address,
+            decimals: TOKENS[chainId].USDT.decimals,
+        },
     ];
 
     const pathTo6Decimals: Path = {
@@ -56,7 +70,7 @@ describe('Swap', () => {
                     balancerVersion: 3,
                 };
                 new Swap({
-                    chainId: ChainId.MAINNET,
+                    chainId,
                     paths: [pathWethDai, pathV3],
                     swapKind: SwapKind.GivenIn,
                     sender: '0x',
@@ -74,7 +88,7 @@ describe('Swap', () => {
                         tokens: [tokens[2], tokens[1]],
                     };
                     new Swap({
-                        chainId: ChainId.MAINNET,
+                        chainId,
                         paths: [pathWethDai, pathUsdcDai],
                         swapKind: SwapKind.GivenIn,
                         sender: '0x',
@@ -91,7 +105,7 @@ describe('Swap', () => {
                         tokens: [tokens[0], tokens[2]],
                     };
                     new Swap({
-                        chainId: ChainId.MAINNET,
+                        chainId,
                         paths: [pathWethDai, pathWethUsdc],
                         swapKind: SwapKind.GivenIn,
                         sender: '0x',
@@ -108,7 +122,7 @@ describe('Swap', () => {
         describe('GivenIn', () => {
             test('18decimals>6decimals: minAmountOut to be 0.1% less then expected', () => {
                 const swap = new Swap({
-                    chainId: ChainId.MAINNET,
+                    chainId,
                     paths: [pathTo6Decimals],
                     swapKind: SwapKind.GivenIn,
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
@@ -139,7 +153,7 @@ describe('Swap', () => {
             });
             test('6decimals>18decimals: minAmountOut to be 0.1% less then expected', () => {
                 const swap = new Swap({
-                    chainId: ChainId.MAINNET,
+                    chainId,
                     paths: [pathFrom6Decimals],
                     swapKind: SwapKind.GivenIn,
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
@@ -174,7 +188,7 @@ describe('Swap', () => {
         describe('GivenOut', () => {
             test('18decimals>6decimals: maxAmountIn to be 0.1% more then expected', () => {
                 const swap = new Swap({
-                    chainId: ChainId.MAINNET,
+                    chainId,
                     paths: [pathTo6Decimals],
                     swapKind: SwapKind.GivenOut,
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
@@ -203,7 +217,7 @@ describe('Swap', () => {
             });
             test('6decimals>18decimals: maxAmountIn to be 0.1% more then expected', () => {
                 const swap = new Swap({
-                    chainId: ChainId.MAINNET,
+                    chainId,
                     paths: [pathFrom6Decimals],
                     swapKind: SwapKind.GivenOut,
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',

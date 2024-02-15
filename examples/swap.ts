@@ -27,11 +27,13 @@ const swap = async () => {
         chainId,
         '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         6,
+        'USDC',
     );
     const tokenOut = new Token(
         chainId,
         '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
         18,
+        'GYD',
     );
     const slippage = Slippage.fromPercentage('0.1');
     const swapAmount =
