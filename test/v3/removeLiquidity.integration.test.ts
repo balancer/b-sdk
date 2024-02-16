@@ -310,7 +310,7 @@ describe('remove liquidity test', () => {
 
 /*********************** Mock To Represent API Requirements **********************/
 
-export class MockApi {
+class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {

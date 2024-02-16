@@ -4,8 +4,9 @@ import { PoolType } from '../types';
 const poolTypeMap = {
     WEIGHTED: PoolType.Weighted,
     COMPOSABLE_STABLE: PoolType.ComposableStable,
-    GYRO3: PoolType.Gyro3,
+    GYRO: PoolType.Gyro2,
     GYRO2: PoolType.Gyro2,
+    GYRO3: PoolType.Gyro3,
     GYROE: PoolType.GyroE,
 };
 

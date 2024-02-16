@@ -135,7 +135,7 @@ export class NestedPools {
         }
       }
     }
-    
+
     fragment GqlPoolTokenComposableStable on GqlPoolTokenComposableStable {
       index
       name
@@ -179,56 +179,60 @@ export class NestedPools {
     };
 
     mapPoolToNestedPoolState = (pool: PoolGetPool): NestedPoolState => {
-        const pools: NestedPool[] = [
-            {
-                id: pool.id,
-                address: pool.address,
-                type: mapPoolType(pool.type),
-                level: 1,
-                tokens: pool.tokens.map((t) => {
-                    const minimalToken: MinimalToken = {
-                        address: t.address,
-                        decimals: t.decimals,
-                        index: t.index,
-                    };
-                    return minimalToken;
-                }),
-            },
-        ];
-
-        pool.tokens.forEach((token) => {
-            // Token represents nested pools only nested if they have a pool property
-            if (token.pool === undefined) return;
-
-            // map API result to NestedPool
-            pools.push({
-                id: token.pool.id,
-                address: token.pool.address,
-                level: 0,
-                type: mapPoolType(token.pool.type),
-                tokens: token.pool.tokens.map((t) => {
-                    const minimalToken: MinimalToken = {
-                        address: t.address,
-                        decimals: t.decimals,
-                        index: t.index,
-                    };
-                    return minimalToken;
-                }),
-            });
-        });
-
-        const mainTokens = pool.allTokens
-            .filter((t) => t.isMainToken)
-            .map((t) => {
-                return {
-                    address: t.address,
-                    decimals: t.decimals,
-                };
-            });
-
-        return {
-            pools,
-            mainTokens,
-        } as NestedPoolState;
-    };
+      return mapPoolToNestedPoolState(pool)
+    }
 }
+
+export function  mapPoolToNestedPoolState(pool: PoolGetPool): NestedPoolState {
+  const pools: NestedPool[] = [
+      {
+          id: pool.id,
+          address: pool.address,
+          type: mapPoolType(pool.type),
+          level: 1,
+          tokens: pool.tokens.map((t) => {
+              const minimalToken: MinimalToken = {
+                  address: t.address,
+                  decimals: t.decimals,
+                  index: t.index,
+              };
+              return minimalToken;
+          }),
+      },
+  ];
+
+  pool.tokens.forEach((token) => {
+      // Token represents nested pools only nested if they have a pool property
+      if (token.pool === undefined) return;
+
+      // map API result to NestedPool
+      pools.push({
+          id: token.pool.id,
+          address: token.pool.address,
+          level: 0,
+          type: mapPoolType(token.pool.type),
+          tokens: token.pool.tokens.map((t) => {
+              const minimalToken: MinimalToken = {
+                  address: t.address,
+                  decimals: t.decimals,
+                  index: t.index,
+              };
+              return minimalToken;
+          }),
+      });
+  });
+
+  const mainTokens = pool.allTokens
+      .filter((t) => t.isMainToken)
+      .map((t) => {
+          return {
+              address: t.address,
+              decimals: t.decimals,
+          };
+      });
+
+  return {
+      pools,
+      mainTokens,
+  } as NestedPoolState;
+};

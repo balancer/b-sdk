@@ -43,6 +43,11 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
             decimals: 6,
         },
+        WMATIC: {
+            address: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+            decimals: 18,
+            slot: 3,
+        },
     },
     [ChainId.SEPOLIA]: {
         BAL: {
@@ -86,6 +91,15 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         '50bb_sDAI_50bb_a_USDC': {
             id: '0x0da692ac0611397027c91e559cfd482c4197e4030002000000000000000005c9',
             address: '0x0da692ac0611397027c91e559cfd482c4197e403',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.POLYGON]: {
+        DAO_st_WMATIC: {
+            id: '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9000200000000000000000cc4',
+            address: '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
