@@ -3,31 +3,33 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { parseEther, parseUnits } from 'viem';
+
 import {
-    AddLiquiditySingleTokenInput,
     AddLiquidityKind,
+    AddLiquidityNestedInput,
+    AddLiquiditySingleTokenInput,
+    AddLiquidityUnbalancedInput,
     Address,
-    Hex,
-    PoolState,
     ChainId,
     getPoolAddress,
+    Hex,
     InputAmount,
-    AddLiquidityUnbalancedInput,
-    SwapKind,
-    RemoveLiquiditySingleTokenExactInInput,
-    RemoveLiquidityKind,
-    RemoveLiquidityUnbalancedInput,
-    PoolType,
-    RemoveLiquidityNestedSingleTokenInput,
     NestedPoolState,
+    PoolState,
+    PoolType,
+    PriceImpact,
+    PriceImpactAmount,
+    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityKind,
+    RemoveLiquiditySingleTokenExactInInput,
+    RemoveLiquidityUnbalancedInput,
+    SingleSwapInput,
+    SwapKind,
     ZERO_ADDRESS,
-    AddLiquidityNestedInput,
-} from '../../../src';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
-import { PriceImpact } from '../../../src/entities/priceImpact';
-import { PriceImpactAmount } from '../../../src/entities/priceImpactAmount';
-import { parseEther, parseUnits } from 'viem';
-import { SingleSwapInput } from '../../../src/entities/utils/doSingleSwapQuery';
+} from 'src';
+
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 
 const { rpcUrl } = await startFork(
