@@ -5,6 +5,7 @@ import { NestedPools } from './modules/nested-pool-state';
 import { SorSwapPaths } from './modules/sorSwapPaths';
 
 export { SorInput as GetQuoteInput } from './modules/sorSwapPaths';
+export { mapPoolToNestedPoolState } from './modules/nested-pool-state';
 
 export class BalancerApi {
     balancerApiClient: BalancerApiClient;
