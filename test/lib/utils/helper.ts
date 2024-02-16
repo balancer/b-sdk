@@ -292,7 +292,10 @@ export const forkSetup = async (
     await client.impersonateAccount({ address: accountAddress });
 
     let _slots: number[];
-    if (slots) {
+    if (
+        slots?.every((slot) => slot !== undefined) &&
+        slots.length === tokens.length
+    ) {
         _slots = slots;
     } else {
         _slots = await Promise.all(

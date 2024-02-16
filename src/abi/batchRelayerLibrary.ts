@@ -1,11 +1,7 @@
 export const batchRelayerLibraryAbi = [
     {
         inputs: [
-            {
-                internalType: 'contract IVault',
-                name: 'vault',
-                type: 'address',
-            },
+            { internalType: 'contract IVault', name: 'vault', type: 'address' },
             {
                 internalType: 'contract IERC20',
                 name: 'wstETH',
@@ -16,22 +12,20 @@ export const batchRelayerLibraryAbi = [
                 name: 'minter',
                 type: 'address',
             },
+            {
+                internalType: 'bool',
+                name: 'canCallUserCheckpoint',
+                type: 'bool',
+            },
+            { internalType: 'string', name: 'version', type: 'string' },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
     {
         inputs: [
-            {
-                internalType: 'contract IERC20',
-                name: 'token',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'contract IERC20', name: 'token', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'approveVault',
         outputs: [],
@@ -67,11 +61,7 @@ export const batchRelayerLibraryAbi = [
                         name: 'amount',
                         type: 'uint256',
                     },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct IVault.BatchSwapStep[]',
                 name: 'swaps',
@@ -109,33 +99,13 @@ export const batchRelayerLibraryAbi = [
                 name: 'funds',
                 type: 'tuple',
             },
-            {
-                internalType: 'int256[]',
-                name: 'limits',
-                type: 'int256[]',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'value',
-                type: 'uint256',
-            },
+            { internalType: 'int256[]', name: 'limits', type: 'int256[]' },
+            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+            { internalType: 'uint256', name: 'value', type: 'uint256' },
             {
                 components: [
-                    {
-                        internalType: 'uint256',
-                        name: 'index',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'key',
-                        type: 'uint256',
-                    },
+                    { internalType: 'uint256', name: 'index', type: 'uint256' },
+                    { internalType: 'uint256', name: 'key', type: 'uint256' },
                 ],
                 internalType: 'struct VaultActions.OutputReference[]',
                 name: 'outputReferences',
@@ -143,27 +113,28 @@ export const batchRelayerLibraryAbi = [
             },
         ],
         name: 'batchSwap',
-        outputs: [],
+        outputs: [
+            { internalType: 'int256[]', name: 'results', type: 'int256[]' },
+        ],
         stateMutability: 'payable',
         type: 'function',
     },
     {
+        inputs: [],
+        name: 'canCallUserCheckpoint',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
         inputs: [
-            {
-                internalType: 'bytes32',
-                name: 'poolId',
-                type: 'bytes32',
-            },
+            { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             {
                 internalType: 'enum VaultActions.PoolKind',
                 name: 'kind',
                 type: 'uint8',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
             {
                 internalType: 'address payable',
                 name: 'recipient',
@@ -181,11 +152,7 @@ export const batchRelayerLibraryAbi = [
                         name: 'minAmountsOut',
                         type: 'uint256[]',
                     },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                     {
                         internalType: 'bool',
                         name: 'toInternalBalance',
@@ -198,16 +165,8 @@ export const batchRelayerLibraryAbi = [
             },
             {
                 components: [
-                    {
-                        internalType: 'uint256',
-                        name: 'index',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'key',
-                        type: 'uint256',
-                    },
+                    { internalType: 'uint256', name: 'index', type: 'uint256' },
+                    { internalType: 'uint256', name: 'key', type: 'uint256' },
                 ],
                 internalType: 'struct VaultActions.OutputReference[]',
                 name: 'outputReferences',
@@ -215,6 +174,20 @@ export const batchRelayerLibraryAbi = [
             },
         ],
         name: 'exitPool',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { internalType: 'address', name: 'user', type: 'address' },
+            {
+                internalType: 'contract IStakingLiquidityGauge[]',
+                name: 'gauges',
+                type: 'address[]',
+            },
+        ],
+        name: 'gaugeCheckpoint',
         outputs: [],
         stateMutability: 'payable',
         type: 'function',
@@ -239,21 +212,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'gauge',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'gaugeDeposit',
         outputs: [],
@@ -262,11 +223,7 @@ export const batchRelayerLibraryAbi = [
     },
     {
         inputs: [
-            {
-                internalType: 'address[]',
-                name: 'gauges',
-                type: 'address[]',
-            },
+            { internalType: 'address[]', name: 'gauges', type: 'address[]' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -280,36 +237,12 @@ export const batchRelayerLibraryAbi = [
     },
     {
         inputs: [
-            {
-                internalType: 'bool',
-                name: 'approval',
-                type: 'bool',
-            },
-            {
-                internalType: 'address',
-                name: 'user',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint8',
-                name: 'v',
-                type: 'uint8',
-            },
-            {
-                internalType: 'bytes32',
-                name: 'r',
-                type: 'bytes32',
-            },
-            {
-                internalType: 'bytes32',
-                name: 's',
-                type: 'bytes32',
-            },
+            { internalType: 'bool', name: 'approval', type: 'bool' },
+            { internalType: 'address', name: 'user', type: 'address' },
+            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+            { internalType: 'uint8', name: 'v', type: 'uint8' },
+            { internalType: 'bytes32', name: 'r', type: 'bytes32' },
+            { internalType: 'bytes32', name: 's', type: 'bytes32' },
         ],
         name: 'gaugeSetMinterApproval',
         outputs: [],
@@ -323,21 +256,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'gauge',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'gaugeWithdraw',
         outputs: [],
@@ -361,37 +282,21 @@ export const batchRelayerLibraryAbi = [
         inputs: [],
         name: 'getVault',
         outputs: [
-            {
-                internalType: 'contract IVault',
-                name: '',
-                type: 'address',
-            },
+            { internalType: 'contract IVault', name: '', type: 'address' },
         ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'bytes32',
-                name: 'poolId',
-                type: 'bytes32',
-            },
+            { internalType: 'bytes32', name: 'poolId', type: 'bytes32' },
             {
                 internalType: 'enum VaultActions.PoolKind',
                 name: 'kind',
                 type: 'uint8',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
             {
                 components: [
                     {
@@ -404,11 +309,7 @@ export const batchRelayerLibraryAbi = [
                         name: 'maxAmountsIn',
                         type: 'uint256[]',
                     },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                     {
                         internalType: 'bool',
                         name: 'fromInternalBalance',
@@ -419,11 +320,7 @@ export const batchRelayerLibraryAbi = [
                 name: 'request',
                 type: 'tuple',
             },
-            {
-                internalType: 'uint256',
-                name: 'value',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: 'value', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -469,10 +366,15 @@ export const batchRelayerLibraryAbi = [
                 name: 'ops',
                 type: 'tuple[]',
             },
+            { internalType: 'uint256', name: 'value', type: 'uint256' },
             {
-                internalType: 'uint256',
-                name: 'value',
-                type: 'uint256',
+                components: [
+                    { internalType: 'uint256', name: 'index', type: 'uint256' },
+                    { internalType: 'uint256', name: 'key', type: 'uint256' },
+                ],
+                internalType: 'struct VaultActions.OutputReference[]',
+                name: 'outputReferences',
+                type: 'tuple[]',
             },
         ],
         name: 'manageUserBalance',
@@ -481,41 +383,17 @@ export const batchRelayerLibraryAbi = [
         type: 'function',
     },
     {
-        inputs: [
-            {
-                internalType: 'uint256',
-                name: 'ref',
-                type: 'uint256',
-            },
-        ],
+        inputs: [{ internalType: 'uint256', name: 'ref', type: 'uint256' }],
         name: 'peekChainedReferenceValue',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: 'value',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
+        outputs: [{ internalType: 'uint256', name: 'value', type: 'uint256' }],
+        stateMutability: 'payable',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'relayer',
-                type: 'address',
-            },
-            {
-                internalType: 'bool',
-                name: 'approved',
-                type: 'bool',
-            },
-            {
-                internalType: 'bytes',
-                name: 'authorisation',
-                type: 'bytes',
-            },
+            { internalType: 'address', name: 'relayer', type: 'address' },
+            { internalType: 'bool', name: 'approved', type: 'bool' },
+            { internalType: 'bytes', name: 'authorisation', type: 'bytes' },
         ],
         name: 'setRelayerApproval',
         outputs: [],
@@ -524,16 +402,8 @@ export const batchRelayerLibraryAbi = [
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -547,16 +417,8 @@ export const batchRelayerLibraryAbi = [
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -597,11 +459,7 @@ export const batchRelayerLibraryAbi = [
                         name: 'amount',
                         type: 'uint256',
                     },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct IVault.SingleSwap',
                 name: 'singleSwap',
@@ -634,21 +492,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'funds',
                 type: 'tuple',
             },
-            {
-                internalType: 'uint256',
-                name: 'limit',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'value',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+            { internalType: 'uint256', name: 'value', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -656,7 +502,7 @@ export const batchRelayerLibraryAbi = [
             },
         ],
         name: 'swap',
-        outputs: [],
+        outputs: [{ internalType: 'uint256', name: 'result', type: 'uint256' }],
         stateMutability: 'payable',
         type: 'function',
     },
@@ -667,26 +513,10 @@ export const batchRelayerLibraryAbi = [
                 name: 'staticToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bool',
-                name: 'toUnderlying',
-                type: 'bool',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            { internalType: 'bool', name: 'toUnderlying', type: 'bool' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -705,21 +535,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -738,21 +556,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -771,21 +577,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -804,21 +598,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'dieselAmount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'dieselAmount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -837,21 +619,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'vaultToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -870,21 +640,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -903,21 +661,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -936,21 +682,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrapperToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -964,21 +698,9 @@ export const batchRelayerLibraryAbi = [
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -997,21 +719,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1030,36 +740,12 @@ export const batchRelayerLibraryAbi = [
                 name: 'token',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'value',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint8',
-                name: 'v',
-                type: 'uint8',
-            },
-            {
-                internalType: 'bytes32',
-                name: 'r',
-                type: 'bytes32',
-            },
-            {
-                internalType: 'bytes32',
-                name: 's',
-                type: 'bytes32',
-            },
+            { internalType: 'address', name: 'owner', type: 'address' },
+            { internalType: 'uint256', name: 'value', type: 'uint256' },
+            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+            { internalType: 'uint8', name: 'v', type: 'uint8' },
+            { internalType: 'bytes32', name: 'r', type: 'bytes32' },
+            { internalType: 'bytes32', name: 's', type: 'bytes32' },
         ],
         name: 'vaultPermit',
         outputs: [],
@@ -1073,41 +759,13 @@ export const batchRelayerLibraryAbi = [
                 name: 'token',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'holder',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'nonce',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'expiry',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bool',
-                name: 'allowed',
-                type: 'bool',
-            },
-            {
-                internalType: 'uint8',
-                name: 'v',
-                type: 'uint8',
-            },
-            {
-                internalType: 'bytes32',
-                name: 'r',
-                type: 'bytes32',
-            },
-            {
-                internalType: 'bytes32',
-                name: 's',
-                type: 'bytes32',
-            },
+            { internalType: 'address', name: 'holder', type: 'address' },
+            { internalType: 'uint256', name: 'nonce', type: 'uint256' },
+            { internalType: 'uint256', name: 'expiry', type: 'uint256' },
+            { internalType: 'bool', name: 'allowed', type: 'bool' },
+            { internalType: 'uint8', name: 'v', type: 'uint8' },
+            { internalType: 'bytes32', name: 'r', type: 'bytes32' },
+            { internalType: 'bytes32', name: 's', type: 'bytes32' },
         ],
         name: 'vaultPermitDAI',
         outputs: [],
@@ -1121,26 +779,10 @@ export const batchRelayerLibraryAbi = [
                 name: 'staticToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bool',
-                name: 'fromUnderlying',
-                type: 'bool',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            { internalType: 'bool', name: 'fromUnderlying', type: 'bool' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1159,21 +801,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1192,21 +822,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1225,26 +843,10 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'eulerProtocol',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'eulerProtocol', type: 'address' },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1263,21 +865,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'mainAmount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'mainAmount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1296,21 +886,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'vaultToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1329,21 +907,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1357,21 +923,9 @@ export const batchRelayerLibraryAbi = [
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1390,21 +944,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1423,21 +965,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrapperToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'uAmount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'uAmount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
@@ -1456,21 +986,9 @@ export const batchRelayerLibraryAbi = [
                 name: 'wrappedToken',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'recipient',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'sender', type: 'address' },
+            { internalType: 'address', name: 'recipient', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
             {
                 internalType: 'uint256',
                 name: 'outputReference',
