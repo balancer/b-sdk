@@ -12,6 +12,8 @@ import {
 import { SwapV2 } from './swapV2';
 import { validatePaths } from './pathHelpers';
 import { Slippage } from '../slippage';
+import { SingleSwapInput } from '../utils/doSingleSwapQuery';
+import { PriceImpact } from '../priceImpact';
 
 export * from './types';
 
@@ -49,6 +51,10 @@ export class Swap {
         return this.swap.outputAmount;
     }
 
+    public get isBatchSwap(): boolean {
+        return this.swap.isBatchSwap;
+    }
+
     // rpcUrl is optional, but recommended to prevent rate limiting
     public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
         return this.swap.query(rpcUrl, block);
@@ -58,8 +64,21 @@ export class Swap {
         return this.swap.queryCallData();
     }
 
-    public get priceImpact(): PriceImpactAmount {
-        throw new Error('Price Impact still to be implemented');
+    public async priceImpact(rpcUrl: string): Promise<PriceImpactAmount> {
+        if (!this.swap.isBatchSwap) {
+            const input: SingleSwapInput = {
+                chainId: this.swap.chainId,
+                rpcUrl,
+                poolId: this.swap.paths[0].pools[0],
+                kind: this.swap.swapKind,
+                assetIn: this.swap.inputAmount.token.address,
+                assetOut: this.swap.outputAmount.token.address,
+                amount: this.swap.inputAmount.amount,
+                userData: '0x',
+            };
+            return await PriceImpact.singleSwap(input);
+        }
+        throw new Error('Price Impact BatchSwap still to be implemented');
     }
 
     /**

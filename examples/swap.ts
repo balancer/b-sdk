@@ -23,24 +23,24 @@ import {
 const swap = async () => {
     // User defined
     const chainId = ChainId.MAINNET;
-    const swapKind = SwapKind.GivenOut;
+    const swapKind = SwapKind.GivenIn;
     const tokenIn = new Token(
         chainId,
-        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        6,
-        'USDC',
+        '0xba100000625a3754423978a60c9317c58a424e3D',
+        18,
+        'BAL',
     );
     const tokenOut = new Token(
         chainId,
-        '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         18,
-        'GYD',
+        'WETH',
     );
     const slippage = Slippage.fromPercentage('0.1');
     const swapAmount =
         swapKind === SwapKind.GivenOut
             ? TokenAmount.fromHumanAmount(tokenIn, '1.2345678910')
-            : TokenAmount.fromHumanAmount(tokenOut, '1.2345678910');
+            : TokenAmount.fromHumanAmount(tokenOut, '100.2345678910');
     const sender = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     const recipient = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     const deadline = 999999999999999999n; // Infinity
@@ -89,6 +89,15 @@ const swap = async () => {
         console.log(
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
+
+        if (!swap.isBatchSwap) {
+            console.time('PI');
+            const priceImpact = await swap.priceImpact(
+                process.env.ETHEREUM_RPC_URL as string,
+            );
+            console.timeEnd('PI');
+            console.log(priceImpact.percentage);
+        }
     } else {
         const callData = swap.buildCall({
             slippage,
