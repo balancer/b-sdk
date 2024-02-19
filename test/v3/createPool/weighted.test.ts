@@ -1,4 +1,4 @@
-// pnpm test -- createPool/weighted.integration.test.ts
+// pnpm test -- createPool/weighted.test.ts
 
 import { parseEther, zeroAddress } from 'viem';
 import { ChainId, PoolType, TokenType } from '../../../src';
