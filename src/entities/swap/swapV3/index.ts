@@ -16,8 +16,8 @@ import { balancerRouterAbi } from '../../../abi';
 import {
     SwapBase,
     SwapBuildOutputBase,
-    SwapCallBuild,
-    SwapInputV3,
+    SwapCallBuildBase,
+    SwapInput,
 } from '../types';
 import { PathWithAmount } from '../pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../pathHelpers';
@@ -27,7 +27,7 @@ export * from './types';
 
 // A Swap can be a single or multiple paths
 export class SwapV3 implements SwapBase {
-    public constructor({ chainId, paths, swapKind, wethIsEth }: SwapInputV3) {
+    public constructor({ chainId, paths, swapKind, wethIsEth }: SwapInput) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
@@ -165,7 +165,7 @@ export class SwapV3 implements SwapBase {
      * @param swapCall
      * @returns
      */
-    buildCall(swapCall: SwapCallBuild): SwapBuildOutputBase {
+    buildCall(swapCall: SwapCallBuildBase): SwapBuildOutputBase {
         return {
             to: this.to(),
             callData: this.callData(swapCall.limitAmount, swapCall.deadline),

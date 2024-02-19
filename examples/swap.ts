@@ -25,15 +25,15 @@ const swap = async () => {
     const swapKind = SwapKind.GivenOut;
     const tokenIn = new Token(
         chainId,
-        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        6,
-        'USDC',
+        '0xba100000625a3754423978a60c9317c58a424e3D',
+        18,
+        'BAL',
     );
     const tokenOut = new Token(
         chainId,
-        '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         18,
-        'GYD',
+        'ETH',
     );
     const slippage = Slippage.fromPercentage('0.1');
     const swapAmount =
@@ -63,8 +63,7 @@ const swap = async () => {
         chainId,
         paths: sorPaths,
         swapKind,
-        sender,
-        recipient,
+        wethIsEth: false,
     });
 
     console.log(
@@ -84,6 +83,8 @@ const swap = async () => {
             slippage,
             deadline,
             expectedAmountOut: updated,
+            sender,
+            recipient,
         }) as SwapBuildOutputExactIn;
         console.log(
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
@@ -93,6 +94,8 @@ const swap = async () => {
             slippage,
             deadline,
             expectedAmountIn: updated,
+            sender,
+            recipient,
         }) as SwapBuildOutputExactOut;
         console.log(
             `Max Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,

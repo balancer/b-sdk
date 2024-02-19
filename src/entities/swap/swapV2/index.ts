@@ -17,24 +17,16 @@ import {
     http,
 } from 'viem';
 import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
-import {
-    SwapBase,
-    SwapBuildOutputBase,
-    SwapCallBuild,
-    SwapInputV2,
-} from '../types';
+import { SwapBase, SwapBuildOutputBase, SwapInput } from '../types';
 import { PathWithAmount } from '../pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../pathHelpers';
+import { SwapCallBuildV2 } from './types';
+
+export * from './types';
 
 // A Swap can be a single or multiple paths
 export class SwapV2 implements SwapBase {
-    public constructor({
-        chainId,
-        paths,
-        swapKind,
-        sender,
-        recipient,
-    }: SwapInputV2) {
+    public constructor({ chainId, paths, swapKind }: SwapInput) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
@@ -64,8 +56,6 @@ export class SwapV2 implements SwapBase {
         });
 
         this.swaps = swaps;
-        this.sender = sender;
-        this.recipient = recipient;
     }
 
     public readonly chainId: number;
@@ -76,8 +66,6 @@ export class SwapV2 implements SwapBase {
     public swaps: BatchSwapStep[] | SingleSwap;
     public readonly inputAmount: TokenAmount;
     public readonly outputAmount: TokenAmount;
-    public readonly sender: Address;
-    public readonly recipient: Address;
 
     public get quote(): TokenAmount {
         return this.swapKind === SwapKind.GivenIn
@@ -226,15 +214,15 @@ export class SwapV2 implements SwapBase {
      * @param swapCall
      * @returns
      */
-    buildCall(swapCall: SwapCallBuild): SwapBuildOutputBase {
+    buildCall(swapCall: SwapCallBuildV2): SwapBuildOutputBase {
         const limits = this.limits(swapCall.limitAmount);
         return {
             to: this.to(),
             callData: this.callData(
                 limits,
                 swapCall.deadline,
-                this.sender,
-                this.recipient,
+                swapCall.sender,
+                swapCall.recipient,
             ),
             value: this.value(limits),
         };

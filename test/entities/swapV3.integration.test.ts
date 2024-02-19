@@ -29,7 +29,7 @@ import {
 } from '../../src';
 import { forkSetup, sendTransactionGetBalances } from '../lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
-import { TOKENS } from 'test/lib/utils/addresses';
+import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 import { SwapV3 } from '@/entities/swap/swapV3';
 
 const balancerVersion = 3;
@@ -57,7 +57,7 @@ describe('SwapV3', () => {
                 decimals: TOKENS[chainId].WETH.decimals,
             },
         ],
-        pools: ['0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83'],
+        pools: [POOLS[chainId].MOCK_WEIGHTED_POOL.id],
         inputAmountRaw: 100000000000n,
         outputAmountRaw: 100000000000n,
     };

@@ -3,6 +3,11 @@ import { MinimalToken, Slippage } from '../..';
 import { SingleSwap, SwapKind, BatchSwapStep } from '../../types';
 import { PathWithAmount } from './pathWithAmount';
 import { Address, Hex } from 'viem';
+import {
+    SwapCallBuildV2,
+    SwapCallExactInV2,
+    SwapCallExactOutV2,
+} from './swapV2';
 import { SingleTokenExactIn, SingleTokenExactOut } from './swapV3';
 
 export type SwapBuildOutputBase = {
@@ -29,23 +34,12 @@ export type Path = {
     balancerVersion: 2 | 3;
 };
 
-export type SwapInputBase = {
+export type SwapInput = {
     chainId: number;
     paths: Path[];
     swapKind: SwapKind;
-};
-
-export type SwapInputV2 = SwapInputBase & {
-    sender: Address;
-    recipient: Address;
-};
-
-export type SwapInputV3 = SwapInputBase & {
     wethIsEth: boolean;
 };
-
-export type SwapInput = SwapInputV2 | SwapInputV3;
-
 export interface SwapBase {
     chainId: number;
     isBatchSwap: boolean;
@@ -64,20 +58,24 @@ export interface SwapBase {
     buildCall(swapCall: SwapCallBuild): SwapBuildOutputBase;
 }
 
-type SwapCallBase = {
+export type SwapCallExactInBase = {
     deadline: bigint;
-};
-
-export type SwapCallExactIn = SwapCallBase & {
     slippage: Slippage;
     expectedAmountOut: TokenAmount;
 };
 
-export type SwapCallExactOut = SwapCallBase & {
+export type SwapCallExactOutBase = {
+    deadline: bigint;
     slippage: Slippage;
     expectedAmountIn: TokenAmount;
 };
 
-export type SwapCallBuild = SwapCallBase & {
+export type SwapCallExactIn = SwapCallExactInBase | SwapCallExactInV2;
+export type SwapCallExactOut = SwapCallExactOutBase | SwapCallExactOutV2;
+
+export type SwapCallBuildBase = {
+    deadline: bigint;
     limitAmount: TokenAmount;
 };
+
+export type SwapCallBuild = SwapCallBuildBase | SwapCallBuildV2;
