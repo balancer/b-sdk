@@ -8,6 +8,8 @@ import {
     ZERO_ADDRESS,
     NATIVE_ADDRESS,
     VAULT,
+    NATIVE_ASSETS,
+    ChainId,
 } from '../../../utils';
 import {
     Address,
@@ -26,7 +28,7 @@ export * from './types';
 
 // A Swap can be a single or multiple paths
 export class SwapV2 implements SwapBase {
-    public constructor({ chainId, paths, swapKind }: SwapInput) {
+    public constructor({ chainId, paths, swapKind, wethIsEth }: SwapInput) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
@@ -43,6 +45,7 @@ export class SwapV2 implements SwapBase {
 
         this.chainId = chainId;
         this.swapKind = swapKind;
+        this.wethIsEth = wethIsEth;
         this.inputAmount = getInputAmount(this.paths);
         this.outputAmount = getOutputAmount(this.paths);
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
@@ -54,7 +57,6 @@ export class SwapV2 implements SwapBase {
         this.assets = this.assets.map((a) => {
             return this.convertNativeAddressToZero(a);
         });
-
         this.swaps = swaps;
     }
 
@@ -66,6 +68,7 @@ export class SwapV2 implements SwapBase {
     public swaps: BatchSwapStep[] | SingleSwap;
     public readonly inputAmount: TokenAmount;
     public readonly outputAmount: TokenAmount;
+    public wethIsEth: boolean;
 
     public get quote(): TokenAmount {
         return this.swapKind === SwapKind.GivenIn
@@ -144,6 +147,13 @@ export class SwapV2 implements SwapBase {
         return address === NATIVE_ADDRESS ? ZERO_ADDRESS : address;
     }
 
+    private convertWrappedToZero(chainId: ChainId, address: Address): Address {
+        return address.toLowerCase() ===
+            NATIVE_ASSETS[chainId].wrapped.toLowerCase()
+            ? ZERO_ADDRESS
+            : address;
+    }
+
     public queryCallData(): string {
         let callData: string;
         if (this.isBatchSwap) {
@@ -168,16 +178,16 @@ export class SwapV2 implements SwapBase {
     }
 
     /**
-     * Returns the limits for a swap to be executed
+     * Returns the limits for a batchSwap
      *
      * @param limitAmount maxAmountIn/minAmountOut depending on swap kind
      * @returns
      */
-    limits(limitAmount: TokenAmount): bigint[] {
+    limitsBatchSwap(limitAmount: TokenAmount): bigint[] {
         const limits = new Array(this.assets.length).fill(0n);
 
         if (!this.isBatchSwap) {
-            return [limitAmount.amount];
+            throw new Error('Limits: Non batchSwap path.');
         }
 
         for (let i = 0; i < this.assets.length; i++) {
@@ -215,30 +225,46 @@ export class SwapV2 implements SwapBase {
      * @returns
      */
     buildCall(swapCall: SwapCallBuildV2): SwapBuildOutputBase {
-        const limits = this.limits(swapCall.limitAmount);
+        const funds = {
+            sender: swapCall.sender,
+            recipient: swapCall.recipient,
+            fromInternalBalance: false, // Set default to false as not supported in V3 and keeps interface simple
+            toInternalBalance: false,
+        };
+        let callData: Hex;
+        if (this.isBatchSwap) {
+            const limits = this.limitsBatchSwap(swapCall.limitAmount);
+            callData = this.callDataBatchSwap(limits, swapCall.deadline, funds);
+        } else {
+            callData = this.callDataSingleSwap(
+                swapCall.limitAmount.amount,
+                swapCall.deadline,
+                funds,
+            );
+        }
         return {
             to: this.to(),
-            callData: this.callData(
-                limits,
-                swapCall.deadline,
-                swapCall.sender,
-                swapCall.recipient,
-            ),
-            value: this.value(limits),
+            callData,
+            value: this.value(swapCall.limitAmount),
         };
     }
 
     /**
-     * Returns the native assset value to be sent to the vault contract based on the swap kind and the limit amounts
+     * Returns the native assset value to be sent to the vault contract based on the swap kind and the limit
      *
-     * @param limits calculated from swap.limits()
+     * @param limitAmount
      * @returns
      */
-    private value(limits: bigint[]): bigint {
+    private value(limitAmount: TokenAmount): bigint {
         let value = 0n;
-        if (this.inputAmount.token.address === NATIVE_ADDRESS) {
-            const idx = this.assets.indexOf(ZERO_ADDRESS);
-            value = limits[idx];
+        if (
+            this.wethIsEth &&
+            this.inputAmount.token.address ===
+                NATIVE_ASSETS[this.chainId].wrapped
+        ) {
+            if (this.swapKind === SwapKind.GivenIn)
+                value = this.inputAmount.amount;
+            else value = limitAmount.amount;
         }
         return value;
     }
@@ -250,53 +276,55 @@ export class SwapV2 implements SwapBase {
     /**
      * Returns the call data to be sent to the vault contract for the swap execution.
      *
-     * @param limits calculated from swap.limits()
+     * @param limit Limit amount (minOut for ExactIn, maxIn for ExactOut)
      * @param deadline unix timestamp
-     * @param sender address of the sender
-     * @param recipient defaults to sender
+     * @param funds FundManagement
      * @returns
      */
-    private callData(
-        limits: bigint[],
-        deadline: bigint,
-        sender: Address,
-        recipient = sender,
-        internalBalances = {
-            to: false,
-            from: false,
-        },
-    ): Hex {
-        let callData: Hex;
-
-        const funds = {
-            sender,
-            recipient,
-            fromInternalBalance: internalBalances.from,
-            toInternalBalance: internalBalances.to,
-        };
-
-        if (this.isBatchSwap) {
-            callData = encodeFunctionData({
-                abi: vaultV2Abi,
-                functionName: 'batchSwap',
-                args: [
-                    this.swapKind,
-                    this.swaps as BatchSwapStep[],
-                    this.assets,
-                    funds,
-                    limits,
-                    deadline,
-                ],
-            });
-        } else {
-            callData = encodeFunctionData({
-                abi: vaultV2Abi,
-                functionName: 'swap',
-                args: [this.swaps as SingleSwap, funds, limits[0], deadline],
-            });
+    private callDataSingleSwap(limit: bigint, deadline: bigint, funds): Hex {
+        const swap = { ...this.swaps } as SingleSwap;
+        if (this.wethIsEth) {
+            swap.assetIn = this.convertWrappedToZero(
+                this.chainId,
+                swap.assetIn,
+            );
+            swap.assetOut = this.convertWrappedToZero(
+                this.chainId,
+                swap.assetOut,
+            );
         }
+        return encodeFunctionData({
+            abi: vaultV2Abi,
+            functionName: 'swap',
+            args: [swap, funds, limit, deadline],
+        });
+    }
 
-        return callData;
+    /**
+     * Returns the call data to be sent to the vault contract for the swap execution.
+     *
+     * @param limits calculated from swap.limits()
+     * @param deadline unix timestamp
+     * @param funds FundManagement
+     * @returns
+     */
+    private callDataBatchSwap(limits: bigint[], deadline: bigint, funds): Hex {
+        return encodeFunctionData({
+            abi: vaultV2Abi,
+            functionName: 'batchSwap',
+            args: [
+                this.swapKind,
+                this.swaps as BatchSwapStep[],
+                this.wethIsEth
+                    ? this.assets.map((a) =>
+                          this.convertWrappedToZero(this.chainId, a),
+                      )
+                    : this.assets,
+                funds,
+                limits,
+                deadline,
+            ],
+        });
     }
 
     // helper methods
