@@ -1,11 +1,14 @@
-import { formatUnits } from 'viem';
 import { MathSol, abs, max, min } from '../../utils';
+import { InputAmount, SingleSwap, SwapKind } from '../../types';
+
 import { AddLiquidity } from '../addLiquidity';
 import {
     AddLiquidityKind,
     AddLiquiditySingleTokenInput,
     AddLiquidityUnbalancedInput,
 } from '../addLiquidity/types';
+import { AddLiquidityNested } from '../addLiquidityNested';
+import { AddLiquidityNestedInput } from '../addLiquidityNested/types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import { RemoveLiquidity } from '../removeLiquidity';
 import {
@@ -14,15 +17,11 @@ import {
     RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityUnbalancedInput,
 } from '../removeLiquidity/types';
+import { RemoveLiquidityNested } from '../removeLiquidityNested';
+import { RemoveLiquidityNestedSingleTokenInput } from '../removeLiquidityNested/types';
 import { TokenAmount } from '../tokenAmount';
 import { NestedPoolState, PoolState } from '../types';
-import { getSortedTokens } from '../utils';
-import { InputAmount, SingleSwap, SwapKind } from '../../types';
-import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
-import { RemoveLiquidityNestedSingleTokenInput } from '../removeLiquidityNested/types';
-import { RemoveLiquidityNested } from '../removeLiquidityNested';
-import { AddLiquidityNested } from '../addLiquidityNested';
-import { AddLiquidityNestedInput } from '../addLiquidityNested/types';
+import { getSortedTokens, SingleSwapInput, doSingleSwapQuery } from '../utils';
 
 export class PriceImpact {
     /**
@@ -60,12 +59,8 @@ export class PriceImpact {
         const tokenIndex = sortedTokens.findIndex((t) =>
             t.isSameAddress(input.tokenIn),
         );
-        const amountInitial = parseFloat(amountsIn[tokenIndex].toSignificant());
-        const amountFinal = parseFloat(amountsOut[tokenIndex].toSignificant());
 
-        // calculate price impact using ABA method
-        const priceImpact = (amountInitial - amountFinal) / amountInitial / 2;
-        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+        return priceImpactABA(amountsIn[tokenIndex], amountsOut[tokenIndex]);
     };
 
     /**
@@ -120,23 +115,17 @@ export class PriceImpact {
         // to exactAmountsIn, leaving the remaining delta within a single token
         const remainingDeltaIndex = await zeroOutDeltas(deltas, deltaBPTs);
 
-        // get relevant amounts for price impact calculation
-        const amountInitial = parseFloat(
-            formatUnits(
-                amountsIn[remainingDeltaIndex].amount,
-                amountsIn[remainingDeltaIndex].token.decimals,
-            ),
-        );
-        const amountDelta = parseFloat(
-            formatUnits(
-                abs(deltas[remainingDeltaIndex]),
-                amountsIn[remainingDeltaIndex].token.decimals,
-            ),
+        // get relevant amount for price impact calculation
+        const deltaAmount = TokenAmount.fromRawAmount(
+            amountsIn[remainingDeltaIndex].token,
+            abs(deltas[remainingDeltaIndex]),
         );
 
         // calculate price impact using ABA method
-        const priceImpact = amountDelta / amountInitial / 2;
-        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+        return priceImpactABA(
+            amountsIn[remainingDeltaIndex],
+            amountsIn[remainingDeltaIndex].sub(deltaAmount),
+        );
 
         // helper functions
 
@@ -257,16 +246,8 @@ export class PriceImpact {
             poolState,
         );
 
-        // get relevant amounts for price impact calculation
-        const amountInitial = parseFloat(formatUnits(bptOut.amount, 18));
-        const amountDelta = parseFloat(
-            formatUnits(bptIn.amount - bptOut.amount, 18),
-        );
-
         // calculate price impact using ABA method
-        const priceImpact = amountDelta / amountInitial / 2;
-
-        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+        return priceImpactABA(bptIn, bptOut);
     };
 
     /**
@@ -382,13 +363,8 @@ export class PriceImpact {
             poolState,
         );
 
-        // get relevant amounts for price impact calculation
-        const amountInitial = parseFloat(bptIn.toSignificant());
-        const amountFinal = parseFloat(bptOut.toSignificant());
-
         // calculate price impact using ABA method
-        const priceImpact = (amountInitial - amountFinal) / amountInitial / 2;
-        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+        return priceImpactABA(bptIn, bptOut);
     };
 
     /**
@@ -430,13 +406,8 @@ export class PriceImpact {
             nestedPoolState,
         );
 
-        // get relevant amounts for price impact calculation
-        const amountInitial = parseFloat(bptAmountIn.toSignificant());
-        const amountFinal = parseFloat(bptOut.toSignificant());
-
         // calculate price impact using ABA method
-        const priceImpact = (amountInitial - amountFinal) / amountInitial / 2;
-        return PriceImpactAmount.fromDecimal(`${priceImpact}`);
+        return priceImpactABA(bptAmountIn, bptOut);
     };
 
     /**
@@ -487,3 +458,17 @@ export class PriceImpact {
         return PriceImpactAmount.fromRawAmount(priceImpact);
     };
 }
+
+/**
+ * Applies the ABA method to calculate the price impact of an operation.
+ * @param initialA amount of token A at the begginig of the ABA process, i.e. A -> B amountIn
+ * @param finalA amount of token A at the end of the ABA process, i.e. B -> A amountOut
+ * @returns
+ */
+const priceImpactABA = (initialA: TokenAmount, finalA: TokenAmount) => {
+    const priceImpact = MathSol.divDownFixed(
+        initialA.scale18 - finalA.scale18,
+        initialA.scale18 * 2n,
+    );
+    return PriceImpactAmount.fromRawAmount(priceImpact);
+};
