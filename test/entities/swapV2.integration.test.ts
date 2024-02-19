@@ -1,4 +1,4 @@
-// pnpm test -- swapV3.integration.test.ts
+// pnpm test -- swapV2.integration.test.ts
 import { config } from 'dotenv';
 config();
 import {
@@ -16,28 +16,27 @@ import {
 import { CHAINS, ChainId, SwapKind, Path, Token, Swap } from '../../src';
 import { forkSetup } from '../lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
-import { POOLS, TOKENS } from 'test/lib/utils/addresses';
-import { SwapV3 } from '@/entities/swap/swapV3';
+import { TOKENS } from 'test/lib/utils/addresses';
+import { SwapV2 } from '@/entities/swap/swapV2';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
 } from 'test/lib/utils/swapHelpers';
 
-const balancerVersion = 3;
-const chainId = ChainId.SEPOLIA;
-// blockNo with guaranteed liquidity
-const blockNo = 5287755n;
+const balancerVersion = 2;
+const chainId = ChainId.MAINNET;
+const blockNo = 18980070n;
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, blockNo);
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, blockNo);
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 
-describe('SwapV3', () => {
+describe('SwapV2', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
     let testAddress: Address;
     const pathBalWeth: Path = {
-        balancerVersion: 3,
+        balancerVersion: 2,
         tokens: [
             {
                 address: TOKENS[chainId].BAL.address,
@@ -48,7 +47,9 @@ describe('SwapV3', () => {
                 decimals: TOKENS[chainId].WETH.decimals,
             },
         ],
-        pools: [POOLS[chainId].MOCK_WEIGHTED_POOL.id],
+        pools: [
+            '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
+        ],
         inputAmountRaw: 100000000000n,
         outputAmountRaw: 100000000000n,
     };
@@ -79,7 +80,7 @@ describe('SwapV3', () => {
 
     describe('query method should return correct updated', () => {
         test('GivenIn', async () => {
-            const swap = new SwapV3({
+            const swap = new SwapV2({
                 chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenIn,
@@ -94,10 +95,10 @@ describe('SwapV3', () => {
                 TOKENS[chainId].WETH.decimals,
             );
             expect(updated.token).to.deep.eq(wethToken);
-            expect(updated.amount).to.eq(25115489n);
+            expect(updated.amount).to.eq(44236888n);
         });
         test('GivenOut', async () => {
-            const swap = new SwapV3({
+            const swap = new SwapV2({
                 chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenOut,
@@ -112,7 +113,7 @@ describe('SwapV3', () => {
                 TOKENS[chainId].BAL.decimals,
             );
             expect(updated.token).to.deep.eq(balToken);
-            expect(updated.amount).to.eq(398002113381361n);
+            expect(updated.amount).to.eq(60635225778147n);
         });
     });
     describe('swap should be executed correcly', () => {
