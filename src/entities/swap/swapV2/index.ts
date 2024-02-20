@@ -6,7 +6,6 @@ import {
     DEFAULT_USERDATA,
     DEFAULT_FUND_MANAGMENT,
     ZERO_ADDRESS,
-    NATIVE_ADDRESS,
     VAULT,
     NATIVE_ASSETS,
     ChainId,
@@ -53,10 +52,6 @@ export class SwapV2 implements SwapBase {
             ...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address)),
         ];
         const swaps = this.getSwaps(this.paths);
-
-        this.assets = this.assets.map((a) => {
-            return this.convertNativeAddressToZero(a);
-        });
         this.swaps = swaps;
     }
 
@@ -109,9 +104,7 @@ export class SwapV2 implements SwapBase {
                           abs(
                               result[
                                   this.assets.indexOf(
-                                      this.convertNativeAddressToZero(
-                                          this.outputAmount.token.address,
-                                      ),
+                                      this.outputAmount.token.address,
                                   )
                               ],
                           ),
@@ -121,9 +114,7 @@ export class SwapV2 implements SwapBase {
                           abs(
                               result[
                                   this.assets.indexOf(
-                                      this.convertNativeAddressToZero(
-                                          this.inputAmount.token.address,
-                                      ),
+                                      this.inputAmount.token.address,
                                   )
                               ],
                           ),
@@ -141,10 +132,6 @@ export class SwapV2 implements SwapBase {
         }
 
         return amount;
-    }
-
-    private convertNativeAddressToZero(address: Address): Address {
-        return address === NATIVE_ADDRESS ? ZERO_ADDRESS : address;
     }
 
     private convertWrappedToZero(chainId: ChainId, address: Address): Address {
@@ -191,22 +178,14 @@ export class SwapV2 implements SwapBase {
         }
 
         for (let i = 0; i < this.assets.length; i++) {
-            if (
-                this.assets[i] === this.inputAmount.token.address ||
-                (this.assets[i] === ZERO_ADDRESS &&
-                    this.inputAmount.token.address === NATIVE_ADDRESS)
-            ) {
+            if (this.assets[i] === this.inputAmount.token.address) {
                 if (this.swapKind === SwapKind.GivenIn) {
                     limits[i] = this.inputAmount.amount;
                 } else {
                     limits[i] = limitAmount.amount;
                 }
             }
-            if (
-                this.assets[i] === this.outputAmount.token.address ||
-                (this.assets[i] === ZERO_ADDRESS &&
-                    this.outputAmount.token.address === NATIVE_ADDRESS)
-            ) {
+            if (this.assets[i] === this.outputAmount.token.address) {
                 if (this.swapKind === SwapKind.GivenIn) {
                     limits[i] = -1n * limitAmount.amount;
                 } else {
@@ -374,17 +353,11 @@ export class SwapV2 implements SwapBase {
         } else {
             const path = paths[0];
             const pool = path.pools[0];
-            const assetIn = this.convertNativeAddressToZero(
-                path.tokens[0].address,
-            );
-            const assetOut = this.convertNativeAddressToZero(
-                path.tokens[1].address,
-            );
             swaps = {
                 poolId: pool,
                 kind: this.swapKind,
-                assetIn,
-                assetOut,
+                assetIn: path.tokens[0].address,
+                assetOut: path.tokens[1].address,
                 amount:
                     this.swapKind === SwapKind.GivenIn
                         ? path.inputAmount.amount
