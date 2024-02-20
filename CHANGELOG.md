@@ -1,5 +1,14 @@
 # @balancer/sdk
 
+## 0.9.1
+
+### Patch Changes
+
+- 27296e6: expose mapPoolToNestedPoolState function
+- 4851160: Add Base config.
+- c359a54: add GYRO type for GYRO2 in pool type mapper
+- 8d8a95f: Fix add liquidity nested not working for polygon (and other chains)
+
 ## 0.9.0
 
 ### Minor Changes
