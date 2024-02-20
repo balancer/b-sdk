@@ -19,11 +19,21 @@ export type SwapPathStep = {
     tokenOut: Address;
 };
 
-export type SwapPathExactAmountIn = {
+type SwapPathBase = {
     tokenIn: Address;
+    steps: SwapPathStep[];
+};
+
+export type SwapPathExactAmountIn = SwapPathBase & {
     // for each step:
     // if tokenIn == pool use removeLiquidity SINGLE_TOKEN_EXACT_IN
     // if tokenOut == pool use addLiquidity UNBALANCED
-    steps: SwapPathStep[];
     exactAmountIn: bigint;
+};
+
+export type SwapPathExactAmountOut = SwapPathBase & {
+    // for each step:
+    // if tokenIn == pool use removeLiquidity SINGLE_TOKEN_EXACT_OUT
+    // if tokenOut == pool use addLiquidity SINGLE_TOKEN_EXACT_OUT
+    exactAmountOut: bigint;
 };

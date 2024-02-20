@@ -25,6 +25,7 @@ import {
     SingleTokenExactIn,
     SingleTokenExactOut,
     SwapPathExactAmountIn,
+    SwapPathExactAmountOut,
 } from './types';
 
 export * from './types';
@@ -61,7 +62,8 @@ export class SwapV3 implements SwapBase {
     public swaps:
         | SingleTokenExactIn
         | SingleTokenExactOut
-        | SwapPathExactAmountIn[];
+        | SwapPathExactAmountIn[]
+        | SwapPathExactAmountOut[];
     public readonly inputAmount: TokenAmount;
     public readonly outputAmount: TokenAmount;
 
@@ -266,14 +268,30 @@ export class SwapV3 implements SwapBase {
         let swaps:
             | SingleTokenExactIn
             | SingleTokenExactOut
-            | SwapPathExactAmountIn[];
+            | SwapPathExactAmountIn[]
+            | SwapPathExactAmountOut[];
         if (this.isBatchSwap) {
-            swaps = [] as SwapPathExactAmountIn[];
             if (this.swapKind === SwapKind.GivenIn) {
+                swaps = [] as SwapPathExactAmountIn[];
                 swaps = paths.map((p) => {
                     return {
                         tokenIn: p.inputAmount.token.address,
                         exactAmountIn: p.inputAmount.amount,
+                        steps: p.pools.map((pool, i) => {
+                            return {
+                                pool: pool,
+                                tokenOut: p.tokens[i + 1].address,
+                            };
+                        }),
+                    };
+                });
+            } else {
+                // always use the 'natural' order; (Unlike V2 where order was reversed)
+                swaps = [] as SwapPathExactAmountOut[];
+                swaps = paths.map((p) => {
+                    return {
+                        tokenIn: p.inputAmount.token.address,
+                        exactAmountOut: p.outputAmount.amount,
                         steps: p.pools.map((pool, i) => {
                             return {
                                 pool: pool,

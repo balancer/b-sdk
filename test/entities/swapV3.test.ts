@@ -3,7 +3,11 @@ import { ChainId } from '../../src';
 import { SwapKind } from '@/types';
 import { Path, TokenApi } from '@/entities';
 import { TOKENS } from '../lib/utils/addresses';
-import { SwapPathExactAmountIn, SwapV3 } from '@/entities/swap/swapV3';
+import {
+    SwapPathExactAmountIn,
+    SwapPathExactAmountOut,
+    SwapV3,
+} from '@/entities/swap/swapV3';
 
 describe('SwapV3', () => {
     describe('getSwaps', () => {
@@ -91,8 +95,45 @@ describe('SwapV3', () => {
                 });
             });
             describe('GivenOut', () => {
-                test.skip('', () => {
-                    expect(false).to.be.true;
+                test('swaps should be created correctly', () => {
+                    const swap = new SwapV3({
+                        chainId: ChainId.MAINNET,
+                        paths: [path1hop, path3hops],
+                        swapKind: SwapKind.GivenOut,
+                    });
+                    const expected1hop: SwapPathExactAmountOut = {
+                        tokenIn: path1hop.tokens[0].address,
+                        exactAmountOut: path1hop.outputAmountRaw,
+                        steps: [
+                            {
+                                pool: path1hop.pools[0],
+                                tokenOut: path1hop.tokens[1].address,
+                            },
+                        ],
+                    };
+                    const expected3hops: SwapPathExactAmountOut = {
+                        tokenIn: path3hops.tokens[0].address,
+                        exactAmountOut: path3hops.outputAmountRaw,
+                        steps: [
+                            {
+                                pool: path3hops.pools[0],
+                                tokenOut: path3hops.tokens[1].address,
+                            },
+                            {
+                                pool: path3hops.pools[1],
+                                tokenOut: path3hops.tokens[2].address,
+                            },
+                            {
+                                pool: path3hops.pools[2],
+                                tokenOut: path3hops.tokens[3].address,
+                            },
+                        ],
+                    };
+
+                    expect(swap.swaps).to.deep.eq([
+                        expected1hop,
+                        expected3hops,
+                    ]);
                 });
             });
         });
