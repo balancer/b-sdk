@@ -208,49 +208,6 @@ export class PriceImpact {
     };
 
     /**
-     * Alternative for calculating price impact on add liquidity unbalanced operations
-     *
-     * Note: works on balancer v2 only because it relies on Remove Liquidity Unbalanced
-     * @param input same input used in the corresponding add liquidity operation
-     * @param poolState same pool state used in the corresponding add liquidity operation
-     * @returns price impact amount
-     */
-    static addLiquidityUnbalancedAlternative = async (
-        input: AddLiquidityUnbalancedInput,
-        poolState: PoolState,
-    ): Promise<PriceImpactAmount> => {
-        // inputs are being validated within AddLiquidity
-        if (poolState.balancerVersion !== 2) {
-            throw new Error(
-                'This alternative method relies on Remove Liquidity Unbalanced, which is only available for balancer V2.',
-            );
-        }
-
-        // simulate adding liquidity to get amounts in and bptOut
-        const addLiquidity = new AddLiquidity();
-        const { amountsIn, bptOut } = await addLiquidity.query(
-            input,
-            poolState,
-        );
-
-        // simulate removing liquidity exact out to get bptIn
-        const removeLiquidity = new RemoveLiquidity();
-        const removeLiquidityInput: RemoveLiquidityInput = {
-            chainId: input.chainId,
-            rpcUrl: input.rpcUrl,
-            amountsOut: amountsIn.map((a) => a.toInputAmount()),
-            kind: RemoveLiquidityKind.Unbalanced,
-        };
-        const { bptIn } = await removeLiquidity.query(
-            removeLiquidityInput,
-            poolState,
-        );
-
-        // calculate price impact using ABA method
-        return priceImpactABA(bptIn, bptOut);
-    };
-
-    /**
      * Calculate price impact on adding liquidity for nested pools.
      *
      * Note: is based on the premise that the price impact on adding liquidity
@@ -465,7 +422,7 @@ export class PriceImpact {
  * @param finalA amount of token A at the end of the ABA process, i.e. B -> A amountOut
  * @returns
  */
-const priceImpactABA = (initialA: TokenAmount, finalA: TokenAmount) => {
+export const priceImpactABA = (initialA: TokenAmount, finalA: TokenAmount) => {
     const priceImpact = MathSol.divDownFixed(
         initialA.scale18 - finalA.scale18,
         initialA.scale18 * 2n,
