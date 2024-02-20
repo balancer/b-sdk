@@ -6,7 +6,7 @@ import {
     CreatePoolV2WeightedInput,
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
-import { weightedPoolFactoryV2Abi } from '../../../../abi/weightedPoolFactory.V2';
+import { weightedPoolFactoryV4Abi_V2 } from '../../../../abi/weightedPoolFactoryV4.V2';
 import { WEIGHTED_POOL_FACTORY_BALANCER_V2 } from '@/utils';
 import { sortByAddress } from '@/utils/sortByAddress';
 
@@ -14,7 +14,7 @@ export class CreatePoolWeightedV2 implements CreatePoolBase {
     buildCall(input: CreatePoolV2WeightedInput): CreatePoolBuildCallOutput {
         const args = this.parseCreateFunctionArgs(input);
         const encodedCall = encodeFunctionData({
-            abi: weightedPoolFactoryV2Abi,
+            abi: weightedPoolFactoryV4Abi_V2,
             functionName: 'create',
             args,
         });

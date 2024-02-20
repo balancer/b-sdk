@@ -1,4 +1,4 @@
-export const composabableStablePoolV2Abi = [
+export const composabableStablePoolV5Abi_V2 = [
     {
         inputs: [
             {

@@ -14,7 +14,7 @@ import {
     parseEther,
     zeroAddress,
 } from 'viem';
-import { weightedPoolFactoryV2Abi } from '@/abi';
+import { weightedPoolFactoryV4Abi_V2 } from '@/abi';
 
 const createPool = async () => {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
@@ -69,7 +69,7 @@ const createPool = async () => {
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: weightedPoolFactoryV2Abi,
+        abi: weightedPoolFactoryV4Abi_V2,
         to: WEIGHTED_POOL_FACTORY_BALANCER_V2[chainId],
     });
 

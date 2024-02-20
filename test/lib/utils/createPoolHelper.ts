@@ -1,9 +1,9 @@
 import { CreatePoolTxInput } from './types';
 import { Address, PoolType } from '../../../src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
-import { weightedPoolFactoryV2Abi } from '../../../src/abi/weightedPoolFactory.V2';
-import { composableStableFactoryV2Abi } from '../../../src/abi/composableStableFactory.V2';
-import { weightedPoolFactoryV3Abi } from '@/abi/weightedPoolFactory.V3';
+import { weightedPoolFactoryV4Abi_V2 } from '../../../src/abi/weightedPoolFactoryV4.V2';
+import { composableStableFactoryV5Abi_V2 } from '../../../src/abi/composableStableFactoryV5.V2';
+import { weightedPoolFactoryAbi_V3 } from '@/abi/weightedPoolFactory.V3';
 
 export async function doCreatePool(
     txInput: CreatePoolTxInput,
@@ -14,11 +14,11 @@ export async function doCreatePool(
 
     const abis = {
         2: {
-            [PoolType.Weighted]: weightedPoolFactoryV2Abi,
-            [PoolType.ComposableStable]: composableStableFactoryV2Abi,
+            [PoolType.Weighted]: weightedPoolFactoryV4Abi_V2,
+            [PoolType.ComposableStable]: composableStableFactoryV5Abi_V2,
         },
         3: {
-            [PoolType.Weighted]: weightedPoolFactoryV3Abi,
+            [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
         },
     };
 

@@ -3,7 +3,7 @@ dotenv.config();
 
 import { CreatePool, CreatePoolV3WeightedInput } from '../../src';
 import { PoolType, TokenType } from '@/types';
-import { ChainId, CHAINS, WEIGHTED_POOL_FACTORY_BALANCER_V3 } from '@/utils';
+import { ChainId, CHAINS } from '@/utils';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import {
@@ -15,7 +15,7 @@ import {
     zeroAddress,
 } from 'viem';
 import { TOKENS } from 'test/lib/utils/addresses';
-import { weightedPoolFactoryV3Abi } from '@/abi/weightedPoolFactory.V3';
+import { weightedPoolFactoryAbi_V3 } from '@/abi/weightedPoolFactory.V3';
 
 const createPool = async () => {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
@@ -49,10 +49,11 @@ const createPool = async () => {
             },
         ],
         balancerVersion: 3,
+        chainId,
     };
-    const { call } = createPool.buildCall(createWeightedPoolInput);
+    const { call, to } = createPool.buildCall(createWeightedPoolInput);
     const hash = await client.sendTransaction({
-        to: WEIGHTED_POOL_FACTORY_BALANCER_V3[chainId],
+        to,
         data: call,
         account: signerAddress,
         chain: client.chain,
@@ -64,8 +65,8 @@ const createPool = async () => {
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: weightedPoolFactoryV3Abi,
-        to: WEIGHTED_POOL_FACTORY_BALANCER_V3[chainId],
+        abi: weightedPoolFactoryAbi_V3,
+        to,
     });
 
     const {

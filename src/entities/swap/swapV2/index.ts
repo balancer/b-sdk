@@ -17,12 +17,7 @@ import {
     http,
 } from 'viem';
 import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
-import {
-    Path,
-    SwapBase,
-    SwapBuildOutputBase,
-    SwapCallBuild,
-} from '../types';
+import { Path, SwapBase, SwapBuildOutputBase, SwapCallBuild } from '../types';
 import { PathWithAmount } from '../pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../pathHelpers';
 

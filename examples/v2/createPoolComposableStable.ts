@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { composableStableFactoryV2Abi } from '@/abi/composableStableFactory.V2';
+import { composableStableFactoryV5Abi_V2 } from '@/abi/composableStableFactoryV5.V2';
 import { CreatePool, CreatePoolV2ComposableStableInput } from '@/entities';
 import { PoolType } from '@/types';
 import { ChainId, CHAINS, COMPOSABLE_STABLE_POOL_FACTORY } from '@/utils';
@@ -74,7 +74,7 @@ const createPoolComposableStable = async (): Promise<{
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: composableStableFactoryV2Abi,
+        abi: composableStableFactoryV5Abi_V2,
         to: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
     });
 
