@@ -8,7 +8,12 @@ import {
     SwapCallExactInV2,
     SwapCallExactOutV2,
 } from './swapV2';
-import { SingleTokenExactIn, SingleTokenExactOut } from './swapV3';
+import {
+    SingleTokenExactIn,
+    SingleTokenExactOut,
+    SwapPathExactAmountIn,
+    SwapPathExactAmountOut,
+} from './swapV3';
 
 export type SwapBuildOutputBase = {
     to: Address;
@@ -48,7 +53,9 @@ export interface SwapBase {
         | BatchSwapStep[]
         | SingleSwap
         | SingleTokenExactIn
-        | SingleTokenExactOut;
+        | SingleTokenExactOut
+        | SwapPathExactAmountIn[]
+        | SwapPathExactAmountOut[];
     quote: TokenAmount;
     inputAmount: TokenAmount;
     outputAmount: TokenAmount;
