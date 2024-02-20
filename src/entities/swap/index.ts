@@ -2,36 +2,34 @@ import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import {
-    Path,
     SwapBase,
     SwapCallExactIn,
     SwapCallExactOut,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
+    SwapInput,
 } from './types';
 import { SwapV2 } from './swapV2';
 import { validatePaths } from './pathHelpers';
 import { Slippage } from '../slippage';
+import { SwapV3 } from './swapV3';
 
 export * from './types';
 
 // A Swap can be a single or multiple paths
 export class Swap {
     private readonly swap: SwapBase;
+    public balancerVersion: 2 | 3;
 
-    public constructor({
-        chainId,
-        paths,
-        swapKind,
-    }: { chainId: number; paths: Path[]; swapKind: SwapKind }) {
-        validatePaths(paths);
+    public constructor(swapInput: SwapInput) {
+        validatePaths(swapInput.paths);
 
-        switch (paths[0].balancerVersion) {
-            case 2:
-                this.swap = new SwapV2({ chainId, paths, swapKind });
-                return;
-            case 3:
-                throw new Error('Unsupported Balancer Protocol Version');
+        if (swapInput.paths[0].balancerVersion === 2) {
+            this.balancerVersion = 2;
+            this.swap = new SwapV2(swapInput);
+        } else {
+            this.balancerVersion = 3;
+            this.swap = new SwapV3(swapInput);
         }
     }
 
