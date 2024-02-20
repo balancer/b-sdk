@@ -21,7 +21,11 @@ import {
 } from '../types';
 import { PathWithAmount } from '../pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../pathHelpers';
-import { SingleTokenExactIn, SingleTokenExactOut } from './types';
+import {
+    SingleTokenExactIn,
+    SingleTokenExactOut,
+    SwapPathExactAmountIn,
+} from './types';
 
 export * from './types';
 
@@ -54,7 +58,10 @@ export class SwapV3 implements SwapBase {
     public readonly isBatchSwap: boolean;
     public readonly paths: PathWithAmount[];
     public readonly swapKind: SwapKind;
-    public swaps: SingleTokenExactIn | SingleTokenExactOut;
+    public swaps:
+        | SingleTokenExactIn
+        | SingleTokenExactOut
+        | SwapPathExactAmountIn[];
     public readonly inputAmount: TokenAmount;
     public readonly outputAmount: TokenAmount;
 
@@ -256,10 +263,26 @@ export class SwapV3 implements SwapBase {
     // helper methods
 
     private getSwaps(paths: PathWithAmount[]) {
-        let swaps: SingleTokenExactIn | SingleTokenExactOut;
+        let swaps:
+            | SingleTokenExactIn
+            | SingleTokenExactOut
+            | SwapPathExactAmountIn[];
         if (this.isBatchSwap) {
-            // TODO - Implement this once router available
-            swaps = {} as SingleTokenExactIn;
+            swaps = [] as SwapPathExactAmountIn[];
+            if (this.swapKind === SwapKind.GivenIn) {
+                swaps = paths.map((p) => {
+                    return {
+                        tokenIn: p.inputAmount.token.address,
+                        exactAmountIn: p.inputAmount.amount,
+                        steps: p.pools.map((pool, i) => {
+                            return {
+                                pool: pool,
+                                tokenOut: p.tokens[i + 1].address,
+                            };
+                        }),
+                    };
+                });
+            }
         } else {
             const path = paths[0];
             const pool = path.pools[0];
@@ -271,14 +294,14 @@ export class SwapV3 implements SwapBase {
                     tokenIn,
                     tokenOut,
                     exactAmountIn: path.inputAmount.amount,
-                } as SingleTokenExactIn;
+                };
             } else {
                 swaps = {
                     pool,
                     tokenIn,
                     tokenOut,
                     exactAmountOut: path.outputAmount.amount,
-                } as SingleTokenExactOut;
+                };
             }
         }
         return swaps;
