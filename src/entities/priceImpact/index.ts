@@ -66,7 +66,25 @@ export class PriceImpact {
     /**
      * Calculate price impact on add liquidity unbalanced operations
      *
-     * Note: works on both balancer v2 and v3
+     * This is the only price impact calculation that adapts the ABA method instead
+     * of applying it directly. This happens because tha ABA method requires a
+     * corresponding reverse operation to be applied, so we "get back" to the original
+     * state for comparison, hence A -> B -> A.
+     * This is not possible for AddLiquidityUnbalanced on v3 because there is no
+     * RemoveLiquidityUnbalanced.
+     * The alternative found was to simulate the RemoveLiquidityUnbalanced by applying
+     * RemoveLiquidityProportional and then swapping between tokens.
+     *
+     * Here are the steps to calculate the price impact for add liquidity unbalanced:
+     * 1. query add liquidity unbalanced with `exactAmountsIn` to get `bptOut`
+     * 2. query remove liquidity proportional with `bptOut` as `bptIn` to get `proportionalAmountsOut`
+     * 3. get `diffs` =  `proportionalAmountsOut` - `exactAmountsIn`
+     * 4. swap between tokens zeroing out the `diffs` between `proportionalAmountsOut`
+     *    and `exactAmountsIn`, leaving the remaining diff within a single
+     *    token → `diffFinal` (see code below for detailed steps)
+     * 5. `amountInitial` will be the the `exactAmountsIn` respective to `diffFinal` token
+     * 6. price impact ABA = `diffFinal` / `amountInitial` / 2
+     *
      * @param input same input used in the corresponding add liquidity operation
      * @param poolState same pool state used in the corresponding add liquidity operation
      * @returns price impact amount
