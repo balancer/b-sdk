@@ -1,9 +1,7 @@
 // pnpm test -- createPool/weighted.test.ts
 
 import { parseEther, zeroAddress } from 'viem';
-import { ChainId, PoolType } from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolV2WeightedInput } from '../../../src/entities/createPool/types';
+import { ChainId, PoolType, CreatePool, CreatePoolV2WeightedInput } from 'src';
 
 describe('Create Weighted Pool tests', () => {
     const chainId = ChainId.MAINNET;

@@ -16,16 +16,16 @@ import {
     PoolState,
     PoolType,
     Slippage,
-} from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolV2ComposableStableInput } from '../../../src/entities/createPool/types';
+    CreatePool,
+    CreatePoolV2ComposableStableInput,
+    InitPoolDataProvider,
+    InitPool,
+    InitPoolInput
+} from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { InitPoolTxInput, CreatePoolTxInput } from '../../lib/utils/types';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
-import { InitPoolDataProvider } from '../../../src/data/providers/initPoolDataProvider';
 import { forkSetup } from '../../lib/utils/helper';
-import { InitPool } from '../../../src/entities/initPool';
-import { InitPoolInput } from '../../../src/entities/initPool/types';
 import { assertInitPool, doInitPool } from '../../lib/utils/initPoolHelper';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);

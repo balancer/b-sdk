@@ -1,10 +1,13 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { composableStableFactoryV5Abi_V2 } from '@/abi/composableStableFactoryV5.V2';
-import { CreatePool, CreatePoolV2ComposableStableInput } from '@/entities';
+import {
+    composableStableFactoryV5Abi_V2,
+    CreatePool,
+    CreatePoolV2ComposableStableInput,
+} from 'src';
 import { PoolType } from '@/types';
-import { ChainId, CHAINS, COMPOSABLE_STABLE_POOL_FACTORY } from '@/utils';
+import { ChainId, CHAINS } from '@/utils';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import {
@@ -59,10 +62,11 @@ const createPoolComposableStable = async (): Promise<{
         swapFee: '0.01',
         poolOwnerAddress: signerAddress, // Balancer DAO Multisig,
         balancerVersion: 2,
+        chainId,
     };
-    const { call } = createPool.buildCall(createPoolComposableStableInput);
+    const { call, to } = createPool.buildCall(createPoolComposableStableInput);
     const hash = await client.sendTransaction({
-        to: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
+        to,
         data: call,
         account: signerAddress,
         chain: client.chain,
@@ -75,7 +79,7 @@ const createPoolComposableStable = async (): Promise<{
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
         abi: composableStableFactoryV5Abi_V2,
-        to: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
+        to,
     });
 
     const {
