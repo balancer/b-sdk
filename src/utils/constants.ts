@@ -3,6 +3,7 @@ import { Token } from '../entities/token';
 import {
     arbitrum,
     avalanche,
+    base,
     baseGoerli,
     bsc,
     gnosis,
@@ -62,6 +63,7 @@ export enum ChainId {
     FANTOM = 250,
     ZKSYNC = 324,
     ZKEVM = 1101,
+    BASE = 8453,
     ARBITRUM_ONE = 42161,
     AVALANCHE = 43114,
     BASE_GOERLI = 84531,
@@ -78,6 +80,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.ZKSYNC_TESTNET]: zkSyncTestnet,
     [ChainId.ZKSYNC]: zkSync,
     [ChainId.ZKEVM]: polygonZkEvm,
+    [ChainId.BASE]: base,
     [ChainId.ARBITRUM_ONE]: arbitrum,
     [ChainId.AVALANCHE]: avalanche,
     [ChainId.BASE_GOERLI]: baseGoerli,
@@ -102,6 +105,8 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zksync-v2',
     [ChainId.ZKEVM]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zkevm-v2',
+    [ChainId.BASE]:
+        'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
     [ChainId.ARBITRUM_ONE]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
     [ChainId.AVALANCHE]:
@@ -121,16 +126,27 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.POLYGON]: 800,
     [ChainId.ZKEVM]: 128,
     [ChainId.FANTOM]: 128,
-};
-
-export const BALANCER_RELAYER: Record<number, Address> = {
-    [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
+    [ChainId.BASE]: 800,
 };
 
 /**
  * Deployment Addresses
  * Source: https://docs.balancer.fi/reference/contracts
  */
+
+export const BALANCER_RELAYER: Record<number, Address> = {
+    [ChainId.ARBITRUM_ONE]: '0x9B892E515D2Ab8869F17488d64B3b918731cc70d',
+    [ChainId.AVALANCHE]: '0xA084c11cb55e67C9becf9607f1DBB20ec4D5E7b2',
+    [ChainId.BSC]: '0xf41D6De4bbE9919d87BC1E5cc3335549e2A1A6c0',
+    [ChainId.GNOSIS_CHAIN]: '0x2163c2FcD0940e84B8a68991bF926eDfB0Cd926C',
+    [ChainId.GOERLI]: '0x7f36A11750F225De646b0de7b26BC74e797c310B',
+    [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
+    [ChainId.OPTIMISM]: '0x015ACA20a1422F3c729086c17f15F10e0CfbC75A',
+    [ChainId.POLYGON]: '0xB1ED8d3b5059b3281D43306cC9D043cE8B22599b',
+    [ChainId.SEPOLIA]: '0x7852fB9d0895e6e8b3EedA553c03F6e2F9124dF9',
+    [ChainId.ZKEVM]: '0x8e620FfCa2580ed87241D7e10F85EE75d0a906F5',
+    [ChainId.BASE]: '0x76f7204b62f554b79d444588edac9dfa7032c71a',
+};
 
 export const VAULT: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
@@ -141,6 +157,7 @@ export const VAULT: Record<number, Address> = {
     [ChainId.POLYGON]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.ZKEVM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.FANTOM]: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
+    [ChainId.BASE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
 export const VAULT_V3: Record<number, Address> = {
@@ -156,6 +173,7 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
     [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
+    [ChainId.BASE]: '0x300ab2038eac391f26d9f895dc61f8f66a548833',
 };
 
 export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
@@ -166,6 +184,7 @@ export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
     [ChainId.OPTIMISM]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
     [ChainId.POLYGON]: '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
+    [ChainId.BASE]: '0x4c32a8a8fda4e24139b51b456b42290f51d6a1c4',
 };
 
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
@@ -176,6 +195,7 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.OPTIMISM]: '0x043a2dad730d585c44fb79d2614f295d2d625412',
     [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
     [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
+    [ChainId.BASE]: '0x8df317a729fcaa260306d7de28888932cb579b88',
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
@@ -246,6 +266,14 @@ export const NATIVE_ASSETS = {
         'ETH',
         'Ether',
         '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+    ),
+    [ChainId.BASE]: new Token(
+        ChainId.BASE,
+        NATIVE_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0x4200000000000000000000000000000000000006',
     ),
 };
 

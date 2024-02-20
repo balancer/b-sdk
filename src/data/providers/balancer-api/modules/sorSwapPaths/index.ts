@@ -118,6 +118,8 @@ export class SorSwapPaths {
                 return 'ZKEVM';
             case ChainId.SEPOLIA:
                 return 'SEPOLIA';
+            case ChainId.BASE:
+                return 'BASE';
             default:
                 throw Error(`Unsupported API chain: ${chainId}`);
         }
