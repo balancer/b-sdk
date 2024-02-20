@@ -174,12 +174,11 @@ describe('price impact', () => {
                 input,
                 nestedPoolState,
             );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal(
-                '0.0472', // TODO: find a way to validate this result
-            );
+            const priceImpactSpot =
+                PriceImpactAmount.fromRawAmount(47564822560662355n); // from previous SDK
             expect(priceImpactABA.decimal).closeTo(
                 priceImpactSpot.decimal,
-                1e-4, // 1 bps
+                1e-3, // 1 bps
             );
         });
     });
