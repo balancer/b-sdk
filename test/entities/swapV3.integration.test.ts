@@ -83,7 +83,6 @@ describe('SwapV3', () => {
                 chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenIn,
-                wethIsEth: false,
             });
 
             const updated = await swap.query(rpcUrl);
@@ -101,7 +100,6 @@ describe('SwapV3', () => {
                 chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenOut,
-                wethIsEth: false,
             });
 
             const updated = await swap.query(rpcUrl);
@@ -144,7 +142,6 @@ describe('SwapV3', () => {
                         chainId,
                         paths: [pathBalWeth],
                         swapKind: SwapKind.GivenIn,
-                        wethIsEth: true,
                     });
                     await assertSwapExactIn(
                         client,
@@ -159,7 +156,6 @@ describe('SwapV3', () => {
                         chainId,
                         paths: [pathBalWeth],
                         swapKind: SwapKind.GivenOut,
-                        wethIsEth: true,
                     });
                     await assertSwapExactOut(
                         client,
@@ -180,7 +176,6 @@ describe('SwapV3', () => {
                         chainId,
                         paths: [pathWethBal],
                         swapKind: SwapKind.GivenIn,
-                        wethIsEth: true,
                     });
                     await assertSwapExactIn(
                         client,
@@ -199,7 +194,6 @@ describe('SwapV3', () => {
                         chainId,
                         paths: [pathWethBal],
                         swapKind: SwapKind.GivenOut,
-                        wethIsEth: true,
                     });
                     await assertSwapExactOut(
                         client,

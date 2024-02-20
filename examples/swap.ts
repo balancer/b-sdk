@@ -63,7 +63,6 @@ const swap = async () => {
         chainId,
         paths: sorPaths,
         swapKind,
-        wethIsEth: false,
     });
 
     console.log(
@@ -85,6 +84,7 @@ const swap = async () => {
             expectedAmountOut: updated,
             sender,
             recipient,
+            wethIsEth: false,
         }) as SwapBuildOutputExactIn;
         console.log(
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
@@ -96,6 +96,7 @@ const swap = async () => {
             expectedAmountIn: updated,
             sender,
             recipient,
+            wethIsEth: false,
         }) as SwapBuildOutputExactOut;
         console.log(
             `Max Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,

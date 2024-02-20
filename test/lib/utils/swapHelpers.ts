@@ -32,6 +32,7 @@ export async function assertSwapExactIn(
         slippage,
         deadline,
         expectedAmountOut,
+        wethIsEth,
     };
     let contractToCall = BALANCER_ROUTER[chainId];
 
@@ -110,6 +111,7 @@ export async function assertSwapExactOut(
         slippage,
         deadline,
         expectedAmountIn,
+        wethIsEth,
     };
     let contractToCall = BALANCER_ROUTER[chainId];
 

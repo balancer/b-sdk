@@ -38,7 +38,6 @@ export type SwapInput = {
     chainId: number;
     paths: Path[];
     swapKind: SwapKind;
-    wethIsEth: boolean;
 };
 export interface SwapBase {
     chainId: number;
@@ -61,12 +60,14 @@ export interface SwapBase {
 export type SwapCallExactInBase = {
     deadline: bigint;
     slippage: Slippage;
+    wethIsEth: boolean;
     expectedAmountOut: TokenAmount;
 };
 
 export type SwapCallExactOutBase = {
     deadline: bigint;
     slippage: Slippage;
+    wethIsEth: boolean;
     expectedAmountIn: TokenAmount;
 };
 
@@ -76,6 +77,7 @@ export type SwapCallExactOut = SwapCallExactOutBase | SwapCallExactOutV2;
 export type SwapCallBuildBase = {
     deadline: bigint;
     limitAmount: TokenAmount;
+    wethIsEth: boolean;
 };
 
 export type SwapCallBuild = SwapCallBuildBase | SwapCallBuildV2;

@@ -27,7 +27,7 @@ export * from './types';
 
 // A Swap can be a single or multiple paths
 export class SwapV3 implements SwapBase {
-    public constructor({ chainId, paths, swapKind, wethIsEth }: SwapInput) {
+    public constructor({ chainId, paths, swapKind }: SwapInput) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
@@ -47,7 +47,6 @@ export class SwapV3 implements SwapBase {
         this.inputAmount = getInputAmount(this.paths);
         this.outputAmount = getOutputAmount(this.paths);
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
-        this.wethIsEth = wethIsEth;
         this.swaps = this.getSwaps(this.paths);
     }
 
@@ -58,7 +57,6 @@ export class SwapV3 implements SwapBase {
     public swaps: SingleTokenExactIn | SingleTokenExactOut;
     public readonly inputAmount: TokenAmount;
     public readonly outputAmount: TokenAmount;
-    public readonly wethIsEth: boolean;
 
     // TODO - this could be moved to base swap?
     public get quote(): TokenAmount {
@@ -168,8 +166,12 @@ export class SwapV3 implements SwapBase {
     buildCall(swapCall: SwapCallBuildBase): SwapBuildOutputBase {
         return {
             to: this.to(),
-            callData: this.callData(swapCall.limitAmount, swapCall.deadline),
-            value: this.value(swapCall.limitAmount),
+            callData: this.callData(
+                swapCall.limitAmount,
+                swapCall.deadline,
+                swapCall.wethIsEth,
+            ),
+            value: this.value(swapCall.limitAmount, swapCall.wethIsEth),
         };
     }
 
@@ -179,10 +181,10 @@ export class SwapV3 implements SwapBase {
      * @param limit
      * @returns
      */
-    private value(limit: TokenAmount): bigint {
+    private value(limit: TokenAmount, wethIsEth: boolean): bigint {
         let value = 0n;
         if (
-            this.wethIsEth &&
+            wethIsEth &&
             this.inputAmount.token.address ===
                 NATIVE_ASSETS[this.chainId].wrapped
         ) {
@@ -204,7 +206,11 @@ export class SwapV3 implements SwapBase {
      * @param deadline unix timestamp
      * @returns
      */
-    private callData(limit: TokenAmount, deadline: bigint): Hex {
+    private callData(
+        limit: TokenAmount,
+        deadline: bigint,
+        wethIsEth: boolean,
+    ): Hex {
         let callData: Hex;
 
         if (this.isBatchSwap) {
@@ -223,7 +229,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.exactAmountIn,
                         limit.amount, // minAmountOut
                         deadline,
-                        this.wethIsEth,
+                        wethIsEth,
                         DEFAULT_USERDATA,
                     ],
                 });
@@ -238,7 +244,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.exactAmountOut,
                         limit.amount, // maxAmountIn
                         deadline,
-                        this.wethIsEth,
+                        wethIsEth,
                         DEFAULT_USERDATA,
                     ],
                 });

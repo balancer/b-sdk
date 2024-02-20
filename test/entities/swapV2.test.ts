@@ -6,8 +6,6 @@ import { TOKENS } from '../lib/utils/addresses';
 import { SwapV2 } from '@/entities/swap/swapV2';
 
 describe('SwapV2', () => {
-    const wethIsEth = true;
-
     describe('limits', () => {
         describe('batchSwap', () => {
             const tokens: TokenApi[] = [
@@ -54,7 +52,6 @@ describe('SwapV2', () => {
                         chainId: ChainId.MAINNET,
                         paths: [pathTo6Decimals],
                         swapKind: SwapKind.GivenIn,
-                        wethIsEth,
                     });
                     const tokenOut = new Token(
                         1,
@@ -80,7 +77,6 @@ describe('SwapV2', () => {
                         chainId: ChainId.MAINNET,
                         paths: [pathFrom6Decimals],
                         swapKind: SwapKind.GivenIn,
-                        wethIsEth,
                     });
                     const tokenOut = new Token(
                         1,
@@ -107,7 +103,6 @@ describe('SwapV2', () => {
                         chainId: ChainId.MAINNET,
                         paths: [pathTo6Decimals],
                         swapKind: SwapKind.GivenOut,
-                        wethIsEth,
                     });
                     const tokenIn = new Token(
                         1,
@@ -129,7 +124,6 @@ describe('SwapV2', () => {
                         chainId: ChainId.MAINNET,
                         paths: [pathFrom6Decimals],
                         swapKind: SwapKind.GivenOut,
-                        wethIsEth,
                     });
                     const tokenIn = new Token(
                         1,
