@@ -298,6 +298,12 @@ describe('price impact', () => {
         });
     });
 
+    /**
+     * FIXME: Test pending a reference value for comparison/validation, because
+     * there is no corresponding method in previous SDK to validate the result.
+     * We should be able to infer that it is correct because it follows the same
+     * ABA approach as price impact for other actions (addLiquidity, swap, etc.)
+     */
     describe('remove liquidity nested - single token', () => {
         let input: RemoveLiquidityNestedSingleTokenInput;
         beforeAll(() => {
@@ -314,9 +320,7 @@ describe('price impact', () => {
                 input,
                 nestedPoolState,
             );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal(
-                '0.0288', // TODO: find a way to validate this result
-            );
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0288');
             expect(priceImpactABA.decimal).closeTo(
                 priceImpactSpot.decimal,
                 1e-4, // 1 bps
