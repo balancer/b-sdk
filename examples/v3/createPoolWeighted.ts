@@ -1,9 +1,15 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { CreatePool, CreatePoolV3WeightedInput } from '../../src';
-import { PoolType, TokenType } from '@/types';
-import { ChainId, CHAINS } from '@/utils';
+import {
+    CreatePool,
+    CreatePoolV3WeightedInput,
+    weightedPoolFactoryAbi_V3,
+    PoolType,
+    TokenType,
+    ChainId,
+    CHAINS,
+} from 'src';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import {
@@ -15,7 +21,6 @@ import {
     zeroAddress,
 } from 'viem';
 import { TOKENS } from 'test/lib/utils/addresses';
-import { weightedPoolFactoryAbi_V3 } from '@/abi/weightedPoolFactory.V3';
 
 const createPool = async () => {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
