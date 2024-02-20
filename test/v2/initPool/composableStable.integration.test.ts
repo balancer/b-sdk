@@ -20,7 +20,7 @@ import {
     CreatePoolV2ComposableStableInput,
     InitPoolDataProvider,
     InitPool,
-    InitPoolInput
+    InitPoolInput,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { InitPoolTxInput, CreatePoolTxInput } from '../../lib/utils/types';
