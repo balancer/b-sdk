@@ -3,7 +3,7 @@ import {
     CreatePoolV2WeightedInput,
     CreatePoolV3WeightedInput,
 } from '../../createPool/types';
-import { InitPoolInput } from '../../initPool/types';
+import { InitPoolInputV2 } from '../../initPool/types';
 import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
@@ -48,7 +48,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
     }
 
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput | InitPoolInput,
+        addLiquidityInput: AddLiquidityInput | InitPoolInputV2,
         poolState: PoolState,
     ): void {
         validateTokensAddLiquidity(addLiquidityInput, poolState);

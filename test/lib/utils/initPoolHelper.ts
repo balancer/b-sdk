@@ -1,3 +1,4 @@
+import { q } from 'vitest/dist/reporters-trlZlObr';
 import { InitPoolBuildOutput, PoolState } from '../../../src';
 import { InitPool } from '../../../src/entities/initPool';
 import { InitPoolInput } from '../../../src/entities/initPool/types';
@@ -60,7 +61,6 @@ export function assertInitPool(
     },
 ) {
     const { txOutput } = initPoolOutput;
-
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
     // Matching order of getTokens helper: [poolTokens, BPT, native]

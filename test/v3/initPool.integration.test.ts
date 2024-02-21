@@ -1,42 +1,41 @@
-// pnpm test -- initPool/weighted.integration.test.ts
-
+import { InitPoolDataProvider } from '@/data/providers/initPoolDataProvider';
 import {
-    createTestClient,
-    http,
-    parseEther,
-    parseUnits,
-    publicActions,
-    walletActions,
-    zeroAddress,
-} from 'viem';
+    PoolState,
+    CreatePool,
+    InitPool,
+    Slippage,
+    CreatePoolV3WeightedInput,
+    InitPoolInputV3,
+    InitPoolInput,
+} from '@/entities';
+import { PoolType, TokenType } from '@/types';
+import { ChainId, CHAINS } from '@/utils';
+import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
+import { TOKENS } from 'test/lib/utils/addresses';
+import { doCreatePool } from 'test/lib/utils/createPoolHelper';
+import { forkSetup } from 'test/lib/utils/helper';
+import { doInitPool, assertInitPool } from 'test/lib/utils/initPoolHelper';
+import { CreatePoolTxInput, InitPoolTxInput } from 'test/lib/utils/types';
 import {
     Address,
-    CHAINS,
-    ChainId,
-    PoolState,
-    PoolType,
-    Slippage,
-} from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolV2WeightedInput } from '../../../src/entities/createPool/types';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
-import { InitPoolTxInput, CreatePoolTxInput } from '../../lib/utils/types';
-import { doCreatePool } from '../../lib/utils/createPoolHelper';
-import { InitPoolDataProvider } from '../../../src/data/providers/initPoolDataProvider';
-import { forkSetup } from '../../lib/utils/helper';
-import { InitPool } from '../../../src/entities/initPool';
-import { InitPoolInput } from '../../../src/entities/initPool/types';
-import { assertInitPool, doInitPool } from '../../lib/utils/initPoolHelper';
+    createTestClient,
+    http,
+    publicActions,
+    walletActions,
+    parseEther,
+    zeroAddress,
+    parseUnits,
+} from 'viem';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
-const chainId = ChainId.MAINNET;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
+const chainId = ChainId.SEPOLIA;
 
 describe('Add Liquidity Init - Weighted Pool', async () => {
     let poolAddress: Address;
-    let createPoolWeightedInput: CreatePoolV2WeightedInput;
+    let createWeightedPoolInput: CreatePoolV3WeightedInput;
     let createTxInput: CreatePoolTxInput;
     let initPoolTxInput: InitPoolTxInput;
-    let initPoolInput: InitPoolInput;
+    let initPoolInput: InitPoolInputV3;
     let poolState: PoolState;
     beforeAll(async () => {
         const client = createTestClient({
@@ -48,50 +47,49 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             .extend(walletActions);
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
         const signerAddress = (await client.getAddresses())[0];
-        createPoolWeightedInput = {
-            name: 'Test Pool',
+
+        createWeightedPoolInput = {
             poolType: PoolType.Weighted,
             symbol: '50BAL-50WETH',
             tokens: [
                 {
-                    address: '0xba100000625a3754423978a60c9317c58a424e3d',
+                    address: TOKENS[chainId].BAL.address, // BAL
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
+                    tokenType: TokenType.STANDARD,
                 },
                 {
-                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                    address: TOKENS[chainId].WETH.address, // WETH
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
+                    tokenType: TokenType.STANDARD,
                 },
             ],
-            swapFee: '0.01',
-            poolOwnerAddress: signerAddress, // Balancer DAO Multisig
             chainId,
-            balancerVersion: 2,
+            balancerVersion: 3,
         };
 
         createTxInput = {
             client,
             createPool: new CreatePool(),
             testAddress: signerAddress,
-            createPoolInput: createPoolWeightedInput,
+            createPoolInput: createWeightedPoolInput,
         };
 
         initPoolInput = {
-            sender: signerAddress,
-            recipient: signerAddress,
             amountsIn: [
                 {
-                    address: createPoolWeightedInput.tokens[0].address,
+                    address: createWeightedPoolInput.tokens[0].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                 },
                 {
-                    address: createPoolWeightedInput.tokens[1].address,
+                    address: createWeightedPoolInput.tokens[1].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                 },
             ],
+            minBptAmountOut: parseEther('90'),
             chainId,
         };
         poolAddress = await doCreatePool(createTxInput);
@@ -108,14 +106,16 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
         poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
             PoolType.Weighted,
-            2,
+            3,
         );
         await forkSetup(
             initPoolTxInput.client,
             initPoolTxInput.testAddress,
             [...poolState.tokens.map((t) => t.address)],
-            [1, 3],
+            [3, 1],
             [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
+            undefined,
+            3,
         );
     });
     test('Add Liquidity Init - Weighted Pool', async () => {

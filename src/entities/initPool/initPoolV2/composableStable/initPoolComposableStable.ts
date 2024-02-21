@@ -6,13 +6,20 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '../../../utils';
-import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../../types';
+import {
+    InitPoolBase,
+    InitPoolBuildOutput,
+    InitPoolInputV2,
+} from '../../types';
 import { vaultV2Abi } from '../../../../abi';
 import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../../utils';
 import { Token } from '@/entities/token';
 
 export class InitPoolComposableStable implements InitPoolBase {
-    buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
+    buildCall(
+        input: InitPoolInputV2,
+        poolState: PoolState,
+    ): InitPoolBuildOutput {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = this.getAmounts(input, poolState.address, sortedTokens);
 
@@ -45,7 +52,7 @@ export class InitPoolComposableStable implements InitPoolBase {
     }
 
     private getAmounts(
-        input: InitPoolInput,
+        input: InitPoolInputV2,
         poolAddress: Address,
         poolTokens: Token[],
     ): InitPoolAmountsComposableStable {
