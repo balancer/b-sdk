@@ -8,7 +8,6 @@ export * from './composableStablePoolV5.V2';
 export * from './erc20';
 export * from './vaultV2';
 export * from './vaultV3';
-export * from './vaultV3Extension';
 export * from './composableStablePoolV5.V2';
 export * from './weightedPoolFactory.V3';
 export * from './weightedPoolFactoryV4.V2';
