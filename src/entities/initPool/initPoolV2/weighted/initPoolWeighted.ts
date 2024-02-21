@@ -1,6 +1,10 @@
 import { Address, encodeFunctionData } from 'viem';
 import { InitPoolAmounts, PoolState } from '../../../types';
-import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../../types';
+import {
+    InitPoolBase,
+    InitPoolBuildOutput,
+    InitPoolInputV2,
+} from '../../types';
 import { VAULT, ZERO_ADDRESS } from '../../../../utils';
 import { vaultV2Abi } from '../../../../abi';
 import {
@@ -12,7 +16,10 @@ import { Token } from '../../../token';
 import { WeightedEncoder } from '../../../encoders';
 
 export class InitPoolWeighted implements InitPoolBase {
-    buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
+    buildCall(
+        input: InitPoolInputV2,
+        poolState: PoolState,
+    ): InitPoolBuildOutput {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = this.getAmounts(input, sortedTokens);
         const userData = WeightedEncoder.encodeInitPoolUserData(amounts);
@@ -43,7 +50,7 @@ export class InitPoolWeighted implements InitPoolBase {
     }
 
     private getAmounts(
-        input: InitPoolInput,
+        input: InitPoolInputV2,
         poolTokens: Token[],
     ): InitPoolAmounts {
         return {
