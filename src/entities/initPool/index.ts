@@ -20,7 +20,10 @@ export class InitPool {
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
         switch (poolState.balancerVersion) {
             case 2:
-                this.inputValidator.validateAddLiquidity(input as InitPoolInputV2, poolState);
+                this.inputValidator.validateAddLiquidity(
+                    input as InitPoolInputV2,
+                    poolState,
+                );
                 return new InitPoolV2().buildCall(
                     input as InitPoolInputV2,
                     poolState,

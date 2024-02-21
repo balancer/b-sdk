@@ -1,4 +1,3 @@
-import { InputAmount } from '@/types';
 import { Address } from 'viem';
 import { Token } from '../token';
 import { InitializeArgs } from '../initPool';
