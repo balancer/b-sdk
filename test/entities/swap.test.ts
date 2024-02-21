@@ -13,6 +13,7 @@ import {
 import { TOKENS } from '../lib/utils/addresses';
 
 const chainId = ChainId.MAINNET;
+const wethIsEth = false;
 
 describe('Swap', () => {
     const tokens: TokenApi[] = [
@@ -112,6 +113,17 @@ describe('Swap', () => {
         });
     });
 
+    describe('balancer version', () => {
+        test('should be balancer version 2', () => {
+            const swap = new Swap({
+                chainId,
+                paths: [pathTo6Decimals],
+                swapKind: SwapKind.GivenIn,
+            });
+            expect(swap.balancerVersion).to.eq(2);
+        });
+    });
+
     describe('buildCall max/min amounts', () => {
         describe('GivenIn', () => {
             test('18decimals>6decimals: minAmountOut to be 0.1% less then expected', () => {
@@ -136,9 +148,10 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
+                    expectedAmountOut,
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
                     recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
-                    expectedAmountOut,
+                    wethIsEth,
                 }) as SwapBuildOutputExactIn;
                 expect(tokenOut.decimals).to.eq(6);
                 expect(callInfo.minAmountOut).to.deep.eq(
@@ -169,9 +182,10 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
+                    expectedAmountOut,
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
                     recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
-                    expectedAmountOut,
+                    wethIsEth,
                 }) as SwapBuildOutputExactIn;
                 expect(tokenOut.decimals).to.eq(18);
                 expect(callInfo.minAmountOut).to.deep.eq(
@@ -200,9 +214,10 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
+                    expectedAmountIn,
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
                     recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
-                    expectedAmountIn,
+                    wethIsEth,
                 }) as SwapBuildOutputExactOut;
                 expect(tokenIn.decimals).to.eq(18);
                 expect(callInfo.maxAmountIn).to.deep.eq(
@@ -229,9 +244,10 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
+                    expectedAmountIn,
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
                     recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
-                    expectedAmountIn,
+                    wethIsEth,
                 }) as SwapBuildOutputExactOut;
                 expect(tokenIn.decimals).to.eq(6);
                 expect(callInfo.maxAmountIn).to.deep.eq(

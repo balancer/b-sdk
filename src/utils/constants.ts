@@ -20,8 +20,7 @@ import {
 
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
-export const NATIVE_ADDRESS: Address =
-    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
 export const MAX_UINT256 =
