@@ -9,15 +9,17 @@ import {
     walletActions,
     zeroAddress,
 } from 'viem';
-import { CHAINS, ChainId, PoolType } from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
+import {
+    CHAINS,
+    ChainId,
+    PoolType,
+    CreatePool,
+    CreatePoolInput,
+    CreatePoolV2WeightedInput,
+} from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
 import { CreatePoolTxInput } from '../../lib/utils/types';
-import {
-    CreatePoolInput,
-    CreatePoolV2WeightedInput,
-} from '../../../src/entities/createPool/types';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 

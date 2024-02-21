@@ -1,9 +1,13 @@
 // pnpm test -- createPool/weighted.test.ts
 
 import { parseEther, zeroAddress } from 'viem';
-import { ChainId, PoolType, TokenType } from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolV3WeightedInput } from '../../../src/entities/createPool/types';
+import {
+    ChainId,
+    PoolType,
+    TokenType,
+    CreatePool,
+    CreatePoolV3WeightedInput,
+} from 'src';
 import { TOKENS } from 'test/lib/utils/addresses';
 
 describe('Create Weighted Pool tests', () => {

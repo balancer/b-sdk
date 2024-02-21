@@ -9,15 +9,18 @@ import {
     walletActions,
     zeroAddress,
 } from 'viem';
-import { CHAINS, ChainId, PoolType, TokenType } from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
+import {
+    CHAINS,
+    ChainId,
+    PoolType,
+    TokenType,
+    CreatePool,
+    CreatePoolInput,
+    CreatePoolV3WeightedInput,
+} from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
 import { CreatePoolTxInput } from '../../lib/utils/types';
-import {
-    CreatePoolInput,
-    CreatePoolV3WeightedInput,
-} from '../../../src/entities/createPool/types';
 import { TOKENS } from 'test/lib/utils/addresses';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
@@ -71,103 +74,5 @@ describe('Create Weighted Pool tests', () => {
             createPoolInput: createWeightedPoolInput,
         });
         expect(poolAddress).to.not.be.undefined;
-    });
-
-    test('Wrong weights, expects error', async () => {
-        const tokens: CreatePoolV3WeightedInput['tokens'] = [
-            {
-                address: TOKENS[chainId].BAL.address, // BAL
-                weight: parseEther(`${1 / 2}`),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-            },
-            {
-                address: TOKENS[chainId].WETH.address, // WETH
-                weight: parseEther(`${1 / 4}`),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-            },
-        ];
-        await expect(() =>
-            doCreatePool({
-                ...txInput,
-                createPoolInput: { ...createWeightedPoolInput, tokens },
-            }),
-        ).rejects.toThrowError('Weights must sum to 1e18');
-    });
-
-    test('Weight value 0, expects error', async () => {
-        const tokens: CreatePoolV3WeightedInput['tokens'] = [
-            {
-                address: TOKENS[chainId].BAL.address, // BAL
-                weight: parseEther('0'),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-            },
-            {
-                address: TOKENS[chainId].WETH.address, // WETH
-                weight: parseEther('1'),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-            },
-        ];
-        await expect(() =>
-            doCreatePool({
-                ...txInput,
-                createPoolInput: { ...createWeightedPoolInput, tokens },
-            }),
-        ).rejects.toThrowError('Weight cannot be 0');
-    });
-    test('Duplicate token addresses, expects error', async () => {
-        const tokens: CreatePoolV3WeightedInput['tokens'] = [
-            {
-                address: TOKENS[chainId].BAL.address, // BAL
-                weight: parseEther(`${1 / 4}`),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-            },
-            {
-                address: TOKENS[chainId].BAL.address, // BAL
-                weight: parseEther(`${1 / 4}`),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-            },
-            {
-                address: TOKENS[chainId].WETH.address, // WETH
-                weight: parseEther(`${1 / 2}`),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-            },
-        ];
-        await expect(() =>
-            doCreatePool({
-                ...txInput,
-                createPoolInput: { ...createWeightedPoolInput, tokens },
-            }),
-        ).rejects.toThrowError('Duplicate token addresses');
-    });
-    test('Allowing only TokenType.STANDARD to have address zero as rateProvider', async () => {
-        const tokens: CreatePoolV3WeightedInput['tokens'] = [
-            {
-                address: TOKENS[chainId].BAL.address, // BAL
-                weight: parseEther(`${1 / 2}`),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-            },
-            {
-                address: TOKENS[chainId].WETH.address, // WETH
-                weight: parseEther(`${1 / 2}`),
-                rateProvider: zeroAddress,
-                tokenType: TokenType.ERC4626_TOKEN,
-            },
-        ];
-        await expect(() =>
-            doCreatePool({
-                ...txInput,
-                createPoolInput: { ...createWeightedPoolInput, tokens },
-            }),
-        ).rejects.toThrowError(
-            'Only TokenType.STANDARD is allowed to have zeroAddress rateProvider',
-        );
     });
 });

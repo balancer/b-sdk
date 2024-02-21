@@ -1,7 +1,4 @@
-import { q } from 'vitest/dist/reporters-trlZlObr';
-import { InitPoolBuildOutput, PoolState } from '../../../src';
-import { InitPool } from '../../../src/entities/initPool';
-import { InitPoolInput } from '../../../src/entities/initPool/types';
+import { InitPoolBuildOutput, PoolState, InitPool, InitPoolInput } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { InitPoolTxInput } from './types';

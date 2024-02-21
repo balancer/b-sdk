@@ -1,7 +1,10 @@
-import { InitPoolDataProvider } from '@/data/providers/initPoolDataProvider';
-import { InitPool, InitPoolInput } from '@/entities';
-import { PoolType } from '@/types';
-import { ChainId } from '@/utils';
+import {
+    InitPoolDataProvider,
+    InitPool,
+    InitPoolInput,
+    PoolType,
+    ChainId,
+} from 'src';
 import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils/helper';
 import { parseEther, parseUnits } from 'viem';
 import createPoolComposableStable from './createPoolComposableStable';

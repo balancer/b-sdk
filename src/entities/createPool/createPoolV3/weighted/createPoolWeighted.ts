@@ -7,7 +7,7 @@ import {
     CreatePoolV3WeightedArgs,
     TokenConfig,
 } from '../../types';
-import { weightedPoolFactoryV3Abi } from '@/abi/weightedPoolFactory.V3';
+import { weightedPoolFactoryAbi_V3 } from '@/abi/weightedPoolFactory.V3';
 import { WEIGHTED_POOL_FACTORY_BALANCER_V3 } from '@/utils';
 import { sortByAddress } from '@/utils/sortByAddress';
 
@@ -15,7 +15,7 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
     buildCall(input: CreatePoolV3WeightedInput): CreatePoolBuildCallOutput {
         const args = this.parseCreateFunctionArgs(input);
         const encodedCall = encodeFunctionData({
-            abi: weightedPoolFactoryV3Abi,
+            abi: weightedPoolFactoryAbi_V3,
             functionName: 'create',
             args,
         });

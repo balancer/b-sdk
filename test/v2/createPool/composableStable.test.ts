@@ -1,9 +1,12 @@
 // pnpm test -- test/createPool/composableStable.test.ts
 
 import { zeroAddress } from 'viem';
-import { ChainId, PoolType } from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolV2ComposableStableInput } from '../../../src/entities/createPool/types';
+import {
+    ChainId,
+    PoolType,
+    CreatePool,
+    CreatePoolV2ComposableStableInput,
+} from 'src';
 
 describe('Create Composable Stable Pool tests', () => {
     const chainId = ChainId.MAINNET;

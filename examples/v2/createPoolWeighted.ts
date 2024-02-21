@@ -1,9 +1,15 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { CreatePool, CreatePoolV2WeightedInput } from '@/entities';
-import { PoolType } from '@/types';
-import { ChainId, CHAINS, WEIGHTED_POOL_FACTORY_BALANCER_V2 } from '@/utils';
+import {
+    CreatePool,
+    CreatePoolV2WeightedInput,
+    PoolType,
+    ChainId,
+    CHAINS,
+    WEIGHTED_POOL_FACTORY_BALANCER_V2,
+    weightedPoolFactoryV4Abi_V2,
+} from 'src';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import {
@@ -14,7 +20,6 @@ import {
     parseEther,
     zeroAddress,
 } from 'viem';
-import { weightedPoolFactoryV2Abi } from '@/abi';
 
 const createPool = async () => {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
@@ -69,7 +74,7 @@ const createPool = async () => {
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: weightedPoolFactoryV2Abi,
+        abi: weightedPoolFactoryV4Abi_V2,
         to: WEIGHTED_POOL_FACTORY_BALANCER_V2[chainId],
     });
 
