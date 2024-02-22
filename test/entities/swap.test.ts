@@ -148,7 +148,10 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    expectedAmountOut,
+                    expected: {
+                        swapKind: SwapKind.GivenIn,
+                        expectedAmountOut,
+                    },
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
                     recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                     wethIsEth,
@@ -182,7 +185,10 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    expectedAmountOut,
+                    expected: {
+                        swapKind: SwapKind.GivenIn,
+                        expectedAmountOut,
+                    },
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
                     recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                     wethIsEth,
@@ -214,7 +220,10 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    expectedAmountIn,
+                    expected: {
+                        swapKind: SwapKind.GivenOut,
+                        expectedAmountIn,
+                    },
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
                     recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                     wethIsEth,
@@ -244,7 +253,10 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    expectedAmountIn,
+                    expected: {
+                        swapKind: SwapKind.GivenOut,
+                        expectedAmountIn,
+                    },
                     sender: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
                     recipient: '0x76fd639005b09140a8616f036B64DaCefe93617B',
                     wethIsEth,

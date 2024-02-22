@@ -1,21 +1,12 @@
 import { Address } from 'viem';
-import {
-    SwapCallBuildBase,
-    SwapCallExactInBase,
-    SwapCallExactOutBase,
-} from '../types';
+import { SwapCallBuildBase, SwapCallBase } from '../types';
 
 export type SwapCallBuildV2 = SwapCallBuildBase & {
     sender: Address;
     recipient: Address;
 };
 
-export type SwapCallExactInV2 = SwapCallExactInBase & {
-    sender: Address;
-    recipient: Address;
-};
-
-export type SwapCallExactOutV2 = SwapCallExactOutBase & {
+export type SwapCallV2 = SwapCallBase & {
     sender: Address;
     recipient: Address;
 };

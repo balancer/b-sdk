@@ -8,9 +8,9 @@ import {
     NATIVE_ASSETS,
     SwapBuildOutputExactIn,
     VAULT,
-    SwapCallExactIn,
-    SwapCallExactOut,
+    SwapCall,
     BALANCER_ROUTER,
+    SwapKind,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
@@ -25,13 +25,14 @@ export async function assertSwapExactIn(
     const slippage = Slippage.fromPercentage('0.1');
     const deadline = 999999999999999999n;
 
-    const expectedAmountOut = await swap.query(rpcUrl);
-    expect(expectedAmountOut.amount > 0n).to.be.true;
+    const expected = await swap.query(rpcUrl);
+    if (expected.swapKind !== SwapKind.GivenIn) throw Error('Expected GivenIn');
+    expect(expected.expectedAmountOut.amount > 0n).to.be.true;
 
-    let buildCallInput: SwapCallExactIn = {
+    let buildCallInput: SwapCall = {
         slippage,
         deadline,
-        expectedAmountOut,
+        expected,
         wethIsEth,
     };
     let contractToCall = BALANCER_ROUTER[chainId];
@@ -75,7 +76,7 @@ export async function assertSwapExactIn(
         swap.outputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
     let expectedEthDelta = 0n;
     let expectedTokenInDelta = swap.inputAmount.amount;
-    let expectedTokenOutDelta = expectedAmountOut.amount;
+    let expectedTokenOutDelta = expected.expectedAmountOut.amount;
     if (isEthInput) {
         // Should send eth instead of tokenIn (weth)
         expectedEthDelta = swap.inputAmount.amount;
@@ -83,7 +84,7 @@ export async function assertSwapExactIn(
     }
     if (isEthOutput) {
         // should receive eth instead of tokenOut (weth)
-        expectedEthDelta = expectedAmountOut.amount;
+        expectedEthDelta = expected.expectedAmountOut.amount;
         expectedTokenOutDelta = 0n;
     }
 
@@ -105,12 +106,14 @@ export async function assertSwapExactOut(
     const slippage = Slippage.fromPercentage('0.1');
     const deadline = 999999999999999999n;
 
-    const expectedAmountIn = await swap.query(rpcUrl);
+    const expected = await swap.query(rpcUrl);
+    if (expected.swapKind !== SwapKind.GivenOut)
+        throw Error('Expected GivenOut');
 
-    let buildCallInput: SwapCallExactOut = {
+    let buildCallInput: SwapCall = {
         slippage,
         deadline,
-        expectedAmountIn,
+        expected,
         wethIsEth,
     };
     let contractToCall = BALANCER_ROUTER[chainId];
@@ -123,7 +126,7 @@ export async function assertSwapExactOut(
         };
         contractToCall = VAULT[chainId];
     }
-    expect(expectedAmountIn.amount > 0n).to.be.true;
+    expect(expected.expectedAmountIn.amount > 0n).to.be.true;
 
     const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
 
@@ -157,11 +160,11 @@ export async function assertSwapExactOut(
         wethIsEth &&
         swap.outputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
     let expectedEthDelta = 0n;
-    let expectedTokenInDelta = expectedAmountIn.amount;
+    let expectedTokenInDelta = expected.expectedAmountIn.amount;
     let expectedTokenOutDelta = swap.outputAmount.amount;
     if (isEthInput) {
         // Should send eth instead of tokenIn (weth)
-        expectedEthDelta = expectedAmountIn.amount;
+        expectedEthDelta = expected.expectedAmountIn.amount;
         expectedTokenInDelta = 0n;
     }
     if (isEthOutput) {

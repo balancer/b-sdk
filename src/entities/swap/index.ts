@@ -3,11 +3,13 @@ import { SwapKind } from '../../types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import {
     SwapBase,
-    SwapCallExactIn,
-    SwapCallExactOut,
+    SwapCall,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
+    ExpectedExactOut,
+    ExpectedExactIn,
+    ExpectedBase,
 } from './types';
 import { SwapV2 } from './swapV2';
 import { validatePaths } from './pathHelpers';
@@ -48,7 +50,10 @@ export class Swap {
     }
 
     // rpcUrl is optional, but recommended to prevent rate limiting
-    public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
+    public async query(
+        rpcUrl?: string,
+        block?: bigint,
+    ): Promise<ExpectedExactIn | ExpectedExactOut> {
         return this.swap.query(rpcUrl, block);
     }
 
@@ -67,28 +72,41 @@ export class Swap {
      * @returns
      */
     buildCall(
-        swapCall: SwapCallExactIn | SwapCallExactOut,
+        swapCall: SwapCall,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
-        let limitAmount: TokenAmount;
-        if ('expectedAmountOut' in swapCall) {
-            limitAmount = this.limitAmount(
+        if (swapCall.expected.swapKind === SwapKind.GivenIn) {
+            const minAmountOut = this.limitAmount(
                 swapCall.slippage,
                 SwapKind.GivenIn,
-                swapCall.expectedAmountOut,
+                swapCall.expected.expectedAmountOut,
             );
             return {
-                ...this.swap.buildCall({ ...swapCall, limitAmount }),
-                minAmountOut: limitAmount,
+                ...this.swap.buildCall({
+                    ...swapCall,
+                    limitAmount: minAmountOut,
+                    pathLimits: this.pathLimits(
+                        swapCall.slippage,
+                        swapCall.expected,
+                    ),
+                }),
+                minAmountOut,
             };
         }
-        limitAmount = this.limitAmount(
+        const maxAmountIn = this.limitAmount(
             swapCall.slippage,
             SwapKind.GivenOut,
-            swapCall.expectedAmountIn,
+            swapCall.expected.expectedAmountIn,
         );
         return {
-            ...this.swap.buildCall({ ...swapCall, limitAmount }),
-            maxAmountIn: limitAmount,
+            ...this.swap.buildCall({
+                ...swapCall,
+                limitAmount: maxAmountIn,
+                pathLimits: this.pathLimits(
+                    swapCall.slippage,
+                    swapCall.expected,
+                ),
+            }),
+            maxAmountIn,
         };
     }
 
@@ -111,5 +129,27 @@ export class Swap {
             limitAmount = slippage.applyTo(expectedAmount.amount);
         }
         return TokenAmount.fromRawAmount(expectedAmount.token, limitAmount);
+    }
+
+    /**
+     * Apply slippage to pathAmounts. GivenIn: Remove to give minOut. GivenOut: Add to give maxIn.
+     * @param slippage
+     * @param expected
+     * @returns
+     */
+    private pathLimits(
+        slippage: Slippage,
+        expected: ExpectedBase,
+    ): bigint[] | undefined {
+        if (!expected.pathAmounts) return undefined;
+        let pathAmounts: bigint[];
+        if (expected.swapKind === SwapKind.GivenIn) {
+            pathAmounts = expected.pathAmounts.map((a) =>
+                slippage.applyTo(a, -1),
+            );
+        } else {
+            pathAmounts = expected.pathAmounts.map((a) => slippage.applyTo(a));
+        }
+        return pathAmounts;
     }
 }

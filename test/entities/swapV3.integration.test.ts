@@ -13,7 +13,16 @@ import {
     TestActions,
     WalletActions,
 } from 'viem';
-import { CHAINS, ChainId, SwapKind, Path, Token, Swap } from '../../src';
+import {
+    CHAINS,
+    ChainId,
+    SwapKind,
+    Path,
+    Token,
+    Swap,
+    ExpectedExactIn,
+    ExpectedExactOut,
+} from '../../src';
 import { forkSetup } from '../lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
@@ -85,15 +94,15 @@ describe('SwapV3', () => {
                 swapKind: SwapKind.GivenIn,
             });
 
-            const updated = await swap.query(rpcUrl);
+            const expected = (await swap.query(rpcUrl)) as ExpectedExactIn;
 
             const wethToken = new Token(
                 chainId,
                 TOKENS[chainId].WETH.address,
                 TOKENS[chainId].WETH.decimals,
             );
-            expect(updated.token).to.deep.eq(wethToken);
-            expect(updated.amount).to.eq(25115489n);
+            expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
+            expect(expected.expectedAmountOut.amount).to.eq(25115489n);
         });
         test('GivenOut', async () => {
             const swap = new SwapV3({
@@ -102,15 +111,15 @@ describe('SwapV3', () => {
                 swapKind: SwapKind.GivenOut,
             });
 
-            const updated = await swap.query(rpcUrl);
+            const expected = (await swap.query(rpcUrl)) as ExpectedExactOut;
 
             const balToken = new Token(
                 chainId,
                 TOKENS[chainId].BAL.address,
                 TOKENS[chainId].BAL.decimals,
             );
-            expect(updated.token).to.deep.eq(balToken);
-            expect(updated.amount).to.eq(398002113381361n);
+            expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
+            expect(expected.expectedAmountIn.amount).to.eq(398002113381361n);
         });
     });
     describe('swap should be executed correcly', () => {

@@ -73,15 +73,15 @@ const swap = async () => {
     );
 
     // Get up to date swap result by querying onchain
-    const updated = await swap.query(process.env.ETHEREUM_RPC_URL);
-    console.log(`Updated amount: ${updated.amount}`);
+    const expected = await swap.query(process.env.ETHEREUM_RPC_URL);
 
     // Construct transaction to make swap
-    if (swapKind === SwapKind.GivenIn) {
+    if (expected.swapKind === SwapKind.GivenIn) {
+        console.log(`Updated amount: ${expected.expectedAmountOut.amount}`);
         const callData = swap.buildCall({
             slippage,
             deadline,
-            expectedAmountOut: updated,
+            expected,
             sender,
             recipient,
             wethIsEth: false,
@@ -90,10 +90,11 @@ const swap = async () => {
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
     } else {
+        console.log(`Updated amount: ${expected.expectedAmountIn.amount}`);
         const callData = swap.buildCall({
             slippage,
             deadline,
-            expectedAmountIn: updated,
+            expected,
             sender,
             recipient,
             wethIsEth: false,
