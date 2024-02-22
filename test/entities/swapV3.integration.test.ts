@@ -26,7 +26,6 @@ import {
 import { forkSetup } from '../lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
-import { SwapV3 } from '@/entities/swap/swapV3';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
@@ -88,7 +87,7 @@ describe('SwapV3', () => {
 
     describe('query method should return correct updated', () => {
         test('GivenIn', async () => {
-            const swap = new SwapV3({
+            const swap = new Swap({
                 chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenIn,
@@ -105,7 +104,7 @@ describe('SwapV3', () => {
             expect(expected.expectedAmountOut.amount).to.eq(25115489n);
         });
         test('GivenOut', async () => {
-            const swap = new SwapV3({
+            const swap = new Swap({
                 chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenOut,

@@ -26,7 +26,6 @@ import {
 import { forkSetup } from '../lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
-import { SwapV2 } from '@/entities/swap/swapV2';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
@@ -89,7 +88,7 @@ describe('SwapV2', () => {
 
     describe('query method should return correct updated', () => {
         test('GivenIn', async () => {
-            const swap = new SwapV2({
+            const swap = new Swap({
                 chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenIn,
@@ -106,7 +105,7 @@ describe('SwapV2', () => {
             expect(updated.expectedAmountOut.amount).to.eq(44236888n);
         });
         test('GivenOut', async () => {
-            const swap = new SwapV2({
+            const swap = new Swap({
                 chainId,
                 paths: [pathBalWeth],
                 swapKind: SwapKind.GivenOut,
@@ -125,27 +124,40 @@ describe('SwapV2', () => {
     });
     describe('swap should be executed correcly', () => {
         describe('wethIsEth: false', () => {
+            const wethIsEth = false;
             const swapParams = {
                 chainId,
                 paths: [pathBalWeth],
-                wethIsEth: false,
             };
             test('GivenIn', async () => {
                 const swap = new Swap({
                     ...swapParams,
                     swapKind: SwapKind.GivenIn,
                 });
-                await assertSwapExactIn(client, rpcUrl, chainId, swap, false);
+                await assertSwapExactIn(
+                    client,
+                    rpcUrl,
+                    chainId,
+                    swap,
+                    wethIsEth,
+                );
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
                     ...swapParams,
                     swapKind: SwapKind.GivenOut,
                 });
-                await assertSwapExactOut(client, rpcUrl, chainId, swap, false);
+                await assertSwapExactOut(
+                    client,
+                    rpcUrl,
+                    chainId,
+                    swap,
+                    wethIsEth,
+                );
             });
         });
         describe('wethIsEth: true', () => {
+            const wethIsEth = true;
             describe('eth out', async () => {
                 test('GivenIn', async () => {
                     const swap = new Swap({
@@ -158,7 +170,7 @@ describe('SwapV2', () => {
                         rpcUrl,
                         chainId,
                         swap,
-                        true,
+                        wethIsEth,
                     );
                 });
                 test('GivenOut', async () => {
@@ -172,7 +184,7 @@ describe('SwapV2', () => {
                         rpcUrl,
                         chainId,
                         swap,
-                        true,
+                        wethIsEth,
                     );
                 });
             });
@@ -192,7 +204,7 @@ describe('SwapV2', () => {
                         rpcUrl,
                         chainId,
                         swap,
-                        true,
+                        wethIsEth,
                     );
                 });
                 test('GivenOut', async () => {
@@ -210,7 +222,7 @@ describe('SwapV2', () => {
                         rpcUrl,
                         chainId,
                         swap,
-                        true,
+                        wethIsEth,
                     );
                 });
             });
