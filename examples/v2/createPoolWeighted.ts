@@ -59,6 +59,7 @@ const createPool = async () => {
         swapFee: '0.01',
         poolOwnerAddress: signerAddress, // Balancer DAO Multisig
         balancerVersion: 2,
+        chainId,
     };
     const { call } = createPool.buildCall(createWeightedPoolInput);
     const hash = await client.sendTransaction({

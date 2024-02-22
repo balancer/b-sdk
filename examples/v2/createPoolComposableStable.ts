@@ -5,9 +5,10 @@ import {
     composableStableFactoryV5Abi_V2,
     CreatePool,
     CreatePoolV2ComposableStableInput,
+    PoolType,
+    ChainId,
+    CHAINS,
 } from 'src';
-import { PoolType } from '@/types';
-import { ChainId, CHAINS } from '@/utils';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import {
