@@ -1,4 +1,4 @@
-export const composableStableFactoryV5Abi = [
+export const composableStableFactoryV5Abi_V2 = [
     {
         inputs: [
             { internalType: 'contract IVault', name: 'vault', type: 'address' },

@@ -175,7 +175,7 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.BASE]: '0x300ab2038eac391f26d9f895dc61f8f66a548833',
 };
 
-export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
+export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
     [ChainId.AVALANCHE]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
     [ChainId.GNOSIS_CHAIN]: '0x6cad2ea22bfa7f4c14aae92e47f510cd5c509bc7',
@@ -185,7 +185,9 @@ export const WEIGHTED_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
     [ChainId.BASE]: '0x4c32a8a8fda4e24139b51b456b42290f51d6a1c4',
 };
-
+export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x5939ab16fdf1991b0ef603c639b6b501a7841fab',
+};
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
     [ChainId.AVALANCHE]: '0xe42ffa682a26ef8f25891db4882932711d42e467',

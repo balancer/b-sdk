@@ -16,16 +16,16 @@ import {
     PoolState,
     PoolType,
     Slippage,
-} from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolWeightedInput } from '../../../src/entities/createPool/types';
+    CreatePool,
+    CreatePoolV2WeightedInput,
+    InitPoolDataProvider,
+    InitPool,
+    InitPoolInput,
+} from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { InitPoolTxInput, CreatePoolTxInput } from '../../lib/utils/types';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
-import { InitPoolDataProvider } from '../../../src/data/providers/initPoolDataProvider';
 import { forkSetup } from '../../lib/utils/helper';
-import { InitPool } from '../../../src/entities/initPool';
-import { InitPoolInput } from '../../../src/entities/initPool/types';
 import { assertInitPool, doInitPool } from '../../lib/utils/initPoolHelper';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
@@ -33,7 +33,7 @@ const chainId = ChainId.MAINNET;
 
 describe('Add Liquidity Init - Weighted Pool', async () => {
     let poolAddress: Address;
-    let createPoolWeightedInput: CreatePoolWeightedInput;
+    let createPoolWeightedInput: CreatePoolV2WeightedInput;
     let createTxInput: CreatePoolTxInput;
     let initPoolTxInput: InitPoolTxInput;
     let initPoolInput: InitPoolInput;
@@ -54,18 +54,19 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             symbol: '50BAL-50WETH',
             tokens: [
                 {
-                    tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
+                    address: '0xba100000625a3754423978a60c9317c58a424e3d',
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                 },
                 {
-                    tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                 },
             ],
             swapFee: '0.01',
             poolOwnerAddress: signerAddress, // Balancer DAO Multisig
+            chainId,
             balancerVersion: 2,
         };
 
@@ -81,13 +82,13 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             recipient: signerAddress,
             amountsIn: [
                 {
-                    address: createPoolWeightedInput.tokens[0].tokenAddress,
+                    address: createPoolWeightedInput.tokens[0].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                     weight: parseEther(`${1 / 2}`),
                 },
                 {
-                    address: createPoolWeightedInput.tokens[1].tokenAddress,
+                    address: createPoolWeightedInput.tokens[1].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                     weight: parseEther(`${1 / 2}`),

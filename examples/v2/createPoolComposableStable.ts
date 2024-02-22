@@ -2,28 +2,27 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
+    composableStableFactoryV5Abi_V2,
+    CreatePool,
+    CreatePoolV2ComposableStableInput,
+    PoolType,
+    ChainId,
+    CHAINS,
+} from 'src';
+import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
+import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
+import {
     Address,
     Client,
     PublicActions,
-    TestActions,
     WalletActions,
+    TestActions,
     createTestClient,
     http,
     publicActions,
     walletActions,
     zeroAddress,
 } from 'viem';
-import { CreatePoolComposableStableInput } from '../src/entities/createPool/types';
-import { CreatePool } from '../src/entities/createPool';
-import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
-import {
-    CHAINS,
-    COMPOSABLE_STABLE_POOL_FACTORY,
-    ChainId,
-    PoolType,
-} from '../src';
-import { findEventInReceiptLogs } from '../test/lib/utils/findEventInReceiptLogs';
-import { composableStableFactoryV5Abi } from '../src/abi/composableStableFactoryV5';
 
 const createPoolComposableStable = async (): Promise<{
     poolAddress: Address;
@@ -43,18 +42,18 @@ const createPoolComposableStable = async (): Promise<{
     const signerAddress = (await client.getAddresses())[0];
     const createPool = new CreatePool();
     const poolType = PoolType.ComposableStable;
-    const createPoolComposableStableInput: CreatePoolComposableStableInput = {
+    const createPoolComposableStableInput: CreatePoolV2ComposableStableInput = {
         name: 'Test Pool',
         symbol: '50BAL-50WETH',
         poolType,
         tokens: [
             {
-                tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
+                address: '0xba100000625a3754423978a60c9317c58a424e3d',
                 rateProvider: zeroAddress,
                 tokenRateCacheDuration: BigInt(100),
             },
             {
-                tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                 rateProvider: zeroAddress,
                 tokenRateCacheDuration: BigInt(100),
             },
@@ -64,10 +63,11 @@ const createPoolComposableStable = async (): Promise<{
         swapFee: '0.01',
         poolOwnerAddress: signerAddress, // Balancer DAO Multisig,
         balancerVersion: 2,
+        chainId,
     };
-    const { call } = createPool.buildCall(createPoolComposableStableInput);
+    const { call, to } = createPool.buildCall(createPoolComposableStableInput);
     const hash = await client.sendTransaction({
-        to: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
+        to,
         data: call,
         account: signerAddress,
         chain: client.chain,
@@ -79,8 +79,8 @@ const createPoolComposableStable = async (): Promise<{
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: composableStableFactoryV5Abi,
-        to: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
+        abi: composableStableFactoryV5Abi_V2,
+        to,
     });
 
     const {

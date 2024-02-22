@@ -13,26 +13,28 @@ import {
     CHAINS,
     ChainId,
     PoolType,
+    TokenType,
     CreatePool,
     CreatePoolInput,
-    CreatePoolV2WeightedInput,
+    CreatePoolV3WeightedInput,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
 import { CreatePoolTxInput } from '../../lib/utils/types';
+import { TOKENS } from 'test/lib/utils/addresses';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 
 describe('Create Weighted Pool tests', () => {
-    const chainId = ChainId.MAINNET;
+    const chainId = ChainId.SEPOLIA;
     let txInput: CreatePoolTxInput;
     let poolAddress: Address;
-    let createWeightedPoolInput: CreatePoolV2WeightedInput;
+    let createWeightedPoolInput: CreatePoolV3WeightedInput;
     beforeAll(async () => {
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl),
+            transport: http(rpcUrl, { timeout: 20_000 }),
         })
             .extend(publicActions)
             .extend(walletActions);
@@ -46,30 +48,24 @@ describe('Create Weighted Pool tests', () => {
         };
 
         createWeightedPoolInput = {
-            name: 'Test Pool',
             poolType: PoolType.Weighted,
-            symbol: '50BAL-25WETH-25DAI',
+            symbol: '50BAL-50WETH',
             tokens: [
                 {
-                    address: '0xba100000625a3754423978a60c9317c58a424e3d',
+                    address: TOKENS[chainId].BAL.address, // BAL
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
+                    tokenType: TokenType.STANDARD,
                 },
                 {
-                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-                    weight: parseEther(`${1 / 4}`),
+                    address: TOKENS[chainId].WETH.address, // WETH
+                    weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
-                },
-                {
-                    address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-                    weight: parseEther(`${1 / 4}`),
-                    rateProvider: zeroAddress,
+                    tokenType: TokenType.STANDARD,
                 },
             ],
-            swapFee: '0.01',
-            poolOwnerAddress: txInput.testAddress, // Balancer DAO Multisig
             chainId,
-            balancerVersion: 2,
+            balancerVersion: 3,
         };
     });
     test('Create Weighted Pool', async () => {

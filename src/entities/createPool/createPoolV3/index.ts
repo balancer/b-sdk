@@ -1,19 +1,17 @@
 import { PoolType } from '@/types';
-import { CreatePoolComposableStableV2 } from './composableStable/createPoolComposableStable';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
     CreatePoolInput,
 } from '../types';
-import { CreatePoolWeightedV2 } from './weighted/createPoolWeighted';
+import { CreatePoolWeightedV3 } from './weighted/createPoolWeighted';
 
-export class CreatePoolV2 implements CreatePoolBase {
+export class CreatePoolV3 implements CreatePoolBase {
     private readonly createPoolTypes: Record<string, CreatePoolBase> = {};
 
     constructor() {
         this.createPoolTypes = {
-            [PoolType.Weighted]: new CreatePoolWeightedV2(),
-            [PoolType.ComposableStable]: new CreatePoolComposableStableV2(),
+            [PoolType.Weighted]: new CreatePoolWeightedV3(),
         };
     }
 

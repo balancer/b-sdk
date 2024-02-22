@@ -1,5 +1,5 @@
 import { AddLiquidityInput } from '../../addLiquidity/types';
-import { CreatePoolComposableStableInput } from '../../createPool/types';
+import { CreatePoolV2ComposableStableInput } from '../../createPool/types';
 import { InitPoolInput } from '../../initPool/types';
 import { RemoveLiquidityInput } from '../../removeLiquidity/types';
 import { PoolState } from '../../types';
@@ -28,7 +28,7 @@ export class InputValidatorComposableStable implements InputValidatorBase {
         validateTokensRemoveLiquidity(input, poolState);
     }
 
-    validateCreatePool(input: CreatePoolComposableStableInput): void {
+    validateCreatePool(input: CreatePoolV2ComposableStableInput): void {
         validateCreatePoolTokens(input.tokens);
         if (input.tokens.length > 5) {
             throw new Error(
