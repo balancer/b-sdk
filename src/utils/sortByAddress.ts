@@ -8,6 +8,6 @@ export function sortByAddress<T extends ObjectWithAddress>(
     objectWithAddressArray: T[],
 ): T[] {
     return objectWithAddressArray.sort((a, b) =>
-        a.address.localeCompare(b.address),
+        a.address.toLowerCase().localeCompare(b.address.toLowerCase()),
     );
 }
