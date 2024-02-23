@@ -1,5 +1,13 @@
 # @balancer/sdk
 
+## 0.10.0
+
+### Minor Changes
+
+- f5291c6: Add V3 Single Swap support.
+- 517a13e: Add price impact for add/remove nested liquidity
+- b547e32: Adds Balancer's V3 CreatePool functionality for Weighted Pools;
+
 ## 0.9.1
 
 ### Patch Changes
