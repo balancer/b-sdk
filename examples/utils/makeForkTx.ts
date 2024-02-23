@@ -1,4 +1,3 @@
-import { CHAINS, PoolState } from '../../src';
 import {
     createTestClient,
     http,
@@ -7,6 +6,8 @@ import {
     Address,
     Hex,
 } from 'viem';
+
+import { CHAINS, PoolState } from '../../src';
 import {
     forkSetup,
     sendTransactionGetBalances,
@@ -77,7 +78,8 @@ export async function makeForkTx(
         throw Error('Transaction reverted');
 
     console.log('Token balance deltas:');
-    tokensForBalanceCheck.forEach((t, i) => {
-        console.log(`${t} ${balanceDeltas[i]}`);
+    console.table({
+        tokens: tokensForBalanceCheck,
+        balanceDeltas,
     });
 }

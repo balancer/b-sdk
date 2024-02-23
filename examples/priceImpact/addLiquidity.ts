@@ -2,6 +2,9 @@
  * Example showing how to calculate price impact when adding liquidity with unbalanced inputs.
  * (Runs against a local Anvil fork)
  *
+ * Note: this example is highlighting one use case. You'll find other price impact
+ * calculations within each example, such as add/remove liquidity nested, etc..
+ *
  * Run with:
  * pnpm example ./examples/priceImpact/addLiquidity.ts
  */
