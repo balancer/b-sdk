@@ -37,6 +37,18 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0x82698aecc9e28e9bb27608bd52cf57f704bd1b83',
             decimals: 18,
         },
+        wstETH: {
+            address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+            decimals: 18,
+        },
+        rETH: {
+            address: '0xae78736cd615f374d3085123a210448e74fc6393',
+            decimals: 18,
+        },
+        sfrxETH: {
+            address: '0xac3e018457b222d93114458476f3e3416abbe38f',
+            decimals: 18,
+        },
         BAL: {
             address: '0xba100000625a3754423978a60c9317c58a424e3D',
             decimals: 18,
@@ -97,6 +109,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             id: '0x0da692ac0611397027c91e559cfd482c4197e4030002000000000000000005c9',
             address: '0x0da692ac0611397027c91e559cfd482c4197e403',
             type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        wstETH_rETH_sfrxETH: {
+            id: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b',
+            address: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af7',
+            type: PoolType.ComposableStable,
             decimals: 18,
             slot: 0,
         },
