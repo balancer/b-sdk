@@ -1,9 +1,9 @@
 /**
- * Example showing how to add liquidity to a pool.
+ * Example showing how to add liquidity to a pool (Balancer V2).
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/addLiquidity.ts
+ * pnpm example ./examples/v2/addLiquidity.ts
  */
 import { config } from 'dotenv';
 config();
@@ -18,9 +18,9 @@ import {
     ChainId,
     PriceImpact,
     Slippage,
-} from '../src';
-import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
-import { makeForkTx } from './utils/makeForkTx';
+} from '../../src';
+import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
+import { makeForkTx } from '../utils/makeForkTx';
 
 const addLiquidity = async () => {
     // User defined

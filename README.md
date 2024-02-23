@@ -1,26 +1,70 @@
 # SDK
 
-WIP upgrade of the SDK. Not meant for production usage yet and interfaces may have frequent breaking changes until a stable release.
+INTRODUCTION TEXT
 
-## Setup
+# Setup
+In order to install SDK dependencies, you need to run the command:
 
-`pnpm install`
+- `pnpm install`
 
-### Requirements
+## Requirements
 
-- `fetch`
+- [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch): b-sdk uses native Fetch API, if your platform cannot support Fetch API, you can also use a polyfill.
 
-### Polyfill
+### Using node-fetch polyfill
 
-If your platform does not support one of the required features, it is also possible to import a polyfill.
+If your platform does not support native fetch, it is also possible to import a polyfill.
 
 - `fetch` -> [node-fetch](https://github.com/node-fetch/node-fetch#providing-global-access)
 
+### Requirements to run tests and examples
+
+**Foundry**
+
+ The SDK tests and examples runs using anvil nodes, which are part of the Foundry Toolchain, if you don't have foundry installed in your environment.
+
+To download and install the anvil client, run the following commands (MacOS):
+- `curl -L https://foundry.paradigm.xyz | bash`
+- `brew install libusb`
+- `source /Users/$(whoami)/.zshenv`
+- `foundryup`
+
+For other SO's check https://book.getfoundry.sh/getting-started/installation
+
+- <b>NodeJS</b>: The recommended version is 18 or greater.
+
 ## Testing
+You can test all files with the command:
+
+- `pnpm test`
+
+Or a specific file:
+- `pnpm test ./test/v2/initPool/composableStable.integration.test.ts`
+
+### Configuring RPC's
 
 Testing requires access to an archive node for onchain quote comparisons. This can be done using Infura.
+#### RPC Environment variables
 
-`pnpm test`
+
+# Modules
+
+## Add Liquidity
+
+## Add Liquidity Nested
+
+## Remove Liquidity
+
+## Remove Liquidity Nested
+
+## Swap
+
+## Create Pool
+
+## Initialize Pool
+
+# Data Providers and Abi's
+
 
 ## Balancer Api Provider
 
@@ -114,14 +158,7 @@ For usage of Pool Initialization check our example:
 - Pool Initialization [examples/createPoolComposableStable.ts](./examples/initPool.ts)
 
 
-## Anvil client
-To download and install the anvil client, run the following commands (MacOS):
-- `curl -L https://foundry.paradigm.xyz | bash`
-- `brew install libusb`
-- `source /Users/$(whoami)/.zshenv`
-- `foundryup`
 
-For other SO's check https://book.getfoundry.sh/getting-started/installation
 
 
 

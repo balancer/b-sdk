@@ -20,9 +20,9 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     Slippage,
-} from '../src';
-import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
-import { makeForkTx } from './utils/makeForkTx';
+} from '../../src';
+import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
+import { makeForkTx } from '../utils/makeForkTx';
 
 const removeLiquidity = async () => {
     // User defined:
