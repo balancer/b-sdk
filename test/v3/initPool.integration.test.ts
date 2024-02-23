@@ -1,4 +1,3 @@
-import { InitPoolDataProvider } from '@/data/providers/initPoolDataProvider';
 import {
     PoolState,
     CreatePool,
@@ -7,9 +6,12 @@ import {
     CreatePoolV3WeightedInput,
     InitPoolInputV3,
     InitPoolInput,
-} from '@/entities';
-import { PoolType, TokenType } from '@/types';
-import { ChainId, CHAINS } from '@/utils';
+    InitPoolDataProvider,
+    PoolType,
+    TokenType,
+    ChainId,
+    CHAINS,
+} from 'src';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { doCreatePool } from 'test/lib/utils/createPoolHelper';
