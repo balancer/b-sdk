@@ -17,7 +17,7 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
-} from '../../src';
+} from '../src';
 
 const swap = async () => {
     // User defined

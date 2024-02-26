@@ -3,7 +3,7 @@
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/v2/addLiquidityNested.ts
+ * pnpm example ./examples/addLiquidityNested.ts
  */
 
 import { config } from 'dotenv';
@@ -34,12 +34,12 @@ import {
     Relayer,
     replaceWrapped,
     Slippage,
-} from '../../src';
+} from '../src';
 import {
     forkSetup,
     sendTransactionGetBalances,
-} from '../../test/lib/utils/helper';
-import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
+} from '../test/lib/utils/helper';
+import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
 const poolId =
