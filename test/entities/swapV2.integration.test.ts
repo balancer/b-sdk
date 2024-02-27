@@ -20,8 +20,8 @@ import {
     Path,
     Token,
     Swap,
-    ExpectedExactIn,
-    ExpectedExactOut,
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
 } from '../../src';
 import { forkSetup } from '../lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
@@ -94,7 +94,7 @@ describe('SwapV2', () => {
                 swapKind: SwapKind.GivenIn,
             });
 
-            const updated = (await swap.query(rpcUrl)) as ExpectedExactIn;
+            const updated = (await swap.query(rpcUrl)) as ExactInQueryOutput;
 
             const wethToken = new Token(
                 chainId,
@@ -111,7 +111,7 @@ describe('SwapV2', () => {
                 swapKind: SwapKind.GivenOut,
             });
 
-            const updated = (await swap.query(rpcUrl)) as ExpectedExactOut;
+            const updated = (await swap.query(rpcUrl)) as ExactOutQueryOutput;
 
             const balToken = new Token(
                 chainId,

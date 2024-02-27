@@ -3,13 +3,13 @@ import { SwapKind } from '../../types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import {
     SwapBase,
-    SwapCall,
+    SwapCallInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
-    ExpectedExactOut,
-    ExpectedExactIn,
-    ExpectedBase,
+    ExactOutQueryOutput,
+    ExactInQueryOutput,
+    QueryOutputBase,
 } from './types';
 import { SwapV2 } from './swapV2';
 import { validatePaths } from './pathHelpers';
@@ -53,7 +53,7 @@ export class Swap {
     public async query(
         rpcUrl?: string,
         block?: bigint,
-    ): Promise<ExpectedExactIn | ExpectedExactOut> {
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         return this.swap.query(rpcUrl, block);
     }
 
@@ -68,42 +68,42 @@ export class Swap {
     /**
      * Returns the transaction data to be sent to the vault contract
      *
-     * @param swapCall
+     * @param callInput
      * @returns
      */
     buildCall(
-        swapCall: SwapCall,
+        callInput: SwapCallInput,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
-        if (swapCall.expected.swapKind === SwapKind.GivenIn) {
+        if (callInput.queryOutput.swapKind === SwapKind.GivenIn) {
             const minAmountOut = this.limitAmount(
-                swapCall.slippage,
+                callInput.slippage,
                 SwapKind.GivenIn,
-                swapCall.expected.expectedAmountOut,
+                callInput.queryOutput.expectedAmountOut,
             );
             return {
                 ...this.swap.buildCall({
-                    ...swapCall,
+                    ...callInput,
                     limitAmount: minAmountOut,
                     pathLimits: this.pathLimits(
-                        swapCall.slippage,
-                        swapCall.expected,
+                        callInput.slippage,
+                        callInput.queryOutput,
                     ),
                 }),
                 minAmountOut,
             };
         }
         const maxAmountIn = this.limitAmount(
-            swapCall.slippage,
+            callInput.slippage,
             SwapKind.GivenOut,
-            swapCall.expected.expectedAmountIn,
+            callInput.queryOutput.expectedAmountIn,
         );
         return {
             ...this.swap.buildCall({
-                ...swapCall,
+                ...callInput,
                 limitAmount: maxAmountIn,
                 pathLimits: this.pathLimits(
-                    swapCall.slippage,
-                    swapCall.expected,
+                    callInput.slippage,
+                    callInput.queryOutput,
                 ),
             }),
             maxAmountIn,
@@ -139,7 +139,7 @@ export class Swap {
      */
     private pathLimits(
         slippage: Slippage,
-        expected: ExpectedBase,
+        expected: QueryOutputBase,
     ): bigint[] | undefined {
         if (!expected.pathAmounts) return undefined;
         let pathAmounts: bigint[];

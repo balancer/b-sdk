@@ -81,7 +81,7 @@ const swap = async () => {
         const callData = swap.buildCall({
             slippage,
             deadline,
-            expected,
+            queryOutput: expected,
             sender,
             recipient,
             wethIsEth: false,
@@ -94,7 +94,7 @@ const swap = async () => {
         const callData = swap.buildCall({
             slippage,
             deadline,
-            expected,
+            queryOutput: expected,
             sender,
             recipient,
             wethIsEth: false,

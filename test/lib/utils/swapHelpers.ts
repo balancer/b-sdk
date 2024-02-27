@@ -8,7 +8,7 @@ import {
     NATIVE_ASSETS,
     SwapBuildOutputExactIn,
     VAULT,
-    SwapCall,
+    SwapCallInput,
     BALANCER_ROUTER,
     SwapKind,
 } from '../../../src';
@@ -29,10 +29,10 @@ export async function assertSwapExactIn(
     if (expected.swapKind !== SwapKind.GivenIn) throw Error('Expected GivenIn');
     expect(expected.expectedAmountOut.amount > 0n).to.be.true;
 
-    let buildCallInput: SwapCall = {
+    let buildCallInput: SwapCallInput = {
         slippage,
         deadline,
-        expected,
+        queryOutput: expected,
         wethIsEth,
     };
     let contractToCall = BALANCER_ROUTER[chainId];
@@ -110,10 +110,10 @@ export async function assertSwapExactOut(
     if (expected.swapKind !== SwapKind.GivenOut)
         throw Error('Expected GivenOut');
 
-    let buildCallInput: SwapCall = {
+    let buildCallInput: SwapCallInput = {
         slippage,
         deadline,
-        expected,
+        queryOutput: expected,
         wethIsEth,
     };
     let contractToCall = BALANCER_ROUTER[chainId];

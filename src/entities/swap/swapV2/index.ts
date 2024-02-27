@@ -19,8 +19,8 @@ import {
 } from 'viem';
 import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
 import {
-    ExpectedExactIn,
-    ExpectedExactOut,
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
     SwapBase,
     SwapBuildOutputBase,
     SwapInput,
@@ -79,7 +79,7 @@ export class SwapV2 implements SwapBase {
     public async query(
         rpcUrl?: string,
         block?: bigint,
-    ): Promise<ExpectedExactIn | ExpectedExactOut> {
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const client = createPublicClient({
             transport: http(rpcUrl),
         });
@@ -97,7 +97,7 @@ export class SwapV2 implements SwapBase {
     private async querySingleSwap(
         queriesContract,
         block?: bigint,
-    ): Promise<ExpectedExactIn | ExpectedExactOut> {
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const { result } = await queriesContract.simulate.querySwap(
             [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
             { blockNumber: block },
@@ -124,7 +124,7 @@ export class SwapV2 implements SwapBase {
     private async queryBatchSwap(
         queriesContract,
         block?: bigint,
-    ): Promise<ExpectedExactIn | ExpectedExactOut> {
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const { result } = await queriesContract.simulate.queryBatchSwap(
             [
                 this.swapKind,

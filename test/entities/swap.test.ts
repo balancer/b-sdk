@@ -148,7 +148,7 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    expected: {
+                    queryOutput: {
                         swapKind: SwapKind.GivenIn,
                         expectedAmountOut,
                     },
@@ -185,7 +185,7 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    expected: {
+                    queryOutput: {
                         swapKind: SwapKind.GivenIn,
                         expectedAmountOut,
                     },
@@ -220,7 +220,7 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    expected: {
+                    queryOutput: {
                         swapKind: SwapKind.GivenOut,
                         expectedAmountIn,
                     },
@@ -253,7 +253,7 @@ describe('Swap', () => {
                 const callInfo = swap.buildCall({
                     slippage,
                     deadline: 999999999999999999n, // Infinity
-                    expected: {
+                    queryOutput: {
                         swapKind: SwapKind.GivenOut,
                         expectedAmountIn,
                     },

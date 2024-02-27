@@ -1,12 +1,12 @@
 import { Address } from 'viem';
-import { SwapCallBuildBase, SwapCallBase } from '../types';
+import { SwapCallBuildV3, CallInputBase } from '../types';
 
-export type SwapCallBuildV2 = SwapCallBuildBase & {
+export type SwapCallBuildV2 = SwapCallBuildV3 & {
     sender: Address;
     recipient: Address;
 };
 
-export type SwapCallV2 = SwapCallBase & {
+export type SwapCallV2 = CallInputBase & {
     sender: Address;
     recipient: Address;
 };

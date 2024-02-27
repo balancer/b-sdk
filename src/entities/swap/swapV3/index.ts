@@ -14,11 +14,10 @@ import {
 } from '../../../utils';
 import { balancerRouterAbi } from '../../../abi';
 import {
-    ExpectedExactIn,
-    ExpectedExactOut,
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
     SwapBase,
     SwapBuildOutputBase,
-    SwapCallBuildBase,
     SwapInput,
 } from '../types';
 import { PathWithAmount } from '../pathWithAmount';
@@ -26,6 +25,7 @@ import { getInputAmount, getOutputAmount } from '../pathHelpers';
 import {
     SingleTokenExactIn,
     SingleTokenExactOut,
+    SwapCallBuildV3,
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from './types';
@@ -79,7 +79,7 @@ export class SwapV3 implements SwapBase {
     public async query(
         rpcUrl?: string,
         block?: bigint,
-    ): Promise<ExpectedExactIn | ExpectedExactOut> {
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const client = createPublicClient({
             transport: http(rpcUrl),
         });
@@ -98,7 +98,7 @@ export class SwapV3 implements SwapBase {
     private async querySingleSwap(
         routerContract,
         block?: bigint,
-    ): Promise<ExpectedExactIn | ExpectedExactOut> {
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         if ('exactAmountIn' in this.swaps) {
             const { result } =
                 await routerContract.simulate.querySwapSingleTokenExactIn(
@@ -145,7 +145,7 @@ export class SwapV3 implements SwapBase {
     private async queryBatchSwap(
         routerContract,
         block?: bigint,
-    ): Promise<ExpectedExactIn | ExpectedExactOut> {
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         // TODO - Implement onchain call once router available - still to be implemented on Router
         /*
         In V3 all paths must have individual limits set using minAmountOut/maxAmountIn. 
@@ -237,7 +237,7 @@ export class SwapV3 implements SwapBase {
      * @param swapCall
      * @returns
      */
-    buildCall(swapCall: SwapCallBuildBase): SwapBuildOutputBase {
+    buildCall(swapCall: SwapCallBuildV3): SwapBuildOutputBase {
         if (!this.isBatchSwap) {
             return {
                 to: this.to(),

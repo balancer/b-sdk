@@ -1,4 +1,5 @@
 import { Address } from 'viem';
+import { TokenAmount } from '../../tokenAmount';
 
 type SingleStep = {
     pool: Address;
@@ -36,4 +37,11 @@ export type SwapPathExactAmountOut = SwapPathBase & {
     // if tokenIn == pool use removeLiquidity SINGLE_TOKEN_EXACT_OUT
     // if tokenOut == pool use addLiquidity SINGLE_TOKEN_EXACT_OUT
     exactAmountOut: bigint;
+};
+
+export type SwapCallBuildV3 = {
+    deadline: bigint;
+    limitAmount: TokenAmount;
+    pathLimits: bigint[] | undefined;
+    wethIsEth: boolean;
 };
