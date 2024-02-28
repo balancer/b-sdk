@@ -31,7 +31,7 @@ export type Path = {
     tokens: TokenApi[];
     outputAmountRaw: bigint;
     inputAmountRaw: bigint;
-    balancerVersion: 2 | 3;
+    vaultVersion: 2 | 3;
 };
 
 export type SwapInput = {

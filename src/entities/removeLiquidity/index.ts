@@ -21,7 +21,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
         this.inputValidator.validateRemoveLiquidity(input, poolState);
-        switch (poolState.balancerVersion) {
+        switch (poolState.vaultVersion) {
             case 2: {
                 const removeLiquidity = new RemoveLiquidityV2(this.config);
                 return removeLiquidity.query(input, poolState);
@@ -34,7 +34,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     }
 
     public buildCall(input: RemoveLiquidityCall): RemoveLiquidityBuildOutput {
-        switch (input.balancerVersion) {
+        switch (input.vaultVersion) {
             case 2: {
                 const removeLiquidity = new RemoveLiquidityV2(this.config);
                 return removeLiquidity.buildCall(input);

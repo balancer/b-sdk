@@ -101,7 +101,7 @@ const addLiquidityUnbalancedAlternative = async (
     poolState: PoolState,
 ): Promise<PriceImpactAmount> => {
     // inputs are being validated within AddLiquidity
-    if (poolState.balancerVersion !== 2) {
+    if (poolState.vaultVersion !== 2) {
         throw new Error(
             'This alternative method relies on Remove Liquidity Unbalanced, which is only available for balancer V2.',
         );
@@ -160,7 +160,7 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.ComposableStable,
             tokens,
-            balancerVersion: 2,
+            vaultVersion: 2,
         };
     }
 }

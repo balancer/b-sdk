@@ -278,7 +278,7 @@ export class PriceImpact {
             };
             const poolState: PoolState = {
                 ...pool,
-                balancerVersion: 2, // TODO: refactor to allow v3 on a separate PR
+                vaultVersion: 2, // TODO: refactor to allow v3 on a separate PR
             };
 
             // calculate individual price impact

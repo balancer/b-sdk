@@ -50,7 +50,7 @@ export class NestedPools {
         name
         type
         version
-        balancerVersion:vaultVersion
+        vaultVersion
         allTokens {
           id
           address

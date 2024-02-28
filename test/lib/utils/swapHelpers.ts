@@ -36,7 +36,7 @@ export async function assertSwapExactIn(
     };
     let contractToCall = BALANCER_ROUTER[chainId];
 
-    if (swap.balancerVersion === 2) {
+    if (swap.vaultVersion === 2) {
         buildCallInput = {
             ...buildCallInput,
             sender: testAddress,
@@ -115,7 +115,7 @@ export async function assertSwapExactOut(
     };
     let contractToCall = BALANCER_ROUTER[chainId];
 
-    if (swap.balancerVersion === 2) {
+    if (swap.vaultVersion === 2) {
         buildCallInput = {
             ...buildCallInput,
             sender: testAddress,

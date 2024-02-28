@@ -75,7 +75,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             tokenOutIndex: amounts.tokenOutIndex,
             toInternalBalance: !!input.toInternalBalance,
             bptIndex,
-            balancerVersion: poolState.balancerVersion,
+            vaultVersion: poolState.vaultVersion,
         };
     }
 

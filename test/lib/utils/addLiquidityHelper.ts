@@ -151,7 +151,7 @@ export function assertAddLiquidityUnbalanced(
     addLiquidityInput: AddLiquidityUnbalancedInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         addLiquidityOutput;
@@ -162,7 +162,7 @@ export function assertAddLiquidityUnbalanced(
         if (
             addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             t.address === NATIVE_ASSETS[chainId].wrapped &&
-            balancerVersion === 2
+            vaultVersion === 2
         )
             token = new Token(chainId, zeroAddress, t.decimals);
         else token = new Token(chainId, t.address, t.decimals);
@@ -185,7 +185,7 @@ export function assertAddLiquidityUnbalanced(
         poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
-        balancerVersion: poolState.balancerVersion,
+        vaultVersion: poolState.vaultVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, true);
@@ -201,7 +201,7 @@ export function assertAddLiquidityUnbalanced(
         addLiquidityBuildOutput,
         true,
         slippage,
-        balancerVersion,
+        vaultVersion,
     );
 
     assertTokenDeltas(
@@ -210,7 +210,7 @@ export function assertAddLiquidityUnbalanced(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
-        balancerVersion,
+        vaultVersion,
     );
 }
 
@@ -220,7 +220,7 @@ export function assertAddLiquiditySingleToken(
     addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         addLiquidityOutput;
@@ -251,7 +251,7 @@ export function assertAddLiquiditySingleToken(
         poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
-        balancerVersion: poolState.balancerVersion,
+        vaultVersion: poolState.vaultVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, false);
@@ -262,7 +262,7 @@ export function assertAddLiquiditySingleToken(
     // (Note addLiquidityQueryOutput also has value for bpt if pre-minted)
     addLiquidityQueryOutput.amountsIn.forEach((a) => {
         if (
-            balancerVersion === 2 &&
+            vaultVersion === 2 &&
             addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
             a.token.address === zeroAddress
         ) {
@@ -280,7 +280,7 @@ export function assertAddLiquiditySingleToken(
         addLiquidityBuildOutput,
         false,
         slippage,
-        balancerVersion,
+        vaultVersion,
     );
 
     assertTokenDeltas(
@@ -289,7 +289,7 @@ export function assertAddLiquiditySingleToken(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
-        balancerVersion,
+        vaultVersion,
     );
 }
 
@@ -299,7 +299,7 @@ export function assertAddLiquidityProportional(
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
         addLiquidityOutput;
@@ -322,7 +322,7 @@ export function assertAddLiquidityProportional(
         poolType: poolState.type,
         fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
-        balancerVersion: poolState.balancerVersion,
+        vaultVersion: poolState.vaultVersion,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, false);
@@ -341,7 +341,7 @@ export function assertAddLiquidityProportional(
         addLiquidityBuildOutput,
         false,
         slippage,
-        balancerVersion,
+        vaultVersion,
     );
 
     assertTokenDeltas(
@@ -350,7 +350,7 @@ export function assertAddLiquidityProportional(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
-        balancerVersion,
+        vaultVersion,
     );
 }
 
@@ -360,7 +360,7 @@ function assertTokenDeltas(
     addLiquidityQueryOutput: AddLiquidityQueryOutput,
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
     txOutput: TxOutput,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
@@ -384,7 +384,7 @@ function assertTokenDeltas(
      */
     if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
         const respectiveNativeAddress =
-            balancerVersion === 2
+            vaultVersion === 2
                 ? zeroAddress
                 : NATIVE_ASSETS[addLiquidityInput.chainId].wrapped;
         const nativeAssetIndex = amountsWithoutBpt.findIndex(
@@ -404,7 +404,7 @@ function assertAddLiquidityBuildOutput(
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
     isExactIn: boolean,
     slippage: Slippage,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
     const maxAmountsIn = isExactIn
@@ -423,7 +423,7 @@ function assertAddLiquidityBuildOutput(
 
     // user interacts with the router on balancer v3
     const to =
-        balancerVersion === 2
+        vaultVersion === 2
             ? VAULT[addLiquidityInput.chainId]
             : BALANCER_ROUTER[addLiquidityInput.chainId];
 
@@ -431,7 +431,7 @@ function assertAddLiquidityBuildOutput(
     if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
         // v2 uses zero address for native asset, while v3 uses wethIsEth flag only
         const nativeAsset =
-            balancerVersion === 2
+            vaultVersion === 2
                 ? zeroAddress
                 : NATIVE_ASSETS[addLiquidityInput.chainId].wrapped;
         value =

@@ -80,7 +80,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             bptOut,
             amountsIn,
             fromInternalBalance: input.fromInternalBalance ?? false,
-            balancerVersion: 3,
+            vaultVersion: 3,
             tokenInIndex,
         };
 
