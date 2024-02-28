@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.11.0
+
+### Minor Changes
+
+- b77768a: Change all refs to balancerVersion to vaultVersion to match API.
+
 ## 0.10.0
 
 ### Minor Changes
