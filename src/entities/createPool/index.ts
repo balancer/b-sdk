@@ -18,7 +18,7 @@ export class CreatePool implements CreatePoolBase {
 
     public buildCall(input: CreatePoolInput): CreatePoolBuildCallOutput {
         this.inputValidator.validateCreatePool(input);
-        switch (input.balancerVersion) {
+        switch (input.vaultVersion) {
             case 2:
                 return new CreatePoolV2().buildCall(input);
             case 3:

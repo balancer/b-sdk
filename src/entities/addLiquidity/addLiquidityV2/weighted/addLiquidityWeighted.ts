@@ -68,7 +68,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
             fromInternalBalance: !!input.fromInternalBalance,
-            balancerVersion: 2,
+            vaultVersion: 2,
         };
     }
 

@@ -21,17 +21,17 @@ import {
 
 const swap = async () => {
     // User defined
-    const chainId = ChainId.MAINNET;
+    const chainId = ChainId.POLYGON;
     const swapKind = SwapKind.GivenOut;
     const tokenIn = new Token(
         chainId,
-        '0xba100000625a3754423978a60c9317c58a424e3D',
+        '0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6',
         18,
         'BAL',
     );
     const tokenOut = new Token(
         chainId,
-        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
         18,
         'ETH',
     );
@@ -73,7 +73,7 @@ const swap = async () => {
     );
 
     // Get up to date swap result by querying onchain
-    const updated = await swap.query(process.env.ETHEREUM_RPC_URL);
+    const updated = await swap.query(process.env.POLYGON_RPC_URL);
     console.log(`Updated amount: ${updated.amount}`);
 
     // Construct transaction to make swap

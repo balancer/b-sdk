@@ -33,7 +33,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
         if (input.tokens.find(({ weight }) => weight === 0n)) {
             throw new Error('Weight cannot be 0');
         }
-        if (input.balancerVersion === 3) {
+        if (input.vaultVersion === 3) {
             input.tokens.forEach(({ tokenType, rateProvider }) => {
                 if (
                     tokenType !== TokenType.STANDARD &&

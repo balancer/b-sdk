@@ -10,13 +10,13 @@ export type CreatePoolBaseInput = {
     symbol: string;
     salt?: Hex;
     chainId: number;
-    balancerVersion: 2 | 3;
+    vaultVersion: 2 | 3;
 };
 
 export type CreatePoolV2BaseInput = CreatePoolBaseInput & {
     swapFee: string;
     poolOwnerAddress: Address;
-    balancerVersion: 2;
+    vaultVersion: 2;
 };
 
 export type CreatePoolV2WeightedInput = CreatePoolV2BaseInput & {
@@ -40,7 +40,7 @@ export type CreatePoolV2ComposableStableInput = CreatePoolV2BaseInput & {
 };
 
 export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
-    balancerVersion: 3;
+    vaultVersion: 3;
 };
 
 export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {

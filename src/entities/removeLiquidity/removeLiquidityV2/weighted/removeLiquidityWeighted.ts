@@ -67,7 +67,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
             toInternalBalance: !!input.toInternalBalance,
-            balancerVersion: poolState.balancerVersion,
+            vaultVersion: poolState.vaultVersion,
         };
     }
 

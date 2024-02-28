@@ -78,7 +78,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             tokenInIndex: amounts.tokenInIndex,
             fromInternalBalance: !!input.fromInternalBalance,
             bptIndex,
-            balancerVersion: 2,
+            vaultVersion: 2,
         };
     }
 

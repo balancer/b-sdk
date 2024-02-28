@@ -22,7 +22,7 @@ import {
     assertSwapExactOut,
 } from 'test/lib/utils/swapHelpers';
 
-const balancerVersion = 2;
+const vaultVersion = 2;
 const chainId = ChainId.MAINNET;
 const blockNo = 18980070n;
 
@@ -35,7 +35,7 @@ describe('SwapV2', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
     let testAddress: Address;
     const pathBalWeth: Path = {
-        balancerVersion: 2,
+        vaultVersion: 2,
         tokens: [
             {
                 address: TOKENS[chainId].BAL.address,
@@ -73,7 +73,7 @@ describe('SwapV2', () => {
             [WETH.slot as number, BAL.slot as number],
             [parseEther('100'), parseEther('100')],
             undefined,
-            balancerVersion,
+            vaultVersion,
         );
     });
 
