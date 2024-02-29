@@ -41,8 +41,13 @@ export class SwapV2 implements SwapBase {
             (p) =>
                 new PathWithAmount(
                     chainId,
-                    p.tokens,
-                    p.pools,
+                    p.tokens.map((t) => {
+                        return {
+                            ...t,
+                            address: t.address.toLowerCase() as Address,
+                        };
+                    }),
+                    p.pools.map((pool) => pool.toLowerCase() as Address),
                     p.inputAmountRaw,
                     p.outputAmountRaw,
                 ),
@@ -52,9 +57,12 @@ export class SwapV2 implements SwapBase {
         this.swapKind = swapKind;
         this.inputAmount = getInputAmount(this.paths);
         this.outputAmount = getOutputAmount(this.paths);
-        this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
+        this.isBatchSwap =
+            this.paths.length > 1 || this.paths[0].pools.length > 1;
         this.assets = [
-            ...new Set(paths.flatMap((p) => p.tokens).map((t) => t.address)),
+            ...new Set(
+                this.paths.flatMap((p) => p.tokens).map((t) => t.address),
+            ),
         ];
         const swaps = this.getSwaps(this.paths);
         this.swaps = swaps;

@@ -42,6 +42,18 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
             slot: 1,
         },
+        wstETH: {
+            address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+            decimals: 18,
+        },
+        sfrxETH: {
+            address: '0xac3e018457b222d93114458476f3e3416abbe38f',
+            decimals: 18,
+        },
+        rETH: {
+            address: '0xae78736cd615f374d3085123a210448e74fc6393',
+            decimals: 18,
+        },
     },
     [ChainId.POLYGON]: {
         USDC: {
@@ -97,6 +109,27 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             id: '0x0da692ac0611397027c91e559cfd482c4197e4030002000000000000000005c9',
             address: '0x0da692ac0611397027c91e559cfd482c4197e403',
             type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        wstETH_rETH_sfrxETH: {
+            id: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b',
+            address: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af7',
+            type: PoolType.ComposableStable,
+            decimals: 18,
+            slot: 0,
+        },
+        BAL_WETH: {
+            id: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
+            address: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        wstETH_wETH: {
+            id: '0x93d199263632a4ef4bb438f1feb99e57b4b5f0bd0000000000000000000005c2',
+            address: '0x93d199263632a4ef4bb438f1feb99e57b4b5f0bd',
+            type: PoolType.ComposableStable,
             decimals: 18,
             slot: 0,
         },

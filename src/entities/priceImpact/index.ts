@@ -18,7 +18,9 @@ import { TokenAmount } from '../tokenAmount';
 import { PoolState } from '../types';
 import { getSortedTokens } from '../utils';
 import { SingleSwap, SwapKind } from '../../types';
-import { SingleSwapInput, doSingleSwapQuery } from '../utils/doSingleSwapQuery';
+import { doSingleSwapQuery } from '../utils/doSingleSwapQuery';
+import { Swap, SwapInput } from '../swap';
+import { Token } from '../token';
 
 export class PriceImpact {
     static addLiquiditySingleToken = async (
@@ -237,46 +239,98 @@ export class PriceImpact {
         return PriceImpactAmount.fromDecimal(`${priceImpact}`);
     };
 
-    static singleSwap = async ({
-        poolId,
-        kind,
-        assetIn,
-        assetOut,
-        amount,
-        userData,
-        rpcUrl,
-        chainId,
-    }: SingleSwapInput): Promise<PriceImpactAmount> => {
-        // simulate swap in original direction
-        const amountResult = await doSingleSwapQuery({
-            poolId,
-            kind,
-            assetIn,
-            assetOut,
-            amount,
-            userData,
-            rpcUrl,
-            chainId,
-        });
+    static swap = async (
+        swapInput: SwapInput,
+        rpcUrl?: string,
+        block?: bigint,
+    ): Promise<PriceImpactAmount> => {
+        // simulate swapping to get amount out
+        const swap = new Swap(swapInput);
+        const swapQueryOutput = await swap.query(rpcUrl, block);
 
-        // simulate swap in the reverse direction
-        const amountFinal = await doSingleSwapQuery({
-            poolId: poolId,
-            kind: kind,
-            assetIn: assetOut,
-            assetOut: assetIn,
-            amount: amountResult,
-            userData,
-            rpcUrl,
-            chainId,
-        });
+        // build reverse swap with expected amount as given amount
+        let expectedAmountsOut: bigint[];
+        let expectedAmountsIn: bigint[];
+        if (swapQueryOutput.swapKind === SwapKind.GivenIn) {
+            expectedAmountsOut = swapQueryOutput.pathAmounts ?? [
+                swapQueryOutput.expectedAmountOut.amount,
+            ];
+            expectedAmountsIn = swapInput.paths.map((p) => p.inputAmountRaw);
+        } else {
+            expectedAmountsIn = swapQueryOutput.pathAmounts ?? [
+                swapQueryOutput.expectedAmountIn.amount,
+            ];
+            expectedAmountsOut = swapInput.paths.map((p) => p.outputAmountRaw);
+        }
+        const reverseSwapInput: SwapInput = {
+            ...swapInput,
+            paths: swapInput.paths.map((p, i) => ({
+                ...p,
+                tokens: [...p.tokens].reverse(),
+                pools: [...p.pools].reverse(),
+                outputAmountRaw: expectedAmountsIn[i],
+                inputAmountRaw: expectedAmountsOut[i],
+            })),
+        };
 
-        // calculate price impact using ABA method
-        const priceImpact = MathSol.divDownFixed(
-            abs(amount - amountFinal),
-            amount * 2n,
+        // simulate reverse swapping to get amount in
+        const reverseSwap = new Swap(reverseSwapInput);
+        const reverseSwapQueryOutput = await reverseSwap.query(rpcUrl, block);
+
+        // get relevant amounts for price impact calculation
+        const tokenAIndex =
+            swapInput.swapKind === SwapKind.GivenIn
+                ? 0 // first token of the path
+                : swapInput.paths[0].tokens.length - 1; // last token of the path
+        const tokenA = new Token(
+            swapInput.chainId,
+            swapInput.paths[0].tokens[tokenAIndex].address,
+            swapInput.paths[0].tokens[tokenAIndex].decimals,
         );
+        let initialA: TokenAmount;
+        let finalA: TokenAmount;
+        if ('expectedAmountOut' in reverseSwapQueryOutput) {
+            // givenIn case
+            initialA = TokenAmount.fromRawAmount(
+                tokenA,
+                swapInput.paths
+                    .map((p) => p.inputAmountRaw)
+                    .reduce((a, b) => a + b),
+            );
+            finalA = TokenAmount.fromRawAmount(
+                tokenA,
+                reverseSwapQueryOutput.expectedAmountOut.amount,
+            );
+        } else {
+            // givenOut case
+            // Note: in the given out case, query output is greater than input, so we
+            // reverse the order of initialA and finalA for ABA to work as expected
+            initialA = TokenAmount.fromRawAmount(
+                tokenA,
+                reverseSwapQueryOutput.expectedAmountIn.amount,
+            );
+            finalA = TokenAmount.fromRawAmount(
+                tokenA,
+                swapInput.paths
+                    .map((p) => p.outputAmountRaw)
+                    .reduce((a, b) => a + b),
+            );
+        }
 
-        return PriceImpactAmount.fromRawAmount(priceImpact);
+        return priceImpactABA(initialA, finalA);
     };
 }
+
+/**
+ * Applies the ABA method to calculate the price impact of an operation.
+ * @param initialA amount of token A at the begginig of the ABA process, i.e. A -> B amountIn
+ * @param finalA amount of token A at the end of the ABA process, i.e. B -> A amountOut
+ * @returns
+ */
+export const priceImpactABA = (initialA: TokenAmount, finalA: TokenAmount) => {
+    const priceImpact = MathSol.divDownFixed(
+        initialA.scale18 - finalA.scale18,
+        initialA.scale18 * 2n,
+    );
+    return PriceImpactAmount.fromRawAmount(priceImpact);
+};
