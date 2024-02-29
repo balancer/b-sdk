@@ -33,7 +33,7 @@ export class SorSwapPaths {
         inputAmountRaw
         outputAmountRaw
         pools
-        balancerVersion:vaultVersion
+        vaultVersion
         tokens {
           address
           decimals
@@ -61,7 +61,7 @@ export class SorSwapPaths {
         inputAmountRaw
         outputAmountRaw
         pools
-        balancerVersion:vaultVersion
+        vaultVersion
         tokens {
           address
           decimals
@@ -118,6 +118,8 @@ export class SorSwapPaths {
                 return 'ZKEVM';
             case ChainId.SEPOLIA:
                 return 'SEPOLIA';
+            case ChainId.BASE:
+                return 'BASE';
             default:
                 throw Error(`Unsupported API chain: ${chainId}`);
         }

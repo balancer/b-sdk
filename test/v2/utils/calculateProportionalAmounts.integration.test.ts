@@ -178,7 +178,7 @@ class MockApi {
             type: PoolType.ComposableStable,
             tokens,
             totalShares: '1.879969119336134102' as HumanAmount,
-            balancerVersion: 2,
+            vaultVersion: 2,
         };
     }
 }

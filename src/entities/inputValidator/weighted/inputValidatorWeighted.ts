@@ -23,7 +23,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
             initPoolInput.amountsIn.map((a) => a.address),
             poolState.tokens.map((t) => t.address),
         );
-        if (poolState.balancerVersion === 3) {
+        if (poolState.vaultVersion === 3) {
             this.validateWethIsEth(initPoolInput as InitPoolInputV3, poolState);
         }
     }
@@ -45,7 +45,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
         if (input.tokens.find(({ weight }) => weight === 0n)) {
             throw new Error('Weight cannot be 0');
         }
-        if (input.balancerVersion === 3) {
+        if (input.vaultVersion === 3) {
             input.tokens.forEach(({ tokenType, rateProvider }) => {
                 if (
                     tokenType !== TokenType.STANDARD &&

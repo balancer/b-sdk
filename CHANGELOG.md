@@ -1,5 +1,28 @@
 # @balancer/sdk
 
+## 0.11.0
+
+### Minor Changes
+
+- b77768a: Change all refs to balancerVersion to vaultVersion to match API.
+
+## 0.10.0
+
+### Minor Changes
+
+- f5291c6: Add V3 Single Swap support.
+- 517a13e: Add price impact for add/remove nested liquidity
+- b547e32: Adds Balancer's V3 CreatePool functionality for Weighted Pools;
+
+## 0.9.1
+
+### Patch Changes
+
+- 27296e6: expose mapPoolToNestedPoolState function
+- 4851160: Add Base config.
+- c359a54: add GYRO type for GYRO2 in pool type mapper
+- 8d8a95f: Fix add liquidity nested not working for polygon (and other chains)
+
 ## 0.9.0
 
 ### Minor Changes

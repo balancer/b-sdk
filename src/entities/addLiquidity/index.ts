@@ -20,7 +20,7 @@ export class AddLiquidity implements AddLiquidityBase {
         poolState: PoolState,
     ): Promise<AddLiquidityQueryOutput> {
         this.inputValidator.validateAddLiquidity(input, poolState);
-        switch (poolState.balancerVersion) {
+        switch (poolState.vaultVersion) {
             case 2: {
                 const addLiquidity = new AddLiquidityV2(this.config);
                 return addLiquidity.query(input, poolState);
@@ -33,7 +33,7 @@ export class AddLiquidity implements AddLiquidityBase {
     }
 
     buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
-        switch (input.balancerVersion) {
+        switch (input.vaultVersion) {
             case 2: {
                 const addLiquidity = new AddLiquidityV2(this.config);
                 return addLiquidity.buildCall(input);

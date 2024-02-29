@@ -1,4 +1,4 @@
-import { Address, Hex, PoolType } from '../../types';
+import { Address, Hex, InputAmount, PoolType } from '../../types';
 import { ChainId } from '../../utils';
 import { Slippage } from '../slippage';
 import { Token } from '../token';
@@ -6,10 +6,7 @@ import { TokenAmount } from '../tokenAmount';
 import { PoolKind } from '../types';
 
 export type AddLiquidityNestedInput = {
-    amountsIn: {
-        address: Address;
-        rawAmount: bigint;
-    }[];
+    amountsIn: InputAmount[];
     chainId: ChainId;
     rpcUrl: string;
     accountAddress: Address;

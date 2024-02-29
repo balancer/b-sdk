@@ -53,7 +53,7 @@ const createPool = async () => {
                 tokenType: TokenType.STANDARD,
             },
         ],
-        balancerVersion: 3,
+        vaultVersion: 3,
         chainId,
     };
     const { call, to } = createPool.buildCall(createWeightedPoolInput);

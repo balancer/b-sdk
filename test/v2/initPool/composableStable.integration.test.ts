@@ -70,7 +70,7 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             swapFee: '0.01',
             poolOwnerAddress: signerAddress, // Balancer DAO Multisig
             chainId,
-            balancerVersion: 2,
+            vaultVersion: 2,
         };
 
         createTxInput = {

@@ -45,7 +45,7 @@ import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 import { doAddLiquidity } from 'test/lib/utils/addLiquidityHelper';
 
-const balancerVersion = 3;
+const vaultVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
@@ -120,7 +120,7 @@ describe('remove liquidity test', () => {
                 ),
             ],
             undefined,
-            balancerVersion,
+            vaultVersion,
         );
         await doAddLiquidity(prepTxInput);
     });
@@ -178,7 +178,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                balancerVersion,
+                vaultVersion,
             );
         });
 
@@ -198,7 +198,7 @@ describe('remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
-                balancerVersion,
+                vaultVersion,
             );
         });
     });
@@ -232,7 +232,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                balancerVersion,
+                vaultVersion,
             );
         });
 
@@ -252,7 +252,7 @@ describe('remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
-                balancerVersion,
+                vaultVersion,
             );
         });
     });
@@ -284,7 +284,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                balancerVersion,
+                vaultVersion,
             );
         });
         test('with native', async () => {
@@ -302,7 +302,7 @@ describe('remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
-                balancerVersion,
+                vaultVersion,
             );
         });
     });
@@ -330,7 +330,7 @@ class MockApi {
             address: id,
             type: PoolType.Weighted,
             tokens,
-            balancerVersion,
+            vaultVersion,
         };
     }
 }

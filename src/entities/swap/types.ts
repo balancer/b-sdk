@@ -3,6 +3,12 @@ import { MinimalToken, Slippage } from '../..';
 import { SingleSwap, SwapKind, BatchSwapStep } from '../../types';
 import { PathWithAmount } from './pathWithAmount';
 import { Address, Hex } from 'viem';
+import {
+    SwapCallBuildV2,
+    SwapCallExactInV2,
+    SwapCallExactOutV2,
+} from './swapV2';
+import { SingleTokenExactIn, SingleTokenExactOut } from './swapV3';
 
 export type SwapBuildOutputBase = {
     to: Address;
@@ -25,16 +31,24 @@ export type Path = {
     tokens: TokenApi[];
     outputAmountRaw: bigint;
     inputAmountRaw: bigint;
-    balancerVersion: 2 | 3;
+    vaultVersion: 2 | 3;
 };
 
+export type SwapInput = {
+    chainId: number;
+    paths: Path[];
+    swapKind: SwapKind;
+};
 export interface SwapBase {
     chainId: number;
     isBatchSwap: boolean;
     paths: PathWithAmount[];
-    assets: Address[];
     swapKind: SwapKind;
-    swaps: BatchSwapStep[] | SingleSwap;
+    swaps:
+        | BatchSwapStep[]
+        | SingleSwap
+        | SingleTokenExactIn
+        | SingleTokenExactOut;
     quote: TokenAmount;
     inputAmount: TokenAmount;
     outputAmount: TokenAmount;
@@ -43,22 +57,27 @@ export interface SwapBase {
     buildCall(swapCall: SwapCallBuild): SwapBuildOutputBase;
 }
 
-type SwapCallBase = {
+export type SwapCallExactInBase = {
     deadline: bigint;
-    sender: Address;
-    recipient: Address;
-};
-
-export type SwapCallExactIn = SwapCallBase & {
     slippage: Slippage;
+    wethIsEth: boolean;
     expectedAmountOut: TokenAmount;
 };
 
-export type SwapCallExactOut = SwapCallBase & {
+export type SwapCallExactOutBase = {
+    deadline: bigint;
     slippage: Slippage;
+    wethIsEth: boolean;
     expectedAmountIn: TokenAmount;
 };
 
-export type SwapCallBuild = SwapCallBase & {
+export type SwapCallExactIn = SwapCallExactInBase | SwapCallExactInV2;
+export type SwapCallExactOut = SwapCallExactOutBase | SwapCallExactOutV2;
+
+export type SwapCallBuildBase = {
+    deadline: bigint;
     limitAmount: TokenAmount;
+    wethIsEth: boolean;
 };
+
+export type SwapCallBuild = SwapCallBuildBase | SwapCallBuildV2;

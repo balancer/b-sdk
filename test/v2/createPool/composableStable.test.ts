@@ -39,7 +39,7 @@ describe('Create Composable Stable Pool tests', () => {
             swapFee: '0.01',
             poolOwnerAddress: zeroAddress,
             chainId,
-            balancerVersion: 2,
+            vaultVersion: 2,
         };
     });
     test('Amplification Parameter 0, expects error', async () => {

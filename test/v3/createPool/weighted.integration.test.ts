@@ -65,7 +65,7 @@ describe('Create Weighted Pool tests', () => {
                 },
             ],
             chainId,
-            balancerVersion: 3,
+            vaultVersion: 3,
         };
     });
     test('Create Weighted Pool', async () => {

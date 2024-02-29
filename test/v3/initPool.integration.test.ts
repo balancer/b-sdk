@@ -68,7 +68,7 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
                 },
             ],
             chainId,
-            balancerVersion: 3,
+            vaultVersion: 3,
         };
 
         createTxInput = {

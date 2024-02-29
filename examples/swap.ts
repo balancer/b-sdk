@@ -1,6 +1,5 @@
 /**
  * Example showing how to find swap information for a token pair.
- * (Runs against a local Anvil fork)
  *
  * Run with:
  * pnpm example ./examples/swap.ts
@@ -22,19 +21,19 @@ import {
 
 const swap = async () => {
     // User defined
-    const chainId = ChainId.MAINNET;
+    const chainId = ChainId.POLYGON;
     const swapKind = SwapKind.GivenOut;
     const tokenIn = new Token(
         chainId,
-        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        6,
-        'USDC',
+        '0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6',
+        18,
+        'BAL',
     );
     const tokenOut = new Token(
         chainId,
-        '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
+        '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
         18,
-        'GYD',
+        'ETH',
     );
     const slippage = Slippage.fromPercentage('0.1');
     const swapAmount =
@@ -74,7 +73,7 @@ const swap = async () => {
     );
 
     // Get up to date swap result by querying onchain
-    const updated = await swap.query(process.env.ETHEREUM_RPC_URL);
+    const updated = await swap.query(process.env.POLYGON_RPC_URL);
     console.log(`Updated amount: ${updated.amount}`);
 
     // Construct transaction to make swap
@@ -82,9 +81,10 @@ const swap = async () => {
         const callData = swap.buildCall({
             slippage,
             deadline,
+            expectedAmountOut: updated,
             sender,
             recipient,
-            expectedAmountOut: updated,
+            wethIsEth: false,
         }) as SwapBuildOutputExactIn;
         console.log(
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
@@ -93,9 +93,10 @@ const swap = async () => {
         const callData = swap.buildCall({
             slippage,
             deadline,
+            expectedAmountIn: updated,
             sender,
             recipient,
-            expectedAmountIn: updated,
+            wethIsEth: false,
         }) as SwapBuildOutputExactOut;
         console.log(
             `Max Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,

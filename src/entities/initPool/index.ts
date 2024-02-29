@@ -19,7 +19,7 @@ export class InitPool {
 
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
         this.inputValidator.validateInitPool(input, poolState);
-        switch (poolState.balancerVersion) {
+        switch (poolState.vaultVersion) {
             case 2:
                 return new InitPoolV2().buildCall(
                     input as InitPoolInputV2,
