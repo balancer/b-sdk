@@ -32,7 +32,7 @@ import {
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const chainId = ChainId.SEPOLIA;
 
-describe('Add Liquidity Init - Weighted Pool', async () => {
+describe('Initialize Pool V3 - Weighted Pool', async () => {
     let poolAddress: Address;
     let createWeightedPoolInput: CreatePoolV3WeightedInput;
     let createTxInput: CreatePoolTxInput;
@@ -120,7 +120,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             3,
         );
     });
-    test('Add Liquidity Init - Weighted Pool', async () => {
+    test('Initialize Pool V3 - Weighted Pool', async () => {
         const addLiquidityOutput = await doInitPool({
             ...initPoolTxInput,
             initPoolInput,

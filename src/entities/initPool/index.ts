@@ -18,12 +18,9 @@ export class InitPool {
     constructor(public config?: InitPoolConfig) {}
 
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
+        this.inputValidator.validateInitPool(input, poolState);
         switch (poolState.balancerVersion) {
             case 2:
-                this.inputValidator.validateAddLiquidity(
-                    input as InitPoolInputV2,
-                    poolState,
-                );
                 return new InitPoolV2().buildCall(
                     input as InitPoolInputV2,
                     poolState,

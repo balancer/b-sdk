@@ -1,12 +1,12 @@
 import { AddLiquidityInput } from '../addLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
-import { InitPoolInputV2 } from '../initPool/types';
+import { InitPoolInput } from '../initPool/types';
 import { RemoveLiquidityInput } from '../removeLiquidity/types';
 import { PoolState } from '../types';
 
 export interface InputValidatorBase {
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput | InitPoolInputV2,
+        addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void;
 
@@ -16,4 +16,6 @@ export interface InputValidatorBase {
     ): void;
 
     validateCreatePool(input: CreatePoolInput): void;
+
+    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void;
 }

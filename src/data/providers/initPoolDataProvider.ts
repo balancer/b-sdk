@@ -6,10 +6,13 @@ import {
     getContract,
     http,
 } from 'viem';
-import { CHAINS, VAULT, VAULT_V3 } from '../../utils';
+import { CHAINS } from '../../utils';
 import { PoolState } from '../../entities';
-import { getTokenDecimals } from '../../utils/tokens';
-import { vaultV2Abi, vaultV3Abi } from '@/abi';
+import {
+    getPoolTokensV2,
+    getPoolTokensV3,
+    getTokenDecimals,
+} from '../../utils/tokens';
 
 export class InitPoolDataProvider {
     private readonly client: PublicClient;
@@ -55,89 +58,58 @@ export class InitPoolDataProvider {
         poolAddress: Address,
         poolType: string,
     ): Promise<PoolState> {
-        const chainId = await this.client.getChainId();
         const poolContract = getContract({
             abi: this.simplePoolAbi,
             address: poolAddress,
             client: this.client,
         });
 
-        const vaultV2 = getContract({
-            abi: vaultV2Abi,
-            address: VAULT[chainId],
-            client: this.client,
-        });
-
-        try {
-            const poolId = (await poolContract.read.getPoolId()) as Hex;
-            const poolTokensFromVault = await vaultV2.read.getPoolTokens([
-                poolId,
-            ]);
-            const poolTokens = await Promise.all(
-                poolTokensFromVault[0].map(async (address, index) => {
-                    const decimals = await getTokenDecimals(
-                        address,
-                        this.client,
-                    );
-                    return {
-                        address: address.toLowerCase() as Address,
-                        index,
-                        decimals,
-                    };
-                }),
-            );
-            return {
-                id: poolId,
-                address: poolAddress.toLowerCase() as Address,
-                type: poolType,
-                tokens: poolTokens,
-                balancerVersion: 2,
-            };
-        } catch (e) {
-            console.warn(e);
-            throw new Error(
-                'Invalid pool address, not possible to retrieve Pool Id',
-            );
-        }
+        const poolId = (await poolContract.read.getPoolId()) as Hex;
+        const poolTokensFromVault = await getPoolTokensV2(poolId, this.client);
+        const poolTokens = await Promise.all(
+            poolTokensFromVault[0].map(async (address, index) => {
+                const decimals = await getTokenDecimals(address, this.client);
+                return {
+                    address: address.toLowerCase() as Address,
+                    index,
+                    decimals,
+                };
+            }),
+        );
+        return {
+            id: poolId,
+            address: poolAddress.toLowerCase() as Address,
+            type: poolType,
+            tokens: poolTokens,
+            balancerVersion: 2,
+        };
     }
 
     private async getInitPoolDataV3(
         poolAddress: Address,
         poolType: string,
     ): Promise<PoolState> {
-        const chainId = await this.client.getChainId();
-        const vaultV3 = getContract({
-            abi: vaultV3Abi,
-            address: VAULT_V3[chainId],
-            client: this.client,
-        });
+        const poolTokensFromVault: Address[] = await getPoolTokensV3(
+            poolAddress,
+            this.client,
+        );
 
-        try {
-            const poolTokensFromVault: Address[] =
-                (await vaultV3.read.getPoolTokens([poolAddress])) as Address[];
-            const poolTokens = await Promise.all(
-                poolTokensFromVault.map(async (address, index) => {
-                    const decimals = await getTokenDecimals(
-                        address,
-                        this.client,
-                    );
-                    return {
-                        address: address.toLowerCase() as Address,
-                        index,
-                        decimals,
-                    };
-                }),
-            );
-            return {
-                id: poolAddress,
-                address: poolAddress.toLowerCase() as Address,
-                type: poolType,
-                tokens: poolTokens,
-                balancerVersion: 3,
-            };
-        } catch (e) {
-            console.warn(e);
-            throw new Error('Invalid pool address');
-        }
+        const poolTokens = await Promise.all(
+            poolTokensFromVault.map(async (address, index) => {
+                const decimals = await getTokenDecimals(address, this.client);
+                return {
+                    address: address.toLowerCase() as Address,
+                    index,
+                    decimals,
+                };
+            }),
+        );
+        return {
+            id: poolAddress,
+            address: poolAddress.toLowerCase() as Address,
+            type: poolType,
+            tokens: poolTokens,
+            balancerVersion: 3,
+        };
     }
 }

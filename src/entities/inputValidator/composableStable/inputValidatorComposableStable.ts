@@ -1,6 +1,7 @@
+import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { AddLiquidityInput } from '../../addLiquidity/types';
 import { CreatePoolV2ComposableStableInput } from '../../createPool/types';
-import { InitPoolInputV2 } from '../../initPool/types';
+import { InitPoolInput } from '../../initPool/types';
 import { RemoveLiquidityInput } from '../../removeLiquidity/types';
 import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
@@ -12,8 +13,15 @@ import {
 } from '../utils/validateTokens';
 
 export class InputValidatorComposableStable implements InputValidatorBase {
+    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
+        areTokensInArray(
+            initPoolInput.amountsIn.map((a) => a.address),
+            poolState.tokens.map((t) => t.address),
+        );
+    }
+
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput | InitPoolInputV2,
+        addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
         validatePoolHasBpt(poolState);
