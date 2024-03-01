@@ -1,6 +1,5 @@
 import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
-import { PriceImpactAmount } from '../priceImpactAmount';
 import {
     SwapBase,
     SwapCallInput,
@@ -59,10 +58,6 @@ export class Swap {
 
     public queryCallData(): string {
         return this.swap.queryCallData();
-    }
-
-    public get priceImpact(): PriceImpactAmount {
-        throw new Error('Price Impact still to be implemented');
     }
 
     /**
