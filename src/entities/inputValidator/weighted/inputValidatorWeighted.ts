@@ -1,7 +1,9 @@
-import { AddLiquidityInput } from '../../addLiquidity';
-import { CreatePoolWeightedInput } from '../../createPool/types';
+import { RemoveLiquidityInput } from '@/entities/removeLiquidity/types';
+import {
+    CreatePoolV2WeightedInput,
+    CreatePoolV3WeightedInput,
+} from '../../createPool/types';
 import { InitPoolInput } from '../../initPool/types';
-import { RemoveLiquidityInput } from '../../removeLiquidity';
 import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
@@ -9,9 +11,14 @@ import {
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
 } from '../utils/validateTokens';
+import { TokenType } from '@/types';
+import { zeroAddress } from 'viem';
+import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 
 export class InputValidatorWeighted implements InputValidatorBase {
-    validateCreatePool(input: CreatePoolWeightedInput) {
+    validateCreatePool(
+        input: CreatePoolV2WeightedInput | CreatePoolV3WeightedInput,
+    ) {
         validateCreatePoolTokens(input.tokens);
         if (input.tokens.length > 8) {
             throw new Error('Weighted pools can have a maximum of 8 tokens');
@@ -25,6 +32,18 @@ export class InputValidatorWeighted implements InputValidatorBase {
         }
         if (input.tokens.find(({ weight }) => weight === 0n)) {
             throw new Error('Weight cannot be 0');
+        }
+        if (input.vaultVersion === 3) {
+            input.tokens.forEach(({ tokenType, rateProvider }) => {
+                if (
+                    tokenType !== TokenType.STANDARD &&
+                    rateProvider === zeroAddress
+                ) {
+                    throw new Error(
+                        'Only TokenType.STANDARD is allowed to have zeroAddress rateProvider',
+                    );
+                }
+            });
         }
     }
 

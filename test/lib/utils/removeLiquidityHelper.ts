@@ -178,7 +178,7 @@ export function assertRemoveLiquidityUnbalanced(
         poolType: poolState.type,
         toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
-        balancerVersion: poolState.balancerVersion,
+        vaultVersion: poolState.vaultVersion,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, false);
@@ -210,7 +210,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
     removeLiquidityInput: RemoveLiquiditySingleTokenExactOutInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -221,7 +221,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         if (
             removeLiquidityInput.toNativeAsset &&
             t.address === NATIVE_ASSETS[chainId].wrapped &&
-            balancerVersion === 2
+            vaultVersion === 2
         ) {
             token = new Token(chainId, zeroAddress, t.decimals);
         } else {
@@ -252,7 +252,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         poolType: poolState.type,
         toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
-        balancerVersion: poolState.balancerVersion,
+        vaultVersion: poolState.vaultVersion,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, false);
@@ -268,7 +268,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         false,
         slippage,
         chainId,
-        balancerVersion,
+        vaultVersion,
     );
 
     assertTokenDeltas(
@@ -276,7 +276,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        balancerVersion,
+        vaultVersion,
     );
 }
 
@@ -286,7 +286,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     removeLiquidityInput: RemoveLiquiditySingleTokenExactInInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -317,7 +317,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         poolType: poolState.type,
         toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
-        balancerVersion: poolState.balancerVersion,
+        vaultVersion: poolState.vaultVersion,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);
@@ -328,7 +328,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     // (Note removeLiquidityQueryOutput also has value for bpt if pre-minted)
     removeLiquidityQueryOutput.amountsOut.forEach((a) => {
         if (
-            balancerVersion === 2 &&
+            vaultVersion === 2 &&
             removeLiquidityInput.toNativeAsset &&
             a.token.address === zeroAddress
         ) {
@@ -346,7 +346,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         true,
         slippage,
         chainId,
-        balancerVersion,
+        vaultVersion,
     );
 
     assertTokenDeltas(
@@ -354,7 +354,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        balancerVersion,
+        vaultVersion,
     );
 }
 
@@ -364,7 +364,7 @@ export function assertRemoveLiquidityProportional(
     removeLiquidityInput: RemoveLiquidityProportionalInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -387,7 +387,7 @@ export function assertRemoveLiquidityProportional(
         poolType: poolState.type,
         toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
-        balancerVersion: poolState.balancerVersion,
+        vaultVersion: poolState.vaultVersion,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);
@@ -406,7 +406,7 @@ export function assertRemoveLiquidityProportional(
         true,
         slippage,
         chainId,
-        balancerVersion,
+        vaultVersion,
     );
 
     assertTokenDeltas(
@@ -414,7 +414,7 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        balancerVersion,
+        vaultVersion,
     );
 }
 
@@ -446,7 +446,7 @@ export function assertRemoveLiquidityRecovery(
         poolType: poolState.type,
         toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
-        balancerVersion: poolState.balancerVersion,
+        vaultVersion: poolState.vaultVersion,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);
@@ -480,7 +480,7 @@ function assertTokenDeltas(
     removeLiquidityInput: RemoveLiquidityInput,
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
     txOutput: TxOutput,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
@@ -499,7 +499,7 @@ function assertTokenDeltas(
     // If removing liquidity to native asset we must replace it with 0 and update native value instead
     if (removeLiquidityInput.toNativeAsset) {
         const respectiveNativeAddress =
-            balancerVersion === 2
+            vaultVersion === 2
                 ? zeroAddress
                 : NATIVE_ASSETS[removeLiquidityInput.chainId].wrapped;
         const nativeAssetIndex = amountsWithoutBpt.findIndex(
@@ -527,7 +527,7 @@ function assertRemoveLiquidityBuildOutput(
     isExactIn: boolean,
     slippage: Slippage,
     chainId: number,
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
     // slippage.applyTo(a.amount, -1)
@@ -548,8 +548,7 @@ function assertRemoveLiquidityBuildOutput(
               slippage.applyTo(removeLiquidityQueryOutput.bptIn.amount),
           );
 
-    const to =
-        balancerVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId];
+    const to = vaultVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId];
 
     const expectedBuildOutput: Omit<RemoveLiquidityBuildOutput, 'call'> = {
         minAmountsOut,

@@ -36,7 +36,7 @@ describe('Swap', () => {
     ];
 
     const pathTo6Decimals: Path = {
-        balancerVersion: 2,
+        vaultVersion: 2,
         tokens,
         pools: [
             '0xc2aa60465bffa1a88f5ba471a59ca0435c3ec5c100020000000000000000062c',
@@ -56,7 +56,7 @@ describe('Swap', () => {
 
     describe('path validation', () => {
         const pathWethDai: Path = {
-            balancerVersion: 2,
+            vaultVersion: 2,
             tokens: [tokens[0], tokens[1]],
             pools: [
                 '0xc2aa60465bffa1a88f5ba471a59ca0435c3ec5c100020000000000000000062c',
@@ -68,7 +68,7 @@ describe('Swap', () => {
             expect(() => {
                 const pathV3: Path = {
                     ...pathWethDai,
-                    balancerVersion: 3,
+                    vaultVersion: 3,
                 };
                 new Swap({
                     chainId,
@@ -120,7 +120,7 @@ describe('Swap', () => {
                 paths: [pathTo6Decimals],
                 swapKind: SwapKind.GivenIn,
             });
-            expect(swap.balancerVersion).to.eq(2);
+            expect(swap.vaultVersion).to.eq(2);
         });
     });
 

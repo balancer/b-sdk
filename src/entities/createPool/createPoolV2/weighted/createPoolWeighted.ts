@@ -2,36 +2,36 @@ import { Address, encodeFunctionData, parseEther } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
-    CreatePoolWeightedArgs,
-    CreatePoolWeightedInput,
+    CreatePoolV2WeightedArgs,
+    CreatePoolV2WeightedInput,
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
-import { weightedFactoryV4Abi } from '../../../../abi/weightedFactoryV4';
+import { weightedPoolFactoryV4Abi_V2 } from '../../../../abi/weightedPoolFactoryV4.V2';
+import { WEIGHTED_POOL_FACTORY_BALANCER_V2 } from '@/utils';
+import { sortByAddress } from '@/utils/sortByAddress';
 
-export class CreatePoolWeighted implements CreatePoolBase {
-    buildCall(input: CreatePoolWeightedInput): CreatePoolBuildCallOutput {
+export class CreatePoolWeightedV2 implements CreatePoolBase {
+    buildCall(input: CreatePoolV2WeightedInput): CreatePoolBuildCallOutput {
         const args = this.parseCreateFunctionArgs(input);
         const encodedCall = encodeFunctionData({
-            abi: weightedFactoryV4Abi,
+            abi: weightedPoolFactoryV4Abi_V2,
             functionName: 'create',
             args,
         });
-        return { call: encodedCall };
+        return {
+            call: encodedCall,
+            to: WEIGHTED_POOL_FACTORY_BALANCER_V2[input.chainId],
+        };
     }
 
     private parseCreateFunctionArgs(
-        input: CreatePoolWeightedInput,
-    ): CreatePoolWeightedArgs {
-        const sortedTokenParams = input.tokens.sort(
-            ({ tokenAddress: address1 }, { tokenAddress: address2 }) => {
-                const diff = BigInt(address1) - BigInt(address2);
-                return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-            },
-        );
+        input: CreatePoolV2WeightedInput,
+    ): CreatePoolV2WeightedArgs {
+        const sortedTokenParams = sortByAddress(input.tokens);
 
         const [tokens, weights, rateProviders] = sortedTokenParams.reduce(
             (acc, curr) => {
-                acc[0].push(curr.tokenAddress);
+                acc[0].push(curr.address);
                 acc[1].push(curr.weight);
                 acc[2].push(curr.rateProvider);
                 return acc;

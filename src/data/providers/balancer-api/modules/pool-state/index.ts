@@ -11,7 +11,7 @@ export class Pools {
       name
       type
       version
-      balancerVersion:vaultVersion
+      vaultVersion
       ... on GqlPoolWeighted {
         tokens {
           ... on GqlPoolTokenBase {
@@ -86,7 +86,7 @@ export class Pools {
         name
         type
         version
-        balancerVersion:vaultVersion
+        vaultVersion
         dynamicData {totalShares}
         ... on GqlPoolWeighted {
           tokens {

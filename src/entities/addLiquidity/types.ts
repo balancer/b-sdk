@@ -46,7 +46,7 @@ export type AddLiquidityBaseQueryOutput = {
     amountsIn: TokenAmount[];
     fromInternalBalance: boolean;
     tokenInIndex?: number;
-    balancerVersion: 2 | 3;
+    vaultVersion: 2 | 3;
 };
 
 export type AddLiquidityWeightedQueryOutput = AddLiquidityBaseQueryOutput;

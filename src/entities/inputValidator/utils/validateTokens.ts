@@ -77,10 +77,8 @@ export const validatePoolHasBpt = (poolState: PoolState) => {
     }
 };
 
-export const validateCreatePoolTokens = (
-    tokens: { tokenAddress: string }[],
-) => {
-    const tokenAddresses = tokens.map((t) => t.tokenAddress);
+export const validateCreatePoolTokens = (tokens: { address: string }[]) => {
+    const tokenAddresses = tokens.map((t) => t.address);
     if (tokenAddresses.length !== new Set(tokenAddresses).size) {
         throw new Error('Duplicate token addresses');
     }

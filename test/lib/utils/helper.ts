@@ -47,11 +47,11 @@ export const approveToken = async (
     account: Address,
     token: Address,
     amount = MAX_UINT256, // approve max by default
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ): Promise<boolean> => {
     const chainId = await client.getChainId();
     const vaultAddress =
-        balancerVersion === 2 ? VAULT[chainId] : VAULT_V3[chainId];
+        vaultVersion === 2 ? VAULT[chainId] : VAULT_V3[chainId];
     // approve token on the vault
     const hash = await client.writeContract({
         account,
@@ -287,7 +287,7 @@ export const forkSetup = async (
     slots: number[] | undefined,
     balances: bigint[],
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
-    balancerVersion: 2 | 3 = 2,
+    vaultVersion: 2 | 3 = 2,
 ): Promise<void> => {
     await client.impersonateAccount({ address: accountAddress });
 
@@ -328,7 +328,7 @@ export const forkSetup = async (
             accountAddress,
             tokens[i],
             undefined,
-            balancerVersion,
+            vaultVersion,
         );
     }
 };

@@ -1,20 +1,19 @@
 import { PoolType } from '@/types';
-import { CreatePoolComposableStable } from './composableStable/createPoolComposableStable';
+import { CreatePoolComposableStableV2 } from './composableStable/createPoolComposableStable';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
     CreatePoolInput,
 } from '../types';
-import { CreatePoolWeighted } from './weighted/createPoolWeighted';
+import { CreatePoolWeightedV2 } from './weighted/createPoolWeighted';
 
 export class CreatePoolV2 implements CreatePoolBase {
-    // TODO: should we allow for custom create pool types?
     private readonly createPoolTypes: Record<string, CreatePoolBase> = {};
 
     constructor() {
         this.createPoolTypes = {
-            [PoolType.Weighted]: new CreatePoolWeighted(),
-            [PoolType.ComposableStable]: new CreatePoolComposableStable(),
+            [PoolType.Weighted]: new CreatePoolWeightedV2(),
+            [PoolType.ComposableStable]: new CreatePoolComposableStableV2(),
         };
     }
 

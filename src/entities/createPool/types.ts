@@ -1,4 +1,4 @@
-import { PoolType } from '@/types';
+import { PoolType, TokenType } from '@/types';
 import { Address, Hex } from 'viem';
 
 export interface CreatePoolBase {
@@ -8,25 +8,30 @@ export interface CreatePoolBase {
 export type CreatePoolBaseInput = {
     name?: string;
     symbol: string;
-    swapFee: string;
-    poolOwnerAddress: Address;
     salt?: Hex;
-    balancerVersion: 2 | 3;
+    chainId: number;
+    vaultVersion: 2 | 3;
 };
 
-export type CreatePoolWeightedInput = CreatePoolBaseInput & {
+export type CreatePoolV2BaseInput = CreatePoolBaseInput & {
+    swapFee: string;
+    poolOwnerAddress: Address;
+    vaultVersion: 2;
+};
+
+export type CreatePoolV2WeightedInput = CreatePoolV2BaseInput & {
     poolType: PoolType.Weighted;
     tokens: {
-        tokenAddress: Address;
+        address: Address;
         rateProvider: Address;
         weight: bigint;
     }[];
 };
 
-export type CreatePoolComposableStableInput = CreatePoolBaseInput & {
+export type CreatePoolV2ComposableStableInput = CreatePoolV2BaseInput & {
     poolType: PoolType.ComposableStable;
     tokens: {
-        tokenAddress: Address;
+        address: Address;
         rateProvider: Address;
         tokenRateCacheDuration: bigint;
     }[];
@@ -34,15 +39,32 @@ export type CreatePoolComposableStableInput = CreatePoolBaseInput & {
     exemptFromYieldProtocolFeeFlag: boolean;
 };
 
+export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
+    vaultVersion: 3;
+};
+
+export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
+    poolType: PoolType.Weighted;
+    tokens: {
+        address: Address;
+        rateProvider: Address;
+        weight: bigint;
+        tokenType: TokenType;
+        yieldFeeExempt?: boolean;
+    }[];
+};
+
 export type CreatePoolInput =
-    | CreatePoolWeightedInput
-    | CreatePoolComposableStableInput;
+    | CreatePoolV2WeightedInput
+    | CreatePoolV2ComposableStableInput
+    | CreatePoolV3WeightedInput;
 
 export type CreatePoolBuildCallOutput = {
     call: Hex;
+    to: Address;
 };
 
-export type CreatePoolWeightedArgs = [
+export type CreatePoolV2WeightedArgs = [
     string,
     string,
     Address[],
@@ -53,7 +75,7 @@ export type CreatePoolWeightedArgs = [
     Hex,
 ];
 
-export type CreatePoolComposableStableArgs = [
+export type CreatePoolV2ComposableStableArgs = [
     string,
     string,
     Address[],
@@ -65,3 +87,18 @@ export type CreatePoolComposableStableArgs = [
     Address,
     Hex,
 ];
+
+export type CreatePoolV3WeightedArgs = [
+    string,
+    string,
+    TokenConfig[],
+    bigint[],
+    Hex,
+];
+
+export type TokenConfig = {
+    token: Address;
+    tokenType: TokenType;
+    rateProvider: Address;
+    yieldFeeExempt: boolean;
+};

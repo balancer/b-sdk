@@ -1,35 +1,32 @@
 import { CreatePoolTxInput } from './types';
 import {
     Address,
-    COMPOSABLE_STABLE_POOL_FACTORY,
     PoolType,
-    WEIGHTED_POOL_FACTORY,
-} from '../../../src';
+    weightedPoolFactoryV4Abi_V2,
+    composableStableFactoryV5Abi_V2,
+    weightedPoolFactoryAbi_V3,
+} from 'src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
-import { weightedFactoryV4Abi } from '../../../src/abi/weightedFactoryV4';
-import { composableStableFactoryV5Abi } from '../../../src/abi/composableStableFactoryV5';
 
 export async function doCreatePool(
     txInput: CreatePoolTxInput,
 ): Promise<Address> {
     const { client, createPool, createPoolInput, testAddress } = txInput;
 
-    const { call } = createPool.buildCall(createPoolInput);
-    const chainId = await client.getChainId();
+    const { call, to } = createPool.buildCall(createPoolInput);
 
-    const factories = {
-        [PoolType.Weighted]: {
-            address: WEIGHTED_POOL_FACTORY[chainId],
-            abi: weightedFactoryV4Abi,
+    const abis = {
+        2: {
+            [PoolType.Weighted]: weightedPoolFactoryV4Abi_V2,
+            [PoolType.ComposableStable]: composableStableFactoryV5Abi_V2,
         },
-        [PoolType.ComposableStable]: {
-            address: COMPOSABLE_STABLE_POOL_FACTORY[chainId],
-            abi: composableStableFactoryV5Abi,
+        3: {
+            [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
         },
     };
 
     const hash = await client.sendTransaction({
-        to: factories[createPoolInput.poolType].address,
+        to,
         data: call,
         account: testAddress,
         chain: client.chain,
@@ -38,12 +35,11 @@ export async function doCreatePool(
     const transactionReceipt = await client.waitForTransactionReceipt({
         hash,
     });
-
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: factories[createPoolInput.poolType].abi,
-        to: factories[createPoolInput.poolType].address,
+        abi: abis[createPoolInput.vaultVersion][createPoolInput.poolType],
+        to,
     });
 
     const {
