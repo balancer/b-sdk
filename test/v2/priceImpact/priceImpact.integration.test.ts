@@ -3,10 +3,11 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { parseEther } from 'viem';
+import { parseEther, parseUnits } from 'viem';
 
 import {
     AddLiquidityKind,
+    AddLiquidityNestedInput,
     AddLiquiditySingleTokenInput,
     AddLiquidityUnbalancedInput,
     Address,
@@ -15,6 +16,7 @@ import {
     Hex,
     InputAmount,
     Path,
+    NestedPoolState,
     PoolState,
     PoolType,
     PriceImpact,
@@ -23,6 +25,8 @@ import {
     RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityUnbalancedInput,
     SwapKind,
+    RemoveLiquidityNestedSingleTokenInput,
+    ZERO_ADDRESS,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -32,25 +36,36 @@ const block = 18559730n;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, block);
 const chainId = ChainId.MAINNET;
 
-const poolId = POOLS[chainId].wstETH_rETH_sfrxETH.id;
+// pool and tokens for add/remove liquidity
+const wstETH_rETH_sfrxETH = POOLS[chainId].wstETH_rETH_sfrxETH;
 const wstETH = TOKENS[chainId].wstETH;
 const sfrxETH = TOKENS[chainId].sfrxETH;
 const rETH = TOKENS[chainId].rETH;
 
+// pool and tokens for swap
 const BAL_WETH = POOLS[chainId].BAL_WETH;
 const wstETH_wETH = POOLS[chainId].wstETH_wETH;
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 
+// nested pool and tokens
+const DAI = TOKENS[chainId].DAI;
+const USDC = TOKENS[chainId].USDC;
+const USDT = TOKENS[chainId].USDT;
+const BPT_3POOL = POOLS[chainId].BPT_3POOL;
+const BPT_WETH_3POOL = POOLS[chainId].BPT_WETH_3POOL;
+
 describe('price impact', () => {
     let poolState: PoolState;
+    let nestedPoolState: NestedPoolState;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolState = await api.getPool(poolId);
+        poolState = await api.getPool(wstETH_rETH_sfrxETH.id);
+        nestedPoolState = await api.getNestedPool(BPT_WETH_3POOL.id);
     });
 
     describe('add liquidity single token', () => {
@@ -94,7 +109,10 @@ describe('price impact', () => {
                     rawAmount:
                         i === 0
                             ? 0n
-                            : parseEther((10n ** BigInt(i)).toString()),
+                            : parseUnits(
+                                  (10n ** BigInt(i)).toString(),
+                                  t.decimals,
+                              ),
                     decimals: t.decimals,
                     address: t.address,
                 };
@@ -122,12 +140,57 @@ describe('price impact', () => {
         });
     });
 
+    describe('add liquidity nested - unbalanced', () => {
+        let input: AddLiquidityNestedInput;
+        beforeAll(() => {
+            input = {
+                chainId,
+                rpcUrl,
+                accountAddress: ZERO_ADDRESS,
+                amountsIn: [
+                    {
+                        address: DAI.address,
+                        rawAmount: parseUnits('100000', DAI.decimals),
+                        decimals: DAI.decimals,
+                    },
+                    {
+                        address: USDC.address,
+                        rawAmount: parseUnits('1000', USDC.decimals),
+                        decimals: USDC.decimals,
+                    },
+                    {
+                        address: USDT.address,
+                        rawAmount: parseUnits('10', USDT.decimals),
+                        decimals: USDT.decimals,
+                    },
+                    {
+                        address: WETH.address,
+                        rawAmount: parseUnits('0.1', WETH.decimals),
+                        decimals: WETH.decimals,
+                    },
+                ],
+            };
+        });
+        test('ABA close to Spot Price', async () => {
+            const priceImpactABA = await PriceImpact.addLiquidityNested(
+                input,
+                nestedPoolState,
+            );
+            const priceImpactSpot =
+                PriceImpactAmount.fromRawAmount(47564822560662355n); // from previous SDK
+            expect(priceImpactABA.decimal).closeTo(
+                priceImpactSpot.decimal,
+                1e-3, // 1 bps
+            );
+        });
+    });
+
     describe('swap', () => {
         let pathBalWeth: Path;
         let pathBalWethWsteth: Path;
         beforeAll(() => {
             pathBalWeth = {
-                balancerVersion: 2,
+                vaultVersion: 2,
                 tokens: [
                     {
                         address: BAL.address,
@@ -298,6 +361,36 @@ describe('price impact', () => {
             );
         });
     });
+
+    /**
+     * FIXME: Test pending a reference value for comparison/validation, because
+     * there is no corresponding method in previous SDK to validate the result.
+     * We should be able to infer that it is correct because it follows the same
+     * ABA approach as price impact for other actions (addLiquidity, swap, etc.)
+     */
+    describe('remove liquidity nested - single token', () => {
+        let input: RemoveLiquidityNestedSingleTokenInput;
+        beforeAll(() => {
+            input = {
+                chainId,
+                rpcUrl,
+                bptAmountIn: parseEther('1200'),
+                accountAddress: ZERO_ADDRESS,
+                tokenOut: WETH.address,
+            };
+        });
+        test('ABA close to Spot Price', async () => {
+            const priceImpactABA = await PriceImpact.removeLiquidityNested(
+                input,
+                nestedPoolState,
+            );
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0288');
+            expect(priceImpactABA.decimal).closeTo(
+                priceImpactSpot.decimal,
+                1e-4, // 1 bps
+            );
+        });
+    });
 });
 
 /*********************** Mock To Represent API Requirements **********************/
@@ -332,7 +425,79 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.ComposableStable,
             tokens,
-            balancerVersion: 2,
+            vaultVersion: 2,
+        };
+    }
+
+    public async getNestedPool(poolId: Hex): Promise<NestedPoolState> {
+        if (poolId !== BPT_WETH_3POOL.id) throw Error();
+        return {
+            pools: [
+                {
+                    id: BPT_WETH_3POOL.id,
+                    address: BPT_WETH_3POOL.address,
+                    type: BPT_WETH_3POOL.type,
+                    level: 1,
+                    tokens: [
+                        {
+                            address: BPT_3POOL.address,
+                            decimals: BPT_3POOL.decimals,
+                            index: 0,
+                        },
+                        {
+                            address: WETH.address,
+                            decimals: WETH.decimals,
+                            index: 1,
+                        },
+                    ],
+                },
+                {
+                    id: BPT_3POOL.id,
+                    address: BPT_3POOL.address,
+                    type: BPT_3POOL.type,
+                    level: 0,
+                    tokens: [
+                        {
+                            address: DAI.address,
+                            decimals: DAI.decimals,
+                            index: 0,
+                        },
+                        {
+                            address: BPT_3POOL.address,
+                            decimals: BPT_3POOL.decimals,
+                            index: 1,
+                        },
+                        {
+                            address: USDC.address,
+                            decimals: USDC.decimals,
+                            index: 2,
+                        },
+                        {
+                            address: USDT.address,
+                            decimals: USDT.decimals,
+                            index: 3,
+                        },
+                    ],
+                },
+            ],
+            mainTokens: [
+                {
+                    address: WETH.address,
+                    decimals: WETH.decimals,
+                },
+                {
+                    address: DAI.address,
+                    decimals: DAI.decimals,
+                },
+                {
+                    address: USDC.address,
+                    decimals: USDC.decimals,
+                },
+                {
+                    address: USDT.address,
+                    decimals: USDT.decimals,
+                },
+            ],
         };
     }
 }

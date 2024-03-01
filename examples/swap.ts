@@ -21,23 +21,23 @@ import {
 
 const swap = async () => {
     // User defined
-    const chainId = ChainId.MAINNET;
-    const swapKind = SwapKind.GivenOut;
+    const chainId = ChainId.POLYGON;
+    const swapKind = SwapKind.GivenIn;
     const tokenIn = new Token(
         chainId,
-        '0xba100000625a3754423978a60c9317c58a424e3D',
+        '0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6',
         18,
         'BAL',
     );
     const tokenOut = new Token(
         chainId,
-        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
         18,
         'ETH',
     );
     const slippage = Slippage.fromPercentage('0.1');
     const swapAmount =
-        swapKind === SwapKind.GivenOut
+        swapKind === SwapKind.GivenIn
             ? TokenAmount.fromHumanAmount(tokenIn, '1.2345678910')
             : TokenAmount.fromHumanAmount(tokenOut, '1.2345678910');
     const sender = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
@@ -73,15 +73,15 @@ const swap = async () => {
     );
 
     // Get up to date swap result by querying onchain
-    const expected = await swap.query(process.env.ETHEREUM_RPC_URL);
+    const updated = await swap.query(process.env.POLYGON_RPC_URL);
 
     // Construct transaction to make swap
-    if (expected.swapKind === SwapKind.GivenIn) {
-        console.log(`Updated amount: ${expected.expectedAmountOut.amount}`);
+    if (updated.swapKind === SwapKind.GivenIn) {
+        console.log(`Updated amount: ${updated.expectedAmountOut.amount}`);
         const callData = swap.buildCall({
             slippage,
             deadline,
-            queryOutput: expected,
+            queryOutput: updated,
             sender,
             recipient,
             wethIsEth: false,
@@ -90,11 +90,11 @@ const swap = async () => {
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
     } else {
-        console.log(`Updated amount: ${expected.expectedAmountIn.amount}`);
+        console.log(`Updated amount: ${updated.expectedAmountIn.amount}`);
         const callData = swap.buildCall({
             slippage,
             deadline,
-            queryOutput: expected,
+            queryOutput: updated,
             sender,
             recipient,
             wethIsEth: false,

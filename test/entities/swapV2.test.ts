@@ -28,7 +28,7 @@ describe('SwapV2', () => {
             ];
 
             const pathTo6Decimals: Path = {
-                balancerVersion: 2,
+                vaultVersion: 2,
                 tokens,
                 pools: [
                     '0xc2aa60465bffa1a88f5ba471a59ca0435c3ec5c100020000000000000000062c',

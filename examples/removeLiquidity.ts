@@ -8,17 +8,19 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import {
-    ChainId,
-    RemoveLiquidityKind,
-    RemoveLiquidity,
-    PoolState,
-    Slippage,
-    InputAmount,
-    RemoveLiquidityInput,
-    BalancerApi,
-} from '../src';
 import { parseEther } from 'viem';
+
+import {
+    BalancerApi,
+    ChainId,
+    InputAmount,
+    PoolState,
+    PriceImpact,
+    RemoveLiquidity,
+    RemoveLiquidityInput,
+    RemoveLiquidityKind,
+    Slippage,
+} from '../src';
 import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
 import { makeForkTx } from './utils/makeForkTx';
 
@@ -55,6 +57,13 @@ const removeLiquidity = async () => {
         kind: RemoveLiquidityKind.SingleTokenExactIn,
     };
 
+    // Calculate price impact to ensure it's acceptable
+    const priceImpact = await PriceImpact.removeLiquidity(
+        removeLiquidityInput,
+        poolState,
+    );
+    console.log(`\nPrice Impact: ${priceImpact.percentage.toFixed(2)}%`);
+
     // Simulate removing liquidity to get the tokens out
     const removeLiquidity = new RemoveLiquidity();
     const queryOutput = await removeLiquidity.query(
@@ -62,11 +71,12 @@ const removeLiquidity = async () => {
         poolState,
     );
 
-    console.log('Remove Liquidity Query Output:');
-    console.log(`BPT In: ${queryOutput.bptIn.amount.toString()}\nTokens Out:`);
-    queryOutput.amountsOut.map((a) =>
-        console.log(a.token.address, a.amount.toString()),
-    );
+    console.log('\nRemove Liquidity Query Output:');
+    console.log(`BPT In: ${queryOutput.bptIn.amount.toString()}`);
+    console.table({
+        tokensOut: queryOutput.amountsOut.map((a) => a.token.address),
+        amountsOut: queryOutput.amountsOut.map((a) => a.amount),
+    });
 
     // Apply slippage to the tokens out received from the query and construct the call
     const call = removeLiquidity.buildCall({
@@ -80,10 +90,10 @@ const removeLiquidity = async () => {
 
     console.log('\nWith slippage applied:');
     console.log(`Max BPT In: ${call.maxBptIn.amount}`);
-    console.log('Min amounts out: ');
-    call.minAmountsOut.forEach((a) =>
-        console.log(a.token.address, a.amount.toString()),
-    );
+    console.table({
+        tokensOut: call.minAmountsOut.map((a) => a.token.address),
+        minAmountsOut: call.minAmountsOut.map((a) => a.amount),
+    });
 
     // Make the tx against the local fork and print the result
     await makeForkTx(

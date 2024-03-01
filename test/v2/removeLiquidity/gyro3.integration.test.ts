@@ -223,7 +223,7 @@ class MockApi {
                     index: 2,
                 },
             ],
-            balancerVersion: 2,
+            vaultVersion: 2,
         };
     }
 }

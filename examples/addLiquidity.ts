@@ -8,15 +8,17 @@
 import { config } from 'dotenv';
 config();
 
+import { parseUnits } from 'viem';
+
 import {
-    BalancerApi,
-    ChainId,
     AddLiquidityInput,
     AddLiquidityKind,
     AddLiquidity,
+    BalancerApi,
+    ChainId,
+    PriceImpact,
     Slippage,
 } from '../src';
-import { parseUnits } from 'viem';
 import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
 import { makeForkTx } from './utils/makeForkTx';
 
@@ -53,11 +55,18 @@ const addLiquidity = async () => {
         kind: AddLiquidityKind.Unbalanced,
     };
 
+    // Calculate price impact to ensure it's acceptable
+    const priceImpact = await PriceImpact.addLiquidityUnbalanced(
+        addLiquidityInput,
+        poolState,
+    );
+    console.log(`\nPrice Impact: ${priceImpact.percentage.toFixed(2)}%`);
+
     // Simulate addLiquidity to get the amount of BPT out
     const addLiquidity = new AddLiquidity();
     const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
 
-    console.log('Add Liquidity Query Output:');
+    console.log('\nAdd Liquidity Query Output:');
     console.log('Tokens In:');
     queryOutput.amountsIn.map((a) =>
         console.log(a.token.address, a.amount.toString()),
@@ -71,6 +80,7 @@ const addLiquidity = async () => {
         sender: userAccount,
         recipient: userAccount,
         chainId,
+        wethIsEth: false,
     });
 
     console.log('\nWith slippage applied:');

@@ -1,18 +1,14 @@
-// pnpm example ./examples/addLiquidityNested.ts
+/**
+ * Example showing how to add liquidity to a pool.
+ * (Runs against a local Anvil fork)
+ *
+ * Run with:
+ * pnpm example ./examples/addLiquidityNested.ts
+ */
+
 import { config } from 'dotenv';
 config();
 
-import {
-    Address,
-    BALANCER_RELAYER,
-    BalancerApi,
-    ChainId,
-    CHAINS,
-    AddLiquidityNested,
-    NestedPoolState,
-    replaceWrapped,
-    Slippage,
-} from '../src';
 import {
     Client,
     createTestClient,
@@ -24,8 +20,21 @@ import {
     WalletActions,
     walletActions,
 } from 'viem';
-import { AddLiquidityNestedInput } from '../src/entities/addLiquidityNested/types';
-import { Relayer } from '../src/entities/relayer';
+
+import {
+    Address,
+    AddLiquidityNested,
+    AddLiquidityNestedInput,
+    BALANCER_RELAYER,
+    BalancerApi,
+    ChainId,
+    CHAINS,
+    NestedPoolState,
+    PriceImpact,
+    Relayer,
+    replaceWrapped,
+    Slippage,
+} from '../src';
 import {
     forkSetup,
     sendTransactionGetBalances,
@@ -49,6 +58,7 @@ const addLiquidityNested = async () => {
         {
             address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
             rawAmount: parseUnits('1', 18),
+            decimals: 18,
         },
     ];
 
@@ -61,10 +71,25 @@ const addLiquidityNested = async () => {
         accountAddress,
         useNativeAssetAsWrappedAmountIn,
     };
+
+    // Calculate price impact to ensure it's acceptable
+    const priceImpact = await PriceImpact.addLiquidityNested(
+        addLiquidityInput,
+        nestedPoolState,
+    );
+    console.log(`\nPrice Impact: ${priceImpact.percentage.toFixed(2)}%`);
+
     const queryOutput = await addLiquidityNested.query(
         addLiquidityInput,
         nestedPoolState,
     );
+
+    console.log('\nAdd Liquidity Query Output:');
+    console.table({
+        tokensIn: queryOutput.amountsIn.map((a) => a.token.address),
+        amountsIn: queryOutput.amountsIn.map((a) => a.amount),
+    });
+    console.log(`BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
     // build add liquidity nested call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
@@ -75,7 +100,7 @@ const addLiquidityNested = async () => {
         client,
     );
 
-    const { call, to, value } = addLiquidityNested.buildCall({
+    const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
         sender: accountAddress,
@@ -87,6 +112,9 @@ const addLiquidityNested = async () => {
     if (useNativeAssetAsWrappedAmountIn) {
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
+
+    console.log('\nWith slippage applied:');
+    console.log(`Min BPT Out: ${minBptOut.toString()}`);
 
     const tokens = [
         ...tokensIn.map((t) => t.address),
@@ -103,7 +131,8 @@ const addLiquidityNested = async () => {
             call,
             value,
         );
-    console.log(`transaction status: ${transactionReceipt.status}`);
+    console.log(`\nTransaction status: ${transactionReceipt.status}`);
+    console.log('Token balance deltas:');
     console.table({
         tokens,
         balanceDeltas,

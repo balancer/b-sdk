@@ -33,7 +33,7 @@ export class SorSwapPaths {
         inputAmountRaw
         outputAmountRaw
         pools
-        balancerVersion:vaultVersion
+        vaultVersion
         tokens {
           address
           decimals
@@ -61,7 +61,7 @@ export class SorSwapPaths {
         inputAmountRaw
         outputAmountRaw
         pools
-        balancerVersion:vaultVersion
+        vaultVersion
         tokens {
           address
           decimals

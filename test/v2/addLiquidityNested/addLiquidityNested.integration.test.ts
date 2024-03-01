@@ -1,5 +1,4 @@
 // pnpm test -- addLiquidityNested.integration.test.ts
-import { describe, expect, test, beforeAll } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -15,9 +14,7 @@ import {
     walletActions,
 } from 'viem';
 
-import { NestedPoolState } from '@/entities';
-import { Address, Hex } from '@/types';
-import { CHAINS, ChainId } from '@/utils';
+import { Address, CHAINS, ChainId, Hex, NestedPoolState } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { POOLS, TestToken, TOKENS } from 'test/lib/utils/addresses';
@@ -95,6 +92,7 @@ describe('add liquidity nested test', () => {
             {
                 address: WETH.address,
                 rawAmount: parseUnits('1', WETH.decimals),
+                decimals: WETH.decimals,
             },
         ];
 
@@ -128,6 +126,7 @@ describe('add liquidity nested test', () => {
         const amountsIn = mainTokens.map((t) => ({
             address: t.address,
             rawAmount: parseUnits('1', t.decimals),
+            decimals: t.decimals,
         }));
 
         txInput = {
@@ -160,6 +159,7 @@ describe('add liquidity nested test', () => {
         const amountsIn = mainTokens.map((t) => ({
             address: t.address,
             rawAmount: parseUnits('1', t.decimals),
+            decimals: t.decimals,
         }));
 
         const useNativeAssetAsWrappedAmountIn = true;
@@ -197,6 +197,7 @@ describe('add liquidity nested test', () => {
             {
                 address: USDC.address,
                 rawAmount: parseUnits('1', USDC.decimals),
+                decimals: USDC.decimals,
             },
         ];
 

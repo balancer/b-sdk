@@ -1,40 +1,40 @@
 import { Address, encodeFunctionData, parseEther } from 'viem';
-import { composableStableFactoryV5Abi } from '../../../../abi/composableStableFactoryV5';
+import { composableStableFactoryV5Abi_V2 } from '../../../../abi/composableStableFactoryV5.V2';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
-    CreatePoolComposableStableArgs,
-    CreatePoolComposableStableInput,
+    CreatePoolV2ComposableStableArgs,
+    CreatePoolV2ComposableStableInput,
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
+import { COMPOSABLE_STABLE_POOL_FACTORY } from '@/utils';
+import { sortByAddress } from '@/utils/sortByAddress';
 
-export class CreatePoolComposableStable implements CreatePoolBase {
+export class CreatePoolComposableStableV2 implements CreatePoolBase {
     buildCall(
-        input: CreatePoolComposableStableInput,
+        input: CreatePoolV2ComposableStableInput,
     ): CreatePoolBuildCallOutput {
         const args = this.parseCreateFunctionArgs(input);
         const encodedCall = encodeFunctionData({
-            abi: composableStableFactoryV5Abi,
+            abi: composableStableFactoryV5Abi_V2,
             functionName: 'create',
             args,
         });
-        return { call: encodedCall };
+        return {
+            call: encodedCall,
+            to: COMPOSABLE_STABLE_POOL_FACTORY[input.chainId],
+        };
     }
 
     private parseCreateFunctionArgs(
-        input: CreatePoolComposableStableInput,
-    ): CreatePoolComposableStableArgs {
-        const sortedTokenParams = input.tokens.sort(
-            ({ tokenAddress: address1 }, { tokenAddress: address2 }) => {
-                const diff = BigInt(address1) - BigInt(address2);
-                return diff > 0 ? 1 : diff < 0 ? -1 : 0;
-            },
-        );
+        input: CreatePoolV2ComposableStableInput,
+    ): CreatePoolV2ComposableStableArgs {
+        const sortedTokenParams = sortByAddress(input.tokens);
 
         const [tokens, rateProviders, tokenRateCacheDurations] =
             sortedTokenParams.reduce(
                 (acc, curr) => {
-                    acc[0].push(curr.tokenAddress);
+                    acc[0].push(curr.address);
                     acc[1].push(curr.rateProvider);
                     acc[2].push(curr.tokenRateCacheDuration);
                     return acc;

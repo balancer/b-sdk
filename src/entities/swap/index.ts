@@ -21,16 +21,16 @@ export * from './types';
 // A Swap can be a single or multiple paths
 export class Swap {
     private readonly swap: SwapBase;
-    public balancerVersion: 2 | 3;
+    public vaultVersion: 2 | 3;
 
     public constructor(swapInput: SwapInput) {
         validatePaths(swapInput.paths);
 
-        if (swapInput.paths[0].balancerVersion === 2) {
-            this.balancerVersion = 2;
+        if (swapInput.paths[0].vaultVersion === 2) {
+            this.vaultVersion = 2;
             this.swap = new SwapV2(swapInput);
         } else {
-            this.balancerVersion = 3;
+            this.vaultVersion = 3;
             this.swap = new SwapV3(swapInput);
         }
     }
@@ -74,6 +74,13 @@ export class Swap {
     buildCall(
         callInput: SwapCallInput,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        const isV2Input = 'sender' in callInput;
+        if (this.vaultVersion === 3 && isV2Input)
+            throw Error('Cannot define sender/recipient in V3');
+
+        if (this.vaultVersion === 2 && !isV2Input)
+            throw Error('Sender/recipient must be defined in V2');
+
         if (callInput.queryOutput.swapKind === SwapKind.GivenIn) {
             const minAmountOut = this.limitAmount(
                 callInput.slippage,

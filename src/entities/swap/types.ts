@@ -33,7 +33,7 @@ export type Path = {
     tokens: TokenApi[];
     outputAmountRaw: bigint;
     inputAmountRaw: bigint;
-    balancerVersion: 2 | 3;
+    vaultVersion: 2 | 3;
 };
 
 export type SwapInput = {
@@ -87,3 +87,9 @@ export type CallInputBase = {
 };
 
 export type SwapCallInput = CallInputBase | CallInputV2;
+
+export type SwapCallBuildBase = {
+    deadline: bigint;
+    limitAmount: TokenAmount;
+    wethIsEth: boolean;
+};

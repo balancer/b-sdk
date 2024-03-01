@@ -16,16 +16,16 @@ import {
     PoolState,
     PoolType,
     Slippage,
-} from '../../../src';
-import { CreatePool } from '../../../src/entities/createPool';
-import { CreatePoolComposableStableInput } from '../../../src/entities/createPool/types';
+    CreatePool,
+    CreatePoolV2ComposableStableInput,
+    InitPoolDataProvider,
+    InitPool,
+    InitPoolInput,
+} from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { InitPoolTxInput, CreatePoolTxInput } from '../../lib/utils/types';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
-import { InitPoolDataProvider } from '../../../src/data/providers/initPoolDataProvider';
 import { forkSetup } from '../../lib/utils/helper';
-import { InitPool } from '../../../src/entities/initPool';
-import { InitPoolInput } from '../../../src/entities/initPool/types';
 import { assertInitPool, doInitPool } from '../../lib/utils/initPoolHelper';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
@@ -33,7 +33,7 @@ const chainId = ChainId.MAINNET;
 
 describe('Composable Stable Pool - Init Pool tests', async () => {
     let poolAddress: Address;
-    let createPoolComposableStableInput: CreatePoolComposableStableInput;
+    let createPoolComposableStableInput: CreatePoolV2ComposableStableInput;
     let createTxInput: CreatePoolTxInput;
     let initPoolTxInput: InitPoolTxInput;
     let initPoolInput: InitPoolInput;
@@ -55,12 +55,12 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             poolType: PoolType.ComposableStable,
             tokens: [
                 {
-                    tokenAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
+                    address: '0xba100000625a3754423978a60c9317c58a424e3d',
                     rateProvider: zeroAddress,
                     tokenRateCacheDuration: 100n,
                 },
                 {
-                    tokenAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                     rateProvider: zeroAddress,
                     tokenRateCacheDuration: 100n,
                 },
@@ -69,7 +69,8 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             exemptFromYieldProtocolFeeFlag: false,
             swapFee: '0.01',
             poolOwnerAddress: signerAddress, // Balancer DAO Multisig
-            balancerVersion: 2,
+            chainId,
+            vaultVersion: 2,
         };
 
         createTxInput = {
@@ -84,14 +85,12 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
             recipient: signerAddress,
             amountsIn: [
                 {
-                    address:
-                        createPoolComposableStableInput.tokens[0].tokenAddress,
+                    address: createPoolComposableStableInput.tokens[0].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                 },
                 {
-                    address:
-                        createPoolComposableStableInput.tokens[1].tokenAddress,
+                    address: createPoolComposableStableInput.tokens[1].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                 },
