@@ -1,8 +1,11 @@
-import { Address, getContract } from 'viem';
+import { Address, Client, Hex, PublicClient, getContract } from 'viem';
 import { vaultV2Abi, vaultV3Abi } from '../abi';
 import { VAULT, VAULT_V3 } from './constants';
 
-export async function getTokenDecimals(tokenAddress, client) {
+export async function getTokenDecimals(
+    tokenAddress: Address,
+    client: Client,
+): Promise<number> {
     try {
         const abi = [
             {
@@ -25,7 +28,8 @@ export async function getTokenDecimals(tokenAddress, client) {
             address: tokenAddress,
             client,
         });
-        const decimals = await tokenContract.read.decimals();
+        const decimals: number =
+            (await tokenContract.read.decimals()) as number;
         return decimals;
     } catch (e) {
         console.warn(e);
@@ -35,7 +39,10 @@ export async function getTokenDecimals(tokenAddress, client) {
     }
 }
 
-export async function getPoolTokensV2(poolId, client) {
+export async function getPoolTokensV2(
+    poolId: Hex,
+    client: PublicClient,
+): Promise<[Address[], bigint[], bigint]> {
     try {
         const chainId = await client.getChainId();
         const vaultV2 = getContract({
@@ -43,7 +50,9 @@ export async function getPoolTokensV2(poolId, client) {
             address: VAULT[chainId],
             client,
         });
-        const poolTokensFromVault = await vaultV2.read.getPoolTokens([poolId]);
+        const poolTokensFromVault = (await vaultV2.read.getPoolTokens([
+            poolId,
+        ])) as [Address[], bigint[], bigint];
         return poolTokensFromVault;
     } catch (e) {
         console.warn(e);
@@ -53,7 +62,10 @@ export async function getPoolTokensV2(poolId, client) {
     }
 }
 
-export async function getPoolTokensV3(poolAddress, client) {
+export async function getPoolTokensV3(
+    poolAddress: Address,
+    client: PublicClient,
+): Promise<Address[]> {
     try {
         const chainId = await client.getChainId();
         const vaultV3 = getContract({
