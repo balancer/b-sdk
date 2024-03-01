@@ -74,6 +74,13 @@ export class Swap {
     buildCall(
         callInput: SwapCallInput,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        const isV2Input = 'sender' in callInput;
+        if (this.vaultVersion === 3 && isV2Input)
+            throw Error('Cannot define sender/recipient in V3');
+
+        if (this.vaultVersion === 2 && !isV2Input)
+            throw Error('Sender/recipient must be defined in V2');
+
         if (callInput.queryOutput.swapKind === SwapKind.GivenIn) {
             const minAmountOut = this.limitAmount(
                 callInput.slippage,

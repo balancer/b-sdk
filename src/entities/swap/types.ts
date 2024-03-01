@@ -87,3 +87,9 @@ export type CallInputBase = {
 };
 
 export type SwapCallInput = CallInputBase | CallInputV2;
+
+export type SwapCallBuildBase = {
+    deadline: bigint;
+    limitAmount: TokenAmount;
+    wethIsEth: boolean;
+};
