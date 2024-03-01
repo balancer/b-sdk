@@ -49,7 +49,7 @@ export class InitPoolV3 implements InitPoolBase {
             ? (input.amountsIn.find((a) =>
                   isSameAddress(
                       a.address,
-                      NATIVE_ASSETS[input.chainId].address,
+                      NATIVE_ASSETS[input.chainId].wrapped,
                   ),
               )?.rawAmount as bigint)
             : 0n;
