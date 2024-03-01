@@ -83,7 +83,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
         const poolContainsWrappedNativeAsset = !!poolState.tokens.find((a) =>
             isSameAddress(
                 a.address,
-                NATIVE_ASSETS[initPoolInput.chainId].address,
+                NATIVE_ASSETS[initPoolInput.chainId].wrapped,
             ),
         );
         if (!poolContainsWrappedNativeAsset) {
