@@ -43,12 +43,6 @@ export type InputAmount = InputToken & {
     rawAmount: bigint;
 };
 
-export type InputAmountInit = InputAmount | InputAmountInitWeighted;
-
-export type InputAmountInitWeighted = InputAmount & {
-    weight: bigint;
-};
-
 export enum TokenType {
     STANDARD = 0,
     TOKEN_WITH_RATE = 1,

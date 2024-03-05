@@ -6,7 +6,7 @@ import { PoolState } from '../types';
 
 export interface InputValidatorBase {
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput | InitPoolInput,
+        addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void;
 
@@ -16,4 +16,6 @@ export interface InputValidatorBase {
     ): void;
 
     validateCreatePool(input: CreatePoolInput): void;
+
+    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void;
 }

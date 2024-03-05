@@ -58,7 +58,6 @@ export function assertInitPool(
     },
 ) {
     const { txOutput } = initPoolOutput;
-
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
     // Matching order of getTokens helper: [poolTokens, BPT, native]

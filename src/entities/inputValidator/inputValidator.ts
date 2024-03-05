@@ -27,8 +27,15 @@ export class InputValidator {
         return this.validators[poolType];
     }
 
+    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState) {
+        this.getValidator(poolState.type).validateInitPool(
+            initPoolInput,
+            poolState,
+        );
+    }
+
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput | InitPoolInput,
+        addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
         this.getValidator(poolState.type).validateAddLiquidity(
