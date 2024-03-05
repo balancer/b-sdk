@@ -16,6 +16,7 @@ import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { encodeCalls } from './encodeCalls';
 import { getPeekCalls } from './getPeekCalls';
 import { validateInputs } from './validateInputs';
+import { validateNestedPoolState } from '../utils';
 
 export class RemoveLiquidityNested {
     async query(
@@ -25,6 +26,7 @@ export class RemoveLiquidityNested {
         nestedPoolState: NestedPoolState,
     ): Promise<RemoveLiquidityNestedQueryOutput> {
         const isProportional = validateInputs(input, nestedPoolState);
+        validateNestedPoolState(nestedPoolState);
 
         const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
             input,

@@ -22,6 +22,7 @@ import {
     parseAddLiquidityArgs,
 } from '@/entities/utils';
 import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
+import { getValue } from '../../helpers';
 
 type AddLiquidityAmounts = AddLiquidityAmountsBase & {
     maxAmountsInWithoutBpt: bigint[];
@@ -105,14 +106,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             args,
         });
 
-        const value = input.amountsIn.find(
-            (a) => a.token.address === ZERO_ADDRESS,
-        )?.amount;
-
         return {
             call,
             to: VAULT[input.chainId],
-            value: value === undefined ? 0n : value,
+            value: getValue(input),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,

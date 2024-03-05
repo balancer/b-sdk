@@ -13,7 +13,6 @@ export const getQueryCallsAttributes = (
         amountsIn,
         chainId,
         accountAddress,
-        sendNativeAsset,
         fromInternalBalance,
     }: AddLiquidityNestedInput,
     pools: NestedPool[],
@@ -38,7 +37,6 @@ export const getQueryCallsAttributes = (
         }
         calls.push({
             chainId: chainId,
-            sendNativeAsset: sendNativeAsset ?? false,
             sortedTokens,
             poolId: pool.id,
             poolAddress: pool.address,

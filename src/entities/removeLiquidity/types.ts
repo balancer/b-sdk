@@ -67,6 +67,7 @@ export type RemoveLiquidityBaseQueryOutput = {
     tokenOutIndex?: number;
     toInternalBalance: boolean;
     vaultVersion: 2 | 3;
+    chainId: number;
 };
 
 export type RemoveLiquidityComposableStableQueryOutput =

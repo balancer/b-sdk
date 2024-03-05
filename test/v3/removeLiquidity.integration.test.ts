@@ -183,22 +183,21 @@ describe('remove liquidity test', () => {
         });
 
         test('with native', async () => {
-            const removeLiquidityInput = {
-                ...input,
-                receiveNativeAsset: true,
-            };
+            const receiveNativeAsset = true;
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
-                removeLiquidityInput,
+                removeLiquidityInput: input,
+                receiveNativeAsset,
             });
 
             assertRemoveLiquiditySingleTokenExactOut(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
-                removeLiquidityInput,
+                input,
                 removeLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
+                receiveNativeAsset,
             );
         });
     });
@@ -237,22 +236,21 @@ describe('remove liquidity test', () => {
         });
 
         test('with native', async () => {
-            const removeLiquidityInput = {
-                ...input,
-                receiveNativeAsset: true,
-            };
+            const receiveNativeAsset = true;
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
-                removeLiquidityInput,
+                removeLiquidityInput: input,
+                receiveNativeAsset,
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
-                removeLiquidityInput,
+                input,
                 removeLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
+                receiveNativeAsset,
             );
         });
     });
@@ -288,21 +286,20 @@ describe('remove liquidity test', () => {
             );
         });
         test('with native', async () => {
-            const removeLiquidityInput = {
-                ...input,
-                receiveNativeAsset: true,
-            };
+            const receiveNativeAsset = true;
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
-                removeLiquidityInput,
+                removeLiquidityInput: input,
+                receiveNativeAsset,
             });
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
                 txInput.poolState,
-                removeLiquidityInput,
+                input,
                 removeLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
+                receiveNativeAsset,
             );
         });
     });

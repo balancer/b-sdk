@@ -1,5 +1,5 @@
 export * from './calculateProportionalAmounts';
-export * from './constraintValidation';
+export * from './validateNestedPoolState';
 export * from './doAddLiquidityQuery';
 export * from './doSingleSwapQuery';
 export * from './getAmounts';

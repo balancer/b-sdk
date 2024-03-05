@@ -45,7 +45,6 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
-            receiveNativeAsset: !!input.receiveNativeAsset,
             poolId: poolState.id,
             sortedTokens,
             sender: ZERO_ADDRESS,
@@ -76,6 +75,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             toInternalBalance: !!input.toInternalBalance,
             bptIndex,
             vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
         };
     }
 
@@ -143,6 +143,8 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             minAmountsOut: amounts.minAmountsOut,
             userData,
             toInternalBalance: !!input.toInternalBalance,
+            receiveNativeAsset: !!input.receiveNativeAsset,
+            chainId: input.chainId,
         });
         const call = encodeFunctionData({
             abi: vaultV2Abi,

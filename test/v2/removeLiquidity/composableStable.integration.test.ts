@@ -126,14 +126,15 @@ describe('composable stable remove liquidity test', () => {
             );
         });
         test('with native', async () => {
+            const receiveNativeAsset = true;
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
-                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                receiveNativeAsset,
             });
             assertRemoveLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
@@ -141,6 +142,8 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                2,
+                receiveNativeAsset,
             );
         });
     });
@@ -178,14 +181,15 @@ describe('composable stable remove liquidity test', () => {
             );
         });
         test('with native', async () => {
+            const receiveNativeAsset = true;
             const removeLiquidityInput = {
                 ...input,
                 amountOut,
-                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                receiveNativeAsset,
             });
             assertRemoveLiquiditySingleTokenExactOut(
                 txInput.client.chain?.id as number,
@@ -193,6 +197,8 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                2,
+                receiveNativeAsset,
             );
         });
     });
@@ -230,13 +236,14 @@ describe('composable stable remove liquidity test', () => {
         });
 
         test('with native', async () => {
+            const receiveNativeAsset = true;
             const removeLiquidityInput = {
                 ...input,
-                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                receiveNativeAsset,
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
@@ -245,6 +252,8 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                2,
+                receiveNativeAsset,
             );
         });
     });
@@ -279,13 +288,14 @@ describe('composable stable remove liquidity test', () => {
             );
         });
         test('with native', async () => {
+            const receiveNativeAsset = true;
             const removeLiquidityInput = {
                 ...input,
-                sendNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                receiveNativeAsset,
             });
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
@@ -293,6 +303,8 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                2,
+                receiveNativeAsset,
             );
         });
     });

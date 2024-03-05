@@ -98,6 +98,7 @@ describe('composable stable remove liquidity test', () => {
                 txInput.slippage,
             );
         });
+        // TODO: with native asset
     });
 });
 

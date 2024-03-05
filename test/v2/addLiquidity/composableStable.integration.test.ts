@@ -126,14 +126,15 @@ describe('add liquidity composable stable test', () => {
         });
 
         test('with native', async () => {
+            const sendNativeAsset = true;
             const addLiquidityInput = {
                 ...input,
                 amountsIn,
-                sendNativeAsset: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
+                sendNativeAsset,
             });
             assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
@@ -141,6 +142,8 @@ describe('add liquidity composable stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                2,
+                sendNativeAsset,
             );
         });
     });
@@ -178,13 +181,14 @@ describe('add liquidity composable stable test', () => {
         });
 
         test('with native', async () => {
+            const sendNativeAsset = true;
             const addLiquidityInput = {
                 ...input,
-                sendNativeAsset: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
+                sendNativeAsset,
             });
 
             assertAddLiquiditySingleToken(
@@ -193,6 +197,8 @@ describe('add liquidity composable stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                2,
+                sendNativeAsset,
             );
         });
     });
@@ -227,13 +233,14 @@ describe('add liquidity composable stable test', () => {
             );
         });
         test('with native', async () => {
+            const sendNativeAsset = true;
             const addLiquidityInput = {
                 ...input,
-                sendNativeAsset: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
+                sendNativeAsset,
             });
             assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
@@ -241,6 +248,8 @@ describe('add liquidity composable stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                2,
+                sendNativeAsset,
             );
         });
     });

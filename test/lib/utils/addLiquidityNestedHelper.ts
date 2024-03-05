@@ -62,7 +62,6 @@ export const doAddLiquidityNested = async ({
         chainId,
         rpcUrl,
         accountAddress: testAddress,
-        sendNativeAsset,
     };
     const queryOutput = await addLiquidityNested.query(
         addLiquidityInput,
@@ -84,6 +83,7 @@ export const doAddLiquidityNested = async ({
         sender: testAddress,
         recipient: testAddress,
         relayerApprovalSignature: signature,
+        sendNativeAsset,
     });
 
     let tokensIn = queryOutput.amountsIn.map((a) => a.token);

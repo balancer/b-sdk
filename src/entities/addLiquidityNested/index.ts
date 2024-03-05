@@ -13,15 +13,17 @@ import {
 } from './types';
 import { doAddLiquidityNestedQuery } from './doAddLiquidityNestedQuery';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
-import { validateInputs } from './validateInputs';
+import { validateBuildCallInput, validateQueryInput } from './validateInputs';
 import { NestedPoolState } from '../types';
+import { validateNestedPoolState } from '../utils';
 
 export class AddLiquidityNested {
     async query(
         input: AddLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
     ): Promise<AddLiquidityNestedQueryOutput> {
-        const amountsIn = validateInputs(input, nestedPoolState);
+        const amountsIn = validateQueryInput(input, nestedPoolState);
+        validateNestedPoolState(nestedPoolState);
 
         const callsAttributes = getQueryCallsAttributes(
             input,
@@ -65,6 +67,7 @@ export class AddLiquidityNested {
         value: bigint | undefined;
         minBptOut: bigint;
     } {
+        validateBuildCallInput(input);
         // apply slippage to bptOut
         const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
 
@@ -73,6 +76,14 @@ export class AddLiquidityNested {
             ...input.callsAttributes[input.callsAttributes.length - 1],
             minBptOut,
         };
+
+        // update sendNativeAsset flag
+        input.callsAttributes = input.callsAttributes.map((call) => {
+            return {
+                ...call,
+                sendNativeAsset: input.sendNativeAsset,
+            };
+        });
 
         const { encodedCalls, values } = encodeCalls(input.callsAttributes);
 

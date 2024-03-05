@@ -22,6 +22,7 @@ export type AddLiquidityTxInput = {
     slippage: Slippage;
     poolState: PoolState;
     testAddress: Address;
+    sendNativeAsset?: boolean;
 };
 
 export type InitPoolTxInput = Omit<
@@ -54,6 +55,7 @@ export type AddLiquidityNestedTxInput = {
     amountsIn: {
         address: Address; // DAI
         rawAmount: bigint;
+        decimals: number;
     }[];
     chainId: ChainId;
     rpcUrl: string;

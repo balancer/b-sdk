@@ -36,7 +36,6 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
-            receiveNativeAsset: !!input.receiveNativeAsset,
             poolId: poolState.id,
             sortedTokens,
             sender: ZERO_ADDRESS,
@@ -68,6 +67,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             tokenOutIndex: amounts.tokenOutIndex,
             toInternalBalance: !!input.toInternalBalance,
             vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
         };
     }
 
@@ -89,6 +89,8 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             minAmountsOut: amounts.minAmountsOut,
             userData,
             toInternalBalance: !!input.toInternalBalance,
+            receiveNativeAsset: !!input.receiveNativeAsset,
+            chainId: input.chainId,
         });
 
         const call = encodeFunctionData({

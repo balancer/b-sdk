@@ -103,6 +103,7 @@ describe('weighted remove liquidity recovery test', () => {
                 txInput.slippage,
             );
         });
+        // TODO: with native asset
     });
 });
 

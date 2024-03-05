@@ -1,3 +1,4 @@
+import { NATIVE_ASSETS } from '@/utils';
 import { AddLiquidityAmounts } from '../types';
 import { AddLiquidityBaseCall, AddLiquidityKind } from './types';
 
@@ -24,4 +25,15 @@ export const getAmountsCall = (
             };
         }
     }
+};
+
+export const getValue = (input: AddLiquidityBaseCall): bigint => {
+    let value = 0n;
+    if (input.sendNativeAsset) {
+        value =
+            input.amountsIn.find(
+                (a) => a.token.address === NATIVE_ASSETS[input.chainId].wrapped,
+            )?.amount ?? 0n;
+    }
+    return value;
 };

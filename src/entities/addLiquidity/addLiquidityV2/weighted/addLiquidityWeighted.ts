@@ -19,7 +19,7 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '@/entities/utils';
-import { getAmountsCall } from '../../helpers';
+import { getAmountsCall, getValue } from '../../helpers';
 
 export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
@@ -35,7 +35,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         );
 
         const { args, tokensIn } = parseAddLiquidityArgs({
-            sendNativeAsset: !!input.sendNativeAsset,
             chainId: input.chainId,
             sortedTokens,
             poolId: poolState.id,
@@ -85,6 +84,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
             fromInternalBalance: input.fromInternalBalance,
+            sendNativeAsset: !!input.sendNativeAsset,
         });
 
         const call = encodeFunctionData({
@@ -93,14 +93,10 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             args,
         });
 
-        const value = input.amountsIn.find(
-            (a) => a.token.address === ZERO_ADDRESS,
-        )?.amount;
-
         return {
             call,
             to: VAULT[input.chainId],
-            value: value === undefined ? 0n : value,
+            value: getValue(input),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,
