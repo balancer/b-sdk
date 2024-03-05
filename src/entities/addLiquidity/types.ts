@@ -13,7 +13,6 @@ export enum AddLiquidityKind {
 export type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
-    useNativeAssetAsWrappedAmountIn?: boolean;
     fromInternalBalance?: boolean;
 };
 
@@ -66,7 +65,7 @@ export type AddLiquidityBaseCall = {
     sender: Address;
     recipient: Address;
     chainId: number;
-    wethIsEth: boolean;
+    sendNativeAsset?: boolean;
 } & AddLiquidityBaseQueryOutput;
 
 export type AddLiquidityWeightedCall = AddLiquidityBaseCall;
@@ -100,7 +99,7 @@ export type AddLiquidityConfig = {
 
 export type JoinPoolRequest = {
     assets: Address[];
-    maxAmountsIn: bigint[];
+    maxAmountsIn: readonly bigint[];
     userData: Hex;
     fromInternalBalance: boolean;
 };

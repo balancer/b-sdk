@@ -62,14 +62,14 @@ const addLiquidityNested = async () => {
         },
     ];
 
-    const useNativeAssetAsWrappedAmountIn = false;
+    const sendNativeAsset = false;
 
     const addLiquidityInput: AddLiquidityNestedInput = {
         amountsIn,
         chainId,
         rpcUrl,
         accountAddress,
-        useNativeAssetAsWrappedAmountIn,
+        sendNativeAsset,
     };
 
     // Calculate price impact to ensure it's acceptable
@@ -109,7 +109,7 @@ const addLiquidityNested = async () => {
     });
 
     let tokensIn = queryOutput.amountsIn.map((a) => a.token);
-    if (useNativeAssetAsWrappedAmountIn) {
+    if (sendNativeAsset) {
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
 

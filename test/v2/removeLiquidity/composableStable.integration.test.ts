@@ -129,7 +129,7 @@ describe('composable stable remove liquidity test', () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -181,7 +181,7 @@ describe('composable stable remove liquidity test', () => {
             const removeLiquidityInput = {
                 ...input,
                 amountOut,
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -232,7 +232,7 @@ describe('composable stable remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -281,7 +281,7 @@ describe('composable stable remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                useNativeAssetAsWrappedAmountIn: true,
+                sendNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,

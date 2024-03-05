@@ -35,8 +35,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         );
 
         const { args, tokensIn } = parseAddLiquidityArgs({
-            useNativeAssetAsWrappedAmountIn:
-                !!input.useNativeAssetAsWrappedAmountIn,
+            sendNativeAsset: !!input.sendNativeAsset,
             chainId: input.chainId,
             sortedTokens,
             poolId: poolState.id,

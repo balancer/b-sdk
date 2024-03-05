@@ -24,7 +24,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
             poolState.tokens.map((t) => t.address),
         );
         if (poolState.vaultVersion === 3) {
-            this.validateWethIsEth(initPoolInput as InitPoolInputV3, poolState);
+            this.validateSendNativeAsset(initPoolInput as InitPoolInputV3);
         }
     }
 
@@ -73,23 +73,20 @@ export class InputValidatorWeighted implements InputValidatorBase {
         validateTokensRemoveLiquidity(input, poolState);
     }
 
-    private validateWethIsEth(
-        initPoolInput: InitPoolInputV3,
-        poolState: PoolState,
-    ) {
-        if (!initPoolInput.wethIsEth) {
-            return;
-        }
-        const poolContainsWrappedNativeAsset = !!poolState.tokens.find((a) =>
-            isSameAddress(
-                a.address,
-                NATIVE_ASSETS[initPoolInput.chainId].wrapped,
-            ),
-        );
-        if (!poolContainsWrappedNativeAsset) {
-            throw new Error(
-                "Flag wethIsEth is active and pool doesn't contain the wrapped native asset",
-            );
+    private validateSendNativeAsset(initPoolInput: InitPoolInputV3) {
+        if (initPoolInput.sendNativeAsset) {
+            const inputContainsWrappedNativeAsset =
+                initPoolInput.amountsIn.some((a) =>
+                    isSameAddress(
+                        a.address,
+                        NATIVE_ASSETS[initPoolInput.chainId].wrapped,
+                    ),
+                );
+            if (!inputContainsWrappedNativeAsset) {
+                throw new Error(
+                    'sendNativeAsset requires wrapped native asset as input',
+                );
+            }
         }
     }
 }

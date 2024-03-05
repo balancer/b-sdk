@@ -371,8 +371,7 @@ export class PriceImpact {
             accountAddress: input.accountAddress,
             chainId: input.chainId,
             rpcUrl: input.rpcUrl,
-            useNativeAssetAsWrappedAmountIn:
-                input.useNativeAssetAsWrappedAmountOut,
+            sendNativeAsset: input.useNativeAssetAsWrappedAmountOut,
             fromInternalBalance: input.toInternalBalance,
             amountsIn: amountsOut.map((a) => a.toInputAmount()),
         };

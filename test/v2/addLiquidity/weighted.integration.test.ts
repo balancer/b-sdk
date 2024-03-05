@@ -129,7 +129,7 @@ describe('add liquidity weighted test', () => {
             const addLiquidityInput = {
                 ...input,
                 amountsIn,
-                useNativeAssetAsWrappedAmountIn: true,
+                sendNativeAsset: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
@@ -183,7 +183,7 @@ describe('add liquidity weighted test', () => {
                 ...txInput,
                 addLiquidityInput: {
                     ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
+                    sendNativeAsset: true,
                 },
             });
 
@@ -192,7 +192,7 @@ describe('add liquidity weighted test', () => {
                 txInput.poolState,
                 {
                     ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
+                    sendNativeAsset: true,
                 },
                 addLiquidityOutput,
                 txInput.slippage,
@@ -234,7 +234,7 @@ describe('add liquidity weighted test', () => {
                 ...txInput,
                 addLiquidityInput: {
                     ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
+                    sendNativeAsset: true,
                 },
             });
 
@@ -243,7 +243,7 @@ describe('add liquidity weighted test', () => {
                 txInput.poolState,
                 {
                     ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
+                    sendNativeAsset: true,
                 },
                 addLiquidityOutput,
                 txInput.slippage,

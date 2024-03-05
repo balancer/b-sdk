@@ -15,7 +15,6 @@ export enum RemoveLiquidityKind {
 export type RemoveLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
-    toNativeAsset?: boolean;
     toInternalBalance?: boolean;
 };
 
@@ -80,7 +79,7 @@ export type RemoveLiquidityBaseCall = {
     sender: Address;
     recipient: Address;
     chainId: number;
-    wethIsEth: boolean;
+    receiveNativeAsset?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
 export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall;

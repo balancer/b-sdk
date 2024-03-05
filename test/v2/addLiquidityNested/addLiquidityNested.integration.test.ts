@@ -162,12 +162,12 @@ describe('add liquidity nested test', () => {
             decimals: t.decimals,
         }));
 
-        const useNativeAssetAsWrappedAmountIn = true;
+        const sendNativeAsset = true;
 
         txInput = {
             ...txInput,
             amountsIn,
-            useNativeAssetAsWrappedAmountIn,
+            sendNativeAsset,
         };
 
         const {
@@ -188,7 +188,7 @@ describe('add liquidity nested test', () => {
             minBptOut,
             chainId,
             value,
-            useNativeAssetAsWrappedAmountIn,
+            sendNativeAsset,
         );
     });
 
@@ -201,12 +201,12 @@ describe('add liquidity nested test', () => {
             },
         ];
 
-        const useNativeAssetAsWrappedAmountIn = true;
+        const sendNativeAsset = true;
 
         txInput = {
             ...txInput,
             amountsIn,
-            useNativeAssetAsWrappedAmountIn,
+            sendNativeAsset,
         };
 
         await expect(() => doAddLiquidityNested(txInput)).rejects.toThrowError(

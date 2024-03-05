@@ -124,7 +124,7 @@ describe('GyroE V2 add liquidity test', () => {
                 ...txInput,
                 addLiquidityInput: {
                     ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
+                    sendNativeAsset: true,
                 },
             });
             assertAddLiquidityProportional(
@@ -132,7 +132,7 @@ describe('GyroE V2 add liquidity test', () => {
                 txInput.poolState,
                 {
                     ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
+                    sendNativeAsset: true,
                 },
                 addLiquidityOutput,
                 txInput.slippage,

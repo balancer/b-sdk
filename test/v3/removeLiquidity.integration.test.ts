@@ -185,7 +185,7 @@ describe('remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -239,7 +239,7 @@ describe('remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -290,7 +290,7 @@ describe('remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,

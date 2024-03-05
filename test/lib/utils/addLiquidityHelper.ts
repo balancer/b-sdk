@@ -35,12 +35,14 @@ async function sdkAddLiquidity({
     poolState,
     slippage,
     testAddress,
+    sendNativeAsset,
 }: {
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
     poolState: PoolState;
     slippage: Slippage;
     testAddress: Address;
+    sendNativeAsset?: boolean;
 }): Promise<{
     addLiquidityBuildOutput: AddLiquidityBuildOutput;
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -55,7 +57,7 @@ async function sdkAddLiquidity({
         sender: testAddress,
         recipient: testAddress,
         chainId: addLiquidityInput.chainId,
-        wethIsEth: addLiquidityInput.useNativeAssetAsWrappedAmountIn ?? false,
+        sendNativeAsset: !!sendNativeAsset,
     });
 
     return {
@@ -160,7 +162,7 @@ export function assertAddLiquidityUnbalanced(
     const expectedAmountsIn = poolState.tokens.map((t) => {
         let token: Token;
         if (
-            addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
+            addLiquidityInput.sendNativeAsset &&
             t.address === NATIVE_ASSETS[chainId].wrapped &&
             vaultVersion === 2
         )
@@ -263,7 +265,7 @@ export function assertAddLiquiditySingleToken(
     addLiquidityQueryOutput.amountsIn.forEach((a) => {
         if (
             vaultVersion === 2 &&
-            addLiquidityInput.useNativeAssetAsWrappedAmountIn &&
+            addLiquidityInput.sendNativeAsset &&
             a.token.address === zeroAddress
         ) {
             expect(a.amount > 0n).to.be.true;
@@ -361,6 +363,7 @@ function assertTokenDeltas(
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
     txOutput: TxOutput,
     vaultVersion: 2 | 3 = 2,
+    sendNativeAsset?: boolean,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
@@ -380,9 +383,9 @@ function assertTokenDeltas(
      * Since native asset was moved to an extra index, we need to identify its
      * respective amount within the amounts array and move it to that index.
      * - Balancer V2: zero address represents the native asset
-     * - Balancer V3: WETH address represents the native asset (in combination with wethIsEth flag)
+     * - Balancer V3: WETH address represents the native asset (in combination with sendNativeAsset flag)
      */
-    if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
+    if (sendNativeAsset) {
         const respectiveNativeAddress =
             vaultVersion === 2
                 ? zeroAddress
@@ -405,6 +408,7 @@ function assertAddLiquidityBuildOutput(
     isExactIn: boolean,
     slippage: Slippage,
     vaultVersion: 2 | 3 = 2,
+    sendNativeAsset?: boolean,
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
     const maxAmountsIn = isExactIn
@@ -428,8 +432,8 @@ function assertAddLiquidityBuildOutput(
             : BALANCER_ROUTER[addLiquidityInput.chainId];
 
     let value = 0n;
-    if (addLiquidityInput.useNativeAssetAsWrappedAmountIn) {
-        // v2 uses zero address for native asset, while v3 uses wethIsEth flag only
+    if (sendNativeAsset) {
+        // v2 uses zero address for native asset, while v3 uses sendNativeAsset flag
         const nativeAsset =
             vaultVersion === 2
                 ? zeroAddress

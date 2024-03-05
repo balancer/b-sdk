@@ -121,7 +121,7 @@ describe('weighted remove liquidity test', () => {
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -173,7 +173,7 @@ describe('weighted remove liquidity test', () => {
             const removeLiquidityInput = {
                 ...input,
                 amountOut,
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -224,7 +224,7 @@ describe('weighted remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
@@ -273,7 +273,7 @@ describe('weighted remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                toNativeAsset: true,
+                receiveNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,

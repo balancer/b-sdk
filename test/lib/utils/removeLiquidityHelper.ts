@@ -35,6 +35,7 @@ export const sdkRemoveLiquidity = async ({
     poolState,
     slippage,
     testAddress,
+    receiveNativeAsset,
 }: Omit<RemoveLiquidityTxInput, 'client'>): Promise<{
     removeLiquidityBuildOutput: RemoveLiquidityBuildOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
@@ -49,7 +50,7 @@ export const sdkRemoveLiquidity = async ({
         sender: testAddress,
         recipient: testAddress,
         chainId: removeLiquidityInput.chainId,
-        wethIsEth: !!removeLiquidityInput.toNativeAsset,
+        receiveNativeAsset: !!receiveNativeAsset,
     });
 
     return {
@@ -154,7 +155,7 @@ export function assertRemoveLiquidityUnbalanced(
     const expectedAmountsOut = poolState.tokens.map((t) => {
         let token: Token;
         if (
-            removeLiquidityInput.toNativeAsset &&
+            removeLiquidityInput.receiveNativeAsset &&
             t.address === NATIVE_ASSETS[chainId].wrapped
         )
             token = new Token(chainId, zeroAddress, t.decimals);
@@ -219,7 +220,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
     const expectedAmountsOut = poolState.tokens.map((t) => {
         let token: Token;
         if (
-            removeLiquidityInput.toNativeAsset &&
+            removeLiquidityInput.receiveNativeAsset &&
             t.address === NATIVE_ASSETS[chainId].wrapped &&
             vaultVersion === 2
         ) {
@@ -329,7 +330,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     removeLiquidityQueryOutput.amountsOut.forEach((a) => {
         if (
             vaultVersion === 2 &&
-            removeLiquidityInput.toNativeAsset &&
+            removeLiquidityInput.receiveNativeAsset &&
             a.token.address === zeroAddress
         ) {
             expect(a.amount > 0n).to.be.true;
@@ -497,7 +498,7 @@ function assertTokenDeltas(
     ];
 
     // If removing liquidity to native asset we must replace it with 0 and update native value instead
-    if (removeLiquidityInput.toNativeAsset) {
+    if (removeLiquidityInput.receiveNativeAsset) {
         const respectiveNativeAddress =
             vaultVersion === 2
                 ? zeroAddress

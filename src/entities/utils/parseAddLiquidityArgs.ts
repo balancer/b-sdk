@@ -3,7 +3,7 @@ import { Token } from '../token';
 import { replaceWrapped } from './replaceWrapped';
 
 export function parseAddLiquidityArgs({
-    useNativeAssetAsWrappedAmountIn,
+    sendNativeAsset,
     chainId,
     sortedTokens,
     poolId,
@@ -14,7 +14,7 @@ export function parseAddLiquidityArgs({
     fromInternalBalance,
 }: {
     chainId?: number;
-    useNativeAssetAsWrappedAmountIn?: boolean;
+    sendNativeAsset?: boolean;
     sortedTokens: Token[];
     poolId: Hex;
     sender: Address;
@@ -25,7 +25,7 @@ export function parseAddLiquidityArgs({
 }) {
     // replace wrapped token with native asset if needed
     const tokensIn =
-        chainId && useNativeAssetAsWrappedAmountIn
+        chainId && sendNativeAsset
             ? replaceWrapped([...sortedTokens], chainId)
             : [...sortedTokens];
 

@@ -44,8 +44,6 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         );
 
         const { args, tokensIn } = parseAddLiquidityArgs({
-            useNativeAssetAsWrappedAmountIn:
-                !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
             sortedTokens,
             poolId: poolState.id,
@@ -98,6 +96,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
             fromInternalBalance: input.fromInternalBalance,
+            sendNativeAsset: !!input.sendNativeAsset,
         });
 
         const call = encodeFunctionData({

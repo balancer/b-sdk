@@ -115,7 +115,7 @@ describe('GyroE V2 remove liquidity test', () => {
         test('with native', async () => {
             const removeLiquidityInput = {
                 ...input,
-                useNativeAssetAsWrappedAmountIn: true,
+                sendNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,

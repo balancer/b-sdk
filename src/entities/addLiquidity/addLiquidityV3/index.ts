@@ -102,7 +102,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                             input.poolId,
                             input.amountsIn.map((a) => a.amount),
                             amounts.minimumBpt,
-                            input.wethIsEth,
+                            !!input.sendNativeAsset,
                             '0x',
                         ],
                     });
@@ -122,7 +122,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                             input.amountsIn[input.tokenInIndex].token.address,
                             input.amountsIn[input.tokenInIndex].amount,
                             input.bptOut.amount,
-                            input.wethIsEth,
+                            !!input.sendNativeAsset,
                             '0x',
                         ],
                     });
@@ -131,14 +131,16 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         }
 
         let value = 0n;
-        if (input.wethIsEth) {
-            const wethInput = input.amountsIn.find(
+        if (input.sendNativeAsset) {
+            const wrappedNativeAssetInput = input.amountsIn.find(
                 (a) => a.token.address === NATIVE_ASSETS[input.chainId].wrapped,
             );
-            if (wethInput === undefined) {
-                throw new Error('wethIsEth is true but no WETH input found');
+            if (wrappedNativeAssetInput === undefined) {
+                throw new Error(
+                    'sendNativeAsset requires wrapped native asset as input',
+                );
             }
-            value = wethInput.amount;
+            value = wrappedNativeAssetInput.amount;
         }
 
         return {

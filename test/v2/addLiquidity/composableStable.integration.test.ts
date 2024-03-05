@@ -129,7 +129,7 @@ describe('add liquidity composable stable test', () => {
             const addLiquidityInput = {
                 ...input,
                 amountsIn,
-                useNativeAssetAsWrappedAmountIn: true,
+                sendNativeAsset: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
@@ -180,7 +180,7 @@ describe('add liquidity composable stable test', () => {
         test('with native', async () => {
             const addLiquidityInput = {
                 ...input,
-                useNativeAssetAsWrappedAmountIn: true,
+                sendNativeAsset: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
@@ -229,7 +229,7 @@ describe('add liquidity composable stable test', () => {
         test('with native', async () => {
             const addLiquidityInput = {
                 ...input,
-                useNativeAssetAsWrappedAmountIn: true,
+                sendNativeAsset: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,

@@ -5,7 +5,7 @@ import { replaceWrapped } from './replaceWrapped';
 
 export function parseRemoveLiquidityArgs({
     chainId,
-    toNativeAsset,
+    receiveNativeAsset,
     sortedTokens,
     poolId,
     sender,
@@ -15,7 +15,7 @@ export function parseRemoveLiquidityArgs({
     toInternalBalance,
 }: {
     chainId?: number;
-    toNativeAsset?: boolean;
+    receiveNativeAsset?: boolean;
     sortedTokens: Token[];
     poolId: Address;
     sender: Address;
@@ -26,7 +26,7 @@ export function parseRemoveLiquidityArgs({
 }) {
     // replace wrapped token with native asset if needed
     const tokensOut =
-        chainId && toNativeAsset
+        chainId && receiveNativeAsset
             ? replaceWrapped([...sortedTokens], chainId)
             : [...sortedTokens];
 

@@ -10,13 +10,13 @@ export type AddLiquidityNestedInput = {
     chainId: ChainId;
     rpcUrl: string;
     accountAddress: Address;
-    useNativeAssetAsWrappedAmountIn?: boolean;
+    sendNativeAsset?: boolean;
     fromInternalBalance?: boolean;
 };
 
 export type AddLiquidityNestedCallAttributes = {
     chainId: ChainId;
-    useNativeAssetAsWrappedAmountIn: boolean;
+    sendNativeAsset: boolean;
     sortedTokens: Token[];
     poolId: Hex;
     poolAddress: Address;

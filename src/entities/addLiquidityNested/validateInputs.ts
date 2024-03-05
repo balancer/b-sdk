@@ -26,7 +26,7 @@ export const validateInputs = (
         return TokenAmount.fromRawAmount(tokenIn, amountIn.rawAmount);
     });
 
-    if (input.useNativeAssetAsWrappedAmountIn) {
+    if (input.sendNativeAsset) {
         if (
             !mainTokens.some((t) =>
                 t.isUnderlyingEqual(NATIVE_ASSETS[input.chainId]),
