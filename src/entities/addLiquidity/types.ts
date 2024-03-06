@@ -48,28 +48,32 @@ export type AddLiquidityBaseQueryOutput = {
     vaultVersion: 2 | 3;
 };
 
-export type AddLiquidityWeightedQueryOutput = AddLiquidityBaseQueryOutput;
-
 export type AddLiquidityComposableStableQueryOutput =
     AddLiquidityBaseQueryOutput & {
         bptIndex: number;
     };
 
+export type AddLiquidityWeightedQueryOutput = AddLiquidityBaseQueryOutput;
+
 export type AddLiquidityQueryOutput =
     | AddLiquidityBaseQueryOutput
-    | AddLiquidityWeightedQueryOutput
-    | AddLiquidityComposableStableQueryOutput;
+    | AddLiquidityComposableStableQueryOutput
+    | AddLiquidityWeightedQueryOutput;
 
 export type AddLiquidityBaseCall = {
     slippage: Slippage;
-    sender: Address;
-    recipient: Address;
     chainId: number;
     sendNativeAsset?: boolean;
 } & AddLiquidityBaseQueryOutput;
 
-export type AddLiquidityWeightedCall = AddLiquidityBaseCall;
-export type AddLiquidityComposableStableCall = AddLiquidityBaseCall &
+export type AddLiquidityBaseCallV2 = AddLiquidityBaseCall & {
+    sender: Address;
+    recipient: Address;
+};
+
+export type AddLiquidityWeightedCall = AddLiquidityBaseCallV2 &
+    AddLiquidityWeightedQueryOutput;
+export type AddLiquidityComposableStableCall = AddLiquidityBaseCallV2 &
     AddLiquidityComposableStableQueryOutput;
 
 export type AddLiquidityCall =

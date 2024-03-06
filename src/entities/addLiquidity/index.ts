@@ -33,6 +33,13 @@ export class AddLiquidity implements AddLiquidityBase {
     }
 
     buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
+        // TODO: refactor validators to take v3 into account
+        const isV2Input = 'sender' in input;
+        if (input.vaultVersion === 3 && isV2Input)
+            throw Error('Cannot define sender/recipient in V3');
+        if (input.vaultVersion === 2 && !isV2Input)
+            throw Error('Sender/recipient must be defined in V2');
+
         switch (input.vaultVersion) {
             case 2: {
                 const addLiquidity = new AddLiquidityV2(this.config);

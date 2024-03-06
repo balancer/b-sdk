@@ -53,10 +53,6 @@ export type RemoveLiquidityInput =
     | RemoveLiquidityProportionalInput
     | RemoveLiquidityRecoveryInput;
 
-export type RemoveLiquidityQueryOutput =
-    | RemoveLiquidityBaseQueryOutput
-    | RemoveLiquidityComposableStableQueryOutput;
-
 // Returned from a remove liquidity query
 export type RemoveLiquidityBaseQueryOutput = {
     poolType: string;
@@ -74,18 +70,27 @@ export type RemoveLiquidityComposableStableQueryOutput =
     RemoveLiquidityBaseQueryOutput & {
         bptIndex: number;
     };
+export type RemoveLiquidityWeightedQueryOutput = RemoveLiquidityBaseQueryOutput;
+
+export type RemoveLiquidityQueryOutput =
+    | RemoveLiquidityBaseQueryOutput
+    | RemoveLiquidityComposableStableQueryOutput
+    | RemoveLiquidityWeightedQueryOutput;
 
 export type RemoveLiquidityBaseCall = {
     slippage: Slippage;
-    sender: Address;
-    recipient: Address;
     chainId: number;
     receiveNativeAsset?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
-export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall;
-export type RemoveLiquidityComposableStableCall = RemoveLiquidityBaseCall &
+export type RemoveLiquidityBaseCallV2 = RemoveLiquidityBaseCall & {
+    sender: Address;
+    recipient: Address;
+};
+
+export type RemoveLiquidityComposableStableCall = RemoveLiquidityBaseCallV2 &
     RemoveLiquidityComposableStableQueryOutput;
+export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCallV2;
 
 export type RemoveLiquidityCall =
     | RemoveLiquidityBaseCall
