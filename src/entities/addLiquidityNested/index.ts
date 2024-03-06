@@ -1,7 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
 import { Token } from '../token';
-import { BALANCER_RELAYER } from '../../utils';
+import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../utils';
 import { Relayer } from '../relayer';
 import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../tokenAmount';
@@ -47,7 +47,6 @@ export class AddLiquidityNested {
         const peekedValue = await doAddLiquidityNestedQuery(
             input.chainId,
             input.rpcUrl,
-            input.accountAddress,
             encodedMulticall,
         );
 
@@ -77,10 +76,18 @@ export class AddLiquidityNested {
             minBptOut,
         };
 
-        // update sendNativeAsset flag
+        // update sendNativeAsset flag + sender and recipient placeholders
         input.callsAttributes = input.callsAttributes.map((call) => {
             return {
                 ...call,
+                sender:
+                    call.sender === ZERO_ADDRESS
+                        ? input.accountAddress
+                        : call.sender,
+                recipient:
+                    call.recipient === ZERO_ADDRESS
+                        ? input.accountAddress
+                        : call.recipient,
                 sendNativeAsset: input.sendNativeAsset,
             };
         });

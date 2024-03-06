@@ -7,7 +7,7 @@ import {
 import { NestedPool, PoolKind } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address, PoolType } from '../../types';
-import { BALANCER_RELAYER, ChainId } from '../../utils';
+import { BALANCER_RELAYER, ChainId, ZERO_ADDRESS } from '../../utils';
 import { Relayer } from '../relayer';
 
 export const getQueryCallsAttributes = (
@@ -20,22 +20,19 @@ export const getQueryCallsAttributes = (
     bptAmountIn: TokenAmount;
     callsAttributes: RemoveLiquidityNestedCallAttributes[];
 } => {
-    const {
-        bptAmountIn,
-        chainId,
-        accountAddress,
-        toInternalBalance = false,
-    } = input;
+    const { bptAmountIn, chainId, toInternalBalance = false } = input;
     let callsAttributes: RemoveLiquidityNestedCallAttributes[];
 
     // sort pools by descending level
     const poolsTopDown = pools.sort((a, b) => b.level - a.level);
 
+    const accountAddressPlaceholder = ZERO_ADDRESS;
+
     if (isProportional) {
         callsAttributes = getProportionalCallsAttributes(
             poolsTopDown,
             chainId,
-            accountAddress,
+            accountAddressPlaceholder,
             bptAmountIn,
             toInternalBalance,
         );
@@ -45,7 +42,7 @@ export const getQueryCallsAttributes = (
         callsAttributes = getSingleTokenCallsAttributes(
             poolsTopDown,
             chainId,
-            accountAddress,
+            accountAddressPlaceholder,
             bptAmountIn,
             toInternalBalance,
             tokenOut,

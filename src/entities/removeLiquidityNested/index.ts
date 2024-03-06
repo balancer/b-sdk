@@ -1,6 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
-import { BALANCER_RELAYER } from '../../utils';
+import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../utils';
 import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
 import { balancerRelayerAbi } from '../../abi';
@@ -53,7 +53,6 @@ export class RemoveLiquidityNested {
         const peekedValues = await doRemoveLiquidityNestedQuery(
             input.chainId,
             input.rpcUrl,
-            input.accountAddress,
             encodedMulticall,
             tokensOut.length,
         );
@@ -99,6 +98,15 @@ export class RemoveLiquidityNested {
             });
             // update receiveNativeAsset flag
             call.receiveNativeAsset = !!input.receiveNativeAsset;
+            // update sender and recipient placeholders
+            call.sender =
+                call.sender === ZERO_ADDRESS
+                    ? input.accountAddress
+                    : call.sender;
+            call.recipient =
+                call.recipient === ZERO_ADDRESS
+                    ? input.accountAddress
+                    : call.recipient;
         });
 
         const encodedCalls = encodeCalls(

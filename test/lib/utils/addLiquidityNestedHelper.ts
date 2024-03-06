@@ -61,7 +61,6 @@ export const doAddLiquidityNested = async ({
         amountsIn,
         chainId,
         rpcUrl,
-        accountAddress: testAddress,
     };
     const queryOutput = await addLiquidityNested.query(
         addLiquidityInput,
@@ -80,8 +79,7 @@ export const doAddLiquidityNested = async ({
     const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
-        sender: testAddress,
-        recipient: testAddress,
+        accountAddress: testAddress,
         relayerApprovalSignature: signature,
         sendNativeAsset,
     });

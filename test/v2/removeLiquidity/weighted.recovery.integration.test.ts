@@ -29,9 +29,9 @@ import {
     doRemoveLiquidity,
     forkSetup,
     POOLS,
+    RemoveLiquidityTxInput,
     TOKENS,
 } from 'test/lib/utils';
-import { RemoveLiquidityTxInput } from 'test/lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 
 const chainId = ChainId.POLYGON;
