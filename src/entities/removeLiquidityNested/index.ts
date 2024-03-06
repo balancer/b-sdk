@@ -1,28 +1,28 @@
 import { encodeFunctionData } from 'viem';
+
+import { balancerRelayerAbi } from '../../abi';
 import { Address, Hex } from '../../types';
 import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../utils';
+
 import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
-import { balancerRelayerAbi } from '../../abi';
+import { NestedPoolState } from '../types';
+import { validateNestedPoolState } from '../utils';
+
+import { encodeCalls } from './encodeCalls';
+import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
+import { getPeekCalls } from './getPeekCalls';
+import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import {
-    RemoveLiquidityNestedProportionalInput,
-    RemoveLiquidityNestedSingleTokenInput,
     RemoveLiquidityNestedQueryOutput,
     RemoveLiquidityNestedCallInput,
+    RemoveLiquidityNestedInput,
 } from './types';
-import { NestedPoolState } from '../types';
-import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
-import { getQueryCallsAttributes } from './getQueryCallsAttributes';
-import { encodeCalls } from './encodeCalls';
-import { getPeekCalls } from './getPeekCalls';
 import { validateQueryInput, validateBuildCallInput } from './validateInputs';
-import { validateNestedPoolState } from '../utils';
 
 export class RemoveLiquidityNested {
     async query(
-        input:
-            | RemoveLiquidityNestedProportionalInput
-            | RemoveLiquidityNestedSingleTokenInput,
+        input: RemoveLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
     ): Promise<RemoveLiquidityNestedQueryOutput> {
         const isProportional = validateQueryInput(input, nestedPoolState);

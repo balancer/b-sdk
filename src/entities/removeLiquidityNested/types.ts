@@ -17,6 +17,10 @@ export type RemoveLiquidityNestedSingleTokenInput =
         tokenOut: Address;
     };
 
+export type RemoveLiquidityNestedInput =
+    | RemoveLiquidityNestedProportionalInput
+    | RemoveLiquidityNestedSingleTokenInput;
+
 export type RemoveLiquidityNestedCallAttributes = {
     chainId: ChainId;
     sortedTokens: Token[];
