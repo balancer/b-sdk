@@ -2,11 +2,12 @@ import { NATIVE_ASSETS } from '../../utils';
 import { Token } from '../token';
 import { NestedPoolState } from '../types';
 import {
+    RemoveLiquidityNestedCallInput,
     RemoveLiquidityNestedProportionalInput,
     RemoveLiquidityNestedSingleTokenInput,
 } from './types';
 
-export const validateInputs = (
+export const validateQueryInput = (
     input:
         | RemoveLiquidityNestedProportionalInput
         | RemoveLiquidityNestedSingleTokenInput,
@@ -17,12 +18,7 @@ export const validateInputs = (
     const mainTokens = nestedPoolState.mainTokens.map(
         (token) => new Token(input.chainId, token.address, token.decimals),
     );
-    if (isProportional) {
-        validateInputsProportional(
-            input as RemoveLiquidityNestedProportionalInput,
-            mainTokens,
-        );
-    } else {
+    if (!isProportional) {
         validateInputsSingleToken(
             input as RemoveLiquidityNestedSingleTokenInput,
             mainTokens,
@@ -30,22 +26,6 @@ export const validateInputs = (
     }
 
     return isProportional;
-};
-
-const validateInputsProportional = (
-    input: RemoveLiquidityNestedProportionalInput,
-    mainTokens: Token[],
-) => {
-    if (
-        input.useNativeAssetAsWrappedAmountOut &&
-        !mainTokens.some((t) =>
-            t.isUnderlyingEqual(NATIVE_ASSETS[input.chainId]),
-        )
-    ) {
-        throw new Error(
-            'Removing liquidity to native asset requires wrapped native asset to exist within main tokens',
-        );
-    }
 };
 
 const validateInputsSingleToken = (
@@ -59,13 +39,19 @@ const validateInputsSingleToken = (
             `Removing liquidity to ${input.tokenOut} requires it to exist within main tokens`,
         );
     }
+};
 
+export const validateBuildCallInput = (
+    input: RemoveLiquidityNestedCallInput,
+) => {
     if (
-        input.useNativeAssetAsWrappedAmountOut &&
-        !tokenOut.isUnderlyingEqual(NATIVE_ASSETS[input.chainId])
+        input.receiveNativeAsset &&
+        !input.amountsOut.some((a) =>
+            a.token.isSameAddress(NATIVE_ASSETS[input.chainId].wrapped),
+        )
     ) {
         throw new Error(
-            'Removing liquidity to native asset requires wrapped native asset to be the tokenOut',
+            'Removing liquidity to native asset requires wrapped native asset to exist within amounts out',
         );
     }
 };

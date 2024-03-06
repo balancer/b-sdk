@@ -10,7 +10,6 @@ export type RemoveLiquidityNestedProportionalInput = {
     chainId: ChainId;
     rpcUrl: string;
     accountAddress: Address;
-    useNativeAssetAsWrappedAmountOut?: boolean;
     toInternalBalance?: boolean;
 };
 
@@ -21,7 +20,6 @@ export type RemoveLiquidityNestedSingleTokenInput =
 
 export type RemoveLiquidityNestedCallAttributes = {
     chainId: ChainId;
-    useNativeAssetAsWrappedAmountOut: boolean;
     sortedTokens: Token[];
     poolId: Address;
     poolAddress: Address;
@@ -40,6 +38,7 @@ export type RemoveLiquidityNestedCallAttributes = {
         index: bigint;
     }[];
     tokenOutIndex?: number;
+    receiveNativeAsset?: boolean;
 };
 
 export type RemoveLiquidityNestedQueryOutput = {
@@ -47,6 +46,7 @@ export type RemoveLiquidityNestedQueryOutput = {
     bptAmountIn: TokenAmount;
     amountsOut: TokenAmount[];
     isProportional: boolean;
+    chainId: ChainId;
 };
 
 export type RemoveLiquidityNestedCallInput =
@@ -55,4 +55,5 @@ export type RemoveLiquidityNestedCallInput =
         sender: Address;
         recipient: Address;
         relayerApprovalSignature?: Hex;
+        receiveNativeAsset?: boolean;
     };

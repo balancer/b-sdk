@@ -43,7 +43,7 @@ type TxInput = {
     testAddress: Address;
     client: Client & PublicActions & TestActions & WalletActions;
     tokenOut?: Address;
-    useNativeAssetAsWrappedAmountOut?: boolean;
+    receiveNativeAsset?: boolean;
 };
 
 describe('remove liquidity nested test', () => {
@@ -113,7 +113,7 @@ describe('remove liquidity nested test', () => {
 
     test('proportional - native asset', async () => {
         const amountIn = parseUnits('1', 18);
-        const useNativeAssetAsWrappedAmountOut = true;
+        const receiveNativeAsset = true;
 
         const {
             transactionReceipt,
@@ -129,7 +129,7 @@ describe('remove liquidity nested test', () => {
             rpcUrl,
             testAddress,
             client,
-            useNativeAssetAsWrappedAmountOut,
+            receiveNativeAsset,
         });
 
         assertResults(
@@ -176,7 +176,7 @@ describe('remove liquidity nested test', () => {
     test('single token - native asset', async () => {
         const amountIn = parseUnits('1', 18);
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
-        const useNativeAssetAsWrappedAmountOut = true;
+        const receiveNativeAsset = true;
 
         const {
             transactionReceipt,
@@ -193,7 +193,7 @@ describe('remove liquidity nested test', () => {
             testAddress,
             client,
             tokenOut,
-            useNativeAssetAsWrappedAmountOut,
+            receiveNativeAsset,
         });
 
         assertResults(
@@ -209,7 +209,7 @@ describe('remove liquidity nested test', () => {
     test('single token - native asset - invalid input', async () => {
         const amountIn = parseUnits('1', 18);
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
-        const useNativeAssetAsWrappedAmountOut = true;
+        const receiveNativeAsset = true;
 
         await expect(
             doTransaction({
@@ -220,10 +220,10 @@ describe('remove liquidity nested test', () => {
                 testAddress,
                 client,
                 tokenOut,
-                useNativeAssetAsWrappedAmountOut,
+                receiveNativeAsset,
             }),
         ).rejects.toThrow(
-            'Removing liquidity to native asset requires wrapped native asset to be the tokenOut',
+            'Removing liquidity to native asset requires wrapped native asset to exist within amounts out',
         );
     });
 });
@@ -236,7 +236,7 @@ export const doTransaction = async ({
     testAddress,
     client,
     tokenOut,
-    useNativeAssetAsWrappedAmountOut = false,
+    receiveNativeAsset = false,
 }: TxInput) => {
     // setup mock api
     const api = new MockApi();
@@ -252,7 +252,6 @@ export const doTransaction = async ({
         chainId,
         rpcUrl,
         accountAddress: testAddress,
-        useNativeAssetAsWrappedAmountOut,
         tokenOut,
     };
     const queryOutput = await removeLiquidityNested.query(
@@ -275,10 +274,11 @@ export const doTransaction = async ({
         sender: testAddress,
         recipient: testAddress,
         relayerApprovalSignature: signature,
+        receiveNativeAsset,
     });
 
     let tokensOut = minAmountsOut.map((a) => a.token);
-    if (useNativeAssetAsWrappedAmountOut) {
+    if (receiveNativeAsset) {
         tokensOut = replaceWrapped(tokensOut, chainId);
     }
 

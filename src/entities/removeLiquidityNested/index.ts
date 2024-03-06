@@ -15,7 +15,7 @@ import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { encodeCalls } from './encodeCalls';
 import { getPeekCalls } from './getPeekCalls';
-import { validateInputs } from './validateInputs';
+import { validateQueryInput, validateBuildCallInput } from './validateInputs';
 import { validateNestedPoolState } from '../utils';
 
 export class RemoveLiquidityNested {
@@ -25,7 +25,7 @@ export class RemoveLiquidityNested {
             | RemoveLiquidityNestedSingleTokenInput,
         nestedPoolState: NestedPoolState,
     ): Promise<RemoveLiquidityNestedQueryOutput> {
-        const isProportional = validateInputs(input, nestedPoolState);
+        const isProportional = validateQueryInput(input, nestedPoolState);
         validateNestedPoolState(nestedPoolState);
 
         const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
@@ -58,13 +58,17 @@ export class RemoveLiquidityNested {
             tokensOut.length,
         );
 
-        console.log('peekedValues ', peekedValues);
-
         const amountsOut = tokensOut.map((tokenOut, i) =>
             TokenAmount.fromRawAmount(tokenOut, peekedValues[i]),
         );
 
-        return { callsAttributes, bptAmountIn, amountsOut, isProportional };
+        return {
+            callsAttributes,
+            bptAmountIn,
+            amountsOut,
+            isProportional,
+            chainId: input.chainId,
+        };
     }
 
     buildCall(input: RemoveLiquidityNestedCallInput): {
@@ -72,6 +76,8 @@ export class RemoveLiquidityNested {
         to: Address;
         minAmountsOut: TokenAmount[];
     } {
+        validateBuildCallInput(input);
+
         // apply slippage to amountsOut
         const minAmountsOut = input.amountsOut.map((amountOut) =>
             TokenAmount.fromRawAmount(
@@ -91,6 +97,8 @@ export class RemoveLiquidityNested {
                         minAmountsOut[j].amount;
                 }
             });
+            // update receiveNativeAsset flag
+            call.receiveNativeAsset = !!input.receiveNativeAsset;
         });
 
         const encodedCalls = encodeCalls(

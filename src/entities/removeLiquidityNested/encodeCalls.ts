@@ -14,7 +14,7 @@ export const encodeCalls = (
     const encodedCalls: Hex[] = [];
     for (const callAttributes of callsAttributes) {
         const {
-            useNativeAssetAsWrappedAmountOut,
+            receiveNativeAsset,
             chainId,
             sortedTokens,
             poolId,
@@ -31,7 +31,7 @@ export const encodeCalls = (
 
         // replace wrapped token with native asset if needed
         let tokensOut = [...sortedTokens];
-        if (useNativeAssetAsWrappedAmountOut) {
+        if (receiveNativeAsset) {
             tokensOut = replaceWrapped([...sortedTokens], chainId);
         }
 
