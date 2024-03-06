@@ -1,4 +1,4 @@
-// pnpm test -- removeLiquidity/weighted.integration.test.ts
+// pnpm test -- removeLiquidity/weighted.recovery.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -10,6 +10,7 @@ import {
     publicActions,
     walletActions,
 } from 'viem';
+
 import {
     RemoveLiquidityKind,
     Slippage,
@@ -21,21 +22,25 @@ import {
     RemoveLiquidityInput,
     InputAmount,
     RemoveLiquidityRecoveryInput,
-} from '../../../src';
-import { forkSetup } from '../../lib/utils/helper';
+} from 'src';
+
 import {
     assertRemoveLiquidityRecovery,
     doRemoveLiquidity,
-} from '../../lib/utils/removeLiquidityHelper';
-import { RemoveLiquidityTxInput } from '../../lib/utils/types';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
-import { POOLS, TOKENS } from 'test/lib/utils/addresses';
+    forkSetup,
+    POOLS,
+    TOKENS,
+} from 'test/lib/utils';
+import { RemoveLiquidityTxInput } from 'test/lib/utils/types';
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 
-const chainId = ChainId.MAINNET;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const chainId = ChainId.POLYGON;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]);
 
-const testPool = POOLS[chainId]['50bb_sDAI_50bb_a_USDC'];
-const TOKENS_MAINNET = TOKENS[chainId];
+const testPool = POOLS[chainId].DAI_WMATIC;
+const DAI = TOKENS[chainId].DAI;
+const WMATIC = TOKENS[chainId].WMATIC;
+
 describe('weighted remove liquidity recovery test', () => {
     let txInput: RemoveLiquidityTxInput;
     let poolInput: PoolState;
@@ -54,12 +59,14 @@ describe('weighted remove liquidity recovery test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
+        const testAddress = (await client.getAddresses())[0];
+
         txInput = {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolState: poolInput,
-            testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
+            testAddress,
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
     });
@@ -103,7 +110,24 @@ describe('weighted remove liquidity recovery test', () => {
                 txInput.slippage,
             );
         });
-        // TODO: with native asset
+        test('with native', async () => {
+            const receiveNativeAsset = true;
+            const removeLiquidityOutput = await doRemoveLiquidity({
+                ...txInput,
+                removeLiquidityInput: input,
+                receiveNativeAsset,
+            });
+
+            assertRemoveLiquidityRecovery(
+                txInput.client.chain?.id as number,
+                txInput.poolState,
+                input,
+                removeLiquidityOutput,
+                txInput.slippage,
+                2,
+                receiveNativeAsset,
+            );
+        });
     });
 });
 
@@ -113,13 +137,13 @@ class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                address: TOKENS_MAINNET.bb_s_DAI.address,
-                decimals: TOKENS_MAINNET.bb_s_DAI.decimals,
+                address: WMATIC.address,
+                decimals: WMATIC.decimals,
                 index: 0,
             },
             {
-                address: TOKENS_MAINNET.bb_a_USDC.address,
-                decimals: TOKENS_MAINNET.bb_a_USDC.decimals,
+                address: DAI.address,
+                decimals: DAI.decimals,
                 index: 1,
             },
         ];
