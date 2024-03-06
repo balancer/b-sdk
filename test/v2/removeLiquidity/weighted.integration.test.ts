@@ -134,7 +134,6 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
-                2,
                 receiveNativeAsset,
             );
         });

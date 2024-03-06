@@ -208,7 +208,6 @@ export function assertAddLiquidityUnbalanced(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
-        vaultVersion,
         sendNativeAsset,
     );
 }
@@ -284,7 +283,6 @@ export function assertAddLiquiditySingleToken(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
-        vaultVersion,
         sendNativeAsset,
     );
 }
@@ -356,7 +354,6 @@ export function assertAddLiquidityProportional(
         addLiquidityQueryOutput,
         addLiquidityBuildOutput,
         txOutput,
-        vaultVersion,
         sendNativeAsset,
     );
 }
@@ -367,7 +364,6 @@ function assertTokenDeltas(
     addLiquidityQueryOutput: AddLiquidityQueryOutput,
     addLiquidityBuildOutput: AddLiquidityBuildOutput,
     txOutput: TxOutput,
-    vaultVersion: 2 | 3 = 2,
     sendNativeAsset?: boolean,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');

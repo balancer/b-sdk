@@ -149,7 +149,6 @@ export function assertRemoveLiquidityUnbalanced(
     removeLiquidityInput: RemoveLiquidityUnbalancedInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
     receiveNativeAsset?: boolean,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
@@ -201,7 +200,6 @@ export function assertRemoveLiquidityUnbalanced(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        vaultVersion,
         receiveNativeAsset,
     );
 }
@@ -271,7 +269,6 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        vaultVersion,
         receiveNativeAsset,
     );
 }
@@ -352,7 +349,6 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        vaultVersion,
         receiveNativeAsset,
     );
 }
@@ -423,7 +419,6 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        vaultVersion,
         receiveNativeAsset,
     );
 }
@@ -494,7 +489,6 @@ export function assertRemoveLiquidityRecovery(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        vaultVersion,
         receiveNativeAsset,
     );
 }
@@ -504,7 +498,6 @@ function assertTokenDeltas(
     removeLiquidityInput: RemoveLiquidityInput,
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
     txOutput: TxOutput,
-    vaultVersion: 2 | 3 = 2,
     receiveNativeAsset?: boolean,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
