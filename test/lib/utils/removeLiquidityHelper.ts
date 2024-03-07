@@ -1,27 +1,29 @@
-import { RemoveLiquidityTxInput } from './types';
+import { zeroAddress } from 'viem';
 import {
+    BALANCER_ROUTER,
     ChainId,
-    RemoveLiquidityComposableStableQueryOutput,
-    RemoveLiquidityBuildOutput,
-    RemoveLiquidityQueryOutput,
     NATIVE_ASSETS,
     PoolState,
-    TokenAmount,
-    Slippage,
-    Token,
-    RemoveLiquidityUnbalancedInput,
-    RemoveLiquiditySingleTokenExactInInput,
-    VAULT,
+    RemoveLiquidityBaseCallV2,
+    RemoveLiquidityCall,
+    RemoveLiquidityBuildOutput,
+    RemoveLiquidityComposableStableQueryOutput,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
-    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
-    BALANCER_ROUTER,
-    RemoveLiquiditySingleTokenExactOutInput,
+    RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
-} from '../../../src';
-import { sendTransactionGetBalances, TxOutput } from './helper';
-import { zeroAddress } from 'viem';
+    RemoveLiquiditySingleTokenExactInInput,
+    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+    RemoveLiquiditySingleTokenExactOutInput,
+    RemoveLiquidityUnbalancedInput,
+    Slippage,
+    Token,
+    TokenAmount,
+    VAULT,
+} from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
+import { sendTransactionGetBalances, TxOutput } from './helper';
+import { RemoveLiquidityTxInput } from './types';
 
 type RemoveLiquidityOutput = {
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
@@ -44,14 +46,24 @@ export const sdkRemoveLiquidity = async ({
         removeLiquidityInput,
         poolState,
     );
-    const removeLiquidityBuildOutput = removeLiquidity.buildCall({
+
+    let removeLiquidityBuildInput: RemoveLiquidityCall = {
         ...removeLiquidityQueryOutput,
         slippage,
-        sender: testAddress,
-        recipient: testAddress,
         chainId: removeLiquidityInput.chainId,
         receiveNativeAsset: !!receiveNativeAsset,
-    });
+    };
+    if (poolState.vaultVersion === 2) {
+        (removeLiquidityBuildInput as RemoveLiquidityBaseCallV2) = {
+            ...removeLiquidityBuildInput,
+            sender: testAddress,
+            recipient: testAddress,
+        };
+    }
+
+    const removeLiquidityBuildOutput = removeLiquidity.buildCall(
+        removeLiquidityBuildInput,
+    );
 
     return {
         removeLiquidityBuildOutput,

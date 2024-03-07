@@ -1,26 +1,28 @@
 import {
     AddLiquidity,
+    AddLiquidityBaseCallV2,
+    AddLiquidityBuildOutput,
+    AddLiquidityCall,
+    AddLiquidityComposableStableQueryOutput,
     AddLiquidityInput,
+    AddLiquidityProportionalInput,
+    AddLiquidityQueryOutput,
+    AddLiquiditySingleTokenInput,
+    addLiquiditySingleTokenShouldHaveTokenInIndexError,
+    AddLiquidityUnbalancedInput,
+    Address,
+    BALANCER_ROUTER,
+    ChainId,
+    NATIVE_ASSETS,
     PoolState,
     Slippage,
-    Address,
-    AddLiquidityBuildOutput,
-    AddLiquidityQueryOutput,
-    AddLiquidityUnbalancedInput,
-    VAULT,
-    AddLiquiditySingleTokenInput,
-    AddLiquidityProportionalInput,
     Token,
-    ChainId,
     TokenAmount,
-    AddLiquidityComposableStableQueryOutput,
-    NATIVE_ASSETS,
-    BALANCER_ROUTER,
-} from '../../../src';
+    VAULT,
+} from 'src';
+import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
-import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
-import { addLiquiditySingleTokenShouldHaveTokenInIndexError } from '../../../src/utils/errors';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -50,14 +52,24 @@ async function sdkAddLiquidity({
         addLiquidityInput,
         poolState,
     );
-    const addLiquidityBuildOutput = addLiquidity.buildCall({
+
+    let addLiquidityBuildInput: AddLiquidityCall = {
         ...addLiquidityQueryOutput,
         slippage,
-        sender: testAddress,
-        recipient: testAddress,
         chainId: addLiquidityInput.chainId,
         sendNativeAsset: !!sendNativeAsset,
-    });
+    };
+    if (poolState.vaultVersion === 2) {
+        (addLiquidityBuildInput as AddLiquidityBaseCallV2) = {
+            ...addLiquidityBuildInput,
+            sender: testAddress,
+            recipient: testAddress,
+        };
+    }
+
+    const addLiquidityBuildOutput = addLiquidity.buildCall(
+        addLiquidityBuildInput,
+    );
 
     return {
         addLiquidityBuildOutput,
