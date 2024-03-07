@@ -5,7 +5,7 @@ import {
     http,
 } from 'viem';
 import { Hex } from '../../types';
-import { BALANCER_RELAYER, CHAINS, ChainId, ZERO_ADDRESS } from '../../utils';
+import { BALANCER_RELAYER, CHAINS, ChainId } from '../../utils';
 import { balancerRelayerAbi } from '../../abi';
 
 export const doAddLiquidityNestedQuery = async (
@@ -19,7 +19,6 @@ export const doAddLiquidityNestedQuery = async (
     });
 
     const { data } = await client.call({
-        account: ZERO_ADDRESS,
         to: BALANCER_RELAYER[chainId],
         data: encodedMulticall,
     });
