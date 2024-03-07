@@ -368,7 +368,6 @@ export class PriceImpact {
         // simulate adding liquidity to get amounts in
         const addLiquidityNested = new AddLiquidityNested();
         const addLiquidityNestedInput: AddLiquidityNestedInput = {
-            accountAddress: input.accountAddress,
             chainId: input.chainId,
             rpcUrl: input.rpcUrl,
             fromInternalBalance: input.toInternalBalance,
