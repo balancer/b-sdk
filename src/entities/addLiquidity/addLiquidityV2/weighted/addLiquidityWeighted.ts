@@ -6,10 +6,10 @@ import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
+    AddLiquidityBaseQueryOutput,
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityWeightedQueryOutput,
     AddLiquidityWeightedCall,
 } from '@/entities/addLiquidity/types';
 import { AddLiquidityAmounts, PoolState } from '@/entities/types';
@@ -25,7 +25,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityWeightedQueryOutput> {
+    ): Promise<AddLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = this.getAmountsQuery(sortedTokens, input);
 

@@ -8,7 +8,6 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityComposableStableQueryOutput,
     AddLiquidityComposableStableCall,
 } from '@/entities/addLiquidity/types';
 import {
@@ -23,6 +22,7 @@ import {
 } from '@/entities/utils';
 import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
 import { getValue } from '../../helpers';
+import { AddLiquidityV2ComposableStableQueryOutput } from './types';
 
 type AddLiquidityAmounts = AddLiquidityAmountsBase & {
     maxAmountsInWithoutBpt: bigint[];
@@ -32,7 +32,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityComposableStableQueryOutput> {
+    ): Promise<AddLiquidityV2ComposableStableQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const bptIndex = sortedTokens.findIndex(
             (t) => t.address === poolState.address,

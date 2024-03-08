@@ -1,8 +1,14 @@
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, Hex } from 'viem';
 import { Address } from '../../types';
 import { BALANCER_QUERIES, CHAINS } from '../../utils';
 import { balancerQueriesAbi } from '../../abi';
-import { JoinPoolRequest } from '../addLiquidity/types';
+
+type JoinPoolRequest = {
+    assets: Address[];
+    maxAmountsIn: readonly bigint[];
+    userData: Hex;
+    fromInternalBalance: boolean;
+};
 
 export async function doAddLiquidityQuery(
     rpcUrl: string,
