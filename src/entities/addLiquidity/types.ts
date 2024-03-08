@@ -81,3 +81,11 @@ export type AddLiquidityBuildOutput = {
 export type AddLiquidityConfig = {
     customAddLiquidityTypes: Record<string, AddLiquidityBase>;
 };
+
+// type consumed by FE team, so should be exported here
+export type JoinPoolRequest = {
+    assets: Address[];
+    maxAmountsIn: readonly bigint[];
+    userData: Hex;
+    fromInternalBalance: boolean;
+};
