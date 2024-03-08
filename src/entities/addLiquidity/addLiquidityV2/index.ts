@@ -3,11 +3,12 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityConfig,
     AddLiquidityInput,
+    AddLiquidityQueryOutput,
     PoolState,
 } from '../..';
 import { PoolType } from '../../../types';
 import { AddLiquidityComposableStable } from './composableStable/addLiquidityComposableStable';
-import { AddLiquidityV2Call, AddLiqudityV2QueryOutput } from './types';
+import { AddLiquidityV2Call } from './types';
 import { AddLiquidityWeighted } from './weighted/addLiquidityWeighted';
 
 export class AddLiquidityV2 implements AddLiquidityBase {
@@ -37,7 +38,7 @@ export class AddLiquidityV2 implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiqudityV2QueryOutput> {
+    ): Promise<AddLiquidityQueryOutput> {
         return this.getAddLiquidity(poolState.type).query(input, poolState);
     }
 

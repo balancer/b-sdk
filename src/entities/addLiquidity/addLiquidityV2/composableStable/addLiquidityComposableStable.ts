@@ -54,7 +54,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance ?? false,
+            fromInternalBalance: false, // This isn't required for the query
         });
 
         const queryOutput = await doAddLiquidityQuery(
@@ -77,7 +77,6 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             bptOut,
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
-            fromInternalBalance: !!input.fromInternalBalance,
             bptIndex,
             vaultVersion: 2,
         };
@@ -98,7 +97,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance,
+            fromInternalBalance: !!input.fromInternalBalance,
             sendNativeAsset: !!input.sendNativeAsset,
         });
 

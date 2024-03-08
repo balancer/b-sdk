@@ -38,11 +38,6 @@ export class InputValidator {
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
-        if (
-            addLiquidityInput.fromInternalBalance &&
-            poolState.vaultVersion === 3
-        )
-            throw new Error('Cannot use internal balances in V3');
         this.getValidator(poolState.type).validateAddLiquidity(
             addLiquidityInput,
             poolState,

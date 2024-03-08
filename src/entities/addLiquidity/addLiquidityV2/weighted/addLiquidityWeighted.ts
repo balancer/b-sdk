@@ -44,7 +44,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance ?? false,
+            fromInternalBalance: false, // This isn't required for the query
         });
 
         const queryOutput = await doAddLiquidityQuery(
@@ -67,7 +67,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             bptOut,
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
-            fromInternalBalance: !!input.fromInternalBalance,
             vaultVersion: 2,
         };
     }
@@ -85,7 +84,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance,
+            fromInternalBalance: !!input.fromInternalBalance,
             sendNativeAsset: !!input.sendNativeAsset,
         });
 

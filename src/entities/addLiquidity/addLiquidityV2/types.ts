@@ -6,7 +6,7 @@ import {
 } from './composableStable/types';
 
 export type AddLiquidityV2BaseCall = AddLiquidityBaseCall & {
-    fromInternalBalance: boolean;
+    fromInternalBalance?: boolean;
     sender: Address;
     recipient: Address;
 };
@@ -16,7 +16,6 @@ export type AddLiquidityV2Call =
     | AddLiquidityV2ComposableStableCall;
 
 export type AddLiquidityV2BaseQueryOutput = AddLiquidityBaseQueryOutput & {
-    fromInternalBalance: boolean;
     vaultVersion: 2;
 };
 

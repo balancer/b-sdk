@@ -17,7 +17,6 @@ export enum AddLiquidityKind {
 export type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
-    fromInternalBalance?: boolean;
 };
 
 export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {
