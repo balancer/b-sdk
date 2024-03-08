@@ -6,11 +6,9 @@ import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
-    AddLiquidityBaseQueryOutput,
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityWeightedCall,
 } from '@/entities/addLiquidity/types';
 import { AddLiquidityAmounts, PoolState } from '@/entities/types';
 import {
@@ -20,12 +18,16 @@ import {
     parseAddLiquidityArgs,
 } from '@/entities/utils';
 import { getAmountsCall, getValue } from '../../helpers';
+import {
+    AddLiquidityV2BaseCall,
+    AddLiquidityV2BaseQueryOutput,
+} from '../types';
 
 export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityBaseQueryOutput> {
+    ): Promise<AddLiquidityV2BaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = this.getAmountsQuery(sortedTokens, input);
 
@@ -70,7 +72,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         };
     }
 
-    public buildCall(input: AddLiquidityWeightedCall): AddLiquidityBuildOutput {
+    public buildCall(input: AddLiquidityV2BaseCall): AddLiquidityBuildOutput {
         const amounts = getAmountsCall(input);
 
         const userData = WeightedEncoder.encodeAddLiquidityUserData(

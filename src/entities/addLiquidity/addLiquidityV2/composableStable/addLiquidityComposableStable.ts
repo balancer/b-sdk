@@ -8,7 +8,6 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityComposableStableCall,
 } from '@/entities/addLiquidity/types';
 import {
     AddLiquidityAmounts as AddLiquidityAmountsBase,
@@ -22,7 +21,10 @@ import {
 } from '@/entities/utils';
 import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
 import { getValue } from '../../helpers';
-import { AddLiquidityV2ComposableStableQueryOutput } from './types';
+import {
+    AddLiquidityV2ComposableStableCall,
+    AddLiquidityV2ComposableStableQueryOutput,
+} from './types';
 
 type AddLiquidityAmounts = AddLiquidityAmountsBase & {
     maxAmountsInWithoutBpt: bigint[];
@@ -82,7 +84,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     }
 
     public buildCall(
-        input: AddLiquidityComposableStableCall,
+        input: AddLiquidityV2ComposableStableCall,
     ): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
@@ -174,7 +176,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     }
 
     private getAmountsCall(
-        input: AddLiquidityComposableStableCall,
+        input: AddLiquidityV2ComposableStableCall,
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {

@@ -1,8 +1,10 @@
-import { AddLiquidityBaseQueryOutput } from '../../types';
-import { AddLiquidityV2BaseCall } from '../types';
+import {
+    AddLiquidityV2BaseCall,
+    AddLiquidityV2BaseQueryOutput,
+} from '../types';
 
 export type AddLiquidityV2ComposableStableQueryOutput =
-    AddLiquidityBaseQueryOutput & {
+    AddLiquidityV2BaseQueryOutput & {
         bptIndex: number;
     };
 
