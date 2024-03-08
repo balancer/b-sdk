@@ -6,7 +6,7 @@ import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
 } from '@/entities/addLiquidity/types';
@@ -19,7 +19,7 @@ import {
 } from '@/entities/utils';
 import { getAmountsCall, getValue } from '../../helpers';
 import {
-    AddLiquidityV2BaseCall,
+    AddLiquidityV2BaseBuildCallInput,
     AddLiquidityV2BaseQueryOutput,
 } from '../types';
 
@@ -71,7 +71,9 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         };
     }
 
-    public buildCall(input: AddLiquidityV2BaseCall): AddLiquidityBuildOutput {
+    public buildCall(
+        input: AddLiquidityV2BaseBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
         const userData = WeightedEncoder.encodeAddLiquidityUserData(

@@ -1,9 +1,9 @@
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityQueryOutput,
-    AddLiquidityCall,
+    AddLiquidityBuildCallInput,
     AddLiquidityConfig,
 } from './types';
 import { PoolState } from '../types';
@@ -32,7 +32,7 @@ export class AddLiquidity implements AddLiquidityBase {
         }
     }
 
-    buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
+    buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput {
         if (input.vaultVersion === 2 && 'sender' in input) {
             const addLiquidity = new AddLiquidityV2(this.config);
             return addLiquidity.buildCall(input);

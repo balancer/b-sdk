@@ -15,9 +15,9 @@ import {
 import { getAmountsCall } from '../helpers';
 import {
     AddLiquidityBase,
-    AddLiquidityBaseCall,
+    AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
 } from '../types';
@@ -86,7 +86,9 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         return output;
     }
 
-    buildCall(input: AddLiquidityBaseCall): AddLiquidityBuildOutput {
+    buildCall(
+        input: AddLiquidityBaseBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
         let call: Hex;
         switch (input.addLiquidityKind) {

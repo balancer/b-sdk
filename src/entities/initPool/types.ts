@@ -1,7 +1,7 @@
 import { Address, Hex } from 'viem';
 import {
     AddLiquidityBaseInput,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
 } from '../addLiquidity/types';
 import { InputAmount } from '../../types';
 import { PoolState } from '../types';
@@ -11,7 +11,7 @@ export interface InitPoolBase {
 }
 
 export type InitPoolBuildOutput = Omit<
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     'minBptOut' | 'maxAmountsIn'
 >;
 

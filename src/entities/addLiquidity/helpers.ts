@@ -1,9 +1,9 @@
 import { NATIVE_ASSETS } from '@/utils';
 import { AddLiquidityAmounts } from '../types';
-import { AddLiquidityBaseCall, AddLiquidityKind } from './types';
+import { AddLiquidityBaseBuildCallInput, AddLiquidityKind } from './types';
 
 export const getAmountsCall = (
-    input: AddLiquidityBaseCall,
+    input: AddLiquidityBaseBuildCallInput,
 ): AddLiquidityAmounts => {
     switch (input.addLiquidityKind) {
         case AddLiquidityKind.Unbalanced: {
@@ -27,7 +27,7 @@ export const getAmountsCall = (
     }
 };
 
-export const getValue = (input: AddLiquidityBaseCall): bigint => {
+export const getValue = (input: AddLiquidityBaseBuildCallInput): bigint => {
     let value = 0n;
     if (input.wethIsEth) {
         value =

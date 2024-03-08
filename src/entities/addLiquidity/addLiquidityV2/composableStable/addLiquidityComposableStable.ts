@@ -5,7 +5,7 @@ import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
 } from '@/entities/addLiquidity/types';
@@ -22,7 +22,7 @@ import {
 import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
 import { getValue } from '../../helpers';
 import {
-    AddLiquidityV2ComposableStableCall,
+    AddLiquidityV2ComposableStableBuildCallInput,
     AddLiquidityV2ComposableStableQueryOutput,
 } from './types';
 
@@ -83,8 +83,8 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     }
 
     public buildCall(
-        input: AddLiquidityV2ComposableStableCall,
-    ): AddLiquidityBuildOutput {
+        input: AddLiquidityV2ComposableStableBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
@@ -175,7 +175,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     }
 
     private getAmountsCall(
-        input: AddLiquidityV2ComposableStableCall,
+        input: AddLiquidityV2ComposableStableBuildCallInput,
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {
