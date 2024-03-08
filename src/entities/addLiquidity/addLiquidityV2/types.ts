@@ -14,6 +14,11 @@ export type AddLiquidityV2Call =
     | AddLiquidityV2BaseCall
     | AddLiquidityV2ComposableStableCall;
 
+type AddLiquidityV2BaseQueryOutput = AddLiquidityBaseQueryOutput & {
+    fromInternalBalance: boolean;
+    vaultVersion: 2;
+};
+
 export type AddLiqudityV2QueryOutput =
-    | AddLiquidityBaseQueryOutput
+    | AddLiquidityV2BaseQueryOutput
     | AddLiquidityV2ComposableStableQueryOutput;
