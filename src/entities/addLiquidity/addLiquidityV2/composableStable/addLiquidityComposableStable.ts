@@ -8,8 +8,6 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityComposableStableQueryOutput,
-    AddLiquidityComposableStableCall,
 } from '@/entities/addLiquidity/types';
 import {
     AddLiquidityAmounts as AddLiquidityAmountsBase,
@@ -23,6 +21,10 @@ import {
 } from '@/entities/utils';
 import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
 import { getValue } from '../../helpers';
+import {
+    AddLiquidityV2ComposableStableCall,
+    AddLiquidityV2ComposableStableQueryOutput,
+} from './types';
 
 type AddLiquidityAmounts = AddLiquidityAmountsBase & {
     maxAmountsInWithoutBpt: bigint[];
@@ -32,7 +34,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityComposableStableQueryOutput> {
+    ): Promise<AddLiquidityV2ComposableStableQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const bptIndex = sortedTokens.findIndex(
             (t) => t.address === poolState.address,
@@ -52,7 +54,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance ?? false,
+            fromInternalBalance: false, // This isn't required for the query
         });
 
         const queryOutput = await doAddLiquidityQuery(
@@ -75,14 +77,13 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             bptOut,
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
-            fromInternalBalance: !!input.fromInternalBalance,
             bptIndex,
             vaultVersion: 2,
         };
     }
 
     public buildCall(
-        input: AddLiquidityComposableStableCall,
+        input: AddLiquidityV2ComposableStableCall,
     ): AddLiquidityBuildOutput {
         const amounts = this.getAmountsCall(input);
 
@@ -96,7 +97,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance,
+            fromInternalBalance: !!input.fromInternalBalance,
             sendNativeAsset: !!input.sendNativeAsset,
         });
 
@@ -174,7 +175,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     }
 
     private getAmountsCall(
-        input: AddLiquidityComposableStableCall,
+        input: AddLiquidityV2ComposableStableCall,
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {

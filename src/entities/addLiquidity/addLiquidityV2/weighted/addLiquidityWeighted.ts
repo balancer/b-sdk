@@ -9,8 +9,6 @@ import {
     AddLiquidityBuildOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityWeightedQueryOutput,
-    AddLiquidityWeightedCall,
 } from '@/entities/addLiquidity/types';
 import { AddLiquidityAmounts, PoolState } from '@/entities/types';
 import {
@@ -20,12 +18,16 @@ import {
     parseAddLiquidityArgs,
 } from '@/entities/utils';
 import { getAmountsCall, getValue } from '../../helpers';
+import {
+    AddLiquidityV2BaseCall,
+    AddLiquidityV2BaseQueryOutput,
+} from '../types';
 
 export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityWeightedQueryOutput> {
+    ): Promise<AddLiquidityV2BaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = this.getAmountsQuery(sortedTokens, input);
 
@@ -42,7 +44,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance ?? false,
+            fromInternalBalance: false, // This isn't required for the query
         });
 
         const queryOutput = await doAddLiquidityQuery(
@@ -65,12 +67,11 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             bptOut,
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
-            fromInternalBalance: !!input.fromInternalBalance,
             vaultVersion: 2,
         };
     }
 
-    public buildCall(input: AddLiquidityWeightedCall): AddLiquidityBuildOutput {
+    public buildCall(input: AddLiquidityV2BaseCall): AddLiquidityBuildOutput {
         const amounts = getAmountsCall(input);
 
         const userData = WeightedEncoder.encodeAddLiquidityUserData(
@@ -83,7 +84,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance,
+            fromInternalBalance: !!input.fromInternalBalance,
             sendNativeAsset: !!input.sendNativeAsset,
         });
 

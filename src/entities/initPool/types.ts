@@ -22,6 +22,7 @@ export type InitPoolInputV2 = Omit<AddLiquidityBaseInput, 'rpcUrl'> & {
     recipient: Address;
     amountsIn: InputAmount[];
     chainId: number;
+    fromInternalBalance?: boolean;
 };
 
 export type InitPoolInputV3 = {

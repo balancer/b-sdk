@@ -1,9 +1,7 @@
 import {
     AddLiquidity,
-    AddLiquidityBaseCallV2,
     AddLiquidityBuildOutput,
     AddLiquidityCall,
-    AddLiquidityComposableStableQueryOutput,
     AddLiquidityInput,
     AddLiquidityProportionalInput,
     AddLiquidityQueryOutput,
@@ -23,6 +21,8 @@ import {
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
+import { AddLiquidityV2BaseCall } from '@/entities/addLiquidity/addLiquidityV2/types';
+import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -60,10 +60,11 @@ async function sdkAddLiquidity({
         sendNativeAsset: !!sendNativeAsset,
     };
     if (poolState.vaultVersion === 2) {
-        (addLiquidityBuildInput as AddLiquidityBaseCallV2) = {
+        (addLiquidityBuildInput as AddLiquidityV2BaseCall) = {
             ...addLiquidityBuildInput,
             sender: testAddress,
             recipient: testAddress,
+            fromInternalBalance: false,
         };
     }
 
@@ -80,10 +81,8 @@ async function sdkAddLiquidity({
 function isAddLiquidityComposableStableQueryOutput(
     output: AddLiquidityQueryOutput,
 ): boolean {
-    return (
-        (output as AddLiquidityComposableStableQueryOutput).bptIndex !==
-        undefined
-    );
+    if ('bptIndex' in output) return true;
+    return false;
 }
 
 function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
@@ -92,12 +91,12 @@ function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
             // Using this destructuring to return only the fields of interest
             // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { bptOut, bptIndex, ...check } =
-                output as AddLiquidityComposableStableQueryOutput;
+                output as AddLiquidityV2ComposableStableQueryOutput;
             return check;
         }
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { amountsIn, bptIndex, ...check } =
-            output as AddLiquidityComposableStableQueryOutput;
+            output as AddLiquidityV2ComposableStableQueryOutput;
         return check;
     }
     if (isExactIn) {
@@ -186,13 +185,13 @@ export function assertAddLiquidityUnbalanced(
         AddLiquidityQueryOutput,
         'bptOut' | 'bptIndex'
     > = {
+        // | Omit<AddLiquidityV2BaseQueryOutput, 'amountsIn' | 'bptIndex'> = {
         // Query should use same amountsIn as input
         amountsIn: expectedAmountsIn,
         tokenInIndex: undefined,
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
-        fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
     };
@@ -260,7 +259,6 @@ export function assertAddLiquiditySingleToken(
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
-        fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
     };
@@ -327,7 +325,6 @@ export function assertAddLiquidityProportional(
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
-        fromInternalBalance: !!addLiquidityInput.fromInternalBalance,
         addLiquidityKind: addLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
     };

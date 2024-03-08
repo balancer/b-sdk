@@ -1,7 +1,6 @@
 import {
     AddLiquidityBase,
     AddLiquidityBuildOutput,
-    AddLiquidityCall,
     AddLiquidityConfig,
     AddLiquidityInput,
     AddLiquidityQueryOutput,
@@ -9,6 +8,7 @@ import {
 } from '../..';
 import { PoolType } from '../../../types';
 import { AddLiquidityComposableStable } from './composableStable/addLiquidityComposableStable';
+import { AddLiquidityV2Call } from './types';
 import { AddLiquidityWeighted } from './weighted/addLiquidityWeighted';
 
 export class AddLiquidityV2 implements AddLiquidityBase {
@@ -42,7 +42,7 @@ export class AddLiquidityV2 implements AddLiquidityBase {
         return this.getAddLiquidity(poolState.type).query(input, poolState);
     }
 
-    public buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
+    public buildCall(input: AddLiquidityV2Call): AddLiquidityBuildOutput {
         return this.getAddLiquidity(input.poolType).buildCall(input);
     }
 }
