@@ -4,10 +4,10 @@ import {
     ChainId,
     NATIVE_ASSETS,
     PoolState,
-    RemoveLiquidityBaseBuildCallInputV2,
+    RemoveLiquidityV2BaseBuildCallInput,
     RemoveLiquidityBuildCallInput,
     RemoveLiquidityBuildCallOutput,
-    RemoveLiquidityComposableStableQueryOutput,
+    RemoveLiquidityV2ComposableStableQueryOutput,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
     RemoveLiquidityQueryOutput,
@@ -54,7 +54,7 @@ export const sdkRemoveLiquidity = async ({
         wethIsEth: !!wethIsEth,
     };
     if (poolState.vaultVersion === 2) {
-        (removeLiquidityBuildInput as RemoveLiquidityBaseBuildCallInputV2) = {
+        (removeLiquidityBuildInput as RemoveLiquidityV2BaseBuildCallInput) = {
             ...removeLiquidityBuildInput,
             sender: testAddress,
             recipient: testAddress,
@@ -71,27 +71,27 @@ export const sdkRemoveLiquidity = async ({
     };
 };
 
-function isRemoveLiquidityComposableStableQueryOutput(
+function isRemoveLiquidityV2ComposableStableQueryOutput(
     output: RemoveLiquidityQueryOutput,
 ): boolean {
     return (
-        (output as RemoveLiquidityComposableStableQueryOutput).bptIndex !==
+        (output as RemoveLiquidityV2ComposableStableQueryOutput).bptIndex !==
         undefined
     );
 }
 
 function getCheck(output: RemoveLiquidityQueryOutput, isExactIn: boolean) {
-    if (isRemoveLiquidityComposableStableQueryOutput(output)) {
+    if (isRemoveLiquidityV2ComposableStableQueryOutput(output)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
             // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { amountsOut, bptIndex, ...check } =
-                output as RemoveLiquidityComposableStableQueryOutput;
+                output as RemoveLiquidityV2ComposableStableQueryOutput;
             return check;
         }
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { bptIn, bptIndex, ...check } =
-            output as RemoveLiquidityComposableStableQueryOutput;
+            output as RemoveLiquidityV2ComposableStableQueryOutput;
         return check;
     }
     if (isExactIn) {

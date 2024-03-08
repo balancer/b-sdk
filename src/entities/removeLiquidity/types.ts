@@ -2,6 +2,10 @@ import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address, InputAmount } from '../../types';
 import { PoolState } from '../types';
+import {
+    RemoveLiquidityV2BuildCallInput,
+    RemoveLiquidityV2QueryOutput,
+} from './removeLiquidityV2/types';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
@@ -66,16 +70,9 @@ export type RemoveLiquidityBaseQueryOutput = {
     chainId: number;
 };
 
-export type RemoveLiquidityComposableStableQueryOutput =
-    RemoveLiquidityBaseQueryOutput & {
-        bptIndex: number;
-    };
-export type RemoveLiquidityWeightedQueryOutput = RemoveLiquidityBaseQueryOutput;
-
 export type RemoveLiquidityQueryOutput =
     | RemoveLiquidityBaseQueryOutput
-    | RemoveLiquidityComposableStableQueryOutput
-    | RemoveLiquidityWeightedQueryOutput;
+    | RemoveLiquidityV2QueryOutput;
 
 export type RemoveLiquidityBaseBuildCallInput = {
     slippage: Slippage;
@@ -83,22 +80,9 @@ export type RemoveLiquidityBaseBuildCallInput = {
     wethIsEth?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
-export type RemoveLiquidityBaseBuildCallInputV2 =
-    RemoveLiquidityBaseBuildCallInput & {
-        sender: Address;
-        recipient: Address;
-    };
-
-export type RemoveLiquidityComposableStableBuildCallInput =
-    RemoveLiquidityBaseBuildCallInputV2 &
-        RemoveLiquidityComposableStableQueryOutput;
-export type RemoveLiquidityWeightedBuildCallInput =
-    RemoveLiquidityBaseBuildCallInputV2;
-
 export type RemoveLiquidityBuildCallInput =
     | RemoveLiquidityBaseBuildCallInput
-    | RemoveLiquidityComposableStableBuildCallInput
-    | RemoveLiquidityWeightedBuildCallInput;
+    | RemoveLiquidityV2BuildCallInput;
 
 export type RemoveLiquidityBuildCallOutput = {
     call: Address;

@@ -11,12 +11,12 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
-    RemoveLiquidityWeightedBuildCallInput,
 } from '../../types';
 import { PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { getSortedTokens } from '../../../utils';
 import { getAmountsCall, getAmountsQuery } from '../../helper';
+import { RemoveLiquidityV2BaseBuildCallInput } from '../types';
 
 export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     public async query(
@@ -72,7 +72,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityWeightedBuildCallInput,
+        input: RemoveLiquidityV2BaseBuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 

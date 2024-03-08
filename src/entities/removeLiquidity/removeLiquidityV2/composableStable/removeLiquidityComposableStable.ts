@@ -6,12 +6,12 @@ import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityComposableStableBuildCallInput,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
 } from '../../types';
+import { RemoveLiquidityV2ComposableStableBuildCallInput } from './types';
 import { RemoveLiquidityAmounts, PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { ComposableStableEncoder } from '../../../encoders/composableStable';
@@ -120,7 +120,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityComposableStableBuildCallInput,
+        input: RemoveLiquidityV2ComposableStableBuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
         const amounts = this.getAmountsCall(input);
         const amountsWithoutBpt = {
@@ -167,7 +167,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     }
 
     private getAmountsCall(
-        input: RemoveLiquidityComposableStableBuildCallInput,
+        input: RemoveLiquidityV2ComposableStableBuildCallInput,
     ): RemoveLiquidityAmounts {
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:

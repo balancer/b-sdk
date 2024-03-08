@@ -4,7 +4,7 @@ import { PoolState } from '../types';
 import { Address, Hex, InputAmount } from '../../types';
 import {
     AddLiquidityV2BuildCallInput,
-    AddLiqudityV2QueryOutput,
+    AddLiquidityV2QueryOutput,
 } from './addLiquidityV2/types';
 
 export enum AddLiquidityKind {
@@ -52,7 +52,7 @@ export type AddLiquidityBaseQueryOutput = {
 
 export type AddLiquidityQueryOutput =
     | AddLiquidityBaseQueryOutput
-    | AddLiqudityV2QueryOutput;
+    | AddLiquidityV2QueryOutput;
 
 export type AddLiquidityBaseBuildCallInput = {
     slippage: Slippage;

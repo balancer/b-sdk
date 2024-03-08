@@ -1,4 +1,4 @@
-import { Address } from 'viem';
+import { Address } from '@/types';
 import {
     AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
@@ -23,6 +23,6 @@ export type AddLiquidityV2BaseQueryOutput = AddLiquidityBaseQueryOutput & {
     vaultVersion: 2;
 };
 
-export type AddLiqudityV2QueryOutput =
+export type AddLiquidityV2QueryOutput =
     | AddLiquidityV2BaseQueryOutput
     | AddLiquidityV2ComposableStableQueryOutput;
