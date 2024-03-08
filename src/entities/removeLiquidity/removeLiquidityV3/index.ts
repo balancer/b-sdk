@@ -11,9 +11,9 @@ import {
 import { getAmountsCall, getAmountsQuery } from '../helper';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBaseCall,
+    RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityBaseQueryOutput,
-    RemoveLiquidityBuildOutput,
+    RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
 } from '../types';
@@ -100,8 +100,8 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityBaseCall,
-    ): RemoveLiquidityBuildOutput {
+        input: RemoveLiquidityBaseBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
         let call: Hex;

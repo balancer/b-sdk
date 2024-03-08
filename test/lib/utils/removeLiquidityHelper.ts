@@ -4,9 +4,9 @@ import {
     ChainId,
     NATIVE_ASSETS,
     PoolState,
-    RemoveLiquidityBaseCallV2,
-    RemoveLiquidityCall,
-    RemoveLiquidityBuildOutput,
+    RemoveLiquidityBaseBuildCallInputV2,
+    RemoveLiquidityBuildCallInput,
+    RemoveLiquidityBuildCallOutput,
     RemoveLiquidityComposableStableQueryOutput,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
@@ -27,7 +27,7 @@ import { RemoveLiquidityTxInput } from './types';
 
 type RemoveLiquidityOutput = {
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
-    removeLiquidityBuildOutput: RemoveLiquidityBuildOutput;
+    removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     txOutput: TxOutput;
 };
 
@@ -39,7 +39,7 @@ export const sdkRemoveLiquidity = async ({
     testAddress,
     wethIsEth,
 }: Omit<RemoveLiquidityTxInput, 'client'>): Promise<{
-    removeLiquidityBuildOutput: RemoveLiquidityBuildOutput;
+    removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
     const removeLiquidityQueryOutput = await removeLiquidity.query(
@@ -47,26 +47,26 @@ export const sdkRemoveLiquidity = async ({
         poolState,
     );
 
-    let removeLiquidityBuildInput: RemoveLiquidityCall = {
+    let removeLiquidityBuildInput: RemoveLiquidityBuildCallInput = {
         ...removeLiquidityQueryOutput,
         slippage,
         chainId: removeLiquidityInput.chainId,
         wethIsEth: !!wethIsEth,
     };
     if (poolState.vaultVersion === 2) {
-        (removeLiquidityBuildInput as RemoveLiquidityBaseCallV2) = {
+        (removeLiquidityBuildInput as RemoveLiquidityBaseBuildCallInputV2) = {
             ...removeLiquidityBuildInput,
             sender: testAddress,
             recipient: testAddress,
         };
     }
 
-    const removeLiquidityBuildOutput = removeLiquidity.buildCall(
+    const removeLiquidityBuildCallOutput = removeLiquidity.buildCall(
         removeLiquidityBuildInput,
     );
 
     return {
-        removeLiquidityBuildOutput,
+        removeLiquidityBuildCallOutput,
         removeLiquidityQueryOutput,
     };
 };
@@ -125,7 +125,7 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
         wethIsEth,
     } = txInput;
 
-    const { removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
+    const { removeLiquidityQueryOutput, removeLiquidityBuildCallOutput } =
         await sdkRemoveLiquidity({
             removeLiquidity,
             removeLiquidityInput,
@@ -143,14 +143,14 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
         tokens,
         client,
         testAddress,
-        removeLiquidityBuildOutput.to,
-        removeLiquidityBuildOutput.call,
-        removeLiquidityBuildOutput.value,
+        removeLiquidityBuildCallOutput.to,
+        removeLiquidityBuildCallOutput.call,
+        removeLiquidityBuildCallOutput.value,
     );
 
     return {
         removeLiquidityQueryOutput,
-        removeLiquidityBuildOutput,
+        removeLiquidityBuildCallOutput,
         txOutput,
     };
 }
@@ -163,8 +163,11 @@ export function assertRemoveLiquidityUnbalanced(
     slippage: Slippage,
     wethIsEth?: boolean,
 ) {
-    const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
-        removeLiquidityOutput;
+    const {
+        txOutput,
+        removeLiquidityQueryOutput,
+        removeLiquidityBuildCallOutput,
+    } = removeLiquidityOutput;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsOut = poolState.tokens.map((t) => {
@@ -199,9 +202,9 @@ export function assertRemoveLiquidityUnbalanced(
     // Expect some bpt amount
     expect(removeLiquidityQueryOutput.bptIn.amount > 0n).to.be.true;
 
-    assertRemoveLiquidityBuildOutput(
+    assertRemoveLiquidityBuildCallOutput(
         removeLiquidityQueryOutput,
-        removeLiquidityBuildOutput,
+        removeLiquidityBuildCallOutput,
         false,
         slippage,
         chainId,
@@ -225,8 +228,11 @@ export function assertRemoveLiquiditySingleTokenExactOut(
     vaultVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
-    const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
-        removeLiquidityOutput;
+    const {
+        txOutput,
+        removeLiquidityQueryOutput,
+        removeLiquidityBuildCallOutput,
+    } = removeLiquidityOutput;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsOut = poolState.tokens.map((t) => {
@@ -267,9 +273,9 @@ export function assertRemoveLiquiditySingleTokenExactOut(
     // Expect some bpt amount
     expect(removeLiquidityQueryOutput.bptIn.amount > 0n).to.be.true;
 
-    assertRemoveLiquidityBuildOutput(
+    assertRemoveLiquidityBuildCallOutput(
         removeLiquidityQueryOutput,
-        removeLiquidityBuildOutput,
+        removeLiquidityBuildCallOutput,
         false,
         slippage,
         chainId,
@@ -294,8 +300,11 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     vaultVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
-    const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
-        removeLiquidityOutput;
+    const {
+        txOutput,
+        removeLiquidityQueryOutput,
+        removeLiquidityBuildCallOutput,
+    } = removeLiquidityOutput;
 
     if (removeLiquidityQueryOutput.tokenOutIndex === undefined)
         throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
@@ -347,9 +356,9 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         }
     });
 
-    assertRemoveLiquidityBuildOutput(
+    assertRemoveLiquidityBuildCallOutput(
         removeLiquidityQueryOutput,
-        removeLiquidityBuildOutput,
+        removeLiquidityBuildCallOutput,
         true,
         slippage,
         chainId,
@@ -374,8 +383,11 @@ export function assertRemoveLiquidityProportional(
     vaultVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
-    const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
-        removeLiquidityOutput;
+    const {
+        txOutput,
+        removeLiquidityQueryOutput,
+        removeLiquidityBuildCallOutput,
+    } = removeLiquidityOutput;
 
     const bptToken = new Token(chainId, poolState.address, 18);
 
@@ -417,9 +429,9 @@ export function assertRemoveLiquidityProportional(
         ).to.be.true;
     }
 
-    assertRemoveLiquidityBuildOutput(
+    assertRemoveLiquidityBuildCallOutput(
         removeLiquidityQueryOutput,
-        removeLiquidityBuildOutput,
+        removeLiquidityBuildCallOutput,
         true,
         slippage,
         chainId,
@@ -444,8 +456,11 @@ export function assertRemoveLiquidityRecovery(
     vaultVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
-    const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
-        removeLiquidityOutput;
+    const {
+        txOutput,
+        removeLiquidityQueryOutput,
+        removeLiquidityBuildCallOutput,
+    } = removeLiquidityOutput;
 
     const bptToken = new Token(chainId, poolState.address, 18);
 
@@ -487,9 +502,9 @@ export function assertRemoveLiquidityRecovery(
         ).to.be.true;
     }
 
-    assertRemoveLiquidityBuildOutput(
+    assertRemoveLiquidityBuildCallOutput(
         removeLiquidityQueryOutput,
-        removeLiquidityBuildOutput,
+        removeLiquidityBuildCallOutput,
         true,
         slippage,
         chainId,
@@ -549,9 +564,9 @@ function assertTokenDeltas(
     });
 }
 
-function assertRemoveLiquidityBuildOutput(
+function assertRemoveLiquidityBuildCallOutput(
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
-    RemoveLiquidityBuildOutput: RemoveLiquidityBuildOutput,
+    RemoveLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput,
     isExactIn: boolean,
     slippage: Slippage,
     chainId: number,
@@ -578,7 +593,7 @@ function assertRemoveLiquidityBuildOutput(
 
     const to = vaultVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId];
 
-    const expectedBuildOutput: Omit<RemoveLiquidityBuildOutput, 'call'> = {
+    const expectedBuildOutput: Omit<RemoveLiquidityBuildCallOutput, 'call'> = {
         minAmountsOut,
         maxBptIn,
         to,
@@ -586,6 +601,6 @@ function assertRemoveLiquidityBuildOutput(
     };
 
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { call, ...buildCheck } = RemoveLiquidityBuildOutput;
+    const { call, ...buildCheck } = RemoveLiquidityBuildCallOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

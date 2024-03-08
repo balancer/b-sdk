@@ -7,11 +7,11 @@ import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBuildOutput,
+    RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
-    RemoveLiquidityWeightedCall,
+    RemoveLiquidityWeightedBuildCallInput,
 } from '../../types';
 import { PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
@@ -72,8 +72,8 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityWeightedCall,
-    ): RemoveLiquidityBuildOutput {
+        input: RemoveLiquidityWeightedBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
         const userData = WeightedEncoder.encodeRemoveLiquidityUserData(

@@ -1,7 +1,7 @@
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBuildOutput,
-    RemoveLiquidityCall,
+    RemoveLiquidityBuildCallOutput,
+    RemoveLiquidityBuildCallInput,
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
@@ -33,7 +33,9 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         }
     }
 
-    public buildCall(input: RemoveLiquidityCall): RemoveLiquidityBuildOutput {
+    public buildCall(
+        input: RemoveLiquidityBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
         // TODO: refactor validators to take v3 into account
         const isV2Input = 'sender' in input;
         if (input.vaultVersion === 3 && isV2Input)

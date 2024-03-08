@@ -77,27 +77,30 @@ export type RemoveLiquidityQueryOutput =
     | RemoveLiquidityComposableStableQueryOutput
     | RemoveLiquidityWeightedQueryOutput;
 
-export type RemoveLiquidityBaseCall = {
+export type RemoveLiquidityBaseBuildCallInput = {
     slippage: Slippage;
     chainId: number;
     wethIsEth?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
-export type RemoveLiquidityBaseCallV2 = RemoveLiquidityBaseCall & {
-    sender: Address;
-    recipient: Address;
-};
+export type RemoveLiquidityBaseBuildCallInputV2 =
+    RemoveLiquidityBaseBuildCallInput & {
+        sender: Address;
+        recipient: Address;
+    };
 
-export type RemoveLiquidityComposableStableCall = RemoveLiquidityBaseCallV2 &
-    RemoveLiquidityComposableStableQueryOutput;
-export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCallV2;
+export type RemoveLiquidityComposableStableBuildCallInput =
+    RemoveLiquidityBaseBuildCallInputV2 &
+        RemoveLiquidityComposableStableQueryOutput;
+export type RemoveLiquidityWeightedBuildCallInput =
+    RemoveLiquidityBaseBuildCallInputV2;
 
-export type RemoveLiquidityCall =
-    | RemoveLiquidityBaseCall
-    | RemoveLiquidityComposableStableCall
-    | RemoveLiquidityWeightedCall;
+export type RemoveLiquidityBuildCallInput =
+    | RemoveLiquidityBaseBuildCallInput
+    | RemoveLiquidityComposableStableBuildCallInput
+    | RemoveLiquidityWeightedBuildCallInput;
 
-export type RemoveLiquidityBuildOutput = {
+export type RemoveLiquidityBuildCallOutput = {
     call: Address;
     to: Address;
     value: bigint;
@@ -110,7 +113,9 @@ export interface RemoveLiquidityBase {
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput>;
-    buildCall(input: RemoveLiquidityCall): RemoveLiquidityBuildOutput;
+    buildCall(
+        input: RemoveLiquidityBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput;
 }
 
 export type RemoveLiquidityConfig = {

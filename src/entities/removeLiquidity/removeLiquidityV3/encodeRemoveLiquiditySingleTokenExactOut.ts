@@ -1,11 +1,11 @@
 import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
-import { RemoveLiquidityBaseCall } from '../types';
+import { RemoveLiquidityBaseBuildCallInput } from '../types';
 import { encodeFunctionData } from 'viem';
 import { balancerRouterAbi } from '@/abi';
 import { Hex } from '@/types';
 
 export const encodeRemoveLiquiditySingleTokenExactOut = (
-    input: RemoveLiquidityBaseCall,
+    input: RemoveLiquidityBaseBuildCallInput,
     maxBptAmountIn: bigint,
 ): Hex => {
     // just a sanity check as this is already checked in InputValidator
