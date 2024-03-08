@@ -44,7 +44,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: false, // This isn't required for the query
         });
 
         const queryOutput = await doAddLiquidityQuery(

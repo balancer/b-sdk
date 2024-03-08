@@ -51,7 +51,6 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,
             userData,
-            toInternalBalance: !!input.toInternalBalance,
         });
         const queryOutput = await doRemoveLiquidityQuery(
             input.rpcUrl,
@@ -72,7 +71,6 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
-            toInternalBalance: !!input.toInternalBalance,
             bptIndex,
             vaultVersion: poolState.vaultVersion,
             chainId: input.chainId,

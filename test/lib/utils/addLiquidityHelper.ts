@@ -37,6 +37,7 @@ async function sdkAddLiquidity({
     slippage,
     testAddress,
     wethIsEth,
+    fromInternalBalance,
 }: {
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
@@ -44,6 +45,7 @@ async function sdkAddLiquidity({
     slippage: Slippage;
     testAddress: Address;
     wethIsEth?: boolean;
+    fromInternalBalance?: boolean;
 }): Promise<{
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -64,7 +66,7 @@ async function sdkAddLiquidity({
             ...addLiquidityBuildInput,
             sender: testAddress,
             recipient: testAddress,
-            fromInternalBalance: false,
+            fromInternalBalance: !!fromInternalBalance,
         };
     }
 

@@ -42,7 +42,6 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,
             userData,
-            toInternalBalance: !!input.toInternalBalance,
         });
 
         const queryOutput = await doRemoveLiquidityQuery(
@@ -65,7 +64,6 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
-            toInternalBalance: !!input.toInternalBalance,
             vaultVersion: poolState.vaultVersion,
             chainId: input.chainId,
         };

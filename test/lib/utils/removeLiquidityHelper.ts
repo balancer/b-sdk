@@ -4,10 +4,8 @@ import {
     ChainId,
     NATIVE_ASSETS,
     PoolState,
-    RemoveLiquidityV2BaseBuildCallInput,
     RemoveLiquidityBuildCallInput,
     RemoveLiquidityBuildCallOutput,
-    RemoveLiquidityV2ComposableStableQueryOutput,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
     RemoveLiquidityQueryOutput,
@@ -24,6 +22,8 @@ import {
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import { RemoveLiquidityTxInput } from './types';
+import { RemoveLiquidityV2BaseBuildCallInput } from '@/entities/removeLiquidity/removeLiquidityV2/types';
+import { RemoveLiquidityV2ComposableStableQueryOutput } from '@/entities/removeLiquidity/removeLiquidityV2/composableStable/types';
 
 type RemoveLiquidityOutput = {
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
@@ -38,6 +38,7 @@ export const sdkRemoveLiquidity = async ({
     slippage,
     testAddress,
     wethIsEth,
+    toInternalBalance,
 }: Omit<RemoveLiquidityTxInput, 'client'>): Promise<{
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
@@ -58,6 +59,7 @@ export const sdkRemoveLiquidity = async ({
             ...removeLiquidityBuildInput,
             sender: testAddress,
             recipient: testAddress,
+            toInternalBalance: !!toInternalBalance,
         };
     }
 
@@ -189,7 +191,6 @@ export function assertRemoveLiquidityUnbalanced(
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
-        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
         chainId,
@@ -260,7 +261,6 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
-        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
         chainId,
@@ -330,7 +330,6 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
-        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
         chainId,
@@ -405,7 +404,6 @@ export function assertRemoveLiquidityProportional(
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
-        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
         chainId,
@@ -478,7 +476,6 @@ export function assertRemoveLiquidityRecovery(
         // Should match inputs
         poolId: poolState.id,
         poolType: poolState.type,
-        toInternalBalance: !!removeLiquidityInput.toInternalBalance,
         removeLiquidityKind: removeLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
         chainId,

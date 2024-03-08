@@ -12,6 +12,7 @@ export type RemoveLiquidityV2BaseBuildCallInput =
     RemoveLiquidityBaseBuildCallInput & {
         sender: Address;
         recipient: Address;
+        toInternalBalance?: boolean;
     };
 
 export type RemoveLiquidityV2BuildCallInput =

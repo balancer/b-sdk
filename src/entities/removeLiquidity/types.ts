@@ -19,7 +19,6 @@ export enum RemoveLiquidityKind {
 export type RemoveLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
-    toInternalBalance?: boolean;
 };
 
 export type RemoveLiquidityUnbalancedInput = RemoveLiquidityBaseInput & {
@@ -65,7 +64,6 @@ export type RemoveLiquidityBaseQueryOutput = {
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
     tokenOutIndex?: number;
-    toInternalBalance: boolean;
     vaultVersion: 2 | 3;
     chainId: number;
 };

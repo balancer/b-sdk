@@ -23,6 +23,7 @@ export type AddLiquidityTxInput = {
     poolState: PoolState;
     testAddress: Address;
     wethIsEth?: boolean;
+    fromInternalBalance?: boolean;
 };
 
 export type InitPoolTxInput = Omit<
@@ -41,6 +42,7 @@ export type RemoveLiquidityTxInput = {
     poolState: PoolState;
     testAddress: Address;
     wethIsEth?: boolean;
+    toInternalBalance?: boolean;
 };
 
 export type CreatePoolTxInput = {

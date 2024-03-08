@@ -91,7 +91,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 TokenAmount.fromRawAmount(t, minAmountsOut[i]),
             ),
             tokenOutIndex: amounts.tokenOutIndex,
-            toInternalBalance: !!input.toInternalBalance,
             vaultVersion: poolState.vaultVersion,
             chainId: input.chainId,
         };
