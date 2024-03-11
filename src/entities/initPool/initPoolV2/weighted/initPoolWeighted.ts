@@ -5,7 +5,7 @@ import {
     InitPoolBuildOutput,
     InitPoolInputV2,
 } from '../../types';
-import { VAULT, ZERO_ADDRESS } from '../../../../utils';
+import { VAULT } from '../../../../utils';
 import { vaultV2Abi } from '../../../../abi';
 import {
     getAmounts,
@@ -14,6 +14,8 @@ import {
 } from '../../../utils';
 import { Token } from '../../../token';
 import { WeightedEncoder } from '../../../encoders';
+import { TokenAmount } from '@/entities/tokenAmount';
+import { getValue } from '@/entities/utils/getValue';
 
 export class InitPoolWeighted implements InitPoolBase {
     buildCall(
@@ -38,14 +40,15 @@ export class InitPoolWeighted implements InitPoolBase {
             args,
         });
 
-        const value = input.amountsIn.find(
-            (a) => a.address === ZERO_ADDRESS,
-        )?.rawAmount;
+        const amountsIn = input.amountsIn.map((a) => {
+            const token = new Token(input.chainId, a.address, a.decimals);
+            return TokenAmount.fromRawAmount(token, a.rawAmount);
+        });
 
         return {
             call,
             to: VAULT[input.chainId] as Address,
-            value: value === undefined ? 0n : value,
+            value: getValue(amountsIn, !!input.wethIsEth),
         };
     }
 

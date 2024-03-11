@@ -17,7 +17,8 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '@/entities/utils';
-import { getAmountsCall, getValue } from '../../helpers';
+import { getAmountsCall } from '../../helpers';
+import { getValue } from '../../../utils/getValue';
 import {
     AddLiquidityV2BaseBuildCallInput,
     AddLiquidityV2BaseQueryOutput,
@@ -98,7 +99,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         return {
             call,
             to: VAULT[input.chainId],
-            value: getValue(input),
+            value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,

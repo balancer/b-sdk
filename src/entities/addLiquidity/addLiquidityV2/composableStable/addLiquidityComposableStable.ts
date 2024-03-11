@@ -20,7 +20,7 @@ import {
     parseAddLiquidityArgs,
 } from '@/entities/utils';
 import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
-import { getValue } from '../../helpers';
+import { getValue } from '../../../utils/getValue';
 import {
     AddLiquidityV2ComposableStableBuildCallInput,
     AddLiquidityV2ComposableStableQueryOutput,
@@ -110,7 +110,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         return {
             call,
             to: VAULT[input.chainId],
-            value: getValue(input),
+            value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,

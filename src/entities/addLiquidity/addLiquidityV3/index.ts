@@ -7,7 +7,6 @@ import { getAmounts, getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
-    NATIVE_ASSETS,
     addLiquidityProportionalUnavailableError,
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
 } from '@/utils';
@@ -23,6 +22,7 @@ import {
 } from '../types';
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
+import { getValue } from '@/entities/utils/getValue';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -131,23 +131,10 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                 break;
         }
 
-        let value = 0n;
-        if (input.wethIsEth) {
-            const wrappedNativeAssetInput = input.amountsIn.find(
-                (a) => a.token.address === NATIVE_ASSETS[input.chainId].wrapped,
-            );
-            if (wrappedNativeAssetInput === undefined) {
-                throw new Error(
-                    'wethIsEth requires wrapped native asset as input',
-                );
-            }
-            value = wrappedNativeAssetInput.amount;
-        }
-
         return {
             call,
             to: BALANCER_ROUTER[input.chainId],
-            value,
+            value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,
