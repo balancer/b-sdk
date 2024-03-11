@@ -41,7 +41,7 @@ export type RemoveLiquidityNestedCallAttributes = {
         index: bigint;
     }[];
     tokenOutIndex?: number;
-    receiveNativeAsset?: boolean;
+    wethIsEth?: boolean;
 };
 
 export type RemoveLiquidityNestedQueryOutput = {
@@ -57,5 +57,5 @@ export type RemoveLiquidityNestedCallInput =
         slippage: Slippage;
         accountAddress: Address;
         relayerApprovalSignature?: Hex;
-        receiveNativeAsset?: boolean;
+        wethIsEth?: boolean;
     };

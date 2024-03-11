@@ -45,7 +45,7 @@ export class InitPoolV3 implements InitPoolBase {
     }
 
     private value(input: InitPoolInputV3) {
-        return input.sendNativeAsset
+        return input.wethIsEth
             ? (input.amountsIn.find((a) =>
                   isSameAddress(
                       a.address,

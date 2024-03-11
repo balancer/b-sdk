@@ -89,7 +89,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             minAmountsOut: amounts.minAmountsOut,
             userData,
             toInternalBalance: !!input.toInternalBalance,
-            receiveNativeAsset: !!input.receiveNativeAsset,
+            wethIsEth: !!input.wethIsEth,
             chainId: input.chainId,
         });
 

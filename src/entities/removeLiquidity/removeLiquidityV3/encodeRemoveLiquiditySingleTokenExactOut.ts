@@ -20,7 +20,7 @@ export const encodeRemoveLiquiditySingleTokenExactOut = (
             maxBptAmountIn,
             input.amountsOut[input.tokenOutIndex].token.address,
             input.amountsOut[input.tokenOutIndex].amount,
-            !!input.receiveNativeAsset,
+            !!input.wethIsEth,
             '0x',
         ],
     });

@@ -80,7 +80,7 @@ export type RemoveLiquidityBaseCall = {
     sender: Address;
     recipient: Address;
     chainId: number;
-    receiveNativeAsset?: boolean;
+    wethIsEth?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
 export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall;

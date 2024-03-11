@@ -27,7 +27,7 @@ export type InitPoolInputV2 = Omit<AddLiquidityBaseInput, 'rpcUrl'> & {
 export type InitPoolInputV3 = {
     amountsIn: InputAmount[];
     minBptAmountOut: bigint;
-    sendNativeAsset?: boolean;
+    wethIsEth?: boolean;
     chainId: number;
 };
 

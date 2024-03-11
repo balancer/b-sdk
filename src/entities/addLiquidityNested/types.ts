@@ -14,7 +14,7 @@ export type AddLiquidityNestedInput = {
 
 export type AddLiquidityNestedCallAttributes = {
     chainId: ChainId;
-    sendNativeAsset?: boolean;
+    wethIsEth?: boolean;
     sortedTokens: Token[];
     poolId: Hex;
     poolAddress: Address;
@@ -41,5 +41,5 @@ export type AddLiquidityNestedCallInput = AddLiquidityNestedQueryOutput & {
     slippage: Slippage;
     accountAddress: Address;
     relayerApprovalSignature?: Hex;
-    sendNativeAsset?: boolean;
+    wethIsEth?: boolean;
 };

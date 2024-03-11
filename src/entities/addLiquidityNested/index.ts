@@ -88,7 +88,7 @@ export class AddLiquidityNested {
                     call.recipient === ZERO_ADDRESS
                         ? input.accountAddress
                         : call.recipient,
-                sendNativeAsset: input.sendNativeAsset,
+                wethIsEth: input.wethIsEth,
             };
         });
 
