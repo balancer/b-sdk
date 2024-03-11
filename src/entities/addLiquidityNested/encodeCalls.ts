@@ -14,7 +14,7 @@ export const encodeCalls = (
     const values: bigint[] = [];
     for (const callAttributes of callsAttributes) {
         const {
-            sendNativeAsset,
+            wethIsEth,
             chainId,
             sortedTokens,
             poolId,
@@ -33,7 +33,7 @@ export const encodeCalls = (
         let tokensIn = [...sortedTokens];
 
         let value = 0n;
-        if (sendNativeAsset) {
+        if (wethIsEth) {
             tokensIn = replaceWrapped([...sortedTokens], chainId);
             const nativeAssetIndex = tokensIn.findIndex((t) =>
                 t.isSameAddress(ZERO_ADDRESS),

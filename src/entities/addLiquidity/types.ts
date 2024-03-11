@@ -65,7 +65,7 @@ export type AddLiquidityBaseCall = {
     sender: Address;
     recipient: Address;
     chainId: number;
-    sendNativeAsset?: boolean;
+    wethIsEth?: boolean;
 } & AddLiquidityBaseQueryOutput;
 
 export type AddLiquidityWeightedCall = AddLiquidityBaseCall;

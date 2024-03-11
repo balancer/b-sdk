@@ -77,11 +77,11 @@ export class AddLiquidityNested {
             minBptOut,
         };
 
-        // update sendNativeAsset flag
+        // update wethIsEth flag
         input.callsAttributes = input.callsAttributes.map((call) => {
             return {
                 ...call,
-                sendNativeAsset: input.sendNativeAsset,
+                wethIsEth: input.wethIsEth,
             };
         });
 

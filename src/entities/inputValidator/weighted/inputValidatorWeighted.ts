@@ -24,7 +24,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
             poolState.tokens.map((t) => t.address),
         );
         if (poolState.vaultVersion === 3) {
-            this.validateSendNativeAsset(initPoolInput as InitPoolInputV3);
+            this.validateWethIsEth(initPoolInput as InitPoolInputV3);
         }
     }
 
@@ -73,8 +73,8 @@ export class InputValidatorWeighted implements InputValidatorBase {
         validateTokensRemoveLiquidity(input, poolState);
     }
 
-    private validateSendNativeAsset(initPoolInput: InitPoolInputV3) {
-        if (initPoolInput.sendNativeAsset) {
+    private validateWethIsEth(initPoolInput: InitPoolInputV3) {
+        if (initPoolInput.wethIsEth) {
             const inputContainsWrappedNativeAsset =
                 initPoolInput.amountsIn.some((a) =>
                     isSameAddress(
@@ -84,7 +84,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
                 );
             if (!inputContainsWrappedNativeAsset) {
                 throw new Error(
-                    'sendNativeAsset requires wrapped native asset as input',
+                    'wethIsEth requires wrapped native asset as input',
                 );
             }
         }

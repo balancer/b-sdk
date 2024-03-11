@@ -97,7 +97,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
             fromInternalBalance: input.fromInternalBalance,
-            sendNativeAsset: !!input.sendNativeAsset,
+            wethIsEth: !!input.wethIsEth,
         });
 
         const call = encodeFunctionData({

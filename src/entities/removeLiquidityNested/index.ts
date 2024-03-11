@@ -97,8 +97,8 @@ export class RemoveLiquidityNested {
                         minAmountsOut[j].amount;
                 }
             });
-            // update receiveNativeAsset flag
-            call.receiveNativeAsset = !!input.receiveNativeAsset;
+            // update wethIsEth flag
+            call.wethIsEth = !!input.wethIsEth;
         });
 
         const encodedCalls = encodeCalls(

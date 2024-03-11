@@ -45,7 +45,7 @@ export const validateBuildCallInput = (
     input: RemoveLiquidityNestedCallInput,
 ) => {
     if (
-        input.receiveNativeAsset &&
+        input.wethIsEth &&
         !input.amountsOut.some((a) =>
             a.token.isSameAddress(NATIVE_ASSETS[input.chainId].wrapped),
         )

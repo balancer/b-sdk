@@ -35,7 +35,7 @@ export const sdkRemoveLiquidity = async ({
     poolState,
     slippage,
     testAddress,
-    receiveNativeAsset,
+    wethIsEth,
 }: Omit<RemoveLiquidityTxInput, 'client'>): Promise<{
     removeLiquidityBuildOutput: RemoveLiquidityBuildOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
@@ -50,7 +50,7 @@ export const sdkRemoveLiquidity = async ({
         sender: testAddress,
         recipient: testAddress,
         chainId: removeLiquidityInput.chainId,
-        receiveNativeAsset: !!receiveNativeAsset,
+        wethIsEth: !!wethIsEth,
     });
 
     return {
@@ -110,7 +110,7 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
         testAddress,
         client,
         slippage,
-        receiveNativeAsset,
+        wethIsEth,
     } = txInput;
 
     const { removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
@@ -120,7 +120,7 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
             poolState,
             slippage,
             testAddress,
-            receiveNativeAsset,
+            wethIsEth,
         });
 
     // get tokens for balance change - pool tokens, BPT, native
@@ -149,7 +149,7 @@ export function assertRemoveLiquidityUnbalanced(
     removeLiquidityInput: RemoveLiquidityUnbalancedInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    receiveNativeAsset?: boolean,
+    wethIsEth?: boolean,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -200,7 +200,7 @@ export function assertRemoveLiquidityUnbalanced(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        receiveNativeAsset,
+        wethIsEth,
     );
 }
 
@@ -211,7 +211,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
     vaultVersion: 2 | 3 = 2,
-    receiveNativeAsset?: boolean,
+    wethIsEth?: boolean,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -269,7 +269,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        receiveNativeAsset,
+        wethIsEth,
     );
 }
 
@@ -280,7 +280,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
     vaultVersion: 2 | 3 = 2,
-    receiveNativeAsset?: boolean,
+    wethIsEth?: boolean,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -324,7 +324,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     removeLiquidityQueryOutput.amountsOut.forEach((a) => {
         if (
             vaultVersion === 2 &&
-            receiveNativeAsset &&
+            wethIsEth &&
             a.token.address === zeroAddress
         ) {
             expect(a.amount > 0n).to.be.true;
@@ -349,7 +349,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        receiveNativeAsset,
+        wethIsEth,
     );
 }
 
@@ -360,7 +360,7 @@ export function assertRemoveLiquidityProportional(
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
     vaultVersion: 2 | 3 = 2,
-    receiveNativeAsset?: boolean,
+    wethIsEth?: boolean,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -397,7 +397,7 @@ export function assertRemoveLiquidityProportional(
         else expect(a.amount > 0n).to.be.true;
     });
 
-    if (receiveNativeAsset) {
+    if (wethIsEth) {
         expect(
             removeLiquidityQueryOutput.amountsOut.some((a) =>
                 a.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped),
@@ -419,7 +419,7 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        receiveNativeAsset,
+        wethIsEth,
     );
 }
 
@@ -430,7 +430,7 @@ export function assertRemoveLiquidityRecovery(
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
     vaultVersion: 2 | 3 = 2,
-    receiveNativeAsset?: boolean,
+    wethIsEth?: boolean,
 ) {
     const { txOutput, removeLiquidityQueryOutput, removeLiquidityBuildOutput } =
         removeLiquidityOutput;
@@ -467,7 +467,7 @@ export function assertRemoveLiquidityRecovery(
         else expect(a.amount > 0n).to.be.true;
     });
 
-    if (receiveNativeAsset) {
+    if (wethIsEth) {
         expect(
             removeLiquidityQueryOutput.amountsOut.some((a) =>
                 a.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped),
@@ -489,7 +489,7 @@ export function assertRemoveLiquidityRecovery(
         removeLiquidityInput,
         removeLiquidityQueryOutput,
         txOutput,
-        receiveNativeAsset,
+        wethIsEth,
     );
 }
 
@@ -498,7 +498,7 @@ function assertTokenDeltas(
     removeLiquidityInput: RemoveLiquidityInput,
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
     txOutput: TxOutput,
-    receiveNativeAsset?: boolean,
+    wethIsEth?: boolean,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
@@ -515,7 +515,7 @@ function assertTokenDeltas(
     ];
 
     // If removing liquidity to native asset we must replace it with 0 and update native value instead
-    if (receiveNativeAsset) {
+    if (wethIsEth) {
         const nativeAssetIndex = amountsWithoutBpt.findIndex((a) =>
             a.token.isSameAddress(
                 NATIVE_ASSETS[removeLiquidityInput.chainId].wrapped,

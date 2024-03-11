@@ -111,11 +111,11 @@ describe('weighted remove liquidity recovery test', () => {
             );
         });
         test('with native', async () => {
-            const receiveNativeAsset = true;
+            const wethIsEth = true;
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput: input,
-                receiveNativeAsset,
+                wethIsEth,
             });
 
             assertRemoveLiquidityRecovery(
@@ -125,7 +125,7 @@ describe('weighted remove liquidity recovery test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
                 2,
-                receiveNativeAsset,
+                wethIsEth,
             );
         });
     });

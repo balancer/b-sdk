@@ -38,7 +38,7 @@ export type RemoveLiquidityNestedCallAttributes = {
         index: bigint;
     }[];
     tokenOutIndex?: number;
-    receiveNativeAsset?: boolean;
+    wethIsEth?: boolean;
 };
 
 export type RemoveLiquidityNestedQueryOutput = {
@@ -55,5 +55,5 @@ export type RemoveLiquidityNestedCallInput =
         sender: Address;
         recipient: Address;
         relayerApprovalSignature?: Hex;
-        receiveNativeAsset?: boolean;
+        wethIsEth?: boolean;
     };

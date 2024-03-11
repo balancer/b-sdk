@@ -126,7 +126,7 @@ describe('add liquidity weighted test', () => {
         });
 
         test('with native', async () => {
-            const sendNativeAsset = true;
+            const wethIsEth = true;
             const addLiquidityInput = {
                 ...input,
                 amountsIn,
@@ -134,7 +134,7 @@ describe('add liquidity weighted test', () => {
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
-                sendNativeAsset,
+                wethIsEth,
             });
             assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
@@ -143,7 +143,7 @@ describe('add liquidity weighted test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 2,
-                sendNativeAsset,
+                wethIsEth,
             );
         });
     });
@@ -182,11 +182,11 @@ describe('add liquidity weighted test', () => {
         });
 
         test('with native', async () => {
-            const sendNativeAsset = true;
+            const wethIsEth = true;
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
-                sendNativeAsset,
+                wethIsEth,
             });
 
             assertAddLiquiditySingleToken(
@@ -196,7 +196,7 @@ describe('add liquidity weighted test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 2,
-                sendNativeAsset,
+                wethIsEth,
             );
         });
     });
@@ -231,11 +231,11 @@ describe('add liquidity weighted test', () => {
             );
         });
         test('with native', async () => {
-            const sendNativeAsset = true;
+            const wethIsEth = true;
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
-                sendNativeAsset,
+                wethIsEth,
             });
 
             assertAddLiquidityProportional(
@@ -245,7 +245,7 @@ describe('add liquidity weighted test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 2,
-                sendNativeAsset,
+                wethIsEth,
             );
         });
     });

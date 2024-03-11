@@ -29,7 +29,7 @@ export const validateBuildCallInput = (
     input: AddLiquidityNestedCallInput,
 ): void => {
     const chainId = input.callsAttributes[0].chainId;
-    if (input.sendNativeAsset) {
+    if (input.wethIsEth) {
         if (
             !input.amountsIn.some((a) =>
                 a.token.isUnderlyingEqual(NATIVE_ASSETS[chainId]),
