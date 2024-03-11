@@ -120,11 +120,11 @@ describe('GyroE V2 add liquidity test', () => {
             );
         });
         test('with native', async () => {
-            const sendNativeAsset = true;
+            const wethIsEth = true;
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
-                sendNativeAsset,
+                wethIsEth,
             });
             assertAddLiquidityProportional(
                 txInput.client.chain?.id as number,
@@ -133,7 +133,7 @@ describe('GyroE V2 add liquidity test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 2,
-                sendNativeAsset,
+                wethIsEth,
             );
         });
     });

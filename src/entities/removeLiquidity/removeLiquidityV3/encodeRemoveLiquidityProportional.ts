@@ -13,7 +13,7 @@ export const encodeRemoveLiquidityProportional = (
             input.poolId,
             input.bptIn.amount,
             minAmountsOut,
-            !!input.receiveNativeAsset,
+            !!input.wethIsEth,
             '0x',
         ],
     });

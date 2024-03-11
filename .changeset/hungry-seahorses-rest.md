@@ -2,4 +2,4 @@
 "@balancer/sdk": minor
 ---
 
-Refactor wethIsEth into sendNativeAsset and receiveNativeAsset
+Refactor useNativeAssetAsWrappedAmountIn adn toNativeAsset into wethIsEth

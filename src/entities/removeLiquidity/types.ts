@@ -80,7 +80,7 @@ export type RemoveLiquidityQueryOutput =
 export type RemoveLiquidityBaseCall = {
     slippage: Slippage;
     chainId: number;
-    receiveNativeAsset?: boolean;
+    wethIsEth?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
 export type RemoveLiquidityBaseCallV2 = RemoveLiquidityBaseCall & {

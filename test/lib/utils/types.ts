@@ -22,7 +22,7 @@ export type AddLiquidityTxInput = {
     slippage: Slippage;
     poolState: PoolState;
     testAddress: Address;
-    sendNativeAsset?: boolean;
+    wethIsEth?: boolean;
 };
 
 export type InitPoolTxInput = Omit<
@@ -40,7 +40,7 @@ export type RemoveLiquidityTxInput = {
     slippage: Slippage;
     poolState: PoolState;
     testAddress: Address;
-    receiveNativeAsset?: boolean;
+    wethIsEth?: boolean;
 };
 
 export type CreatePoolTxInput = {
@@ -61,5 +61,5 @@ export type AddLiquidityNestedTxInput = {
     rpcUrl: string;
     testAddress: Address;
     client: Client & PublicActions & TestActions & WalletActions;
-    sendNativeAsset?: boolean;
+    wethIsEth?: boolean;
 };

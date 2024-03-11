@@ -127,7 +127,7 @@ describe('add liquidity test', () => {
         });
 
         test('with native', async () => {
-            const sendNativeAsset = true;
+            const wethIsEth = true;
             const addLiquidityInput = {
                 ...input,
                 amountsIn,
@@ -135,7 +135,7 @@ describe('add liquidity test', () => {
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
-                sendNativeAsset,
+                wethIsEth,
             });
             assertAddLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
@@ -144,7 +144,7 @@ describe('add liquidity test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
-                sendNativeAsset,
+                wethIsEth,
             );
         });
     });
@@ -183,14 +183,14 @@ describe('add liquidity test', () => {
         });
 
         test('with native', async () => {
-            const sendNativeAsset = true;
+            const wethIsEth = true;
             const addLiquidityInput = {
                 ...input,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
-                sendNativeAsset,
+                wethIsEth,
             });
 
             assertAddLiquiditySingleToken(
@@ -200,7 +200,7 @@ describe('add liquidity test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
-                sendNativeAsset,
+                wethIsEth,
             );
         });
     });

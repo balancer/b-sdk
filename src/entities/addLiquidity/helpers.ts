@@ -29,7 +29,7 @@ export const getAmountsCall = (
 
 export const getValue = (input: AddLiquidityBaseCall): bigint => {
     let value = 0n;
-    if (input.sendNativeAsset) {
+    if (input.wethIsEth) {
         value =
             input.amountsIn.find(
                 (a) => a.token.address === NATIVE_ASSETS[input.chainId].wrapped,

@@ -96,18 +96,18 @@ const addLiquidityNested = async () => {
         client,
     );
 
-    const sendNativeAsset = false;
+    const wethIsEth = false;
 
     const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
         accountAddress,
         relayerApprovalSignature: signature,
-        sendNativeAsset,
+        wethIsEth,
     });
 
     let tokensIn = queryOutput.amountsIn.map((a) => a.token);
-    if (sendNativeAsset) {
+    if (wethIsEth) {
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
 

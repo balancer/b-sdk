@@ -118,7 +118,7 @@ describe('weighted remove liquidity test', () => {
             );
         });
         test('with native', async () => {
-            const receiveNativeAsset = true;
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
@@ -126,7 +126,7 @@ describe('weighted remove liquidity test', () => {
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
-                receiveNativeAsset,
+                wethIsEth,
             });
             assertRemoveLiquidityUnbalanced(
                 txInput.client.chain?.id as number,
@@ -134,7 +134,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
-                receiveNativeAsset,
+                wethIsEth,
             );
         });
     });
@@ -172,7 +172,7 @@ describe('weighted remove liquidity test', () => {
             );
         });
         test('with native', async () => {
-            const receiveNativeAsset = true;
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
                 amountOut,
@@ -180,7 +180,7 @@ describe('weighted remove liquidity test', () => {
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
-                receiveNativeAsset,
+                wethIsEth,
             });
             assertRemoveLiquiditySingleTokenExactOut(
                 txInput.client.chain?.id as number,
@@ -189,7 +189,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
                 2,
-                receiveNativeAsset,
+                wethIsEth,
             );
         });
     });
@@ -227,14 +227,14 @@ describe('weighted remove liquidity test', () => {
         });
 
         test('with native', async () => {
-            const receiveNativeAsset = true;
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
-                receiveNativeAsset,
+                wethIsEth,
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
@@ -244,7 +244,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
                 2,
-                receiveNativeAsset,
+                wethIsEth,
             );
         });
     });
@@ -279,14 +279,14 @@ describe('weighted remove liquidity test', () => {
             );
         });
         test('with native', async () => {
-            const receiveNativeAsset = true;
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
-                receiveNativeAsset,
+                wethIsEth,
             });
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
@@ -295,7 +295,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
                 2,
-                receiveNativeAsset,
+                wethIsEth,
             );
         });
     });

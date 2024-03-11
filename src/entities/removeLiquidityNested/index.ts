@@ -96,8 +96,8 @@ export class RemoveLiquidityNested {
                         minAmountsOut[j].amount;
                 }
             });
-            // update receiveNativeAsset flag
-            call.receiveNativeAsset = !!input.receiveNativeAsset;
+            // update wethIsEth flag
+            call.wethIsEth = !!input.wethIsEth;
             // update sender and recipient placeholders
             call.sender =
                 call.sender === ZERO_ADDRESS

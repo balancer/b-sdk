@@ -143,7 +143,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             minAmountsOut: amounts.minAmountsOut,
             userData,
             toInternalBalance: !!input.toInternalBalance,
-            receiveNativeAsset: !!input.receiveNativeAsset,
+            wethIsEth: !!input.wethIsEth,
             chainId: input.chainId,
         });
         const call = encodeFunctionData({

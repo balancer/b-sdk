@@ -183,11 +183,11 @@ describe('remove liquidity test', () => {
         });
 
         test('with native', async () => {
-            const receiveNativeAsset = true;
+            const wethIsEth = true;
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput: input,
-                receiveNativeAsset,
+                wethIsEth,
             });
 
             assertRemoveLiquiditySingleTokenExactOut(
@@ -197,7 +197,7 @@ describe('remove liquidity test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
-                receiveNativeAsset,
+                wethIsEth,
             );
         });
     });
@@ -236,11 +236,11 @@ describe('remove liquidity test', () => {
         });
 
         test('with native', async () => {
-            const receiveNativeAsset = true;
+            const wethIsEth = true;
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput: input,
-                receiveNativeAsset,
+                wethIsEth,
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
@@ -250,7 +250,7 @@ describe('remove liquidity test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
-                receiveNativeAsset,
+                wethIsEth,
             );
         });
     });
@@ -286,11 +286,11 @@ describe('remove liquidity test', () => {
             );
         });
         test('with native', async () => {
-            const receiveNativeAsset = true;
+            const wethIsEth = true;
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput: input,
-                receiveNativeAsset,
+                wethIsEth,
             });
             assertRemoveLiquidityProportional(
                 txInput.client.chain?.id as number,
@@ -299,7 +299,7 @@ describe('remove liquidity test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
-                receiveNativeAsset,
+                wethIsEth,
             );
         });
     });

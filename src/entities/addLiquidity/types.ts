@@ -57,7 +57,7 @@ export type AddLiquidityQueryOutput =
 export type AddLiquidityBaseCall = {
     slippage: Slippage;
     chainId: number;
-    sendNativeAsset?: boolean;
+    wethIsEth?: boolean;
 } & AddLiquidityBaseQueryOutput;
 
 export type AddLiquidityCall = AddLiquidityBaseCall | AddLiquidityV2Call;

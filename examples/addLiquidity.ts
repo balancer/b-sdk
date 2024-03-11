@@ -80,7 +80,7 @@ const addLiquidity = async () => {
         sender: userAccount,
         recipient: userAccount,
         chainId,
-        sendNativeAsset: false,
+        wethIsEth: false,
     });
 
     console.log('\nWith slippage applied:');
