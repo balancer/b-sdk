@@ -6,7 +6,7 @@ import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
 } from '@/entities/addLiquidity/types';
@@ -17,9 +17,10 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '@/entities/utils';
-import { getAmountsCall, getValue } from '../../helpers';
+import { getAmountsCall } from '../../helpers';
+import { getValue } from '../../../utils/getValue';
 import {
-    AddLiquidityV2BaseCall,
+    AddLiquidityV2BaseBuildCallInput,
     AddLiquidityV2BaseQueryOutput,
 } from '../types';
 
@@ -44,7 +45,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: false, // This isn't required for the query
         });
 
         const queryOutput = await doAddLiquidityQuery(
@@ -71,7 +71,9 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         };
     }
 
-    public buildCall(input: AddLiquidityV2BaseCall): AddLiquidityBuildOutput {
+    public buildCall(
+        input: AddLiquidityV2BaseBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
         const userData = WeightedEncoder.encodeAddLiquidityUserData(
@@ -97,7 +99,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         return {
             call,
             to: VAULT[input.chainId],
-            value: getValue(input),
+            value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,

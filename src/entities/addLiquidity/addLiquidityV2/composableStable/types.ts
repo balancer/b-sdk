@@ -1,5 +1,5 @@
 import {
-    AddLiquidityV2BaseCall,
+    AddLiquidityV2BaseBuildCallInput,
     AddLiquidityV2BaseQueryOutput,
 } from '../types';
 
@@ -8,5 +8,6 @@ export type AddLiquidityV2ComposableStableQueryOutput =
         bptIndex: number;
     };
 
-export type AddLiquidityV2ComposableStableCall = AddLiquidityV2BaseCall &
-    AddLiquidityV2ComposableStableQueryOutput;
+export type AddLiquidityV2ComposableStableBuildCallInput =
+    AddLiquidityV2BaseBuildCallInput &
+        AddLiquidityV2ComposableStableQueryOutput;

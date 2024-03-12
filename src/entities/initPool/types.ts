@@ -1,8 +1,4 @@
 import { Address, Hex } from 'viem';
-import {
-    AddLiquidityBaseInput,
-    AddLiquidityBuildOutput,
-} from '../addLiquidity/types';
 import { InputAmount } from '../../types';
 import { PoolState } from '../types';
 
@@ -10,26 +6,28 @@ export interface InitPoolBase {
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput;
 }
 
-export type InitPoolBuildOutput = Omit<
-    AddLiquidityBuildOutput,
-    'minBptOut' | 'maxAmountsIn'
->;
+export type InitPoolBuildOutput = {
+    call: Hex;
+    to: Address;
+    value: bigint;
+};
 
 export type InitPoolInput = InitPoolInputV2 | InitPoolInputV3;
 
-export type InitPoolInputV2 = Omit<AddLiquidityBaseInput, 'rpcUrl'> & {
-    sender: Address;
-    recipient: Address;
+type InitBaseInput = {
     amountsIn: InputAmount[];
     chainId: number;
+    wethIsEth?: boolean;
+};
+
+export type InitPoolInputV2 = InitBaseInput & {
+    sender: Address;
+    recipient: Address;
     fromInternalBalance?: boolean;
 };
 
-export type InitPoolInputV3 = {
-    amountsIn: InputAmount[];
+export type InitPoolInputV3 = InitBaseInput & {
     minBptAmountOut: bigint;
-    wethIsEth?: boolean;
-    chainId: number;
 };
 
 export type InitPoolConfig = {

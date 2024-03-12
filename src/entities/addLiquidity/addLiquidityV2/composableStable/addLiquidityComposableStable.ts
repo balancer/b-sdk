@@ -5,7 +5,7 @@ import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
 } from '@/entities/addLiquidity/types';
@@ -20,9 +20,9 @@ import {
     parseAddLiquidityArgs,
 } from '@/entities/utils';
 import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
-import { getValue } from '../../helpers';
+import { getValue } from '../../../utils/getValue';
 import {
-    AddLiquidityV2ComposableStableCall,
+    AddLiquidityV2ComposableStableBuildCallInput,
     AddLiquidityV2ComposableStableQueryOutput,
 } from './types';
 
@@ -83,8 +83,8 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     }
 
     public buildCall(
-        input: AddLiquidityV2ComposableStableCall,
-    ): AddLiquidityBuildOutput {
+        input: AddLiquidityV2ComposableStableBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
@@ -110,7 +110,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         return {
             call,
             to: VAULT[input.chainId],
-            value: getValue(input),
+            value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,
@@ -175,7 +175,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     }
 
     private getAmountsCall(
-        input: AddLiquidityV2ComposableStableCall,
+        input: AddLiquidityV2ComposableStableBuildCallInput,
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {

@@ -1,7 +1,7 @@
 import {
     AddLiquidity,
-    AddLiquidityBuildOutput,
-    AddLiquidityCall,
+    AddLiquidityBuildCallOutput,
+    AddLiquidityBuildCallInput,
     AddLiquidityInput,
     AddLiquidityProportionalInput,
     AddLiquidityQueryOutput,
@@ -21,12 +21,12 @@ import {
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
-import { AddLiquidityV2BaseCall } from '@/entities/addLiquidity/addLiquidityV2/types';
+import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
-    addLiquidityBuildOutput: AddLiquidityBuildOutput;
+    addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
     txOutput: TxOutput;
 };
 
@@ -37,6 +37,7 @@ async function sdkAddLiquidity({
     slippage,
     testAddress,
     wethIsEth,
+    fromInternalBalance,
 }: {
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
@@ -44,8 +45,9 @@ async function sdkAddLiquidity({
     slippage: Slippage;
     testAddress: Address;
     wethIsEth?: boolean;
+    fromInternalBalance?: boolean;
 }): Promise<{
-    addLiquidityBuildOutput: AddLiquidityBuildOutput;
+    addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
 }> {
     const addLiquidityQueryOutput = await addLiquidity.query(
@@ -53,27 +55,27 @@ async function sdkAddLiquidity({
         poolState,
     );
 
-    let addLiquidityBuildInput: AddLiquidityCall = {
+    let addLiquidityBuildInput: AddLiquidityBuildCallInput = {
         ...addLiquidityQueryOutput,
         slippage,
         chainId: addLiquidityInput.chainId,
         wethIsEth: !!wethIsEth,
     };
     if (poolState.vaultVersion === 2) {
-        (addLiquidityBuildInput as AddLiquidityV2BaseCall) = {
+        (addLiquidityBuildInput as AddLiquidityV2BaseBuildCallInput) = {
             ...addLiquidityBuildInput,
             sender: testAddress,
             recipient: testAddress,
-            fromInternalBalance: false,
+            fromInternalBalance: !!fromInternalBalance,
         };
     }
 
-    const addLiquidityBuildOutput = addLiquidity.buildCall(
+    const addLiquidityBuildCallOutput = addLiquidity.buildCall(
         addLiquidityBuildInput,
     );
 
     return {
-        addLiquidityBuildOutput,
+        addLiquidityBuildCallOutput,
         addLiquidityQueryOutput,
     };
 }
@@ -130,7 +132,7 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
         wethIsEth,
     } = txInput;
 
-    const { addLiquidityQueryOutput, addLiquidityBuildOutput } =
+    const { addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         await sdkAddLiquidity({
             addLiquidity,
             addLiquidityInput,
@@ -147,14 +149,14 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
         tokens,
         client,
         testAddress,
-        addLiquidityBuildOutput.to,
-        addLiquidityBuildOutput.call,
-        addLiquidityBuildOutput.value,
+        addLiquidityBuildCallOutput.to,
+        addLiquidityBuildCallOutput.call,
+        addLiquidityBuildCallOutput.value,
     );
 
     return {
         addLiquidityQueryOutput,
-        addLiquidityBuildOutput,
+        addLiquidityBuildCallOutput,
         txOutput,
     };
 }
@@ -168,7 +170,7 @@ export function assertAddLiquidityUnbalanced(
     vaultVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
-    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
+    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
@@ -203,10 +205,10 @@ export function assertAddLiquidityUnbalanced(
     // Expect some bpt amount
     expect(addLiquidityQueryOutput.bptOut.amount > 0n).to.be.true;
 
-    assertAddLiquidityBuildOutput(
+    assertAddLiquidityBuildCallOutput(
         addLiquidityInput,
         addLiquidityQueryOutput,
-        addLiquidityBuildOutput,
+        addLiquidityBuildCallOutput,
         true,
         slippage,
         vaultVersion,
@@ -217,7 +219,7 @@ export function assertAddLiquidityUnbalanced(
         poolState,
         addLiquidityInput,
         addLiquidityQueryOutput,
-        addLiquidityBuildOutput,
+        addLiquidityBuildCallOutput,
         txOutput,
         wethIsEth,
     );
@@ -232,7 +234,7 @@ export function assertAddLiquiditySingleToken(
     vaultVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
-    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
+    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
@@ -277,10 +279,10 @@ export function assertAddLiquiditySingleToken(
         }
     });
 
-    assertAddLiquidityBuildOutput(
+    assertAddLiquidityBuildCallOutput(
         addLiquidityInput,
         addLiquidityQueryOutput,
-        addLiquidityBuildOutput,
+        addLiquidityBuildCallOutput,
         false,
         slippage,
         vaultVersion,
@@ -291,7 +293,7 @@ export function assertAddLiquiditySingleToken(
         poolState,
         addLiquidityInput,
         addLiquidityQueryOutput,
-        addLiquidityBuildOutput,
+        addLiquidityBuildCallOutput,
         txOutput,
         wethIsEth,
     );
@@ -306,7 +308,7 @@ export function assertAddLiquidityProportional(
     vaultVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
-    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildOutput } =
+    const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
     const bptToken = new Token(chainId, poolState.address, 18);
@@ -339,10 +341,10 @@ export function assertAddLiquidityProportional(
         else expect(a.amount > 0n).to.be.true;
     });
 
-    assertAddLiquidityBuildOutput(
+    assertAddLiquidityBuildCallOutput(
         addLiquidityInput,
         addLiquidityQueryOutput,
-        addLiquidityBuildOutput,
+        addLiquidityBuildCallOutput,
         false,
         slippage,
         vaultVersion,
@@ -361,7 +363,7 @@ export function assertAddLiquidityProportional(
         poolState,
         addLiquidityInput,
         addLiquidityQueryOutput,
-        addLiquidityBuildOutput,
+        addLiquidityBuildCallOutput,
         txOutput,
         wethIsEth,
     );
@@ -371,7 +373,7 @@ function assertTokenDeltas(
     poolState: PoolState,
     addLiquidityInput: AddLiquidityInput,
     addLiquidityQueryOutput: AddLiquidityQueryOutput,
-    addLiquidityBuildOutput: AddLiquidityBuildOutput,
+    addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput,
     txOutput: TxOutput,
     wethIsEth?: boolean,
 ) {
@@ -403,16 +405,16 @@ function assertTokenDeltas(
         );
         expectedDeltas[nativeAssetIndex] = 0n;
         expectedDeltas[expectedDeltas.length - 1] =
-            addLiquidityBuildOutput.value;
+            addLiquidityBuildCallOutput.value;
     }
 
     expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
 }
 
-function assertAddLiquidityBuildOutput(
+function assertAddLiquidityBuildCallOutput(
     addLiquidityInput: AddLiquidityInput,
     addLiquidityQueryOutput: AddLiquidityQueryOutput,
-    addLiquidityBuildOutput: AddLiquidityBuildOutput,
+    addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput,
     isExactIn: boolean,
     slippage: Slippage,
     vaultVersion: 2 | 3 = 2,
@@ -449,7 +451,7 @@ function assertAddLiquidityBuildOutput(
             )?.amount ?? 0n;
     }
 
-    const expectedBuildOutput: Omit<AddLiquidityBuildOutput, 'call'> = {
+    const expectedBuildOutput: Omit<AddLiquidityBuildCallOutput, 'call'> = {
         maxAmountsIn,
         minBptOut,
         to,
@@ -457,6 +459,6 @@ function assertAddLiquidityBuildOutput(
     };
 
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { call, ...buildCheck } = addLiquidityBuildOutput;
+    const { call, ...buildCheck } = addLiquidityBuildCallOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

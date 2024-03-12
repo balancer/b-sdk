@@ -3,8 +3,8 @@ import { Slippage } from '../slippage';
 import { PoolState } from '../types';
 import { Address, Hex, InputAmount } from '../../types';
 import {
-    AddLiquidityV2Call,
-    AddLiqudityV2QueryOutput,
+    AddLiquidityV2BuildCallInput,
+    AddLiquidityV2QueryOutput,
 } from './addLiquidityV2/types';
 
 export enum AddLiquidityKind {
@@ -52,25 +52,27 @@ export type AddLiquidityBaseQueryOutput = {
 
 export type AddLiquidityQueryOutput =
     | AddLiquidityBaseQueryOutput
-    | AddLiqudityV2QueryOutput;
+    | AddLiquidityV2QueryOutput;
 
-export type AddLiquidityBaseCall = {
+export type AddLiquidityBaseBuildCallInput = {
     slippage: Slippage;
     chainId: number;
     wethIsEth?: boolean;
 } & AddLiquidityBaseQueryOutput;
 
-export type AddLiquidityCall = AddLiquidityBaseCall | AddLiquidityV2Call;
+export type AddLiquidityBuildCallInput =
+    | AddLiquidityBaseBuildCallInput
+    | AddLiquidityV2BuildCallInput;
 
 export interface AddLiquidityBase {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<AddLiquidityQueryOutput>;
-    buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput;
+    buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput;
 }
 
-export type AddLiquidityBuildOutput = {
+export type AddLiquidityBuildCallOutput = {
     call: Hex;
     to: Address;
     value: bigint;
