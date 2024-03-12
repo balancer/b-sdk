@@ -21,7 +21,7 @@ export function parseAddLiquidityArgs({
     recipient: Address;
     maxAmountsIn: readonly bigint[];
     userData: Hex;
-    fromInternalBalance: boolean;
+    fromInternalBalance?: boolean;
 }) {
     // replace wrapped token with native asset if needed
     const tokensIn =
@@ -33,7 +33,7 @@ export function parseAddLiquidityArgs({
         assets: tokensIn.map((t) => t.address), // with BPT
         maxAmountsIn, // with BPT
         userData, // wihtout BPT
-        fromInternalBalance,
+        fromInternalBalance: !!fromInternalBalance,
     };
 
     return {

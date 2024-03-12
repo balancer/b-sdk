@@ -6,11 +6,9 @@ import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityWeightedQueryOutput,
-    AddLiquidityWeightedCall,
 } from '@/entities/addLiquidity/types';
 import { AddLiquidityAmounts, PoolState } from '@/entities/types';
 import {
@@ -19,13 +17,18 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '@/entities/utils';
-import { getAmountsCall, getValue } from '../../helpers';
+import { getAmountsCall } from '../../helpers';
+import { getValue } from '../../../utils/getValue';
+import {
+    AddLiquidityV2BaseBuildCallInput,
+    AddLiquidityV2BaseQueryOutput,
+} from '../types';
 
 export class AddLiquidityWeighted implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityWeightedQueryOutput> {
+    ): Promise<AddLiquidityV2BaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = this.getAmountsQuery(sortedTokens, input);
 
@@ -42,7 +45,6 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance ?? false,
         });
 
         const queryOutput = await doAddLiquidityQuery(
@@ -65,12 +67,13 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             bptOut,
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
-            fromInternalBalance: !!input.fromInternalBalance,
             vaultVersion: 2,
         };
     }
 
-    public buildCall(input: AddLiquidityWeightedCall): AddLiquidityBuildOutput {
+    public buildCall(
+        input: AddLiquidityV2BaseBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
         const userData = WeightedEncoder.encodeAddLiquidityUserData(
@@ -83,7 +86,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance,
+            fromInternalBalance: !!input.fromInternalBalance,
             wethIsEth: !!input.wethIsEth,
         });
 
@@ -96,7 +99,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         return {
             call,
             to: VAULT[input.chainId],
-            value: getValue(input),
+            value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,

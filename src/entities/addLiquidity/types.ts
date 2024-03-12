@@ -2,6 +2,10 @@ import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { PoolState } from '../types';
 import { Address, Hex, InputAmount } from '../../types';
+import {
+    AddLiquidityV2BuildCallInput,
+    AddLiquidityV2QueryOutput,
+} from './addLiquidityV2/types';
 
 export enum AddLiquidityKind {
     Unbalanced = 'Unbalanced',
@@ -13,7 +17,6 @@ export enum AddLiquidityKind {
 export type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
-    fromInternalBalance?: boolean;
 };
 
 export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {
@@ -43,49 +46,33 @@ export type AddLiquidityBaseQueryOutput = {
     addLiquidityKind: AddLiquidityKind;
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
-    fromInternalBalance: boolean;
     tokenInIndex?: number;
     vaultVersion: 2 | 3;
 };
 
-export type AddLiquidityWeightedQueryOutput = AddLiquidityBaseQueryOutput;
-
-export type AddLiquidityComposableStableQueryOutput =
-    AddLiquidityBaseQueryOutput & {
-        bptIndex: number;
-    };
-
 export type AddLiquidityQueryOutput =
     | AddLiquidityBaseQueryOutput
-    | AddLiquidityWeightedQueryOutput
-    | AddLiquidityComposableStableQueryOutput;
+    | AddLiquidityV2QueryOutput;
 
-export type AddLiquidityBaseCall = {
+export type AddLiquidityBaseBuildCallInput = {
     slippage: Slippage;
-    sender: Address;
-    recipient: Address;
     chainId: number;
     wethIsEth?: boolean;
 } & AddLiquidityBaseQueryOutput;
 
-export type AddLiquidityWeightedCall = AddLiquidityBaseCall;
-export type AddLiquidityComposableStableCall = AddLiquidityBaseCall &
-    AddLiquidityComposableStableQueryOutput;
-
-export type AddLiquidityCall =
-    | AddLiquidityBaseCall
-    | AddLiquidityWeightedCall
-    | AddLiquidityComposableStableCall;
+export type AddLiquidityBuildCallInput =
+    | AddLiquidityBaseBuildCallInput
+    | AddLiquidityV2BuildCallInput;
 
 export interface AddLiquidityBase {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
     ): Promise<AddLiquidityQueryOutput>;
-    buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput;
+    buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput;
 }
 
-export type AddLiquidityBuildOutput = {
+export type AddLiquidityBuildCallOutput = {
     call: Hex;
     to: Address;
     value: bigint;
@@ -97,6 +84,7 @@ export type AddLiquidityConfig = {
     customAddLiquidityTypes: Record<string, AddLiquidityBase>;
 };
 
+// type exposed because FE team uses it for batching add liquidity and stake operations
 export type JoinPoolRequest = {
     assets: Address[];
     maxAmountsIn: readonly bigint[];

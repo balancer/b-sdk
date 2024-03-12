@@ -1,8 +1,8 @@
 import {
     PoolState,
     RemoveLiquidityBase,
-    RemoveLiquidityBuildOutput,
-    RemoveLiquidityCall,
+    RemoveLiquidityBuildCallOutput,
+    RemoveLiquidityBuildCallInput,
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
@@ -44,7 +44,9 @@ export class RemoveLiquidityV2 implements RemoveLiquidityBase {
         return this.getRemoveLiquidity(poolState.type).query(input, poolState);
     }
 
-    public buildCall(input: RemoveLiquidityCall): RemoveLiquidityBuildOutput {
+    public buildCall(
+        input: RemoveLiquidityBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
         return this.getRemoveLiquidity(input.poolType).buildCall(input);
     }
 }

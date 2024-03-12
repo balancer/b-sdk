@@ -6,7 +6,7 @@ import { Token } from '../token';
 import { RemoveLiquidityAmounts } from '../types';
 import { getAmounts } from '../utils';
 import {
-    RemoveLiquidityCall,
+    RemoveLiquidityBuildCallInput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
 } from './types';
@@ -49,7 +49,7 @@ export const getAmountsQuery = (
 };
 
 export const getAmountsCall = (
-    input: RemoveLiquidityCall,
+    input: RemoveLiquidityBuildCallInput,
 ): RemoveLiquidityAmounts => {
     switch (input.removeLiquidityKind) {
         case RemoveLiquidityKind.Unbalanced:
