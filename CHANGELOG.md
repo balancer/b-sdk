@@ -1,5 +1,18 @@
 # @balancer/sdk
 
+## 0.12.0
+
+### Minor Changes
+
+- dfacb04: Rename buildCall interface for consistency and clarity
+- e2d66ce: Adds Initialize Pool functionality for V3 pools;
+- c071850: Refactor useNativeAssetAsWrappedAmountIn adn toNativeAsset into wethIsEth
+- 7bc308a: Move accountAddress from query to buildCall input
+
+### Patch Changes
+
+- 8825f0a: Refactor sender and recipient to exist on v2 only
+
 ## 0.11.0
 
 ### Minor Changes
