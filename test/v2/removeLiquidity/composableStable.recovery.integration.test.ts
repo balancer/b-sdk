@@ -99,7 +99,6 @@ describe('composable stable remove liquidity test', () => {
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -115,7 +114,6 @@ describe('composable stable remove liquidity test', () => {
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,

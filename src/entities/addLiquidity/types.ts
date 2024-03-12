@@ -46,6 +46,7 @@ export type AddLiquidityBaseQueryOutput = {
     addLiquidityKind: AddLiquidityKind;
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
+    chainId: number;
     tokenInIndex?: number;
     vaultVersion: 2 | 3;
 };
@@ -56,7 +57,6 @@ export type AddLiquidityQueryOutput =
 
 export type AddLiquidityBaseBuildCallInput = {
     slippage: Slippage;
-    chainId: number;
     wethIsEth?: boolean;
 } & AddLiquidityBaseQueryOutput;
 

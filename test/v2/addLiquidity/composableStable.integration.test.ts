@@ -117,7 +117,6 @@ describe('add liquidity composable stable test', () => {
                 addLiquidityInput,
             });
             assertAddLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -137,7 +136,6 @@ describe('add liquidity composable stable test', () => {
                 wethIsEth,
             });
             assertAddLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -172,7 +170,6 @@ describe('add liquidity composable stable test', () => {
             });
 
             assertAddLiquiditySingleToken(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 addLiquidityOutput,
@@ -192,7 +189,6 @@ describe('add liquidity composable stable test', () => {
             });
 
             assertAddLiquiditySingleToken(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -225,7 +221,6 @@ describe('add liquidity composable stable test', () => {
             });
 
             assertAddLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 addLiquidityOutput,
@@ -243,7 +238,6 @@ describe('add liquidity composable stable test', () => {
                 wethIsEth,
             });
             assertAddLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,

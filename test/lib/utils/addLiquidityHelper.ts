@@ -10,7 +10,6 @@ import {
     AddLiquidityUnbalancedInput,
     Address,
     BALANCER_ROUTER,
-    ChainId,
     NATIVE_ASSETS,
     PoolState,
     Slippage,
@@ -58,7 +57,6 @@ async function sdkAddLiquidity({
     let addLiquidityBuildInput: AddLiquidityBuildCallInput = {
         ...addLiquidityQueryOutput,
         slippage,
-        chainId: addLiquidityInput.chainId,
         wethIsEth: !!wethIsEth,
     };
     if (poolState.vaultVersion === 2) {
@@ -162,7 +160,6 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
 }
 
 export function assertAddLiquidityUnbalanced(
-    chainId: ChainId,
     poolState: PoolState,
     addLiquidityInput: AddLiquidityUnbalancedInput,
     addLiquidityOutput: AddLiquidityOutput,
@@ -175,7 +172,11 @@ export function assertAddLiquidityUnbalanced(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsIn = poolState.tokens.map((t) => {
-        const token = new Token(chainId, t.address, t.decimals);
+        const token = new Token(
+            addLiquidityInput.chainId,
+            t.address,
+            t.decimals,
+        );
         const input = addLiquidityInput.amountsIn.find(
             (a) => a.address === t.address,
         );
@@ -196,6 +197,7 @@ export function assertAddLiquidityUnbalanced(
         poolType: poolState.type,
         addLiquidityKind: addLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
+        chainId: addLiquidityInput.chainId,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, true);
@@ -226,7 +228,6 @@ export function assertAddLiquidityUnbalanced(
 }
 
 export function assertAddLiquiditySingleToken(
-    chainId: ChainId,
     poolState: PoolState,
     addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
@@ -240,7 +241,11 @@ export function assertAddLiquiditySingleToken(
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
         throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
 
-    const bptToken = new Token(chainId, poolState.address, 18);
+    const bptToken = new Token(
+        addLiquidityInput.chainId,
+        poolState.address,
+        18,
+    );
 
     const tokensWithoutBpt = poolState.tokens.filter(
         (t) => t.address !== poolState.address,
@@ -263,6 +268,7 @@ export function assertAddLiquiditySingleToken(
         poolType: poolState.type,
         addLiquidityKind: addLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
+        chainId: addLiquidityInput.chainId,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, false);
@@ -300,7 +306,6 @@ export function assertAddLiquiditySingleToken(
 }
 
 export function assertAddLiquidityProportional(
-    chainId: ChainId,
     poolState: PoolState,
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
@@ -311,7 +316,11 @@ export function assertAddLiquidityProportional(
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
-    const bptToken = new Token(chainId, poolState.address, 18);
+    const bptToken = new Token(
+        addLiquidityInput.chainId,
+        poolState.address,
+        18,
+    );
 
     const expectedQueryOutput: Omit<
         AddLiquidityQueryOutput,
@@ -329,6 +338,7 @@ export function assertAddLiquidityProportional(
         poolType: poolState.type,
         addLiquidityKind: addLiquidityInput.kind,
         vaultVersion: poolState.vaultVersion,
+        chainId: addLiquidityInput.chainId,
     };
 
     const queryCheck = getCheck(addLiquidityQueryOutput, false);
@@ -354,7 +364,9 @@ export function assertAddLiquidityProportional(
     if (wethIsEth) {
         expect(
             addLiquidityOutput.addLiquidityQueryOutput.amountsIn.some((t) =>
-                t.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped),
+                t.token.isSameAddress(
+                    NATIVE_ASSETS[addLiquidityInput.chainId].wrapped,
+                ),
             ),
         ).to.be.true;
     }

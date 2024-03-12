@@ -117,7 +117,6 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
             });
             assertAddLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -138,7 +137,6 @@ describe('add liquidity test', () => {
                 wethIsEth,
             });
             assertAddLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -173,7 +171,6 @@ describe('add liquidity test', () => {
             });
 
             assertAddLiquiditySingleToken(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 addLiquidityOutput,
@@ -194,7 +191,6 @@ describe('add liquidity test', () => {
             });
 
             assertAddLiquiditySingleToken(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,

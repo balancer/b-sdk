@@ -77,8 +77,9 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             bptOut,
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
-            bptIndex,
+            chainId: input.chainId,
             vaultVersion: 2,
+            bptIndex,
         };
     }
 

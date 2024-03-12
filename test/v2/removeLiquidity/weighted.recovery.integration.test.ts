@@ -103,7 +103,6 @@ describe('weighted remove liquidity recovery test', () => {
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -119,7 +118,6 @@ describe('weighted remove liquidity recovery test', () => {
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,

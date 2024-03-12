@@ -173,7 +173,6 @@ describe('remove liquidity test', () => {
             });
 
             assertRemoveLiquiditySingleTokenExactOut(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -191,7 +190,6 @@ describe('remove liquidity test', () => {
             });
 
             assertRemoveLiquiditySingleTokenExactOut(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -226,7 +224,6 @@ describe('remove liquidity test', () => {
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -244,7 +241,6 @@ describe('remove liquidity test', () => {
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -277,7 +273,6 @@ describe('remove liquidity test', () => {
             });
 
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -293,7 +288,6 @@ describe('remove liquidity test', () => {
                 wethIsEth,
             });
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,

@@ -118,7 +118,6 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
             });
             assertRemoveLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
@@ -137,7 +136,6 @@ describe('composable stable remove liquidity test', () => {
                 wethIsEth,
             });
             assertRemoveLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
@@ -172,7 +170,6 @@ describe('composable stable remove liquidity test', () => {
                 removeLiquidityInput,
             });
             assertRemoveLiquiditySingleTokenExactOut(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
@@ -191,7 +188,6 @@ describe('composable stable remove liquidity test', () => {
                 wethIsEth,
             });
             assertRemoveLiquiditySingleTokenExactOut(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
@@ -226,7 +222,6 @@ describe('composable stable remove liquidity test', () => {
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -246,7 +241,6 @@ describe('composable stable remove liquidity test', () => {
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
@@ -279,7 +273,6 @@ describe('composable stable remove liquidity test', () => {
             });
 
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -297,7 +290,6 @@ describe('composable stable remove liquidity test', () => {
                 wethIsEth,
             });
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,

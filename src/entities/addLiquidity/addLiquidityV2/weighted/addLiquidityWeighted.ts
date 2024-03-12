@@ -66,6 +66,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             poolId: poolState.id,
             bptOut,
             amountsIn,
+            chainId: input.chainId,
             tokenInIndex: amounts.tokenInIndex,
             vaultVersion: 2,
         };

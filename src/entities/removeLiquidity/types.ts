@@ -74,7 +74,6 @@ export type RemoveLiquidityQueryOutput =
 
 export type RemoveLiquidityBaseBuildCallInput = {
     slippage: Slippage;
-    chainId: number;
     wethIsEth?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
