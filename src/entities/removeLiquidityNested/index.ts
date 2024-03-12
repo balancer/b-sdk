@@ -1,30 +1,32 @@
 import { encodeFunctionData } from 'viem';
+
+import { balancerRelayerAbi } from '../../abi';
 import { Address, Hex } from '../../types';
-import { BALANCER_RELAYER } from '../../utils';
+import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../utils';
+
 import { Relayer } from '../relayer';
 import { TokenAmount } from '../tokenAmount';
-import { balancerRelayerAbi } from '../../abi';
+import { NestedPoolState } from '../types';
+import { validateNestedPoolState } from '../utils';
+
+import { encodeCalls } from './encodeCalls';
+import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
+import { getPeekCalls } from './getPeekCalls';
+import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import {
-    RemoveLiquidityNestedProportionalInput,
-    RemoveLiquidityNestedSingleTokenInput,
     RemoveLiquidityNestedQueryOutput,
     RemoveLiquidityNestedCallInput,
+    RemoveLiquidityNestedInput,
 } from './types';
-import { NestedPoolState } from '../types';
-import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
-import { getQueryCallsAttributes } from './getQueryCallsAttributes';
-import { encodeCalls } from './encodeCalls';
-import { getPeekCalls } from './getPeekCalls';
-import { validateInputs } from './validateInputs';
+import { validateQueryInput, validateBuildCallInput } from './validateInputs';
 
 export class RemoveLiquidityNested {
     async query(
-        input:
-            | RemoveLiquidityNestedProportionalInput
-            | RemoveLiquidityNestedSingleTokenInput,
+        input: RemoveLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
     ): Promise<RemoveLiquidityNestedQueryOutput> {
-        const isProportional = validateInputs(input, nestedPoolState);
+        const isProportional = validateQueryInput(input, nestedPoolState);
+        validateNestedPoolState(nestedPoolState);
 
         const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
             input,
@@ -51,18 +53,21 @@ export class RemoveLiquidityNested {
         const peekedValues = await doRemoveLiquidityNestedQuery(
             input.chainId,
             input.rpcUrl,
-            input.accountAddress,
             encodedMulticall,
             tokensOut.length,
         );
-
-        console.log('peekedValues ', peekedValues);
 
         const amountsOut = tokensOut.map((tokenOut, i) =>
             TokenAmount.fromRawAmount(tokenOut, peekedValues[i]),
         );
 
-        return { callsAttributes, bptAmountIn, amountsOut, isProportional };
+        return {
+            callsAttributes,
+            bptAmountIn,
+            amountsOut,
+            isProportional,
+            chainId: input.chainId,
+        };
     }
 
     buildCall(input: RemoveLiquidityNestedCallInput): {
@@ -70,6 +75,8 @@ export class RemoveLiquidityNested {
         to: Address;
         minAmountsOut: TokenAmount[];
     } {
+        validateBuildCallInput(input);
+
         // apply slippage to amountsOut
         const minAmountsOut = input.amountsOut.map((amountOut) =>
             TokenAmount.fromRawAmount(
@@ -89,6 +96,17 @@ export class RemoveLiquidityNested {
                         minAmountsOut[j].amount;
                 }
             });
+            // update wethIsEth flag
+            call.wethIsEth = !!input.wethIsEth;
+            // update sender and recipient placeholders
+            call.sender =
+                call.sender === ZERO_ADDRESS
+                    ? input.accountAddress
+                    : call.sender;
+            call.recipient =
+                call.recipient === ZERO_ADDRESS
+                    ? input.accountAddress
+                    : call.recipient;
         });
 
         const encodedCalls = encodeCalls(

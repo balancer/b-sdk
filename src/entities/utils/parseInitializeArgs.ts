@@ -6,13 +6,13 @@ import { DEFAULT_USERDATA } from '@/utils';
 export function parseInitializeArgs({
     exactAmountsIn,
     minBptAmountOut,
-    useNativeAssetAsWrappedAmountIn,
+    wethIsEth,
     poolAddress,
     sortedTokens,
 }: {
     exactAmountsIn: bigint[];
     minBptAmountOut: bigint;
-    useNativeAssetAsWrappedAmountIn?: boolean;
+    wethIsEth?: boolean;
     chainId: number;
     poolAddress: Address;
     sortedTokens: Token[];
@@ -23,7 +23,7 @@ export function parseInitializeArgs({
             sortedTokens.map(({ address }) => address),
             exactAmountsIn,
             minBptAmountOut,
-            useNativeAssetAsWrappedAmountIn ?? false,
+            wethIsEth ?? false,
             DEFAULT_USERDATA,
         ],
     };

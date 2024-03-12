@@ -5,11 +5,9 @@ import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityComposableStableQueryOutput,
-    AddLiquidityComposableStableCall,
 } from '@/entities/addLiquidity/types';
 import {
     AddLiquidityAmounts as AddLiquidityAmountsBase,
@@ -22,6 +20,11 @@ import {
     parseAddLiquidityArgs,
 } from '@/entities/utils';
 import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
+import { getValue } from '../../../utils/getValue';
+import {
+    AddLiquidityV2ComposableStableBuildCallInput,
+    AddLiquidityV2ComposableStableQueryOutput,
+} from './types';
 
 type AddLiquidityAmounts = AddLiquidityAmountsBase & {
     maxAmountsInWithoutBpt: bigint[];
@@ -31,7 +34,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityComposableStableQueryOutput> {
+    ): Promise<AddLiquidityV2ComposableStableQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const bptIndex = sortedTokens.findIndex(
             (t) => t.address === poolState.address,
@@ -44,8 +47,6 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         );
 
         const { args, tokensIn } = parseAddLiquidityArgs({
-            useNativeAssetAsWrappedAmountIn:
-                !!input.useNativeAssetAsWrappedAmountIn,
             chainId: input.chainId,
             sortedTokens,
             poolId: poolState.id,
@@ -53,7 +54,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance ?? false,
+            fromInternalBalance: false, // This isn't required for the query
         });
 
         const queryOutput = await doAddLiquidityQuery(
@@ -76,15 +77,15 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             bptOut,
             amountsIn,
             tokenInIndex: amounts.tokenInIndex,
-            fromInternalBalance: !!input.fromInternalBalance,
-            bptIndex,
+            chainId: input.chainId,
             vaultVersion: 2,
+            bptIndex,
         };
     }
 
     public buildCall(
-        input: AddLiquidityComposableStableCall,
-    ): AddLiquidityBuildOutput {
+        input: AddLiquidityV2ComposableStableBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         const amounts = this.getAmountsCall(input);
 
         const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
@@ -97,7 +98,8 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: input.fromInternalBalance,
+            fromInternalBalance: !!input.fromInternalBalance,
+            wethIsEth: !!input.wethIsEth,
         });
 
         const call = encodeFunctionData({
@@ -106,14 +108,10 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             args,
         });
 
-        const value = input.amountsIn.find(
-            (a) => a.token.address === ZERO_ADDRESS,
-        )?.amount;
-
         return {
             call,
             to: VAULT[input.chainId],
-            value: value === undefined ? 0n : value,
+            value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,
@@ -178,7 +176,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     }
 
     private getAmountsCall(
-        input: AddLiquidityComposableStableCall,
+        input: AddLiquidityV2ComposableStableBuildCallInput,
     ): AddLiquidityAmounts {
         let addLiquidityAmounts: AddLiquidityAmountsBase;
         switch (input.addLiquidityKind) {

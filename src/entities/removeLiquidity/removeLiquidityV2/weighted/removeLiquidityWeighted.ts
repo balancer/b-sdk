@@ -7,16 +7,16 @@ import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBuildOutput,
+    RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
-    RemoveLiquidityWeightedCall,
 } from '../../types';
 import { PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { getSortedTokens } from '../../../utils';
 import { getAmountsCall, getAmountsQuery } from '../../helper';
+import { RemoveLiquidityV2BaseBuildCallInput } from '../types';
 
 export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     public async query(
@@ -36,14 +36,12 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
-            toNativeAsset: !!input.toNativeAsset,
             poolId: poolState.id,
             sortedTokens,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,
             userData,
-            toInternalBalance: !!input.toInternalBalance,
         });
 
         const queryOutput = await doRemoveLiquidityQuery(
@@ -66,14 +64,14 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
-            toInternalBalance: !!input.toInternalBalance,
             vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
         };
     }
 
     public buildCall(
-        input: RemoveLiquidityWeightedCall,
-    ): RemoveLiquidityBuildOutput {
+        input: RemoveLiquidityV2BaseBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
         const userData = WeightedEncoder.encodeRemoveLiquidityUserData(
@@ -89,6 +87,8 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             minAmountsOut: amounts.minAmountsOut,
             userData,
             toInternalBalance: !!input.toInternalBalance,
+            wethIsEth: !!input.wethIsEth,
+            chainId: input.chainId,
         });
 
         const call = encodeFunctionData({

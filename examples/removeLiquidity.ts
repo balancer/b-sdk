@@ -85,7 +85,6 @@ const removeLiquidity = async () => {
         sender: userAccount,
         recipient: userAccount,
         chainId,
-        wethIsEth: !!removeLiquidityInput.toNativeAsset,
     });
 
     console.log('\nWith slippage applied:');

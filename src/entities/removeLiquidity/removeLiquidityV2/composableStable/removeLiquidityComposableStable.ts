@@ -6,12 +6,12 @@ import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityComposableStableCall,
-    RemoveLiquidityBuildOutput,
+    RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
 } from '../../types';
+import { RemoveLiquidityV2ComposableStableBuildCallInput } from './types';
 import { RemoveLiquidityAmounts, PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { ComposableStableEncoder } from '../../../encoders/composableStable';
@@ -45,14 +45,12 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
-            toNativeAsset: !!input.toNativeAsset,
             poolId: poolState.id,
             sortedTokens,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,
             userData,
-            toInternalBalance: !!input.toInternalBalance,
         });
         const queryOutput = await doRemoveLiquidityQuery(
             input.rpcUrl,
@@ -73,9 +71,9 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
-            toInternalBalance: !!input.toInternalBalance,
             bptIndex,
             vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
         };
     }
 
@@ -120,8 +118,8 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityComposableStableCall,
-    ): RemoveLiquidityBuildOutput {
+        input: RemoveLiquidityV2ComposableStableBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
         const amounts = this.getAmountsCall(input);
         const amountsWithoutBpt = {
             ...amounts,
@@ -143,6 +141,8 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             minAmountsOut: amounts.minAmountsOut,
             userData,
             toInternalBalance: !!input.toInternalBalance,
+            wethIsEth: !!input.wethIsEth,
+            chainId: input.chainId,
         });
         const call = encodeFunctionData({
             abi: vaultV2Abi,
@@ -165,7 +165,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     }
 
     private getAmountsCall(
-        input: RemoveLiquidityComposableStableCall,
+        input: RemoveLiquidityV2ComposableStableBuildCallInput,
     ): RemoveLiquidityAmounts {
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:

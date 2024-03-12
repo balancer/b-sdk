@@ -22,6 +22,8 @@ export type AddLiquidityTxInput = {
     slippage: Slippage;
     poolState: PoolState;
     testAddress: Address;
+    wethIsEth?: boolean;
+    fromInternalBalance?: boolean;
 };
 
 export type InitPoolTxInput = Omit<
@@ -39,6 +41,8 @@ export type RemoveLiquidityTxInput = {
     slippage: Slippage;
     poolState: PoolState;
     testAddress: Address;
+    wethIsEth?: boolean;
+    toInternalBalance?: boolean;
 };
 
 export type CreatePoolTxInput = {
@@ -53,10 +57,11 @@ export type AddLiquidityNestedTxInput = {
     amountsIn: {
         address: Address; // DAI
         rawAmount: bigint;
+        decimals: number;
     }[];
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
     client: Client & PublicActions & TestActions & WalletActions;
-    useNativeAssetAsWrappedAmountIn?: boolean;
+    wethIsEth?: boolean;
 };

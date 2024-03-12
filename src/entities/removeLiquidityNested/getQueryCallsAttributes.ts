@@ -7,7 +7,7 @@ import {
 import { NestedPool, PoolKind } from '../types';
 import { TokenAmount } from '../tokenAmount';
 import { Address, PoolType } from '../../types';
-import { BALANCER_RELAYER, ChainId } from '../../utils';
+import { BALANCER_RELAYER, ChainId, ZERO_ADDRESS } from '../../utils';
 import { Relayer } from '../relayer';
 
 export const getQueryCallsAttributes = (
@@ -20,24 +20,19 @@ export const getQueryCallsAttributes = (
     bptAmountIn: TokenAmount;
     callsAttributes: RemoveLiquidityNestedCallAttributes[];
 } => {
-    const {
-        bptAmountIn,
-        chainId,
-        accountAddress,
-        useNativeAssetAsWrappedAmountOut = false,
-        toInternalBalance = false,
-    } = input;
+    const { bptAmountIn, chainId, toInternalBalance = false } = input;
     let callsAttributes: RemoveLiquidityNestedCallAttributes[];
 
     // sort pools by descending level
     const poolsTopDown = pools.sort((a, b) => b.level - a.level);
 
+    const accountAddressPlaceholder = ZERO_ADDRESS;
+
     if (isProportional) {
         callsAttributes = getProportionalCallsAttributes(
             poolsTopDown,
             chainId,
-            useNativeAssetAsWrappedAmountOut,
-            accountAddress,
+            accountAddressPlaceholder,
             bptAmountIn,
             toInternalBalance,
         );
@@ -47,8 +42,7 @@ export const getQueryCallsAttributes = (
         callsAttributes = getSingleTokenCallsAttributes(
             poolsTopDown,
             chainId,
-            useNativeAssetAsWrappedAmountOut,
-            accountAddress,
+            accountAddressPlaceholder,
             bptAmountIn,
             toInternalBalance,
             tokenOut,
@@ -63,7 +57,6 @@ export const getQueryCallsAttributes = (
 const getProportionalCallsAttributes = (
     poolsSortedByLevel: NestedPool[],
     chainId: ChainId,
-    useNativeAssetAsWrappedAmountOut: boolean,
     accountAddress: Address,
     bptAmountIn: bigint,
     toInternalBalance: boolean,
@@ -86,7 +79,6 @@ const getProportionalCallsAttributes = (
         );
         calls.push({
             chainId: chainId,
-            useNativeAssetAsWrappedAmountOut,
             sortedTokens,
             poolId: pool.id,
             poolAddress: pool.address,
@@ -122,7 +114,6 @@ const getProportionalCallsAttributes = (
 const getSingleTokenCallsAttributes = (
     poolsTopDown: NestedPool[],
     chainId: ChainId,
-    useNativeAssetAsWrappedAmountOut: boolean,
     accountAddress: Address,
     bptAmountIn: bigint,
     toInternalBalance: boolean,
@@ -156,7 +147,6 @@ const getSingleTokenCallsAttributes = (
         );
         calls.push({
             chainId: chainId,
-            useNativeAssetAsWrappedAmountOut,
             sortedTokens,
             poolId: pool.id,
             poolAddress: pool.address,

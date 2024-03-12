@@ -4,14 +4,13 @@ import {
     decodeFunctionResult,
     http,
 } from 'viem';
-import { Address, Hex } from '../../types';
+import { Hex } from '../../types';
 import { BALANCER_RELAYER, CHAINS, ChainId } from '../../utils';
 import { balancerRelayerAbi } from '../../abi';
 
 export const doAddLiquidityNestedQuery = async (
     chainId: ChainId,
     rpcUrl: string,
-    accountAddress: Address,
     encodedMulticall: Hex,
 ): Promise<bigint> => {
     const client = createPublicClient({
@@ -20,7 +19,6 @@ export const doAddLiquidityNestedQuery = async (
     });
 
     const { data } = await client.call({
-        account: accountAddress,
         to: BALANCER_RELAYER[chainId],
         data: encodedMulticall,
     });

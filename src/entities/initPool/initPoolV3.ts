@@ -1,10 +1,12 @@
 import { balancerRouterAbi } from '@/abi';
 import { PoolState } from '../types';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInputV3 } from './types';
-import { BALANCER_ROUTER, NATIVE_ASSETS, isSameAddress } from '@/utils';
+import { BALANCER_ROUTER } from '@/utils';
 import { encodeFunctionData, Address } from 'viem';
 import { getSortedTokens, parseInitializeArgs, getAmounts } from '../utils';
 import { Token } from '../token';
+import { TokenAmount } from '../tokenAmount';
+import { getValue } from '../utils/getValue';
 
 export class InitPoolV3 implements InitPoolBase {
     buildCall(
@@ -26,12 +28,15 @@ export class InitPoolV3 implements InitPoolBase {
             args,
         });
 
-        const value = this.value(input);
+        const amountsIn = input.amountsIn.map((a) => {
+            const token = new Token(input.chainId, a.address, a.decimals);
+            return TokenAmount.fromRawAmount(token, a.rawAmount);
+        });
 
         return {
             call,
             to: BALANCER_ROUTER[input.chainId] as Address,
-            value,
+            value: getValue(amountsIn, !!input.wethIsEth),
         };
     }
 
@@ -42,16 +47,5 @@ export class InitPoolV3 implements InitPoolBase {
         return {
             exactAmountsIn: getAmounts(tokens, input.amountsIn),
         };
-    }
-
-    private value(input: InitPoolInputV3) {
-        return input.wethIsEth
-            ? (input.amountsIn.find((a) =>
-                  isSameAddress(
-                      a.address,
-                      NATIVE_ASSETS[input.chainId].wrapped,
-                  ),
-              )?.rawAmount as bigint)
-            : 0n;
     }
 }

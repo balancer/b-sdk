@@ -1,6 +1,6 @@
 import { NestedPoolState } from '../types';
 
-export function constraintValidation(
+export function validateNestedPoolState(
     nestedPoolState: NestedPoolState,
 ): boolean {
     /*

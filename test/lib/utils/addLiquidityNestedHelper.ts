@@ -23,7 +23,7 @@ export const assertResults = (
     minBptOut: bigint,
     chainId: number,
     value?: bigint,
-    useNativeAssetAsWrappedAmountIn = false,
+    wethIsEth = false,
 ) => {
     expect(transactionReceipt.status).to.eq('success');
     expect(bptOut.amount > 0n).to.be.true;
@@ -38,7 +38,7 @@ export const assertResults = (
     const wrappedNativeAsset = amountsIn.find(
         (a) => a.address === NATIVE_ASSETS[chainId].wrapped,
     );
-    if (wrappedNativeAsset && useNativeAssetAsWrappedAmountIn) {
+    if (wrappedNativeAsset && wethIsEth) {
         expect(value).to.eq(wrappedNativeAsset.rawAmount);
     } else {
         expect(value).to.eq(undefined || 0n);
@@ -52,7 +52,7 @@ export const doAddLiquidityNested = async ({
     rpcUrl,
     testAddress,
     client,
-    useNativeAssetAsWrappedAmountIn = false,
+    wethIsEth = false,
 }: AddLiquidityNestedTxInput) => {
     // setup add liquidity helper
     const addLiquidityNested = new AddLiquidityNested();
@@ -61,8 +61,6 @@ export const doAddLiquidityNested = async ({
         amountsIn,
         chainId,
         rpcUrl,
-        accountAddress: testAddress,
-        useNativeAssetAsWrappedAmountIn,
     };
     const queryOutput = await addLiquidityNested.query(
         addLiquidityInput,
@@ -81,13 +79,13 @@ export const doAddLiquidityNested = async ({
     const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
-        sender: testAddress,
-        recipient: testAddress,
+        accountAddress: testAddress,
         relayerApprovalSignature: signature,
+        wethIsEth,
     });
 
     let tokensIn = queryOutput.amountsIn.map((a) => a.token);
-    if (useNativeAssetAsWrappedAmountIn) {
+    if (wethIsEth) {
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
 

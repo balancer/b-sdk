@@ -56,6 +56,10 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         },
     },
     [ChainId.POLYGON]: {
+        DAI: {
+            address: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063',
+            decimals: 18,
+        },
         USDC: {
             address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
             decimals: 6,
@@ -105,13 +109,6 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
-        '50bb_sDAI_50bb_a_USDC': {
-            id: '0x0da692ac0611397027c91e559cfd482c4197e4030002000000000000000005c9',
-            address: '0x0da692ac0611397027c91e559cfd482c4197e403',
-            type: PoolType.Weighted,
-            decimals: 18,
-            slot: 0,
-        },
         wstETH_rETH_sfrxETH: {
             id: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b',
             address: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af7',
@@ -124,6 +121,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         DAO_st_WMATIC: {
             id: '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9000200000000000000000cc4',
             address: '0x60f46b189736c0d2ae52a79382b64c1e2a86b0d9',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        DAI_WMATIC: {
+            id: '0x9d75cc71555ddabcb89b52c818c2c689e2191401000200000000000000000762',
+            address: '0x9d75cc71555ddabcb89b52c818c2c689e2191401',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,

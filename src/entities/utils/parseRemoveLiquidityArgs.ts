@@ -5,7 +5,7 @@ import { replaceWrapped } from './replaceWrapped';
 
 export function parseRemoveLiquidityArgs({
     chainId,
-    toNativeAsset,
+    wethIsEth,
     sortedTokens,
     poolId,
     sender,
@@ -15,18 +15,18 @@ export function parseRemoveLiquidityArgs({
     toInternalBalance,
 }: {
     chainId?: number;
-    toNativeAsset?: boolean;
+    wethIsEth?: boolean;
     sortedTokens: Token[];
     poolId: Address;
     sender: Address;
     recipient: Address;
     minAmountsOut: bigint[];
     userData: Address;
-    toInternalBalance: boolean;
+    toInternalBalance?: boolean;
 }) {
     // replace wrapped token with native asset if needed
     const tokensOut =
-        chainId && toNativeAsset
+        chainId && wethIsEth
             ? replaceWrapped([...sortedTokens], chainId)
             : [...sortedTokens];
 
@@ -34,7 +34,7 @@ export function parseRemoveLiquidityArgs({
         assets: tokensOut.map((t) => t.address), // with BPT
         minAmountsOut, // with BPT
         userData, // wihtout BPT
-        toInternalBalance,
+        toInternalBalance: !!toInternalBalance,
     };
 
     return {

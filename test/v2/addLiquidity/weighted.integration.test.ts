@@ -117,7 +117,6 @@ describe('add liquidity weighted test', () => {
                 addLiquidityInput,
             });
             assertAddLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -126,21 +125,23 @@ describe('add liquidity weighted test', () => {
         });
 
         test('with native', async () => {
+            const wethIsEth = true;
             const addLiquidityInput = {
                 ...input,
                 amountsIn,
-                useNativeAssetAsWrappedAmountIn: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
+                wethIsEth,
             });
             assertAddLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                2,
+                wethIsEth,
             );
         });
     });
@@ -170,7 +171,6 @@ describe('add liquidity weighted test', () => {
             });
 
             assertAddLiquiditySingleToken(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -179,23 +179,20 @@ describe('add liquidity weighted test', () => {
         });
 
         test('with native', async () => {
+            const wethIsEth = true;
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
-                addLiquidityInput: {
-                    ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                addLiquidityInput,
+                wethIsEth,
             });
 
             assertAddLiquiditySingleToken(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
-                {
-                    ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                2,
+                wethIsEth,
             );
         });
     });
@@ -222,7 +219,6 @@ describe('add liquidity weighted test', () => {
             });
 
             assertAddLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -230,23 +226,20 @@ describe('add liquidity weighted test', () => {
             );
         });
         test('with native', async () => {
+            const wethIsEth = true;
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
-                addLiquidityInput: {
-                    ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                addLiquidityInput,
+                wethIsEth,
             });
 
             assertAddLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
-                {
-                    ...addLiquidityInput,
-                    useNativeAssetAsWrappedAmountIn: true,
-                },
+                addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                2,
+                wethIsEth,
             );
         });
     });

@@ -1,8 +1,8 @@
 import { AddLiquidityAmounts } from '../types';
-import { AddLiquidityBaseCall, AddLiquidityKind } from './types';
+import { AddLiquidityBaseBuildCallInput, AddLiquidityKind } from './types';
 
 export const getAmountsCall = (
-    input: AddLiquidityBaseCall,
+    input: AddLiquidityBaseBuildCallInput,
 ): AddLiquidityAmounts => {
     switch (input.addLiquidityKind) {
         case AddLiquidityKind.Unbalanced: {

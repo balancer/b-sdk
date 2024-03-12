@@ -3,20 +3,20 @@ import { describe, expect, test } from 'vitest';
 import {
     NestedPoolState,
     NestedPool,
-    constraintValidation,
+    validateNestedPoolState,
 } from '../src/entities';
 import { PoolType } from '@/types';
 
-describe('constraint validations', () => {
+describe('nested pool state validations', () => {
     describe('happy case', () => {
         test('should be valid', () => {
-            expect(constraintValidation(happyPoolState)).to.be.true;
+            expect(validateNestedPoolState(happyPoolState)).to.be.true;
         });
     });
     describe('A main token must exist as a token of a pool', () => {
         test('should throw', () => {
             // Test the exact error message
-            expect(() => constraintValidation(missingMain)).toThrowError(
+            expect(() => validateNestedPoolState(missingMain)).toThrowError(
                 /^NestedPoolState, main token must exist as a token of a pool$/,
             );
         });
@@ -25,7 +25,7 @@ describe('constraint validations', () => {
         test('should throw', () => {
             // Test the exact error message
             expect(() =>
-                constraintValidation(multiTokenPoolState),
+                validateNestedPoolState(multiTokenPoolState),
             ).toThrowError(
                 /^NestedPoolState, main token can't be token of more than 1 pool$/,
             );
@@ -34,7 +34,7 @@ describe('constraint validations', () => {
     describe('A main token only supported to a max of 1 level of nesting', () => {
         test('should throw', () => {
             // Test the exact error message
-            expect(() => constraintValidation(deepPoolState)).toThrowError(
+            expect(() => validateNestedPoolState(deepPoolState)).toThrowError(
                 /^NestedPoolState, main token only supported to a max of 1 level of nesting$/,
             );
         });

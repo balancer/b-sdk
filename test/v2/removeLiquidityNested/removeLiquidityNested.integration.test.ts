@@ -1,5 +1,4 @@
 // pnpm test -- removeLiquidityNested.integration.test.ts
-import { describe, expect, test, beforeAll } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -17,23 +16,24 @@ import {
 } from 'viem';
 
 import {
-    Slippage,
-    RemoveLiquidityNested,
-    replaceWrapped,
+    Address,
+    BALANCER_RELAYER,
+    ChainId,
+    CHAINS,
+    Hex,
     NestedPoolState,
-    TokenAmount,
-} from '../../../src/entities';
-import { Address, Hex, PoolType } from '../../../src/types';
-
-import { BALANCER_RELAYER, CHAINS, ChainId } from '../../../src/utils';
-
-import { forkSetup, sendTransactionGetBalances } from '../../lib/utils/helper';
-import { Relayer } from '../../../src/entities/relayer';
-import {
+    PoolType,
+    Relayer,
+    RemoveLiquidityNested,
     RemoveLiquidityNestedProportionalInput,
     RemoveLiquidityNestedSingleTokenInput,
-} from '../../../src/entities/removeLiquidityNested/types';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+    replaceWrapped,
+    Slippage,
+    TokenAmount,
+} from 'src';
+
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
+import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
 
 type TxInput = {
     poolId: Hex;
@@ -43,7 +43,7 @@ type TxInput = {
     testAddress: Address;
     client: Client & PublicActions & TestActions & WalletActions;
     tokenOut?: Address;
-    useNativeAssetAsWrappedAmountOut?: boolean;
+    wethIsEth?: boolean;
 };
 
 describe('remove liquidity nested test', () => {
@@ -113,7 +113,7 @@ describe('remove liquidity nested test', () => {
 
     test('proportional - native asset', async () => {
         const amountIn = parseUnits('1', 18);
-        const useNativeAssetAsWrappedAmountOut = true;
+        const wethIsEth = true;
 
         const {
             transactionReceipt,
@@ -129,7 +129,7 @@ describe('remove liquidity nested test', () => {
             rpcUrl,
             testAddress,
             client,
-            useNativeAssetAsWrappedAmountOut,
+            wethIsEth,
         });
 
         assertResults(
@@ -176,7 +176,7 @@ describe('remove liquidity nested test', () => {
     test('single token - native asset', async () => {
         const amountIn = parseUnits('1', 18);
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
-        const useNativeAssetAsWrappedAmountOut = true;
+        const wethIsEth = true;
 
         const {
             transactionReceipt,
@@ -193,7 +193,7 @@ describe('remove liquidity nested test', () => {
             testAddress,
             client,
             tokenOut,
-            useNativeAssetAsWrappedAmountOut,
+            wethIsEth,
         });
 
         assertResults(
@@ -209,7 +209,7 @@ describe('remove liquidity nested test', () => {
     test('single token - native asset - invalid input', async () => {
         const amountIn = parseUnits('1', 18);
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
-        const useNativeAssetAsWrappedAmountOut = true;
+        const wethIsEth = true;
 
         await expect(
             doTransaction({
@@ -220,10 +220,10 @@ describe('remove liquidity nested test', () => {
                 testAddress,
                 client,
                 tokenOut,
-                useNativeAssetAsWrappedAmountOut,
+                wethIsEth,
             }),
         ).rejects.toThrow(
-            'Removing liquidity to native asset requires wrapped native asset to be the tokenOut',
+            'Removing liquidity to native asset requires wrapped native asset to exist within amounts out',
         );
     });
 });
@@ -236,7 +236,7 @@ export const doTransaction = async ({
     testAddress,
     client,
     tokenOut,
-    useNativeAssetAsWrappedAmountOut = false,
+    wethIsEth = false,
 }: TxInput) => {
     // setup mock api
     const api = new MockApi();
@@ -251,8 +251,6 @@ export const doTransaction = async ({
         bptAmountIn: amountIn,
         chainId,
         rpcUrl,
-        accountAddress: testAddress,
-        useNativeAssetAsWrappedAmountOut,
         tokenOut,
     };
     const queryOutput = await removeLiquidityNested.query(
@@ -272,13 +270,13 @@ export const doTransaction = async ({
     const { call, to, minAmountsOut } = removeLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
-        sender: testAddress,
-        recipient: testAddress,
+        accountAddress: testAddress,
         relayerApprovalSignature: signature,
+        wethIsEth,
     });
 
     let tokensOut = minAmountsOut.map((a) => a.token);
-    if (useNativeAssetAsWrappedAmountOut) {
+    if (wethIsEth) {
         tokensOut = replaceWrapped(tokensOut, chainId);
     }
 
