@@ -84,7 +84,7 @@ export type AddLiquidityConfig = {
     customAddLiquidityTypes: Record<string, AddLiquidityBase>;
 };
 
-// type consumed by FE team, so should be exported here
+// type exposed because FE team uses it for batching add liquidity and stake operations
 export type JoinPoolRequest = {
     assets: Address[];
     maxAmountsIn: readonly bigint[];

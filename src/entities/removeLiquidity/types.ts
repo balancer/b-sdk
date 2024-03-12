@@ -104,6 +104,7 @@ export type RemoveLiquidityConfig = {
     customRemoveLiquidityTypes: Record<string, RemoveLiquidityBase>;
 };
 
+// type exposed because FE team uses it for batching unstake and remove liquidity operations
 export type ExitPoolRequest = {
     assets: Address[];
     minAmountsOut: bigint[];
