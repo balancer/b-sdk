@@ -2,6 +2,10 @@ import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address, InputAmount } from '../../types';
 import { PoolState } from '../types';
+import {
+    RemoveLiquidityV2BuildCallInput,
+    RemoveLiquidityV2QueryOutput,
+} from './removeLiquidityV2/types';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
@@ -15,7 +19,6 @@ export enum RemoveLiquidityKind {
 export type RemoveLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
-    toInternalBalance?: boolean;
 };
 
 export type RemoveLiquidityUnbalancedInput = RemoveLiquidityBaseInput & {
@@ -53,10 +56,6 @@ export type RemoveLiquidityInput =
     | RemoveLiquidityProportionalInput
     | RemoveLiquidityRecoveryInput;
 
-export type RemoveLiquidityQueryOutput =
-    | RemoveLiquidityBaseQueryOutput
-    | RemoveLiquidityComposableStableQueryOutput;
-
 // Returned from a remove liquidity query
 export type RemoveLiquidityBaseQueryOutput = {
     poolType: string;
@@ -65,34 +64,25 @@ export type RemoveLiquidityBaseQueryOutput = {
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
     tokenOutIndex?: number;
-    toInternalBalance: boolean;
     vaultVersion: 2 | 3;
     chainId: number;
 };
 
-export type RemoveLiquidityComposableStableQueryOutput =
-    RemoveLiquidityBaseQueryOutput & {
-        bptIndex: number;
-    };
+export type RemoveLiquidityQueryOutput =
+    | RemoveLiquidityBaseQueryOutput
+    | RemoveLiquidityV2QueryOutput;
 
-export type RemoveLiquidityBaseCall = {
+export type RemoveLiquidityBaseBuildCallInput = {
     slippage: Slippage;
-    sender: Address;
-    recipient: Address;
     chainId: number;
     wethIsEth?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
-export type RemoveLiquidityWeightedCall = RemoveLiquidityBaseCall;
-export type RemoveLiquidityComposableStableCall = RemoveLiquidityBaseCall &
-    RemoveLiquidityComposableStableQueryOutput;
+export type RemoveLiquidityBuildCallInput =
+    | RemoveLiquidityBaseBuildCallInput
+    | RemoveLiquidityV2BuildCallInput;
 
-export type RemoveLiquidityCall =
-    | RemoveLiquidityBaseCall
-    | RemoveLiquidityComposableStableCall
-    | RemoveLiquidityWeightedCall;
-
-export type RemoveLiquidityBuildOutput = {
+export type RemoveLiquidityBuildCallOutput = {
     call: Address;
     to: Address;
     value: bigint;
@@ -105,13 +95,16 @@ export interface RemoveLiquidityBase {
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput>;
-    buildCall(input: RemoveLiquidityCall): RemoveLiquidityBuildOutput;
+    buildCall(
+        input: RemoveLiquidityBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput;
 }
 
 export type RemoveLiquidityConfig = {
     customRemoveLiquidityTypes: Record<string, RemoveLiquidityBase>;
 };
 
+// type exposed because FE team uses it for batching unstake and remove liquidity operations
 export type ExitPoolRequest = {
     assets: Address[];
     minAmountsOut: bigint[];

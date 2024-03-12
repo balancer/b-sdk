@@ -1,9 +1,9 @@
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityQueryOutput,
-    AddLiquidityCall,
+    AddLiquidityBuildCallInput,
     AddLiquidityConfig,
 } from './types';
 import { PoolState } from '../types';
@@ -32,16 +32,17 @@ export class AddLiquidity implements AddLiquidityBase {
         }
     }
 
-    buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
-        switch (input.vaultVersion) {
-            case 2: {
-                const addLiquidity = new AddLiquidityV2(this.config);
-                return addLiquidity.buildCall(input);
-            }
-            case 3: {
-                const addLiquidity = new AddLiquidityV3();
-                return addLiquidity.buildCall(input);
-            }
+    buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput {
+        if (input.vaultVersion === 2 && 'sender' in input) {
+            const addLiquidity = new AddLiquidityV2(this.config);
+            return addLiquidity.buildCall(input);
         }
+
+        if (input.vaultVersion === 3 && !('sender' in input)) {
+            const addLiquidity = new AddLiquidityV3();
+            return addLiquidity.buildCall(input);
+        }
+
+        throw Error('buildCall input/version mis-match');
     }
 }

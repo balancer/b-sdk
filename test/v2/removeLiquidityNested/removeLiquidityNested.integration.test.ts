@@ -1,5 +1,4 @@
 // pnpm test -- removeLiquidityNested.integration.test.ts
-import { describe, expect, test, beforeAll } from 'vitest';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -17,23 +16,24 @@ import {
 } from 'viem';
 
 import {
-    Slippage,
-    RemoveLiquidityNested,
-    replaceWrapped,
+    Address,
+    BALANCER_RELAYER,
+    ChainId,
+    CHAINS,
+    Hex,
     NestedPoolState,
-    TokenAmount,
-} from '../../../src/entities';
-import { Address, Hex, PoolType } from '../../../src/types';
-
-import { BALANCER_RELAYER, CHAINS, ChainId } from '../../../src/utils';
-
-import { forkSetup, sendTransactionGetBalances } from '../../lib/utils/helper';
-import { Relayer } from '../../../src/entities/relayer';
-import {
+    PoolType,
+    Relayer,
+    RemoveLiquidityNested,
     RemoveLiquidityNestedProportionalInput,
     RemoveLiquidityNestedSingleTokenInput,
-} from '../../../src/entities/removeLiquidityNested/types';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+    replaceWrapped,
+    Slippage,
+    TokenAmount,
+} from 'src';
+
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
+import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
 
 type TxInput = {
     poolId: Hex;
@@ -251,7 +251,6 @@ export const doTransaction = async ({
         bptAmountIn: amountIn,
         chainId,
         rpcUrl,
-        accountAddress: testAddress,
         tokenOut,
     };
     const queryOutput = await removeLiquidityNested.query(
@@ -271,8 +270,7 @@ export const doTransaction = async ({
     const { call, to, minAmountsOut } = removeLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
-        sender: testAddress,
-        recipient: testAddress,
+        accountAddress: testAddress,
         relayerApprovalSignature: signature,
         wethIsEth,
     });

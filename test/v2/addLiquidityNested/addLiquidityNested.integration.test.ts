@@ -17,13 +17,15 @@ import {
 import { Address, CHAINS, ChainId, Hex, NestedPoolState } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
-import { POOLS, TestToken, TOKENS } from 'test/lib/utils/addresses';
 import {
+    AddLiquidityNestedTxInput,
     assertResults,
     doAddLiquidityNested,
-} from 'test/lib/utils/addLiquidityNestedHelper';
-import { forkSetup } from 'test/lib/utils/helper';
-import { AddLiquidityNestedTxInput } from 'test/lib/utils/types';
+    forkSetup,
+    POOLS,
+    TestToken,
+    TOKENS,
+} from 'test/lib/utils';
 
 const chainId = ChainId.MAINNET;
 const DAI = TOKENS[chainId].DAI;

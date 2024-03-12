@@ -28,9 +28,9 @@ import {
     doRemoveLiquidity,
     forkSetup,
     POOLS,
+    RemoveLiquidityTxInput,
     TOKENS,
 } from 'test/lib/utils';
-import { RemoveLiquidityTxInput } from 'test/lib/utils/types';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);

@@ -22,7 +22,7 @@ export function parseRemoveLiquidityArgs({
     recipient: Address;
     minAmountsOut: bigint[];
     userData: Address;
-    toInternalBalance: boolean;
+    toInternalBalance?: boolean;
 }) {
     // replace wrapped token with native asset if needed
     const tokensOut =
@@ -34,7 +34,7 @@ export function parseRemoveLiquidityArgs({
         assets: tokensOut.map((t) => t.address), // with BPT
         minAmountsOut, // with BPT
         userData, // wihtout BPT
-        toInternalBalance,
+        toInternalBalance: !!toInternalBalance,
     };
 
     return {
