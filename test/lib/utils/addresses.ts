@@ -40,6 +40,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         wstETH: {
             address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
             decimals: 18,
+            slot: 0,
         },
         rETH: {
             address: '0xae78736cd615f374d3085123a210448e74fc6393',
@@ -113,6 +114,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             id: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b',
             address: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af7',
             type: PoolType.ComposableStable,
+            decimals: 18,
+            slot: 0,
+        },
+        wstETH_wETH: {
+            id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
+            address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
+            type: PoolType.MetaStable,
             decimals: 18,
             slot: 0,
         },

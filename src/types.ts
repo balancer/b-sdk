@@ -2,14 +2,15 @@ export type Address = `0x${string}`;
 export type Hex = `0x${string}`;
 
 export enum PoolType {
-    Weighted = 'Weighted',
-    ComposableStable = 'ComposableStable',
-    MetaStable = 'MetaStable',
     AaveLinear = 'AaveLinear',
+    ComposableStable = 'ComposableStable',
     Fx = 'FX',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
     GyroE = 'GyroE',
+    MetaStable = 'MetaStable',
+    Stable = 'Stable',
+    Weighted = 'Weighted',
 }
 
 export enum SwapKind {

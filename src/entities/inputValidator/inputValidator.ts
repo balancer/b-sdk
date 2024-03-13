@@ -5,6 +5,7 @@ import { InitPoolInput } from '../initPool/types';
 import { PoolState } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
+import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './types';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
 
@@ -13,11 +14,13 @@ export class InputValidator {
 
     constructor() {
         this.validators = {
-            [PoolType.Weighted]: new InputValidatorWeighted(),
+            [PoolType.ComposableStable]: new InputValidatorComposableStable(),
             [PoolType.Gyro2]: new InputValidatorGyro(),
             [PoolType.Gyro3]: new InputValidatorGyro(),
             [PoolType.GyroE]: new InputValidatorGyro(),
-            [PoolType.ComposableStable]: new InputValidatorComposableStable(),
+            [PoolType.MetaStable]: new InputValidatorStable(),
+            [PoolType.Stable]: new InputValidatorStable(),
+            [PoolType.Weighted]: new InputValidatorWeighted(),
         };
     }
 
