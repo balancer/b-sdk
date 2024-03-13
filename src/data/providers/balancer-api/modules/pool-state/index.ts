@@ -21,6 +21,15 @@ export class Pools {
           }
         }
       }
+      ... on GqlPoolMetaStable {
+        tokens {
+          ... on GqlPoolTokenBase {
+            address
+            decimals
+            index
+          }
+        }
+      }
       ... on GqlPoolStable {
         tokens {
           ... on GqlPoolTokenBase {
@@ -89,6 +98,18 @@ export class Pools {
         vaultVersion
         dynamicData {totalShares}
         ... on GqlPoolWeighted {
+          tokens {
+            ... on GqlPoolTokenBase {
+              address
+              decimals
+              index
+              balance
+              name
+              symbol
+            }
+          }
+        }
+        ... on GqlPoolMetaStable {
           tokens {
             ... on GqlPoolTokenBase {
               address
