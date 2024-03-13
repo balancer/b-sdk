@@ -14,6 +14,7 @@ import {
 export const getAmountsQuery = (
     tokens: Token[],
     input: RemoveLiquidityInput,
+    bptIndex = -1,
 ): RemoveLiquidityAmounts => {
     switch (input.kind) {
         case RemoveLiquidityKind.Unbalanced:
@@ -25,17 +26,17 @@ export const getAmountsQuery = (
         case RemoveLiquidityKind.SingleTokenExactOut:
             return {
                 minAmountsOut: getAmounts(tokens, [input.amountOut]),
-                tokenOutIndex: tokens.findIndex((t) =>
-                    t.isSameAddress(input.amountOut.address),
-                ),
+                tokenOutIndex: tokens
+                    .filter((_, index) => index !== bptIndex)
+                    .findIndex((t) => t.isSameAddress(input.amountOut.address)),
                 maxBptAmountIn: MAX_UINT256, // maxAmountIn set to max when querying
             };
         case RemoveLiquidityKind.SingleTokenExactIn:
             return {
                 minAmountsOut: Array(tokens.length).fill(1n), // minAmountsOut set to 1 wei when querying
-                tokenOutIndex: tokens.findIndex((t) =>
-                    t.isSameAddress(input.tokenOut),
-                ),
+                tokenOutIndex: tokens
+                    .filter((_, index) => index !== bptIndex)
+                    .findIndex((t) => t.isSameAddress(input.tokenOut)),
                 maxBptAmountIn: input.bptIn.rawAmount,
             };
         case RemoveLiquidityKind.Proportional:

@@ -1,21 +1,16 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '@/utils';
+import { VAULT, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
     AddLiquidityBuildCallOutput,
     AddLiquidityInput,
-    AddLiquidityKind,
 } from '@/entities/addLiquidity/types';
-import {
-    AddLiquidityAmounts as AddLiquidityAmountsBase,
-    PoolState,
-} from '@/entities/types';
+import { PoolState } from '@/entities/types';
 import {
     doAddLiquidityQuery,
-    getAmounts,
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '@/entities/utils';
@@ -25,10 +20,7 @@ import {
     AddLiquidityV2ComposableStableBuildCallInput,
     AddLiquidityV2ComposableStableQueryOutput,
 } from './types';
-
-type AddLiquidityAmounts = AddLiquidityAmountsBase & {
-    maxAmountsInWithoutBpt: bigint[];
-};
+import { getAmountsCall, getAmountsQuery } from '../../helpers';
 
 export class AddLiquidityComposableStable implements AddLiquidityBase {
     public async query(
@@ -39,7 +31,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         const bptIndex = sortedTokens.findIndex(
             (t) => t.address === poolState.address,
         );
-        const amounts = this.getAmountsQuery(sortedTokens, input, bptIndex);
+        const amounts = getAmountsQuery(sortedTokens, input, bptIndex);
 
         const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
             input.kind,
@@ -86,7 +78,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
     public buildCall(
         input: AddLiquidityV2ComposableStableBuildCallInput,
     ): AddLiquidityBuildCallOutput {
-        const amounts = this.getAmountsCall(input);
+        const amounts = getAmountsCall(input, input.bptIndex);
 
         const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
             input.addLiquidityKind,
@@ -119,97 +111,6 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             maxAmountsIn: input.amountsIn.map((a, i) =>
                 TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
             ),
-        };
-    }
-
-    private getAmountsQuery(
-        poolTokens: Token[],
-        input: AddLiquidityInput,
-        bptIndex: number,
-    ): AddLiquidityAmounts {
-        let addLiquidityAmounts: AddLiquidityAmountsBase;
-        switch (input.kind) {
-            case AddLiquidityKind.Unbalanced: {
-                addLiquidityAmounts = {
-                    minimumBpt: 0n,
-                    maxAmountsIn: getAmounts(
-                        poolTokens,
-                        input.amountsIn,
-                        BigInt(0),
-                    ),
-                    tokenInIndex: undefined,
-                };
-                break;
-            }
-            case AddLiquidityKind.SingleToken: {
-                const tokenInIndex = poolTokens
-                    .filter((_, index) => index !== bptIndex) // Need to remove Bpt
-                    .findIndex((t) => t.isSameAddress(input.tokenIn));
-                if (tokenInIndex === -1)
-                    throw Error("Can't find index of SingleToken");
-                const maxAmountsIn = Array(poolTokens.length).fill(0n);
-                maxAmountsIn[tokenInIndex] = MAX_UINT256;
-                addLiquidityAmounts = {
-                    minimumBpt: input.bptOut.rawAmount,
-                    maxAmountsIn,
-                    tokenInIndex,
-                };
-                break;
-            }
-            case AddLiquidityKind.Proportional: {
-                addLiquidityAmounts = {
-                    minimumBpt: input.bptOut.rawAmount,
-                    maxAmountsIn: Array(poolTokens.length).fill(MAX_UINT256),
-                    tokenInIndex: undefined,
-                };
-                break;
-            }
-        }
-
-        return {
-            ...addLiquidityAmounts,
-            maxAmountsInWithoutBpt: [
-                ...addLiquidityAmounts.maxAmountsIn.slice(0, bptIndex),
-                ...addLiquidityAmounts.maxAmountsIn.slice(bptIndex + 1),
-            ],
-        };
-    }
-
-    private getAmountsCall(
-        input: AddLiquidityV2ComposableStableBuildCallInput,
-    ): AddLiquidityAmounts {
-        let addLiquidityAmounts: AddLiquidityAmountsBase;
-        switch (input.addLiquidityKind) {
-            case AddLiquidityKind.Unbalanced: {
-                const minimumBpt = input.slippage.applyTo(
-                    input.bptOut.amount,
-                    -1,
-                );
-                addLiquidityAmounts = {
-                    minimumBpt,
-                    maxAmountsIn: input.amountsIn.map((a) => a.amount),
-                    tokenInIndex: input.tokenInIndex,
-                };
-                break;
-            }
-            case AddLiquidityKind.SingleToken:
-            case AddLiquidityKind.Proportional: {
-                addLiquidityAmounts = {
-                    minimumBpt: input.bptOut.amount,
-                    maxAmountsIn: input.amountsIn.map((a) =>
-                        input.slippage.applyTo(a.amount),
-                    ),
-                    tokenInIndex: input.tokenInIndex,
-                };
-                break;
-            }
-        }
-        return {
-            ...addLiquidityAmounts,
-            maxAmountsInWithoutBpt: [
-                ...addLiquidityAmounts.maxAmountsIn.slice(0, input.bptIndex),
-                ...addLiquidityAmounts.maxAmountsIn.slice(input.bptIndex + 1),
-            ],
         };
     }
 }
