@@ -45,7 +45,7 @@ const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
 const poolId = POOLS[chainId].wstETH_wETH.id; // B-stETH-STABLE
 
-describe('add liquidity weighted test', () => {
+describe('add liquidity stable test', () => {
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
 
