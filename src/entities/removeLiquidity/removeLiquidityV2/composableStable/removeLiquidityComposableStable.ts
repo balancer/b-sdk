@@ -36,13 +36,10 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             ],
         };
         const userData = ComposableStableEncoder.encodeRemoveLiquidityUserData(
-            input.kind === RemoveLiquidityKind.Recovery
-                ? RemoveLiquidityKind.Proportional
-                : input.kind,
+            input.kind,
             amountsWithoutBpt,
         );
 
-        // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
             poolId: poolState.id,

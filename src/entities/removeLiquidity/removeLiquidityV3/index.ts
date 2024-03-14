@@ -74,10 +74,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     );
                 }
                 break;
-            case RemoveLiquidityKind.Recovery:
-                throw new Error(
-                    'Pending smart contract implementation and Router ABI update',
-                );
         }
 
         const bptToken = new Token(input.chainId, poolState.address, 18);

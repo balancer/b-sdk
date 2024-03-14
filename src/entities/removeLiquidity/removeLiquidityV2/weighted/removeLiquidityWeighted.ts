@@ -9,7 +9,6 @@ import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
-    RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
 } from '../../types';
 import { PoolState } from '../../../types';
@@ -27,13 +26,10 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         const amounts = getAmountsQuery(sortedTokens, input);
 
         const userData = WeightedEncoder.encodeRemoveLiquidityUserData(
-            input.kind === RemoveLiquidityKind.Recovery
-                ? RemoveLiquidityKind.Proportional
-                : input.kind,
+            input.kind,
             amounts,
         );
 
-        // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
             poolId: poolState.id,
