@@ -1,7 +1,10 @@
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { PoolState } from '@/entities/types';
-import { getSortedTokens } from '@/entities/utils';
+import { PoolState, PoolStateWithBalances } from '@/entities/types';
+import {
+    calculateProportionalAmounts,
+    getSortedTokens,
+} from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
@@ -16,6 +19,7 @@ import {
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
+    RemoveLiquidityRecoveryInput,
 } from '../types';
 import { doRemoveLiquiditySingleTokenExactOutQuery } from './doRemoveLiquiditySingleTokenExactOutQuery';
 import { doRemoveLiquiditySingleTokenExactInQuery } from './doRemoveLiquiditySingleTokenExactInQuery';
@@ -92,6 +96,41 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         };
 
         return output;
+    }
+
+    /**
+     * It's not possible to query Remove Liquidity Recovery in the same way as
+     * other remove liquidity kinds, but since it's not affected by fees or anything
+     * other than pool balances, we can calculate amountsOut as proportional amounts.
+     */
+    public queryRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolStateWithBalances: PoolStateWithBalances,
+    ): RemoveLiquidityBaseQueryOutput {
+        const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
+            poolStateWithBalances,
+            input.bptIn,
+        );
+        const bptIn = TokenAmount.fromRawAmount(
+            new Token(input.chainId, bptAmount.address, bptAmount.decimals),
+            bptAmount.rawAmount,
+        );
+        const amountsOut = tokenAmounts.map((amountIn) =>
+            TokenAmount.fromRawAmount(
+                new Token(input.chainId, amountIn.address, amountIn.decimals),
+                amountIn.rawAmount,
+            ),
+        );
+        return {
+            poolType: poolStateWithBalances.type,
+            removeLiquidityKind: input.kind,
+            poolId: poolStateWithBalances.id,
+            bptIn,
+            amountsOut,
+            tokenOutIndex: undefined,
+            vaultVersion: poolStateWithBalances.vaultVersion,
+            chainId: input.chainId,
+        };
     }
 
     public buildCall(

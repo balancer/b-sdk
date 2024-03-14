@@ -2,14 +2,18 @@ import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { AddLiquidityInput } from '../../addLiquidity/types';
 import { CreatePoolV2ComposableStableInput } from '../../createPool/types';
 import { InitPoolInput } from '../../initPool/types';
-import { RemoveLiquidityInput } from '../../removeLiquidity/types';
-import { PoolState } from '../../types';
+import {
+    RemoveLiquidityInput,
+    RemoveLiquidityRecoveryInput,
+} from '../../removeLiquidity/types';
+import { PoolState, PoolStateWithBalances } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
     validateCreatePoolTokens,
     validatePoolHasBpt,
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
+    validateTokensRemoveLiquidityRecovery,
 } from '../utils/validateTokens';
 
 export class InputValidatorComposableStable implements InputValidatorBase {
@@ -34,6 +38,14 @@ export class InputValidatorComposableStable implements InputValidatorBase {
     ): void {
         validatePoolHasBpt(poolState);
         validateTokensRemoveLiquidity(input, poolState);
+    }
+
+    validateRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolStateWithBalances: PoolStateWithBalances,
+    ): void {
+        validatePoolHasBpt(poolStateWithBalances);
+        validateTokensRemoveLiquidityRecovery(input, poolStateWithBalances);
     }
 
     validateCreatePool(input: CreatePoolV2ComposableStableInput): void {

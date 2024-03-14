@@ -26,13 +26,13 @@ import {
 
 import {
     assertRemoveLiquidityRecovery,
+    doRemoveLiquidityRecovery,
     forkSetup,
     POOLS,
     RemoveLiquidityRecoveryTxInput,
     TOKENS,
 } from 'test/lib/utils';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
-import { doRemoveLiquidityRecovery } from 'test/lib/utils/removeLiquidityRecoveryHelper';
 
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]);

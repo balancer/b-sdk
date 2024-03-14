@@ -20,10 +20,7 @@ import {
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
-import {
-    RemoveLiquidityRecoveryTxInput,
-    RemoveLiquidityTxInput,
-} from './types';
+import { RemoveLiquidityTxInput } from './types';
 import { RemoveLiquidityV2BaseBuildCallInput } from '@/entities/removeLiquidity/removeLiquidityV2/types';
 import { RemoveLiquidityV2ComposableStableQueryOutput } from '@/entities/removeLiquidity/removeLiquidityV2/composableStable/types';
 
@@ -56,48 +53,6 @@ export const sdkRemoveLiquidity = async ({
         wethIsEth: !!wethIsEth,
     };
     if (poolState.vaultVersion === 2) {
-        (removeLiquidityBuildInput as RemoveLiquidityV2BaseBuildCallInput) = {
-            ...removeLiquidityBuildInput,
-            sender: testAddress,
-            recipient: testAddress,
-            toInternalBalance: !!toInternalBalance,
-        };
-    }
-
-    const removeLiquidityBuildCallOutput = removeLiquidity.buildCall(
-        removeLiquidityBuildInput,
-    );
-
-    return {
-        removeLiquidityBuildCallOutput,
-        removeLiquidityQueryOutput,
-    };
-};
-
-export const sdkRemoveLiquidityRecovery = async ({
-    removeLiquidity,
-    removeLiquidityRecoveryInput,
-    poolStateWithBalances,
-    slippage,
-    testAddress,
-    wethIsEth,
-    toInternalBalance,
-}: Omit<RemoveLiquidityRecoveryTxInput, 'client'>): Promise<{
-    removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
-    removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
-}> => {
-    const removeLiquidityQueryOutput =
-        removeLiquidity.queryRemoveLiquidityRecovery(
-            removeLiquidityRecoveryInput,
-            poolStateWithBalances,
-        );
-
-    let removeLiquidityBuildInput: RemoveLiquidityBuildCallInput = {
-        ...removeLiquidityQueryOutput,
-        slippage,
-        wethIsEth: !!wethIsEth,
-    };
-    if (poolStateWithBalances.vaultVersion === 2) {
         (removeLiquidityBuildInput as RemoveLiquidityV2BaseBuildCallInput) = {
             ...removeLiquidityBuildInput,
             sender: testAddress,
@@ -501,82 +456,6 @@ export function assertRemoveLiquidityProportional(
     );
 }
 
-export function assertRemoveLiquidityRecovery(
-    poolState: PoolState,
-    removeLiquidityInput: RemoveLiquidityRecoveryInput,
-    removeLiquidityOutput: RemoveLiquidityOutput,
-    slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
-    wethIsEth?: boolean,
-) {
-    const {
-        txOutput,
-        removeLiquidityQueryOutput,
-        removeLiquidityBuildCallOutput,
-    } = removeLiquidityOutput;
-
-    const bptToken = new Token(
-        removeLiquidityInput.chainId,
-        poolState.address,
-        18,
-    );
-
-    const expectedQueryOutput: Omit<
-        RemoveLiquidityQueryOutput,
-        'amountsOut' | 'bptIndex'
-    > = {
-        // Query should use same bpt out as user sets
-        bptIn: TokenAmount.fromRawAmount(
-            bptToken,
-            removeLiquidityInput.bptIn.rawAmount,
-        ),
-        // Only expect tokenInIndex for AddLiquiditySingleToken
-        tokenOutIndex: undefined,
-        // Should match inputs
-        poolId: poolState.id,
-        poolType: poolState.type,
-        removeLiquidityKind: removeLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
-        chainId: removeLiquidityInput.chainId,
-    };
-
-    const queryCheck = getCheck(removeLiquidityQueryOutput, true);
-
-    expect(queryCheck).to.deep.eq(expectedQueryOutput);
-
-    // Expect all assets in to have an amount > 0 apart from BPT if it exists
-    removeLiquidityQueryOutput.amountsOut.forEach((a) => {
-        if (a.token.address === poolState.address) expect(a.amount).toEqual(0n);
-        else expect(a.amount > 0n).to.be.true;
-    });
-
-    if (wethIsEth) {
-        expect(
-            removeLiquidityQueryOutput.amountsOut.some((a) =>
-                a.token.isSameAddress(
-                    NATIVE_ASSETS[removeLiquidityQueryOutput.chainId].wrapped,
-                ),
-            ),
-        ).to.be.true;
-    }
-
-    assertRemoveLiquidityBuildCallOutput(
-        removeLiquidityQueryOutput,
-        removeLiquidityBuildCallOutput,
-        true,
-        slippage,
-        vaultVersion,
-    );
-
-    assertTokenDeltas(
-        poolState,
-        removeLiquidityInput,
-        removeLiquidityQueryOutput,
-        txOutput,
-        wethIsEth,
-    );
-}
-
 export function assertTokenDeltas(
     poolState: PoolState,
     removeLiquidityInput: RemoveLiquidityInput | RemoveLiquidityRecoveryInput,
@@ -615,7 +494,8 @@ export function assertTokenDeltas(
             return Math.abs(parseInt(delta.toString()));
         },
     );
-    //The Balance Delta for Recovery Exits has rounding errors, since the query is done for proportional exits
+    // Expected Delta for Recovery Exits has rounding errors because it relies
+    // on calculating proportional amounts off-chain instead of on-chain queries
     balanceVsExpectedDeltas.forEach((diff) => {
         expect(diff).to.be.lessThanOrEqual(5);
     });

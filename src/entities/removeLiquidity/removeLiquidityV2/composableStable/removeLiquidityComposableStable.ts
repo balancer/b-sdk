@@ -8,15 +8,16 @@ import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
-    RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
+    RemoveLiquidityRecoveryInput,
 } from '../../types';
 import { RemoveLiquidityV2ComposableStableBuildCallInput } from './types';
-import { PoolState } from '../../../types';
+import { PoolState, PoolStateWithBalances } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { ComposableStableEncoder } from '../../../encoders/composableStable';
-import { getSortedTokens } from '../../../utils';
+import { calculateProportionalAmounts, getSortedTokens } from '../../../utils';
 import { getAmountsCall, getAmountsQuery } from '../../helper';
+import { insertIndex } from '@/utils';
 
 export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
@@ -70,6 +71,47 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             tokenOutIndex: amounts.tokenOutIndex,
             bptIndex,
             vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
+        };
+    }
+
+    public queryRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolStateWithBalances: PoolStateWithBalances,
+    ): RemoveLiquidityQueryOutput {
+        const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
+            poolStateWithBalances,
+            input.bptIn,
+        );
+        const bptToken = new Token(
+            input.chainId,
+            bptAmount.address,
+            bptAmount.decimals,
+        );
+        const bptIn = TokenAmount.fromRawAmount(bptToken, bptAmount.rawAmount);
+        // should already have been validated within input validator
+        const bptIndex = poolStateWithBalances.tokens.findIndex(
+            (t) => t.address === poolStateWithBalances.address,
+        );
+        let amountsOut = tokenAmounts.map((amount) =>
+            TokenAmount.fromRawAmount(
+                new Token(input.chainId, amount.address, amount.decimals),
+                amount.rawAmount,
+            ),
+        );
+        amountsOut = insertIndex(
+            amountsOut,
+            bptIndex,
+            TokenAmount.fromRawAmount(bptToken, 0n),
+        );
+        return {
+            poolType: poolStateWithBalances.type,
+            removeLiquidityKind: input.kind,
+            poolId: poolStateWithBalances.id,
+            bptIn,
+            amountsOut,
+            tokenOutIndex: undefined,
+            vaultVersion: poolStateWithBalances.vaultVersion,
             chainId: input.chainId,
         };
     }
