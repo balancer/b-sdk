@@ -18,12 +18,7 @@ export const doAddLiquidityUnbalancedQuery = async (
         address: BALANCER_ROUTER[chainId],
         abi: balancerRouterAbi,
         functionName: 'queryAddLiquidityUnbalanced',
-        args: [
-            poolAddress,
-            maxAmountsIn,
-            0n, // minBptOut set to 0 when querying
-            '0x',
-        ],
+        args: [poolAddress, maxAmountsIn, '0x'],
     });
     return bptAmountOut;
 };
