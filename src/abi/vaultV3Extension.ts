@@ -7,14 +7,9 @@ export const vaultV3ExtensionAbi = [
                 type: 'address',
             },
             {
-                internalType: 'uint256',
-                name: 'pauseWindowDuration',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'bufferPeriodDuration',
-                type: 'uint256',
+                internalType: 'contract IVaultAdmin',
+                name: 'vaultAdmin',
+                type: 'address',
             },
         ],
         stateMutability: 'nonpayable',
@@ -40,6 +35,26 @@ export const vaultV3ExtensionAbi = [
             },
         ],
         name: 'AddressInsufficientBalance',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterAddLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterInitializeHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterRemoveLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterSwapHookFailed',
         type: 'error',
     },
     {
@@ -95,6 +110,31 @@ export const vaultV3ExtensionAbi = [
         type: 'error',
     },
     {
+        inputs: [],
+        name: 'BalanceOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeAddLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeInitializeHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeRemoveLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeSwapHookFailed',
+        type: 'error',
+    },
+    {
         inputs: [
             {
                 internalType: 'uint256',
@@ -128,11 +168,6 @@ export const vaultV3ExtensionAbi = [
     },
     {
         inputs: [],
-        name: 'CallbackFailed',
-        type: 'error',
-    },
-    {
-        inputs: [],
         name: 'CannotReceiveEth',
         type: 'error',
     },
@@ -144,6 +179,16 @@ export const vaultV3ExtensionAbi = [
     {
         inputs: [],
         name: 'CodecOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportAddLiquidityCustom',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportRemoveLiquidityCustom',
         type: 'error',
     },
     {
@@ -238,17 +283,6 @@ export const vaultV3ExtensionAbi = [
         type: 'error',
     },
     {
-        inputs: [
-            {
-                internalType: 'uint256',
-                name: 'index',
-                type: 'uint256',
-            },
-        ],
-        name: 'HandlerOutOfBounds',
-        type: 'error',
-    },
-    {
         inputs: [],
         name: 'InputLengthMismatch',
         type: 'error',
@@ -279,6 +313,17 @@ export const vaultV3ExtensionAbi = [
         type: 'error',
     },
     {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'index',
+                type: 'uint256',
+            },
+        ],
+        name: 'LockerOutOfBounds',
+        type: 'error',
+    },
+    {
         inputs: [],
         name: 'MaxTokens',
         type: 'error',
@@ -290,7 +335,7 @@ export const vaultV3ExtensionAbi = [
     },
     {
         inputs: [],
-        name: 'NoHandler',
+        name: 'NoLocker',
         type: 'error',
     },
     {
@@ -301,6 +346,11 @@ export const vaultV3ExtensionAbi = [
     {
         inputs: [],
         name: 'NotVaultDelegateCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'OperationNotSupported',
         type: 'error',
     },
     {
@@ -419,6 +469,11 @@ export const vaultV3ExtensionAbi = [
     },
     {
         inputs: [],
+        name: 'ProtocolYieldFeePercentageTooHigh',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'QueriesDisabled',
         type: 'error',
     },
@@ -463,17 +518,6 @@ export const vaultV3ExtensionAbi = [
         inputs: [
             {
                 internalType: 'address',
-                name: 'token',
-                type: 'address',
-            },
-        ],
-        name: 'SafeERC20FailedOperation',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
                 name: 'pool',
                 type: 'address',
             },
@@ -494,12 +538,23 @@ export const vaultV3ExtensionAbi = [
     },
     {
         inputs: [],
-        name: 'SenderNotAllowed',
+        name: 'SwapFeePercentageTooHigh',
         type: 'error',
     },
     {
-        inputs: [],
-        name: 'SwapFeePercentageTooHigh',
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'limit',
+                type: 'uint256',
+            },
+        ],
+        name: 'SwapLimit',
         type: 'error',
     },
     {
@@ -537,6 +592,11 @@ export const vaultV3ExtensionAbi = [
             },
         ],
         name: 'TokensMismatch',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'TokensNotSorted',
         type: 'error',
     },
     {
@@ -584,7 +644,7 @@ export const vaultV3ExtensionAbi = [
         inputs: [
             {
                 internalType: 'address',
-                name: 'handler',
+                name: 'locker',
                 type: 'address',
             },
             {
@@ -593,7 +653,12 @@ export const vaultV3ExtensionAbi = [
                 type: 'address',
             },
         ],
-        name: 'WrongHandler',
+        name: 'WrongLocker',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'WrongVaultAdminDeployment',
         type: 'error',
     },
     {
@@ -607,7 +672,7 @@ export const vaultV3ExtensionAbi = [
             {
                 indexed: true,
                 internalType: 'address',
-                name: 'token',
+                name: 'pool',
                 type: 'address',
             },
             {
@@ -826,8 +891,8 @@ export const vaultV3ExtensionAbi = [
                     },
                 ],
                 indexed: false,
-                internalType: 'struct PoolCallbacks',
-                name: 'callbacks',
+                internalType: 'struct PoolHooks',
+                name: 'hooks',
                 type: 'tuple',
             },
             {
@@ -876,6 +941,31 @@ export const vaultV3ExtensionAbi = [
         inputs: [
             {
                 indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
+        ],
+        name: 'ProtocolSwapFeeCharged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
                 internalType: 'uint256',
                 name: 'swapFeePercentage',
                 type: 'uint256',
@@ -895,12 +985,31 @@ export const vaultV3ExtensionAbi = [
             },
             {
                 indexed: true,
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+            {
+                indexed: false,
                 internalType: 'uint256',
-                name: 'swapFeePercentage',
+                name: 'amount',
                 type: 'uint256',
             },
         ],
-        name: 'SwapFeePercentageChanged',
+        name: 'ProtocolYieldFeeCharged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'uint256',
+                name: 'yieldFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'ProtocolYieldFeePercentageChanged',
         type: 'event',
     },
     {
@@ -909,7 +1018,7 @@ export const vaultV3ExtensionAbi = [
             {
                 indexed: true,
                 internalType: 'address',
-                name: 'token',
+                name: 'pool',
                 type: 'address',
             },
             {
@@ -946,6 +1055,10 @@ export const vaultV3ExtensionAbi = [
         ],
         name: 'VaultPausedStateChanged',
         type: 'event',
+    },
+    {
+        stateMutability: 'payable',
+        type: 'fallback',
     },
     {
         inputs: [],
@@ -1058,116 +1171,12 @@ export const vaultV3ExtensionAbi = [
     {
         inputs: [
             {
-                internalType: 'contract IERC20[]',
-                name: 'tokens',
-                type: 'address[]',
-            },
-        ],
-        name: 'collectProtocolFees',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'disableQuery',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        name: 'disableRecoveryMode',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        name: 'enableRecoveryMode',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'bytes4',
-                name: 'selector',
-                type: 'bytes4',
-            },
-        ],
-        name: 'getActionId',
-        outputs: [
-            {
-                internalType: 'bytes32',
-                name: '',
-                type: 'bytes32',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getAuthorizer',
-        outputs: [
-            {
-                internalType: 'contract IAuthorizer',
-                name: '',
-                type: 'address',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getBufferPeriodDuration',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getBufferPeriodEndTime',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
                 internalType: 'uint256',
                 name: 'index',
                 type: 'uint256',
             },
         ],
-        name: 'getHandler',
+        name: 'getLocker',
         outputs: [
             {
                 internalType: 'address',
@@ -1180,7 +1189,7 @@ export const vaultV3ExtensionAbi = [
     },
     {
         inputs: [],
-        name: 'getHandlersCount',
+        name: 'getLockersCount',
         outputs: [
             {
                 internalType: 'uint256',
@@ -1189,50 +1198,11 @@ export const vaultV3ExtensionAbi = [
             },
         ],
         stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getMaximumPoolTokens',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'pure',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getMinimumPoolTokens',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
         name: 'getNonzeroDeltaCount',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getPauseWindowEndTime',
         outputs: [
             {
                 internalType: 'uint256',
@@ -1281,9 +1251,9 @@ export const vaultV3ExtensionAbi = [
                         type: 'bool',
                     },
                     {
-                        internalType: 'uint64',
+                        internalType: 'uint256',
                         name: 'staticSwapFeePercentage',
-                        type: 'uint64',
+                        type: 'uint256',
                     },
                     {
                         internalType: 'uint24',
@@ -1338,8 +1308,8 @@ export const vaultV3ExtensionAbi = [
                                 type: 'bool',
                             },
                         ],
-                        internalType: 'struct PoolCallbacks',
-                        name: 'callbacks',
+                        internalType: 'struct PoolHooks',
+                        name: 'hooks',
                         type: 'tuple',
                     },
                     {
@@ -1409,35 +1379,6 @@ export const vaultV3ExtensionAbi = [
                 name: 'pool',
                 type: 'address',
             },
-            {
-                internalType: 'contract IERC20',
-                name: 'token',
-                type: 'address',
-            },
-        ],
-        name: 'getPoolTokenCountAndIndexOfToken',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
         ],
         name: 'getPoolTokenInfo',
         outputs: [
@@ -1478,25 +1419,6 @@ export const vaultV3ExtensionAbi = [
                 type: 'address',
             },
         ],
-        name: 'getPoolTokenRates',
-        outputs: [
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
         name: 'getPoolTokens',
         outputs: [
             {
@@ -1516,7 +1438,7 @@ export const vaultV3ExtensionAbi = [
                 type: 'address',
             },
         ],
-        name: 'getProtocolSwapFee',
+        name: 'getProtocolFees',
         outputs: [
             {
                 internalType: 'uint256',
@@ -1530,6 +1452,38 @@ export const vaultV3ExtensionAbi = [
     {
         inputs: [],
         name: 'getProtocolSwapFeePercentage',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getProtocolYieldFeePercentage',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
+        ],
+        name: 'getReservesOf',
         outputs: [
             {
                 internalType: 'uint256',
@@ -1584,42 +1538,13 @@ export const vaultV3ExtensionAbi = [
         type: 'function',
     },
     {
-        inputs: [
-            {
-                internalType: 'contract IERC20',
-                name: 'token',
-                type: 'address',
-            },
-        ],
-        name: 'getTokenReserve',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
         inputs: [],
-        name: 'getVaultPausedState',
+        name: 'getVaultAdmin',
         outputs: [
             {
-                internalType: 'bool',
+                internalType: 'address',
                 name: '',
-                type: 'bool',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
+                type: 'address',
             },
         ],
         stateMutability: 'view',
@@ -1759,39 +1684,6 @@ export const vaultV3ExtensionAbi = [
         type: 'function',
     },
     {
-        inputs: [],
-        name: 'isVaultPaused',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        name: 'pausePool',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'pauseVault',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
         inputs: [
             {
                 internalType: 'bytes',
@@ -1808,6 +1700,19 @@ export const vaultV3ExtensionAbi = [
             },
         ],
         stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'reentrancyGuardEntered',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
     },
     {
@@ -1897,8 +1802,8 @@ export const vaultV3ExtensionAbi = [
                         type: 'bool',
                     },
                 ],
-                internalType: 'struct PoolCallbacks',
-                name: 'poolCallbacks',
+                internalType: 'struct PoolHooks',
+                name: 'poolHooks',
                 type: 'tuple',
             },
             {
@@ -1927,44 +1832,29 @@ export const vaultV3ExtensionAbi = [
     {
         inputs: [
             {
-                internalType: 'contract IAuthorizer',
-                name: 'newAuthorizer',
-                type: 'address',
-            },
-        ],
-        name: 'setAuthorizer',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'uint256',
-                name: 'newProtocolSwapFeePercentage',
-                type: 'uint256',
-            },
-        ],
-        name: 'setProtocolSwapFeePercentage',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
                 internalType: 'address',
                 name: 'pool',
                 type: 'address',
             },
             {
+                internalType: 'address',
+                name: 'from',
+                type: 'address',
+            },
+            {
                 internalType: 'uint256',
-                name: 'swapFeePercentage',
+                name: 'exactBptAmountIn',
                 type: 'uint256',
             },
         ],
-        name: 'setStaticSwapFeePercentage',
-        outputs: [],
+        name: 'removeLiquidityRecovery',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'amountsOutRaw',
+                type: 'uint256[]',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -2051,26 +1941,6 @@ export const vaultV3ExtensionAbi = [
         type: 'function',
     },
     {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        name: 'unpausePool',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'unpauseVault',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
         inputs: [],
         name: 'vault',
         outputs: [
@@ -2082,5 +1952,9 @@ export const vaultV3ExtensionAbi = [
         ],
         stateMutability: 'view',
         type: 'function',
+    },
+    {
+        stateMutability: 'payable',
+        type: 'receive',
     },
 ] as const;

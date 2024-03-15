@@ -160,7 +160,7 @@ export const VAULT: Record<number, Address> = {
 };
 
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x816e90DC85bF016455017a76Bc09CC0451Eeb308',
+    [ChainId.SEPOLIA]: '0x1FC7F1F84CFE61a04224AC8D3F87f56214FeC08c',
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
@@ -200,7 +200,7 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x9958317b80ee5f10457017d54c2484D722059157',
+    [ChainId.SEPOLIA]: '0xA0De078cd5cFa7088821B83e0bD7545ccfb7c883',
 };
 
 export const NATIVE_ASSETS = {
