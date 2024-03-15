@@ -1,3 +1,5 @@
+// pnpm test -- test/v3/initPool.integration.test.ts
+
 import {
     PoolState,
     CreatePool,
@@ -43,7 +45,7 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl),
+            transport: http(rpcUrl, { timeout: 60_000 }),
         })
             .extend(publicActions)
             .extend(walletActions);
@@ -119,7 +121,7 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
             undefined,
             3,
         );
-    });
+    }, 60000);
     test('Initialize Pool V3 - Weighted Pool', async () => {
         const addLiquidityOutput = await doInitPool({
             ...initPoolTxInput,
@@ -128,5 +130,5 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
         });
 
         assertInitPool(initPoolInput, addLiquidityOutput);
-    });
+    }, 60000);
 });
