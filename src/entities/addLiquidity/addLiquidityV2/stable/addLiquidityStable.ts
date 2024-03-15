@@ -1,12 +1,14 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
+import { StableEncoder } from '@/entities/encoders/stable';
 import { VAULT, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
-    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
+    AddLiquidityBaseQueryOutput,
+    AddLiquidityBuildCallOutput,
 } from '@/entities/addLiquidity/types';
 import { PoolState } from '@/entities/types';
 import {
@@ -14,26 +16,19 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '@/entities/utils';
-import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
-import { getValue } from '../../../utils/getValue';
-import {
-    AddLiquidityV2ComposableStableBuildCallInput,
-    AddLiquidityV2ComposableStableQueryOutput,
-} from './types';
 import { getAmountsCall, getAmountsQuery } from '../../helpers';
+import { AddLiquidityV2BaseBuildCallInput } from '../types';
+import { getValue } from '@/entities/utils/getValue';
 
-export class AddLiquidityComposableStable implements AddLiquidityBase {
+export class AddLiquidityStable implements AddLiquidityBase {
     public async query(
         input: AddLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityV2ComposableStableQueryOutput> {
+    ): Promise<AddLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const bptIndex = sortedTokens.findIndex(
-            (t) => t.address === poolState.address,
-        );
-        const amounts = getAmountsQuery(sortedTokens, input, bptIndex);
+        const amounts = getAmountsQuery(sortedTokens, input);
 
-        const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
+        const userData = StableEncoder.encodeAddLiquidityUserData(
             input.kind,
             amounts,
         );
@@ -46,7 +41,6 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             recipient: ZERO_ADDRESS,
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: false, // This isn't required for the query
         });
 
         const queryOutput = await doAddLiquidityQuery(
@@ -68,19 +62,18 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             poolId: poolState.id,
             bptOut,
             amountsIn,
-            tokenInIndex: amounts.tokenInIndex,
             chainId: input.chainId,
-            vaultVersion: 2,
-            bptIndex,
+            tokenInIndex: amounts.tokenInIndex,
+            vaultVersion: poolState.vaultVersion,
         };
     }
 
     public buildCall(
-        input: AddLiquidityV2ComposableStableBuildCallInput,
+        input: AddLiquidityV2BaseBuildCallInput,
     ): AddLiquidityBuildCallOutput {
-        const amounts = getAmountsCall(input, input.bptIndex);
+        const amounts = getAmountsCall(input);
 
-        const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
+        const userData = StableEncoder.encodeAddLiquidityUserData(
             input.addLiquidityKind,
             amounts,
         );
@@ -90,7 +83,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             sortedTokens: input.amountsIn.map((a) => a.token),
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
-            fromInternalBalance: !!input.fromInternalBalance,
+            fromInternalBalance: input.fromInternalBalance,
             wethIsEth: !!input.wethIsEth,
         });
 

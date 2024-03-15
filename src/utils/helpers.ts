@@ -39,3 +39,9 @@ export function checkInputs(
 export function isSameAddress(address1: Address, address2: Address) {
     return address1.toLowerCase() === address2.toLowerCase();
 }
+
+export function removeIndex<T>(array: T[], index: number): T[] {
+    return index === -1
+        ? array
+        : [...array.slice(0, index), ...array.slice(index + 1)];
+}

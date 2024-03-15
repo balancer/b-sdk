@@ -40,6 +40,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         wstETH: {
             address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
             decimals: 18,
+            slot: 0,
         },
         rETH: {
             address: '0xae78736cd615f374d3085123a210448e74fc6393',
@@ -53,6 +54,20 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0xba100000625a3754423978a60c9317c58a424e3D',
             decimals: 18,
             slot: 1,
+        },
+    },
+    [ChainId.OPTIMISM]: {
+        FRAX: {
+            address: '0x2e3d870790dc77a83dd1d18184acc7439a53f475',
+            decimals: 18,
+        },
+        MAI: {
+            address: '0xdfa46478f9e5ea86d57387849598dbfb2e964b02',
+            decimals: 18,
+        },
+        USDC: {
+            address: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
+            decimals: 6,
         },
     },
     [ChainId.POLYGON]: {
@@ -113,6 +128,22 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             id: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b',
             address: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af7',
             type: PoolType.ComposableStable,
+            decimals: 18,
+            slot: 0,
+        },
+        wstETH_wETH: {
+            id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
+            address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
+            type: PoolType.MetaStable,
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.OPTIMISM]: {
+        FRAX_USDC_MAI: {
+            id: '0x3dc09db8e571da76dd04e9176afc7feee0b89106000000000000000000000019',
+            address: '0x3dc09db8e571da76dd04e9176afc7feee0b89106',
+            type: PoolType.Stable,
             decimals: 18,
             slot: 0,
         },

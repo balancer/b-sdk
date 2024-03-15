@@ -12,3 +12,8 @@ export const removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError =
 export const removeLiquidityUnbalancedNotSupportedOnV3 = Error(
     'Unbalanced remove liquidity not supported on V3',
 );
+
+export const addLiquidityProportionalNotSupportedOnPoolTypeError = (
+    poolType: string,
+) =>
+    Error(`Add Liquidity Proportional not supported on pool type: ${poolType}`);

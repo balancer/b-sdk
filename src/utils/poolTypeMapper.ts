@@ -2,12 +2,13 @@ import { PoolType } from '../types';
 
 // map pool type from the api to the sdk
 const poolTypeMap = {
-    WEIGHTED: PoolType.Weighted,
     COMPOSABLE_STABLE: PoolType.ComposableStable,
     GYRO: PoolType.Gyro2,
-    GYRO2: PoolType.Gyro2,
     GYRO3: PoolType.Gyro3,
     GYROE: PoolType.GyroE,
+    META_STABLE: PoolType.MetaStable,
+    STABLE: PoolType.Stable,
+    WEIGHTED: PoolType.Weighted,
 };
 
 export const mapPoolType = (type: string): PoolType => {

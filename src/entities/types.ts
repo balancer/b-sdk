@@ -21,6 +21,7 @@ export type PoolStateWithBalances = {
 
 export type AddLiquidityAmounts = {
     maxAmountsIn: bigint[];
+    maxAmountsInWithoutBpt: bigint[];
     tokenInIndex: number | undefined;
     minimumBpt: bigint;
 };

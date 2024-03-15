@@ -1,6 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
+import { StableEncoder } from '../../../encoders/stable';
 import { VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
@@ -11,35 +12,25 @@ import {
     RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
 } from '../../types';
-import { RemoveLiquidityV2ComposableStableBuildCallInput } from './types';
 import { PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
-import { ComposableStableEncoder } from '../../../encoders/composableStable';
 import { getSortedTokens } from '../../../utils';
 import { getAmountsCall, getAmountsQuery } from '../../helper';
+import { RemoveLiquidityV2BaseBuildCallInput } from '../types';
 
-export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
+export class RemoveLiquidityStable implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const bptIndex = poolState.tokens.findIndex(
-            (t) => t.address === poolState.address,
-        );
-        const amounts = getAmountsQuery(sortedTokens, input, bptIndex);
-        const amountsWithoutBpt = {
-            ...amounts,
-            minAmountsOut: [
-                ...amounts.minAmountsOut.slice(0, bptIndex),
-                ...amounts.minAmountsOut.slice(bptIndex + 1),
-            ],
-        };
-        const userData = ComposableStableEncoder.encodeRemoveLiquidityUserData(
+        const amounts = getAmountsQuery(sortedTokens, input);
+
+        const userData = StableEncoder.encodeRemoveLiquidityUserData(
             input.kind === RemoveLiquidityKind.Recovery
                 ? RemoveLiquidityKind.Proportional
                 : input.kind,
-            amountsWithoutBpt,
+            amounts,
         );
 
         // tokensOut will have zero address if removing liquidity to native asset
@@ -52,11 +43,13 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             minAmountsOut: amounts.minAmountsOut,
             userData,
         });
+
         const queryOutput = await doRemoveLiquidityQuery(
             input.rpcUrl,
             input.chainId,
             args,
         );
+
         const bpt = new Token(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(bpt, queryOutput.bptIn);
 
@@ -71,26 +64,19 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
-            bptIndex,
             vaultVersion: poolState.vaultVersion,
             chainId: input.chainId,
         };
     }
 
     public buildCall(
-        input: RemoveLiquidityV2ComposableStableBuildCallInput,
+        input: RemoveLiquidityV2BaseBuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
-        const amountsWithoutBpt = {
-            ...amounts,
-            minAmountsOut: [
-                ...amounts.minAmountsOut.slice(0, input.bptIndex),
-                ...amounts.minAmountsOut.slice(input.bptIndex + 1),
-            ],
-        };
-        const userData = ComposableStableEncoder.encodeRemoveLiquidityUserData(
+
+        const userData = StableEncoder.encodeRemoveLiquidityUserData(
             input.removeLiquidityKind,
-            amountsWithoutBpt,
+            amounts,
         );
 
         const { args } = parseRemoveLiquidityArgs({
@@ -104,6 +90,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             wethIsEth: !!input.wethIsEth,
             chainId: input.chainId,
         });
+
         const call = encodeFunctionData({
             abi: vaultV2Abi,
             functionName: 'exitPool',
