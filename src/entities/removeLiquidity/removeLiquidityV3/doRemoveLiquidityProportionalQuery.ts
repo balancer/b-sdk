@@ -7,7 +7,6 @@ import { Address } from '@/types';
 export const doRemoveLiquidityProportionalQuery = async (
     { chainId, rpcUrl, bptIn }: RemoveLiquidityProportionalInput,
     poolAddress: Address,
-    minAmountsOut: bigint[],
 ): Promise<readonly bigint[]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -17,7 +16,7 @@ export const doRemoveLiquidityProportionalQuery = async (
         address: BALANCER_ROUTER[chainId],
         abi: balancerRouterAbi,
         functionName: 'queryRemoveLiquidityProportional',
-        args: [poolAddress, bptIn.rawAmount, minAmountsOut, '0x'],
+        args: [poolAddress, bptIn.rawAmount, '0x'],
     });
     return amountsOut;
 };

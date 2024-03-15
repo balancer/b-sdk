@@ -166,8 +166,8 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
     },
     [ChainId.SEPOLIA]: {
         MOCK_WEIGHTED_POOL: {
-            address: '0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83',
-            id: '0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83',
+            address: '0x204d4194e4e42364e3d1841d0a9b1ef857879c31',
+            id: '0x204d4194e4e42364e3d1841d0a9b1ef857879c31',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
