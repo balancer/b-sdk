@@ -12,9 +12,8 @@ import {
 import {
     CHAINS,
     ChainId,
-    HumanAmount,
     InputAmount,
-    PoolStateWithBalances,
+    PoolState,
     RemoveLiquidity,
     RemoveLiquidityKind,
     RemoveLiquidityRecoveryInput,
@@ -38,13 +37,13 @@ const testPool = POOLS[chainId].vETH_WETH;
 
 describe('composable stable remove liquidity test', () => {
     let txInput: RemoveLiquidityRecoveryTxInput;
-    let poolStateWithBalances: PoolStateWithBalances;
+    let poolState: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolStateWithBalances = await api.getPoolWithBalances();
+        poolState = await api.getPool();
 
         const client = createTestClient({
             mode: 'anvil',
@@ -60,7 +59,7 @@ describe('composable stable remove liquidity test', () => {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateWithBalances,
+            poolState,
             testAddress,
             removeLiquidityRecoveryInput: {} as RemoveLiquidityRecoveryInput,
         };
@@ -82,7 +81,7 @@ describe('composable stable remove liquidity test', () => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('0.1'),
                 decimals: 18,
-                address: poolStateWithBalances.address,
+                address: poolState.address,
             };
             input = {
                 bptIn,
@@ -98,11 +97,11 @@ describe('composable stable remove liquidity test', () => {
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.poolStateWithBalances,
+                txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                poolStateWithBalances.vaultVersion,
+                poolState.vaultVersion,
             );
         });
         test('with native', async () => {
@@ -114,11 +113,11 @@ describe('composable stable remove liquidity test', () => {
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.poolStateWithBalances,
+                txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                poolStateWithBalances.vaultVersion,
+                poolState.vaultVersion,
                 wethIsEth,
             );
         });
@@ -126,31 +125,22 @@ describe('composable stable remove liquidity test', () => {
 });
 
 class MockApi {
-    public async getPoolWithBalances(): Promise<PoolStateWithBalances> {
+    public async getPool(): Promise<PoolState> {
         const tokens = [
             {
                 address: testPool.address,
                 decimals: testPool.decimals,
                 index: 0,
-                name: 'vETH_wETH',
-                symbol: 'vETH_wETH',
-                balance: '2596148429267413.794052669613761796' as HumanAmount,
             },
             {
                 address: TOKENS_MAINNET.vETH.address,
                 decimals: TOKENS_MAINNET.vETH.decimals,
                 index: 1,
-                name: 'vETH',
-                symbol: 'vETH',
-                balance: '1.045187143371175654' as HumanAmount,
             },
             {
                 address: TOKENS_MAINNET.WETH.address,
                 decimals: TOKENS_MAINNET.WETH.decimals,
                 index: 2,
-                name: 'WETH',
-                symbol: 'WETH',
-                balance: '0.813652579142753934' as HumanAmount,
             },
         ];
 
@@ -159,7 +149,6 @@ class MockApi {
             address: testPool.address,
             type: testPool.type,
             tokens,
-            totalShares: '1.879969119336134102' as HumanAmount,
             vaultVersion: 2,
         };
     }

@@ -5,7 +5,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '../removeLiquidity/types';
-import { PoolState, PoolStateWithBalances } from '../types';
+import { PoolState } from '../types';
 
 export interface InputValidatorBase {
     validateAddLiquidity(
@@ -20,7 +20,7 @@ export interface InputValidatorBase {
 
     validateRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
-        poolStateWithBalances: PoolStateWithBalances,
+        poolState: PoolState,
     ): void;
 
     validateCreatePool(input: CreatePoolInput): void;

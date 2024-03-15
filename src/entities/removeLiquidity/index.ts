@@ -7,7 +7,7 @@ import {
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
 } from './types';
-import { PoolState, PoolStateWithBalances } from '../types';
+import { PoolState } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
@@ -40,27 +40,24 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
      * Since it's not affected by fees or anything other than pool balances,
      * it's possible to calculate amountsOut as proportional amounts.
      */
-    public queryRemoveLiquidityRecovery(
+    public async queryRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
-        poolStateWithBalances: PoolStateWithBalances,
-    ): RemoveLiquidityQueryOutput {
-        this.inputValidator.validateRemoveLiquidityRecovery(
-            input,
-            poolStateWithBalances,
-        );
-        switch (poolStateWithBalances.vaultVersion) {
+        poolState: PoolState,
+    ): Promise<RemoveLiquidityQueryOutput> {
+        this.inputValidator.validateRemoveLiquidityRecovery(input, poolState);
+        switch (poolState.vaultVersion) {
             case 2: {
                 const removeLiquidity = new RemoveLiquidityV2(this.config);
                 return removeLiquidity.queryRemoveLiquidityRecovery(
                     input,
-                    poolStateWithBalances,
+                    poolState,
                 );
             }
             case 3: {
                 const removeLiquidity = new RemoveLiquidityV3();
                 return removeLiquidity.queryRemoveLiquidityRecovery(
                     input,
-                    poolStateWithBalances,
+                    poolState,
                 );
             }
         }

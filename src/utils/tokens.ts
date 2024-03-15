@@ -81,3 +81,81 @@ export async function getPoolTokensV3(
         );
     }
 }
+
+export async function getTotalSupply(
+    poolAddress: Address,
+    client: PublicClient,
+): Promise<bigint> {
+    const abi = [
+        {
+            inputs: [],
+            name: 'totalSupply',
+            outputs: [
+                {
+                    internalType: 'uint256',
+                    name: '',
+                    type: 'uint256',
+                },
+            ],
+            stateMutability: 'view',
+            type: 'function',
+        },
+    ];
+
+    try {
+        const poolContract = getContract({
+            abi,
+            address: poolAddress,
+            client,
+        });
+
+        const totalSupply: bigint =
+            (await poolContract.read.totalSupply()) as bigint;
+
+        return totalSupply;
+    } catch (e) {
+        console.warn(e);
+        throw new Error(
+            `Error: Unable to get total supply for pool ${poolAddress}`,
+        );
+    }
+}
+
+export async function getActualSupply(
+    poolAddress: Address,
+    client: PublicClient,
+): Promise<bigint> {
+    const abi = [
+        {
+            inputs: [],
+            name: 'getActualSupply',
+            outputs: [
+                {
+                    internalType: 'uint256',
+                    name: '',
+                    type: 'uint256',
+                },
+            ],
+            stateMutability: 'view',
+            type: 'function',
+        },
+    ];
+
+    try {
+        const poolContract = getContract({
+            abi,
+            address: poolAddress,
+            client,
+        });
+
+        const actualSupply: bigint =
+            (await poolContract.read.getActualSupply()) as bigint;
+
+        return actualSupply;
+    } catch (e) {
+        console.warn(e);
+        throw new Error(
+            `Error: Unable to get actual supply for pool ${poolAddress}`,
+        );
+    }
+}

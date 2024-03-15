@@ -8,6 +8,7 @@ import {
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
+    CHAINS,
     removeLiquidityUnbalancedNotSupportedOnV3,
 } from '@/utils';
 
@@ -27,6 +28,9 @@ import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportio
 import { encodeRemoveLiquiditySingleTokenExactOut } from './encodeRemoveLiquiditySingleTokenExactOut';
 import { encodeRemoveLiquiditySingleTokenExactIn } from './encodeRemoveLiquiditySingleTokenExactIn';
 import { encodeRemoveLiquidityProportional } from './encodeRemoveLiquidityProportional';
+import { createPublicClient, formatEther, formatUnits, http } from 'viem';
+import { getPoolTokensV2, getTotalSupply } from '@/utils/tokens';
+import { HumanAmount } from '@/data';
 
 export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
@@ -103,10 +107,37 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
      * other remove liquidity kinds, but since it's not affected by fees or anything
      * other than pool balances, we can calculate amountsOut as proportional amounts.
      */
-    public queryRemoveLiquidityRecovery(
+    public async queryRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
-        poolStateWithBalances: PoolStateWithBalances,
-    ): RemoveLiquidityBaseQueryOutput {
+        poolState: PoolState,
+    ): Promise<RemoveLiquidityBaseQueryOutput> {
+        const client = createPublicClient({
+            transport: http(input.rpcUrl),
+            chain: CHAINS[input.chainId],
+        });
+
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        // FIXME: this should be updated with v3 implementation - still pending from SC team
+        const [_, tokenBalances] = await getPoolTokensV2(
+            poolState.address,
+            client,
+        );
+        const totalShares = await getTotalSupply(poolState.address, client);
+
+        const poolStateWithBalances: PoolStateWithBalances = {
+            ...poolState,
+            tokens: sortedTokens.map((token, i) => ({
+                address: token.address,
+                decimals: token.decimals,
+                index: i,
+                balance: formatUnits(
+                    tokenBalances[i],
+                    token.decimals,
+                ) as HumanAmount,
+            })),
+            totalShares: formatEther(totalShares) as HumanAmount,
+        };
+
         const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
             poolStateWithBalances,
             input.bptIn,
@@ -122,13 +153,13 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
             ),
         );
         return {
-            poolType: poolStateWithBalances.type,
+            poolType: poolState.type,
             removeLiquidityKind: input.kind,
-            poolId: poolStateWithBalances.id,
+            poolId: poolState.id,
             bptIn,
             amountsOut,
             tokenOutIndex: undefined,
-            vaultVersion: poolStateWithBalances.vaultVersion,
+            vaultVersion: poolState.vaultVersion,
             chainId: input.chainId,
         };
     }

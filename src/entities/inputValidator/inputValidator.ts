@@ -6,7 +6,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '../removeLiquidity/types';
-import { PoolState, PoolStateWithBalances } from '../types';
+import { PoolState } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
 import { InputValidatorStable } from './stable/inputValidatorStable';
@@ -63,13 +63,11 @@ export class InputValidator {
 
     validateRemoveLiquidityRecovery(
         removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
-        poolStateWithBalances: PoolStateWithBalances,
+        poolState: PoolState,
     ): void {
-        this.getValidator(
-            poolStateWithBalances.type,
-        ).validateRemoveLiquidityRecovery(
+        this.getValidator(poolState.type).validateRemoveLiquidityRecovery(
             removeLiquidityRecoveryInput,
-            poolStateWithBalances,
+            poolState,
         );
     }
 

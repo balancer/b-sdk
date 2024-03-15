@@ -23,7 +23,7 @@ import {
 export const sdkRemoveLiquidityRecovery = async ({
     removeLiquidity,
     removeLiquidityRecoveryInput,
-    poolStateWithBalances,
+    poolState,
     slippage,
     testAddress,
     wethIsEth,
@@ -33,9 +33,9 @@ export const sdkRemoveLiquidityRecovery = async ({
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
     const removeLiquidityQueryOutput =
-        removeLiquidity.queryRemoveLiquidityRecovery(
+        await removeLiquidity.queryRemoveLiquidityRecovery(
             removeLiquidityRecoveryInput,
-            poolStateWithBalances,
+            poolState,
         );
 
     let removeLiquidityBuildInput: RemoveLiquidityBuildCallInput = {
@@ -43,7 +43,7 @@ export const sdkRemoveLiquidityRecovery = async ({
         slippage,
         wethIsEth: !!wethIsEth,
     };
-    if (poolStateWithBalances.vaultVersion === 2) {
+    if (poolState.vaultVersion === 2) {
         (removeLiquidityBuildInput as RemoveLiquidityV2BaseBuildCallInput) = {
             ...removeLiquidityBuildInput,
             sender: testAddress,
@@ -77,7 +77,7 @@ export async function doRemoveLiquidityRecovery(
 ) {
     const {
         removeLiquidity,
-        poolStateWithBalances,
+        poolState,
         removeLiquidityRecoveryInput,
         testAddress,
         client,
@@ -89,14 +89,14 @@ export async function doRemoveLiquidityRecovery(
         await sdkRemoveLiquidityRecovery({
             removeLiquidity,
             removeLiquidityRecoveryInput,
-            poolStateWithBalances,
+            poolState,
             slippage,
             testAddress,
             wethIsEth,
         });
 
     // get tokens for balance change - pool tokens, BPT, native
-    const tokens = getTokensForBalanceCheck(poolStateWithBalances);
+    const tokens = getTokensForBalanceCheck(poolState);
 
     // send transaction and calculate balance changes
     const txOutput = await sendTransactionGetBalances(

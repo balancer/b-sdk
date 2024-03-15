@@ -1,7 +1,13 @@
-import { encodeFunctionData } from 'viem';
+import {
+    createPublicClient,
+    encodeFunctionData,
+    formatEther,
+    formatUnits,
+    http,
+} from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
-import { VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
+import { CHAINS, VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
@@ -18,6 +24,8 @@ import { ComposableStableEncoder } from '../../../encoders/composableStable';
 import { calculateProportionalAmounts, getSortedTokens } from '../../../utils';
 import { getAmountsCall, getAmountsQuery } from '../../helper';
 import { insertIndex } from '@/utils';
+import { getActualSupply, getPoolTokensV2 } from '@/utils/tokens';
+import { HumanAmount } from '@/data';
 
 export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
@@ -75,10 +83,33 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         };
     }
 
-    public queryRemoveLiquidityRecovery(
+    public async queryRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
-        poolStateWithBalances: PoolStateWithBalances,
-    ): RemoveLiquidityQueryOutput {
+        poolState: PoolState,
+    ): Promise<RemoveLiquidityQueryOutput> {
+        const client = createPublicClient({
+            transport: http(input.rpcUrl),
+            chain: CHAINS[input.chainId],
+        });
+
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        const [_, tokenBalances] = await getPoolTokensV2(poolState.id, client);
+        const totalShares = await getActualSupply(poolState.address, client);
+
+        const poolStateWithBalances: PoolStateWithBalances = {
+            ...poolState,
+            tokens: sortedTokens.map((token, i) => ({
+                address: token.address,
+                decimals: token.decimals,
+                index: i,
+                balance: formatUnits(
+                    tokenBalances[i],
+                    token.decimals,
+                ) as HumanAmount,
+            })),
+            totalShares: formatEther(totalShares) as HumanAmount,
+        };
+
         const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
             poolStateWithBalances,
             input.bptIn,
@@ -89,9 +120,8 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             bptAmount.decimals,
         );
         const bptIn = TokenAmount.fromRawAmount(bptToken, bptAmount.rawAmount);
-        // should already have been validated within input validator
-        const bptIndex = poolStateWithBalances.tokens.findIndex(
-            (t) => t.address === poolStateWithBalances.address,
+        const bptIndex = poolState.tokens.findIndex(
+            (t) => t.address === poolState.address,
         );
         let amountsOut = tokenAmounts.map((amount) =>
             TokenAmount.fromRawAmount(
@@ -105,13 +135,13 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             TokenAmount.fromRawAmount(bptToken, 0n),
         );
         return {
-            poolType: poolStateWithBalances.type,
+            poolType: poolState.type,
             removeLiquidityKind: input.kind,
-            poolId: poolStateWithBalances.id,
+            poolId: poolState.id,
             bptIn,
             amountsOut,
             tokenOutIndex: undefined,
-            vaultVersion: poolStateWithBalances.vaultVersion,
+            vaultVersion: poolState.vaultVersion,
             chainId: input.chainId,
         };
     }

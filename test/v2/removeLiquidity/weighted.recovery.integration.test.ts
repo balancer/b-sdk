@@ -20,8 +20,7 @@ import {
     ChainId,
     InputAmount,
     RemoveLiquidityRecoveryInput,
-    PoolStateWithBalances,
-    HumanAmount,
+    PoolState,
 } from 'src';
 
 import {
@@ -43,13 +42,13 @@ const WMATIC = TOKENS[chainId].WMATIC;
 
 describe('weighted remove liquidity recovery test', () => {
     let txInput: RemoveLiquidityRecoveryTxInput;
-    let poolStateWithBalances: PoolStateWithBalances;
+    let poolState: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolStateWithBalances = await api.getPoolWithBalances(testPool.id);
+        poolState = await api.getPool(testPool.id);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -65,7 +64,7 @@ describe('weighted remove liquidity recovery test', () => {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolStateWithBalances,
+            poolState,
             testAddress,
             removeLiquidityRecoveryInput: {} as RemoveLiquidityRecoveryInput,
         };
@@ -75,7 +74,7 @@ describe('weighted remove liquidity recovery test', () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
-            [txInput.poolStateWithBalances.address],
+            [txInput.poolState.address],
             [testPool.slot as number],
             [parseUnits('1000', 18)],
         );
@@ -87,7 +86,7 @@ describe('weighted remove liquidity recovery test', () => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolStateWithBalances.address,
+                address: poolState.address,
             };
             input = {
                 bptIn,
@@ -103,7 +102,7 @@ describe('weighted remove liquidity recovery test', () => {
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.poolStateWithBalances,
+                txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -118,7 +117,7 @@ describe('weighted remove liquidity recovery test', () => {
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.poolStateWithBalances,
+                txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
@@ -132,23 +131,17 @@ describe('weighted remove liquidity recovery test', () => {
 /*********************** Mock To Represent API Requirements **********************/
 
 class MockApi {
-    public async getPoolWithBalances(id: Hex): Promise<PoolStateWithBalances> {
+    public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
                 address: WMATIC.address,
                 decimals: WMATIC.decimals,
                 index: 0,
-                symbol: 'WMATIC',
-                name: 'WMATIC',
-                balance: '3.061351040680712624' as HumanAmount,
             },
             {
                 address: DAI.address,
                 decimals: DAI.decimals,
                 index: 1,
-                symbol: 'DAI',
-                name: 'DAI',
-                balance: '2.030340444339934752' as HumanAmount,
             },
         ];
         return {
@@ -156,7 +149,6 @@ class MockApi {
             address: testPool.address,
             type: testPool.type,
             tokens,
-            totalShares: '4.978228468641314918' as HumanAmount,
             vaultVersion: 2,
         };
     }

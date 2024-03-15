@@ -14,7 +14,7 @@ import {
     BalancerApi,
     ChainId,
     InputAmount,
-    PoolStateWithBalances,
+    PoolState,
     RemoveLiquidity,
     RemoveLiquidityKind,
     RemoveLiquidityRecoveryInput,
@@ -39,14 +39,13 @@ const removeLiquidity = async () => {
         'https://backend-v3-canary.beets-ftm-node.com/graphql',
         chainId,
     );
-    const poolStateWithBalances: PoolStateWithBalances =
-        await balancerApi.pools.fetchPoolStateWithBalances(poolId);
+    const poolState: PoolState = await balancerApi.pools.fetchPoolState(poolId);
 
     // Construct the RemoveLiquidityInput, in this case a RemoveLiquiditySingleTokenExactIn
     const bptIn: InputAmount = {
         rawAmount: parseEther('1'),
         decimals: 18,
-        address: poolStateWithBalances.address,
+        address: poolState.address,
     };
     const removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput = {
         chainId,
@@ -61,7 +60,7 @@ const removeLiquidity = async () => {
     const removeLiquidity = new RemoveLiquidity();
     const queryOutput = await removeLiquidity.queryRemoveLiquidityRecovery(
         removeLiquidityRecoveryInput,
-        poolStateWithBalances,
+        poolState,
     );
 
     console.log('\nRemove Liquidity Query Output:');
@@ -102,7 +101,7 @@ const removeLiquidity = async () => {
                 },
             ],
         },
-        poolStateWithBalances,
+        poolState,
     );
 };
 

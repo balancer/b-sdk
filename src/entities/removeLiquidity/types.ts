@@ -1,7 +1,7 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
 import { Address, InputAmount } from '../../types';
-import { PoolState, PoolStateWithBalances } from '../types';
+import { PoolState } from '../types';
 import {
     RemoveLiquidityV2BuildCallInput,
     RemoveLiquidityV2QueryOutput,
@@ -95,8 +95,8 @@ export interface RemoveLiquidityBase {
     ): Promise<RemoveLiquidityQueryOutput>;
     queryRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
-        poolStateWithBalances: PoolStateWithBalances,
-    ): RemoveLiquidityQueryOutput;
+        poolState: PoolState,
+    ): Promise<RemoveLiquidityQueryOutput>;
     buildCall(
         input: RemoveLiquidityBuildCallInput,
     ): RemoveLiquidityBuildCallOutput;
