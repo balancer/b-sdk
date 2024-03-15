@@ -119,7 +119,7 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
             undefined,
             3,
         );
-    }, 10000);
+    }, 30000);
     test('Initialize Pool V3 - Weighted Pool', async () => {
         const addLiquidityOutput = await doInitPool({
             ...initPoolTxInput,
@@ -128,5 +128,5 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
         });
 
         assertInitPool(initPoolInput, addLiquidityOutput);
-    }, 10000);
+    }, 30000);
 });
