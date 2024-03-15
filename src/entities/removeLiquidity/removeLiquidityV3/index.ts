@@ -56,8 +56,8 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                             input,
                             poolState.address,
                         );
-                    minAmountsOut = poolState.tokens.map((t) => {
-                        return t.address.toLowerCase() === input.tokenOut
+                    minAmountsOut = sortedTokens.map((t) => {
+                        return t.isSameAddress(input.tokenOut)
                             ? minAmountOut
                             : 0n;
                     });
