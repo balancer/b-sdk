@@ -85,7 +85,7 @@ export class SwapV3 implements SwapBase {
         } else {
             if ('exactAmountIn' in this.swaps) {
                 const { result } =
-                    await routerContract.simulate.querySwapExactIn(
+                    await routerContract.simulate.querySwapSingleTokenExactIn(
                         [
                             this.swaps.pool,
                             this.swaps.tokenIn,
@@ -101,7 +101,7 @@ export class SwapV3 implements SwapBase {
                 );
             } else if ('exactAmountOut' in this.swaps) {
                 const { result } =
-                    await routerContract.simulate.querySwapExactOut(
+                    await routerContract.simulate.querySwapSingleTokenExactOut(
                         [
                             this.swaps.pool,
                             this.swaps.tokenIn,
@@ -131,7 +131,7 @@ export class SwapV3 implements SwapBase {
             if ('exactAmountIn' in this.swaps) {
                 callData = encodeFunctionData({
                     abi: balancerRouterAbi,
-                    functionName: 'querySwapExactIn',
+                    functionName: 'querySwapSingleTokenExactIn',
                     args: [
                         this.swaps.pool,
                         this.swaps.tokenIn,
@@ -143,7 +143,7 @@ export class SwapV3 implements SwapBase {
             } else if ('exactAmountOut' in this.swaps) {
                 callData = encodeFunctionData({
                     abi: balancerRouterAbi,
-                    functionName: 'querySwapExactOut',
+                    functionName: 'querySwapSingleTokenExactOut',
                     args: [
                         this.swaps.pool,
                         this.swaps.tokenIn,
@@ -221,7 +221,7 @@ export class SwapV3 implements SwapBase {
             if ('exactAmountIn' in this.swaps) {
                 callData = encodeFunctionData({
                     abi: balancerRouterAbi,
-                    functionName: 'swapExactIn',
+                    functionName: 'swapSingleTokenExactIn',
                     args: [
                         this.swaps.pool,
                         this.swaps.tokenIn,
@@ -236,7 +236,7 @@ export class SwapV3 implements SwapBase {
             } else if ('exactAmountOut' in this.swaps) {
                 callData = encodeFunctionData({
                     abi: balancerRouterAbi,
-                    functionName: 'swapExactOut',
+                    functionName: 'swapSingleTokenExactOut',
                     args: [
                         this.swaps.pool,
                         this.swaps.tokenIn,

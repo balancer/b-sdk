@@ -58,14 +58,17 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     bptToken,
                     input.bptOut.rawAmount,
                 );
-                const maxAmountsIn = await doAddLiquiditySingleTokenQuery(
+                const amountIn = await doAddLiquiditySingleTokenQuery(
                     input,
                     poolState.address,
                     input.bptOut.rawAmount,
                 );
-                amountsIn = sortedTokens.map((t, i) =>
-                    TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
-                );
+                amountsIn = sortedTokens.map((t) => {
+                    if (t.isSameAddress(input.tokenIn))
+                        return TokenAmount.fromRawAmount(t, amountIn);
+
+                    return TokenAmount.fromRawAmount(t, 0n);
+                });
                 tokenInIndex = sortedTokens.findIndex((t) =>
                     t.isSameAddress(input.tokenIn),
                 );

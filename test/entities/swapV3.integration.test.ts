@@ -25,7 +25,7 @@ import {
 const vaultVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo with guaranteed liquidity
-const blockNo = 5287755n;
+const blockNo = 5490330n;
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA, undefined, blockNo);
 
@@ -92,7 +92,7 @@ describe('SwapV3', () => {
                 TOKENS[chainId].WETH.decimals,
             );
             expect(updated.token).to.deep.eq(wethToken);
-            expect(updated.amount).to.eq(25115489n);
+            expect(updated.amount).to.eq(138379302n);
         });
         test('GivenOut', async () => {
             const swap = new Swap({
@@ -109,7 +109,7 @@ describe('SwapV3', () => {
                 TOKENS[chainId].BAL.decimals,
             );
             expect(updated.token).to.deep.eq(balToken);
-            expect(updated.amount).to.eq(398002113381361n);
+            expect(updated.amount).to.eq(72265254280201n);
         });
     });
     describe('swap should be executed correcly', () => {
