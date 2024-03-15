@@ -44,7 +44,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                         await doRemoveLiquiditySingleTokenExactOutQuery(
                             input,
                             poolState.address,
-                            amounts.maxBptAmountIn,
                         );
                     minAmountsOut = amounts.minAmountsOut;
                 }
@@ -52,16 +51,16 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
             case RemoveLiquidityKind.SingleTokenExactIn:
                 {
                     maxBptAmountIn = amounts.maxBptAmountIn;
-                    minAmountsOut =
+                    const minAmountOut =
                         await doRemoveLiquiditySingleTokenExactInQuery(
                             input,
                             poolState.address,
-                            amounts.minAmountsOut[
-                                sortedTokens.findIndex((t) =>
-                                    t.isSameAddress(input.tokenOut),
-                                )
-                            ],
                         );
+                    minAmountsOut = poolState.tokens.map((t) => {
+                        return t.address.toLowerCase() === input.tokenOut
+                            ? minAmountOut
+                            : 0n;
+                    });
                 }
                 break;
             case RemoveLiquidityKind.Proportional:
@@ -70,7 +69,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     minAmountsOut = await doRemoveLiquidityProportionalQuery(
                         input,
                         poolState.address,
-                        amounts.minAmountsOut,
                     );
                 }
                 break;
