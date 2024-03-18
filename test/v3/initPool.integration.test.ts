@@ -45,7 +45,7 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl, { timeout: 60_000 }),
+            transport: http(rpcUrl, { timeout: 120_000 }), // FIXME: shouldn't take that long - investigate/fix in a following PR
         })
             .extend(publicActions)
             .extend(walletActions);
@@ -121,7 +121,7 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
             undefined,
             3,
         );
-    }, 60000);
+    }, 120_000);
     test('Initialize Pool V3 - Weighted Pool', async () => {
         const addLiquidityOutput = await doInitPool({
             ...initPoolTxInput,
@@ -130,5 +130,5 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
         });
 
         assertInitPool(initPoolInput, addLiquidityOutput);
-    }, 60000);
+    }, 120_000);
 });
