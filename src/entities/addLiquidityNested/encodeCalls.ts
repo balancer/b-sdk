@@ -1,11 +1,12 @@
 import { Hex, PoolType } from '../../types';
-import { ZERO_ADDRESS } from '../../utils';
 import { WeightedEncoder } from '../encoders';
 import { ComposableStableEncoder } from '../encoders/composableStable';
 import { AddLiquidityNestedCallAttributes } from './types';
 import { replaceWrapped } from '../utils/replaceWrapped';
 import { batchRelayerLibraryAbi } from '../../abi';
 import { encodeFunctionData } from 'viem';
+import { TokenAmount } from '../tokenAmount';
+import { getValue } from '../utils/getValue';
 
 export const encodeCalls = (
     callsAttributes: AddLiquidityNestedCallAttributes[],
@@ -14,7 +15,7 @@ export const encodeCalls = (
     const values: bigint[] = [];
     for (const callAttributes of callsAttributes) {
         const {
-            useNativeAssetAsWrappedAmountIn,
+            wethIsEth,
             chainId,
             sortedTokens,
             poolId,
@@ -30,18 +31,14 @@ export const encodeCalls = (
         } = callAttributes;
 
         // replace wrapped token with native asset if needed
-        let tokensIn = [...sortedTokens];
+        const tokensIn = wethIsEth
+            ? replaceWrapped([...sortedTokens], chainId)
+            : [...sortedTokens];
 
-        let value = 0n;
-        if (useNativeAssetAsWrappedAmountIn) {
-            tokensIn = replaceWrapped([...sortedTokens], chainId);
-            const nativeAssetIndex = tokensIn.findIndex((t) =>
-                t.isSameAddress(ZERO_ADDRESS),
-            );
-            if (nativeAssetIndex > -1) {
-                value = maxAmountsIn[nativeAssetIndex].amount;
-            }
-        }
+        const amountsIn = [...sortedTokens].map((t, i) => {
+            return TokenAmount.fromRawAmount(t, maxAmountsIn[i].amount);
+        });
+        const value = getValue(amountsIn, !!wethIsEth);
 
         const _maxAmountsIn = maxAmountsIn.map((a) => a.amount);
         const amountsInWithoutBpt = _maxAmountsIn.filter(

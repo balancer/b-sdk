@@ -1,7 +1,6 @@
 import {
     AddLiquidityBase,
-    AddLiquidityBuildOutput,
-    AddLiquidityCall,
+    AddLiquidityBuildCallOutput,
     AddLiquidityConfig,
     AddLiquidityInput,
     AddLiquidityQueryOutput,
@@ -9,6 +8,8 @@ import {
 } from '../..';
 import { PoolType } from '../../../types';
 import { AddLiquidityComposableStable } from './composableStable/addLiquidityComposableStable';
+import { AddLiquidityStable } from './stable/addLiquidityStable';
+import { AddLiquidityV2BuildCallInput } from './types';
 import { AddLiquidityWeighted } from './weighted/addLiquidityWeighted';
 
 export class AddLiquidityV2 implements AddLiquidityBase {
@@ -18,11 +19,13 @@ export class AddLiquidityV2 implements AddLiquidityBase {
         const { customAddLiquidityTypes } = config || {};
         this.addLiquidityTypes = {
             //GYRO2, GYRO3, GYROE pool types only support Add Liquidity Proportional (3 - ALL_TOKENS_IN_FOR_BPT_OUT)
+            [PoolType.ComposableStable]: new AddLiquidityComposableStable(),
             [PoolType.Gyro2]: new AddLiquidityWeighted(),
             [PoolType.Gyro3]: new AddLiquidityWeighted(),
             [PoolType.GyroE]: new AddLiquidityWeighted(),
+            [PoolType.MetaStable]: new AddLiquidityStable(),
+            [PoolType.Stable]: new AddLiquidityStable(),
             [PoolType.Weighted]: new AddLiquidityWeighted(),
-            [PoolType.ComposableStable]: new AddLiquidityComposableStable(),
             // custom add liquidity types take precedence over base types
             ...customAddLiquidityTypes,
         };
@@ -42,7 +45,9 @@ export class AddLiquidityV2 implements AddLiquidityBase {
         return this.getAddLiquidity(poolState.type).query(input, poolState);
     }
 
-    public buildCall(input: AddLiquidityCall): AddLiquidityBuildOutput {
+    public buildCall(
+        input: AddLiquidityV2BuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         return this.getAddLiquidity(input.poolType).buildCall(input);
     }
 }

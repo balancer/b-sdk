@@ -105,7 +105,6 @@ describe('GyroE V1 remove liquidity test', () => {
             });
 
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,

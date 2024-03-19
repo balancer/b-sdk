@@ -6,7 +6,7 @@ import {
     InitPoolBase,
     InitPoolBuildOutput,
     InitPoolConfig,
-    InitPoolInput,
+    InitPoolInputV2,
 } from '../types';
 import { InitPoolWeighted } from './weighted/initPoolWeighted';
 
@@ -29,7 +29,10 @@ export class InitPoolV2 implements InitPoolBase {
         return this.initPoolTypes[poolType];
     }
 
-    buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
+    buildCall(
+        input: InitPoolInputV2,
+        poolState: PoolState,
+    ): InitPoolBuildOutput {
         return this.getInitPool(poolState.type).buildCall(input, poolState);
     }
 }

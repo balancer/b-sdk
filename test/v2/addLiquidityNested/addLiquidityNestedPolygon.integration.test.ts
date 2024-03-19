@@ -15,18 +15,18 @@ import {
     walletActions,
 } from 'viem';
 
-import { NestedPoolState } from '@/entities';
-import { Address, Hex, PoolType } from '@/types';
-import { CHAINS, ChainId } from '@/utils';
+import { Address, CHAINS, ChainId, Hex, PoolType, NestedPoolState } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
-import { POOLS, TestToken, TOKENS } from 'test/lib/utils/addresses';
 import {
+    AddLiquidityNestedTxInput,
     assertResults,
     doAddLiquidityNested,
-} from 'test/lib/utils/addLiquidityNestedHelper';
-import { forkSetup } from 'test/lib/utils/helper';
-import { AddLiquidityNestedTxInput } from 'test/lib/utils/types';
+    forkSetup,
+    POOLS,
+    TestToken,
+    TOKENS,
+} from 'test/lib/utils';
 
 const chainId = ChainId.POLYGON;
 const WMATIC = TOKENS[chainId].WMATIC;
@@ -92,6 +92,7 @@ describe('add liquidity nested test', () => {
             {
                 address: WMATIC.address,
                 rawAmount: parseUnits('1', WMATIC.decimals),
+                decimals: WMATIC.decimals,
             },
         ];
 

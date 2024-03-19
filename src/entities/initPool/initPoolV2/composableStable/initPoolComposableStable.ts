@@ -6,13 +6,22 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '../../../utils';
-import { InitPoolBase, InitPoolBuildOutput, InitPoolInput } from '../../types';
+import {
+    InitPoolBase,
+    InitPoolBuildOutput,
+    InitPoolInputV2,
+} from '../../types';
 import { vaultV2Abi } from '../../../../abi';
-import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../../utils';
+import { VAULT, MAX_UINT256 } from '../../../../utils';
 import { Token } from '@/entities/token';
+import { getValue } from '@/entities/utils/getValue';
+import { TokenAmount } from '@/entities/tokenAmount';
 
 export class InitPoolComposableStable implements InitPoolBase {
-    buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
+    buildCall(
+        input: InitPoolInputV2,
+        poolState: PoolState,
+    ): InitPoolBuildOutput {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = this.getAmounts(input, poolState.address, sortedTokens);
 
@@ -26,6 +35,7 @@ export class InitPoolComposableStable implements InitPoolBase {
             maxAmountsIn: amounts.maxAmountsIn,
             userData,
             fromInternalBalance: input.fromInternalBalance ?? false,
+            wethIsEth: !!input.wethIsEth,
         });
         const call = encodeFunctionData({
             abi: vaultV2Abi,
@@ -33,19 +43,20 @@ export class InitPoolComposableStable implements InitPoolBase {
             args,
         });
 
-        const value = input.amountsIn.find(
-            (a) => a.address === ZERO_ADDRESS,
-        )?.rawAmount;
+        const amountsIn = input.amountsIn.map((a) => {
+            const token = new Token(input.chainId, a.address, a.decimals);
+            return TokenAmount.fromRawAmount(token, a.rawAmount);
+        });
 
         return {
             call,
             to: VAULT[input.chainId] as Address,
-            value: value === undefined ? 0n : value,
+            value: getValue(amountsIn, !!input.wethIsEth),
         };
     }
 
     private getAmounts(
-        input: InitPoolInput,
+        input: InitPoolInputV2,
         poolAddress: Address,
         poolTokens: Token[],
     ): InitPoolAmountsComposableStable {

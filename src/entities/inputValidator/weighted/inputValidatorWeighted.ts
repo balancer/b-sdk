@@ -3,7 +3,7 @@ import {
     CreatePoolV2WeightedInput,
     CreatePoolV3WeightedInput,
 } from '../../createPool/types';
-import { InitPoolInput } from '../../initPool/types';
+import { InitPoolInput, InitPoolInputV3 } from '../../initPool/types';
 import { PoolState } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
@@ -14,8 +14,20 @@ import {
 import { TokenType } from '@/types';
 import { zeroAddress } from 'viem';
 import { AddLiquidityInput } from '@/entities/addLiquidity/types';
+import { areTokensInArray } from '@/entities/utils/areTokensInArray';
+import { isSameAddress, NATIVE_ASSETS } from '@/utils';
 
 export class InputValidatorWeighted implements InputValidatorBase {
+    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
+        areTokensInArray(
+            initPoolInput.amountsIn.map((a) => a.address),
+            poolState.tokens.map((t) => t.address),
+        );
+        if (poolState.vaultVersion === 3) {
+            this.validateWethIsEth(initPoolInput as InitPoolInputV3);
+        }
+    }
+
     validateCreatePool(
         input: CreatePoolV2WeightedInput | CreatePoolV3WeightedInput,
     ) {
@@ -48,7 +60,7 @@ export class InputValidatorWeighted implements InputValidatorBase {
     }
 
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput | InitPoolInput,
+        addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
         validateTokensAddLiquidity(addLiquidityInput, poolState);
@@ -59,5 +71,22 @@ export class InputValidatorWeighted implements InputValidatorBase {
         poolState: PoolState,
     ): void {
         validateTokensRemoveLiquidity(input, poolState);
+    }
+
+    private validateWethIsEth(initPoolInput: InitPoolInputV3) {
+        if (initPoolInput.wethIsEth) {
+            const inputContainsWrappedNativeAsset =
+                initPoolInput.amountsIn.some((a) =>
+                    isSameAddress(
+                        a.address,
+                        NATIVE_ASSETS[initPoolInput.chainId].wrapped,
+                    ),
+                );
+            if (!inputContainsWrappedNativeAsset) {
+                throw new Error(
+                    'wethIsEth requires wrapped native asset as input',
+                );
+            }
+        }
     }
 }

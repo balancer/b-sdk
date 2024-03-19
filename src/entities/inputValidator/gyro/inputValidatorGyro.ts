@@ -1,5 +1,6 @@
+import { InitPoolInput } from '@/entities/initPool';
 import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
-import { CreatePoolWeightedInput } from '../../createPool/types';
+import { CreatePoolInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
@@ -12,6 +13,11 @@ import {
 } from '../utils/validateTokens';
 
 export class InputValidatorGyro implements InputValidatorBase {
+    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
+        console.log(initPoolInput, poolState);
+        throw new Error('Method not implemented.');
+    }
+
     static readonly addLiquidityKindNotSupportedByGyro =
         'INPUT_ERROR: Gyro pools do not implement this add liquidity kind, only Add Liquidity Proportional (3 - ALL_TOKENS_IN_FOR_BPT_OUT) is supported';
 
@@ -42,7 +48,7 @@ export class InputValidatorGyro implements InputValidatorBase {
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);
     }
 
-    validateCreatePool(input: CreatePoolWeightedInput): void {
+    validateCreatePool(input: CreatePoolInput): void {
         console.log(input);
         throw new Error('Method not implemented.');
     }

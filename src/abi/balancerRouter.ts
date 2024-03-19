@@ -500,11 +500,6 @@ export const balancerRouterAbi = [
             },
             {
                 internalType: 'uint256',
-                name: 'maxAmountIn',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
                 name: 'exactBptAmountOut',
                 type: 'uint256',
             },
@@ -536,11 +531,6 @@ export const balancerRouterAbi = [
                 internalType: 'uint256[]',
                 name: 'exactAmountsIn',
                 type: 'uint256[]',
-            },
-            {
-                internalType: 'uint256',
-                name: 'minBptAmountOut',
-                type: 'uint256',
             },
             {
                 internalType: 'bytes',
@@ -682,11 +672,6 @@ export const balancerRouterAbi = [
                 type: 'uint256',
             },
             {
-                internalType: 'uint256[]',
-                name: 'minAmountsOut',
-                type: 'uint256[]',
-            },
-            {
                 internalType: 'bytes',
                 name: 'userData',
                 type: 'bytes',
@@ -715,15 +700,63 @@ export const balancerRouterAbi = [
                 name: 'exactBptAmountIn',
                 type: 'uint256',
             },
+        ],
+        name: 'queryRemoveLiquidityRecovery',
+        outputs: [
             {
-                internalType: 'contract IERC20',
-                name: 'tokenOut',
+                internalType: 'uint256[]',
+                name: 'amountsOut',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'sender',
                 type: 'address',
             },
             {
                 internalType: 'uint256',
-                name: 'minAmountOut',
+                name: 'exactBptAmountIn',
                 type: 'uint256',
+            },
+        ],
+        name: 'queryRemoveLiquidityRecoveryHook',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: 'amountOut',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenOut',
+                type: 'address',
             },
             {
                 internalType: 'bytes',
@@ -748,11 +781,6 @@ export const balancerRouterAbi = [
                 internalType: 'address',
                 name: 'pool',
                 type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'maxBptAmountIn',
-                type: 'uint256',
             },
             {
                 internalType: 'contract IERC20',
@@ -1096,6 +1124,59 @@ export const balancerRouterAbi = [
                 name: 'exactBptAmountIn',
                 type: 'uint256',
             },
+        ],
+        name: 'removeLiquidityRecovery',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'amountsOut',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountIn',
+                type: 'uint256',
+            },
+        ],
+        name: 'removeLiquidityRecoveryHook',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'amountsOut',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountIn',
+                type: 'uint256',
+            },
             {
                 internalType: 'contract IERC20',
                 name: 'tokenOut',
@@ -1166,6 +1247,114 @@ export const balancerRouterAbi = [
             {
                 internalType: 'uint256',
                 name: 'bptAmountIn',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenIn',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenOut',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactAmountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minAmountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'deadline',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
+        ],
+        name: 'swapSingleTokenExactIn',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenIn',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenOut',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactAmountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxAmountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'deadline',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
+        ],
+        name: 'swapSingleTokenExactOut',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
                 type: 'uint256',
             },
         ],

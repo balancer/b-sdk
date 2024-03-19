@@ -81,7 +81,7 @@ describe('add liquidity test', () => {
             txInput.client,
             txInput.testAddress,
             [...txInput.poolState.tokens.map((t) => t.address)],
-            [WETH.slot, BAL.slot],
+            [WETH.slot, BAL.slot] as number[],
             [
                 ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
@@ -117,7 +117,6 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
             });
             assertAddLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
@@ -127,22 +126,23 @@ describe('add liquidity test', () => {
         });
 
         test('with native', async () => {
+            const wethIsEth = true;
             const addLiquidityInput = {
                 ...input,
                 amountsIn,
-                useNativeAssetAsWrappedAmountIn: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
+                wethIsEth,
             });
             assertAddLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
+                wethIsEth,
             );
         });
     });
@@ -171,7 +171,6 @@ describe('add liquidity test', () => {
             });
 
             assertAddLiquiditySingleToken(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 addLiquidityOutput,
@@ -181,22 +180,23 @@ describe('add liquidity test', () => {
         });
 
         test('with native', async () => {
+            const wethIsEth = true;
             const addLiquidityInput = {
                 ...input,
-                useNativeAssetAsWrappedAmountIn: true,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
+                wethIsEth,
             });
 
             assertAddLiquiditySingleToken(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
+                wethIsEth,
             );
         });
     });

@@ -11,9 +11,9 @@ import {
 import { getAmountsCall, getAmountsQuery } from '../helper';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBaseCall,
+    RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityBaseQueryOutput,
-    RemoveLiquidityBuildOutput,
+    RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
 } from '../types';
@@ -44,7 +44,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                         await doRemoveLiquiditySingleTokenExactOutQuery(
                             input,
                             poolState.address,
-                            amounts.maxBptAmountIn,
                         );
                     minAmountsOut = amounts.minAmountsOut;
                 }
@@ -52,16 +51,16 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
             case RemoveLiquidityKind.SingleTokenExactIn:
                 {
                     maxBptAmountIn = amounts.maxBptAmountIn;
-                    minAmountsOut =
+                    const minAmountOut =
                         await doRemoveLiquiditySingleTokenExactInQuery(
                             input,
                             poolState.address,
-                            amounts.minAmountsOut[
-                                sortedTokens.findIndex((t) =>
-                                    t.isSameAddress(input.tokenOut),
-                                )
-                            ],
                         );
+                    minAmountsOut = sortedTokens.map((t) => {
+                        return t.isSameAddress(input.tokenOut)
+                            ? minAmountOut
+                            : 0n;
+                    });
                 }
                 break;
             case RemoveLiquidityKind.Proportional:
@@ -70,7 +69,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     minAmountsOut = await doRemoveLiquidityProportionalQuery(
                         input,
                         poolState.address,
-                        amounts.minAmountsOut,
                     );
                 }
                 break;
@@ -91,16 +89,16 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 TokenAmount.fromRawAmount(t, minAmountsOut[i]),
             ),
             tokenOutIndex: amounts.tokenOutIndex,
-            toInternalBalance: !!input.toInternalBalance,
             vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
         };
 
         return output;
     }
 
     public buildCall(
-        input: RemoveLiquidityBaseCall,
-    ): RemoveLiquidityBuildOutput {
+        input: RemoveLiquidityBaseBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
         let call: Hex;

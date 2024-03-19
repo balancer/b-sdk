@@ -7,7 +7,6 @@ import { Address } from '@/types';
 export const doRemoveLiquiditySingleTokenExactOutQuery = async (
     { chainId, rpcUrl, amountOut }: RemoveLiquiditySingleTokenExactOutInput,
     poolAddress: Address,
-    maxBptAmountIn: bigint,
 ): Promise<bigint> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -17,13 +16,7 @@ export const doRemoveLiquiditySingleTokenExactOutQuery = async (
         address: BALANCER_ROUTER[chainId],
         abi: balancerRouterAbi,
         functionName: 'queryRemoveLiquiditySingleTokenExactOut',
-        args: [
-            poolAddress,
-            maxBptAmountIn,
-            amountOut.address,
-            amountOut.rawAmount,
-            '0x',
-        ],
+        args: [poolAddress, amountOut.address, amountOut.rawAmount, '0x'],
     });
     return bptIn;
 };

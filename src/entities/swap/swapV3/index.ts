@@ -408,6 +408,8 @@ export class SwapV3 implements SwapBase {
         return BALANCER_ROUTER[this.chainId];
     }
 
+    // helper methods
+
     private getSwaps(paths: PathWithAmount[]) {
         let swaps:
             | SingleTokenExactIn
