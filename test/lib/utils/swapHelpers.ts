@@ -1,4 +1,10 @@
-import { Client, PublicActions, TestActions, WalletActions } from 'viem';
+import {
+    Address,
+    Client,
+    PublicActions,
+    TestActions,
+    WalletActions,
+} from 'viem';
 import {
     ChainId,
     Slippage,
@@ -7,14 +13,13 @@ import {
     SwapBuildOutputExactOut,
     NATIVE_ASSETS,
     SwapBuildOutputExactIn,
-    VAULT,
     SwapCallInput,
-    BALANCER_ROUTER,
     SwapKind,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
 export async function assertSwapExactIn(
+    contractToCall: Address,
     client: Client & PublicActions & TestActions & WalletActions,
     rpcUrl: string,
     chainId: ChainId,
@@ -35,7 +40,6 @@ export async function assertSwapExactIn(
         queryOutput: expected,
         wethIsEth,
     };
-    let contractToCall = BALANCER_ROUTER[chainId];
 
     if (swap.vaultVersion === 2) {
         buildCallInput = {
@@ -43,7 +47,6 @@ export async function assertSwapExactIn(
             sender: testAddress,
             recipient: testAddress,
         };
-        contractToCall = VAULT[chainId];
     }
     const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
 
@@ -96,6 +99,7 @@ export async function assertSwapExactIn(
 }
 
 export async function assertSwapExactOut(
+    contractToCall: Address,
     client: Client & PublicActions & TestActions & WalletActions,
     rpcUrl: string,
     chainId: ChainId,
@@ -116,7 +120,6 @@ export async function assertSwapExactOut(
         queryOutput: expected,
         wethIsEth,
     };
-    let contractToCall = BALANCER_ROUTER[chainId];
 
     if (swap.vaultVersion === 2) {
         buildCallInput = {
@@ -124,7 +127,6 @@ export async function assertSwapExactOut(
             sender: testAddress,
             recipient: testAddress,
         };
-        contractToCall = VAULT[chainId];
     }
     expect(expected.expectedAmountIn.amount > 0n).to.be.true;
 

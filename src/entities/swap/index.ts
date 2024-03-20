@@ -94,6 +94,7 @@ export class Swap {
                     pathLimits: this.pathLimits(
                         callInput.slippage,
                         callInput.queryOutput,
+                        minAmountOut.amount,
                     ),
                 }),
                 minAmountOut,
@@ -104,14 +105,16 @@ export class Swap {
             SwapKind.GivenOut,
             callInput.queryOutput.expectedAmountIn,
         );
+        const pathLimits = this.pathLimits(
+            callInput.slippage,
+            callInput.queryOutput,
+            maxAmountIn.amount,
+        );
         return {
             ...this.swap.buildCall({
                 ...callInput,
                 limitAmount: maxAmountIn,
-                pathLimits: this.pathLimits(
-                    callInput.slippage,
-                    callInput.queryOutput,
-                ),
+                pathLimits,
             }),
             maxAmountIn,
         };
@@ -147,16 +150,27 @@ export class Swap {
     private pathLimits(
         slippage: Slippage,
         expected: QueryOutputBase,
+        maxAmount: bigint,
     ): bigint[] | undefined {
         if (!expected.pathAmounts) return undefined;
         let pathAmounts: bigint[];
+        let total = 0n;
         if (expected.swapKind === SwapKind.GivenIn) {
-            pathAmounts = expected.pathAmounts.map((a) =>
-                slippage.applyTo(a, -1),
-            );
+            pathAmounts = expected.pathAmounts.map((a) => {
+                const limit = slippage.applyTo(a, -1);
+                total = total + limit;
+                return limit;
+            });
         } else {
-            pathAmounts = expected.pathAmounts.map((a) => slippage.applyTo(a));
+            pathAmounts = expected.pathAmounts.map((a) => {
+                const limit = slippage.applyTo(a);
+                total = total + limit;
+                return limit;
+            });
         }
+        // Slippage can lead to rounding diff compared to total so this handles dust diff
+        const diff = maxAmount - total;
+        pathAmounts[0] = pathAmounts[0] + diff;
         return pathAmounts;
     }
 }

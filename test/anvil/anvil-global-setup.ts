@@ -102,6 +102,23 @@ export async function stopAnvilForks() {
     runningForks = {};
 }
 
+// Stop a specific anvil fork
+export async function stopAnvilFork(
+    network: NetworkSetup,
+    jobId = Number(process.env.VITEST_WORKER_ID) || 0,
+    blockNumber?: bigint, // If not provided, the fork will start from the network's forkBlockNumber
+) {
+    const anvilOptions = getAnvilOptions(network, blockNumber);
+
+    const defaultAnvilPort = 8545;
+    const port = (anvilOptions.port || defaultAnvilPort) + jobId;
+    // Avoid starting fork if it was running already
+    if (!runningForks[port]) return;
+
+    await runningForks[port].stop();
+    delete runningForks[port];
+}
+
 /*
     Starts an anvil fork with the given options.
     In vitest, each thread is assigned a unique, numerical id (`process.env.VITEST_POOL_ID`).

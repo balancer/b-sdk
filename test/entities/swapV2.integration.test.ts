@@ -22,6 +22,7 @@ import {
     Swap,
     ExactInQueryOutput,
     ExactOutQueryOutput,
+    VAULT,
 } from '../../src';
 import { forkSetup } from '../lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
@@ -39,6 +40,7 @@ const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, blockNo);
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
+const vault = VAULT[chainId];
 
 describe('SwapV2', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
@@ -135,6 +137,7 @@ describe('SwapV2', () => {
                     swapKind: SwapKind.GivenIn,
                 });
                 await assertSwapExactIn(
+                    vault,
                     client,
                     rpcUrl,
                     chainId,
@@ -148,6 +151,7 @@ describe('SwapV2', () => {
                     swapKind: SwapKind.GivenOut,
                 });
                 await assertSwapExactOut(
+                    vault,
                     client,
                     rpcUrl,
                     chainId,
@@ -166,6 +170,7 @@ describe('SwapV2', () => {
                         swapKind: SwapKind.GivenIn,
                     });
                     await assertSwapExactIn(
+                        vault,
                         client,
                         rpcUrl,
                         chainId,
@@ -180,6 +185,7 @@ describe('SwapV2', () => {
                         swapKind: SwapKind.GivenOut,
                     });
                     await assertSwapExactOut(
+                        vault,
                         client,
                         rpcUrl,
                         chainId,
@@ -200,6 +206,7 @@ describe('SwapV2', () => {
                         swapKind: SwapKind.GivenIn,
                     });
                     await assertSwapExactIn(
+                        vault,
                         client,
                         rpcUrl,
                         chainId,
@@ -218,6 +225,7 @@ describe('SwapV2', () => {
                         swapKind: SwapKind.GivenOut,
                     });
                     await assertSwapExactOut(
+                        vault,
                         client,
                         rpcUrl,
                         chainId,
