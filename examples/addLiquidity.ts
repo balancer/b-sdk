@@ -1,5 +1,5 @@
 /**
- * Example showing how to add liquidity to a pool.
+ * Example showing how to add liquidity to a pool (Balancer V2).
  * (Runs against a local Anvil fork)
  *
  * Run with:

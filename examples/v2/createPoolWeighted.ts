@@ -1,3 +1,11 @@
+/**
+ * Example showing how to create a Weighted Pool(Balancer V2).
+ * (Runs against a local Anvil fork)
+ *
+ * Run with:
+ * pnpm example ./examples/v2/createPoolWeighted.ts
+ */
+
 import dotenv from 'dotenv';
 dotenv.config();
 

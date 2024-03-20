@@ -1,3 +1,11 @@
+/**
+ * Example showing how to initialize a pool (Balancer V2).
+ * (Runs against a local Anvil fork)
+ *
+ * Run with:
+ * pnpm example ./examples/v2/initPool.ts
+ */
+
 import {
     InitPoolDataProvider,
     InitPool,
