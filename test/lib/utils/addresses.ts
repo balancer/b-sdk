@@ -96,6 +96,21 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
             slot: 3,
         },
+        DAI: {
+            address: '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613',
+            decimals: 18,
+            slot: 1,
+        },
+        USDC: {
+            address: '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a',
+            decimals: 6,
+            slot: 1,
+        },
+        BPT: {
+            address: '0xe623a14c663e66f63ceddd73528da84db4e41350',
+            decimals: 18,
+            slot: 1,
+        },
     },
 };
 
@@ -168,6 +183,27 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         MOCK_WEIGHTED_POOL: {
             address: '0x204d4194e4e42364e3d1841d0a9b1ef857879c31',
             id: '0x204d4194e4e42364e3d1841d0a9b1ef857879c31',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_BAL_DAI_POOL: {
+            address: '0xac79a8276860bf96d761804e5ed5736d3afaaecf',
+            id: '0xac79a8276860bf96d761804e5ed5736d3afaaecf',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_USDC_DAI_POOL: {
+            address: '0xe623a14c663e66f63ceddd73528da84db4e41350',
+            id: '0xe623a14c663e66f63ceddd73528da84db4e41350',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_NESTED_POOL: {
+            address: '0x4c885071fc0e694c7e0091c1e5694267066df96f',
+            id: '0x4c885071fc0e694c7e0091c1e5694267066df96f',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,

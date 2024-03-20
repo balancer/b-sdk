@@ -1,5 +1,6 @@
 import {
     Address,
+    PublicClient,
     createPublicClient,
     encodeFunctionData,
     getContract,
@@ -11,6 +12,7 @@ import {
     DEFAULT_USERDATA,
     BALANCER_ROUTER,
     NATIVE_ASSETS,
+    BALANCER_BATCH_ROUTER,
 } from '../../../utils';
 import { balancerRouterAbi } from '../../../abi';
 import {
@@ -29,6 +31,7 @@ import {
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from './types';
+import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
 
 export * from './types';
 
@@ -84,21 +87,20 @@ export class SwapV3 implements SwapBase {
             transport: http(rpcUrl),
         });
 
+        return this.isBatchSwap
+            ? this.queryBatchSwap(client, block)
+            : this.querySingleSwap(client, block);
+    }
+
+    private async querySingleSwap(
+        client: PublicClient,
+        block?: bigint,
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
             address: BALANCER_ROUTER[this.chainId],
             abi: balancerRouterAbi,
             client,
         });
-
-        return this.isBatchSwap
-            ? this.queryBatchSwap(routerContract, block)
-            : this.querySingleSwap(routerContract, block);
-    }
-
-    private async querySingleSwap(
-        routerContract,
-        block?: bigint,
-    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         if ('exactAmountIn' in this.swaps) {
             const { result } =
                 await routerContract.simulate.querySwapSingleTokenExactIn(
@@ -143,64 +145,107 @@ export class SwapV3 implements SwapBase {
     }
 
     private async queryBatchSwap(
-        routerContract,
+        client: PublicClient,
         block?: bigint,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
-        // TODO - Implement onchain call once router available - still to be implemented on Router
+        const routerContract = getContract({
+            address: BALANCER_BATCH_ROUTER[this.chainId],
+            abi: balancerBatchRouterAbi,
+            client,
+        });
         /*
         In V3 all paths must have individual limits set using minAmountOut/maxAmountIn. 
         pathAmountsOut/In returned by query can be used along with slippage to set these correctly.
         */
         if (this.swapKind === SwapKind.GivenIn) {
-            // Expected return: uint256[] memory pathAmountsOut, address[] memory tokensOut,  uint256[] memory tokenAmountsOut
-            const mockQueryReturn = {
-                pathAmountsOut: (this.swaps as SwapPathExactAmountIn[]).map(
-                    (_s, i) => BigInt(i),
-                ),
-                tokensOut: [this.outputAmount.token.address],
-                tokenAmountsOut: [this.outputAmount.amount],
-            };
-            if (mockQueryReturn.tokenAmountsOut.length !== 1)
+            const swapsWithLimits = (this.swaps as SwapPathExactAmountIn[]).map(
+                (s) => {
+                    return {
+                        ...s,
+                        minAmountOut: 0n, // we default to 0 for query
+                    };
+                },
+            );
+            const { result } = await routerContract.simulate.querySwapExactIn(
+                [swapsWithLimits, DEFAULT_USERDATA],
+                { blockNumber: block },
+            );
+
+            if (result[1].length !== 1)
                 throw Error(
-                    'Swap only supports paths with matching tokenIn>tokenOut',
+                    'Swaps only support paths with matching tokenIn>tokenOut',
                 );
+
             return {
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
-                    mockQueryReturn.tokenAmountsOut[0],
+                    result[2][0],
                 ),
-                pathAmounts: mockQueryReturn.pathAmountsOut,
+                pathAmounts: result[0] as bigint[],
             };
         }
-        // Expected return: uint256[] memory pathAmountsIn, address[] memory tokensIn,  uint256[] memory tokenAmountsIn
-        const mockQueryReturn = {
-            pathAmountsOut: (this.swaps as SwapPathExactAmountOut[]).map(
-                (_s, i) => BigInt(i),
-            ),
-            tokensIn: [this.inputAmount.token.address],
-            tokenAmountsIn: [this.inputAmount.amount],
-        };
-        if (mockQueryReturn.tokenAmountsIn.length !== 1)
+
+        const swapsWithLimits = (this.swaps as SwapPathExactAmountOut[]).map(
+            (s) => {
+                return {
+                    ...s,
+                    maxAmountIn: 0n, // we default to 0 for query
+                };
+            },
+        );
+        const { result } = await routerContract.simulate.querySwapExactOut(
+            [swapsWithLimits, DEFAULT_USERDATA],
+            { blockNumber: block },
+        );
+
+        if (result[1].length !== 1)
             throw Error(
                 'Swaps only support paths with matching tokenIn>tokenOut',
             );
+
         return {
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
-                this.outputAmount.token,
-                mockQueryReturn.tokenAmountsIn[0],
+                this.inputAmount.token,
+                result[2][0],
             ),
-            pathAmounts: mockQueryReturn.pathAmountsOut,
+            pathAmounts: result[0] as bigint[],
         };
     }
 
     public queryCallData(): string {
         let callData: string;
         if (this.isBatchSwap) {
-            // TODO - Implement this once router functions available - still to be implemented on Router
-            console.error('BatchSwap not implemented');
-            callData = '';
+            if (this.swapKind === SwapKind.GivenIn) {
+                const swapsWithLimits = (
+                    this.swaps as SwapPathExactAmountIn[]
+                ).map((s) => {
+                    return {
+                        ...s,
+                        minAmountOut: 0n, // we default to 0 for query
+                    };
+                });
+                callData = encodeFunctionData({
+                    abi: balancerBatchRouterAbi,
+                    functionName: 'querySwapExactIn',
+                    args: [swapsWithLimits, DEFAULT_USERDATA],
+                });
+            } else {
+                const swapsWithLimits = (
+                    this.swaps as SwapPathExactAmountOut[]
+                ).map((s) => {
+                    return {
+                        ...s,
+                        maxAmountIn: 0n, // we default to 0 for query
+                    };
+                });
+                callData = encodeFunctionData({
+                    abi: balancerBatchRouterAbi,
+                    functionName: 'querySwapExactOut',
+                    args: [swapsWithLimits, DEFAULT_USERDATA],
+                });
+            }
         } else {
             if ('exactAmountIn' in this.swaps) {
                 callData = encodeFunctionData({
