@@ -4,12 +4,14 @@ import { CreatePoolInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
+    RemoveLiquidityRecoveryInput,
 } from '../../removeLiquidity/types';
-import { PoolState } from '../../types';
+import { PoolState, PoolStateWithBalances } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
+    validateTokensRemoveLiquidityRecovery,
 } from '../utils/validateTokens';
 
 export class InputValidatorGyro implements InputValidatorBase {
@@ -46,6 +48,13 @@ export class InputValidatorGyro implements InputValidatorBase {
             );
         }
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);
+    }
+
+    validateRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolStateWithBalances: PoolStateWithBalances,
+    ): void {
+        validateTokensRemoveLiquidityRecovery(input, poolStateWithBalances);
     }
 
     validateCreatePool(input: CreatePoolInput): void {

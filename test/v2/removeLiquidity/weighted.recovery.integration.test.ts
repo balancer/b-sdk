@@ -14,22 +14,21 @@ import {
 import {
     RemoveLiquidityKind,
     Slippage,
-    PoolState,
     RemoveLiquidity,
     Hex,
     CHAINS,
     ChainId,
-    RemoveLiquidityInput,
     InputAmount,
     RemoveLiquidityRecoveryInput,
+    PoolState,
 } from 'src';
 
 import {
     assertRemoveLiquidityRecovery,
-    doRemoveLiquidity,
+    doRemoveLiquidityRecovery,
     forkSetup,
     POOLS,
-    RemoveLiquidityTxInput,
+    RemoveLiquidityRecoveryTxInput,
     TOKENS,
 } from 'test/lib/utils';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -42,14 +41,14 @@ const DAI = TOKENS[chainId].DAI;
 const WMATIC = TOKENS[chainId].WMATIC;
 
 describe('weighted remove liquidity recovery test', () => {
-    let txInput: RemoveLiquidityTxInput;
-    let poolInput: PoolState;
+    let txInput: RemoveLiquidityRecoveryTxInput;
+    let poolState: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolInput = await api.getPool(testPool.id);
+        poolState = await api.getPool(testPool.id);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -65,9 +64,9 @@ describe('weighted remove liquidity recovery test', () => {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolState: poolInput,
+            poolState,
             testAddress,
-            removeLiquidityInput: {} as RemoveLiquidityInput,
+            removeLiquidityRecoveryInput: {} as RemoveLiquidityRecoveryInput,
         };
     });
 
@@ -87,7 +86,7 @@ describe('weighted remove liquidity recovery test', () => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolInput.address,
+                address: poolState.address,
             };
             input = {
                 bptIn,
@@ -97,9 +96,9 @@ describe('weighted remove liquidity recovery test', () => {
             };
         });
         test('with tokens', async () => {
-            const removeLiquidityOutput = await doRemoveLiquidity({
+            const removeLiquidityOutput = await doRemoveLiquidityRecovery({
                 ...txInput,
-                removeLiquidityInput: input,
+                removeLiquidityRecoveryInput: input,
             });
 
             assertRemoveLiquidityRecovery(
@@ -111,9 +110,9 @@ describe('weighted remove liquidity recovery test', () => {
         });
         test('with native', async () => {
             const wethIsEth = true;
-            const removeLiquidityOutput = await doRemoveLiquidity({
+            const removeLiquidityOutput = await doRemoveLiquidityRecovery({
                 ...txInput,
-                removeLiquidityInput: input,
+                removeLiquidityRecoveryInput: input,
                 wethIsEth,
             });
 

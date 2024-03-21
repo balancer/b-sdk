@@ -8,23 +8,6 @@ export interface MinimalToken {
     index: number;
 }
 
-export interface RawPoolToken extends MinimalToken {
-    symbol: string;
-    name: string;
+export interface PoolTokenWithBalance extends MinimalToken {
     balance: HumanAmount;
-}
-
-export interface RawWeightedPoolToken extends RawPoolToken {
-    weight: HumanAmount;
-}
-
-export interface RawPoolTokenWithRate extends RawPoolToken {
-    priceRate: HumanAmount;
-}
-
-export interface RawFxPoolToken extends RawPoolToken {
-    token: {
-        latestFXPrice: HumanAmount;
-        fxOracleDecimals?: number;
-    };
 }

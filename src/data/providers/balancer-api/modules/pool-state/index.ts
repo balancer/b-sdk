@@ -104,8 +104,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -116,8 +114,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -128,8 +124,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -140,8 +134,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -152,8 +144,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -164,8 +154,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -176,8 +164,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -188,8 +174,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }

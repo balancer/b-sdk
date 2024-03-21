@@ -40,7 +40,6 @@ export const getAmountsQuery = (
                 maxBptAmountIn: input.bptIn.rawAmount,
             };
         case RemoveLiquidityKind.Proportional:
-        case RemoveLiquidityKind.Recovery:
             return {
                 minAmountsOut: Array(tokens.length).fill(1n), // minAmountsOut set to 1 wei when querying
                 tokenOutIndex: undefined,

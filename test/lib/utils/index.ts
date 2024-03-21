@@ -9,5 +9,6 @@ export * from './initPoolHelper';
 export * from './promises';
 export * from './relayerHelper';
 export * from './removeLiquidityHelper';
+export * from './removeLiquidityRecoveryHelper';
 export * from './swapHelpers';
 export * from './types';

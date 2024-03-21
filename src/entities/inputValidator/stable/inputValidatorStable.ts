@@ -3,8 +3,11 @@ import {
     AddLiquidityKind,
 } from '@/entities/addLiquidity/types';
 import { InitPoolInput, InitPoolInputV3 } from '@/entities/initPool/types';
-import { RemoveLiquidityInput } from '@/entities/removeLiquidity/types';
-import { PoolState } from '@/entities/types';
+import {
+    RemoveLiquidityInput,
+    RemoveLiquidityRecoveryInput,
+} from '@/entities/removeLiquidity/types';
+import { PoolState, PoolStateWithBalances } from '@/entities/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import {
     addLiquidityProportionalNotSupportedOnPoolTypeError,
@@ -16,6 +19,7 @@ import { InputValidatorBase } from '../types';
 import {
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
+    validateTokensRemoveLiquidityRecovery,
 } from '../utils/validateTokens';
 import { CreatePoolInput } from '@/entities/createPool';
 
@@ -51,6 +55,13 @@ export class InputValidatorStable implements InputValidatorBase {
         poolState: PoolState,
     ): void {
         validateTokensRemoveLiquidity(input, poolState);
+    }
+
+    validateRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolStateWithBalances: PoolStateWithBalances,
+    ): void {
+        validateTokensRemoveLiquidityRecovery(input, poolStateWithBalances);
     }
 
     private validateWethIsEth(initPoolInput: InitPoolInputV3) {

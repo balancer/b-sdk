@@ -1,15 +1,19 @@
-import { RemoveLiquidityInput } from '@/entities/removeLiquidity/types';
+import {
+    RemoveLiquidityInput,
+    RemoveLiquidityRecoveryInput,
+} from '@/entities/removeLiquidity/types';
 import {
     CreatePoolV2WeightedInput,
     CreatePoolV3WeightedInput,
 } from '../../createPool/types';
 import { InitPoolInput, InitPoolInputV3 } from '../../initPool/types';
-import { PoolState } from '../../types';
+import { PoolState, PoolStateWithBalances } from '../../types';
 import { InputValidatorBase } from '../types';
 import {
     validateCreatePoolTokens,
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
+    validateTokensRemoveLiquidityRecovery,
 } from '../utils/validateTokens';
 import { TokenType } from '@/types';
 import { zeroAddress } from 'viem';
@@ -71,6 +75,13 @@ export class InputValidatorWeighted implements InputValidatorBase {
         poolState: PoolState,
     ): void {
         validateTokensRemoveLiquidity(input, poolState);
+    }
+
+    validateRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolStateWithBalances: PoolStateWithBalances,
+    ): void {
+        validateTokensRemoveLiquidityRecovery(input, poolStateWithBalances);
     }
 
     private validateWethIsEth(initPoolInput: InitPoolInputV3) {
