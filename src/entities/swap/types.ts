@@ -1,16 +1,26 @@
 import { TokenAmount } from '../tokenAmount';
-import { MinimalToken, Slippage } from '../..';
-import { SingleSwap, SwapKind, BatchSwapStep } from '../../types';
-import { PathWithAmount } from './pathWithAmount';
+import { Slippage } from '../..';
+import { SwapKind } from '../../types';
 import { Address, Hex } from 'viem';
-import { SwapCallBuildV2, SwapCallV2 as CallInputV2 } from './swapV2';
-import {
-    SingleTokenExactIn,
-    SingleTokenExactOut,
-    SwapCallBuildV3,
-    SwapPathExactAmountIn,
-    SwapPathExactAmountOut,
-} from './swapV3';
+import { SwapCallBuildInputBaseV2 } from './swaps/v2';
+import { Path } from './paths/types';
+
+export type SwapInput = {
+    chainId: number;
+    paths: Path[];
+    swapKind: SwapKind;
+};
+
+type SwapCallBuildInputBase = {
+    deadline?: bigint;
+    slippage: Slippage;
+    wethIsEth?: boolean;
+    queryOutput: ExactInQueryOutput | ExactOutQueryOutput;
+};
+
+export type SwapCallBuildInput =
+    | SwapCallBuildInputBase
+    | (SwapCallBuildInputBase & SwapCallBuildInputBaseV2);
 
 export type SwapBuildOutputBase = {
     to: Address;
@@ -26,44 +36,6 @@ export type SwapBuildOutputExactOut = SwapBuildOutputBase & {
     maxAmountIn: TokenAmount;
 };
 
-export type TokenApi = Omit<MinimalToken, 'index'>;
-
-export type Path = {
-    pools: Address[] | Hex[];
-    tokens: TokenApi[];
-    outputAmountRaw: bigint;
-    inputAmountRaw: bigint;
-    vaultVersion: 2 | 3;
-};
-
-export type SwapInput = {
-    chainId: number;
-    paths: Path[];
-    swapKind: SwapKind;
-};
-export interface SwapBase {
-    chainId: number;
-    isBatchSwap: boolean;
-    paths: PathWithAmount[];
-    swapKind: SwapKind;
-    swaps:
-        | BatchSwapStep[]
-        | SingleSwap
-        | SingleTokenExactIn
-        | SingleTokenExactOut
-        | SwapPathExactAmountIn[]
-        | SwapPathExactAmountOut[];
-    quote: TokenAmount;
-    inputAmount: TokenAmount;
-    outputAmount: TokenAmount;
-    query(
-        rpcUrl?: string,
-        block?: bigint,
-    ): Promise<ExactInQueryOutput | ExactOutQueryOutput>;
-    queryCallData(): string;
-    buildCall(swapCall: SwapCallBuildV3 | SwapCallBuildV2): SwapBuildOutputBase;
-}
-
 export type QueryOutputBase = {
     swapKind: SwapKind;
     pathAmounts?: bigint[];
@@ -77,19 +49,4 @@ export type ExactInQueryOutput = QueryOutputBase & {
 export type ExactOutQueryOutput = QueryOutputBase & {
     swapKind: SwapKind.GivenOut;
     expectedAmountIn: TokenAmount;
-};
-
-export type CallInputBase = {
-    deadline: bigint;
-    slippage: Slippage;
-    wethIsEth: boolean;
-    queryOutput: ExactInQueryOutput | ExactOutQueryOutput;
-};
-
-export type SwapCallInput = CallInputBase | CallInputV2;
-
-export type SwapCallBuildBase = {
-    deadline: bigint;
-    limitAmount: TokenAmount;
-    wethIsEth: boolean;
 };

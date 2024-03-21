@@ -5,32 +5,32 @@ import {
     getContract,
     http,
 } from 'viem';
-import { TokenAmount } from '../../tokenAmount';
-import { SwapKind, Hex } from '../../../types';
+import { TokenAmount } from '../../../tokenAmount';
+import { SwapKind, Hex } from '../../../../types';
 import {
     DEFAULT_USERDATA,
     BALANCER_ROUTER,
     NATIVE_ASSETS,
     BALANCER_BATCH_ROUTER,
-} from '../../../utils';
-import { balancerRouterAbi } from '../../../abi';
+} from '../../../../utils';
+import { balancerRouterAbi } from '../../../../abi';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
-    SwapBase,
     SwapBuildOutputBase,
     SwapInput,
-} from '../types';
-import { PathWithAmount } from '../pathWithAmount';
-import { getInputAmount, getOutputAmount } from '../pathHelpers';
+} from '../../types';
+import { PathWithAmount } from '../../paths/pathWithAmount';
+import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
 import {
     SingleTokenExactIn,
     SingleTokenExactOut,
-    SwapCallBuildV3,
+    SwapCallBuildInputV3,
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from './types';
 import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
+import { SwapBase } from '../types';
 
 export * from './types';
 
@@ -279,32 +279,32 @@ export class SwapV3 implements SwapBase {
     /**
      * Returns the transaction data to be sent to the router contract
      *
-     * @param swapCall
+     * @param input
      * @returns
      */
-    buildCall(swapCall: SwapCallBuildV3): SwapBuildOutputBase {
+    buildCall(input: SwapCallBuildInputV3): SwapBuildOutputBase {
         if (!this.isBatchSwap) {
             return {
                 to: BALANCER_ROUTER[this.chainId],
                 callData: this.callDataSingleSwap(
-                    swapCall.limitAmount,
-                    swapCall.deadline,
-                    swapCall.wethIsEth,
+                    input.limitAmount,
+                    input.deadline,
+                    input.wethIsEth,
                 ),
-                value: this.value(swapCall.limitAmount, swapCall.wethIsEth),
+                value: this.value(input.limitAmount, input.wethIsEth),
             };
         }
-        if (!swapCall.pathLimits)
+        if (!input.pathLimits)
             throw Error('V3 BatchSwaps need path limits for call construction');
         return {
             to: BALANCER_BATCH_ROUTER[this.chainId],
             callData: this.callDataBatchSwap(
-                swapCall.limitAmount.amount,
-                swapCall.pathLimits,
-                swapCall.deadline,
-                swapCall.wethIsEth,
+                input.limitAmount.amount,
+                input.pathLimits,
+                input.deadline,
+                input.wethIsEth,
             ),
-            value: this.value(swapCall.limitAmount, swapCall.wethIsEth),
+            value: this.value(input.limitAmount, input.wethIsEth),
         };
     }
 

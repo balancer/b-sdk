@@ -13,7 +13,7 @@ import {
     SwapBuildOutputExactOut,
     NATIVE_ASSETS,
     SwapBuildOutputExactIn,
-    SwapCallInput,
+    SwapCallBuildInput,
     SwapKind,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
@@ -34,7 +34,7 @@ export async function assertSwapExactIn(
     if (expected.swapKind !== SwapKind.GivenIn) throw Error('Expected GivenIn');
     expect(expected.expectedAmountOut.amount > 0n).to.be.true;
 
-    let buildCallInput: SwapCallInput = {
+    let buildCallInput: SwapCallBuildInput = {
         slippage,
         deadline,
         queryOutput: expected,
@@ -114,7 +114,7 @@ export async function assertSwapExactOut(
     if (expected.swapKind !== SwapKind.GivenOut)
         throw Error('Expected GivenOut');
 
-    let buildCallInput: SwapCallInput = {
+    let buildCallInput: SwapCallBuildInput = {
         slippage,
         deadline,
         queryOutput: expected,

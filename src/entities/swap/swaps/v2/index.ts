@@ -1,5 +1,5 @@
-import { TokenAmount } from '../../tokenAmount';
-import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../../../types';
+import { TokenAmount } from '../../../tokenAmount';
+import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../../../../types';
 import {
     abs,
     BALANCER_QUERIES,
@@ -9,7 +9,7 @@ import {
     VAULT,
     NATIVE_ASSETS,
     ChainId,
-} from '../../../utils';
+} from '../../../../utils';
 import {
     Address,
     createPublicClient,
@@ -17,17 +17,17 @@ import {
     getContract,
     http,
 } from 'viem';
-import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
+import { balancerQueriesAbi, vaultV2Abi } from '../../../../abi';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
-    SwapBase,
     SwapBuildOutputBase,
     SwapInput,
-} from '../types';
-import { PathWithAmount } from '../pathWithAmount';
-import { getInputAmount, getOutputAmount } from '../pathHelpers';
-import { SwapCallBuildV2 } from './types';
+} from '../../types';
+import { PathWithAmount } from '../../paths/pathWithAmount';
+import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
+import { SwapCallBuildInputV2 } from './types';
+import { SwapBase } from '../types';
 
 export * from './types';
 
@@ -227,37 +227,37 @@ export class SwapV2 implements SwapBase {
     /**
      * Returns the transaction data to be sent to the vault contract
      *
-     * @param swapCall
+     * @param input
      * @returns
      */
-    buildCall(swapCall: SwapCallBuildV2): SwapBuildOutputBase {
+    buildCall(input: SwapCallBuildInputV2): SwapBuildOutputBase {
         const funds = {
-            sender: swapCall.sender,
-            recipient: swapCall.recipient,
+            sender: input.sender,
+            recipient: input.recipient,
             fromInternalBalance: false, // Set default to false as not supported in V3 and keeps interface simple
             toInternalBalance: false,
         };
         let callData: Hex;
         if (this.isBatchSwap) {
-            const limits = this.limitsBatchSwap(swapCall.limitAmount);
+            const limits = this.limitsBatchSwap(input.limitAmount);
             callData = this.callDataBatchSwap(
                 limits,
-                swapCall.deadline,
+                input.deadline,
                 funds,
-                swapCall.wethIsEth,
+                input.wethIsEth,
             );
         } else {
             callData = this.callDataSingleSwap(
-                swapCall.limitAmount.amount,
-                swapCall.deadline,
+                input.limitAmount.amount,
+                input.deadline,
                 funds,
-                swapCall.wethIsEth,
+                input.wethIsEth,
             );
         }
         return {
             to: this.to(),
             callData,
-            value: this.value(swapCall.limitAmount, swapCall.wethIsEth),
+            value: this.value(input.limitAmount, input.wethIsEth),
         };
     }
 

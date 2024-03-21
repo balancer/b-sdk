@@ -17,7 +17,6 @@ import {
     CHAINS,
     ChainId,
     SwapKind,
-    Path,
     Token,
     Swap,
     ExactInQueryOutput,
@@ -36,6 +35,7 @@ import {
     assertSwapExactIn,
     assertSwapExactOut,
 } from 'test/lib/utils/swapHelpers';
+import { Path } from '@/entities/swap/paths/types';
 
 const vaultVersion = 3;
 const chainId = ChainId.SEPOLIA;

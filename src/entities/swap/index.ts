@@ -2,8 +2,7 @@ import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import {
-    SwapBase,
-    SwapCallInput,
+    SwapCallBuildInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
@@ -11,10 +10,12 @@ import {
     ExactInQueryOutput,
     QueryOutputBase,
 } from './types';
-import { SwapV2 } from './swapV2';
-import { validatePaths } from './pathHelpers';
+import { SwapV2 } from './swaps/v2';
+import { validatePaths } from './paths/pathHelpers';
 import { Slippage } from '../slippage';
-import { SwapV3 } from './swapV3';
+import { SwapV3 } from './swaps/v3';
+import { MAX_UINT256 } from '@/utils';
+import { SwapBase } from './swaps/types';
 
 export * from './types';
 
@@ -68,32 +69,34 @@ export class Swap {
     /**
      * Returns the transaction data to be sent to the vault contract
      *
-     * @param callInput
+     * @param input
      * @returns
      */
     buildCall(
-        callInput: SwapCallInput,
+        input: SwapCallBuildInput,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
-        const isV2Input = 'sender' in callInput;
+        const isV2Input = 'sender' in input;
         if (this.vaultVersion === 3 && isV2Input)
             throw Error('Cannot define sender/recipient in V3');
 
         if (this.vaultVersion === 2 && !isV2Input)
             throw Error('Sender/recipient must be defined in V2');
 
-        if (callInput.queryOutput.swapKind === SwapKind.GivenIn) {
+        if (input.queryOutput.swapKind === SwapKind.GivenIn) {
             const minAmountOut = this.limitAmount(
-                callInput.slippage,
+                input.slippage,
                 SwapKind.GivenIn,
-                callInput.queryOutput.expectedAmountOut,
+                input.queryOutput.expectedAmountOut,
             );
             return {
                 ...this.swap.buildCall({
-                    ...callInput,
+                    ...input,
+                    deadline: input.deadline ?? MAX_UINT256,
+                    wethIsEth: !!input.wethIsEth,
                     limitAmount: minAmountOut,
                     pathLimits: this.pathLimits(
-                        callInput.slippage,
-                        callInput.queryOutput,
+                        input.slippage,
+                        input.queryOutput,
                         minAmountOut.amount,
                     ),
                 }),
@@ -101,18 +104,20 @@ export class Swap {
             };
         }
         const maxAmountIn = this.limitAmount(
-            callInput.slippage,
+            input.slippage,
             SwapKind.GivenOut,
-            callInput.queryOutput.expectedAmountIn,
+            input.queryOutput.expectedAmountIn,
         );
         const pathLimits = this.pathLimits(
-            callInput.slippage,
-            callInput.queryOutput,
+            input.slippage,
+            input.queryOutput,
             maxAmountIn.amount,
         );
         return {
             ...this.swap.buildCall({
-                ...callInput,
+                ...input,
+                deadline: input.deadline ?? MAX_UINT256,
+                wethIsEth: !!input.wethIsEth,
                 limitAmount: maxAmountIn,
                 pathLimits,
             }),

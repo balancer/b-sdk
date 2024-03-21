@@ -1,5 +1,5 @@
+import { TokenAmount } from '@/entities/tokenAmount';
 import { Address } from 'viem';
-import { SwapCallBuildBase } from '../types';
 
 type SingleStep = {
     pool: Address;
@@ -39,6 +39,9 @@ export type SwapPathExactAmountOut = SwapPathBase & {
     exactAmountOut: bigint;
 };
 
-export type SwapCallBuildV3 = SwapCallBuildBase & {
+export type SwapCallBuildInputV3 = {
+    deadline: bigint;
+    limitAmount: TokenAmount;
+    wethIsEth: boolean;
     pathLimits: bigint[] | undefined;
 };
