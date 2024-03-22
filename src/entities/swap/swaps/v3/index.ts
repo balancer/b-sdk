@@ -27,7 +27,9 @@ import {
     SingleTokenExactOut,
     SwapBuildCallInputV3,
     SwapPathExactAmountIn,
+    SwapPathExactAmountInWithLimit,
     SwapPathExactAmountOut,
+    SwapPathExactAmountOutWithLimit,
 } from './types';
 import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
 import { SwapBase } from '../types';
@@ -143,6 +145,31 @@ export class SwapV3 implements SwapBase {
         throw Error('Unsupported V3 Query');
     }
 
+    private getSwapsWithDefaultLimits():
+        | SwapPathExactAmountInWithLimit[]
+        | SwapPathExactAmountOutWithLimit[] {
+        if (this.swapKind === SwapKind.GivenIn) {
+            const swapsWithLimits = (this.swaps as SwapPathExactAmountIn[]).map(
+                (s) => {
+                    return {
+                        ...s,
+                        minAmountOut: 0n, // we default to 0 for query
+                    };
+                },
+            );
+            return swapsWithLimits;
+        }
+        const swapsWithLimits = (this.swaps as SwapPathExactAmountOut[]).map(
+            (s) => {
+                return {
+                    ...s,
+                    maxAmountIn: 0n, // we default to 0 for query
+                };
+            },
+        );
+        return swapsWithLimits;
+    }
+
     private async queryBatchSwap(
         client: PublicClient,
         block?: bigint,
@@ -157,17 +184,14 @@ export class SwapV3 implements SwapBase {
         In V3 all paths must have individual limits set using minAmountOut/maxAmountIn. 
         pathAmountsOut/In returned by query can be used along with slippage to set these correctly.
         */
+        const swapsWithLimits = this.getSwapsWithDefaultLimits();
+
         if (this.swapKind === SwapKind.GivenIn) {
-            const swapsWithLimits = (this.swaps as SwapPathExactAmountIn[]).map(
-                (s) => {
-                    return {
-                        ...s,
-                        minAmountOut: 0n, // we default to 0 for query
-                    };
-                },
-            );
             const { result } = await routerContract.simulate.querySwapExactIn(
-                [swapsWithLimits, DEFAULT_USERDATA],
+                [
+                    swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                    DEFAULT_USERDATA,
+                ],
                 { blockNumber: block },
             );
 
@@ -186,16 +210,11 @@ export class SwapV3 implements SwapBase {
             };
         }
 
-        const swapsWithLimits = (this.swaps as SwapPathExactAmountOut[]).map(
-            (s) => {
-                return {
-                    ...s,
-                    maxAmountIn: 0n, // we default to 0 for query
-                };
-            },
-        );
         const { result } = await routerContract.simulate.querySwapExactOut(
-            [swapsWithLimits, DEFAULT_USERDATA],
+            [
+                swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                DEFAULT_USERDATA,
+            ],
             { blockNumber: block },
         );
 
@@ -217,33 +236,25 @@ export class SwapV3 implements SwapBase {
     public queryCallData(): string {
         let callData: string;
         if (this.isBatchSwap) {
+            const swapsWithLimits = this.getSwapsWithDefaultLimits();
+
             if (this.swapKind === SwapKind.GivenIn) {
-                const swapsWithLimits = (
-                    this.swaps as SwapPathExactAmountIn[]
-                ).map((s) => {
-                    return {
-                        ...s,
-                        minAmountOut: 0n, // we default to 0 for query
-                    };
-                });
                 callData = encodeFunctionData({
                     abi: balancerBatchRouterAbi,
                     functionName: 'querySwapExactIn',
-                    args: [swapsWithLimits, DEFAULT_USERDATA],
+                    args: [
+                        swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                        DEFAULT_USERDATA,
+                    ],
                 });
             } else {
-                const swapsWithLimits = (
-                    this.swaps as SwapPathExactAmountOut[]
-                ).map((s) => {
-                    return {
-                        ...s,
-                        maxAmountIn: 0n, // we default to 0 for query
-                    };
-                });
                 callData = encodeFunctionData({
                     abi: balancerBatchRouterAbi,
                     functionName: 'querySwapExactOut',
-                    args: [swapsWithLimits, DEFAULT_USERDATA],
+                    args: [
+                        swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                        DEFAULT_USERDATA,
+                    ],
                 });
             }
         } else {

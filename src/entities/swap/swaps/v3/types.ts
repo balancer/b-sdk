@@ -32,11 +32,19 @@ export type SwapPathExactAmountIn = SwapPathBase & {
     exactAmountIn: bigint;
 };
 
+export type SwapPathExactAmountInWithLimit = SwapPathExactAmountIn & {
+    minAmountOut: bigint;
+};
+
 export type SwapPathExactAmountOut = SwapPathBase & {
     // for each step:
     // if tokenIn == pool use removeLiquidity SINGLE_TOKEN_EXACT_OUT
     // if tokenOut == pool use addLiquidity SINGLE_TOKEN_EXACT_OUT
     exactAmountOut: bigint;
+};
+
+export type SwapPathExactAmountOutWithLimit = SwapPathExactAmountOut & {
+    maxAmountIn: bigint;
 };
 
 export type SwapBuildCallInputV3 = {
