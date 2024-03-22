@@ -1,7 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Address, Hex } from '../../types';
 import { Token } from '../token';
-import { BALANCER_RELAYER } from '../../utils';
+import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../utils';
 import { Relayer } from '../relayer';
 import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../tokenAmount';
@@ -13,15 +13,17 @@ import {
 } from './types';
 import { doAddLiquidityNestedQuery } from './doAddLiquidityNestedQuery';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
-import { validateInputs } from './validateInputs';
+import { validateBuildCallInput, validateQueryInput } from './validateInputs';
 import { NestedPoolState } from '../types';
+import { validateNestedPoolState } from '../utils';
 
 export class AddLiquidityNested {
     async query(
         input: AddLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
     ): Promise<AddLiquidityNestedQueryOutput> {
-        const amountsIn = validateInputs(input, nestedPoolState);
+        const amountsIn = validateQueryInput(input, nestedPoolState);
+        validateNestedPoolState(nestedPoolState);
 
         const callsAttributes = getQueryCallsAttributes(
             input,
@@ -45,7 +47,6 @@ export class AddLiquidityNested {
         const peekedValue = await doAddLiquidityNestedQuery(
             input.chainId,
             input.rpcUrl,
-            input.accountAddress,
             encodedMulticall,
         );
 
@@ -65,6 +66,7 @@ export class AddLiquidityNested {
         value: bigint | undefined;
         minBptOut: bigint;
     } {
+        validateBuildCallInput(input);
         // apply slippage to bptOut
         const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
 
@@ -73,6 +75,22 @@ export class AddLiquidityNested {
             ...input.callsAttributes[input.callsAttributes.length - 1],
             minBptOut,
         };
+
+        // update wethIsEth flag + sender and recipient placeholders
+        input.callsAttributes = input.callsAttributes.map((call) => {
+            return {
+                ...call,
+                sender:
+                    call.sender === ZERO_ADDRESS
+                        ? input.accountAddress
+                        : call.sender,
+                recipient:
+                    call.recipient === ZERO_ADDRESS
+                        ? input.accountAddress
+                        : call.recipient,
+                wethIsEth: input.wethIsEth,
+            };
+        });
 
         const { encodedCalls, values } = encodeCalls(input.callsAttributes);
 

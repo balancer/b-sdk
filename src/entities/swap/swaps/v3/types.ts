@@ -1,5 +1,4 @@
 import { Address } from 'viem';
-import { SwapCallBuildBase } from '../types';
 
 type SingleStep = {
     pool: Address;
@@ -32,6 +31,10 @@ export type SwapPathExactAmountIn = SwapPathBase & {
     exactAmountIn: bigint;
 };
 
+export type SwapPathExactAmountInWithLimit = SwapPathExactAmountIn & {
+    minAmountOut: bigint;
+};
+
 export type SwapPathExactAmountOut = SwapPathBase & {
     // for each step:
     // if tokenIn == pool use removeLiquidity SINGLE_TOKEN_EXACT_OUT
@@ -39,6 +42,6 @@ export type SwapPathExactAmountOut = SwapPathBase & {
     exactAmountOut: bigint;
 };
 
-export type SwapCallBuildV3 = SwapCallBuildBase & {
-    pathLimits: bigint[] | undefined;
+export type SwapPathExactAmountOutWithLimit = SwapPathExactAmountOut & {
+    maxAmountIn: bigint;
 };

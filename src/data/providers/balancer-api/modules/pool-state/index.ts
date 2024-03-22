@@ -21,6 +21,15 @@ export class Pools {
           }
         }
       }
+      ... on GqlPoolMetaStable {
+        tokens {
+          ... on GqlPoolTokenBase {
+            address
+            decimals
+            index
+          }
+        }
+      }
       ... on GqlPoolStable {
         tokens {
           ... on GqlPoolTokenBase {
@@ -95,8 +104,16 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
+            }
+          }
+        }
+        ... on GqlPoolMetaStable {
+          tokens {
+            ... on GqlPoolTokenBase {
+              address
+              decimals
+              index
+              balance
             }
           }
         }
@@ -107,8 +124,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -119,8 +134,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -131,8 +144,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -143,8 +154,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -155,8 +164,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }
@@ -167,8 +174,6 @@ export class Pools {
               decimals
               index
               balance
-              name
-              symbol
             }
           }
         }

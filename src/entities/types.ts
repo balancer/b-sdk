@@ -1,4 +1,4 @@
-import { HumanAmount, MinimalToken, RawPoolToken } from '../data';
+import { HumanAmount, MinimalToken, PoolTokenWithBalance } from '../data';
 import { Address, Hex, PoolType } from '../types';
 
 // Returned from API and used as input
@@ -14,13 +14,14 @@ export type PoolStateWithBalances = {
     id: Hex;
     address: Address;
     type: string;
-    tokens: RawPoolToken[];
+    tokens: PoolTokenWithBalance[];
     totalShares: HumanAmount;
     vaultVersion: 2 | 3;
 };
 
 export type AddLiquidityAmounts = {
     maxAmountsIn: bigint[];
+    maxAmountsInWithoutBpt: bigint[];
     tokenInIndex: number | undefined;
     minimumBpt: bigint;
 };

@@ -1,22 +1,31 @@
-import { encodeFunctionData } from 'viem';
+import {
+    createPublicClient,
+    encodeFunctionData,
+    formatEther,
+    formatUnits,
+    http,
+} from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
-import { VAULT, MAX_UINT256, ZERO_ADDRESS } from '../../../../utils/constants';
+import { CHAINS, VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityComposableStableCall,
-    RemoveLiquidityBuildOutput,
+    RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
-    RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
+    RemoveLiquidityRecoveryInput,
 } from '../../types';
-import { RemoveLiquidityAmounts, PoolState } from '../../../types';
+import { RemoveLiquidityV2ComposableStableBuildCallInput } from './types';
+import { PoolState, PoolStateWithBalances } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { ComposableStableEncoder } from '../../../encoders/composableStable';
-import { getAmounts, getSortedTokens } from '../../../utils';
-import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
+import { calculateProportionalAmounts, getSortedTokens } from '../../../utils';
+import { getAmountsCall, getAmountsQuery } from '../../helper';
+import { insertIndex } from '@/utils';
+import { getActualSupply, getPoolTokensV2 } from '@/utils/tokens';
+import { HumanAmount } from '@/data';
 
 export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
@@ -27,7 +36,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
         );
-        const amounts = this.getAmountsQuery(sortedTokens, input, bptIndex);
+        const amounts = getAmountsQuery(sortedTokens, input, bptIndex);
         const amountsWithoutBpt = {
             ...amounts,
             minAmountsOut: [
@@ -36,23 +45,18 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             ],
         };
         const userData = ComposableStableEncoder.encodeRemoveLiquidityUserData(
-            input.kind === RemoveLiquidityKind.Recovery
-                ? RemoveLiquidityKind.Proportional
-                : input.kind,
+            input.kind,
             amountsWithoutBpt,
         );
 
-        // tokensOut will have zero address if removing liquidity to native asset
         const { args, tokensOut } = parseRemoveLiquidityArgs({
             chainId: input.chainId,
-            toNativeAsset: !!input.toNativeAsset,
             poolId: poolState.id,
             sortedTokens,
             sender: ZERO_ADDRESS,
             recipient: ZERO_ADDRESS,
             minAmountsOut: amounts.minAmountsOut,
             userData,
-            toInternalBalance: !!input.toInternalBalance,
         });
         const queryOutput = await doRemoveLiquidityQuery(
             input.rpcUrl,
@@ -73,56 +77,79 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
-            toInternalBalance: !!input.toInternalBalance,
             bptIndex,
             vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
         };
     }
 
-    private getAmountsQuery(
-        tokens: Token[],
-        input: RemoveLiquidityInput,
-        bptIndex: number,
-    ): RemoveLiquidityAmounts {
-        switch (input.kind) {
-            case RemoveLiquidityKind.Unbalanced:
-                return {
-                    minAmountsOut: getAmounts(tokens, input.amountsOut),
-                    tokenOutIndex: undefined,
-                    maxBptAmountIn: MAX_UINT256,
-                };
-            case RemoveLiquidityKind.SingleTokenExactOut:
-                return {
-                    minAmountsOut: getAmounts(tokens, [input.amountOut]),
-                    tokenOutIndex: tokens
-                        .filter((_, index) => index !== bptIndex)
-                        .findIndex((t) =>
-                            t.isSameAddress(input.amountOut.address),
-                        ),
-                    maxBptAmountIn: MAX_UINT256,
-                };
-            case RemoveLiquidityKind.SingleTokenExactIn:
-                return {
-                    minAmountsOut: Array(tokens.length).fill(0n),
-                    tokenOutIndex: tokens
-                        .filter((_, index) => index !== bptIndex)
-                        .findIndex((t) => t.isSameAddress(input.tokenOut)),
-                    maxBptAmountIn: input.bptIn.rawAmount,
-                };
-            case RemoveLiquidityKind.Recovery:
-            case RemoveLiquidityKind.Proportional:
-                return {
-                    minAmountsOut: Array(tokens.length).fill(0n),
-                    tokenOutIndex: undefined,
-                    maxBptAmountIn: input.bptIn.rawAmount,
-                };
-        }
+    public async queryRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolState: PoolState,
+    ): Promise<RemoveLiquidityQueryOutput> {
+        const client = createPublicClient({
+            transport: http(input.rpcUrl),
+            chain: CHAINS[input.chainId],
+        });
+
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        const [_, tokenBalances] = await getPoolTokensV2(poolState.id, client);
+        const totalShares = await getActualSupply(poolState.address, client);
+
+        const poolStateWithBalances: PoolStateWithBalances = {
+            ...poolState,
+            tokens: sortedTokens.map((token, i) => ({
+                address: token.address,
+                decimals: token.decimals,
+                index: i,
+                balance: formatUnits(
+                    tokenBalances[i],
+                    token.decimals,
+                ) as HumanAmount,
+            })),
+            totalShares: formatEther(totalShares) as HumanAmount,
+        };
+
+        const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
+            poolStateWithBalances,
+            input.bptIn,
+        );
+        const bptToken = new Token(
+            input.chainId,
+            bptAmount.address,
+            bptAmount.decimals,
+        );
+        const bptIn = TokenAmount.fromRawAmount(bptToken, bptAmount.rawAmount);
+        const bptIndex = poolState.tokens.findIndex(
+            (t) => t.address === poolState.address,
+        );
+        let amountsOut = tokenAmounts.map((amount) =>
+            TokenAmount.fromRawAmount(
+                new Token(input.chainId, amount.address, amount.decimals),
+                amount.rawAmount,
+            ),
+        );
+        amountsOut = insertIndex(
+            amountsOut,
+            bptIndex,
+            TokenAmount.fromRawAmount(bptToken, 0n),
+        );
+        return {
+            poolType: poolState.type,
+            removeLiquidityKind: input.kind,
+            poolId: poolState.id,
+            bptIn,
+            amountsOut,
+            tokenOutIndex: undefined,
+            vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
+        };
     }
 
     public buildCall(
-        input: RemoveLiquidityComposableStableCall,
-    ): RemoveLiquidityBuildOutput {
-        const amounts = this.getAmountsCall(input);
+        input: RemoveLiquidityV2ComposableStableBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
+        const amounts = getAmountsCall(input);
         const amountsWithoutBpt = {
             ...amounts,
             minAmountsOut: [
@@ -143,6 +170,8 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             minAmountsOut: amounts.minAmountsOut,
             userData,
             toInternalBalance: !!input.toInternalBalance,
+            wethIsEth: !!input.wethIsEth,
+            chainId: input.chainId,
         });
         const call = encodeFunctionData({
             abi: vaultV2Abi,
@@ -162,39 +191,5 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
                 TokenAmount.fromRawAmount(a.token, amounts.minAmountsOut[i]),
             ),
         };
-    }
-
-    private getAmountsCall(
-        input: RemoveLiquidityComposableStableCall,
-    ): RemoveLiquidityAmounts {
-        switch (input.removeLiquidityKind) {
-            case RemoveLiquidityKind.Unbalanced:
-            case RemoveLiquidityKind.SingleTokenExactOut:
-                return {
-                    minAmountsOut: input.amountsOut.map((a) => a.amount),
-                    tokenOutIndex: input.tokenOutIndex,
-                    maxBptAmountIn: input.slippage.applyTo(input.bptIn.amount),
-                };
-            case RemoveLiquidityKind.SingleTokenExactIn:
-                if (input.tokenOutIndex === undefined) {
-                    throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
-                }
-                return {
-                    minAmountsOut: input.amountsOut.map((a) =>
-                        input.slippage.applyTo(a.amount, -1),
-                    ),
-                    tokenOutIndex: input.tokenOutIndex,
-                    maxBptAmountIn: input.bptIn.amount,
-                };
-            case RemoveLiquidityKind.Recovery:
-            case RemoveLiquidityKind.Proportional:
-                return {
-                    minAmountsOut: input.amountsOut.map((a) =>
-                        input.slippage.applyTo(a.amount, -1),
-                    ),
-                    tokenOutIndex: input.tokenOutIndex,
-                    maxBptAmountIn: input.bptIn.amount,
-                };
-        }
     }
 }

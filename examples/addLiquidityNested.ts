@@ -62,14 +62,10 @@ const addLiquidityNested = async () => {
         },
     ];
 
-    const useNativeAssetAsWrappedAmountIn = false;
-
     const addLiquidityInput: AddLiquidityNestedInput = {
         amountsIn,
         chainId,
         rpcUrl,
-        accountAddress,
-        useNativeAssetAsWrappedAmountIn,
     };
 
     // Calculate price impact to ensure it's acceptable
@@ -100,16 +96,18 @@ const addLiquidityNested = async () => {
         client,
     );
 
+    const wethIsEth = false;
+
     const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
-        sender: accountAddress,
-        recipient: accountAddress,
+        accountAddress,
         relayerApprovalSignature: signature,
+        wethIsEth,
     });
 
     let tokensIn = queryOutput.amountsIn.map((a) => a.token);
-    if (useNativeAssetAsWrappedAmountIn) {
+    if (wethIsEth) {
         tokensIn = replaceWrapped(tokensIn, chainId);
     }
 

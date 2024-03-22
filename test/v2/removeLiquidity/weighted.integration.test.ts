@@ -110,7 +110,6 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
             });
             assertRemoveLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
@@ -118,21 +117,22 @@ describe('weighted remove liquidity test', () => {
             );
         });
         test('with native', async () => {
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
                 amountsOut: amountsOut.slice(0, 1),
-                toNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                wethIsEth,
             });
             assertRemoveLiquidityUnbalanced(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                wethIsEth,
             );
         });
     });
@@ -162,7 +162,6 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
             });
             assertRemoveLiquiditySingleTokenExactOut(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
@@ -170,21 +169,23 @@ describe('weighted remove liquidity test', () => {
             );
         });
         test('with native', async () => {
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
                 amountOut,
-                toNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                wethIsEth,
             });
             assertRemoveLiquiditySingleTokenExactOut(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                2,
+                wethIsEth,
             );
         });
     });
@@ -213,7 +214,6 @@ describe('weighted remove liquidity test', () => {
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -222,21 +222,23 @@ describe('weighted remove liquidity test', () => {
         });
 
         test('with native', async () => {
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
-                toNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                wethIsEth,
             });
 
             assertRemoveLiquiditySingleTokenExactIn(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                2,
+                wethIsEth,
             );
         });
     });
@@ -263,7 +265,6 @@ describe('weighted remove liquidity test', () => {
             });
 
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -271,20 +272,22 @@ describe('weighted remove liquidity test', () => {
             );
         });
         test('with native', async () => {
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
-                toNativeAsset: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                wethIsEth,
             });
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                2,
+                wethIsEth,
             );
         });
     });

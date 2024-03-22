@@ -7,7 +7,6 @@ import { getAmounts, getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
-    NATIVE_ASSETS,
     addLiquidityProportionalUnavailableError,
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
 } from '@/utils';
@@ -15,14 +14,15 @@ import {
 import { getAmountsCall } from '../helpers';
 import {
     AddLiquidityBase,
-    AddLiquidityBaseCall,
+    AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
-    AddLiquidityBuildOutput,
+    AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
 } from '../types';
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
+import { getValue } from '@/entities/utils/getValue';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -58,14 +58,17 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     bptToken,
                     input.bptOut.rawAmount,
                 );
-                const maxAmountsIn = await doAddLiquiditySingleTokenQuery(
+                const amountIn = await doAddLiquiditySingleTokenQuery(
                     input,
                     poolState.address,
                     input.bptOut.rawAmount,
                 );
-                amountsIn = sortedTokens.map((t, i) =>
-                    TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
-                );
+                amountsIn = sortedTokens.map((t) => {
+                    if (t.isSameAddress(input.tokenIn))
+                        return TokenAmount.fromRawAmount(t, amountIn);
+
+                    return TokenAmount.fromRawAmount(t, 0n);
+                });
                 tokenInIndex = sortedTokens.findIndex((t) =>
                     t.isSameAddress(input.tokenIn),
                 );
@@ -79,15 +82,17 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             addLiquidityKind: input.kind,
             bptOut,
             amountsIn,
-            fromInternalBalance: input.fromInternalBalance ?? false,
-            vaultVersion: 3,
             tokenInIndex,
+            chainId: input.chainId,
+            vaultVersion: 3,
         };
 
         return output;
     }
 
-    buildCall(input: AddLiquidityBaseCall): AddLiquidityBuildOutput {
+    buildCall(
+        input: AddLiquidityBaseBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
         let call: Hex;
         switch (input.addLiquidityKind) {
@@ -102,7 +107,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                             input.poolId,
                             input.amountsIn.map((a) => a.amount),
                             amounts.minimumBpt,
-                            input.wethIsEth,
+                            !!input.wethIsEth,
                             '0x',
                         ],
                     });
@@ -122,7 +127,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                             input.amountsIn[input.tokenInIndex].token.address,
                             input.amountsIn[input.tokenInIndex].amount,
                             input.bptOut.amount,
-                            input.wethIsEth,
+                            !!input.wethIsEth,
                             '0x',
                         ],
                     });
@@ -130,21 +135,10 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                 break;
         }
 
-        let value = 0n;
-        if (input.wethIsEth) {
-            const wethInput = input.amountsIn.find(
-                (a) => a.token.address === NATIVE_ASSETS[input.chainId].wrapped,
-            );
-            if (wethInput === undefined) {
-                throw new Error('wethIsEth is true but no WETH input found');
-            }
-            value = wethInput.amount;
-        }
-
         return {
             call,
             to: BALANCER_ROUTER[input.chainId],
-            value,
+            value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,

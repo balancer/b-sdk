@@ -105,7 +105,6 @@ describe('GyroE V2 remove liquidity test', () => {
             });
 
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
@@ -113,20 +112,22 @@ describe('GyroE V2 remove liquidity test', () => {
             );
         });
         test('with native', async () => {
+            const wethIsEth = true;
             const removeLiquidityInput = {
                 ...input,
-                useNativeAssetAsWrappedAmountIn: true,
             };
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput,
+                wethIsEth,
             });
             assertRemoveLiquidityProportional(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                2,
+                wethIsEth,
             );
         });
     });

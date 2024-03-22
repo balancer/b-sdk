@@ -9,14 +9,12 @@ export type AddLiquidityNestedInput = {
     amountsIn: InputAmount[];
     chainId: ChainId;
     rpcUrl: string;
-    accountAddress: Address;
-    useNativeAssetAsWrappedAmountIn?: boolean;
     fromInternalBalance?: boolean;
 };
 
 export type AddLiquidityNestedCallAttributes = {
     chainId: ChainId;
-    useNativeAssetAsWrappedAmountIn: boolean;
+    wethIsEth?: boolean;
     sortedTokens: Token[];
     poolId: Hex;
     poolAddress: Address;
@@ -41,7 +39,7 @@ export type AddLiquidityNestedQueryOutput = {
 
 export type AddLiquidityNestedCallInput = AddLiquidityNestedQueryOutput & {
     slippage: Slippage;
-    sender: Address;
-    recipient: Address;
+    accountAddress: Address;
     relayerApprovalSignature?: Hex;
+    wethIsEth?: boolean;
 };

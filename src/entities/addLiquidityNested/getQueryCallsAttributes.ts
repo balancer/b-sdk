@@ -1,5 +1,10 @@
 import { Token } from '../token';
-import { BALANCER_RELAYER, ChainId, getPoolAddress } from '../../utils';
+import {
+    BALANCER_RELAYER,
+    ChainId,
+    ZERO_ADDRESS,
+    getPoolAddress,
+} from '../../utils';
 import {
     AddLiquidityNestedInput,
     AddLiquidityNestedCallAttributes,
@@ -9,13 +14,7 @@ import { Address, PoolType } from '../../types';
 import { Relayer } from '../relayer';
 
 export const getQueryCallsAttributes = (
-    {
-        amountsIn,
-        chainId,
-        accountAddress,
-        useNativeAssetAsWrappedAmountIn,
-        fromInternalBalance,
-    }: AddLiquidityNestedInput,
+    { amountsIn, chainId, fromInternalBalance }: AddLiquidityNestedInput,
     pools: NestedPool[],
 ): AddLiquidityNestedCallAttributes[] => {
     /**
@@ -26,6 +25,7 @@ export const getQueryCallsAttributes = (
      */
 
     const poolsSortedByLevel = pools.sort((a, b) => a.level - b.level);
+    const accountAddressPlaceholder = ZERO_ADDRESS;
 
     const calls: AddLiquidityNestedCallAttributes[] = [];
     for (const pool of poolsSortedByLevel) {
@@ -38,8 +38,6 @@ export const getQueryCallsAttributes = (
         }
         calls.push({
             chainId: chainId,
-            useNativeAssetAsWrappedAmountIn:
-                useNativeAssetAsWrappedAmountIn ?? false,
             sortedTokens,
             poolId: pool.id,
             poolAddress: pool.address,
@@ -48,7 +46,7 @@ export const getQueryCallsAttributes = (
                 pool.type === PoolType.ComposableStable
                     ? PoolKind.COMPOSABLE_STABLE_V2
                     : PoolKind.WEIGHTED,
-            sender: getSender(maxAmountsIn, accountAddress, chainId),
+            sender: getSender(maxAmountsIn, accountAddressPlaceholder, chainId),
             recipient: '0x', // set as placeholder - will be updated after all calls are created
             maxAmountsIn,
             minBptOut: 0n, // limits set to zero for query calls
@@ -58,7 +56,7 @@ export const getQueryCallsAttributes = (
             ),
         });
     }
-    updateRecipients(calls, accountAddress);
+    updateRecipients(calls, accountAddressPlaceholder);
     return calls;
 };
 

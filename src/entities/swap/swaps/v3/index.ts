@@ -1,34 +1,41 @@
 import {
-    Address,
+    PublicClient,
     createPublicClient,
     encodeFunctionData,
     getContract,
     http,
 } from 'viem';
-import { TokenAmount } from '../../tokenAmount';
-import { SwapKind, Hex } from '../../../types';
+import { TokenAmount } from '../../../tokenAmount';
+import { SwapKind, Hex } from '../../../../types';
 import {
     DEFAULT_USERDATA,
     BALANCER_ROUTER,
     NATIVE_ASSETS,
-} from '../../../utils';
-import { balancerRouterAbi } from '../../../abi';
+    BALANCER_BATCH_ROUTER,
+    MAX_UINT256,
+} from '../../../../utils';
+import { balancerRouterAbi } from '../../../../abi';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
-    SwapBase,
-    SwapBuildOutputBase,
+    SwapBuildCallInput,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
     SwapInput,
-} from '../types';
-import { PathWithAmount } from '../pathWithAmount';
-import { getInputAmount, getOutputAmount } from '../pathHelpers';
+} from '../../types';
+import { PathWithAmount } from '../../paths/pathWithAmount';
+import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
 import {
     SingleTokenExactIn,
     SingleTokenExactOut,
-    SwapCallBuildV3,
     SwapPathExactAmountIn,
+    SwapPathExactAmountInWithLimit,
     SwapPathExactAmountOut,
+    SwapPathExactAmountOutWithLimit,
 } from './types';
+import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
+import { SwapBase } from '../types';
+import { getLimitAmount, getPathLimits } from '../../limits';
 
 export * from './types';
 
@@ -84,21 +91,20 @@ export class SwapV3 implements SwapBase {
             transport: http(rpcUrl),
         });
 
+        return this.isBatchSwap
+            ? this.queryBatchSwap(client, block)
+            : this.querySingleSwap(client, block);
+    }
+
+    private async querySingleSwap(
+        client: PublicClient,
+        block?: bigint,
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
             address: BALANCER_ROUTER[this.chainId],
             abi: balancerRouterAbi,
             client,
         });
-
-        return this.isBatchSwap
-            ? this.queryBatchSwap(routerContract, block)
-            : this.querySingleSwap(routerContract, block);
-    }
-
-    private async querySingleSwap(
-        routerContract,
-        block?: bigint,
-    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         if ('exactAmountIn' in this.swaps) {
             const { result } =
                 await routerContract.simulate.querySwapSingleTokenExactIn(
@@ -142,65 +148,126 @@ export class SwapV3 implements SwapBase {
         throw Error('Unsupported V3 Query');
     }
 
+    private getSwapsWithLimits(pathLimits?: bigint[]): {
+        swapsWithLimits:
+            | SwapPathExactAmountInWithLimit[]
+            | SwapPathExactAmountOutWithLimit[];
+        totalPathLimits: bigint;
+    } {
+        let totalPathLimits = 0n;
+        if (this.swapKind === SwapKind.GivenIn) {
+            const swapsWithLimits = (this.swaps as SwapPathExactAmountIn[]).map(
+                (s, i) => {
+                    const minAmountOut = pathLimits ? pathLimits[i] : 0n;
+                    totalPathLimits += minAmountOut;
+                    return {
+                        ...s,
+                        minAmountOut,
+                    };
+                },
+            );
+            return { swapsWithLimits, totalPathLimits };
+        }
+        const swapsWithLimits = (this.swaps as SwapPathExactAmountOut[]).map(
+            (s, i) => {
+                const maxAmountIn = pathLimits ? pathLimits[i] : 0n;
+                totalPathLimits += maxAmountIn;
+                return {
+                    ...s,
+                    maxAmountIn,
+                };
+            },
+        );
+        return { swapsWithLimits, totalPathLimits };
+    }
+
     private async queryBatchSwap(
-        routerContract,
+        client: PublicClient,
         block?: bigint,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
-        // TODO - Implement onchain call once router available - still to be implemented on Router
+        // Note - batchSwaps are made via the Batch Router
+        const routerContract = getContract({
+            address: BALANCER_BATCH_ROUTER[this.chainId],
+            abi: balancerBatchRouterAbi,
+            client,
+        });
         /*
         In V3 all paths must have individual limits set using minAmountOut/maxAmountIn. 
         pathAmountsOut/In returned by query can be used along with slippage to set these correctly.
         */
+        const swapsWithLimits = this.getSwapsWithLimits();
+
         if (this.swapKind === SwapKind.GivenIn) {
-            // Expected return: uint256[] memory pathAmountsOut, address[] memory tokensOut,  uint256[] memory tokenAmountsOut
-            const mockQueryReturn = {
-                pathAmountsOut: (this.swaps as SwapPathExactAmountIn[]).map(
-                    (_s, i) => BigInt(i),
-                ),
-                tokensOut: [this.outputAmount.token.address],
-                tokenAmountsOut: [this.outputAmount.amount],
-            };
-            if (mockQueryReturn.tokenAmountsOut.length !== 1)
+            const { result } = await routerContract.simulate.querySwapExactIn(
+                [
+                    swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                    DEFAULT_USERDATA,
+                ],
+                { blockNumber: block },
+            );
+
+            if (result[1].length !== 1)
                 throw Error(
-                    'Swap only supports paths with matching tokenIn>tokenOut',
+                    'Swaps only support paths with matching tokenIn>tokenOut',
                 );
+
             return {
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
-                    mockQueryReturn.tokenAmountsOut[0],
+                    result[2][0],
                 ),
-                pathAmounts: mockQueryReturn.pathAmountsOut,
+                pathAmounts: result[0] as bigint[],
             };
         }
-        // Expected return: uint256[] memory pathAmountsIn, address[] memory tokensIn,  uint256[] memory tokenAmountsIn
-        const mockQueryReturn = {
-            pathAmountsOut: (this.swaps as SwapPathExactAmountOut[]).map(
-                (_s, i) => BigInt(i),
-            ),
-            tokensIn: [this.inputAmount.token.address],
-            tokenAmountsIn: [this.inputAmount.amount],
-        };
-        if (mockQueryReturn.tokenAmountsIn.length !== 1)
+
+        const { result } = await routerContract.simulate.querySwapExactOut(
+            [
+                swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                DEFAULT_USERDATA,
+            ],
+            { blockNumber: block },
+        );
+
+        if (result[1].length !== 1)
             throw Error(
                 'Swaps only support paths with matching tokenIn>tokenOut',
             );
+
         return {
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
-                this.outputAmount.token,
-                mockQueryReturn.tokenAmountsIn[0],
+                this.inputAmount.token,
+                result[2][0],
             ),
-            pathAmounts: mockQueryReturn.pathAmountsOut,
+            pathAmounts: result[0] as bigint[],
         };
     }
 
     public queryCallData(): string {
         let callData: string;
         if (this.isBatchSwap) {
-            // TODO - Implement this once router functions available - still to be implemented on Router
-            console.error('BatchSwap not implemented');
-            callData = '';
+            const swapsWithLimits = this.getSwapsWithLimits();
+
+            if (this.swapKind === SwapKind.GivenIn) {
+                callData = encodeFunctionData({
+                    abi: balancerBatchRouterAbi,
+                    functionName: 'querySwapExactIn',
+                    args: [
+                        swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                        DEFAULT_USERDATA,
+                    ],
+                });
+            } else {
+                callData = encodeFunctionData({
+                    abi: balancerBatchRouterAbi,
+                    functionName: 'querySwapExactOut',
+                    args: [
+                        swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                        DEFAULT_USERDATA,
+                    ],
+                });
+            }
         } else {
             if ('exactAmountIn' in this.swaps) {
                 callData = encodeFunctionData({
@@ -232,39 +299,76 @@ export class SwapV3 implements SwapBase {
     }
 
     /**
-     * Returns the transaction data to be sent to the vault contract
+     * Returns the transaction data to be sent to the router contract
      *
-     * @param swapCall
+     * @param input
      * @returns
      */
-    buildCall(swapCall: SwapCallBuildV3): SwapBuildOutputBase {
+    buildCall(
+        input: SwapBuildCallInput,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        let limitAmount: TokenAmount;
+        let call:
+            | Omit<SwapBuildOutputExactIn, 'minAmountOut'>
+            | Omit<SwapBuildOutputExactOut, 'maxAmountIn'>;
+        if (input.queryOutput.swapKind === SwapKind.GivenIn) {
+            limitAmount = getLimitAmount(
+                input.slippage,
+                SwapKind.GivenIn,
+                input.queryOutput.expectedAmountOut,
+            );
+        } else {
+            limitAmount = getLimitAmount(
+                input.slippage,
+                SwapKind.GivenOut,
+                input.queryOutput.expectedAmountIn,
+            );
+        }
         if (!this.isBatchSwap) {
-            return {
-                to: this.to(),
+            call = {
+                to: BALANCER_ROUTER[this.chainId],
                 callData: this.callDataSingleSwap(
-                    swapCall.limitAmount,
-                    swapCall.deadline,
-                    swapCall.wethIsEth,
+                    limitAmount,
+                    input.deadline ?? MAX_UINT256,
+                    !!input.wethIsEth,
                 ),
-                value: this.value(swapCall.limitAmount, swapCall.wethIsEth),
+                value: this.value(limitAmount, !!input.wethIsEth),
+            };
+        } else {
+            const pathLimits = getPathLimits(
+                input.slippage,
+                input.queryOutput,
+                limitAmount.amount,
+            );
+            if (!pathLimits)
+                throw Error(
+                    'V3 BatchSwaps need path limits for call construction',
+                );
+            call = {
+                to: BALANCER_BATCH_ROUTER[this.chainId],
+                callData: this.callDataBatchSwap(
+                    limitAmount.amount,
+                    pathLimits,
+                    input.deadline ?? MAX_UINT256,
+                    !!input.wethIsEth,
+                ),
+                value: this.value(limitAmount, !!input.wethIsEth),
             };
         }
-        if (!swapCall.pathLimits)
-            throw Error('V3 BatchSwaps need path limits for call construction');
+        if (this.swapKind === SwapKind.GivenIn) {
+            return {
+                ...call,
+                minAmountOut: limitAmount,
+            };
+        }
         return {
-            to: this.to(),
-            callData: this.callDataBatchSwap(
-                swapCall.limitAmount.amount,
-                swapCall.pathLimits,
-                swapCall.deadline,
-                swapCall.wethIsEth,
-            ),
-            value: this.value(swapCall.limitAmount, swapCall.wethIsEth),
+            ...call,
+            maxAmountIn: limitAmount,
         };
     }
 
     /**
-     * Returns the call data to be sent to the vault contract for a single token swap execution.
+     * Returns the call data to be sent to the router contract for a single token swap execution.
      * @param limit minAmountOut/maxAmountIn depending on SwapKind
      * @param deadline
      * @param wethIsEth
@@ -313,7 +417,7 @@ export class SwapV3 implements SwapBase {
     }
 
     /**
-     * Returns the call data to be sent to the vault contract for batchSwap execution.
+     * Returns the call data to be sent to the router contract for batchSwap execution.
      * @param limitAmount total minAmountOut/maxAmountIn depending on SwapKind
      * @param pathLimits individual path minAmountOut/maxAmountIn depending on SwapKind
      * @param deadline
@@ -327,7 +431,7 @@ export class SwapV3 implements SwapBase {
         wethIsEth: boolean,
     ): Hex {
         let callData: Hex;
-        let totalPathLimits = 0n;
+        const swapsWithLimits = this.getSwapsWithLimits(pathLimits);
 
         if (this.swapKind === SwapKind.GivenIn) {
             if (
@@ -336,24 +440,20 @@ export class SwapV3 implements SwapBase {
             )
                 throw Error('Must have a limit for each path.');
 
-            const swapsWithLimits = (this.swaps as SwapPathExactAmountIn[]).map(
-                (s, i) => {
-                    totalPathLimits = totalPathLimits + pathLimits[i];
-                    return {
-                        ...s,
-                        minAmountOut: pathLimits[i],
-                    };
-                },
-            );
-            if (totalPathLimits !== limitAmount)
+            if (swapsWithLimits.totalPathLimits !== limitAmount)
                 throw new Error(
-                    `minAmountOut mismatch, ${limitAmount} ${totalPathLimits}`,
+                    `minAmountOut mismatch, ${limitAmount} ${swapsWithLimits.totalPathLimits}`,
                 );
 
             callData = encodeFunctionData({
-                abi: balancerRouterAbi,
+                abi: balancerBatchRouterAbi,
                 functionName: 'swapExactIn',
-                args: [swapsWithLimits, deadline, wethIsEth, DEFAULT_USERDATA],
+                args: [
+                    swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                    deadline,
+                    wethIsEth,
+                    DEFAULT_USERDATA,
+                ],
             });
         } else {
             if (
@@ -362,30 +462,26 @@ export class SwapV3 implements SwapBase {
             )
                 throw Error('Must have a limit for each path.');
 
-            const swapsWithLimits = (
-                this.swaps as SwapPathExactAmountOut[]
-            ).map((s, i) => {
-                totalPathLimits = totalPathLimits + pathLimits[i];
-                return {
-                    ...s,
-                    maxAmountIn: pathLimits[i],
-                };
-            });
-            if (totalPathLimits !== limitAmount)
+            if (swapsWithLimits.totalPathLimits !== limitAmount)
                 throw new Error(
-                    `maxAmountIn mismatch, ${limitAmount} ${totalPathLimits}`,
+                    `maxAmountIn mismatch, ${limitAmount} ${swapsWithLimits.totalPathLimits}`,
                 );
             callData = encodeFunctionData({
-                abi: balancerRouterAbi,
+                abi: balancerBatchRouterAbi,
                 functionName: 'swapExactOut',
-                args: [swapsWithLimits, deadline, wethIsEth, DEFAULT_USERDATA],
+                args: [
+                    swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                    deadline,
+                    wethIsEth,
+                    DEFAULT_USERDATA,
+                ],
             });
         }
         return callData;
     }
 
     /**
-     * Returns the native assset value to be sent to the vault contract based on the swap kind and the limit amounts
+     * Returns the native assset value to be sent to the router contract based on the swap kind and the limit amounts
      *
      * @param limit
      * @returns
@@ -397,16 +493,25 @@ export class SwapV3 implements SwapBase {
             this.inputAmount.token.address ===
                 NATIVE_ASSETS[this.chainId].wrapped
         ) {
-            if ('exactAmountIn' in this.swaps) value = this.swaps.exactAmountIn;
-            else if ('exactAmountOut' in this.swaps) value = limit.amount;
-            else throw new Error('Incorrect V3 Swap');
+            if (this.isBatchSwap) {
+                if (this.swapKind === SwapKind.GivenIn) {
+                    for (const swap of this.swaps as SwapPathExactAmountIn[]) {
+                        value += swap.exactAmountIn;
+                    }
+                } else {
+                    value = limit.amount;
+                }
+            } else {
+                if ('exactAmountIn' in this.swaps)
+                    value = this.swaps.exactAmountIn;
+                else if ('exactAmountOut' in this.swaps) value = limit.amount;
+                else throw new Error('Incorrect V3 Swap');
+            }
         }
         return value;
     }
 
-    private to(): Address {
-        return BALANCER_ROUTER[this.chainId];
-    }
+    // helper methods
 
     private getSwaps(paths: PathWithAmount[]) {
         let swaps:

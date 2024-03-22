@@ -45,6 +45,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         wstETH: {
             address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
             decimals: 18,
+            slot: 0,
         },
         sfrxETH: {
             address: '0xac3e018457b222d93114458476f3e3416abbe38f',
@@ -55,7 +56,25 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
         },
     },
+    [ChainId.OPTIMISM]: {
+        FRAX: {
+            address: '0x2e3d870790dc77a83dd1d18184acc7439a53f475',
+            decimals: 18,
+        },
+        MAI: {
+            address: '0xdfa46478f9e5ea86d57387849598dbfb2e964b02',
+            decimals: 18,
+        },
+        USDC: {
+            address: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
+            decimals: 6,
+        },
+    },
     [ChainId.POLYGON]: {
+        DAI: {
+            address: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063',
+            decimals: 18,
+        },
         USDC: {
             address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
             decimals: 6,
@@ -76,6 +95,21 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
             decimals: 18,
             slot: 3,
+        },
+        DAI: {
+            address: '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613',
+            decimals: 18,
+            slot: 1,
+        },
+        USDC: {
+            address: '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a',
+            decimals: 6,
+            slot: 0,
+        },
+        BPT: {
+            address: '0xe623a14c663e66f63ceddd73528da84db4e41350',
+            decimals: 18,
+            slot: 1,
         },
     },
 };
@@ -105,13 +139,6 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
-        '50bb_sDAI_50bb_a_USDC': {
-            id: '0x0da692ac0611397027c91e559cfd482c4197e4030002000000000000000005c9',
-            address: '0x0da692ac0611397027c91e559cfd482c4197e403',
-            type: PoolType.Weighted,
-            decimals: 18,
-            slot: 0,
-        },
         wstETH_rETH_sfrxETH: {
             id: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b',
             address: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af7',
@@ -126,10 +153,26 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
-        wstETH_wETH: {
+        wstETH_wETH_CSP: {
             id: '0x93d199263632a4ef4bb438f1feb99e57b4b5f0bd0000000000000000000005c2',
             address: '0x93d199263632a4ef4bb438f1feb99e57b4b5f0bd',
             type: PoolType.ComposableStable,
+            decimals: 18,
+            slot: 0,
+        },
+        wstETH_wETH_MSP: {
+            id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
+            address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
+            type: PoolType.MetaStable,
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.OPTIMISM]: {
+        FRAX_USDC_MAI: {
+            id: '0x3dc09db8e571da76dd04e9176afc7feee0b89106000000000000000000000019',
+            address: '0x3dc09db8e571da76dd04e9176afc7feee0b89106',
+            type: PoolType.Stable,
             decimals: 18,
             slot: 0,
         },
@@ -142,11 +185,39 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
+        DAI_WMATIC: {
+            id: '0x9d75cc71555ddabcb89b52c818c2c689e2191401000200000000000000000762',
+            address: '0x9d75cc71555ddabcb89b52c818c2c689e2191401',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
     },
     [ChainId.SEPOLIA]: {
         MOCK_WEIGHTED_POOL: {
-            address: '0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83',
-            id: '0xB7FdEa33364Da24d6ad01C98EFAb7b539B917A83',
+            address: '0x204d4194e4e42364e3d1841d0a9b1ef857879c31',
+            id: '0x204d4194e4e42364e3d1841d0a9b1ef857879c31',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_BAL_DAI_POOL: {
+            address: '0xac79a8276860bf96d761804e5ed5736d3afaaecf',
+            id: '0xac79a8276860bf96d761804e5ed5736d3afaaecf',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_USDC_DAI_POOL: {
+            address: '0xe623a14c663e66f63ceddd73528da84db4e41350',
+            id: '0xe623a14c663e66f63ceddd73528da84db4e41350',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_NESTED_POOL: {
+            address: '0x4c885071fc0e694c7e0091c1e5694267066df96f',
+            id: '0x4c885071fc0e694c7e0091c1e5694267066df96f',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,

@@ -9,6 +9,7 @@ import {
     Slippage,
     ChainId,
     NestedPoolState,
+    RemoveLiquidityRecoveryInput,
 } from '@/.';
 import { CreatePool } from '@/entities/createPool';
 import { CreatePoolInput } from '@/entities/createPool/types';
@@ -22,6 +23,8 @@ export type AddLiquidityTxInput = {
     slippage: Slippage;
     poolState: PoolState;
     testAddress: Address;
+    wethIsEth?: boolean;
+    fromInternalBalance?: boolean;
 };
 
 export type InitPoolTxInput = Omit<
@@ -32,13 +35,22 @@ export type InitPoolTxInput = Omit<
     initPool: InitPool;
 };
 
-export type RemoveLiquidityTxInput = {
+export type RemoveLiquidityTxInputBase = {
     client: Client & PublicActions & TestActions & WalletActions;
     removeLiquidity: RemoveLiquidity;
-    removeLiquidityInput: RemoveLiquidityInput;
-    slippage: Slippage;
     poolState: PoolState;
+    slippage: Slippage;
     testAddress: Address;
+    wethIsEth?: boolean;
+    toInternalBalance?: boolean;
+};
+
+export type RemoveLiquidityTxInput = RemoveLiquidityTxInputBase & {
+    removeLiquidityInput: RemoveLiquidityInput;
+};
+
+export type RemoveLiquidityRecoveryTxInput = RemoveLiquidityTxInputBase & {
+    removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput;
 };
 
 export type CreatePoolTxInput = {
@@ -53,10 +65,11 @@ export type AddLiquidityNestedTxInput = {
     amountsIn: {
         address: Address; // DAI
         rawAmount: bigint;
+        decimals: number;
     }[];
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
     client: Client & PublicActions & TestActions & WalletActions;
-    useNativeAssetAsWrappedAmountIn?: boolean;
+    wethIsEth?: boolean;
 };

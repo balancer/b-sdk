@@ -1,4 +1,4 @@
-// pnpm test -- removeLiquidity/weighted.integration.test.ts
+// pnpm test -- removeLiquidity/weighted.recovery.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -10,41 +10,45 @@ import {
     publicActions,
     walletActions,
 } from 'viem';
+
 import {
     RemoveLiquidityKind,
     Slippage,
-    PoolState,
     RemoveLiquidity,
     Hex,
     CHAINS,
     ChainId,
-    RemoveLiquidityInput,
     InputAmount,
     RemoveLiquidityRecoveryInput,
-} from '../../../src';
-import { forkSetup } from '../../lib/utils/helper';
+    PoolState,
+} from 'src';
+
 import {
     assertRemoveLiquidityRecovery,
-    doRemoveLiquidity,
-} from '../../lib/utils/removeLiquidityHelper';
-import { RemoveLiquidityTxInput } from '../../lib/utils/types';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
-import { POOLS, TOKENS } from 'test/lib/utils/addresses';
+    doRemoveLiquidityRecovery,
+    forkSetup,
+    POOLS,
+    RemoveLiquidityRecoveryTxInput,
+    TOKENS,
+} from 'test/lib/utils';
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 
-const chainId = ChainId.MAINNET;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const chainId = ChainId.POLYGON;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]);
 
-const testPool = POOLS[chainId]['50bb_sDAI_50bb_a_USDC'];
-const TOKENS_MAINNET = TOKENS[chainId];
+const testPool = POOLS[chainId].DAI_WMATIC;
+const DAI = TOKENS[chainId].DAI;
+const WMATIC = TOKENS[chainId].WMATIC;
+
 describe('weighted remove liquidity recovery test', () => {
-    let txInput: RemoveLiquidityTxInput;
-    let poolInput: PoolState;
+    let txInput: RemoveLiquidityRecoveryTxInput;
+    let poolState: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolInput = await api.getPool(testPool.id);
+        poolState = await api.getPool(testPool.id);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -54,13 +58,15 @@ describe('weighted remove liquidity recovery test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
+        const testAddress = (await client.getAddresses())[0];
+
         txInput = {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolState: poolInput,
-            testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
-            removeLiquidityInput: {} as RemoveLiquidityInput,
+            poolState,
+            testAddress,
+            removeLiquidityRecoveryInput: {} as RemoveLiquidityRecoveryInput,
         };
     });
 
@@ -80,7 +86,7 @@ describe('weighted remove liquidity recovery test', () => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolInput.address,
+                address: poolState.address,
             };
             input = {
                 bptIn,
@@ -90,17 +96,33 @@ describe('weighted remove liquidity recovery test', () => {
             };
         });
         test('with tokens', async () => {
-            const removeLiquidityOutput = await doRemoveLiquidity({
+            const removeLiquidityOutput = await doRemoveLiquidityRecovery({
                 ...txInput,
-                removeLiquidityInput: input,
+                removeLiquidityRecoveryInput: input,
             });
 
             assertRemoveLiquidityRecovery(
-                txInput.client.chain?.id as number,
                 txInput.poolState,
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+            );
+        });
+        test('with native', async () => {
+            const wethIsEth = true;
+            const removeLiquidityOutput = await doRemoveLiquidityRecovery({
+                ...txInput,
+                removeLiquidityRecoveryInput: input,
+                wethIsEth,
+            });
+
+            assertRemoveLiquidityRecovery(
+                txInput.poolState,
+                input,
+                removeLiquidityOutput,
+                txInput.slippage,
+                2,
+                wethIsEth,
             );
         });
     });
@@ -112,13 +134,13 @@ class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [
             {
-                address: TOKENS_MAINNET.bb_s_DAI.address,
-                decimals: TOKENS_MAINNET.bb_s_DAI.decimals,
+                address: WMATIC.address,
+                decimals: WMATIC.decimals,
                 index: 0,
             },
             {
-                address: TOKENS_MAINNET.bb_a_USDC.address,
-                decimals: TOKENS_MAINNET.bb_a_USDC.decimals,
+                address: DAI.address,
+                decimals: DAI.decimals,
                 index: 1,
             },
         ];

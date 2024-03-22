@@ -2,9 +2,14 @@ import { PoolType } from '../../types';
 import { AddLiquidityInput } from '../addLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput } from '../initPool/types';
+import {
+    RemoveLiquidityInput,
+    RemoveLiquidityRecoveryInput,
+} from '../removeLiquidity/types';
 import { PoolState } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
+import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './types';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
 
@@ -13,11 +18,13 @@ export class InputValidator {
 
     constructor() {
         this.validators = {
-            [PoolType.Weighted]: new InputValidatorWeighted(),
+            [PoolType.ComposableStable]: new InputValidatorComposableStable(),
             [PoolType.Gyro2]: new InputValidatorGyro(),
             [PoolType.Gyro3]: new InputValidatorGyro(),
             [PoolType.GyroE]: new InputValidatorGyro(),
-            [PoolType.ComposableStable]: new InputValidatorComposableStable(),
+            [PoolType.MetaStable]: new InputValidatorStable(),
+            [PoolType.Stable]: new InputValidatorStable(),
+            [PoolType.Weighted]: new InputValidatorWeighted(),
         };
     }
 
@@ -27,8 +34,15 @@ export class InputValidator {
         return this.validators[poolType];
     }
 
+    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState) {
+        this.getValidator(poolState.type).validateInitPool(
+            initPoolInput,
+            poolState,
+        );
+    }
+
     validateAddLiquidity(
-        addLiquidityInput: AddLiquidityInput | InitPoolInput,
+        addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
         this.getValidator(poolState.type).validateAddLiquidity(
@@ -37,9 +51,22 @@ export class InputValidator {
         );
     }
 
-    validateRemoveLiquidity(removeLiquidityInput: any, poolState: any): void {
+    validateRemoveLiquidity(
+        removeLiquidityInput: RemoveLiquidityInput,
+        poolState: PoolState,
+    ): void {
         this.getValidator(poolState.type).validateRemoveLiquidity(
             removeLiquidityInput,
+            poolState,
+        );
+    }
+
+    validateRemoveLiquidityRecovery(
+        removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
+        poolState: PoolState,
+    ): void {
+        this.getValidator(poolState.type).validateRemoveLiquidityRecovery(
+            removeLiquidityRecoveryInput,
             poolState,
         );
     }

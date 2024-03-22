@@ -1,6 +1,6 @@
 import { Token } from '../entities/token';
 import { TokenAmount, BigintIsh } from '../entities/tokenAmount';
-import { SwapKind } from '../types';
+import { Address, SwapKind } from '../types';
 
 export function checkInputs(
     tokenIn: Token,
@@ -34,4 +34,20 @@ export function checkInputs(
     }
 
     return amount;
+}
+
+export function isSameAddress(address1: Address, address2: Address) {
+    return address1.toLowerCase() === address2.toLowerCase();
+}
+
+export function removeIndex<T>(array: T[], index: number): T[] {
+    return index === -1
+        ? array
+        : [...array.slice(0, index), ...array.slice(index + 1)];
+}
+
+export function insertIndex<T>(array: T[], index: number, value: T): T[] {
+    return index === -1
+        ? array
+        : [...array.slice(0, index), value, ...array.slice(index)];
 }

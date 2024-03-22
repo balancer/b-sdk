@@ -3,14 +3,13 @@ import { ChainId, Slippage } from '../../src';
 import { SwapKind } from '@/types';
 import {
     Swap,
-    Path,
-    TokenApi,
     Token,
     TokenAmount,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
 } from '@/entities';
 import { TOKENS } from '../lib/utils/addresses';
+import { Path, TokenApi } from '@/entities/swap/paths/types';
 
 const chainId = ChainId.MAINNET;
 const wethIsEth = false;

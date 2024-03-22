@@ -14,7 +14,7 @@ type NetworkSetup = {
 
 type NetworksWithFork = Extract<
     keyof typeof ChainId,
-    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA'
+    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA' | 'OPTIMISM'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -23,12 +23,13 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     POLYGON: 8745,
     FANTOM: 8845,
     SEPOLIA: 8945,
+    OPTIMISM: 9045,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     MAINNET: {
         rpcEnv: 'ETHEREUM_RPC_URL',
-        fallBackRpc: 'https://cloudflare-eth.com',
+        fallBackRpc: 'https://mainnet.gateway.tenderly.co',
         port: ANVIL_PORTS.MAINNET,
         forkBlockNumber: 18980070n,
     },
@@ -51,7 +52,13 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'SEPOLIA_RPC_URL',
         fallBackRpc: 'https://sepolia.gateway.tenderly.co',
         port: ANVIL_PORTS.SEPOLIA,
-        forkBlockNumber: 5158611n,
+        forkBlockNumber: 5490330n,
+    },
+    OPTIMISM: {
+        rpcEnv: 'OPTIMISM_RPC_URL',
+        fallBackRpc: 'https://optimism.gateway.tenderly.co',
+        port: ANVIL_PORTS.OPTIMISM,
+        forkBlockNumber: 117374265n,
     },
 };
 
@@ -93,6 +100,23 @@ export async function stopAnvilForks() {
         }),
     );
     runningForks = {};
+}
+
+// Stop a specific anvil fork
+export async function stopAnvilFork(
+    network: NetworkSetup,
+    jobId = Number(process.env.VITEST_WORKER_ID) || 0,
+    blockNumber?: bigint, // If not provided, the fork will start from the network's forkBlockNumber
+) {
+    const anvilOptions = getAnvilOptions(network, blockNumber);
+
+    const defaultAnvilPort = 8545;
+    const port = (anvilOptions.port || defaultAnvilPort) + jobId;
+    // Avoid starting fork if it was running already
+    if (!runningForks[port]) return;
+
+    await runningForks[port].stop();
+    delete runningForks[port];
 }
 
 /*

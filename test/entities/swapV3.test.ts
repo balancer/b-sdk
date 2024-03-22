@@ -1,13 +1,13 @@
 // pnpm test -- swapV3.test.ts
 import { ChainId } from '../../src';
 import { SwapKind } from '@/types';
-import { Path, TokenApi } from '@/entities';
 import { TOKENS } from '../lib/utils/addresses';
 import {
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
     SwapV3,
-} from '@/entities/swap/swapV3';
+} from '@/entities/swap/swaps/v3';
+import { Path, TokenApi } from '@/entities/swap/paths/types';
 
 describe('SwapV3', () => {
     describe('getSwaps', () => {
@@ -32,7 +32,7 @@ describe('SwapV3', () => {
             ];
 
             const path1hop: Path = {
-                balancerVersion: 3,
+                vaultVersion: 3,
                 tokens: [tokens[0], tokens[3]],
                 pools: [
                     '0xc2aa60465bffa1a88f5ba471a59ca0435c3ec5c100020000000000000000062c',
@@ -41,7 +41,7 @@ describe('SwapV3', () => {
                 outputAmountRaw: 2000000n,
             };
             const path3hops: Path = {
-                balancerVersion: 3,
+                vaultVersion: 3,
                 tokens,
                 pools: [
                     '0xc2aa60465bffa1a88f5ba471a59ca0435c3ec5c100020000000000000000062c',

@@ -44,7 +44,7 @@ const rETH = TOKENS[chainId].rETH;
 
 // pool and tokens for swap
 const BAL_WETH = POOLS[chainId].BAL_WETH;
-const wstETH_wETH = POOLS[chainId].wstETH_wETH;
+const wstETH_wETH = POOLS[chainId].wstETH_wETH_CSP;
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 

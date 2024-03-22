@@ -85,13 +85,11 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
                     address: createPoolWeightedInput.tokens[0].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
-                    weight: parseEther(`${1 / 2}`),
                 },
                 {
                     address: createPoolWeightedInput.tokens[1].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
-                    weight: parseEther(`${1 / 2}`),
                 },
             ],
             chainId,
