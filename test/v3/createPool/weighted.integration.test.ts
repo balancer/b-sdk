@@ -1,4 +1,4 @@
-// pnpm test -- createPool/weighted.integration.test.ts
+// pnpm test -- v3/createPool/weighted.integration.test.ts
 
 import {
     Address,
@@ -34,7 +34,7 @@ describe('Create Weighted Pool tests', () => {
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl, { timeout: 20_000 }),
+            transport: http(rpcUrl, { timeout: 120_000 }),
         })
             .extend(publicActions)
             .extend(walletActions);
@@ -74,5 +74,5 @@ describe('Create Weighted Pool tests', () => {
             createPoolInput: createWeightedPoolInput,
         });
         expect(poolAddress).to.not.be.undefined;
-    });
+    }, 120_000);
 });

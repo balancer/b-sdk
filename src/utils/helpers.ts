@@ -45,3 +45,9 @@ export function removeIndex<T>(array: T[], index: number): T[] {
         ? array
         : [...array.slice(0, index), ...array.slice(index + 1)];
 }
+
+export function insertIndex<T>(array: T[], index: number, value: T): T[] {
+    return index === -1
+        ? array
+        : [...array.slice(0, index), value, ...array.slice(index)];
+}

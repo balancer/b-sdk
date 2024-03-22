@@ -1,10 +1,14 @@
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { PoolState } from '@/entities/types';
-import { getSortedTokens } from '@/entities/utils';
+import { PoolState, PoolStateWithBalances } from '@/entities/types';
+import {
+    calculateProportionalAmounts,
+    getSortedTokens,
+} from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
+    CHAINS,
     removeLiquidityUnbalancedNotSupportedOnV3,
 } from '@/utils';
 
@@ -16,6 +20,7 @@ import {
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
+    RemoveLiquidityRecoveryInput,
 } from '../types';
 import { doRemoveLiquiditySingleTokenExactOutQuery } from './doRemoveLiquiditySingleTokenExactOutQuery';
 import { doRemoveLiquiditySingleTokenExactInQuery } from './doRemoveLiquiditySingleTokenExactInQuery';
@@ -23,6 +28,9 @@ import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportio
 import { encodeRemoveLiquiditySingleTokenExactOut } from './encodeRemoveLiquiditySingleTokenExactOut';
 import { encodeRemoveLiquiditySingleTokenExactIn } from './encodeRemoveLiquiditySingleTokenExactIn';
 import { encodeRemoveLiquidityProportional } from './encodeRemoveLiquidityProportional';
+import { createPublicClient, formatEther, formatUnits, http } from 'viem';
+import { getPoolTokensV2, getTotalSupply } from '@/utils/tokens';
+import { HumanAmount } from '@/data';
 
 export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
@@ -72,10 +80,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     );
                 }
                 break;
-            case RemoveLiquidityKind.Recovery:
-                throw new Error(
-                    'Pending smart contract implementation and Router ABI update',
-                );
         }
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
@@ -94,6 +98,68 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         };
 
         return output;
+    }
+
+    /**
+     * It's not possible to query Remove Liquidity Recovery in the same way as
+     * other remove liquidity kinds, but since it's not affected by fees or anything
+     * other than pool balances, we can calculate amountsOut as proportional amounts.
+     */
+    public async queryRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolState: PoolState,
+    ): Promise<RemoveLiquidityBaseQueryOutput> {
+        const client = createPublicClient({
+            transport: http(input.rpcUrl),
+            chain: CHAINS[input.chainId],
+        });
+
+        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        // FIXME: this should be updated with v3 implementation - still pending from SC team
+        const [_, tokenBalances] = await getPoolTokensV2(
+            poolState.address,
+            client,
+        );
+        const totalShares = await getTotalSupply(poolState.address, client);
+
+        const poolStateWithBalances: PoolStateWithBalances = {
+            ...poolState,
+            tokens: sortedTokens.map((token, i) => ({
+                address: token.address,
+                decimals: token.decimals,
+                index: i,
+                balance: formatUnits(
+                    tokenBalances[i],
+                    token.decimals,
+                ) as HumanAmount,
+            })),
+            totalShares: formatEther(totalShares) as HumanAmount,
+        };
+
+        const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
+            poolStateWithBalances,
+            input.bptIn,
+        );
+        const bptIn = TokenAmount.fromRawAmount(
+            new Token(input.chainId, bptAmount.address, bptAmount.decimals),
+            bptAmount.rawAmount,
+        );
+        const amountsOut = tokenAmounts.map((amountIn) =>
+            TokenAmount.fromRawAmount(
+                new Token(input.chainId, amountIn.address, amountIn.decimals),
+                amountIn.rawAmount,
+            ),
+        );
+        return {
+            poolType: poolState.type,
+            removeLiquidityKind: input.kind,
+            poolId: poolState.id,
+            bptIn,
+            amountsOut,
+            tokenOutIndex: undefined,
+            vaultVersion: poolState.vaultVersion,
+            chainId: input.chainId,
+        };
     }
 
     public buildCall(

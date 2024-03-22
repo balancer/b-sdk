@@ -1,7 +1,6 @@
 // pnpm test -- composableStable.recovery.integration.test.ts
 
 import {
-    Hex,
     createTestClient,
     http,
     parseEther,
@@ -16,7 +15,6 @@ import {
     InputAmount,
     PoolState,
     RemoveLiquidity,
-    RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityRecoveryInput,
     Slippage,
@@ -25,10 +23,10 @@ import {
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import {
     assertRemoveLiquidityRecovery,
-    doRemoveLiquidity,
+    doRemoveLiquidityRecovery,
     forkSetup,
     POOLS,
-    RemoveLiquidityTxInput,
+    RemoveLiquidityRecoveryTxInput,
     TOKENS,
 } from 'test/lib/utils';
 
@@ -38,14 +36,14 @@ const TOKENS_MAINNET = TOKENS[chainId];
 const testPool = POOLS[chainId].vETH_WETH;
 
 describe('composable stable remove liquidity test', () => {
-    let txInput: RemoveLiquidityTxInput;
+    let txInput: RemoveLiquidityRecoveryTxInput;
     let poolState: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolState = await api.getPool(testPool.id);
+        poolState = await api.getPool();
 
         const client = createTestClient({
             mode: 'anvil',
@@ -63,7 +61,7 @@ describe('composable stable remove liquidity test', () => {
             slippage: Slippage.fromPercentage('1'), // 1%
             poolState,
             testAddress,
-            removeLiquidityInput: {} as RemoveLiquidityInput,
+            removeLiquidityRecoveryInput: {} as RemoveLiquidityRecoveryInput,
         };
     });
 
@@ -73,7 +71,7 @@ describe('composable stable remove liquidity test', () => {
             txInput.testAddress,
             [testPool.address],
             [testPool.slot as number],
-            [parseUnits('1000', 18)],
+            [parseUnits('10', 18)],
         );
     });
 
@@ -93,9 +91,9 @@ describe('composable stable remove liquidity test', () => {
             };
         });
         test('with tokens', async () => {
-            const removeLiquidityOutput = await doRemoveLiquidity({
+            const removeLiquidityOutput = await doRemoveLiquidityRecovery({
                 ...txInput,
-                removeLiquidityInput: input,
+                removeLiquidityRecoveryInput: input,
             });
 
             assertRemoveLiquidityRecovery(
@@ -103,13 +101,14 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                poolState.vaultVersion,
             );
         });
         test('with native', async () => {
             const wethIsEth = true;
-            const removeLiquidityOutput = await doRemoveLiquidity({
+            const removeLiquidityOutput = await doRemoveLiquidityRecovery({
                 ...txInput,
-                removeLiquidityInput: input,
+                removeLiquidityRecoveryInput: input,
                 wethIsEth,
             });
 
@@ -118,7 +117,7 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                2,
+                poolState.vaultVersion,
                 wethIsEth,
             );
         });
@@ -126,7 +125,7 @@ describe('composable stable remove liquidity test', () => {
 });
 
 class MockApi {
-    public async getPool(id: Hex): Promise<PoolState> {
+    public async getPool(): Promise<PoolState> {
         const tokens = [
             {
                 address: testPool.address,
@@ -146,7 +145,7 @@ class MockApi {
         ];
 
         return {
-            id,
+            id: testPool.id,
             address: testPool.address,
             type: testPool.type,
             tokens,

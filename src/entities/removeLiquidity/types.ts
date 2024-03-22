@@ -53,8 +53,7 @@ export type RemoveLiquidityInput =
     | RemoveLiquidityUnbalancedInput
     | RemoveLiquiditySingleTokenExactOutInput
     | RemoveLiquiditySingleTokenExactInInput
-    | RemoveLiquidityProportionalInput
-    | RemoveLiquidityRecoveryInput;
+    | RemoveLiquidityProportionalInput;
 
 // Returned from a remove liquidity query
 export type RemoveLiquidityBaseQueryOutput = {
@@ -92,6 +91,10 @@ export type RemoveLiquidityBuildCallOutput = {
 export interface RemoveLiquidityBase {
     query(
         input: RemoveLiquidityInput,
+        poolState: PoolState,
+    ): Promise<RemoveLiquidityQueryOutput>;
+    queryRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput>;
     buildCall(

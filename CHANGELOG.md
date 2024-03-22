@@ -1,5 +1,16 @@
 # @balancer/sdk
 
+## 0.13.0
+
+### Minor Changes
+
+- 6974a7c: Add add/remove liquidity support for stable and metastable pools
+- 87d1dbd: Refactor queryRemoveLiquidityRecovery into a separate method
+
+### Patch Changes
+
+- 33b23c6: Bump create pool test timeout
+
 ## 0.12.0
 
 ### Minor Changes

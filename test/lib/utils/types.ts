@@ -9,6 +9,7 @@ import {
     Slippage,
     ChainId,
     NestedPoolState,
+    RemoveLiquidityRecoveryInput,
 } from '@/.';
 import { CreatePool } from '@/entities/createPool';
 import { CreatePoolInput } from '@/entities/createPool/types';
@@ -34,15 +35,22 @@ export type InitPoolTxInput = Omit<
     initPool: InitPool;
 };
 
-export type RemoveLiquidityTxInput = {
+export type RemoveLiquidityTxInputBase = {
     client: Client & PublicActions & TestActions & WalletActions;
     removeLiquidity: RemoveLiquidity;
-    removeLiquidityInput: RemoveLiquidityInput;
-    slippage: Slippage;
     poolState: PoolState;
+    slippage: Slippage;
     testAddress: Address;
     wethIsEth?: boolean;
     toInternalBalance?: boolean;
+};
+
+export type RemoveLiquidityTxInput = RemoveLiquidityTxInputBase & {
+    removeLiquidityInput: RemoveLiquidityInput;
+};
+
+export type RemoveLiquidityRecoveryTxInput = RemoveLiquidityTxInputBase & {
+    removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput;
 };
 
 export type CreatePoolTxInput = {

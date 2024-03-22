@@ -6,6 +6,7 @@ import {
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
+    RemoveLiquidityRecoveryInput,
 } from '@/entities';
 import { RemoveLiquidityWeighted } from './weighted/removeLiquidityWeighted';
 import { RemoveLiquidityComposableStable } from './composableStable/removeLiquidityComposableStable';
@@ -45,6 +46,15 @@ export class RemoveLiquidityV2 implements RemoveLiquidityBase {
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
         return this.getRemoveLiquidity(poolState.type).query(input, poolState);
+    }
+
+    public async queryRemoveLiquidityRecovery(
+        input: RemoveLiquidityRecoveryInput,
+        poolState: PoolState,
+    ): Promise<RemoveLiquidityQueryOutput> {
+        return this.getRemoveLiquidity(
+            poolState.type,
+        ).queryRemoveLiquidityRecovery(input, poolState);
     }
 
     public buildCall(

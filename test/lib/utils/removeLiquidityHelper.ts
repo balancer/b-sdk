@@ -24,7 +24,7 @@ import { RemoveLiquidityTxInput } from './types';
 import { RemoveLiquidityV2BaseBuildCallInput } from '@/entities/removeLiquidity/removeLiquidityV2/types';
 import { RemoveLiquidityV2ComposableStableQueryOutput } from '@/entities/removeLiquidity/removeLiquidityV2/composableStable/types';
 
-type RemoveLiquidityOutput = {
+export type RemoveLiquidityOutput = {
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     txOutput: TxOutput;
@@ -80,7 +80,10 @@ function isRemoveLiquidityV2ComposableStableQueryOutput(
     );
 }
 
-function getCheck(output: RemoveLiquidityQueryOutput, isExactIn: boolean) {
+export function getCheck(
+    output: RemoveLiquidityQueryOutput,
+    isExactIn: boolean,
+) {
     if (isRemoveLiquidityV2ComposableStableQueryOutput(output)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
@@ -453,85 +456,9 @@ export function assertRemoveLiquidityProportional(
     );
 }
 
-export function assertRemoveLiquidityRecovery(
+export function assertTokenDeltas(
     poolState: PoolState,
-    removeLiquidityInput: RemoveLiquidityRecoveryInput,
-    removeLiquidityOutput: RemoveLiquidityOutput,
-    slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
-    wethIsEth?: boolean,
-) {
-    const {
-        txOutput,
-        removeLiquidityQueryOutput,
-        removeLiquidityBuildCallOutput,
-    } = removeLiquidityOutput;
-
-    const bptToken = new Token(
-        removeLiquidityInput.chainId,
-        poolState.address,
-        18,
-    );
-
-    const expectedQueryOutput: Omit<
-        RemoveLiquidityQueryOutput,
-        'amountsOut' | 'bptIndex'
-    > = {
-        // Query should use same bpt out as user sets
-        bptIn: TokenAmount.fromRawAmount(
-            bptToken,
-            removeLiquidityInput.bptIn.rawAmount,
-        ),
-        // Only expect tokenInIndex for AddLiquiditySingleToken
-        tokenOutIndex: undefined,
-        // Should match inputs
-        poolId: poolState.id,
-        poolType: poolState.type,
-        removeLiquidityKind: removeLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
-        chainId: removeLiquidityInput.chainId,
-    };
-
-    const queryCheck = getCheck(removeLiquidityQueryOutput, true);
-
-    expect(queryCheck).to.deep.eq(expectedQueryOutput);
-
-    // Expect all assets in to have an amount > 0 apart from BPT if it exists
-    removeLiquidityQueryOutput.amountsOut.forEach((a) => {
-        if (a.token.address === poolState.address) expect(a.amount).toEqual(0n);
-        else expect(a.amount > 0n).to.be.true;
-    });
-
-    if (wethIsEth) {
-        expect(
-            removeLiquidityQueryOutput.amountsOut.some((a) =>
-                a.token.isSameAddress(
-                    NATIVE_ASSETS[removeLiquidityQueryOutput.chainId].wrapped,
-                ),
-            ),
-        ).to.be.true;
-    }
-
-    assertRemoveLiquidityBuildCallOutput(
-        removeLiquidityQueryOutput,
-        removeLiquidityBuildCallOutput,
-        true,
-        slippage,
-        vaultVersion,
-    );
-
-    assertTokenDeltas(
-        poolState,
-        removeLiquidityInput,
-        removeLiquidityQueryOutput,
-        txOutput,
-        wethIsEth,
-    );
-}
-
-function assertTokenDeltas(
-    poolState: PoolState,
-    removeLiquidityInput: RemoveLiquidityInput,
+    removeLiquidityInput: RemoveLiquidityInput | RemoveLiquidityRecoveryInput,
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
     txOutput: TxOutput,
     wethIsEth?: boolean,
@@ -567,13 +494,14 @@ function assertTokenDeltas(
             return Math.abs(parseInt(delta.toString()));
         },
     );
-    //The Balance Delta for Recovery Exits has rounding errors, since the query is done for proportional exits
+    // Expected Delta for Recovery Exits has rounding errors because it relies
+    // on calculating proportional amounts off-chain instead of on-chain queries
     balanceVsExpectedDeltas.forEach((diff) => {
-        expect(diff).to.be.lessThanOrEqual(1);
+        expect(diff).to.be.lessThanOrEqual(5);
     });
 }
 
-function assertRemoveLiquidityBuildCallOutput(
+export function assertRemoveLiquidityBuildCallOutput(
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput,
     RemoveLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput,
     isExactIn: boolean,

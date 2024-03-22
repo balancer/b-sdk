@@ -2,6 +2,10 @@ import { PoolType } from '../../types';
 import { AddLiquidityInput } from '../addLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput } from '../initPool/types';
+import {
+    RemoveLiquidityInput,
+    RemoveLiquidityRecoveryInput,
+} from '../removeLiquidity/types';
 import { PoolState } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
@@ -47,9 +51,22 @@ export class InputValidator {
         );
     }
 
-    validateRemoveLiquidity(removeLiquidityInput: any, poolState: any): void {
+    validateRemoveLiquidity(
+        removeLiquidityInput: RemoveLiquidityInput,
+        poolState: PoolState,
+    ): void {
         this.getValidator(poolState.type).validateRemoveLiquidity(
             removeLiquidityInput,
+            poolState,
+        );
+    }
+
+    validateRemoveLiquidityRecovery(
+        removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
+        poolState: PoolState,
+    ): void {
+        this.getValidator(poolState.type).validateRemoveLiquidityRecovery(
+            removeLiquidityRecoveryInput,
             poolState,
         );
     }

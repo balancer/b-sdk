@@ -8,46 +8,56 @@ export function calculateProportionalAmounts(
         totalShares: HumanAmount;
         tokens: { address: Address; balance: HumanAmount; decimals: number }[];
     },
-    inputAmount: InputAmount,
+    referenceAmount: InputAmount,
 ): {
-    amountsIn: InputAmount[];
-    bptOut: InputAmount;
+    tokenAmounts: InputAmount[];
+    bptAmount: InputAmount;
 } {
+    // ensure that bpt is taken into account even with pools that do not contain its BPT as a token
     const tokensWithoutBpt = pool.tokens.filter(
         (t) => !pool.address.toLowerCase().includes(t.address.toLowerCase()),
     );
-    const referenceTokenIndex = tokensWithoutBpt.findIndex(
-        (t) => t.address.toLowerCase() === inputAmount.address.toLowerCase(),
-    );
+    const tokensWithBpt = [
+        ...tokensWithoutBpt,
+        {
+            address: pool.address,
+            balance: pool.totalShares,
+            decimals: 18,
+        },
+    ];
 
+    // validate that input amount is relative to a token in the pool or its BPT
+    const referenceTokenIndex = tokensWithBpt.findIndex(
+        (t) =>
+            t.address.toLowerCase() === referenceAmount.address.toLowerCase(),
+    );
     if (referenceTokenIndex === -1) {
-        throw new Error('Token not found in pool');
+        throw new Error(
+            'Reference amount must be relative to a token in the pool or its BPT',
+        );
     }
 
-    const balances = tokensWithoutBpt.map((t) =>
+    // scale up balances from HumanAmount to RawAmount
+    const balances = tokensWithBpt.map((t) =>
         parseUnits(t.balance, t.decimals),
     );
 
-    const totalSharesBigInt = parseUnits(pool.totalShares, 18);
-
+    // calculate proportional amounts
+    const referenceTokenBalance = balances[referenceTokenIndex];
     const proportionalAmounts = balances.map(
-        (b) => (b * inputAmount.rawAmount) / balances[referenceTokenIndex],
+        (b) => (b * referenceAmount.rawAmount) / referenceTokenBalance,
     );
 
-    const bptOut =
-        (totalSharesBigInt * inputAmount.rawAmount) /
-        balances[referenceTokenIndex];
+    const amounts = tokensWithBpt.map(({ address, decimals }, index) => ({
+        address,
+        decimals,
+        rawAmount: proportionalAmounts[index],
+    }));
+
+    const bptAmount = amounts.pop() as InputAmount;
 
     return {
-        bptOut: {
-            address: pool.address,
-            rawAmount: bptOut,
-            decimals: 18,
-        },
-        amountsIn: tokensWithoutBpt.map(({ address, decimals }, index) => ({
-            address,
-            decimals,
-            rawAmount: proportionalAmounts[index],
-        })),
+        tokenAmounts: amounts,
+        bptAmount,
     };
 }

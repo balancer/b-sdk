@@ -1,3 +1,5 @@
+// pnpm test -- calculateProportionalAmounts.integration.test.ts
+
 import {
     AddLiquidity,
     Slippage,
@@ -35,7 +37,7 @@ const poolId =
 describe('add liquidity composable stable test', () => {
     let txInput: AddLiquidityTxInput;
     let poolState: PoolStateWithBalances;
-    let functionOutput: { amountsIn: InputAmount[]; bptOut: InputAmount };
+    let functionOutput: { tokenAmounts: InputAmount[]; bptAmount: InputAmount };
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
@@ -93,7 +95,7 @@ describe('add liquidity composable stable test', () => {
         test('token inputs', async () => {
             const addLiquidityInput = {
                 ...input,
-                amountsIn: functionOutput.amountsIn,
+                amountsIn: functionOutput.tokenAmounts,
             };
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
@@ -101,7 +103,7 @@ describe('add liquidity composable stable test', () => {
             });
             let delta =
                 addLiquidityOutput.addLiquidityQueryOutput.bptOut.amount -
-                functionOutput.bptOut.rawAmount;
+                functionOutput.bptAmount.rawAmount;
             if (delta < 0) {
                 delta = -delta;
             }
@@ -112,7 +114,7 @@ describe('add liquidity composable stable test', () => {
         let input: AddLiquidityProportionalInput;
         beforeAll(() => {
             input = {
-                bptOut: functionOutput.bptOut,
+                bptOut: functionOutput.bptAmount,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,
@@ -128,7 +130,7 @@ describe('add liquidity composable stable test', () => {
                 .slice(1)
                 .forEach(({ amount }, index) => {
                     const signedDelta =
-                        amount - functionOutput.amountsIn[index].rawAmount;
+                        amount - functionOutput.tokenAmounts[index].rawAmount;
                     const delta = signedDelta < 0 ? -signedDelta : signedDelta;
                     expect(delta < 10n).to.be.true; // 10n of tolerance
                 });
