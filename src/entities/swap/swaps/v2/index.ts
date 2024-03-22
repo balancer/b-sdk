@@ -9,6 +9,7 @@ import {
     VAULT,
     NATIVE_ASSETS,
     ChainId,
+    MAX_UINT256,
 } from '../../../../utils';
 import {
     Address,
@@ -21,13 +22,16 @@ import { balancerQueriesAbi, vaultV2Abi } from '../../../../abi';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
-    SwapBuildOutputBase,
+    SwapBuildCallInput,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
     SwapInput,
 } from '../../types';
 import { PathWithAmount } from '../../paths/pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
-import { SwapBuildCallInputV2 } from './types';
+import { SwapBuildCallInputBaseV2 } from './types';
 import { SwapBase } from '../types';
+import { getLimitAmount } from '../../limits';
 
 export * from './types';
 
@@ -230,7 +234,23 @@ export class SwapV2 implements SwapBase {
      * @param input
      * @returns
      */
-    buildCall(input: SwapBuildCallInputV2): SwapBuildOutputBase {
+    buildCall(
+        input: SwapBuildCallInput & SwapBuildCallInputBaseV2,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        let limitAmount: TokenAmount;
+        if (input.queryOutput.swapKind === SwapKind.GivenIn) {
+            limitAmount = getLimitAmount(
+                input.slippage,
+                SwapKind.GivenIn,
+                input.queryOutput.expectedAmountOut,
+            );
+        } else {
+            limitAmount = getLimitAmount(
+                input.slippage,
+                SwapKind.GivenOut,
+                input.queryOutput.expectedAmountIn,
+            );
+        }
         const funds = {
             sender: input.sender,
             recipient: input.recipient,
@@ -239,25 +259,34 @@ export class SwapV2 implements SwapBase {
         };
         let callData: Hex;
         if (this.isBatchSwap) {
-            const limits = this.limitsBatchSwap(input.limitAmount);
+            const limits = this.limitsBatchSwap(limitAmount);
             callData = this.callDataBatchSwap(
                 limits,
-                input.deadline,
+                input.deadline ?? MAX_UINT256,
                 funds,
-                input.wethIsEth,
+                !!input.wethIsEth,
             );
         } else {
             callData = this.callDataSingleSwap(
-                input.limitAmount.amount,
-                input.deadline,
+                limitAmount.amount,
+                input.deadline ?? MAX_UINT256,
                 funds,
-                input.wethIsEth,
+                !!input.wethIsEth,
             );
+        }
+        if (this.swapKind === SwapKind.GivenIn) {
+            return {
+                to: this.to(),
+                callData,
+                value: this.value(limitAmount, !!input.wethIsEth),
+                minAmountOut: limitAmount,
+            };
         }
         return {
             to: this.to(),
             callData,
-            value: this.value(input.limitAmount, input.wethIsEth),
+            value: this.value(limitAmount, !!input.wethIsEth),
+            maxAmountIn: limitAmount,
         };
     }
 

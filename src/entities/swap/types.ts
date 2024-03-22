@@ -22,7 +22,7 @@ export type SwapBuildCallInput =
     | SwapBuildCallInputBase
     | (SwapBuildCallInputBase & SwapBuildCallInputBaseV2);
 
-export type SwapBuildOutputBase = {
+type SwapBuildOutputBase = {
     to: Address;
     callData: Hex;
     value: bigint;

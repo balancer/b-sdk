@@ -2,15 +2,15 @@ import { TokenAmount } from '../../tokenAmount';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
-    SwapBuildOutputBase,
+    SwapBuildCallInput,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
 } from '../../..';
 import { SingleSwap, SwapKind, BatchSwapStep } from '../../../types';
 import { PathWithAmount } from '../paths/pathWithAmount';
-import { SwapBuildCallInputV2 } from '../swaps/v2';
 import {
     SingleTokenExactIn,
     SingleTokenExactOut,
-    SwapBuildCallInputV3,
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from '../swaps/v3';
@@ -36,6 +36,6 @@ export interface SwapBase {
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput>;
     queryCallData(): string;
     buildCall(
-        input: SwapBuildCallInputV3 | SwapBuildCallInputV2,
-    ): SwapBuildOutputBase;
+        input: SwapBuildCallInput,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
 }
