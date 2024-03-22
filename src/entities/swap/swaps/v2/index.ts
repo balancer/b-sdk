@@ -26,7 +26,7 @@ import {
 } from '../../types';
 import { PathWithAmount } from '../../paths/pathWithAmount';
 import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
-import { SwapCallBuildInputV2 } from './types';
+import { SwapBuildCallInputV2 } from './types';
 import { SwapBase } from '../types';
 
 export * from './types';
@@ -230,7 +230,7 @@ export class SwapV2 implements SwapBase {
      * @param input
      * @returns
      */
-    buildCall(input: SwapCallBuildInputV2): SwapBuildOutputBase {
+    buildCall(input: SwapBuildCallInputV2): SwapBuildOutputBase {
         const funds = {
             sender: input.sender,
             recipient: input.recipient,

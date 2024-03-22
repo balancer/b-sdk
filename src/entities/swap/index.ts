@@ -2,7 +2,7 @@ import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import {
-    SwapCallBuildInput,
+    SwapBuildCallInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
@@ -73,7 +73,7 @@ export class Swap {
      * @returns
      */
     buildCall(
-        input: SwapCallBuildInput,
+        input: SwapBuildCallInput,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
         const isV2Input = 'sender' in input;
         if (this.vaultVersion === 3 && isV2Input)

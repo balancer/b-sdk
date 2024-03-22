@@ -39,7 +39,7 @@ export type SwapPathExactAmountOut = SwapPathBase & {
     exactAmountOut: bigint;
 };
 
-export type SwapCallBuildInputV3 = {
+export type SwapBuildCallInputV3 = {
     deadline: bigint;
     limitAmount: TokenAmount;
     wethIsEth: boolean;

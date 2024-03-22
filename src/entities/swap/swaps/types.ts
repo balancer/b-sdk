@@ -6,11 +6,11 @@ import {
 } from '../../..';
 import { SingleSwap, SwapKind, BatchSwapStep } from '../../../types';
 import { PathWithAmount } from '../paths/pathWithAmount';
-import { SwapCallBuildInputV2 } from '../swaps/v2';
+import { SwapBuildCallInputV2 } from '../swaps/v2';
 import {
     SingleTokenExactIn,
     SingleTokenExactOut,
-    SwapCallBuildInputV3,
+    SwapBuildCallInputV3,
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from '../swaps/v3';
@@ -36,6 +36,6 @@ export interface SwapBase {
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput>;
     queryCallData(): string;
     buildCall(
-        input: SwapCallBuildInputV3 | SwapCallBuildInputV2,
+        input: SwapBuildCallInputV3 | SwapBuildCallInputV2,
     ): SwapBuildOutputBase;
 }

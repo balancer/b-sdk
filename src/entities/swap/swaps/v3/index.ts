@@ -25,7 +25,7 @@ import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
 import {
     SingleTokenExactIn,
     SingleTokenExactOut,
-    SwapCallBuildInputV3,
+    SwapBuildCallInputV3,
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from './types';
@@ -282,7 +282,7 @@ export class SwapV3 implements SwapBase {
      * @param input
      * @returns
      */
-    buildCall(input: SwapCallBuildInputV3): SwapBuildOutputBase {
+    buildCall(input: SwapBuildCallInputV3): SwapBuildOutputBase {
         if (!this.isBatchSwap) {
             return {
                 to: BALANCER_ROUTER[this.chainId],
