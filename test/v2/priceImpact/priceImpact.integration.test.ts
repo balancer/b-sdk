@@ -26,7 +26,6 @@ import {
     RemoveLiquidityUnbalancedInput,
     SwapKind,
     RemoveLiquidityNestedSingleTokenInput,
-    ZERO_ADDRESS,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -146,7 +145,6 @@ describe('price impact', () => {
             input = {
                 chainId,
                 rpcUrl,
-                accountAddress: ZERO_ADDRESS,
                 amountsIn: [
                     {
                         address: DAI.address,
@@ -375,7 +373,6 @@ describe('price impact', () => {
                 chainId,
                 rpcUrl,
                 bptAmountIn: parseEther('1200'),
-                accountAddress: ZERO_ADDRESS,
                 tokenOut: WETH.address,
             };
         });
