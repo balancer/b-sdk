@@ -1,9 +1,9 @@
-import { Path } from '@/entities/swap';
 import { BalancerApiClient } from '../../client';
 import { ChainId } from '@/utils';
 import { Address } from 'viem';
 import { SwapKind } from '@/types';
 import { TokenAmount } from '@/entities';
+import { Path } from '@/entities/swap/paths/types';
 
 export type SorInput = {
     chainId: ChainId;

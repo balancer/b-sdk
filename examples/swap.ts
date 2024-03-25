@@ -22,7 +22,7 @@ import {
 const swap = async () => {
     // User defined
     const chainId = ChainId.POLYGON;
-    const swapKind = SwapKind.GivenOut;
+    const swapKind = SwapKind.GivenIn;
     const tokenIn = new Token(
         chainId,
         '0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6',
@@ -37,7 +37,7 @@ const swap = async () => {
     );
     const slippage = Slippage.fromPercentage('0.1');
     const swapAmount =
-        swapKind === SwapKind.GivenOut
+        swapKind === SwapKind.GivenIn
             ? TokenAmount.fromHumanAmount(tokenIn, '1.2345678910')
             : TokenAmount.fromHumanAmount(tokenOut, '1.2345678910');
     const sender = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
@@ -74,14 +74,14 @@ const swap = async () => {
 
     // Get up to date swap result by querying onchain
     const updated = await swap.query(process.env.POLYGON_RPC_URL);
-    console.log(`Updated amount: ${updated.amount}`);
 
     // Construct transaction to make swap
-    if (swapKind === SwapKind.GivenIn) {
+    if (updated.swapKind === SwapKind.GivenIn) {
+        console.log(`Updated amount: ${updated.expectedAmountOut.amount}`);
         const callData = swap.buildCall({
             slippage,
             deadline,
-            expectedAmountOut: updated,
+            queryOutput: updated,
             sender,
             recipient,
             wethIsEth: false,
@@ -90,10 +90,11 @@ const swap = async () => {
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
     } else {
+        console.log(`Updated amount: ${updated.expectedAmountIn.amount}`);
         const callData = swap.buildCall({
             slippage,
             deadline,
-            expectedAmountIn: updated,
+            queryOutput: updated,
             sender,
             recipient,
             wethIsEth: false,

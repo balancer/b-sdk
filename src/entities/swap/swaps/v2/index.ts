@@ -1,5 +1,5 @@
-import { TokenAmount } from '../../tokenAmount';
-import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../../../types';
+import { TokenAmount } from '../../../tokenAmount';
+import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../../../../types';
 import {
     abs,
     BALANCER_QUERIES,
@@ -9,7 +9,8 @@ import {
     VAULT,
     NATIVE_ASSETS,
     ChainId,
-} from '../../../utils';
+    MAX_UINT256,
+} from '../../../../utils';
 import {
     Address,
     createPublicClient,
@@ -17,11 +18,20 @@ import {
     getContract,
     http,
 } from 'viem';
-import { balancerQueriesAbi, vaultV2Abi } from '../../../abi';
-import { SwapBase, SwapBuildOutputBase, SwapInput } from '../types';
-import { PathWithAmount } from '../pathWithAmount';
-import { getInputAmount, getOutputAmount } from '../pathHelpers';
-import { SwapCallBuildV2 } from './types';
+import { balancerQueriesAbi, vaultV2Abi } from '../../../../abi';
+import {
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
+    SwapBuildCallInput,
+    SwapBuildOutputExactIn,
+    SwapBuildOutputExactOut,
+    SwapInput,
+} from '../../types';
+import { PathWithAmount } from '../../paths/pathWithAmount';
+import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
+import { SwapBuildCallInputBaseV2 } from './types';
+import { SwapBase } from '../types';
+import { getLimitAmount } from '../../limits';
 
 export * from './types';
 
@@ -70,7 +80,10 @@ export class SwapV2 implements SwapBase {
     }
 
     // rpcUrl is optional, but recommended to prevent rate limiting
-    public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
+    public async query(
+        rpcUrl?: string,
+        block?: bigint,
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const client = createPublicClient({
             transport: http(rpcUrl),
         });
@@ -80,56 +93,76 @@ export class SwapV2 implements SwapBase {
             abi: balancerQueriesAbi,
             client,
         });
+        return this.isBatchSwap
+            ? this.queryBatchSwap(queriesContract, block)
+            : this.querySingleSwap(queriesContract, block);
+    }
 
-        let amount: TokenAmount;
-        if (this.isBatchSwap) {
-            const { result } = await queriesContract.simulate.queryBatchSwap(
-                [
-                    this.swapKind,
-                    this.swaps as BatchSwapStep[],
-                    this.assets,
-                    DEFAULT_FUND_MANAGMENT,
-                ],
-                {
-                    blockNumber: block,
-                },
-            );
+    private async querySingleSwap(
+        queriesContract,
+        block?: bigint,
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
+        const { result } = await queriesContract.simulate.querySwap(
+            [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
+            { blockNumber: block },
+        );
 
-            amount =
-                this.swapKind === SwapKind.GivenIn
-                    ? TokenAmount.fromRawAmount(
-                          this.outputAmount.token,
-                          abs(
-                              result[
-                                  this.assets.indexOf(
-                                      this.outputAmount.token.address,
-                                  )
-                              ],
-                          ),
-                      )
-                    : TokenAmount.fromRawAmount(
-                          this.inputAmount.token,
-                          abs(
-                              result[
-                                  this.assets.indexOf(
-                                      this.inputAmount.token.address,
-                                  )
-                              ],
-                          ),
-                      );
-        } else {
-            const { result } = await queriesContract.simulate.querySwap(
-                [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
-                { blockNumber: block },
-            );
-
-            amount =
-                this.swapKind === SwapKind.GivenIn
-                    ? TokenAmount.fromRawAmount(this.outputAmount.token, result)
-                    : TokenAmount.fromRawAmount(this.inputAmount.token, result);
+        if (this.swapKind === SwapKind.GivenIn) {
+            return {
+                swapKind: SwapKind.GivenIn,
+                expectedAmountOut: TokenAmount.fromRawAmount(
+                    this.outputAmount.token,
+                    result,
+                ),
+            };
         }
+        return {
+            swapKind: SwapKind.GivenOut,
+            expectedAmountIn: TokenAmount.fromRawAmount(
+                this.inputAmount.token,
+                result,
+            ),
+        };
+    }
 
-        return amount;
+    private async queryBatchSwap(
+        queriesContract,
+        block?: bigint,
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
+        const { result } = await queriesContract.simulate.queryBatchSwap(
+            [
+                this.swapKind,
+                this.swaps as BatchSwapStep[],
+                this.assets,
+                DEFAULT_FUND_MANAGMENT,
+            ],
+            {
+                blockNumber: block,
+            },
+        );
+
+        if (this.swapKind === SwapKind.GivenIn) {
+            return {
+                swapKind: SwapKind.GivenIn,
+                expectedAmountOut: TokenAmount.fromRawAmount(
+                    this.outputAmount.token,
+                    abs(
+                        result[
+                            this.assets.indexOf(this.outputAmount.token.address)
+                        ],
+                    ),
+                ),
+            };
+        }
+        return {
+            swapKind: SwapKind.GivenOut,
+            expectedAmountIn: TokenAmount.fromRawAmount(
+                this.inputAmount.token,
+                abs(
+                    result[this.assets.indexOf(this.inputAmount.token.address)],
+                ),
+            ),
+        };
     }
 
     private convertWrappedToZero(chainId: ChainId, address: Address): Address {
@@ -198,37 +231,62 @@ export class SwapV2 implements SwapBase {
     /**
      * Returns the transaction data to be sent to the vault contract
      *
-     * @param swapCall
+     * @param input
      * @returns
      */
-    buildCall(swapCall: SwapCallBuildV2): SwapBuildOutputBase {
+    buildCall(
+        input: SwapBuildCallInput & SwapBuildCallInputBaseV2,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        let limitAmount: TokenAmount;
+        if (input.queryOutput.swapKind === SwapKind.GivenIn) {
+            limitAmount = getLimitAmount(
+                input.slippage,
+                SwapKind.GivenIn,
+                input.queryOutput.expectedAmountOut,
+            );
+        } else {
+            limitAmount = getLimitAmount(
+                input.slippage,
+                SwapKind.GivenOut,
+                input.queryOutput.expectedAmountIn,
+            );
+        }
         const funds = {
-            sender: swapCall.sender,
-            recipient: swapCall.recipient,
+            sender: input.sender,
+            recipient: input.recipient,
             fromInternalBalance: false, // Set default to false as not supported in V3 and keeps interface simple
             toInternalBalance: false,
         };
         let callData: Hex;
         if (this.isBatchSwap) {
-            const limits = this.limitsBatchSwap(swapCall.limitAmount);
+            const limits = this.limitsBatchSwap(limitAmount);
             callData = this.callDataBatchSwap(
                 limits,
-                swapCall.deadline,
+                input.deadline ?? MAX_UINT256,
                 funds,
-                swapCall.wethIsEth,
+                !!input.wethIsEth,
             );
         } else {
             callData = this.callDataSingleSwap(
-                swapCall.limitAmount.amount,
-                swapCall.deadline,
+                limitAmount.amount,
+                input.deadline ?? MAX_UINT256,
                 funds,
-                swapCall.wethIsEth,
+                !!input.wethIsEth,
             );
+        }
+        if (this.swapKind === SwapKind.GivenIn) {
+            return {
+                to: this.to(),
+                callData,
+                value: this.value(limitAmount, !!input.wethIsEth),
+                minAmountOut: limitAmount,
+            };
         }
         return {
             to: this.to(),
             callData,
-            value: this.value(swapCall.limitAmount, swapCall.wethIsEth),
+            value: this.value(limitAmount, !!input.wethIsEth),
+            maxAmountIn: limitAmount,
         };
     }
 

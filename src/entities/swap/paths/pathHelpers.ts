@@ -1,5 +1,5 @@
 import { PathWithAmount } from './pathWithAmount';
-import { TokenAmount } from '../tokenAmount';
+import { TokenAmount } from '../../tokenAmount';
 import { Path } from './types';
 
 export function getInputAmount(paths: PathWithAmount[]): TokenAmount {

@@ -1,6 +1,6 @@
-import { TokenAmount } from '../tokenAmount';
+import { TokenAmount } from '../../tokenAmount';
 import { Address } from 'viem';
-import { Token } from '../token';
+import { Token } from '../../token';
 import { TokenApi } from './types';
 
 export class PathWithAmount {

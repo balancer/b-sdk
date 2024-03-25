@@ -2,17 +2,17 @@ import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import {
-    SwapBase,
-    SwapCallExactIn,
-    SwapCallExactOut,
+    SwapBuildCallInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
+    ExactOutQueryOutput,
+    ExactInQueryOutput,
 } from './types';
-import { SwapV2 } from './swapV2';
-import { validatePaths } from './pathHelpers';
-import { Slippage } from '../slippage';
-import { SwapV3 } from './swapV3';
+import { SwapV2 } from './swaps/v2';
+import { validatePaths } from './paths/pathHelpers';
+import { SwapV3 } from './swaps/v3';
+import { SwapBase } from './swaps/types';
 
 export * from './types';
 
@@ -48,7 +48,10 @@ export class Swap {
     }
 
     // rpcUrl is optional, but recommended to prevent rate limiting
-    public async query(rpcUrl?: string, block?: bigint): Promise<TokenAmount> {
+    public async query(
+        rpcUrl?: string,
+        block?: bigint,
+    ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         return this.swap.query(rpcUrl, block);
     }
 
@@ -63,53 +66,19 @@ export class Swap {
     /**
      * Returns the transaction data to be sent to the vault contract
      *
-     * @param swapCall
+     * @param input
      * @returns
      */
     buildCall(
-        swapCall: SwapCallExactIn | SwapCallExactOut,
+        input: SwapBuildCallInput,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
-        let limitAmount: TokenAmount;
-        if ('expectedAmountOut' in swapCall) {
-            limitAmount = this.limitAmount(
-                swapCall.slippage,
-                SwapKind.GivenIn,
-                swapCall.expectedAmountOut,
-            );
-            return {
-                ...this.swap.buildCall({ ...swapCall, limitAmount }),
-                minAmountOut: limitAmount,
-            };
-        }
-        limitAmount = this.limitAmount(
-            swapCall.slippage,
-            SwapKind.GivenOut,
-            swapCall.expectedAmountIn,
-        );
-        return {
-            ...this.swap.buildCall({ ...swapCall, limitAmount }),
-            maxAmountIn: limitAmount,
-        };
-    }
+        const isV2Input = 'sender' in input;
+        if (this.vaultVersion === 3 && isV2Input)
+            throw Error('Cannot define sender/recipient in V3');
 
-    /**
-     * Apply slippage to expectedAmount. GivenIn: Remove to give minOut. GivenOut: Add to give maxIn.
-     * @param slippage
-     * @param swapKind
-     * @param expectedAmount
-     * @returns
-     */
-    private limitAmount(
-        slippage: Slippage,
-        swapKind: SwapKind,
-        expectedAmount: TokenAmount,
-    ): TokenAmount {
-        let limitAmount: bigint;
-        if (swapKind === SwapKind.GivenIn) {
-            limitAmount = slippage.applyTo(expectedAmount.amount, -1);
-        } else {
-            limitAmount = slippage.applyTo(expectedAmount.amount);
-        }
-        return TokenAmount.fromRawAmount(expectedAmount.token, limitAmount);
+        if (this.vaultVersion === 2 && !isV2Input)
+            throw Error('Sender/recipient must be defined in V2');
+
+        return this.swap.buildCall(input);
     }
 }

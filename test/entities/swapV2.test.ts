@@ -1,9 +1,10 @@
 // pnpm test -- swapV2.test.ts
 import { ChainId } from '../../src';
 import { SwapKind } from '@/types';
-import { Path, Token, TokenAmount, TokenApi } from '@/entities';
+import { Token, TokenAmount } from '@/entities';
 import { TOKENS } from '../lib/utils/addresses';
-import { SwapV2 } from '@/entities/swap/swapV2';
+import { SwapV2 } from '@/entities/swap/swaps/v2';
+import { Path, TokenApi } from '@/entities/swap/paths/types';
 
 describe('SwapV2', () => {
     describe('limits', () => {

@@ -203,6 +203,10 @@ export const BALANCER_ROUTER: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0xA0De078cd5cFa7088821B83e0bD7545ccfb7c883',
 };
 
+export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x8A8B9f35765899B3a0291700141470D79EA2eA88',
+};
+
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(
         ChainId.MAINNET,
