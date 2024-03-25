@@ -436,12 +436,7 @@ export class PriceImpact {
         let finalA: TokenAmount;
         if ('expectedAmountOut' in reverseSwapQueryOutput) {
             // givenIn case
-            initialA = TokenAmount.fromRawAmount(
-                tokenA,
-                swapInput.paths
-                    .map((p) => p.inputAmountRaw)
-                    .reduce((a, b) => a + b),
-            );
+            initialA = swap.inputAmount;
             finalA = TokenAmount.fromRawAmount(
                 tokenA,
                 reverseSwapQueryOutput.expectedAmountOut.amount,
@@ -454,12 +449,7 @@ export class PriceImpact {
                 tokenA,
                 reverseSwapQueryOutput.expectedAmountIn.amount,
             );
-            finalA = TokenAmount.fromRawAmount(
-                tokenA,
-                swapInput.paths
-                    .map((p) => p.outputAmountRaw)
-                    .reduce((a, b) => a + b),
-            );
+            finalA = swap.outputAmount;
         }
 
         return priceImpactABA(initialA, finalA);
