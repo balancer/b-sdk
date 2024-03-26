@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 0.14.0
+
+### Minor Changes
+
+- 127bc2f: Add support for V3 Swaps (single and batchSwap). Breaking changes in Swap buildCall to handle path limits correctly.'
+- a759fbf: Add Price Impact for swaps and batchSwaps
+
 ## 0.13.0
 
 ### Minor Changes
