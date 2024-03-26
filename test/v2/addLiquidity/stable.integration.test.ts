@@ -43,7 +43,7 @@ import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
-const poolId = POOLS[chainId].wstETH_wETH.id; // B-stETH-STABLE
+const poolId = POOLS[chainId].wstETH_wETH_MSP.id; // B-stETH-STABLE
 
 describe('add liquidity stable test', () => {
     let txInput: AddLiquidityTxInput;

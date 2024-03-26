@@ -17,6 +17,7 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
+    PriceImpact,
 } from '../src';
 
 const swap = async () => {
@@ -27,13 +28,13 @@ const swap = async () => {
         chainId,
         '0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6',
         18,
-        'BAL',
+        'MaticX',
     );
     const tokenOut = new Token(
         chainId,
         '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
         18,
-        'ETH',
+        'WMATIC',
     );
     const slippage = Slippage.fromPercentage('0.1');
     const swapAmount =
@@ -58,12 +59,14 @@ const swap = async () => {
         swapAmount,
     });
 
-    // Swap object provides useful helpers for re-querying, building call, etc
-    const swap = new Swap({
+    const swapInput = {
         chainId,
         paths: sorPaths,
         swapKind,
-    });
+    };
+
+    // Swap object provides useful helpers for re-querying, building call, etc
+    const swap = new Swap(swapInput);
 
     console.log(
         `Input token: ${swap.inputAmount.token.address}, Amount: ${swap.inputAmount.amount}`,
@@ -71,6 +74,11 @@ const swap = async () => {
     console.log(
         `Output token: ${swap.outputAmount.token.address}, Amount: ${swap.outputAmount.amount}`,
     );
+
+    // Get price impact
+    const priceImpact = await PriceImpact.swap(swapInput);
+
+    console.log(`Price Impact: ${priceImpact.percentage.toFixed(2)}%`);
 
     // Get up to date swap result by querying onchain
     const updated = await swap.query(process.env.POLYGON_RPC_URL);

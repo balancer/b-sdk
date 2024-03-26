@@ -1,6 +1,9 @@
 import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
-import { PriceImpactAmount } from '../priceImpactAmount';
+import { validatePaths } from './paths';
+import { SwapV2 } from './swaps/v2';
+import { SwapV3 } from './swaps/v3';
+import { SwapBase } from './swaps/types';
 import {
     SwapBuildCallInput,
     SwapBuildOutputExactIn,
@@ -9,12 +12,9 @@ import {
     ExactOutQueryOutput,
     ExactInQueryOutput,
 } from './types';
-import { SwapV2 } from './swaps/v2';
-import { validatePaths } from './paths/pathHelpers';
-import { SwapV3 } from './swaps/v3';
-import { SwapBase } from './swaps/types';
 
 export * from './types';
+export * from './paths';
 
 // A Swap can be a single or multiple paths
 export class Swap {
@@ -57,10 +57,6 @@ export class Swap {
 
     public queryCallData(): string {
         return this.swap.queryCallData();
-    }
-
-    public get priceImpact(): PriceImpactAmount {
-        throw new Error('Price Impact still to be implemented');
     }
 
     /**
