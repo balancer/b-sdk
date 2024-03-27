@@ -1,15 +1,15 @@
 /**
- * Example showing how to remove liquidity from a pool in recovery mode.
- * (Runs against a local Anvil fork)
+ * Example showing how to use calculateProportionalAmounts helper to calculate proportional input amounts.
  *
  * Run with:
  * pnpm example ./examples/utils/calculateProportionalAmounts.ts
  */
-
-import { BalancerApi } from '@/data';
-import { calculateProportionalAmounts } from '@/entities/utils/calculateProportionalAmounts';
-import { InputAmount } from '@/types';
-import { ChainId } from '@/utils';
+import {
+    BalancerApi,
+    calculateProportionalAmounts,
+    InputAmount,
+    ChainId,
+} from '../../src';
 
 const calculateProportionalAmountsExample = async () => {
     const chainId = ChainId.MAINNET;
