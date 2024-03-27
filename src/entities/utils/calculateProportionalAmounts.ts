@@ -2,6 +2,12 @@ import { Address, parseUnits } from 'viem';
 import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
 
+/**
+ * For a given pool, calculate all token amounts proportional to a given reference amount.
+ * @param pool
+ * @param referenceAmount
+ * @returns
+ */
 export function calculateProportionalAmounts(
     pool: {
         address: Address;
