@@ -30,6 +30,7 @@ import {
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import { makeForkTx } from 'examples/lib/makeForkTx';
+import { getSlot } from 'examples/lib/getSlot';
 
 async function runAgainstFork() {
     // User defined inputs
@@ -91,16 +92,15 @@ async function runAgainstFork() {
     });
 
     // Make the tx against the local fork and print the result
-    const slots = [1, 3];
     await makeForkTx(
         initCall,
         {
             rpcUrl,
             chainId,
             impersonateAccount: userAccount,
-            forkTokens: initAmounts.map((a, i) => ({
+            forkTokens: initAmounts.map((a) => ({
                 address: a.address,
-                slot: slots[i],
+                slot: getSlot(chainId, a.address),
                 rawBalance: a.rawAmount,
             })),
         },

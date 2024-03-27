@@ -17,6 +17,7 @@ import {
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import { makeForkTx } from '../lib/makeForkTx';
+import { getSlot } from 'examples/lib/getSlot';
 
 async function runAgainstFork() {
     // User defined inputs
@@ -52,16 +53,15 @@ async function runAgainstFork() {
     });
 
     // Make the tx against the local fork and print the result
-    const slots = [1, 3, 0];
     await makeForkTx(
         call,
         {
             rpcUrl,
             chainId,
             impersonateAccount: userAccount,
-            forkTokens: amountsIn.map((a, i) => ({
+            forkTokens: amountsIn.map((a) => ({
                 address: a.address,
-                slot: slots[i],
+                slot: getSlot(chainId, a.address),
                 rawBalance: a.rawAmount,
             })),
         },
