@@ -25,7 +25,7 @@
         "test:ci": "vitest run",
         "changeset": "changeset",
         "changeset:release": "pnpm build && changeset publish",
-        "example": "npx tsx ./examples/executeExample.ts"
+        "example": "npx tsx ./examples/lib/executeExample.ts"
     },
     "dependencies": {
         "decimal.js-light": "^2.5.1",

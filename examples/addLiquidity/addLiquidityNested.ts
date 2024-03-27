@@ -1,9 +1,9 @@
 /**
- * Example showing how to remove liquidity to a pool.
+ * Example showing how to add liquidity to a pool.
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/removeLiquidityNested.ts
+ * pnpm example ./examples/addLiquidityNested.ts
  */
 
 import { config } from 'dotenv';
@@ -23,6 +23,8 @@ import {
 
 import {
     Address,
+    AddLiquidityNested,
+    AddLiquidityNestedInput,
     BALANCER_RELAYER,
     BalancerApi,
     ChainId,
@@ -32,55 +34,60 @@ import {
     Relayer,
     replaceWrapped,
     Slippage,
-    RemoveLiquidityNested,
-    RemoveLiquidityNestedSingleTokenInput,
-} from '../src';
-import { forkSetup, sendTransactionGetBalances } from '../test/lib/utils';
-import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
+} from '../../src';
+import {
+    forkSetup,
+    sendTransactionGetBalances,
+} from '../../test/lib/utils/helper';
+import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 
 const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
 const poolId =
     '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0'; // WETH-3POOL
 const chainId = ChainId.MAINNET;
 
-const removeLiquidityNested = async () => {
+const addLiquidityNested = async () => {
     // User approve vault to spend their tokens and update user balance
     const { client, accountAddress, nestedPoolState, rpcUrl } =
         await exampleSetup();
 
-    // setup remove liquidity helper
-    const removeLiquidityNested = new RemoveLiquidityNested();
+    // setup add liquidity helper
+    const addLiquidityNested = new AddLiquidityNested();
 
-    const bptAmountIn = parseUnits('1', 18);
-    const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address; // DAI
+    const amountsIn = [
+        {
+            address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
+            rawAmount: parseUnits('1', 18),
+            decimals: 18,
+        },
+    ];
 
-    const removeLiquidityInput: RemoveLiquidityNestedSingleTokenInput = {
-        bptAmountIn,
+    const addLiquidityInput: AddLiquidityNestedInput = {
+        amountsIn,
         chainId,
         rpcUrl,
-        tokenOut,
     };
 
     // Calculate price impact to ensure it's acceptable
-    const priceImpact = await PriceImpact.removeLiquidityNested(
-        removeLiquidityInput,
+    const priceImpact = await PriceImpact.addLiquidityNested(
+        addLiquidityInput,
         nestedPoolState,
     );
     console.log(`\nPrice Impact: ${priceImpact.percentage.toFixed(2)}%`);
 
-    const queryOutput = await removeLiquidityNested.query(
-        removeLiquidityInput,
+    const queryOutput = await addLiquidityNested.query(
+        addLiquidityInput,
         nestedPoolState,
     );
 
-    console.log('\nRemove Liquidity Query Output:');
+    console.log('\nAdd Liquidity Query Output:');
     console.table({
-        tokensOut: queryOutput.amountsOut.map((a) => a.token.address),
-        amountsOut: queryOutput.amountsOut.map((a) => a.amount),
+        tokensIn: queryOutput.amountsIn.map((a) => a.token.address),
+        amountsIn: queryOutput.amountsIn.map((a) => a.amount),
     });
-    console.log(`BPT In: ${queryOutput.bptAmountIn.amount.toString()}`);
+    console.log(`BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
-    // build remove liquidity nested call with expected minAmountsOut based on slippage
+    // build add liquidity nested call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
 
     const signature = await Relayer.signRelayerApproval(
@@ -91,7 +98,7 @@ const removeLiquidityNested = async () => {
 
     const wethIsEth = false;
 
-    const { call, to, minAmountsOut } = removeLiquidityNested.buildCall({
+    const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
         accountAddress,
@@ -99,23 +106,20 @@ const removeLiquidityNested = async () => {
         wethIsEth,
     });
 
-    let tokensOut = queryOutput.amountsOut.map((a) => a.token);
+    let tokensIn = queryOutput.amountsIn.map((a) => a.token);
     if (wethIsEth) {
-        tokensOut = replaceWrapped(tokensOut, chainId);
+        tokensIn = replaceWrapped(tokensIn, chainId);
     }
 
     console.log('\nWith slippage applied:');
-    console.table({
-        tokensOut: minAmountsOut.map((a) => a.token.address),
-        minAmountsOut: minAmountsOut.map((a) => a.amount),
-    });
+    console.log(`Min BPT Out: ${minBptOut.toString()}`);
 
     const tokens = [
-        ...tokensOut.map((t) => t.address),
-        queryOutput.bptAmountIn.token.address,
+        ...tokensIn.map((t) => t.address),
+        queryOutput.bptOut.token.address,
     ];
 
-    // send remove liquidity nested transaction and check balance changes
+    // send add liquidity nested transaction and check balance changes
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
             tokens,
@@ -123,6 +127,7 @@ const removeLiquidityNested = async () => {
             accountAddress,
             to,
             call,
+            value,
         );
     console.log(`\nTransaction status: ${transactionReceipt.status}`);
     console.log('Token balance deltas:');
@@ -138,7 +143,7 @@ const exampleSetup = async (): Promise<{
     nestedPoolState: NestedPoolState;
     rpcUrl: string;
 }> => {
-    const { rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]);
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
     const balancerApi = new BalancerApi(balancerApiUrl, chainId);
     const nestedPoolState =
         await balancerApi.nestedPools.fetchNestedPoolState(poolId);
@@ -154,22 +159,35 @@ const exampleSetup = async (): Promise<{
 
     const accountAddress = (await client.getAddresses())[0];
 
-    const rootPool = nestedPoolState.pools.sort((a, b) => b.level - a.level)[0];
-
-    const testTokens = [
+    const mainTokens = [
         {
-            address: rootPool.address,
+            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address,
             balance: parseUnits('1000', 18),
-            slot: 0,
+            slot: 3,
+        },
+        {
+            address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address,
+            balance: parseUnits('1000', 18),
+            slot: 2,
+        },
+        {
+            address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address,
+            balance: parseUnits('1000', 6),
+            slot: 9,
+        },
+        {
+            address: '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address,
+            balance: parseUnits('1000', 6),
+            slot: 2,
         },
     ];
 
     await forkSetup(
         client,
         accountAddress,
-        testTokens.map((t) => t.address),
-        testTokens.map((t) => t.slot),
-        testTokens.map((t) => t.balance),
+        mainTokens.map((t) => t.address),
+        mainTokens.map((t) => t.slot),
+        mainTokens.map((t) => t.balance),
     );
 
     return {
@@ -180,4 +198,4 @@ const exampleSetup = async (): Promise<{
     };
 };
 
-export default removeLiquidityNested;
+export default addLiquidityNested;

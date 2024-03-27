@@ -2,7 +2,7 @@
  * Example showing how to find swap information for a token pair.
  *
  * Run with:
- * pnpm example ./examples/swap.ts
+ * pnpm example ./examples/swaps/swap.ts
  */
 import { config } from 'dotenv';
 config();
@@ -17,7 +17,7 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
-} from '../src';
+} from '../../src';
 
 const swap = async () => {
     // User defined

@@ -3,7 +3,7 @@
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/addLiquidity.ts
+ * pnpm example ./examples/addLiquidity/addLiquidity.ts
  */
 import { config } from 'dotenv';
 config();
@@ -18,20 +18,19 @@ import {
     ChainId,
     PriceImpact,
     Slippage,
-} from '../src';
-import { ANVIL_NETWORKS, startFork } from '../test/anvil/anvil-global-setup';
-import { makeForkTx } from './utils/makeForkTx';
+} from '../../src';
+import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
+import { makeForkTx } from '../lib/makeForkTx';
 
 const addLiquidity = async () => {
     // User defined
+    // Start a local anvil fork that will be used to query/tx against
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
     const chainId = ChainId.MAINNET;
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     const poolId =
         '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
     const slippage = Slippage.fromPercentage('1'); // 1%
-
-    // Start a local anvil fork that will be used to query/tx against
-    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 
     // API is used to fetch relevant pool data
     const balancerApi = new BalancerApi(
