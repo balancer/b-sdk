@@ -3,24 +3,18 @@
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/addLiquidityNested.ts
+ * pnpm example ./examples/addLiquidity/addLiquidityNested.ts
  */
 
 import { config } from 'dotenv';
 config();
-
 import {
-    Client,
     createTestClient,
     http,
-    parseUnits,
-    PublicActions,
+    parseEther,
     publicActions,
-    TestActions,
-    WalletActions,
     walletActions,
 } from 'viem';
-
 import {
     Address,
     AddLiquidityNested,
@@ -29,38 +23,93 @@ import {
     BalancerApi,
     ChainId,
     CHAINS,
-    NestedPoolState,
     PriceImpact,
     Relayer,
     replaceWrapped,
     Slippage,
 } from '../../src';
-import {
-    forkSetup,
-    sendTransactionGetBalances,
-} from '../../test/lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
+import { makeForkTx } from 'examples/lib/makeForkTx';
 
-const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
-const poolId =
-    '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0'; // WETH-3POOL
-const chainId = ChainId.MAINNET;
+async function runAgainstFork() {
+    // User defined inputs
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+    const chainId = ChainId.MAINNET;
+    // WETH-3POOL
+    const pool = {
+        id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',
+        address: '0x08775ccb6674d6bDCeB0797C364C2653ED84F384' as Address,
+    };
+    // DAI
+    const amountsIn = [
+        {
+            rawAmount: parseEther('1'),
+            decimals: 18,
+            address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address,
+        },
+    ];
+    const slippage = Slippage.fromPercentage('1'); // 1%
+    // This example requires the account to sign relayer approval
+    const client = createTestClient({
+        mode: 'anvil',
+        chain: CHAINS[chainId],
+        transport: http(rpcUrl),
+    })
+        .extend(publicActions)
+        .extend(walletActions);
+    const userAccount = (await client.getAddresses())[0];
+    const relayerApprovalSignature = await Relayer.signRelayerApproval(
+        BALANCER_RELAYER[chainId],
+        userAccount,
+        client,
+    );
 
-const addLiquidityNested = async () => {
-    // User approve vault to spend their tokens and update user balance
-    const { client, accountAddress, nestedPoolState, rpcUrl } =
-        await exampleSetup();
+    const call = await addLiquidityNested({
+        rpcUrl,
+        chainId,
+        userAccount,
+        relayerApprovalSignature,
+        amountsIn,
+        poolId: pool.id,
+        slippage,
+    });
+
+    const slots = [2];
+    await makeForkTx(
+        call,
+        {
+            rpcUrl,
+            chainId,
+            impersonateAccount: userAccount,
+            forkTokens: amountsIn.map((a, i) => ({
+                address: a.address,
+                slot: slots[i],
+                rawBalance: a.rawAmount,
+            })),
+        },
+        [...amountsIn.map((a) => a.address), pool.address],
+    );
+}
+
+const addLiquidityNested = async ({
+    rpcUrl,
+    userAccount,
+    relayerApprovalSignature,
+    chainId,
+    poolId,
+    amountsIn,
+    slippage,
+}) => {
+    // API is used to fetch relevant pool data
+    const balancerApi = new BalancerApi(
+        'https://backend-v3-canary.beets-ftm-node.com/graphql',
+        chainId,
+    );
+    const nestedPoolState =
+        await balancerApi.nestedPools.fetchNestedPoolState(poolId);
 
     // setup add liquidity helper
     const addLiquidityNested = new AddLiquidityNested();
-
-    const amountsIn = [
-        {
-            address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address, // DAI
-            rawAmount: parseUnits('1', 18),
-            decimals: 18,
-        },
-    ];
 
     const addLiquidityInput: AddLiquidityNestedInput = {
         amountsIn,
@@ -86,23 +135,13 @@ const addLiquidityNested = async () => {
         amountsIn: queryOutput.amountsIn.map((a) => a.amount),
     });
     console.log(`BPT Out: ${queryOutput.bptOut.amount.toString()}`);
-
-    // build add liquidity nested call with expected minBpOut based on slippage
-    const slippage = Slippage.fromPercentage('1'); // 1%
-
-    const signature = await Relayer.signRelayerApproval(
-        BALANCER_RELAYER[chainId],
-        accountAddress,
-        client,
-    );
-
     const wethIsEth = false;
 
-    const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
+    const call = addLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
-        accountAddress,
-        relayerApprovalSignature: signature,
+        accountAddress: userAccount,
+        relayerApprovalSignature,
         wethIsEth,
     });
 
@@ -112,90 +151,8 @@ const addLiquidityNested = async () => {
     }
 
     console.log('\nWith slippage applied:');
-    console.log(`Min BPT Out: ${minBptOut.toString()}`);
-
-    const tokens = [
-        ...tokensIn.map((t) => t.address),
-        queryOutput.bptOut.token.address,
-    ];
-
-    // send add liquidity nested transaction and check balance changes
-    const { transactionReceipt, balanceDeltas } =
-        await sendTransactionGetBalances(
-            tokens,
-            client,
-            accountAddress,
-            to,
-            call,
-            value,
-        );
-    console.log(`\nTransaction status: ${transactionReceipt.status}`);
-    console.log('Token balance deltas:');
-    console.table({
-        tokens,
-        balanceDeltas,
-    });
+    console.log(`Min BPT Out: ${call.minBptOut.toString()}`);
+    return call;
 };
 
-const exampleSetup = async (): Promise<{
-    client: Client & PublicActions & TestActions & WalletActions;
-    accountAddress: Address;
-    nestedPoolState: NestedPoolState;
-    rpcUrl: string;
-}> => {
-    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
-    const balancerApi = new BalancerApi(balancerApiUrl, chainId);
-    const nestedPoolState =
-        await balancerApi.nestedPools.fetchNestedPoolState(poolId);
-
-    const client: Client & PublicActions & TestActions & WalletActions =
-        createTestClient({
-            mode: 'anvil',
-            chain: CHAINS[chainId],
-            transport: http(rpcUrl),
-        })
-            .extend(publicActions)
-            .extend(walletActions);
-
-    const accountAddress = (await client.getAddresses())[0];
-
-    const mainTokens = [
-        {
-            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address,
-            balance: parseUnits('1000', 18),
-            slot: 3,
-        },
-        {
-            address: '0x6b175474e89094c44da98b954eedeac495271d0f' as Address,
-            balance: parseUnits('1000', 18),
-            slot: 2,
-        },
-        {
-            address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address,
-            balance: parseUnits('1000', 6),
-            slot: 9,
-        },
-        {
-            address: '0xdac17f958d2ee523a2206206994597c13d831ec7' as Address,
-            balance: parseUnits('1000', 6),
-            slot: 2,
-        },
-    ];
-
-    await forkSetup(
-        client,
-        accountAddress,
-        mainTokens.map((t) => t.address),
-        mainTokens.map((t) => t.slot),
-        mainTokens.map((t) => t.balance),
-    );
-
-    return {
-        client,
-        accountAddress,
-        nestedPoolState,
-        rpcUrl,
-    };
-};
-
-export default addLiquidityNested;
+export default runAgainstFork;

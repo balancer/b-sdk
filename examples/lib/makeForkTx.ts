@@ -7,7 +7,7 @@ import {
     Hex,
 } from 'viem';
 
-import { CHAINS, PoolState } from '../../src';
+import { CHAINS } from '../../src';
 import {
     forkSetup,
     sendTransactionGetBalances,
@@ -16,7 +16,7 @@ import {
 type Tx = {
     to: Address;
     call: Hex;
-    value: bigint;
+    value: bigint | undefined;
 };
 
 type ForkToken = {
@@ -27,11 +27,6 @@ type ForkToken = {
 
 /**
  * Sets balances for forkTokens, send tx to Anvil fork and print pool token deltas for account
- * @param tx
- * @param impersonateAccount
- * @param rpcUrl
- * @param poolState
- * @param forkTokens
  */
 export async function makeForkTx(
     tx: Tx,
@@ -41,7 +36,7 @@ export async function makeForkTx(
         impersonateAccount: Address;
         forkTokens: ForkToken[];
     },
-    poolState: PoolState,
+    tokensForBalanceCheck: Address[],
 ) {
     const client = createTestClient({
         mode: 'anvil',
@@ -60,11 +55,6 @@ export async function makeForkTx(
     );
 
     console.log('\nSending tx...');
-
-    const tokensForBalanceCheck = [
-        ...poolState.tokens.map(({ address }) => address),
-        poolState.address,
-    ];
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
             tokensForBalanceCheck,
@@ -78,8 +68,6 @@ export async function makeForkTx(
         throw Error('Transaction reverted');
 
     console.log('Token balance deltas:');
-    console.table({
-        tokens: tokensForBalanceCheck,
-        balanceDeltas,
-    });
+    console.log(tokensForBalanceCheck);
+    console.log(balanceDeltas);
 }
