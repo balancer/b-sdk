@@ -8,8 +8,6 @@
  * Run with:
  * pnpm example ./examples/createPool/createPool.ts
  */
-import dotenv from 'dotenv';
-dotenv.config();
 import {
     createTestClient,
     http,

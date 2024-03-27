@@ -5,10 +5,6 @@
  * Run with:
  * pnpm example ./examples/removeLiquidity/removeLiquidityNested.ts
  */
-
-import { config } from 'dotenv';
-config();
-
 import {
     createTestClient,
     http,

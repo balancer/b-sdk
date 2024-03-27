@@ -5,11 +5,7 @@
  * Run with:
  * pnpm example ./examples/removeLiquidity/removeLiquidityRecovery.ts
  */
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { Address, parseEther } from 'viem';
-
 import {
     BalancerApi,
     ChainId,

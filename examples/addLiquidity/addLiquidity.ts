@@ -5,9 +5,6 @@
  * Run with:
  * pnpm example ./examples/addLiquidity/addLiquidity.ts
  */
-import { config } from 'dotenv';
-config();
-
 import { Address, parseEther } from 'viem';
 import {
     AddLiquidityInput,
