@@ -1,6 +1,5 @@
 /**
  * Example showing how to calculate price impact when adding liquidity with unbalanced inputs.
- * (Runs against a local Anvil fork)
  *
  * Note: this example is highlighting one use case. You'll find other price impact
  * calculations within each example, such as add/remove liquidity nested, etc..
@@ -11,7 +10,7 @@
 import { config } from 'dotenv';
 config();
 
-import { parseUnits } from 'viem';
+import { Address, parseEther } from 'viem';
 import {
     AddLiquidityInput,
     AddLiquidityKind,
@@ -19,16 +18,25 @@ import {
     ChainId,
     PriceImpact,
 } from 'src';
-import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 
 const addLiquidityPriceImpact = async () => {
     // User defined
+    const rpcUrl = process.env.ETHEREUM_RPC_URL as string;
     const chainId = ChainId.MAINNET;
     const poolId =
         '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
-
-    // Start a local anvil fork that will be used to query/tx against
-    const { rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]);
+    const amountsIn = [
+        {
+            rawAmount: parseEther('1'),
+            decimals: 18,
+            address: '0xba100000625a3754423978a60c9317c58a424e3D' as Address,
+        },
+        {
+            rawAmount: parseEther('1'),
+            decimals: 18,
+            address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' as Address,
+        },
+    ];
 
     // API is used to fetch relevant pool data
     const balancerApi = new BalancerApi(
@@ -36,13 +44,6 @@ const addLiquidityPriceImpact = async () => {
         chainId,
     );
     const poolState = await balancerApi.pools.fetchPoolState(poolId);
-
-    // We create arbitrary amounts in but these would usually be set by user
-    const amountsIn = poolState.tokens.map((t) => ({
-        rawAmount: parseUnits('1', t.decimals),
-        decimals: t.decimals,
-        address: t.address,
-    }));
 
     // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced
     const addLiquidityInput: AddLiquidityInput = {
