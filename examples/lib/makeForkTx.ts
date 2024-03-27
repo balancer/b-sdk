@@ -16,7 +16,7 @@ import {
 type Tx = {
     to: Address;
     call: Hex;
-    value: bigint | undefined;
+    value?: bigint | undefined;
 };
 
 type ForkToken = {

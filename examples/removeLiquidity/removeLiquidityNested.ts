@@ -3,31 +3,25 @@
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/removeLiquidityNested.ts
+ * pnpm example ./examples/removeLiquidity/removeLiquidityNested.ts
  */
 
 import { config } from 'dotenv';
 config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
-    PublicActions,
     publicActions,
-    TestActions,
-    WalletActions,
     walletActions,
 } from 'viem';
-
 import {
     Address,
     BALANCER_RELAYER,
     BalancerApi,
     ChainId,
     CHAINS,
-    NestedPoolState,
     PriceImpact,
     Relayer,
     replaceWrapped,
@@ -35,24 +29,84 @@ import {
     RemoveLiquidityNested,
     RemoveLiquidityNestedSingleTokenInput,
 } from '../../src';
-import { forkSetup, sendTransactionGetBalances } from '../../test/lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
+import { makeForkTx } from 'examples/lib/makeForkTx';
 
-const balancerApiUrl = 'https://backend-v3-canary.beets-ftm-node.com/graphql';
-const poolId =
-    '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0'; // WETH-3POOL
-const chainId = ChainId.MAINNET;
-
-const removeLiquidityNested = async () => {
-    // User approve vault to spend their tokens and update user balance
-    const { client, accountAddress, nestedPoolState, rpcUrl } =
-        await exampleSetup();
-
-    // setup remove liquidity helper
-    const removeLiquidityNested = new RemoveLiquidityNested();
-
+async function runAgainstFork() {
+    // User defined inputs
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+    const chainId = ChainId.MAINNET;
+    // WETH-3POOL
+    const pool = {
+        id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',
+        address: '0x08775ccb6674d6bDCeB0797C364C2653ED84F384' as Address,
+    };
     const bptAmountIn = parseUnits('1', 18);
     const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f' as Address; // DAI
+    const slippage = Slippage.fromPercentage('1'); // 1%
+    // This example requires the account to sign relayer approval
+    const client = createTestClient({
+        mode: 'anvil',
+        chain: CHAINS[chainId],
+        transport: http(rpcUrl),
+    })
+        .extend(publicActions)
+        .extend(walletActions);
+    const userAccount = (await client.getAddresses())[0];
+    const relayerApprovalSignature = await Relayer.signRelayerApproval(
+        BALANCER_RELAYER[chainId],
+        userAccount,
+        client,
+    );
+
+    const call = await removeLiquidityNested({
+        rpcUrl,
+        chainId,
+        userAccount,
+        relayerApprovalSignature,
+        bptAmountIn,
+        tokenOut,
+        poolId: pool.id,
+        slippage,
+    });
+
+    await makeForkTx(
+        call,
+        {
+            rpcUrl,
+            chainId,
+            impersonateAccount: userAccount,
+            forkTokens: [
+                {
+                    address: pool.address,
+                    slot: 0,
+                    rawBalance: bptAmountIn,
+                },
+            ],
+        },
+        [tokenOut, pool.address],
+    );
+}
+
+const removeLiquidityNested = async ({
+    rpcUrl,
+    userAccount,
+    bptAmountIn,
+    tokenOut,
+    relayerApprovalSignature,
+    chainId,
+    poolId,
+    slippage,
+}) => {
+    // API is used to fetch relevant pool data
+    const balancerApi = new BalancerApi(
+        'https://backend-v3-canary.beets-ftm-node.com/graphql',
+        chainId,
+    );
+    const nestedPoolState =
+        await balancerApi.nestedPools.fetchNestedPoolState(poolId);
+    // setup remove liquidity helper
+    const removeLiquidityNested = new RemoveLiquidityNested();
 
     const removeLiquidityInput: RemoveLiquidityNestedSingleTokenInput = {
         bptAmountIn,
@@ -80,22 +134,13 @@ const removeLiquidityNested = async () => {
     });
     console.log(`BPT In: ${queryOutput.bptAmountIn.amount.toString()}`);
 
-    // build remove liquidity nested call with expected minAmountsOut based on slippage
-    const slippage = Slippage.fromPercentage('1'); // 1%
-
-    const signature = await Relayer.signRelayerApproval(
-        BALANCER_RELAYER[chainId],
-        accountAddress,
-        client,
-    );
-
     const wethIsEth = false;
 
-    const { call, to, minAmountsOut } = removeLiquidityNested.buildCall({
+    const call = removeLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
-        accountAddress,
-        relayerApprovalSignature: signature,
+        accountAddress: userAccount,
+        relayerApprovalSignature,
         wethIsEth,
     });
 
@@ -106,78 +151,10 @@ const removeLiquidityNested = async () => {
 
     console.log('\nWith slippage applied:');
     console.table({
-        tokensOut: minAmountsOut.map((a) => a.token.address),
-        minAmountsOut: minAmountsOut.map((a) => a.amount),
+        tokensOut: call.minAmountsOut.map((a) => a.token.address),
+        minAmountsOut: call.minAmountsOut.map((a) => a.amount),
     });
-
-    const tokens = [
-        ...tokensOut.map((t) => t.address),
-        queryOutput.bptAmountIn.token.address,
-    ];
-
-    // send remove liquidity nested transaction and check balance changes
-    const { transactionReceipt, balanceDeltas } =
-        await sendTransactionGetBalances(
-            tokens,
-            client,
-            accountAddress,
-            to,
-            call,
-        );
-    console.log(`\nTransaction status: ${transactionReceipt.status}`);
-    console.log('Token balance deltas:');
-    console.table({
-        tokens,
-        balanceDeltas,
-    });
+    return call;
 };
 
-const exampleSetup = async (): Promise<{
-    client: Client & PublicActions & TestActions & WalletActions;
-    accountAddress: Address;
-    nestedPoolState: NestedPoolState;
-    rpcUrl: string;
-}> => {
-    const { rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]);
-    const balancerApi = new BalancerApi(balancerApiUrl, chainId);
-    const nestedPoolState =
-        await balancerApi.nestedPools.fetchNestedPoolState(poolId);
-
-    const client: Client & PublicActions & TestActions & WalletActions =
-        createTestClient({
-            mode: 'anvil',
-            chain: CHAINS[chainId],
-            transport: http(rpcUrl),
-        })
-            .extend(publicActions)
-            .extend(walletActions);
-
-    const accountAddress = (await client.getAddresses())[0];
-
-    const rootPool = nestedPoolState.pools.sort((a, b) => b.level - a.level)[0];
-
-    const testTokens = [
-        {
-            address: rootPool.address,
-            balance: parseUnits('1000', 18),
-            slot: 0,
-        },
-    ];
-
-    await forkSetup(
-        client,
-        accountAddress,
-        testTokens.map((t) => t.address),
-        testTokens.map((t) => t.slot),
-        testTokens.map((t) => t.balance),
-    );
-
-    return {
-        client,
-        accountAddress,
-        nestedPoolState,
-        rpcUrl,
-    };
-};
-
-export default removeLiquidityNested;
+export default runAgainstFork;
