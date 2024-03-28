@@ -235,7 +235,7 @@ const swap = new Swap(swapInput: SwapInput);
 
 | Name               | Type          | Description   |
 | -------------      | ------------- | ------------  |
-| swapInput | [SwapInput]() | Swap input including path information. |
+| swapInput | [SwapInput](./src/entities/swap/types.ts#L8) | Swap input including path information. |
 
 Note: `SwapInput` data is normally returned from an API SOR query but may be constructed manually.
 
@@ -524,7 +524,7 @@ swap = async (
 
 | Name               | Type          | Description   |
 | -------------      | ------------- | ------------  |
-| swapInput | [SwapInput]() | Swap input including path information. |
+| swapInput | [SwapInput](./src/entities/swap/types.ts#L8) | Swap input including path information. |
 | rpcUrl (optional) | string | RPC URL, e.g. Infura/Alchemy |
 | block (optional) | bigint | Block no to perform the query |
 
@@ -546,6 +546,17 @@ This class provides helper functions for interacting with the Balancer API.
 ### Example
 
 See the examples for add/remove/swap linked above as these use BalancerApi to fetch required data.
+
+### Constructor
+
+```typescript
+const balancerApi = new BalancerApi(balancerApiUrl: string, chainId: ChainId);
+```
+
+| Name               | Type          | Description   |
+| -------------      | ------------- | ------------  |
+| balancerApiUrl | string | Url of Balancer API |
+| chainId | [ChainId](./src/utils/constants.ts#L54) | Chain that will be queried |
 
 ### Methods
 
