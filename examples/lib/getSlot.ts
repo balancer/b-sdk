@@ -2,6 +2,13 @@ import { ChainId } from '@/utils';
 import { TOKENS } from 'test/lib/utils';
 import { Address } from 'viem';
 
+/**
+ * Slot refers to the storage slot responsible for token balance within an ERC20 contract. It is used to artificially manipulate account balance before any tests/examples on local forks.
+ * Can be found using: https://www.npmjs.com/package/slot20
+ * @param chainId
+ * @param tokenAddress
+ * @returns
+ */
 export function getSlot(chainId: ChainId, tokenAddress: Address): number {
     const tokens = Object.values(TOKENS[chainId]);
     const token = tokens.find(
@@ -17,14 +24,3 @@ export function getSlot(chainId: ChainId, tokenAddress: Address): number {
         );
     return token.slot;
 }
-
-function test() {
-    const slot = getSlot(
-        ChainId.MAINNET,
-        '0xba100000625a3754423978a60c9317c58a424e3D',
-    );
-    console.log(slot);
-}
-test();
-
-// examples/lib/getSlot.ts

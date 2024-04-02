@@ -6,7 +6,7 @@
  * - V3 creation is also possible by updating vaultVersion
  *
  * Run with:
- * pnpm example ./examples/createPool/createPool.ts
+ * pnpm example ./examples/createAndInitPool/createAndInitPool.ts
  */
 import {
     createTestClient,
