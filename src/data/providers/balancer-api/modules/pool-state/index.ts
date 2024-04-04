@@ -186,7 +186,7 @@ export class Pools {
         const { data } = await this.balancerApiClient.fetch({
             query: this.poolStateQuery,
             variables: {
-                id,
+                id: id.toLowerCase(),
             },
         });
         const poolGetPool: PoolState = data.poolGetPool;
@@ -199,7 +199,7 @@ export class Pools {
         const { data } = await this.balancerApiClient.fetch({
             query: this.poolStateWithRawTokensQuery,
             variables: {
-                id,
+                id: id.toLowerCase(),
             },
         });
         const poolGetPool: PoolStateWithBalancesFromApi = data.poolGetPool;
