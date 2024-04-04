@@ -68,6 +68,7 @@ async function runAgainstFork() {
             '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' as Address,
             pool.address,
         ],
+        call.vaultVersion,
     );
 }
 
@@ -133,7 +134,10 @@ const removeLiquidity = async ({
         minAmountsOut: call.minAmountsOut.map((a) => a.amount),
     });
 
-    return call;
+    return {
+        ...call,
+        vaultVersion: queryOutput.vaultVersion,
+    };
 };
 
 export default runAgainstFork;
