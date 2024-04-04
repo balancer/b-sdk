@@ -21,24 +21,24 @@ import { getSlot } from 'examples/lib/getSlot';
 
 async function runAgainstFork() {
     // User defined inputs
-    const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
-    const chainId = ChainId.MAINNET;
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
+    const chainId = ChainId.SEPOLIA;
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     // 80BAL-20WETH
     const pool = {
-        id: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014',
-        address: '0x5c6Ee304399DBdB9C8Ef030aB642B10820DB8F56' as Address,
+        id: '0x204d4194e4e42364E3D1841d0a9B1eF857879C31',
+        address: '0x204d4194e4e42364E3D1841d0a9B1eF857879C31' as Address,
     };
     const amountsIn = [
         {
             rawAmount: parseEther('1'),
             decimals: 18,
-            address: '0xba100000625a3754423978a60c9317c58a424e3D' as Address,
+            address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' as Address,
         },
         {
             rawAmount: parseEther('1'),
             decimals: 18,
-            address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' as Address,
+            address: '0xb19382073c7a0addbb56ac6af1808fa49e377b75' as Address,
         },
     ];
     const slippage = Slippage.fromPercentage('1'); // 1%
@@ -46,7 +46,6 @@ async function runAgainstFork() {
     const call = await addLiquidity({
         rpcUrl,
         chainId,
-        userAccount,
         amountsIn,
         poolId: pool.id,
         slippage,
@@ -66,13 +65,13 @@ async function runAgainstFork() {
             })),
         },
         [...amountsIn.map((a) => a.address), pool.address],
+        call.vaultVersion,
     );
 }
 
 const addLiquidity = async ({
     rpcUrl,
     chainId,
-    userAccount,
     poolId,
     amountsIn,
     slippage,
@@ -114,8 +113,6 @@ const addLiquidity = async ({
     const call = addLiquidity.buildCall({
         ...queryOutput,
         slippage,
-        sender: userAccount,
-        recipient: userAccount,
         chainId,
         wethIsEth: false,
     });
@@ -127,7 +124,10 @@ const addLiquidity = async ({
     );
     console.log(`Min BPT Out: ${call.minBptOut.amount.toString()}`);
 
-    return call;
+    return {
+        ...call,
+        vaultVersion: queryOutput.vaultVersion,
+    };
 };
 
 export default runAgainstFork;

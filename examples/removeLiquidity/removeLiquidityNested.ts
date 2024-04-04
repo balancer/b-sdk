@@ -81,6 +81,7 @@ async function runAgainstFork() {
             ],
         },
         [tokenOut, pool.address],
+        2, // todo - currently only supports V2
     );
 }
 
@@ -150,7 +151,10 @@ const removeLiquidityNested = async ({
         tokensOut: call.minAmountsOut.map((a) => a.token.address),
         minAmountsOut: call.minAmountsOut.map((a) => a.amount),
     });
-    return call;
+    return {
+        ...call,
+        vaultVersion: 2,
+    };
 };
 
 export default runAgainstFork;

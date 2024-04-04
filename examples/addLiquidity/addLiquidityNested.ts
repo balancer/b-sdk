@@ -85,6 +85,7 @@ async function runAgainstFork() {
             })),
         },
         [...amountsIn.map((a) => a.address), pool.address],
+        2, // TODO - Currently only V2 support, update when SC ready
     );
 }
 

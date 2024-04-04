@@ -105,6 +105,7 @@ async function runAgainstFork() {
             })),
         },
         [...initAmounts.map((a) => a.address), poolAddress],
+        createPoolInput.vaultVersion,
     );
 }
 
