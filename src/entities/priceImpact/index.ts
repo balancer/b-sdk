@@ -1,5 +1,5 @@
 import { MathSol, abs, max, min } from '../../utils';
-import { InputAmount, SingleSwap, SwapKind } from '../../types';
+import { InputAmount, SwapKind } from '../../types';
 
 import { AddLiquidity } from '../addLiquidity';
 import {
@@ -23,7 +23,7 @@ import { Swap, SwapInput } from '../swap';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { NestedPoolState, PoolState } from '../types';
-import { getSortedTokens, doSingleSwapQuery } from '../utils';
+import { getSortedTokens } from '../utils';
 
 export class PriceImpact {
     /**
@@ -162,46 +162,56 @@ export class PriceImpact {
                         deltaBPT === max(deltaBPTs.filter((a) => a < 0n)),
                 );
 
-                let kind: SwapKind;
+                let swapKind: SwapKind;
                 let givenTokenIndex: number;
                 let resultTokenIndex: number;
+                let inputAmountRaw = 0n;
+                let outputAmountRaw = 0n;
                 if (
                     deltaBPTs[minPositiveDeltaIndex] <
                     abs(deltaBPTs[minNegativeDeltaIndex])
                 ) {
-                    kind = SwapKind.GivenIn;
+                    swapKind = SwapKind.GivenIn;
                     givenTokenIndex = minPositiveDeltaIndex;
                     resultTokenIndex = minNegativeDeltaIndex;
+                    inputAmountRaw = abs(deltas[givenTokenIndex]);
                 } else {
-                    kind = SwapKind.GivenOut;
+                    swapKind = SwapKind.GivenOut;
                     givenTokenIndex = minNegativeDeltaIndex;
                     resultTokenIndex = minPositiveDeltaIndex;
+                    outputAmountRaw = abs(deltas[givenTokenIndex]);
                 }
-
-                const singleSwap: SingleSwap = {
-                    poolId: poolState.id,
-                    kind,
-                    assetIn: poolTokens[minPositiveDeltaIndex].address,
-                    assetOut: poolTokens[minNegativeDeltaIndex].address,
-                    amount: abs(deltas[givenTokenIndex]),
-                    userData: '0x',
-                };
-
-                /**
-                 * TODO V3: right now swap exists only as part of the SOR.
-                 * We could make it a proper entity with v2/v3 variations and
-                 * consume it here as a higher level abstraction.
-                 */
-                const resultAmount = await doSingleSwapQuery({
-                    ...singleSwap,
-                    rpcUrl: input.rpcUrl,
+                const swapInput: SwapInput = {
                     chainId: input.chainId,
-                });
+                    paths: [
+                        {
+                            tokens: [
+                                poolTokens[
+                                    minPositiveDeltaIndex
+                                ].toInputToken(),
+                                poolTokens[
+                                    minNegativeDeltaIndex
+                                ].toInputToken(),
+                            ],
+                            pools: [poolState.id],
+                            inputAmountRaw,
+                            outputAmountRaw,
+                            vaultVersion: poolState.vaultVersion,
+                        },
+                    ],
+                    swapKind,
+                };
+                const swap = new Swap(swapInput);
+                const result = await swap.query(input.rpcUrl);
+                const resultAmount =
+                    result.swapKind === SwapKind.GivenIn
+                        ? result.expectedAmountOut
+                        : result.expectedAmountIn;
 
                 deltas[givenTokenIndex] = 0n;
                 deltaBPTs[givenTokenIndex] = 0n;
                 deltas[resultTokenIndex] =
-                    deltas[resultTokenIndex] + resultAmount;
+                    deltas[resultTokenIndex] + resultAmount.amount;
                 deltaBPTs[resultTokenIndex] =
                     await queryAddLiquidityForTokenDelta(resultTokenIndex);
             }
