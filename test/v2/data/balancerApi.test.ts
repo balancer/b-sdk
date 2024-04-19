@@ -51,6 +51,7 @@ describe(
                 await balancerApi.nestedPools.fetchNestedPoolState(poolId);
 
             expect(nestedPoolState.mainTokens).toHaveLength(4);
+            expect(nestedPoolState.pools).toHaveLength(2);
         });
     },
     {
