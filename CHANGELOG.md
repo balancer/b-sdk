@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 0.14.1
+
+### Patch Changes
+
+- 8e7c349: Refactor api client helper to match api changes
+- efe7c94: Handle address correctly in BalancerApi. Example updates.
+
 ## 0.14.0
 
 ### Minor Changes
