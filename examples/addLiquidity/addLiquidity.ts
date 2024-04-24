@@ -31,12 +31,12 @@ async function runAgainstFork() {
     };
     const amountsIn = [
         {
-            rawAmount: parseEther('1'),
+            rawAmount: parseEther('0.01'),
             decimals: 18,
             address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' as Address,
         },
         {
-            rawAmount: parseEther('1'),
+            rawAmount: parseEther('0.01'),
             decimals: 18,
             address: '0xb19382073c7a0addbb56ac6af1808fa49e377b75' as Address,
         },

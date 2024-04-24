@@ -1,7 +1,6 @@
 export * from './calculateProportionalAmounts';
 export * from './validateNestedPoolState';
 export * from './doAddLiquidityQuery';
-export * from './doSingleSwapQuery';
 export * from './getAmounts';
 export * from './getSortedTokens';
 export * from './parseAddLiquidityArgs';

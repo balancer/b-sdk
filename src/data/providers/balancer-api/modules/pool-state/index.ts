@@ -1,181 +1,38 @@
 import { BalancerApiClient } from '../../client';
 import { PoolState, PoolStateWithBalances } from '../../../../../entities';
 import { mapPoolType } from '../../../../../utils/poolTypeMapper';
-import { HumanAmount } from '@/data/types';
 
 export class Pools {
-    readonly poolStateQuery = `query GetPool($id: String!){
-    poolGetPool(id:$id) {
-      id
-      address
-      name
-      type
-      version
-      vaultVersion
-      ... on GqlPoolWeighted {
-        tokens {
-          ... on GqlPoolTokenBase {
-            address
-            decimals
-            index
-          }
-        }
-      }
-      ... on GqlPoolMetaStable {
-        tokens {
-          ... on GqlPoolTokenBase {
-            address
-            decimals
-            index
-          }
-        }
-      }
-      ... on GqlPoolStable {
-        tokens {
-          ... on GqlPoolTokenBase {
-            address
-            decimals
-            index
-          }
-        }
-      }
-      ... on GqlPoolComposableStable {
-        tokens {
-          ... on GqlPoolTokenBase {
-            address
-            decimals
-            index
-          }
-        }
-      }
-      ... on GqlPoolGyro {
-        tokens {
-          ... on GqlPoolTokenBase {
-            address
-            decimals
-            index
-          }
-        }
-      }
-      ... on GqlPoolLiquidityBootstrapping {
-        tokens {
-          ... on GqlPoolTokenBase {
-            address
-            decimals
-            index
-          }
-        }
-      }
-      ... on GqlPoolElement {
-        tokens {
-          ... on GqlPoolTokenBase {
-            address
-            decimals
-            index
-          }
-        }
-      }
-      ... on GqlPoolLiquidityBootstrapping {
-        tokens {
-          ... on GqlPoolTokenBase {
-            address
-            decimals
-            index
-          }
-        }
-      }
-    }
-}`;
-
-    readonly poolStateWithRawTokensQuery = `
-    query GetPool($id: String!){
+    readonly poolStateQuery = `
+    query GetPool($id: String!) {
       poolGetPool(id:$id) {
         id
         address
-        name
         type
-        version
         vaultVersion
-        dynamicData {totalShares}
-        ... on GqlPoolWeighted {
-          tokens {
-            ... on GqlPoolTokenBase {
-              address
-              decimals
-              index
-              balance
-            }
-          }
+        poolTokens {
+          index
+          address
+          decimals
         }
-        ... on GqlPoolMetaStable {
-          tokens {
-            ... on GqlPoolTokenBase {
-              address
-              decimals
-              index
-              balance
-            }
-          }
+      }
+    }`;
+
+    readonly poolStateWithRawTokensQuery = `
+    query GetPool($id: String!) {
+      poolGetPool(id:$id) {
+        id
+        address
+        type
+        vaultVersion
+        poolTokens {
+          index
+          address
+          decimals
+          balance
         }
-        ... on GqlPoolStable {
-          tokens {
-            ... on GqlPoolTokenBase {
-              address
-              decimals
-              index
-              balance
-            }
-          }
-        }
-        ... on GqlPoolComposableStable {
-          tokens {
-            ... on GqlPoolTokenBase {
-              address
-              decimals
-              index
-              balance
-            }
-          }
-        }
-        ... on GqlPoolGyro {
-          tokens {
-            ... on GqlPoolTokenBase {
-              address
-              decimals
-              index
-              balance
-            }
-          }
-        }
-        ... on GqlPoolLiquidityBootstrapping {
-          tokens {
-            ... on GqlPoolTokenBase {
-              address
-              decimals
-              index
-              balance
-            }
-          }
-        }
-        ... on GqlPoolElement {
-          tokens {
-            ... on GqlPoolTokenBase {
-              address
-              decimals
-              index
-              balance
-            }
-          }
-        }
-        ... on GqlPoolLiquidityBootstrapping {
-          tokens {
-            ... on GqlPoolTokenBase {
-              address
-              decimals
-              index
-              balance
-            }
-          }
+        dynamicData {
+          totalShares
         }
       }
     }`;
@@ -189,8 +46,12 @@ export class Pools {
                 id: id.toLowerCase(),
             },
         });
-        const poolGetPool: PoolState = data.poolGetPool;
-        return { ...poolGetPool, type: mapPoolType(poolGetPool.type) };
+        const poolGetPool: PoolState = {
+            ...data.poolGetPool,
+            tokens: data.poolGetPool.poolTokens,
+            type: mapPoolType(data.poolGetPool.type),
+        };
+        return poolGetPool;
     }
 
     async fetchPoolStateWithBalances(
@@ -202,18 +63,12 @@ export class Pools {
                 id: id.toLowerCase(),
             },
         });
-        const poolGetPool: PoolStateWithBalancesFromApi = data.poolGetPool;
-        return {
-            ...poolGetPool,
-            type: mapPoolType(poolGetPool.type),
-            totalShares: poolGetPool.dynamicData.totalShares,
+        const poolStateWithBalances: PoolStateWithBalances = {
+            ...data.poolGetPool,
+            tokens: data.poolGetPool.poolTokens,
+            type: mapPoolType(data.poolGetPool.type),
+            totalShares: data.poolGetPool.dynamicData.totalShares,
         };
+        return poolStateWithBalances;
     }
 }
-
-type PoolStateWithBalancesFromApi = Omit<
-    PoolStateWithBalances,
-    'totalShares'
-> & {
-    dynamicData: { totalShares: HumanAmount };
-};
