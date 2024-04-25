@@ -81,7 +81,7 @@ export type RemoveLiquidityBuildCallInput =
     | RemoveLiquidityV2BuildCallInput;
 
 export type RemoveLiquidityBuildCallOutput = {
-    call: Address;
+    callData: Address;
     to: Address;
     value: bigint;
     maxBptIn: TokenAmount;

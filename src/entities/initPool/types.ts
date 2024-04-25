@@ -7,7 +7,7 @@ export interface InitPoolBase {
 }
 
 export type InitPoolBuildOutput = {
-    call: Hex;
+    callData: Hex;
     to: Address;
     value: bigint;
 };

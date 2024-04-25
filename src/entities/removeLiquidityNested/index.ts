@@ -71,7 +71,7 @@ export class RemoveLiquidityNested {
     }
 
     buildCall(input: RemoveLiquidityNestedCallInput): {
-        call: Hex;
+        callData: Hex;
         to: Address;
         minAmountsOut: TokenAmount[];
     } {
@@ -125,14 +125,14 @@ export class RemoveLiquidityNested {
             );
         }
 
-        const call = encodeFunctionData({
+        const callData = encodeFunctionData({
             abi: balancerRelayerAbi,
             functionName: 'multicall',
             args: [encodedCalls],
         });
 
         return {
-            call,
+            callData,
             to: BALANCER_RELAYER[input.callsAttributes[0].chainId],
             minAmountsOut,
         };

@@ -15,7 +15,7 @@ import {
 
 type Tx = {
     to: Address;
-    call: Hex;
+    callData: Hex;
     value?: bigint | undefined;
 };
 
@@ -64,7 +64,7 @@ export async function makeForkTx(
             client,
             forkConfig.impersonateAccount,
             tx.to,
-            tx.call,
+            tx.callData,
             tx.value,
         );
     if (transactionReceipt.status === 'reverted')

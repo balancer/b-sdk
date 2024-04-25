@@ -19,7 +19,7 @@ export class CreatePoolWeightedV2 implements CreatePoolBase {
             args,
         });
         return {
-            call: encodedCall,
+            callData: encodedCall,
             to: WEIGHTED_POOL_FACTORY_BALANCER_V2[input.chainId],
         };
     }

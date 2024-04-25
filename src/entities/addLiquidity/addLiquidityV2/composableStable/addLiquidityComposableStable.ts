@@ -94,14 +94,14 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
             wethIsEth: !!input.wethIsEth,
         });
 
-        const call = encodeFunctionData({
+        const callData = encodeFunctionData({
             abi: vaultV2Abi,
             functionName: 'joinPool',
             args,
         });
 
         return {
-            call,
+            callData,
             to: VAULT[input.chainId],
             value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(

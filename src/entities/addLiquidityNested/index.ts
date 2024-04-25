@@ -61,7 +61,7 @@ export class AddLiquidityNested {
     }
 
     buildCall(input: AddLiquidityNestedCallInput): {
-        call: Hex;
+        callData: Hex;
         to: Address;
         value: bigint | undefined;
         minBptOut: bigint;
@@ -105,7 +105,7 @@ export class AddLiquidityNested {
             );
         }
 
-        const call = encodeFunctionData({
+        const callData = encodeFunctionData({
             abi: balancerRelayerAbi,
             functionName: 'multicall',
             args: [encodedCalls],
@@ -117,7 +117,7 @@ export class AddLiquidityNested {
         }, 0n);
 
         return {
-            call,
+            callData,
             to: BALANCER_RELAYER[input.callsAttributes[0].chainId],
             value: accumulatedValue,
             minBptOut,

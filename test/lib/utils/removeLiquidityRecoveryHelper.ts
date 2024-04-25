@@ -104,7 +104,7 @@ export async function doRemoveLiquidityRecovery(
         client,
         testAddress,
         removeLiquidityBuildCallOutput.to,
-        removeLiquidityBuildCallOutput.call,
+        removeLiquidityBuildCallOutput.callData,
         removeLiquidityBuildCallOutput.value,
     );
 

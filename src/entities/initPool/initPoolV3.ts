@@ -22,7 +22,7 @@ export class InitPoolV3 implements InitPoolBase {
             sortedTokens,
         });
 
-        const call = encodeFunctionData({
+        const callData = encodeFunctionData({
             abi: balancerRouterAbi,
             functionName: 'initialize',
             args,
@@ -34,7 +34,7 @@ export class InitPoolV3 implements InitPoolBase {
         });
 
         return {
-            call,
+            callData,
             to: BALANCER_ROUTER[input.chainId] as Address,
             value: getValue(amountsIn, !!input.wethIsEth),
         };

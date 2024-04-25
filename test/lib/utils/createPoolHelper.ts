@@ -13,7 +13,7 @@ export async function doCreatePool(
 ): Promise<Address> {
     const { client, createPool, createPoolInput, testAddress } = txInput;
 
-    const { call, to } = createPool.buildCall(createPoolInput);
+    const { callData, to } = createPool.buildCall(createPoolInput);
 
     const abis = {
         2: {
@@ -27,7 +27,7 @@ export async function doCreatePool(
 
     const hash = await client.sendTransaction({
         to,
-        data: call,
+        data: callData,
         account: testAddress,
         chain: client.chain,
     });

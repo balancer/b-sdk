@@ -41,7 +41,7 @@ export async function doInitPool(txInput: InitPoolTxInput) {
         client,
         testAddress,
         initPoolBuildOutput.to,
-        initPoolBuildOutput.call,
+        initPoolBuildOutput.callData,
         initPoolBuildOutput.value,
     );
     return {
