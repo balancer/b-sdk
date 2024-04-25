@@ -18,7 +18,7 @@ export function getSlot(chainId: ChainId, tokenAddress: Address): number {
         throw new Error(
             `TOKENS does not contain token ${tokenAddress} ${chainId}`,
         );
-    if (!token.slot)
+    if (token.slot === undefined)
         throw new Error(
             `TOKENS does not contain slot for token ${tokenAddress} ${chainId}`,
         );
