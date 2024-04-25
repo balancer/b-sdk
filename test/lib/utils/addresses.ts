@@ -111,6 +111,16 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
             slot: 1,
         },
+        scUSD: {
+            address: '0x990c8eab51d9ecb365bf9b3de09d121af007db68',
+            decimals: 18,
+            slot: 0,
+        },
+        scDAI: {
+            address: '0xcd20075dc190c411287132e891ec42f009babc73',
+            decimals: 18,
+            slot: 0,
+        },
     },
 };
 

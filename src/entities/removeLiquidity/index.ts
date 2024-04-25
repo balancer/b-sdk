@@ -7,7 +7,7 @@ import {
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
 } from './types';
-import { PoolState } from '../types';
+import { PoolState, PoolStateWithBalances } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
@@ -42,7 +42,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
      */
     public async queryRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
-        poolState: PoolState,
+        poolState: PoolStateWithBalances,
     ): Promise<RemoveLiquidityQueryOutput> {
         this.inputValidator.validateRemoveLiquidityRecovery(input, poolState);
         switch (poolState.vaultVersion) {

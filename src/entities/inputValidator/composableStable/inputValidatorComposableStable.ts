@@ -1,55 +1,40 @@
-import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { AddLiquidityInput } from '../../addLiquidity/types';
 import { CreatePoolV2ComposableStableInput } from '../../createPool/types';
-import { InitPoolInput } from '../../initPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '../../removeLiquidity/types';
 import { PoolState, PoolStateWithBalances } from '../../types';
-import { InputValidatorBase } from '../types';
-import {
-    validateCreatePoolTokens,
-    validatePoolHasBpt,
-    validateTokensAddLiquidity,
-    validateTokensRemoveLiquidity,
-    validateTokensRemoveLiquidityRecovery,
-} from '../utils/validateTokens';
+import { InputValidatorBase } from '../inputValidatorBase';
+import { validatePoolHasBpt } from '../utils/validateTokens';
 
-export class InputValidatorComposableStable implements InputValidatorBase {
-    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
-        areTokensInArray(
-            initPoolInput.amountsIn.map((a) => a.address),
-            poolState.tokens.map((t) => t.address),
-        );
-    }
-
+export class InputValidatorComposableStable extends InputValidatorBase {
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
+        super.validateAddLiquidity(addLiquidityInput, poolState);
         validatePoolHasBpt(poolState);
-        validateTokensAddLiquidity(addLiquidityInput, poolState);
     }
 
     validateRemoveLiquidity(
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): void {
+        super.validateRemoveLiquidity(input, poolState);
         validatePoolHasBpt(poolState);
-        validateTokensRemoveLiquidity(input, poolState);
     }
 
     validateRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
         poolStateWithBalances: PoolStateWithBalances,
     ): void {
+        super.validateRemoveLiquidityRecovery(input, poolStateWithBalances);
         validatePoolHasBpt(poolStateWithBalances);
-        validateTokensRemoveLiquidityRecovery(input, poolStateWithBalances);
     }
 
     validateCreatePool(input: CreatePoolV2ComposableStableInput): void {
-        validateCreatePoolTokens(input.tokens);
+        super.validateCreatePool(input);
         if (input.tokens.length > 5) {
             throw new Error(
                 'Composable stable pools can have a maximum of 5 tokens',

@@ -1,5 +1,4 @@
-// pnpm test -- test/createPool/composableStable.integration.test.ts
-
+// pnpm test -- test/v2/createPool/composableStable.integration.test.ts
 import {
     Address,
     createTestClient,

@@ -4,19 +4,17 @@ import { CreatePoolInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-    RemoveLiquidityRecoveryInput,
 } from '../../removeLiquidity/types';
-import { PoolState, PoolStateWithBalances } from '../../types';
-import { InputValidatorBase } from '../types';
+import { PoolState } from '../../types';
+import { InputValidatorBase } from '../inputValidatorBase';
 import {
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
-    validateTokensRemoveLiquidityRecovery,
 } from '../utils/validateTokens';
 
-export class InputValidatorGyro implements InputValidatorBase {
+export class InputValidatorGyro extends InputValidatorBase {
+    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
-        console.log(initPoolInput, poolState);
         throw new Error('Method not implemented.');
     }
 
@@ -48,13 +46,6 @@ export class InputValidatorGyro implements InputValidatorBase {
             );
         }
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);
-    }
-
-    validateRemoveLiquidityRecovery(
-        input: RemoveLiquidityRecoveryInput,
-        poolStateWithBalances: PoolStateWithBalances,
-    ): void {
-        validateTokensRemoveLiquidityRecovery(input, poolStateWithBalances);
     }
 
     validateCreatePool(input: CreatePoolInput): void {
