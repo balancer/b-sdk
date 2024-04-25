@@ -60,7 +60,7 @@ export type CreatePoolInput =
     | CreatePoolV3WeightedInput;
 
 export type CreatePoolBuildCallOutput = {
-    call: Hex;
+    callData: Hex;
     to: Address;
 };
 

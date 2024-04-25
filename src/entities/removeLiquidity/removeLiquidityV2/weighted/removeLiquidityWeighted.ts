@@ -148,14 +148,14 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             chainId: input.chainId,
         });
 
-        const call = encodeFunctionData({
+        const callData = encodeFunctionData({
             abi: vaultV2Abi,
             functionName: 'exitPool',
             args,
         });
 
         return {
-            call,
+            callData,
             to: VAULT[input.chainId],
             value: 0n,
             maxBptIn: TokenAmount.fromRawAmount(

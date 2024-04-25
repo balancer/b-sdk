@@ -145,7 +145,7 @@ const initPool = async ({
 async function createPool({ client, call, userAccount }) {
     const hash = await client.sendTransaction({
         to: call.to,
-        data: call.call,
+        data: call.callData,
         chain: client.chain,
         account: userAccount,
     });

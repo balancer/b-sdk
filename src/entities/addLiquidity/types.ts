@@ -73,7 +73,7 @@ export interface AddLiquidityBase {
 }
 
 export type AddLiquidityBuildCallOutput = {
-    call: Hex;
+    callData: Hex;
     to: Address;
     value: bigint;
     minBptOut: TokenAmount;

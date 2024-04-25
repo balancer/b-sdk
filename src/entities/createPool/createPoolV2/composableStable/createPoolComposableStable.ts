@@ -21,7 +21,7 @@ export class CreatePoolComposableStableV2 implements CreatePoolBase {
             args,
         });
         return {
-            call: encodedCall,
+            callData: encodedCall,
             to: COMPOSABLE_STABLE_POOL_FACTORY[input.chainId],
         };
     }

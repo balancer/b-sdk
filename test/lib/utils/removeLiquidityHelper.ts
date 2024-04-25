@@ -147,7 +147,7 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
         client,
         testAddress,
         removeLiquidityBuildCallOutput.to,
-        removeLiquidityBuildCallOutput.call,
+        removeLiquidityBuildCallOutput.callData,
         removeLiquidityBuildCallOutput.value,
     );
 
@@ -540,6 +540,6 @@ export function assertRemoveLiquidityBuildCallOutput(
     };
 
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { call, ...buildCheck } = RemoveLiquidityBuildCallOutput;
+    const { callData, ...buildCheck } = RemoveLiquidityBuildCallOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

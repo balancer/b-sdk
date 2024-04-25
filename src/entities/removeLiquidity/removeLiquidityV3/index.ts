@@ -167,13 +167,13 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
-        let call: Hex;
+        let callData: Hex;
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:
                 throw removeLiquidityUnbalancedNotSupportedOnV3;
             case RemoveLiquidityKind.SingleTokenExactOut:
                 {
-                    call = encodeRemoveLiquiditySingleTokenExactOut(
+                    callData = encodeRemoveLiquiditySingleTokenExactOut(
                         input,
                         amounts.maxBptAmountIn,
                     );
@@ -181,7 +181,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 break;
             case RemoveLiquidityKind.SingleTokenExactIn:
                 {
-                    call = encodeRemoveLiquiditySingleTokenExactIn(
+                    callData = encodeRemoveLiquiditySingleTokenExactIn(
                         input,
                         amounts.minAmountsOut,
                     );
@@ -189,7 +189,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 break;
             case RemoveLiquidityKind.Proportional:
                 {
-                    call = encodeRemoveLiquidityProportional(
+                    callData = encodeRemoveLiquidityProportional(
                         input,
                         amounts.minAmountsOut,
                     );
@@ -202,7 +202,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         }
 
         return {
-            call,
+            callData,
             to: BALANCER_ROUTER[input.chainId],
             value: 0n, // remove liquidity always has value = 0
             maxBptIn: TokenAmount.fromRawAmount(

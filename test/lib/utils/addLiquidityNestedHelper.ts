@@ -76,7 +76,7 @@ export const doAddLiquidityNested = async ({
         client,
     );
 
-    const { call, to, value, minBptOut } = addLiquidityNested.buildCall({
+    const { callData, to, value, minBptOut } = addLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
         accountAddress: testAddress,
@@ -99,7 +99,7 @@ export const doAddLiquidityNested = async ({
             client,
             testAddress,
             to,
-            call,
+            callData,
             value,
         );
     return {

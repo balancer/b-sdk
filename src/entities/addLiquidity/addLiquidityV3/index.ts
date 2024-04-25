@@ -94,13 +94,13 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         input: AddLiquidityBaseBuildCallInput,
     ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
-        let call: Hex;
+        let callData: Hex;
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Proportional:
                 throw addLiquidityProportionalUnavailableError;
             case AddLiquidityKind.Unbalanced:
                 {
-                    call = encodeFunctionData({
+                    callData = encodeFunctionData({
                         abi: balancerRouterAbi,
                         functionName: 'addLiquidityUnbalanced',
                         args: [
@@ -119,7 +119,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     if (input.tokenInIndex === undefined) {
                         throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
                     }
-                    call = encodeFunctionData({
+                    callData = encodeFunctionData({
                         abi: balancerRouterAbi,
                         functionName: 'addLiquiditySingleTokenExactOut',
                         args: [
@@ -136,7 +136,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         }
 
         return {
-            call,
+            callData,
             to: BALANCER_ROUTER[input.chainId],
             value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(

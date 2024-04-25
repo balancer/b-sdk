@@ -267,7 +267,7 @@ export const doTransaction = async ({
         client,
     );
 
-    const { call, to, minAmountsOut } = removeLiquidityNested.buildCall({
+    const { callData, to, minAmountsOut } = removeLiquidityNested.buildCall({
         ...queryOutput,
         slippage,
         accountAddress: testAddress,
@@ -290,7 +290,7 @@ export const doTransaction = async ({
             client,
             testAddress,
             to,
-            call,
+            callData,
         );
 
     const expectedDeltas = [

@@ -148,7 +148,7 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
         client,
         testAddress,
         addLiquidityBuildCallOutput.to,
-        addLiquidityBuildCallOutput.call,
+        addLiquidityBuildCallOutput.callData,
         addLiquidityBuildCallOutput.value,
     );
 
@@ -471,6 +471,6 @@ function assertAddLiquidityBuildCallOutput(
     };
 
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { call, ...buildCheck } = addLiquidityBuildCallOutput;
+    const { callData, ...buildCheck } = addLiquidityBuildCallOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

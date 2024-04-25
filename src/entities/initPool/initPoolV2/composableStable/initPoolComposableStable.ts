@@ -37,7 +37,7 @@ export class InitPoolComposableStable implements InitPoolBase {
             fromInternalBalance: input.fromInternalBalance ?? false,
             wethIsEth: !!input.wethIsEth,
         });
-        const call = encodeFunctionData({
+        const callData = encodeFunctionData({
             abi: vaultV2Abi,
             functionName: 'joinPool',
             args,
@@ -49,7 +49,7 @@ export class InitPoolComposableStable implements InitPoolBase {
         });
 
         return {
-            call,
+            callData,
             to: VAULT[input.chainId] as Address,
             value: getValue(amountsIn, !!input.wethIsEth),
         };
