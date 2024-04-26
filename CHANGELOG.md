@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.15.0
+
+### Minor Changes
+
+- 0edf25b: Use callData instead of call for all build returns.
+
 ## 0.14.1
 
 ### Patch Changes
