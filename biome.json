@@ -34,13 +34,15 @@
                 "noDelete": "off"
             },
             "style": {
-                "useImportType": "off",
                 "noNonNullAssertion": "off",
                 "useShorthandArrayType": "error"
             },
             "suspicious": {
                 "noArrayIndexKey": "off",
                 "noExplicitAny": "off"
+            },
+            "nursery": {
+                "useImportType": "off"
             }
         }
     },
