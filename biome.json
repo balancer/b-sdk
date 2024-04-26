@@ -1,10 +1,17 @@
 {
-    "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
+    "$schema": "https://biomejs.dev/schemas/1.5.2/schema.json",
     "files": {
-        "ignore": ["./node_modules", "dist", "pnpm-lock.yaml", "./local"]
+        "ignore": [
+            "./node_modules",
+            "dist",
+            "pnpm-lock.yaml",
+            "./local"
+        ]
     },
     "organizeImports": {
-        "ignore": ["."]
+        "ignore": [
+            "."
+        ]
     },
     "formatter": {
         "enabled": true,
@@ -33,6 +40,9 @@
             "suspicious": {
                 "noArrayIndexKey": "off",
                 "noExplicitAny": "off"
+            },
+            "nursery": {
+                "useImportType": "off"
             }
         }
     },
