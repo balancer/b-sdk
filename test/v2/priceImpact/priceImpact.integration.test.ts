@@ -18,6 +18,7 @@ import {
     NestedPoolState,
     Path,
     PoolState,
+    PoolStateWithBalances,
     PoolType,
     PriceImpact,
     PriceImpactAmount,
@@ -28,8 +29,12 @@ import {
     RemoveLiquidityNestedSingleTokenInput,
 } from 'src';
 
+import { calculateProportionalAmounts } from '@/entities/utils/calculateProportionalAmounts';
+
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
+import { HumanAmount } from '@/data';
+
 
 const block = 18559730n;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, block);
@@ -57,6 +62,7 @@ const BPT_WETH_3POOL = POOLS[chainId].BPT_WETH_3POOL;
 describe('price impact', () => {
     let poolState: PoolState;
     let nestedPoolState: NestedPoolState;
+    let poolStateWithBalances: PoolStateWithBalances;
 
     beforeAll(async () => {
         // setup mock api
@@ -65,6 +71,8 @@ describe('price impact', () => {
         // get pool state from api
         poolState = await api.getPool(wstETH_rETH_sfrxETH.id);
         nestedPoolState = await api.getNestedPool(BPT_WETH_3POOL.id);
+        poolStateWithBalances = await api.fetchPoolStateWithBalances(wstETH_rETH_sfrxETH.id);
+
     });
 
     describe('add liquidity single token', () => {
@@ -180,6 +188,44 @@ describe('price impact', () => {
                 priceImpactSpot.decimal,
                 1e-3, // 1 bps
             );
+        });
+    });
+
+    describe('add liquidity proportional', () => {
+        let input: AddLiquidityUnbalancedInput;
+        let tokenAmounts: InputAmount[];
+
+        beforeAll(() => {
+            // fetch proportional amounts required to produce the failing test
+            ({tokenAmounts} = calculateProportionalAmounts(
+                poolStateWithBalances,
+                {
+                    rawAmount: parseEther('100'),
+                    decimals: 18,
+                    address: wstETH.address,
+                },
+            ));
+            
+            const  summand = [BigInt('-100000000000000000000'),BigInt('100000000000000000000'),BigInt('200000000000000000000')];
+
+            tokenAmounts.map((item, index) => {
+                item.rawAmount = item.rawAmount + BigInt(summand[index])
+            })
+
+            input = {
+                chainId,
+                rpcUrl,
+                kind: AddLiquidityKind.Unbalanced,
+                amountsIn: tokenAmounts,
+            };
+        });
+        test('it reports PriceImpact with custom inputs', async () => {
+            const priceImpactABA = await PriceImpact.addLiquidityUnbalanced(
+                input,
+                poolStateWithBalances,
+            );
+            console.log(priceImpactABA);
+            expect(priceImpactABA.bps).toBe(0);
         });
     });
 
@@ -359,7 +405,7 @@ describe('price impact', () => {
             );
         });
     });
-
+ 
     /**
      * FIXME: Test pending a reference value for comparison/validation, because
      * there is no corresponding method in previous SDK to validate the result.
@@ -422,6 +468,67 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.ComposableStable,
             tokens,
+            vaultVersion: 2,
+        };
+    }
+
+    public async fetchPoolStateWithBalances(
+        id: Hex,
+    ): Promise<PoolStateWithBalances> {
+
+        /* wstETH_rETH_sfrxETH: {
+            id: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b',
+            address: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af7',
+            type: PoolType.ComposableStable,
+            decimals: 18,
+            slot: 0,
+        }, */
+
+        const tokens = [
+            {
+                symbol: 'wstETH_rETH_sfrxETH BPT',
+                name: 'Balancer wstETH_rETH_sfrxETH StablePool',
+                address: getPoolAddress(id)  as Address, // vETH/WETH BPT
+                decimals: 18,
+                index: 0,
+                balance: '2596148429267413.794052669613761796' as HumanAmount,
+            },
+            {
+                symbol: 'wstETH',
+                name: 'wrapped Staked Ether',
+                address:
+                    wstETH.address as Address, 
+                decimals: 18,
+                index: 1,
+                balance: '2396148429267413.794052669613761796' as HumanAmount,
+            },
+            {
+                symbol: 'sfrxeth',
+                name: 'staked frax ether',
+                address:
+                    sfrxETH.address as Address, 
+                decimals: 18,
+                index: 2,
+                balance: '2596148429267413.794052669613761796' as HumanAmount,
+            },
+            {
+                symbol: 'reth',
+                name: 'rocket pool ether',
+                address:
+                    rETH.address as Address, 
+                decimals: 18,
+                index: 3,
+                balance: '2796148429267413.794052669613761796' as HumanAmount,
+            },
+        ];
+
+    
+        return {
+            id,
+            address: getPoolAddress(id) as Address,
+            type: PoolType.ComposableStable,
+            tokens,
+            totalShares: '1.879969119336134102' as HumanAmount,
             vaultVersion: 2,
         };
     }
