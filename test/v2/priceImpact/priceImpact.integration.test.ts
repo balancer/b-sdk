@@ -35,7 +35,6 @@ import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 import { HumanAmount } from '@/data';
 
-
 const block = 18559730n;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, block);
 const chainId = ChainId.MAINNET;
@@ -71,8 +70,9 @@ describe('price impact', () => {
         // get pool state from api
         poolState = await api.getPool(wstETH_rETH_sfrxETH.id);
         nestedPoolState = await api.getNestedPool(BPT_WETH_3POOL.id);
-        poolStateWithBalances = await api.fetchPoolStateWithBalances(BAL_WETH.id);
-
+        poolStateWithBalances = await api.fetchPoolStateWithBalances(
+            BAL_WETH.id,
+        );
     });
 
     describe('add liquidity single token', () => {
@@ -197,7 +197,7 @@ describe('price impact', () => {
 
         beforeAll(() => {
             // fetch proportional amounts required to produce the failing test
-            ({tokenAmounts} = calculateProportionalAmounts(
+            ({ tokenAmounts } = calculateProportionalAmounts(
                 poolStateWithBalances,
                 {
                     rawAmount: parseEther('1'),
@@ -213,16 +213,15 @@ describe('price impact', () => {
                 amountsIn: tokenAmounts,
             };
         });
-        test('it reports PriceImpact with custom inputs', async () => {
-
-            try {
-                const impact = await PriceImpact.addLiquidityUnbalanced(input, poolStateWithBalances);
-                console.log(impact);
-              } catch (e) {
-                if (e instanceof TypeError) {
-                  throw new Error('TypeError was thrown');
-                }
-              }
+        test('ABA close to zero', async () => {
+            const priceImpactABA = await PriceImpact.addLiquidityUnbalanced(
+                input,
+                poolStateWithBalances,
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                0,
+                1e-4, // 1 bps
+            );
         });
     });
 
@@ -402,7 +401,7 @@ describe('price impact', () => {
             );
         });
     });
- 
+
     /**
      * FIXME: Test pending a reference value for comparison/validation, because
      * there is no corresponding method in previous SDK to validate the result.
@@ -472,13 +471,11 @@ class MockApi {
     public async fetchPoolStateWithBalances(
         id: Hex,
     ): Promise<PoolStateWithBalances> {
-
         const tokens = [
             {
                 symbol: 'BAL',
                 name: 'Balancer',
-                address:
-                    BAL.address as Address, 
+                address: BAL.address as Address,
                 decimals: 18,
                 index: 0,
                 balance: '33209420.429177837538000946' as HumanAmount,
@@ -486,15 +483,13 @@ class MockApi {
             {
                 symbol: 'WETH',
                 name: 'Wrapped Ether',
-                address:
-                    WETH.address as Address, 
+                address: WETH.address as Address,
                 decimals: 18,
                 index: 1,
                 balance: '16591.168598583701574685' as HumanAmount,
             },
         ];
 
-    
         return {
             id,
             address: getPoolAddress(id) as Address,
