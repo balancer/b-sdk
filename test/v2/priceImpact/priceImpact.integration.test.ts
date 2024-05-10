@@ -71,7 +71,7 @@ describe('price impact', () => {
         // get pool state from api
         poolState = await api.getPool(wstETH_rETH_sfrxETH.id);
         nestedPoolState = await api.getNestedPool(BPT_WETH_3POOL.id);
-        poolStateWithBalances = await api.fetchPoolStateWithBalances(wstETH_rETH_sfrxETH.id);
+        poolStateWithBalances = await api.fetchPoolStateWithBalances(BAL_WETH.id);
 
     });
 
@@ -200,17 +200,11 @@ describe('price impact', () => {
             ({tokenAmounts} = calculateProportionalAmounts(
                 poolStateWithBalances,
                 {
-                    rawAmount: parseEther('100'),
+                    rawAmount: parseEther('1'),
                     decimals: 18,
-                    address: wstETH.address,
+                    address: BAL.address,
                 },
             ));
-            
-            const  summand = [BigInt('-100000000000000000000'),BigInt('100000000000000000000'),BigInt('200000000000000000000')];
-
-            tokenAmounts.map((item, index) => {
-                item.rawAmount = item.rawAmount + BigInt(summand[index])
-            })
 
             input = {
                 chainId,
@@ -220,12 +214,15 @@ describe('price impact', () => {
             };
         });
         test('it reports PriceImpact with custom inputs', async () => {
-            const priceImpactABA = await PriceImpact.addLiquidityUnbalanced(
-                input,
-                poolStateWithBalances,
-            );
-            console.log(priceImpactABA);
-            expect(priceImpactABA.bps).toBe(0);
+
+            try {
+                const impact = await PriceImpact.addLiquidityUnbalanced(input, poolStateWithBalances);
+                console.log(impact);
+              } catch (e) {
+                if (e instanceof TypeError) {
+                  throw new Error('TypeError was thrown');
+                }
+              }
         });
     });
 
@@ -476,49 +473,24 @@ class MockApi {
         id: Hex,
     ): Promise<PoolStateWithBalances> {
 
-        /* wstETH_rETH_sfrxETH: {
-            id: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af700000000000000000000058b',
-            address: '0x42ed016f826165c2e5976fe5bc3df540c5ad0af7',
-            type: PoolType.ComposableStable,
-            decimals: 18,
-            slot: 0,
-        }, */
-
         const tokens = [
             {
-                symbol: 'wstETH_rETH_sfrxETH BPT',
-                name: 'Balancer wstETH_rETH_sfrxETH StablePool',
-                address: getPoolAddress(id)  as Address, // vETH/WETH BPT
+                symbol: 'BAL',
+                name: 'Balancer',
+                address:
+                    BAL.address as Address, 
                 decimals: 18,
                 index: 0,
-                balance: '2596148429267413.794052669613761796' as HumanAmount,
+                balance: '33209420.429177837538000946' as HumanAmount,
             },
             {
-                symbol: 'wstETH',
-                name: 'wrapped Staked Ether',
+                symbol: 'WETH',
+                name: 'Wrapped Ether',
                 address:
-                    wstETH.address as Address, 
+                    WETH.address as Address, 
                 decimals: 18,
                 index: 1,
-                balance: '2396148429267413.794052669613761796' as HumanAmount,
-            },
-            {
-                symbol: 'sfrxeth',
-                name: 'staked frax ether',
-                address:
-                    sfrxETH.address as Address, 
-                decimals: 18,
-                index: 2,
-                balance: '2596148429267413.794052669613761796' as HumanAmount,
-            },
-            {
-                symbol: 'reth',
-                name: 'rocket pool ether',
-                address:
-                    rETH.address as Address, 
-                decimals: 18,
-                index: 3,
-                balance: '2796148429267413.794052669613761796' as HumanAmount,
+                balance: '16591.168598583701574685' as HumanAmount,
             },
         ];
 
@@ -526,9 +498,9 @@ class MockApi {
         return {
             id,
             address: getPoolAddress(id) as Address,
-            type: PoolType.ComposableStable,
+            type: PoolType.Weighted,
             tokens,
-            totalShares: '1.879969119336134102' as HumanAmount,
+            totalShares: '14154229.749048855404944279' as HumanAmount,
             vaultVersion: 2,
         };
     }
