@@ -223,6 +223,22 @@ describe('price impact', () => {
                 1e-4, // 1 bps
             );
         });
+        test('ABA close to zero with all deltas being 0', async () => {
+            // force zero deltas and zero deltaBPS
+            input.amountsIn = input.amountsIn.map((amountIn) => ({
+                ...amountIn,
+                rawAmount: 0n,
+            }));
+
+            const priceImpactABA = await PriceImpact.addLiquidityUnbalanced(
+                input,
+                poolStateWithBalances,
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                0,
+                1e-4, // 1 bps
+            );
+        });
     });
 
     describe('swap', () => {
