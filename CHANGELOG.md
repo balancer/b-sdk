@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.15.1
+
+### Patch Changes
+
+- 18087a8: Fixed price impact to return close to 0 on proportional amounts
+
 ## 0.15.0
 
 ### Minor Changes
