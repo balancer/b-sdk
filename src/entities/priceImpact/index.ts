@@ -133,7 +133,10 @@ export class PriceImpact {
 
         // zero out deltas by swapping between tokens from proportionalAmounts
         // to exactAmountsIn, leaving the remaining delta within a single token
-        const remainingDeltaIndex = await zeroOutDeltas(deltas, deltaBPTs);
+        let remainingDeltaIndex = 0;
+        if (deltaBPTs.some((deltaBPT) => deltaBPT !== 0n)) {
+            remainingDeltaIndex = await zeroOutDeltas(deltas, deltaBPTs);
+        }
 
         // get relevant amount for price impact calculation
         const deltaAmount = TokenAmount.fromRawAmount(
@@ -150,9 +153,11 @@ export class PriceImpact {
         // helper functions
 
         async function zeroOutDeltas(deltas: bigint[], deltaBPTs: bigint[]) {
-            let minNegativeDeltaIndex = 0;
-            const nonZeroDeltas = deltas.filter((d) => d !== 0n);
-            for (let i = 0; i < nonZeroDeltas.length - 1; i++) {
+            let minNegativeDeltaIndex = deltaBPTs.findIndex(
+                (deltaBPT) => deltaBPT === max(deltaBPTs.filter((a) => a < 0n)),
+            );
+            const nonZeroDeltasBPTs = deltaBPTs.filter((d) => d !== 0n);
+            for (let i = 0; i < nonZeroDeltasBPTs.length - 1; i++) {
                 const minPositiveDeltaIndex = deltaBPTs.findIndex(
                     (deltaBPT) =>
                         deltaBPT === min(deltaBPTs.filter((a) => a > 0n)),

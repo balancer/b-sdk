@@ -18,6 +18,7 @@ import {
     NestedPoolState,
     Path,
     PoolState,
+    PoolStateWithBalances,
     PoolType,
     PriceImpact,
     PriceImpactAmount,
@@ -28,8 +29,11 @@ import {
     RemoveLiquidityNestedSingleTokenInput,
 } from 'src';
 
+import { calculateProportionalAmounts } from '@/entities/utils/calculateProportionalAmounts';
+
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
+import { HumanAmount } from '@/data';
 
 const block = 18559730n;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, block);
@@ -57,6 +61,7 @@ const BPT_WETH_3POOL = POOLS[chainId].BPT_WETH_3POOL;
 describe('price impact', () => {
     let poolState: PoolState;
     let nestedPoolState: NestedPoolState;
+    let poolStateWithBalances: PoolStateWithBalances;
 
     beforeAll(async () => {
         // setup mock api
@@ -65,6 +70,9 @@ describe('price impact', () => {
         // get pool state from api
         poolState = await api.getPool(wstETH_rETH_sfrxETH.id);
         nestedPoolState = await api.getNestedPool(BPT_WETH_3POOL.id);
+        poolStateWithBalances = await api.fetchPoolStateWithBalances(
+            BAL_WETH.id,
+        );
     });
 
     describe('add liquidity single token', () => {
@@ -179,6 +187,56 @@ describe('price impact', () => {
             expect(priceImpactABA.decimal).closeTo(
                 priceImpactSpot.decimal,
                 1e-3, // 1 bps
+            );
+        });
+    });
+
+    describe('add liquidity proportional', () => {
+        let input: AddLiquidityUnbalancedInput;
+        let tokenAmounts: InputAmount[];
+
+        beforeAll(() => {
+            // fetch proportional amounts required to produce the failing test
+            ({ tokenAmounts } = calculateProportionalAmounts(
+                poolStateWithBalances,
+                {
+                    rawAmount: parseEther('1'),
+                    decimals: 18,
+                    address: BAL.address,
+                },
+            ));
+
+            input = {
+                chainId,
+                rpcUrl,
+                kind: AddLiquidityKind.Unbalanced,
+                amountsIn: tokenAmounts,
+            };
+        });
+        test('ABA close to zero', async () => {
+            const priceImpactABA = await PriceImpact.addLiquidityUnbalanced(
+                input,
+                poolStateWithBalances,
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                0,
+                1e-4, // 1 bps
+            );
+        });
+        test('ABA close to zero with all deltas being 0', async () => {
+            // force zero deltas and zero deltaBPS
+            input.amountsIn = input.amountsIn.map((amountIn) => ({
+                ...amountIn,
+                rawAmount: 0n,
+            }));
+
+            const priceImpactABA = await PriceImpact.addLiquidityUnbalanced(
+                input,
+                poolStateWithBalances,
+            );
+            expect(priceImpactABA.decimal).closeTo(
+                0,
+                1e-4, // 1 bps
             );
         });
     });
@@ -422,6 +480,38 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.ComposableStable,
             tokens,
+            vaultVersion: 2,
+        };
+    }
+
+    public async fetchPoolStateWithBalances(
+        id: Hex,
+    ): Promise<PoolStateWithBalances> {
+        const tokens = [
+            {
+                symbol: 'BAL',
+                name: 'Balancer',
+                address: BAL.address as Address,
+                decimals: 18,
+                index: 0,
+                balance: '33209420.429177837538000946' as HumanAmount,
+            },
+            {
+                symbol: 'WETH',
+                name: 'Wrapped Ether',
+                address: WETH.address as Address,
+                decimals: 18,
+                index: 1,
+                balance: '16591.168598583701574685' as HumanAmount,
+            },
+        ];
+
+        return {
+            id,
+            address: getPoolAddress(id) as Address,
+            type: PoolType.Weighted,
+            tokens,
+            totalShares: '14154229.749048855404944279' as HumanAmount,
             vaultVersion: 2,
         };
     }
