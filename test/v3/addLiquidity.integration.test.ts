@@ -38,7 +38,6 @@ import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 
 const vaultVersion = 3;
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const chainId = ChainId.SEPOLIA;
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.id;
 
@@ -48,6 +47,7 @@ const WETH = TOKENS[chainId].WETH;
 describe('add liquidity test', () => {
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
+    let rpcUrl: string;
 
     beforeAll(async () => {
         // setup mock api
@@ -55,6 +55,8 @@ describe('add liquidity test', () => {
 
         // get pool state from api
         poolState = await api.getPool(poolId);
+
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         const client = createTestClient({
             mode: 'anvil',
