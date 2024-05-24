@@ -49,7 +49,7 @@ const vaultVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
-const poolId = POOLS[chainId].MOCK_WEIGHTED_POOL.address;
+const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;

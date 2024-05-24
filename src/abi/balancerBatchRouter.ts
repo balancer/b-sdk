@@ -11,9 +11,25 @@ export const balancerBatchRouterAbi = [
                 name: 'weth',
                 type: 'address',
             },
+            {
+                internalType: 'contract IPermit2',
+                name: 'permit2',
+                type: 'address',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'target',
+                type: 'address',
+            },
+        ],
+        name: 'AddressEmptyCode',
+        type: 'error',
     },
     {
         inputs: [
@@ -50,11 +66,27 @@ export const balancerBatchRouterAbi = [
         inputs: [
             {
                 internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+        ],
+        name: 'SafeERC20FailedOperation',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
                 name: 'sender',
                 type: 'address',
             },
         ],
         name: 'SenderIsNotVault',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'SwapDeadline',
         type: 'error',
     },
     {

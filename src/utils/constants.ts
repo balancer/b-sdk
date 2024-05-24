@@ -160,7 +160,7 @@ export const VAULT: Record<number, Address> = {
 };
 
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x1FC7F1F84CFE61a04224AC8D3F87f56214FeC08c',
+    [ChainId.SEPOLIA]: '0x89aa28a8D2B327cD9dB4aDc0f259D757F000AE66',
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
@@ -200,12 +200,20 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xA0De078cd5cFa7088821B83e0bD7545ccfb7c883',
+    [ChainId.SEPOLIA]: '0xa59F164d6cf6ee5d63580C0bcEA5CCB2e50b908c',
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x8A8B9f35765899B3a0291700141470D79EA2eA88',
+    [ChainId.SEPOLIA]: '0x0252Cdbd41114e657945772d02cB1eE8008E9E1D',
 };
+
+export const PERMIT2: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+};
+
+/**
+ * Native Assets
+ */
 
 export const NATIVE_ASSETS = {
     [ChainId.MAINNET]: new Token(

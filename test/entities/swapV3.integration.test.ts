@@ -94,7 +94,7 @@ describe('SwapV3', () => {
                     decimals: TOKENS[chainId].WETH.decimals,
                 },
             ],
-            pools: [POOLS[chainId].MOCK_WEIGHTED_POOL.id],
+            pools: [POOLS[chainId].MOCK_WETH_BAL_POOL.id],
             inputAmountRaw: 100000000000n,
             outputAmountRaw: 100000000000n,
         };
@@ -274,7 +274,7 @@ describe('SwapV3', () => {
                 },
             ],
             pools: [
-                POOLS[chainId].MOCK_WEIGHTED_POOL.id,
+                POOLS[chainId].MOCK_WETH_BAL_POOL.id,
                 POOLS[chainId].MOCK_BAL_DAI_POOL.id,
                 POOLS[chainId].MOCK_USDC_DAI_POOL.id,
             ],

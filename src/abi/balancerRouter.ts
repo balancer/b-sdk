@@ -11,9 +11,25 @@ export const balancerRouterAbi = [
                 name: 'weth',
                 type: 'address',
             },
+            {
+                internalType: 'contract IPermit2',
+                name: 'permit2',
+                type: 'address',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'target',
+                type: 'address',
+            },
+        ],
+        name: 'AddressEmptyCode',
+        type: 'error',
     },
     {
         inputs: [
@@ -60,6 +76,17 @@ export const balancerRouterAbi = [
     {
         inputs: [],
         name: 'ReentrancyGuardReentrantCall',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+        ],
+        name: 'SafeERC20FailedOperation',
         type: 'error',
     },
     {
@@ -188,6 +215,45 @@ export const balancerRouterAbi = [
                 internalType: 'bytes',
                 name: 'returnData',
                 type: 'bytes',
+            },
+        ],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'maxAmountsIn',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
+        ],
+        name: 'addLiquidityProportional',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
             },
         ],
         stateMutability: 'payable',
@@ -379,6 +445,136 @@ export const balancerRouterAbi = [
     {
         inputs: [
             {
+                internalType: 'bytes[]',
+                name: 'data',
+                type: 'bytes[]',
+            },
+        ],
+        name: 'multicall',
+        outputs: [
+            {
+                internalType: 'bytes[]',
+                name: 'results',
+                type: 'bytes[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'token',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'owner',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'spender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'nonce',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'deadline',
+                        type: 'uint256',
+                    },
+                ],
+                internalType: 'struct IRouter.PermitApproval[]',
+                name: 'permitBatch',
+                type: 'tuple[]',
+            },
+            {
+                internalType: 'bytes[]',
+                name: 'permitSignatures',
+                type: 'bytes[]',
+            },
+            {
+                components: [
+                    {
+                        components: [
+                            {
+                                internalType: 'address',
+                                name: 'token',
+                                type: 'address',
+                            },
+                            {
+                                internalType: 'uint160',
+                                name: 'amount',
+                                type: 'uint160',
+                            },
+                            {
+                                internalType: 'uint48',
+                                name: 'expiration',
+                                type: 'uint48',
+                            },
+                            {
+                                internalType: 'uint48',
+                                name: 'nonce',
+                                type: 'uint48',
+                            },
+                        ],
+                        internalType:
+                            'struct IAllowanceTransfer.PermitDetails[]',
+                        name: 'details',
+                        type: 'tuple[]',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'spender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'sigDeadline',
+                        type: 'uint256',
+                    },
+                ],
+                internalType: 'struct IAllowanceTransfer.PermitBatch',
+                name: 'permit2Batch',
+                type: 'tuple',
+            },
+            {
+                internalType: 'bytes',
+                name: 'permit2Signature',
+                type: 'bytes',
+            },
+            {
+                internalType: 'bytes[]',
+                name: 'multicallData',
+                type: 'bytes[]',
+            },
+        ],
+        name: 'permitBatchAndCall',
+        outputs: [
+            {
+                internalType: 'bytes[]',
+                name: 'results',
+                type: 'bytes[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
                 internalType: 'address',
                 name: 'pool',
                 type: 'address',
@@ -484,6 +680,40 @@ export const balancerRouterAbi = [
             },
         ],
         stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'maxAmountsIn',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
+        ],
+        name: 'queryAddLiquidityProportional',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -733,9 +963,9 @@ export const balancerRouterAbi = [
         name: 'queryRemoveLiquidityRecoveryHook',
         outputs: [
             {
-                internalType: 'uint256',
-                name: 'amountOut',
-                type: 'uint256',
+                internalType: 'uint256[]',
+                name: 'amountsOut',
+                type: 'uint256[]',
             },
         ],
         stateMutability: 'nonpayable',
@@ -1248,410 +1478,6 @@ export const balancerRouterAbi = [
                 internalType: 'uint256',
                 name: 'bptAmountIn',
                 type: 'uint256',
-            },
-        ],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-            {
-                internalType: 'contract IERC20',
-                name: 'tokenIn',
-                type: 'address',
-            },
-            {
-                internalType: 'contract IERC20',
-                name: 'tokenOut',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'exactAmountIn',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'minAmountOut',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bool',
-                name: 'wethIsEth',
-                type: 'bool',
-            },
-            {
-                internalType: 'bytes',
-                name: 'userData',
-                type: 'bytes',
-            },
-        ],
-        name: 'swapSingleTokenExactIn',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-            {
-                internalType: 'contract IERC20',
-                name: 'tokenIn',
-                type: 'address',
-            },
-            {
-                internalType: 'contract IERC20',
-                name: 'tokenOut',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'exactAmountOut',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'maxAmountIn',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bool',
-                name: 'wethIsEth',
-                type: 'bool',
-            },
-            {
-                internalType: 'bytes',
-                name: 'userData',
-                type: 'bytes',
-            },
-        ],
-        name: 'swapSingleTokenExactOut',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    {
-                        internalType: 'contract IERC20',
-                        name: 'tokenIn',
-                        type: 'address',
-                    },
-                    {
-                        components: [
-                            {
-                                internalType: 'address',
-                                name: 'pool',
-                                type: 'address',
-                            },
-                            {
-                                internalType: 'contract IERC20',
-                                name: 'tokenOut',
-                                type: 'address',
-                            },
-                        ],
-                        internalType: 'struct IRouter.SwapPathStep[]',
-                        name: 'steps',
-                        type: 'tuple[]',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'exactAmountIn',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'minAmountOut',
-                        type: 'uint256',
-                    },
-                ],
-                internalType: 'struct IRouter.SwapPathExactAmountIn[]',
-                name: 'paths',
-                type: 'tuple[]',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bool',
-                name: 'wethIsEth',
-                type: 'bool',
-            },
-            {
-                internalType: 'bytes',
-                name: 'userData',
-                type: 'bytes',
-            },
-        ],
-        name: 'swapExactIn',
-        outputs: [
-            {
-                internalType: 'uint256[]',
-                name: 'amountsOut',
-                type: 'uint256[]',
-            },
-        ],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    {
-                        internalType: 'address',
-                        name: 'sender',
-                        type: 'address',
-                    },
-                    {
-                        components: [
-                            {
-                                internalType: 'contract IERC20',
-                                name: 'tokenIn',
-                                type: 'address',
-                            },
-                            {
-                                components: [
-                                    {
-                                        internalType: 'address',
-                                        name: 'pool',
-                                        type: 'address',
-                                    },
-                                    {
-                                        internalType: 'contract IERC20',
-                                        name: 'tokenOut',
-                                        type: 'address',
-                                    },
-                                ],
-                                internalType: 'struct IRouter.SwapPathStep[]',
-                                name: 'steps',
-                                type: 'tuple[]',
-                            },
-                            {
-                                internalType: 'uint256',
-                                name: 'exactAmountIn',
-                                type: 'uint256',
-                            },
-                            {
-                                internalType: 'uint256',
-                                name: 'minAmountOut',
-                                type: 'uint256',
-                            },
-                        ],
-                        internalType: 'struct IRouter.SwapPathExactAmountIn[]',
-                        name: 'paths',
-                        type: 'tuple[]',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'deadline',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'wethIsEth',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
-                ],
-                internalType: 'struct IRouter.SwapExactInHookParams',
-                name: 'params',
-                type: 'tuple',
-            },
-        ],
-        name: 'swapExactInHook',
-        outputs: [
-            {
-                internalType: 'uint256[]',
-                name: 'pathAmountsOut',
-                type: 'uint256[]',
-            },
-        ],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    {
-                        internalType: 'contract IERC20',
-                        name: 'tokenIn',
-                        type: 'address',
-                    },
-                    {
-                        components: [
-                            {
-                                internalType: 'address',
-                                name: 'pool',
-                                type: 'address',
-                            },
-                            {
-                                internalType: 'contract IERC20',
-                                name: 'tokenOut',
-                                type: 'address',
-                            },
-                        ],
-                        internalType: 'struct IRouter.SwapPathStep[]',
-                        name: 'steps',
-                        type: 'tuple[]',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'maxAmountIn',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'exactAmountOut',
-                        type: 'uint256',
-                    },
-                ],
-                internalType: 'struct IRouter.SwapPathExactAmountOut[]',
-                name: 'paths',
-                type: 'tuple[]',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bool',
-                name: 'wethIsEth',
-                type: 'bool',
-            },
-            {
-                internalType: 'bytes',
-                name: 'userData',
-                type: 'bytes',
-            },
-        ],
-        name: 'swapExactOut',
-        outputs: [
-            {
-                internalType: 'uint256[]',
-                name: 'amountsIn',
-                type: 'uint256[]',
-            },
-        ],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    {
-                        internalType: 'address',
-                        name: 'sender',
-                        type: 'address',
-                    },
-                    {
-                        components: [
-                            {
-                                internalType: 'contract IERC20',
-                                name: 'tokenIn',
-                                type: 'address',
-                            },
-                            {
-                                components: [
-                                    {
-                                        internalType: 'address',
-                                        name: 'pool',
-                                        type: 'address',
-                                    },
-                                    {
-                                        internalType: 'contract IERC20',
-                                        name: 'tokenOut',
-                                        type: 'address',
-                                    },
-                                ],
-                                internalType: 'struct IRouter.SwapPathStep[]',
-                                name: 'steps',
-                                type: 'tuple[]',
-                            },
-                            {
-                                internalType: 'uint256',
-                                name: 'maxAmountIn',
-                                type: 'uint256',
-                            },
-                            {
-                                internalType: 'uint256',
-                                name: 'exactAmountOut',
-                                type: 'uint256',
-                            },
-                        ],
-                        internalType: 'struct IRouter.SwapPathExactAmountOut[]',
-                        name: 'paths',
-                        type: 'tuple[]',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'deadline',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'wethIsEth',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
-                ],
-                internalType: 'struct IRouter.SwapExactOutHookParams',
-                name: 'params',
-                type: 'tuple',
-            },
-        ],
-        name: 'swapExactOutHook',
-        outputs: [
-            {
-                internalType: 'uint256[]',
-                name: 'pathAmountsIn',
-                type: 'uint256[]',
             },
         ],
         stateMutability: 'payable',
