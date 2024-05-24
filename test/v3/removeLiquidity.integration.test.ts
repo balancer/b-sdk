@@ -30,7 +30,7 @@ import {
     RemoveLiquidityUnbalancedInput,
     removeLiquidityUnbalancedNotSupportedOnV3,
 } from '../../src';
-import { forkSetup } from '../lib/utils/helper';
+import { approveToken, forkSetup } from '../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
     assertRemoveLiquiditySingleTokenExactIn,
@@ -122,6 +122,14 @@ describe('remove liquidity test', () => {
             undefined,
             vaultVersion,
         );
+
+        await approveToken(
+            txInput.client,
+            txInput.testAddress,
+            txInput.poolState.address,
+            vaultVersion,
+        );
+
         await doAddLiquidity(prepTxInput);
     });
 
