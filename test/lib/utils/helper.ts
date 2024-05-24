@@ -10,13 +10,22 @@ import {
     encodeAbiParameters,
     hexToBigInt,
     keccak256,
+    maxUint160,
+    maxUint48,
     pad,
     toBytes,
     toHex,
     trim,
 } from 'viem';
-import { erc20Abi } from '../../../src/abi';
-import { VAULT, MAX_UINT256, ZERO_ADDRESS, VAULT_V3 } from '../../../src/utils';
+
+import { erc20Abi, permit2Abi } from '@/abi';
+import {
+    VAULT,
+    MAX_UINT256,
+    ZERO_ADDRESS,
+    PERMIT2,
+    BALANCER_ROUTER,
+} from '@/utils';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;
@@ -28,14 +37,33 @@ export const hasApprovedToken = async (
     client: Client & PublicActions & WalletActions,
     account: Address,
     token: Address,
+    spender: Address,
     amount = MAX_UINT256,
 ): Promise<boolean> => {
-    const chainId = await client.getChainId();
     const allowance = await client.readContract({
         address: token,
         abi: erc20Abi,
         functionName: 'allowance',
-        args: [account, VAULT[chainId]],
+        args: [account, spender],
+    });
+
+    const hasApproved = allowance >= amount;
+    return hasApproved;
+};
+
+export const hasApprovedTokenOnPermit2 = async (
+    client: Client & PublicActions & WalletActions,
+    account: Address,
+    token: Address,
+    spender: Address,
+    amount = maxUint160,
+): Promise<boolean> => {
+    const chainId = await client.getChainId();
+    const [allowance, ,] = await client.readContract({
+        address: PERMIT2[chainId],
+        abi: permit2Abi,
+        functionName: 'allowance',
+        args: [account, token, spender],
     });
 
     const hasApproved = allowance >= amount;
@@ -44,28 +72,100 @@ export const hasApprovedToken = async (
 
 export const approveToken = async (
     client: Client & PublicActions & WalletActions,
-    account: Address,
-    token: Address,
-    amount = MAX_UINT256, // approve max by default
-    vaultVersion: 2 | 3 = 2,
+    accountAddress: Address,
+    tokenAddress: Address,
+    vaultVersion: 2 | 3,
+    amount?: bigint,
+    deadline?: bigint,
 ): Promise<boolean> => {
     const chainId = await client.getChainId();
-    const vaultAddress =
-        vaultVersion === 2 ? VAULT[chainId] : VAULT_V3[chainId];
+
+    let approved = false;
+    if (vaultVersion === 2) {
+        // Approve Vault V2 to spend account tokens
+        approved = await approveSpenderOnToken(
+            client,
+            accountAddress,
+            tokenAddress,
+            VAULT[chainId],
+            amount,
+        );
+    } else {
+        // Approve Permit2 to spend account tokens
+        const approvedOnToken = await approveSpenderOnToken(
+            client,
+            accountAddress,
+            tokenAddress,
+            PERMIT2[chainId],
+            amount,
+        );
+        // Approve Router to spend account tokens using Permit2
+        const approvedOnPermit2 = await approveSpenderOnPermit2(
+            client,
+            accountAddress,
+            tokenAddress,
+            BALANCER_ROUTER[chainId],
+            amount,
+            deadline,
+        );
+        approved = approvedOnToken && approvedOnPermit2;
+    }
+    return approved;
+};
+
+export const approveSpenderOnToken = async (
+    client: Client & PublicActions & WalletActions,
+    account: Address,
+    token: Address,
+    spender: Address,
+    amount = MAX_UINT256, // approve max by default
+): Promise<boolean> => {
     // approve token on the vault
-    const hash = await client.writeContract({
+    await client.writeContract({
         account,
         chain: client.chain,
         address: token,
         abi: erc20Abi,
         functionName: 'approve',
-        args: [vaultAddress, amount],
+        args: [spender, amount],
     });
 
-    const txReceipt = await client.waitForTransactionReceipt({
-        hash,
+    const approved = await hasApprovedToken(
+        client,
+        account,
+        token,
+        spender,
+        amount,
+    );
+    return approved;
+};
+
+export const approveSpenderOnPermit2 = async (
+    client: Client & PublicActions & WalletActions,
+    account: Address,
+    token: Address,
+    spender: Address,
+    amount = maxUint160, // approve max by default
+    deadline = maxUint48, // approve max by default
+): Promise<boolean> => {
+    const chainId = await client.getChainId();
+    await client.writeContract({
+        account,
+        chain: client.chain,
+        address: PERMIT2[chainId],
+        abi: permit2Abi,
+        functionName: 'approve',
+        args: [token, spender, amount, Number(deadline)],
     });
-    return txReceipt.status === 'success';
+
+    const approved = await hasApprovedTokenOnPermit2(
+        client,
+        account,
+        token,
+        spender,
+        amount,
+    );
+    return approved;
 };
 
 export const getErc20Balance = (
@@ -122,6 +222,7 @@ export async function sendTransactionGetBalances(
         client,
         clientAddress,
     );
+
     // Send transaction to local fork
     const hash = await client.sendTransaction({
         account: clientAddress,
@@ -312,7 +413,8 @@ export const forkSetup = async (
     }
 
     for (let i = 0; i < tokens.length; i++) {
-        // Set initial account balance for each token that will be used to add liquidity to the pool
+        // Set initial account balance for each token that will be used to add
+        // liquidity to the pool
         await setTokenBalance(
             client,
             accountAddress,
@@ -322,13 +424,6 @@ export const forkSetup = async (
             isVyperMapping[i],
         );
 
-        // Approve appropriate allowances so that vault contract can move tokens
-        await approveToken(
-            client,
-            accountAddress,
-            tokens[i],
-            undefined,
-            vaultVersion,
-        );
+        await approveToken(client, accountAddress, tokens[i], vaultVersion);
     }
 };
