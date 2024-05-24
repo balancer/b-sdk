@@ -463,7 +463,7 @@ function assertAddLiquidityBuildCallOutput(
             )?.amount ?? 0n;
     }
 
-    const expectedBuildOutput: Omit<AddLiquidityBuildCallOutput, 'call'> = {
+    const expectedBuildOutput: Omit<AddLiquidityBuildCallOutput, 'callData'> = {
         maxAmountsIn,
         minBptOut,
         to,

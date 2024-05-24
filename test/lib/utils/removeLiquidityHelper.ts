@@ -532,7 +532,10 @@ export function assertRemoveLiquidityBuildCallOutput(
             ? VAULT[removeLiquidityQueryOutput.chainId]
             : BALANCER_ROUTER[removeLiquidityQueryOutput.chainId];
 
-    const expectedBuildOutput: Omit<RemoveLiquidityBuildCallOutput, 'call'> = {
+    const expectedBuildOutput: Omit<
+        RemoveLiquidityBuildCallOutput,
+        'callData'
+    > = {
         minAmountsOut,
         maxBptIn,
         to,
