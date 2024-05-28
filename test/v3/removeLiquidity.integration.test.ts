@@ -10,40 +10,43 @@ import {
     publicActions,
     walletActions,
 } from 'viem';
+
 import {
-    RemoveLiquiditySingleTokenExactInInput,
-    RemoveLiquidityProportionalInput,
-    RemoveLiquidityKind,
-    Slippage,
-    PoolState,
-    RemoveLiquidity,
-    Hex,
-    CHAINS,
-    ChainId,
-    RemoveLiquidityInput,
-    InputAmount,
-    PoolType,
     AddLiquidity,
     AddLiquidityKind,
     AddLiquidityUnbalancedInput,
+    BALANCER_ROUTER,
+    CHAINS,
+    ChainId,
+    Hex,
+    InputAmount,
+    PoolState,
+    PoolType,
+    Slippage,
+    RemoveLiquidity,
+    RemoveLiquidityKind,
+    RemoveLiquidityInput,
+    RemoveLiquidityProportionalInput,
+    RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquiditySingleTokenExactOutInput,
     RemoveLiquidityUnbalancedInput,
     removeLiquidityUnbalancedNotSupportedOnV3,
-} from '../../src';
-import { approveToken, forkSetup } from '../lib/utils/helper';
+} from 'src';
+
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
+    AddLiquidityTxInput,
+    approveSpenderOnToken,
     assertRemoveLiquidityProportional,
     assertRemoveLiquiditySingleTokenExactIn,
     assertRemoveLiquiditySingleTokenExactOut,
+    doAddLiquidity,
     doRemoveLiquidity,
-} from '../lib/utils/removeLiquidityHelper';
-import {
-    AddLiquidityTxInput,
+    forkSetup,
+    POOLS,
     RemoveLiquidityTxInput,
-} from '../lib/utils/types';
-import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
-import { POOLS, TOKENS } from 'test/lib/utils/addresses';
-import { doAddLiquidity } from 'test/lib/utils/addLiquidityHelper';
+    TOKENS,
+} from 'test/lib/utils';
 
 const vaultVersion = 3;
 
@@ -123,11 +126,11 @@ describe('remove liquidity test', () => {
             vaultVersion,
         );
 
-        await approveToken(
+        await approveSpenderOnToken(
             txInput.client,
             txInput.testAddress,
             txInput.poolState.address,
-            vaultVersion,
+            BALANCER_ROUTER[chainId],
         );
 
         await doAddLiquidity(prepTxInput);
