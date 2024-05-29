@@ -45,7 +45,7 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl, { timeout: 120_000 }), // FIXME: shouldn't take that long - investigate/fix in a following PR
+            transport: http(rpcUrl, { timeout: 120_000 }), // FIXME: createPool step takes a long time, so we increase the timeout as a temporary solution
         })
             .extend(publicActions)
             .extend(walletActions);
@@ -69,6 +69,10 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
                     tokenType: TokenType.STANDARD,
                 },
             ],
+            swapFeePercentage: parseEther('0.01'),
+            pauseManager: signerAddress,
+            swapFeeManager: signerAddress,
+            poolCreator: signerAddress,
             chainId,
             vaultVersion: 3,
         };

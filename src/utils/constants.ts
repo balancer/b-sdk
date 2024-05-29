@@ -186,7 +186,7 @@ export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
     [ChainId.BASE]: '0x4c32a8a8fda4e24139b51b456b42290f51d6a1c4',
 };
 export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xc00fF743B73346c9a4C40509e0550FfC18e5426d',
+    [ChainId.SEPOLIA]: '0x2FAa140F90f76eeEEBC191f4eF4b2634be1E4e91',
 };
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',

@@ -64,6 +64,10 @@ describe('Create Weighted Pool tests', () => {
                     tokenType: TokenType.STANDARD,
                 },
             ],
+            swapFeePercentage: parseEther('0.01'),
+            pauseManager: signerAddress,
+            swapFeeManager: signerAddress,
+            poolCreator: signerAddress,
             chainId,
             vaultVersion: 3,
         };

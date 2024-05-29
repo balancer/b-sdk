@@ -80,7 +80,7 @@ export const weightedPoolFactoryAbi_V3 = [
                     },
                     {
                         internalType: 'bool',
-                        name: 'yieldFeeExempt',
+                        name: 'paysYieldFees',
                         type: 'bool',
                     },
                 ],
@@ -92,6 +92,33 @@ export const weightedPoolFactoryAbi_V3 = [
                 internalType: 'uint256[]',
                 name: 'normalizedWeights',
                 type: 'uint256[]',
+            },
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'pauseManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'swapFeeManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'poolCreator',
+                        type: 'address',
+                    },
+                ],
+                internalType: 'struct PoolRoleAccounts',
+                name: 'roleAccounts',
+                type: 'tuple',
+            },
+            {
+                internalType: 'uint256',
+                name: 'swapFeePercentage',
+                type: 'uint256',
             },
             {
                 internalType: 'bytes32',
@@ -147,6 +174,96 @@ export const weightedPoolFactoryAbi_V3 = [
             },
         ],
         stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getDefaultLiquidityManagement',
+        outputs: [
+            {
+                components: [
+                    {
+                        internalType: 'bool',
+                        name: 'disableUnbalancedLiquidity',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'enableAddLiquidityCustom',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'enableRemoveLiquidityCustom',
+                        type: 'bool',
+                    },
+                ],
+                internalType: 'struct LiquidityManagement',
+                name: 'liquidityManagement',
+                type: 'tuple',
+            },
+        ],
+        stateMutability: 'pure',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getDefaultPoolHooks',
+        outputs: [
+            {
+                components: [
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallBeforeInitialize',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallAfterInitialize',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallComputeDynamicSwapFee',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallBeforeSwap',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallAfterSwap',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallBeforeAddLiquidity',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallAfterAddLiquidity',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallBeforeRemoveLiquidity',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'shouldCallAfterRemoveLiquidity',
+                        type: 'bool',
+                    },
+                ],
+                internalType: 'struct PoolHooks',
+                name: 'poolHooks',
+                type: 'tuple',
+            },
+        ],
+        stateMutability: 'pure',
         type: 'function',
     },
     {

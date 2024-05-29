@@ -41,6 +41,10 @@ export type CreatePoolV2ComposableStableInput = CreatePoolV2BaseInput & {
 
 export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
     vaultVersion: 3;
+    pauseManager: Address;
+    swapFeeManager: Address;
+    poolCreator: Address;
+    swapFeePercentage: bigint;
 };
 
 export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
@@ -50,7 +54,7 @@ export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
         rateProvider: Address;
         weight: bigint;
         tokenType: TokenType;
-        yieldFeeExempt?: boolean;
+        paysYieldFees?: boolean;
     }[];
 };
 
@@ -88,17 +92,15 @@ export type CreatePoolV2ComposableStableArgs = [
     Hex,
 ];
 
-export type CreatePoolV3WeightedArgs = [
-    string,
-    string,
-    TokenConfig[],
-    bigint[],
-    Hex,
-];
-
 export type TokenConfig = {
     token: Address;
     tokenType: TokenType;
     rateProvider: Address;
-    yieldFeeExempt: boolean;
+    paysYieldFees: boolean;
+};
+
+export type PoolRoleAccounts = {
+    pauseManager: Address;
+    swapFeeManager: Address;
+    poolCreator: Address;
 };
