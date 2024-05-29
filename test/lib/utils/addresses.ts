@@ -106,11 +106,6 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 6,
             slot: 0,
         },
-        BPT: {
-            address: '0x04FCB7Bd2C77597fA89E05C6452E21e01eeE187A',
-            decimals: 18,
-            slot: 1,
-        },
         scUSD: {
             address: '0x990c8eab51d9ecb365bf9b3de09d121af007db68',
             decimals: 18,

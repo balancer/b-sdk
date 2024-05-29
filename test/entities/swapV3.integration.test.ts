@@ -45,6 +45,8 @@ const blockNo = 6001201n;
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 const USDC = TOKENS[chainId].USDC;
+const DAI = TOKENS[chainId].DAI;
+const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
 
 describe('SwapV3', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
@@ -86,12 +88,12 @@ describe('SwapV3', () => {
             vaultVersion: 3,
             tokens: [
                 {
-                    address: TOKENS[chainId].BAL.address,
-                    decimals: TOKENS[chainId].BAL.decimals,
+                    address: BAL.address,
+                    decimals: BAL.decimals,
                 },
                 {
-                    address: TOKENS[chainId].WETH.address,
-                    decimals: TOKENS[chainId].WETH.decimals,
+                    address: WETH.address,
+                    decimals: WETH.decimals,
                 },
             ],
             pools: [POOLS[chainId].MOCK_WETH_BAL_POOL.id],
@@ -112,8 +114,8 @@ describe('SwapV3', () => {
 
                 const wethToken = new Token(
                     chainId,
-                    TOKENS[chainId].WETH.address,
-                    TOKENS[chainId].WETH.decimals,
+                    WETH.address,
+                    WETH.decimals,
                 );
                 expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
                 expect(expected.expectedAmountOut.amount).to.eq(103365122n);
@@ -129,11 +131,7 @@ describe('SwapV3', () => {
                     rpcUrl,
                 )) as ExactOutQueryOutput;
 
-                const balToken = new Token(
-                    chainId,
-                    TOKENS[chainId].BAL.address,
-                    TOKENS[chainId].BAL.decimals,
-                );
+                const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
                 expect(expected.expectedAmountIn.amount).to.eq(96734829986472n);
             });
@@ -257,20 +255,20 @@ describe('SwapV3', () => {
             vaultVersion: 3,
             tokens: [
                 {
-                    address: TOKENS[chainId].WETH.address,
-                    decimals: TOKENS[chainId].WETH.decimals,
+                    address: WETH.address,
+                    decimals: WETH.decimals,
                 },
                 {
-                    address: TOKENS[chainId].BAL.address,
-                    decimals: TOKENS[chainId].BAL.decimals,
+                    address: BAL.address,
+                    decimals: BAL.decimals,
                 },
                 {
-                    address: TOKENS[chainId].DAI.address,
-                    decimals: TOKENS[chainId].DAI.decimals,
+                    address: DAI.address,
+                    decimals: DAI.decimals,
                 },
                 {
-                    address: TOKENS[chainId].USDC.address,
-                    decimals: TOKENS[chainId].USDC.decimals,
+                    address: USDC.address,
+                    decimals: USDC.decimals,
                 },
             ],
             pools: [
@@ -286,16 +284,16 @@ describe('SwapV3', () => {
             vaultVersion: 3,
             tokens: [
                 {
-                    address: TOKENS[chainId].WETH.address,
-                    decimals: TOKENS[chainId].WETH.decimals,
+                    address: WETH.address,
+                    decimals: WETH.decimals,
                 },
                 {
-                    address: TOKENS[chainId].BPT.address,
-                    decimals: TOKENS[chainId].BPT.decimals,
+                    address: USDC_DAI_BPT.address,
+                    decimals: USDC_DAI_BPT.decimals,
                 },
                 {
-                    address: TOKENS[chainId].USDC.address,
-                    decimals: TOKENS[chainId].USDC.decimals,
+                    address: USDC.address,
+                    decimals: USDC.decimals,
                 },
             ],
             pools: [
@@ -320,8 +318,8 @@ describe('SwapV3', () => {
 
                 const usdcToken = new Token(
                     chainId,
-                    TOKENS[chainId].USDC.address,
-                    TOKENS[chainId].USDC.decimals,
+                    USDC.address,
+                    USDC.decimals,
                 );
                 expect(expected.swapKind).to.eq(SwapKind.GivenIn);
                 expect(expected.pathAmounts).to.deep.eq([90214n, 770252n]);
@@ -341,8 +339,8 @@ describe('SwapV3', () => {
 
                 const wethToken = new Token(
                     chainId,
-                    TOKENS[chainId].WETH.address,
-                    TOKENS[chainId].WETH.decimals,
+                    WETH.address,
+                    WETH.decimals,
                 );
                 expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                 expect(expected.pathAmounts).to.deep.eq([
