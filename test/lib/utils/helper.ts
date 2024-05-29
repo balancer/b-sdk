@@ -25,6 +25,7 @@ import {
     ZERO_ADDRESS,
     PERMIT2,
     BALANCER_ROUTER,
+    BALANCER_BATCH_ROUTER,
 } from '@/utils';
 
 export type TxOutput = {
@@ -100,7 +101,7 @@ export const approveToken = async (
             amount,
         );
         // Approve Router to spend account tokens using Permit2
-        const approvedOnPermit2 = await approveSpenderOnPermit2(
+        const routerApprovedOnPermit2 = await approveSpenderOnPermit2(
             client,
             accountAddress,
             tokenAddress,
@@ -108,7 +109,19 @@ export const approveToken = async (
             amount,
             deadline,
         );
-        approved = approvedOnToken && approvedOnPermit2;
+        // Approve BatchRouter to spend account tokens using Permit2
+        const batchRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
+            client,
+            accountAddress,
+            tokenAddress,
+            BALANCER_BATCH_ROUTER[chainId],
+            amount,
+            deadline,
+        );
+        approved =
+            approvedOnToken &&
+            routerApprovedOnPermit2 &&
+            batchRouterApprovedOnPermit2;
     }
     return approved;
 };

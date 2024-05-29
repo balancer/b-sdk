@@ -107,7 +107,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 0,
         },
         BPT: {
-            address: '0xe623a14c663e66f63ceddd73528da84db4e41350',
+            address: '0x04FCB7Bd2C77597fA89E05C6452E21e01eeE187A',
             decimals: 18,
             slot: 1,
         },
