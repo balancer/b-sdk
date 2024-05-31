@@ -14,7 +14,6 @@ import {
     ChainId,
     PriceImpact,
     Slippage,
-    OnChainProvider,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import { makeForkTx } from '../lib/makeForkTx';
