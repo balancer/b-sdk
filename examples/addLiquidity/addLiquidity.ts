@@ -14,6 +14,7 @@ import {
     ChainId,
     PriceImpact,
     Slippage,
+    OnChainProvider,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import { makeForkTx } from '../lib/makeForkTx';
@@ -26,8 +27,8 @@ async function runAgainstFork() {
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     // 80BAL-20WETH
     const pool = {
-        id: '0x204d4194e4e42364E3D1841d0a9B1eF857879C31',
-        address: '0x204d4194e4e42364E3D1841d0a9B1eF857879C31' as Address,
+        id: '0xB2456A6f51530053bC41b0EE700fe6A2C37282e8',
+        address: '0xB2456A6f51530053bC41b0EE700fe6A2C37282e8' as Address,
     };
     const amountsIn = [
         {

@@ -16,7 +16,7 @@ export type SorInput = {
 
 export class SorSwapPaths {
     readonly sorSwapPathQuery = `
-  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: BigDecimal!, $tokenIn: String!, $tokenOut: String!) {
+  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!) {
     sorGetSwapPaths(
     swapAmount: $swapAmount
     chain: $chain
@@ -27,7 +27,10 @@ export class SorSwapPaths {
       tokenInAmount
       tokenOutAmount
       returnAmount
-      priceImpact
+      priceImpact {
+        error
+        priceImpact
+      }
       swapAmount
       paths {
         inputAmountRaw
@@ -43,7 +46,7 @@ export class SorSwapPaths {
   }
 `;
     readonly sorSwapPathQueryWithVersion = `
-  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: BigDecimal!, $tokenIn: String!, $tokenOut: String!, $useVaultVersion: Int!) {
+  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $useVaultVersion: Int!) {
     sorGetSwapPaths(
     swapAmount: $swapAmount
     chain: $chain
@@ -55,7 +58,10 @@ export class SorSwapPaths {
       tokenInAmount
       tokenOutAmount
       returnAmount
-      priceImpact
+      priceImpact {
+        error
+        priceImpact
+      }
       swapAmount
       paths {
         inputAmountRaw
