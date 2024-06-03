@@ -23,7 +23,7 @@ export class Pools {
 
     async fetchPoolState(id: Address, poolType: string): Promise<PoolState> {
         // First call fetches pool tokens from vault
-        const poolTokenCall = await this.client.simulateContract({
+        const poolTokens = await this.client.readContract({
             address: VAULT_V3[this.chainId],
             abi: vaultV3Abi,
             functionName: 'getPoolTokens',
@@ -31,7 +31,7 @@ export class Pools {
         });
 
         // Multicall to fetch token decimals
-        const decimalCalls = (poolTokenCall.result as string[]).map((t) => {
+        const decimalCalls = poolTokens.map((t) => {
             return {
                 address: t as Address,
                 abi: parseAbi([
@@ -51,10 +51,10 @@ export class Pools {
             address: id,
             type: poolType,
             vaultVersion: 3,
-            tokens: (poolTokenCall.result as string[]).map((t, i) => {
+            tokens: poolTokens.map((t, i) => {
                 return {
                     index: i,
-                    address: t as Address,
+                    address: t,
                     decimals: decimals[i],
                 };
             }),

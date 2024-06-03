@@ -25,6 +25,7 @@ async function runAgainstFork() {
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     // Pool from a custom factory that is not currently supported in Balancer API
     const pool = {
+        // TODO: update with pool from testnet deployment 4
         id: '0xd851b2b78c41c40a4fa134f6fc4282b71f0f1491',
         address: '0xd851b2b78c41c40a4fa134f6fc4282b71f0f1491' as Address,
     };

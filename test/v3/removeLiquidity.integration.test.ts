@@ -10,46 +10,49 @@ import {
     publicActions,
     walletActions,
 } from 'viem';
+
 import {
-    RemoveLiquiditySingleTokenExactInInput,
-    RemoveLiquidityProportionalInput,
-    RemoveLiquidityKind,
-    Slippage,
-    PoolState,
-    RemoveLiquidity,
-    Hex,
-    CHAINS,
-    ChainId,
-    RemoveLiquidityInput,
-    InputAmount,
-    PoolType,
     AddLiquidity,
     AddLiquidityKind,
     AddLiquidityUnbalancedInput,
+    BALANCER_ROUTER,
+    CHAINS,
+    ChainId,
+    Hex,
+    InputAmount,
+    PoolState,
+    PoolType,
+    Slippage,
+    RemoveLiquidity,
+    RemoveLiquidityKind,
+    RemoveLiquidityInput,
+    RemoveLiquidityProportionalInput,
+    RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquiditySingleTokenExactOutInput,
     RemoveLiquidityUnbalancedInput,
     removeLiquidityUnbalancedNotSupportedOnV3,
-} from '../../src';
-import { forkSetup } from '../lib/utils/helper';
+} from 'src';
+
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
+    AddLiquidityTxInput,
+    approveSpenderOnToken,
     assertRemoveLiquidityProportional,
     assertRemoveLiquiditySingleTokenExactIn,
     assertRemoveLiquiditySingleTokenExactOut,
+    doAddLiquidity,
     doRemoveLiquidity,
-} from '../lib/utils/removeLiquidityHelper';
-import {
-    AddLiquidityTxInput,
+    forkSetup,
+    POOLS,
     RemoveLiquidityTxInput,
-} from '../lib/utils/types';
-import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
-import { POOLS, TOKENS } from 'test/lib/utils/addresses';
-import { doAddLiquidity } from 'test/lib/utils/addLiquidityHelper';
+    TOKENS,
+} from 'test/lib/utils';
 
 const vaultVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
-const poolId = POOLS[chainId].MOCK_WEIGHTED_POOL.address;
+const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
@@ -122,6 +125,14 @@ describe('remove liquidity test', () => {
             undefined,
             vaultVersion,
         );
+
+        await approveSpenderOnToken(
+            txInput.client,
+            txInput.testAddress,
+            txInput.poolState.address,
+            BALANCER_ROUTER[chainId],
+        );
+
         await doAddLiquidity(prepTxInput);
     });
 

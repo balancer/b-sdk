@@ -39,12 +39,14 @@ import { Path } from '@/entities/swap/paths/types';
 
 const vaultVersion = 3;
 const chainId = ChainId.SEPOLIA;
-// blockNo with guaranteed liquidity
-const blockNo = 5490330n;
+// blockNo shouldn't change as checks depend on token balances
+const blockNo = 6001201n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 const USDC = TOKENS[chainId].USDC;
+const DAI = TOKENS[chainId].DAI;
+const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
 
 describe('SwapV3', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
@@ -86,15 +88,15 @@ describe('SwapV3', () => {
             vaultVersion: 3,
             tokens: [
                 {
-                    address: TOKENS[chainId].BAL.address,
-                    decimals: TOKENS[chainId].BAL.decimals,
+                    address: BAL.address,
+                    decimals: BAL.decimals,
                 },
                 {
-                    address: TOKENS[chainId].WETH.address,
-                    decimals: TOKENS[chainId].WETH.decimals,
+                    address: WETH.address,
+                    decimals: WETH.decimals,
                 },
             ],
-            pools: [POOLS[chainId].MOCK_WEIGHTED_POOL.id],
+            pools: [POOLS[chainId].MOCK_WETH_BAL_POOL.id],
             inputAmountRaw: 100000000000n,
             outputAmountRaw: 100000000000n,
         };
@@ -112,11 +114,11 @@ describe('SwapV3', () => {
 
                 const wethToken = new Token(
                     chainId,
-                    TOKENS[chainId].WETH.address,
-                    TOKENS[chainId].WETH.decimals,
+                    WETH.address,
+                    WETH.decimals,
                 );
                 expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountOut.amount).to.eq(138379302n);
+                expect(expected.expectedAmountOut.amount).to.eq(103365122n);
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -129,13 +131,9 @@ describe('SwapV3', () => {
                     rpcUrl,
                 )) as ExactOutQueryOutput;
 
-                const balToken = new Token(
-                    chainId,
-                    TOKENS[chainId].BAL.address,
-                    TOKENS[chainId].BAL.decimals,
-                );
+                const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
-                expect(expected.expectedAmountIn.amount).to.eq(72265254280201n);
+                expect(expected.expectedAmountIn.amount).to.eq(96734829986472n);
             });
         });
         describe('swap should be executed correctly', () => {
@@ -257,53 +255,53 @@ describe('SwapV3', () => {
             vaultVersion: 3,
             tokens: [
                 {
-                    address: TOKENS[chainId].WETH.address,
-                    decimals: TOKENS[chainId].WETH.decimals,
+                    address: WETH.address,
+                    decimals: WETH.decimals,
                 },
                 {
-                    address: TOKENS[chainId].BAL.address,
-                    decimals: TOKENS[chainId].BAL.decimals,
+                    address: BAL.address,
+                    decimals: BAL.decimals,
                 },
                 {
-                    address: TOKENS[chainId].DAI.address,
-                    decimals: TOKENS[chainId].DAI.decimals,
+                    address: DAI.address,
+                    decimals: DAI.decimals,
                 },
                 {
-                    address: TOKENS[chainId].USDC.address,
-                    decimals: TOKENS[chainId].USDC.decimals,
+                    address: USDC.address,
+                    decimals: USDC.decimals,
                 },
             ],
             pools: [
-                POOLS[chainId].MOCK_WEIGHTED_POOL.id,
+                POOLS[chainId].MOCK_WETH_BAL_POOL.id,
                 POOLS[chainId].MOCK_BAL_DAI_POOL.id,
                 POOLS[chainId].MOCK_USDC_DAI_POOL.id,
             ],
-            inputAmountRaw: 10000000000000000n,
-            outputAmountRaw: 20000000n,
+            inputAmountRaw: 100000000000000n,
+            outputAmountRaw: 2000000n,
         };
         // weth > bpt > usdc
         const pathWithExit: Path = {
             vaultVersion: 3,
             tokens: [
                 {
-                    address: TOKENS[chainId].WETH.address,
-                    decimals: TOKENS[chainId].WETH.decimals,
+                    address: WETH.address,
+                    decimals: WETH.decimals,
                 },
                 {
-                    address: TOKENS[chainId].BPT.address,
-                    decimals: TOKENS[chainId].BPT.decimals,
+                    address: USDC_DAI_BPT.address,
+                    decimals: USDC_DAI_BPT.decimals,
                 },
                 {
-                    address: TOKENS[chainId].USDC.address,
-                    decimals: TOKENS[chainId].USDC.decimals,
+                    address: USDC.address,
+                    decimals: USDC.decimals,
                 },
             ],
             pools: [
                 POOLS[chainId].MOCK_NESTED_POOL.id,
                 POOLS[chainId].MOCK_USDC_DAI_POOL.id,
             ],
-            inputAmountRaw: 10000000000000000n,
-            outputAmountRaw: 60000000n,
+            inputAmountRaw: 100000000000000n,
+            outputAmountRaw: 6000000n,
         };
 
         describe('query method should return correct updated', () => {
@@ -320,13 +318,13 @@ describe('SwapV3', () => {
 
                 const usdcToken = new Token(
                     chainId,
-                    TOKENS[chainId].USDC.address,
-                    TOKENS[chainId].USDC.decimals,
+                    USDC.address,
+                    USDC.decimals,
                 );
                 expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                expect(expected.pathAmounts).to.deep.eq([19831031n, 59000343n]);
+                expect(expected.pathAmounts).to.deep.eq([90214n, 770252n]);
                 expect(expected.expectedAmountOut.token).to.deep.eq(usdcToken);
-                expect(expected.expectedAmountOut.amount).to.eq(78831374n);
+                expect(expected.expectedAmountOut.amount).to.eq(860466n);
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -341,17 +339,17 @@ describe('SwapV3', () => {
 
                 const wethToken = new Token(
                     chainId,
-                    TOKENS[chainId].WETH.address,
-                    TOKENS[chainId].WETH.decimals,
+                    WETH.address,
+                    WETH.decimals,
                 );
                 expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                 expect(expected.pathAmounts).to.deep.eq([
-                    10109072337868053n,
-                    10221727279669762n,
+                    2286265697052729n,
+                    831382813409707n,
                 ]);
                 expect(expected.expectedAmountIn.token).to.deep.eq(wethToken);
                 expect(expected.expectedAmountIn.amount).to.eq(
-                    20330799617537815n,
+                    3117648510462436n,
                 );
             });
         });
@@ -430,16 +428,16 @@ describe('SwapV3', () => {
                         ...pathMultiSwap,
                         tokens: [...pathMultiSwap.tokens].reverse(),
                         pools: [...pathMultiSwap.pools].reverse(),
-                        inputAmountRaw: 1000000n,
-                        outputAmountRaw: 400000000000000n,
+                        inputAmountRaw: 100000n,
+                        outputAmountRaw: 40000000000000n,
                     };
                     // usdc > bpt > weth
                     const pathUsdcWethJoin = {
                         ...pathWithExit,
                         tokens: [...pathWithExit.tokens].reverse(),
                         pools: [...pathWithExit.pools].reverse(),
-                        inputAmountRaw: 60000000n,
-                        outputAmountRaw: 6000000000000000n,
+                        inputAmountRaw: 6000000n,
+                        outputAmountRaw: 600000000000000n,
                     };
                     test('GivenIn', async () => {
                         const swap = new Swap({

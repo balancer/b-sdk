@@ -10,6 +10,7 @@ import {
     NATIVE_ASSETS,
     ChainId,
     MAX_UINT256,
+    CHAINS,
 } from '../../../../utils';
 import {
     Address,
@@ -93,7 +94,8 @@ export class SwapV2 implements SwapBase {
         block?: bigint,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const client = createPublicClient({
-            transport: http(rpcUrl),
+            chain: CHAINS[this.chainId],
+            transport: rpcUrl ? http(rpcUrl) : http(),
         });
 
         const queriesContract = getContract({

@@ -13,6 +13,7 @@ import {
     NATIVE_ASSETS,
     BALANCER_BATCH_ROUTER,
     MAX_UINT256,
+    CHAINS,
 } from '../../../../utils';
 import { balancerRouterAbi } from '../../../../abi';
 import {
@@ -88,7 +89,8 @@ export class SwapV3 implements SwapBase {
         block?: bigint,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const client = createPublicClient({
-            transport: http(rpcUrl),
+            chain: CHAINS[this.chainId],
+            transport: rpcUrl ? http(rpcUrl) : http(),
         });
 
         return this.isBatchSwap

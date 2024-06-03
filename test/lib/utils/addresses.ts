@@ -106,11 +106,6 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 6,
             slot: 0,
         },
-        BPT: {
-            address: '0xe623a14c663e66f63ceddd73528da84db4e41350',
-            decimals: 18,
-            slot: 1,
-        },
         scUSD: {
             address: '0x990c8eab51d9ecb365bf9b3de09d121af007db68',
             decimals: 18,
@@ -204,30 +199,30 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         },
     },
     [ChainId.SEPOLIA]: {
-        MOCK_WEIGHTED_POOL: {
-            address: '0x204d4194e4e42364e3d1841d0a9b1ef857879c31',
-            id: '0x204d4194e4e42364e3d1841d0a9b1ef857879c31',
+        MOCK_WETH_BAL_POOL: {
+            address: '0xB2456A6f51530053bC41b0EE700fe6A2C37282e8',
+            id: '0xB2456A6f51530053bC41b0EE700fe6A2C37282e8',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         MOCK_BAL_DAI_POOL: {
-            address: '0xac79a8276860bf96d761804e5ed5736d3afaaecf',
-            id: '0xac79a8276860bf96d761804e5ed5736d3afaaecf',
+            address: '0x877AbBc4c390716a5F22D1a74183bd88b11106de',
+            id: '0x877AbBc4c390716a5F22D1a74183bd88b11106de',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         MOCK_USDC_DAI_POOL: {
-            address: '0xe623a14c663e66f63ceddd73528da84db4e41350',
-            id: '0xe623a14c663e66f63ceddd73528da84db4e41350',
+            address: '0x04FCB7Bd2C77597fA89E05C6452E21e01eeE187A',
+            id: '0x04FCB7Bd2C77597fA89E05C6452E21e01eeE187A',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         MOCK_NESTED_POOL: {
-            address: '0x4c885071fc0e694c7e0091c1e5694267066df96f',
-            id: '0x4c885071fc0e694c7e0091c1e5694267066df96f',
+            address: '0xE184b377F9Ac3e5BC74c1b6b72f64ce312485081',
+            id: '0xE184b377F9Ac3e5BC74c1b6b72f64ce312485081',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
