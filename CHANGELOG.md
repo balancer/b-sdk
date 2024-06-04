@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.16.0
+
+### Minor Changes
+
+- d81de73: Update SDK to use Permit2 and conform with new SC deployment
+
 ## 0.15.1
 
 ### Patch Changes
