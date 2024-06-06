@@ -11,6 +11,7 @@ import { PoolState, PoolStateWithBalances } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
+import { RemoveLiquidityCowAmm } from './removeLiquidityCowAmm';
 
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -24,7 +25,8 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         this.inputValidator.validateRemoveLiquidity(input, poolState);
         switch (poolState.vaultVersion) {
             case 0: {
-                throw new Error('Not implemented');
+                const removeLiquidity = new RemoveLiquidityCowAmm();
+                return removeLiquidity.query(input, poolState);
             }
             case 2: {
                 const removeLiquidity = new RemoveLiquidityV2(this.config);
@@ -50,7 +52,8 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         this.inputValidator.validateRemoveLiquidityRecovery(input, poolState);
         switch (poolState.vaultVersion) {
             case 0: {
-                throw new Error('Not implemented');
+                const removeLiquidity = new RemoveLiquidityCowAmm();
+                return removeLiquidity.queryRemoveLiquidityRecovery();
             }
             case 2: {
                 const removeLiquidity = new RemoveLiquidityV2(this.config);
@@ -75,7 +78,9 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         const isV2Input = 'sender' in input;
         switch (input.vaultVersion) {
             case 0: {
-                throw new Error('Not implemented');
+                // TODO: check if we need to be more restrictive with input type mismatch here
+                const removeLiquidity = new RemoveLiquidityCowAmm();
+                return removeLiquidity.buildCall(input);
             }
             case 2: {
                 if (isV2Input) {

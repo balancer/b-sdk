@@ -1,11 +1,11 @@
-// pnpm test -- v0/addLiquidity.integration.test.ts
-
+// pnpm test -- v0/removeLiquidity.integration.test.ts
 import { config } from 'dotenv';
 config();
 
 import {
     createTestClient,
     http,
+    parseEther,
     parseUnits,
     publicActions,
     walletActions,
@@ -13,38 +13,45 @@ import {
 
 import {
     AddLiquidity,
-    AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidityProportionalInput,
-    ChainId,
     CHAINS,
+    ChainId,
     Hex,
+    InputAmount,
     PoolState,
     PoolType,
     Slippage,
+    RemoveLiquidity,
+    RemoveLiquidityKind,
+    RemoveLiquidityInput,
+    RemoveLiquidityProportionalInput,
+    AddLiquidityProportionalInput,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityTxInput,
-    assertAddLiquidityProportional,
+    assertRemoveLiquidityProportional,
     doAddLiquidity,
+    doRemoveLiquidity,
     forkSetupCowAmm,
     POOLS,
+    RemoveLiquidityTxInput,
     TOKENS,
 } from 'test/lib/utils';
 
 const vaultVersion = 0;
 
 const chainId = ChainId.SEPOLIA;
-const poolId = POOLS[chainId].MOCK_COW_AMM_POOL.id;
+const poolId = POOLS[chainId].MOCK_COW_AMM_POOL.address;
 
 const USDC = TOKENS[chainId].USDC;
 const BAL = TOKENS[chainId].BAL;
 const DAI = TOKENS[chainId].DAI;
 
-describe('add liquidity test', () => {
-    let txInput: AddLiquidityTxInput;
+describe('remove liquidity test', () => {
+    let prepTxInput: AddLiquidityTxInput;
+    let txInput: RemoveLiquidityTxInput;
     let poolState: PoolState;
     let rpcUrl: string;
 
@@ -71,17 +78,38 @@ describe('add liquidity test', () => {
 
         const testAddress = (await client.getAddresses())[0];
 
-        txInput = {
+        const addLiquidityInput: AddLiquidityProportionalInput = {
+            chainId,
+            rpcUrl,
+            kind: AddLiquidityKind.Proportional,
+            bptOut: {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolState.address,
+            },
+        };
+
+        prepTxInput = {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolState,
             testAddress,
-            addLiquidityInput: {} as AddLiquidityInput,
+            addLiquidityInput,
+        };
+
+        txInput = {
+            client,
+            removeLiquidity: new RemoveLiquidity(),
+            slippage: Slippage.fromPercentage('1'), // 1%
+            poolState,
+            testAddress,
+            removeLiquidityInput: {} as RemoveLiquidityInput,
         };
     });
 
     beforeEach(async () => {
+        // setup by performing an add liquidity so it's possible to remove after that
         await forkSetupCowAmm(
             txInput.client,
             txInput.testAddress,
@@ -94,31 +122,35 @@ describe('add liquidity test', () => {
             ],
             txInput.poolState.address,
         );
+
+        await doAddLiquidity(prepTxInput);
     });
 
-    describe('add liquidity proportional', () => {
-        let addLiquidityInput: AddLiquidityProportionalInput;
+    describe('proportional', () => {
+        let input: RemoveLiquidityProportionalInput;
         beforeAll(() => {
-            addLiquidityInput = {
+            const bptIn: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolState.address,
+            };
+            input = {
+                bptIn,
                 chainId,
                 rpcUrl,
-                kind: AddLiquidityKind.Proportional,
-                bptOut: {
-                    rawAmount: parseUnits('1', 18),
-                    decimals: 18,
-                    address: txInput.poolState.address,
-                },
+                kind: RemoveLiquidityKind.Proportional,
             };
         });
-        test('token inputs', async () => {
-            const addLiquidityOutput = await doAddLiquidity({
+        test('with tokens', async () => {
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
-                addLiquidityInput,
+                removeLiquidityInput: input,
             });
-            assertAddLiquidityProportional(
+
+            assertRemoveLiquidityProportional(
                 txInput.poolState,
-                addLiquidityInput,
-                addLiquidityOutput,
+                input,
+                removeLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
             );
@@ -127,6 +159,7 @@ describe('add liquidity test', () => {
 });
 
 /*********************** Mock To Represent API Requirements **********************/
+
 class MockApi {
     public async getPool(id: Hex): Promise<PoolState> {
         const tokens = [

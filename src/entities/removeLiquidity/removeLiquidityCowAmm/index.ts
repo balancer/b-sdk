@@ -1,3 +1,21 @@
+import { Token } from '@/entities/token';
+import { TokenAmount } from '@/entities/tokenAmount';
+import { PoolState, PoolStateWithBalances } from '@/entities/types';
+import {
+    calculateProportionalAmounts,
+    getSortedTokens,
+} from '@/entities/utils';
+import { CHAINS } from '@/utils';
+
+import { getAmountsCall, getAmountsQuery } from '../helper';
+import {
+    RemoveLiquidityBase,
+    RemoveLiquidityBaseBuildCallInput,
+    RemoveLiquidityBaseQueryOutput,
+    RemoveLiquidityBuildCallOutput,
+    RemoveLiquidityInput,
+    RemoveLiquidityKind,
+} from '../types';
 import {
     createPublicClient,
     encodeFunctionData,
@@ -5,44 +23,26 @@ import {
     formatUnits,
     http,
 } from 'viem';
-import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 import { HumanAmount } from '@/data';
-import { Token } from '@/entities/token';
-import { TokenAmount } from '@/entities/tokenAmount';
-import { PoolState, PoolStateWithBalances } from '@/entities/types';
-import {
-    calculateProportionalAmounts,
-    getSortedTokens,
-    getValue,
-} from '@/entities/utils';
-import { CHAINS } from '@/utils';
-
-import { getAmountsCall } from '../helpers';
-import {
-    AddLiquidityBase,
-    AddLiquidityBaseBuildCallInput,
-    AddLiquidityBaseQueryOutput,
-    AddLiquidityBuildCallOutput,
-    AddLiquidityInput,
-    AddLiquidityKind,
-} from '../types';
 import {
     getPoolTokenBalanceCowAmm,
     getTotalSupplyCowAmm,
-} from '../../utils/cowAmmHelpers';
+} from '@/entities/utils/cowAmmHelpers';
+import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 
-export class AddLiquidityCowAmm implements AddLiquidityBase {
-    async query(
-        input: AddLiquidityInput,
+export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
+    public async query(
+        input: RemoveLiquidityInput,
         poolState: PoolState,
-    ): Promise<AddLiquidityBaseQueryOutput> {
-        if (input.kind !== AddLiquidityKind.Proportional) {
+    ): Promise<RemoveLiquidityBaseQueryOutput> {
+        if (input.kind !== RemoveLiquidityKind.Proportional) {
             throw new Error(
-                `Error: Add Liquidity ${input.kind} is not supported. Cow AMM pools support Add Liquidity Proportional only.`,
+                `Error: Remove Liquidity ${input.kind} is not supported. Cow AMM pools support Remove Liquidity Proportional only.`,
             );
         }
 
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
+        const amounts = getAmountsQuery(sortedTokens, input);
 
         const client = createPublicClient({
             transport: http(input.rpcUrl),
@@ -81,60 +81,66 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
 
         const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
             poolStateWithBalances,
-            input.bptOut,
+            input.bptIn,
         );
-        const bptOut = TokenAmount.fromRawAmount(
+        const bptIn = TokenAmount.fromRawAmount(
             new Token(input.chainId, bptAmount.address, bptAmount.decimals),
             bptAmount.rawAmount,
         );
-        const amountsIn = tokenAmounts.map((amountIn) =>
+        const amountsOut = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
                 new Token(input.chainId, amountIn.address, amountIn.decimals),
                 amountIn.rawAmount,
             ),
         );
-        const tokenInIndex = undefined;
 
-        const output: AddLiquidityBaseQueryOutput = {
-            poolType: poolStateWithBalances.type,
-            poolId: poolStateWithBalances.id,
-            addLiquidityKind: input.kind,
-            bptOut,
-            amountsIn,
-            tokenInIndex,
+        const output: RemoveLiquidityBaseQueryOutput = {
+            poolType: poolState.type,
+            removeLiquidityKind: input.kind,
+            poolId: poolState.id,
+            bptIn,
+            amountsOut,
+            tokenOutIndex: amounts.tokenOutIndex,
+            vaultVersion: poolState.vaultVersion,
             chainId: input.chainId,
-            vaultVersion: 0,
         };
 
         return output;
     }
 
-    buildCall(
-        input: AddLiquidityBaseBuildCallInput,
-    ): AddLiquidityBuildCallOutput {
-        if (input.addLiquidityKind !== AddLiquidityKind.Proportional) {
+    public queryRemoveLiquidityRecovery(): never {
+        throw new Error(
+            'Remove Liquidity Recovery is not supported for Cow AMM pools',
+        );
+    }
+
+    public buildCall(
+        input: RemoveLiquidityBaseBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
+        if (input.removeLiquidityKind !== RemoveLiquidityKind.Proportional) {
             throw new Error(
-                `Error: Add Liquidity ${input.addLiquidityKind} is not supported. Cow AMM pools support Add Liquidity Proportional only.`,
+                `Error: Remove Liquidity ${input.removeLiquidityKind} is not supported. Cow AMM pools support Remove Liquidity Proportional only.`,
             );
         }
 
         const amounts = getAmountsCall(input);
+
         const callData = encodeFunctionData({
             abi: cowAmmPoolAbi,
-            functionName: 'joinPool',
-            args: [amounts.minimumBpt, amounts.maxAmountsInWithoutBpt],
+            functionName: 'exitPool',
+            args: [amounts.maxBptAmountIn, amounts.minAmountsOut],
         });
 
         return {
             callData,
             to: input.poolId,
-            value: getValue(input.amountsIn, !!input.wethIsEth),
-            minBptOut: TokenAmount.fromRawAmount(
-                input.bptOut.token,
-                amounts.minimumBpt,
+            value: 0n, // remove liquidity always has value = 0
+            maxBptIn: TokenAmount.fromRawAmount(
+                input.bptIn.token,
+                amounts.maxBptAmountIn,
             ),
-            maxAmountsIn: input.amountsIn.map((a, i) =>
-                TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
+            minAmountsOut: input.amountsOut.map((a, i) =>
+                TokenAmount.fromRawAmount(a.token, amounts.minAmountsOut[i]),
             ),
         };
     }

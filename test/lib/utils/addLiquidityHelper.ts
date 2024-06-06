@@ -447,7 +447,6 @@ function assertAddLiquidityBuildCallOutput(
           )
         : ({ ...addLiquidityQueryOutput.bptOut } as TokenAmount);
 
-    // user interacts with the router on balancer v3
     let to: Address;
     switch (vaultVersion) {
         case 0:

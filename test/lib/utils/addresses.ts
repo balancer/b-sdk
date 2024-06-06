@@ -99,7 +99,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         DAI: {
             address: '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613',
             decimals: 18,
-            slot: 1,
+            slot: 0,
         },
         USDC: {
             address: '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a',
