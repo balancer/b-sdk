@@ -23,14 +23,21 @@ export class Swap {
 
     public constructor(swapInput: SwapInput) {
         validatePaths(swapInput.paths);
+        const _vaultVersion = swapInput.paths[0].vaultVersion;
 
-        if (swapInput.paths[0].vaultVersion === 2) {
-            this.vaultVersion = 2;
-            this.swap = new SwapV2(swapInput);
-        } else {
-            this.vaultVersion = 3;
-            this.swap = new SwapV3(swapInput);
+        switch (_vaultVersion) {
+            case 2:
+                this.swap = new SwapV2(swapInput);
+                break;
+            case 3:
+                this.swap = new SwapV3(swapInput);
+                break;
+            default:
+                throw Error(
+                    `SDK does not support swap for vault version: ${_vaultVersion}`,
+                );
         }
+        this.vaultVersion = _vaultVersion;
     }
 
     public get quote(): TokenAmount {

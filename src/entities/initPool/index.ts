@@ -20,6 +20,8 @@ export class InitPool {
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
         this.inputValidator.validateInitPool(input, poolState);
         switch (poolState.vaultVersion) {
+            case 0:
+                throw new Error('Init is not supported for CowAmm pools.');
             case 2:
                 return new InitPoolV2().buildCall(
                     input as InitPoolInputV2,

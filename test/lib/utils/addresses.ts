@@ -227,5 +227,12 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
+        MOCK_COW_AMM_POOL: {
+            address: '0x8cc781653bda4643c84dec5d7ad3e19ea354a54a',
+            id: '0x8cc781653bda4643c84dec5d7ad3e19ea354a54a',
+            type: PoolType.CowAmm,
+            decimals: 18,
+            slot: 0,
+        },
     },
 };
