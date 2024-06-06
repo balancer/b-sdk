@@ -16,6 +16,8 @@ import {
     AddLiquidityInput,
     AddLiquidityKind,
     AddLiquidityProportionalInput,
+    addLiquidityProportionalOnlyError,
+    AddLiquidityUnbalancedInput,
     ChainId,
     CHAINS,
     Hex,
@@ -121,6 +123,32 @@ describe('add liquidity test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
+            );
+        });
+    });
+
+    describe('add liquidity unbalanced', () => {
+        let addLiquidityInput: AddLiquidityUnbalancedInput;
+        beforeAll(() => {
+            addLiquidityInput = {
+                chainId,
+                rpcUrl,
+                kind: AddLiquidityKind.Unbalanced,
+                amountsIn: txInput.poolState.tokens.map((t) => ({
+                    rawAmount: parseUnits('1', t.decimals),
+                    decimals: t.decimals,
+                    address: t.address,
+                })),
+            };
+        });
+        test('should fail as not supported', async () => {
+            await expect(() =>
+                doAddLiquidity({ ...txInput, addLiquidityInput }),
+            ).rejects.toThrowError(
+                addLiquidityProportionalOnlyError(
+                    addLiquidityInput.kind,
+                    txInput.poolState.type,
+                ),
             );
         });
     });

@@ -1,3 +1,5 @@
+import { AddLiquidityKind, RemoveLiquidityKind } from '..';
+
 export const addLiquiditySingleTokenShouldHaveTokenInIndexError = Error(
     'AddLiquidityKind.SingleToken should have tokenInIndex',
 );
@@ -17,3 +19,19 @@ export const addLiquidityProportionalNotSupportedOnPoolTypeError = (
     poolType: string,
 ) =>
     Error(`Add Liquidity Proportional not supported on pool type: ${poolType}`);
+
+export const addLiquidityProportionalOnlyError = (
+    kind: AddLiquidityKind,
+    poolType: string,
+) =>
+    Error(
+        `Add Liquidity ${kind} not supported for pool ${poolType}. Use Add Liquidity Proportional`,
+    );
+
+export const removeLiquidityProportionalOnlyError = (
+    kind: RemoveLiquidityKind,
+    poolType: string,
+) =>
+    Error(
+        `Remove Liquidity ${kind} not supported for pool ${poolType}. Use Remove Liquidity Proportional`,
+    );

@@ -13,8 +13,8 @@ import {
     RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityBaseQueryOutput,
     RemoveLiquidityBuildCallOutput,
-    RemoveLiquidityInput,
     RemoveLiquidityKind,
+    RemoveLiquidityProportionalInput,
 } from '../types';
 import {
     createPublicClient,
@@ -32,15 +32,9 @@ import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 
 export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
     public async query(
-        input: RemoveLiquidityInput,
+        input: RemoveLiquidityProportionalInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
-        if (input.kind !== RemoveLiquidityKind.Proportional) {
-            throw new Error(
-                `Error: Remove Liquidity ${input.kind} is not supported. Cow AMM pools support Remove Liquidity Proportional only.`,
-            );
-        }
-
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = getAmountsQuery(sortedTokens, input);
 

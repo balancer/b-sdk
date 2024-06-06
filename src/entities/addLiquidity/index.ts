@@ -5,6 +5,7 @@ import {
     AddLiquidityQueryOutput,
     AddLiquidityBuildCallInput,
     AddLiquidityConfig,
+    AddLiquidityProportionalInput,
 } from './types';
 import { PoolState } from '../types';
 import { AddLiquidityV2 } from './addLiquidityV2';
@@ -24,7 +25,10 @@ export class AddLiquidity implements AddLiquidityBase {
         switch (poolState.vaultVersion) {
             case 0: {
                 const addLiquidity = new AddLiquidityCowAmm();
-                return addLiquidity.query(input, poolState);
+                return addLiquidity.query(
+                    input as AddLiquidityProportionalInput,
+                    poolState,
+                );
             }
             case 2: {
                 const addLiquidity = new AddLiquidityV2(this.config);

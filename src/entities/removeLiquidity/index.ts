@@ -6,6 +6,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
+    RemoveLiquidityProportionalInput,
 } from './types';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
@@ -26,7 +27,10 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         switch (poolState.vaultVersion) {
             case 0: {
                 const removeLiquidity = new RemoveLiquidityCowAmm();
-                return removeLiquidity.query(input, poolState);
+                return removeLiquidity.query(
+                    input as RemoveLiquidityProportionalInput,
+                    poolState,
+                );
             }
             case 2: {
                 const removeLiquidity = new RemoveLiquidityV2(this.config);

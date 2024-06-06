@@ -23,8 +23,8 @@ import {
     AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
     AddLiquidityBuildCallOutput,
-    AddLiquidityInput,
     AddLiquidityKind,
+    AddLiquidityProportionalInput,
 } from '../types';
 import {
     getPoolTokenBalanceCowAmm,
@@ -33,15 +33,9 @@ import {
 
 export class AddLiquidityCowAmm implements AddLiquidityBase {
     async query(
-        input: AddLiquidityInput,
+        input: AddLiquidityProportionalInput,
         poolState: PoolState,
     ): Promise<AddLiquidityBaseQueryOutput> {
-        if (input.kind !== AddLiquidityKind.Proportional) {
-            throw new Error(
-                `Error: Add Liquidity ${input.kind} is not supported. Cow AMM pools support Add Liquidity Proportional only.`,
-            );
-        }
-
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
 
         const client = createPublicClient({

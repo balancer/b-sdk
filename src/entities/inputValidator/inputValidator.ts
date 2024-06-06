@@ -8,6 +8,7 @@ import {
 } from '../removeLiquidity/types';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
+import { InputValidatorCowAmm } from './cowAmm/inputValidatorCowAmm';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
 import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
@@ -19,6 +20,7 @@ export class InputValidator {
     constructor() {
         this.validators = {
             [PoolType.ComposableStable]: new InputValidatorComposableStable(),
+            [PoolType.CowAmm]: new InputValidatorCowAmm(),
             [PoolType.Gyro2]: new InputValidatorGyro(),
             [PoolType.Gyro3]: new InputValidatorGyro(),
             [PoolType.GyroE]: new InputValidatorGyro(),

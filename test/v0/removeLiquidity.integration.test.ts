@@ -14,6 +14,7 @@ import {
 import {
     AddLiquidity,
     AddLiquidityKind,
+    AddLiquidityProportionalInput,
     CHAINS,
     ChainId,
     Hex,
@@ -25,7 +26,8 @@ import {
     RemoveLiquidityKind,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
-    AddLiquidityProportionalInput,
+    removeLiquidityProportionalOnlyError,
+    RemoveLiquidityUnbalancedInput,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -153,6 +155,32 @@ describe('remove liquidity test', () => {
                 removeLiquidityOutput,
                 txInput.slippage,
                 vaultVersion,
+            );
+        });
+    });
+
+    describe('remove liquidity unbalanced', () => {
+        let removeLiquidityInput: RemoveLiquidityUnbalancedInput;
+        beforeAll(() => {
+            removeLiquidityInput = {
+                chainId,
+                rpcUrl,
+                kind: RemoveLiquidityKind.Unbalanced,
+                amountsOut: txInput.poolState.tokens.map((t) => ({
+                    rawAmount: parseUnits('1', t.decimals),
+                    decimals: t.decimals,
+                    address: t.address,
+                })),
+            };
+        });
+        test('should fail as not supported', async () => {
+            await expect(() =>
+                doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
+            ).rejects.toThrowError(
+                removeLiquidityProportionalOnlyError(
+                    removeLiquidityInput.kind,
+                    txInput.poolState.type,
+                ),
             );
         });
     });
