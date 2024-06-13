@@ -7,7 +7,7 @@ import {
 } from '@/entities/utils';
 import { CHAINS } from '@/utils';
 
-import { getAmountsCall, getAmountsQuery } from '../helper';
+import { getAmountsCall } from '../helper';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBaseBuildCallInput,
@@ -36,7 +36,6 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         poolState: PoolState,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const amounts = getAmountsQuery(sortedTokens, input);
 
         const client = createPublicClient({
             transport: http(input.rpcUrl),
@@ -94,7 +93,7 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
             poolId: poolState.id,
             bptIn,
             amountsOut,
-            tokenOutIndex: amounts.tokenOutIndex,
+            tokenOutIndex: undefined,
             vaultVersion: poolState.vaultVersion,
             chainId: input.chainId,
         };

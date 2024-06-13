@@ -82,7 +82,6 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         const isV2Input = 'sender' in input;
         switch (input.vaultVersion) {
             case 0: {
-                // TODO: check if we need to be more restrictive with input type mismatch here
                 const removeLiquidity = new RemoveLiquidityCowAmm();
                 return removeLiquidity.buildCall(input);
             }

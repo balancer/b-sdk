@@ -391,8 +391,8 @@ export async function findTokenBalanceSlot(
  * @param tokens Token addresses which balance will be set and approved
  * @param slots Slot that stores token balance in memory - use npm package `slot20` to identify which slot to provide
  * @param balances Balances in EVM amounts
- * @param jsonRpcUrl Url with remote node to be forked locally
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
+ * @param vaultVersion Balancer vault version
  */
 export const forkSetup = async (
     client: Client & PublicActions & TestActions & WalletActions,
@@ -449,7 +449,7 @@ export const forkSetup = async (
  * @param tokens Token addresses which balance will be set and approved
  * @param slots Slot that stores token balance in memory - use npm package `slot20` to identify which slot to provide
  * @param balances Balances in EVM amounts
- * @param jsonRpcUrl Url with remote node to be forked locally
+ * @param pool Pool address that needs to be approved as token spender
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
  */
 export const forkSetupCowAmm = async (
@@ -458,7 +458,7 @@ export const forkSetupCowAmm = async (
     tokens: Address[],
     slots: number[] | undefined,
     balances: bigint[],
-    spender: Address,
+    pool: Address,
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
 ): Promise<void> => {
     await client.impersonateAccount({ address: accountAddress });
@@ -495,6 +495,6 @@ export const forkSetupCowAmm = async (
             isVyperMapping[i],
         );
 
-        await approveSpenderOnToken(client, accountAddress, tokens[i], spender);
+        await approveSpenderOnToken(client, accountAddress, tokens[i], pool);
     }
 };

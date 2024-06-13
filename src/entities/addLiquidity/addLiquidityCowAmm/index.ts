@@ -13,7 +13,6 @@ import { PoolState, PoolStateWithBalances } from '@/entities/types';
 import {
     calculateProportionalAmounts,
     getSortedTokens,
-    getValue,
 } from '@/entities/utils';
 import { CHAINS } from '@/utils';
 
@@ -111,6 +110,11 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
                 `Error: Add Liquidity ${input.addLiquidityKind} is not supported. Cow AMM pools support Add Liquidity Proportional only.`,
             );
         }
+        if (input.wethIsEth) {
+            throw new Error(
+                'Cow AMM pools do not support adding liquidity with ETH.',
+            );
+        }
 
         const amounts = getAmountsCall(input);
         const callData = encodeFunctionData({
@@ -122,7 +126,7 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
         return {
             callData,
             to: input.poolId,
-            value: getValue(input.amountsIn, !!input.wethIsEth),
+            value: 0n,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,

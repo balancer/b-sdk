@@ -44,7 +44,6 @@ export class AddLiquidity implements AddLiquidityBase {
     buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput {
         switch (input.vaultVersion) {
             case 0: {
-                // TODO: check if we need to be more restrictive with input type mismatch here
                 const addLiquidity = new AddLiquidityCowAmm();
                 return addLiquidity.buildCall(input);
             }
