@@ -1,11 +1,7 @@
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { PoolState, PoolStateWithBalances } from '@/entities/types';
-import {
-    calculateProportionalAmounts,
-    getSortedTokens,
-} from '@/entities/utils';
-import { CHAINS } from '@/utils';
+import { PoolState } from '@/entities/types';
+import { calculateProportionalAmounts } from '@/entities/utils';
 
 import { getAmountsCall } from '../helper';
 import {
@@ -16,18 +12,8 @@ import {
     RemoveLiquidityKind,
     RemoveLiquidityProportionalInput,
 } from '../types';
-import {
-    createPublicClient,
-    encodeFunctionData,
-    formatEther,
-    formatUnits,
-    http,
-} from 'viem';
-import { HumanAmount } from '@/data';
-import {
-    getPoolTokenBalanceCowAmm,
-    getTotalSupplyCowAmm,
-} from '@/entities/utils/cowAmmHelpers';
+import { encodeFunctionData } from 'viem';
+import { getPoolStateWithBalancesCowAmm } from '@/entities/utils/cowAmmHelpers';
 import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 
 export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
@@ -35,42 +21,11 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         input: RemoveLiquidityProportionalInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
-        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-
-        const client = createPublicClient({
-            transport: http(input.rpcUrl),
-            chain: CHAINS[input.chainId],
-        });
-
-        const balances: bigint[] = [];
-        for (const token of sortedTokens) {
-            balances.push(
-                await getPoolTokenBalanceCowAmm(
-                    poolState.id,
-                    token.address,
-                    client,
-                ),
-            );
-        }
-
-        const totalShares = await getTotalSupplyCowAmm(
-            poolState.address,
-            client,
+        const poolStateWithBalances = await getPoolStateWithBalancesCowAmm(
+            poolState,
+            input.chainId,
+            input.rpcUrl,
         );
-
-        const poolStateWithBalances: PoolStateWithBalances = {
-            ...poolState,
-            tokens: sortedTokens.map((token, i) => ({
-                address: token.address,
-                decimals: token.decimals,
-                index: i,
-                balance: formatUnits(
-                    balances[i],
-                    token.decimals,
-                ) as HumanAmount,
-            })),
-            totalShares: formatEther(totalShares) as HumanAmount,
-        };
 
         const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
             poolStateWithBalances,

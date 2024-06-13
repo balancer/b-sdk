@@ -1,20 +1,9 @@
-import {
-    createPublicClient,
-    encodeFunctionData,
-    formatEther,
-    formatUnits,
-    http,
-} from 'viem';
+import { encodeFunctionData } from 'viem';
 import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
-import { HumanAmount } from '@/data';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { PoolState, PoolStateWithBalances } from '@/entities/types';
-import {
-    calculateProportionalAmounts,
-    getSortedTokens,
-} from '@/entities/utils';
-import { CHAINS } from '@/utils';
+import { PoolState } from '@/entities/types';
+import { calculateProportionalAmounts } from '@/entities/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
@@ -25,52 +14,18 @@ import {
     AddLiquidityKind,
     AddLiquidityProportionalInput,
 } from '../types';
-import {
-    getPoolTokenBalanceCowAmm,
-    getTotalSupplyCowAmm,
-} from '../../utils/cowAmmHelpers';
+import { getPoolStateWithBalancesCowAmm } from '@/entities/utils/cowAmmHelpers';
 
 export class AddLiquidityCowAmm implements AddLiquidityBase {
     async query(
         input: AddLiquidityProportionalInput,
         poolState: PoolState,
     ): Promise<AddLiquidityBaseQueryOutput> {
-        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-
-        const client = createPublicClient({
-            transport: http(input.rpcUrl),
-            chain: CHAINS[input.chainId],
-        });
-
-        const balances: bigint[] = [];
-        for (const token of sortedTokens) {
-            balances.push(
-                await getPoolTokenBalanceCowAmm(
-                    poolState.id,
-                    token.address,
-                    client,
-                ),
-            );
-        }
-
-        const totalShares = await getTotalSupplyCowAmm(
-            poolState.address,
-            client,
+        const poolStateWithBalances = await getPoolStateWithBalancesCowAmm(
+            poolState,
+            input.chainId,
+            input.rpcUrl,
         );
-
-        const poolStateWithBalances: PoolStateWithBalances = {
-            ...poolState,
-            tokens: sortedTokens.map((token, i) => ({
-                address: token.address,
-                decimals: token.decimals,
-                index: i,
-                balance: formatUnits(
-                    balances[i],
-                    token.decimals,
-                ) as HumanAmount,
-            })),
-            totalShares: formatEther(totalShares) as HumanAmount,
-        };
 
         const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
             poolStateWithBalances,
