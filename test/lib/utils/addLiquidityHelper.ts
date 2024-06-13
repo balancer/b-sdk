@@ -89,22 +89,18 @@ function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
     if (isAddLiquidityComposableStableQueryOutput(output)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
-            // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { bptOut, bptIndex, ...check } =
                 output as AddLiquidityV2ComposableStableQueryOutput;
             return check;
         }
-        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { amountsIn, bptIndex, ...check } =
             output as AddLiquidityV2ComposableStableQueryOutput;
         return check;
     }
     if (isExactIn) {
-        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { bptOut, ...check } = output;
         return check;
     }
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { amountsIn, ...check } = output;
     return check;
 }
@@ -470,7 +466,6 @@ function assertAddLiquidityBuildCallOutput(
         value,
     };
 
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { callData, ...buildCheck } = addLiquidityBuildCallOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }
