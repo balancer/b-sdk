@@ -1,4 +1,4 @@
-// pnpm test -- addLiquidity.integration.test.ts
+// pnpm test -- v3/addLiquidity.integration.test.ts
 
 import { config } from 'dotenv';
 config();

@@ -4,6 +4,7 @@ export type Hex = `0x${string}`;
 export enum PoolType {
     AaveLinear = 'AaveLinear',
     ComposableStable = 'ComposableStable',
+    CowAmm = 'CowAmm',
     Fx = 'FX',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',

@@ -310,7 +310,7 @@ export function assertAddLiquidityProportional(
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    vaultVersion: 0 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -429,7 +429,7 @@ function assertAddLiquidityBuildCallOutput(
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput,
     isExactIn: boolean,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    vaultVersion: 0 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
@@ -447,11 +447,18 @@ function assertAddLiquidityBuildCallOutput(
           )
         : ({ ...addLiquidityQueryOutput.bptOut } as TokenAmount);
 
-    // user interacts with the router on balancer v3
-    const to =
-        vaultVersion === 2
-            ? VAULT[addLiquidityInput.chainId]
-            : BALANCER_ROUTER[addLiquidityInput.chainId];
+    let to: Address;
+    switch (vaultVersion) {
+        case 0:
+            to = addLiquidityQueryOutput.poolId;
+            break;
+        case 2:
+            to = VAULT[addLiquidityInput.chainId];
+            break;
+        case 3:
+            to = BALANCER_ROUTER[addLiquidityInput.chainId];
+            break;
+    }
 
     let value = 0n;
     if (wethIsEth) {

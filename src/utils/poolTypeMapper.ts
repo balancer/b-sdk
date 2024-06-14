@@ -9,6 +9,7 @@ const poolTypeMap = {
     META_STABLE: PoolType.MetaStable,
     STABLE: PoolType.Stable,
     WEIGHTED: PoolType.Weighted,
+    COW_AMM: PoolType.CowAmm,
 };
 
 export const mapPoolType = (type: string): PoolType => {

@@ -1,5 +1,6 @@
 import { zeroAddress } from 'viem';
 import {
+    Address,
     BALANCER_ROUTER,
     NATIVE_ASSETS,
     PoolState,
@@ -385,7 +386,7 @@ export function assertRemoveLiquidityProportional(
     removeLiquidityInput: RemoveLiquidityProportionalInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    vaultVersion: 0 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const {
@@ -506,7 +507,7 @@ export function assertRemoveLiquidityBuildCallOutput(
     RemoveLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput,
     isExactIn: boolean,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    vaultVersion: 0 | 2 | 3 = 2,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
     // slippage.applyTo(a.amount, -1)
@@ -527,10 +528,18 @@ export function assertRemoveLiquidityBuildCallOutput(
               slippage.applyTo(removeLiquidityQueryOutput.bptIn.amount),
           );
 
-    const to =
-        vaultVersion === 2
-            ? VAULT[removeLiquidityQueryOutput.chainId]
-            : BALANCER_ROUTER[removeLiquidityQueryOutput.chainId];
+    let to: Address;
+    switch (vaultVersion) {
+        case 0:
+            to = removeLiquidityQueryOutput.poolId;
+            break;
+        case 2:
+            to = VAULT[removeLiquidityQueryOutput.chainId];
+            break;
+        case 3:
+            to = BALANCER_ROUTER[removeLiquidityQueryOutput.chainId];
+            break;
+    }
 
     const expectedBuildOutput: Omit<
         RemoveLiquidityBuildCallOutput,

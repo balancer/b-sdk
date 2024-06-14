@@ -8,5 +8,5 @@ export type Path = {
     tokens: TokenApi[];
     outputAmountRaw: bigint;
     inputAmountRaw: bigint;
-    vaultVersion: 2 | 3;
+    vaultVersion: 0 | 2 | 3;
 };

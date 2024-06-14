@@ -5,11 +5,13 @@ import {
     AddLiquidityQueryOutput,
     AddLiquidityBuildCallInput,
     AddLiquidityConfig,
+    AddLiquidityProportionalInput,
 } from './types';
 import { PoolState } from '../types';
 import { AddLiquidityV2 } from './addLiquidityV2';
 import { AddLiquidityV3 } from './addLiquidityV3';
 import { InputValidator } from '../inputValidator/inputValidator';
+import { AddLiquidityCowAmm } from './addLiquidityCowAmm';
 
 export class AddLiquidity implements AddLiquidityBase {
     constructor(public config?: AddLiquidityConfig) {}
@@ -21,6 +23,13 @@ export class AddLiquidity implements AddLiquidityBase {
     ): Promise<AddLiquidityQueryOutput> {
         this.inputValidator.validateAddLiquidity(input, poolState);
         switch (poolState.vaultVersion) {
+            case 0: {
+                const addLiquidity = new AddLiquidityCowAmm();
+                return addLiquidity.query(
+                    input as AddLiquidityProportionalInput,
+                    poolState,
+                );
+            }
             case 2: {
                 const addLiquidity = new AddLiquidityV2(this.config);
                 return addLiquidity.query(input, poolState);
@@ -33,14 +42,25 @@ export class AddLiquidity implements AddLiquidityBase {
     }
 
     buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput {
-        if (input.vaultVersion === 2 && 'sender' in input) {
-            const addLiquidity = new AddLiquidityV2(this.config);
-            return addLiquidity.buildCall(input);
-        }
-
-        if (input.vaultVersion === 3 && !('sender' in input)) {
-            const addLiquidity = new AddLiquidityV3();
-            return addLiquidity.buildCall(input);
+        switch (input.vaultVersion) {
+            case 0: {
+                const addLiquidity = new AddLiquidityCowAmm();
+                return addLiquidity.buildCall(input);
+            }
+            case 2: {
+                if ('sender' in input) {
+                    const addLiquidity = new AddLiquidityV2(this.config);
+                    return addLiquidity.buildCall(input);
+                }
+                break;
+            }
+            case 3: {
+                if (!('sender' in input)) {
+                    const addLiquidity = new AddLiquidityV3();
+                    return addLiquidity.buildCall(input);
+                }
+                break;
+            }
         }
 
         throw Error('buildCall input/version mis-match');

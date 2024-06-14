@@ -63,7 +63,7 @@ export type RemoveLiquidityBaseQueryOutput = {
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
     tokenOutIndex?: number;
-    vaultVersion: 2 | 3;
+    vaultVersion: 0 | 2 | 3;
     chainId: number;
 };
 

@@ -6,11 +6,13 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
+    RemoveLiquidityProportionalInput,
 } from './types';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
+import { RemoveLiquidityCowAmm } from './removeLiquidityCowAmm';
 
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -23,6 +25,13 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     ): Promise<RemoveLiquidityQueryOutput> {
         this.inputValidator.validateRemoveLiquidity(input, poolState);
         switch (poolState.vaultVersion) {
+            case 0: {
+                const removeLiquidity = new RemoveLiquidityCowAmm();
+                return removeLiquidity.query(
+                    input as RemoveLiquidityProportionalInput,
+                    poolState,
+                );
+            }
             case 2: {
                 const removeLiquidity = new RemoveLiquidityV2(this.config);
                 return removeLiquidity.query(input, poolState);
@@ -46,6 +55,10 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     ): Promise<RemoveLiquidityQueryOutput> {
         this.inputValidator.validateRemoveLiquidityRecovery(input, poolState);
         switch (poolState.vaultVersion) {
+            case 0: {
+                const removeLiquidity = new RemoveLiquidityCowAmm();
+                return removeLiquidity.queryRemoveLiquidityRecovery();
+            }
             case 2: {
                 const removeLiquidity = new RemoveLiquidityV2(this.config);
                 return removeLiquidity.queryRemoveLiquidityRecovery(
@@ -66,22 +79,28 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     public buildCall(
         input: RemoveLiquidityBuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
-        // TODO: refactor validators to take v3 into account
         const isV2Input = 'sender' in input;
-        if (input.vaultVersion === 3 && isV2Input)
-            throw Error('Cannot define sender/recipient in V3');
-        if (input.vaultVersion === 2 && !isV2Input)
-            throw Error('Sender/recipient must be defined in V2');
-
         switch (input.vaultVersion) {
-            case 2: {
-                const removeLiquidity = new RemoveLiquidityV2(this.config);
+            case 0: {
+                const removeLiquidity = new RemoveLiquidityCowAmm();
                 return removeLiquidity.buildCall(input);
+            }
+            case 2: {
+                if (isV2Input) {
+                    const removeLiquidity = new RemoveLiquidityV2(this.config);
+                    return removeLiquidity.buildCall(input);
+                }
+                break;
             }
             case 3: {
-                const removeLiquidity = new RemoveLiquidityV3();
-                return removeLiquidity.buildCall(input);
+                if (!isV2Input) {
+                    const removeLiquidity = new RemoveLiquidityV3();
+                    return removeLiquidity.buildCall(input);
+                }
+                break;
             }
         }
+
+        throw Error('buildCall input/version mis-match');
     }
 }

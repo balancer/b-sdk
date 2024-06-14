@@ -16,7 +16,7 @@ import {
     removeLiquidityProportionalOnlyError,
 } from '@/utils';
 
-export class InputValidatorGyro extends InputValidatorBase {
+export class InputValidatorCowAmm extends InputValidatorBase {
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
         throw new Error('Method not implemented.');

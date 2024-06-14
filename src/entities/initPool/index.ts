@@ -30,6 +30,10 @@ export class InitPool {
                     input as InitPoolInputV3,
                     poolState,
                 );
+            default:
+                throw Error(
+                    `SDK does not support init for vault version: ${poolState.vaultVersion}`,
+                );
         }
     }
 }

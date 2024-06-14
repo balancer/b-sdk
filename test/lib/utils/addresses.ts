@@ -99,7 +99,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         DAI: {
             address: '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613',
             decimals: 18,
-            slot: 1,
+            slot: 0,
         },
         USDC: {
             address: '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a',
@@ -224,6 +224,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             address: '0xE184b377F9Ac3e5BC74c1b6b72f64ce312485081',
             id: '0xE184b377F9Ac3e5BC74c1b6b72f64ce312485081',
             type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_COW_AMM_POOL: {
+            address: '0x8cc781653bda4643c84dec5d7ad3e19ea354a54a',
+            id: '0x8cc781653bda4643c84dec5d7ad3e19ea354a54a',
+            type: PoolType.CowAmm,
             decimals: 18,
             slot: 0,
         },
