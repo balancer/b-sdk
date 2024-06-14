@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.17.0
+
+### Minor Changes
+
+- 73dc1bc: Add support for add/remove liquidity on CoWAMM pools
+
 ## 0.16.0
 
 ### Minor Changes
