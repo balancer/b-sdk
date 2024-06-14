@@ -12,3 +12,4 @@ export * from './vaultV3';
 export * from './weightedPoolFactory.V3';
 export * from './weightedPoolFactoryV4.V2';
 export * from './weightedPoolV4.V2';
+export * from './weightedPool.V3';

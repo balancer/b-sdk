@@ -21,7 +21,11 @@ import {
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
-import { RemoveLiquidityTxInput } from './types';
+import {
+    PermitBatchAndSignatures,
+    RemoveLiquidityTxInput,
+    RemoveLiquidityWithSignatureTxInput,
+} from './types';
 import { RemoveLiquidityV2BaseBuildCallInput } from '@/entities/removeLiquidity/removeLiquidityV2/types';
 import { RemoveLiquidityV2ComposableStableQueryOutput } from '@/entities/removeLiquidity/removeLiquidityV2/composableStable/types';
 
@@ -31,15 +35,18 @@ export type RemoveLiquidityOutput = {
     txOutput: TxOutput;
 };
 
-export const sdkRemoveLiquidity = async ({
-    removeLiquidity,
-    removeLiquidityInput,
-    poolState,
-    slippage,
-    testAddress,
-    wethIsEth,
-    toInternalBalance,
-}: Omit<RemoveLiquidityTxInput, 'client'>): Promise<{
+export const sdkRemoveLiquidity = async (
+    {
+        removeLiquidity,
+        removeLiquidityInput,
+        poolState,
+        slippage,
+        testAddress,
+        wethIsEth,
+        toInternalBalance,
+    }: Omit<RemoveLiquidityTxInput, 'client'>,
+    permitInputs?: PermitBatchAndSignatures,
+): Promise<{
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
@@ -62,8 +69,48 @@ export const sdkRemoveLiquidity = async ({
         };
     }
 
-    const removeLiquidityBuildCallOutput = removeLiquidity.buildCall(
+    const removeLiquidityBuildCallOutput =
+        permitInputs !== undefined
+            ? removeLiquidity.buildCallWithPermit(
+                  removeLiquidityBuildInput,
+                  permitInputs.permitBatch,
+                  permitInputs.permitSignature,
+              )
+            : removeLiquidity.buildCall(removeLiquidityBuildInput);
+
+    return {
+        removeLiquidityBuildCallOutput,
+        removeLiquidityQueryOutput,
+    };
+};
+
+export const sdkRemoveLiquidityWithSignature = async ({
+    removeLiquidity,
+    removeLiquidityInput,
+    poolState,
+    slippage,
+    wethIsEth,
+    permitBatch,
+    permitSignature,
+}: Omit<RemoveLiquidityWithSignatureTxInput, 'client'>): Promise<{
+    removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
+    removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
+}> => {
+    const removeLiquidityQueryOutput = await removeLiquidity.query(
+        removeLiquidityInput,
+        poolState,
+    );
+
+    const removeLiquidityBuildInput: RemoveLiquidityBuildCallInput = {
+        ...removeLiquidityQueryOutput,
+        slippage,
+        wethIsEth: !!wethIsEth,
+    };
+
+    const removeLiquidityBuildCallOutput = removeLiquidity.buildCallWithPermit(
         removeLiquidityBuildInput,
+        permitBatch,
+        permitSignature,
     );
 
     return {
@@ -137,6 +184,53 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
             slippage,
             testAddress,
             wethIsEth,
+        });
+
+    // get tokens for balance change - pool tokens, BPT, native
+    const tokens = getTokensForBalanceCheck(poolState);
+
+    // send transaction and calculate balance changes
+    const txOutput = await sendTransactionGetBalances(
+        tokens,
+        client,
+        testAddress,
+        removeLiquidityBuildCallOutput.to,
+        removeLiquidityBuildCallOutput.callData,
+        removeLiquidityBuildCallOutput.value,
+    );
+
+    return {
+        removeLiquidityQueryOutput,
+        removeLiquidityBuildCallOutput,
+        txOutput,
+    };
+}
+
+export async function doRemoveLiquidityWithSignature(
+    txInput: RemoveLiquidityWithSignatureTxInput,
+) {
+    const {
+        removeLiquidity,
+        poolState,
+        removeLiquidityInput,
+        testAddress,
+        client,
+        slippage,
+        wethIsEth,
+        permitBatch,
+        permitSignature,
+    } = txInput;
+
+    const { removeLiquidityQueryOutput, removeLiquidityBuildCallOutput } =
+        await sdkRemoveLiquidityWithSignature({
+            removeLiquidity,
+            removeLiquidityInput,
+            poolState,
+            slippage,
+            testAddress,
+            wethIsEth,
+            permitBatch,
+            permitSignature,
         });
 
     // get tokens for balance change - pool tokens, BPT, native

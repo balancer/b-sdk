@@ -402,6 +402,7 @@ export const forkSetup = async (
     balances: bigint[],
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
     vaultVersion: 2 | 3 = 2,
+    approveTokens = true,
 ): Promise<void> => {
     await client.impersonateAccount({ address: accountAddress });
 
@@ -437,7 +438,9 @@ export const forkSetup = async (
             isVyperMapping[i],
         );
 
-        await approveToken(client, accountAddress, tokens[i], vaultVersion);
+        if (approveTokens) {
+            await approveToken(client, accountAddress, tokens[i], vaultVersion);
+        }
     }
 };
 

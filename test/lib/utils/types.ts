@@ -10,11 +10,14 @@ import {
     ChainId,
     NestedPoolState,
     RemoveLiquidityRecoveryInput,
+    Hex,
 } from '@/.';
 import { CreatePool } from '@/entities/createPool';
 import { CreatePoolInput } from '@/entities/createPool/types';
 import { InitPool } from '@/entities/initPool';
 import { InitPoolInput } from '@/entities/initPool/types';
+import { PermitApproval } from '@/entities/permit';
+import { Permit2Batch } from '@/entities/permit2';
 
 export type AddLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
@@ -26,6 +29,9 @@ export type AddLiquidityTxInput = {
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;
 };
+
+export type AddLiquidityWithSignatureTxInput = AddLiquidityTxInput &
+    Permit2BatchAndSignature;
 
 export type InitPoolTxInput = Omit<
     AddLiquidityTxInput,
@@ -52,6 +58,19 @@ export type RemoveLiquidityTxInput = RemoveLiquidityTxInputBase & {
 export type RemoveLiquidityRecoveryTxInput = RemoveLiquidityTxInputBase & {
     removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput;
 };
+
+export type PermitBatchAndSignature = {
+    permitBatch: PermitApproval;
+    permitSignature: Hex;
+};
+
+export type Permit2BatchAndSignature = {
+    permit2Batch: Permit2Batch;
+    permit2Signature: Hex;
+};
+
+export type RemoveLiquidityWithSignatureTxInput = RemoveLiquidityTxInput &
+    PermitBatchAndSignature;
 
 export type CreatePoolTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;

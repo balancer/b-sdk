@@ -13,6 +13,8 @@ import { InputValidator } from '../inputValidator/inputValidator';
 import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
 import { RemoveLiquidityCowAmm } from './removeLiquidityCowAmm';
+import { PermitApproval } from '../permit';
+import { Hex } from '@/types';
 
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -102,5 +104,24 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         }
 
         throw Error('buildCall input/version mis-match');
+    }
+
+    public buildCallWithPermit(
+        input: RemoveLiquidityBuildCallInput,
+        permitBatch: PermitApproval,
+        permitSignature: Hex,
+    ): RemoveLiquidityBuildCallOutput {
+        if (input.vaultVersion === 3) {
+            const removeLiquidity = new RemoveLiquidityV3();
+            return removeLiquidity.buildCallWithPermit(
+                input,
+                permitBatch,
+                permitSignature,
+            );
+        }
+
+        throw Error(
+            'buildCall with Permit signatures is only available for v3',
+        );
     }
 }
