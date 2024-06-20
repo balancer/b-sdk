@@ -246,7 +246,7 @@ describe('price impact', () => {
         let pathBalWethWsteth: Path;
         beforeAll(() => {
             pathBalWeth = {
-                vaultVersion: 2,
+                protocolVersion: 2,
                 tokens: [
                     {
                         address: BAL.address,
@@ -480,7 +480,7 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.ComposableStable,
             tokens,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 
@@ -512,7 +512,7 @@ class MockApi {
             type: PoolType.Weighted,
             tokens,
             totalShares: '14154229.749048855404944279' as HumanAmount,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 

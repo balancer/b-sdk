@@ -101,7 +101,7 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                poolState.vaultVersion,
+                poolState.protocolVersion,
             );
         });
         test('with native', async () => {
@@ -117,7 +117,7 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                poolState.vaultVersion,
+                poolState.protocolVersion,
                 wethIsEth,
             );
         });
@@ -149,7 +149,7 @@ class MockApi {
             address: testPool.address,
             type: testPool.type,
             tokens,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 }

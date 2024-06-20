@@ -59,7 +59,7 @@ async function sdkAddLiquidity({
         slippage,
         wethIsEth: !!wethIsEth,
     };
-    if (poolState.vaultVersion === 2) {
+    if (poolState.protocolVersion === 2) {
         (addLiquidityBuildInput as AddLiquidityV2BaseBuildCallInput) = {
             ...addLiquidityBuildInput,
             sender: testAddress,
@@ -164,7 +164,7 @@ export function assertAddLiquidityUnbalanced(
     addLiquidityInput: AddLiquidityUnbalancedInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -196,7 +196,7 @@ export function assertAddLiquidityUnbalanced(
         poolId: poolState.id,
         poolType: poolState.type,
         addLiquidityKind: addLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
+        protocolVersion: poolState.protocolVersion,
         chainId: addLiquidityInput.chainId,
     };
 
@@ -213,7 +213,7 @@ export function assertAddLiquidityUnbalanced(
         addLiquidityBuildCallOutput,
         true,
         slippage,
-        vaultVersion,
+        protocolVersion,
         wethIsEth,
     );
 
@@ -232,7 +232,7 @@ export function assertAddLiquiditySingleToken(
     addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -267,7 +267,7 @@ export function assertAddLiquiditySingleToken(
         poolId: poolState.id,
         poolType: poolState.type,
         addLiquidityKind: addLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
+        protocolVersion: poolState.protocolVersion,
         chainId: addLiquidityInput.chainId,
     };
 
@@ -291,7 +291,7 @@ export function assertAddLiquiditySingleToken(
         addLiquidityBuildCallOutput,
         false,
         slippage,
-        vaultVersion,
+        protocolVersion,
         wethIsEth,
     );
 
@@ -310,7 +310,7 @@ export function assertAddLiquidityProportional(
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 0 | 2 | 3 = 2,
+    protocolVersion: 0 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -337,7 +337,7 @@ export function assertAddLiquidityProportional(
         poolId: poolState.id,
         poolType: poolState.type,
         addLiquidityKind: addLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
+        protocolVersion: poolState.protocolVersion,
         chainId: addLiquidityInput.chainId,
     };
 
@@ -357,7 +357,7 @@ export function assertAddLiquidityProportional(
         addLiquidityBuildCallOutput,
         false,
         slippage,
-        vaultVersion,
+        protocolVersion,
         wethIsEth,
     );
 
@@ -429,7 +429,7 @@ function assertAddLiquidityBuildCallOutput(
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput,
     isExactIn: boolean,
     slippage: Slippage,
-    vaultVersion: 0 | 2 | 3 = 2,
+    protocolVersion: 0 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
@@ -448,7 +448,7 @@ function assertAddLiquidityBuildCallOutput(
         : ({ ...addLiquidityQueryOutput.bptOut } as TokenAmount);
 
     let to: Address;
-    switch (vaultVersion) {
+    switch (protocolVersion) {
         case 0:
             to = addLiquidityQueryOutput.poolId;
             break;

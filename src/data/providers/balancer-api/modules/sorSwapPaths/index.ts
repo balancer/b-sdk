@@ -11,7 +11,7 @@ export type SorInput = {
     tokenOut: Address;
     swapKind: SwapKind;
     swapAmount: TokenAmount; // API expects input in human readable form
-    useVaultVersion?: 2 | 3; // If not specified API will return best
+    useProtocolVersion?: 2 | 3; // If not specified API will return best
 };
 
 export class SorSwapPaths {
@@ -36,7 +36,7 @@ export class SorSwapPaths {
         inputAmountRaw
         outputAmountRaw
         pools
-        vaultVersion
+        protocolVersion
         tokens {
           address
           decimals
@@ -46,14 +46,14 @@ export class SorSwapPaths {
   }
 `;
     readonly sorSwapPathQueryWithVersion = `
-  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $useVaultVersion: Int!) {
+  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $useProtocolVersion: Int!) {
     sorGetSwapPaths(
     swapAmount: $swapAmount
     chain: $chain
     swapType: $swapType
     tokenIn: $tokenIn
     tokenOut: $tokenOut
-    useVaultVersion: $useVaultVersion
+    useProtocolVersion: $useProtocolVersion
     ) {
       tokenInAmount
       tokenOutAmount
@@ -67,7 +67,7 @@ export class SorSwapPaths {
         inputAmountRaw
         outputAmountRaw
         pools
-        vaultVersion
+        protocolVersion
         tokens {
           address
           decimals
@@ -93,11 +93,14 @@ export class SorSwapPaths {
             tokenOut: sorInput.tokenOut,
         };
         const { data } = await this.balancerApiClient.fetch({
-            query: sorInput.useVaultVersion
+            query: sorInput.useProtocolVersion
                 ? this.sorSwapPathQueryWithVersion
                 : this.sorSwapPathQuery,
-            variables: sorInput.useVaultVersion
-                ? { ...variables, useVaultVersion: sorInput.useVaultVersion }
+            variables: sorInput.useProtocolVersion
+                ? {
+                      ...variables,
+                      useProtocolVersion: sorInput.useProtocolVersion,
+                  }
                 : variables,
         });
         const poolGetPool: Path[] = data.sorGetSwapPaths.paths;

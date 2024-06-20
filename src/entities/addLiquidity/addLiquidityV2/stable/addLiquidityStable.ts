@@ -64,7 +64,7 @@ export class AddLiquidityStable implements AddLiquidityBase {
             amountsIn,
             chainId: input.chainId,
             tokenInIndex: amounts.tokenInIndex,
-            vaultVersion: poolState.vaultVersion,
+            protocolVersion: poolState.protocolVersion,
         };
     }
 

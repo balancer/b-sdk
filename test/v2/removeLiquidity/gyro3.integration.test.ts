@@ -222,7 +222,7 @@ class MockApi {
                     index: 2,
                 },
             ],
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 }

@@ -3,7 +3,7 @@
  * (Runs against a local Anvil fork)
  * Note
  * - other pool types, e.g. Weighted, can be created using the relative pool types.
- * - V3 creation is also possible by updating vaultVersion
+ * - V3 creation is also possible by updating protocolVersion
  *
  * Run with:
  * pnpm example ./examples/createAndInitPool/createAndInitPool.ts
@@ -64,7 +64,7 @@ async function runAgainstFork() {
         exemptFromYieldProtocolFeeFlag: false,
         swapFee: '0.01',
         poolOwnerAddress: userAccount,
-        vaultVersion: 2, // For V3 creation change to 3
+        protocolVersion: 2, // For V3 creation change to 3
         chainId,
     };
     const initAmounts = createPoolInput.tokens.map((t) => {
@@ -105,7 +105,7 @@ async function runAgainstFork() {
             })),
         },
         [...initAmounts.map((a) => a.address), poolAddress],
-        createPoolInput.vaultVersion,
+        createPoolInput.protocolVersion,
     );
 }
 

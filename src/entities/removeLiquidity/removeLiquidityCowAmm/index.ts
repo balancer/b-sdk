@@ -49,7 +49,7 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: undefined,
-            vaultVersion: poolState.vaultVersion,
+            protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
         };
 

@@ -279,7 +279,7 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.ComposableStable,
             tokens,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 }

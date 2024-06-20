@@ -41,7 +41,7 @@ export async function assertSwapExactIn(
         wethIsEth,
     };
 
-    if (swap.vaultVersion === 2) {
+    if (swap.protocolVersion === 2) {
         buildCallInput = {
             ...buildCallInput,
             sender: testAddress,
@@ -121,7 +121,7 @@ export async function assertSwapExactOut(
         wethIsEth,
     };
 
-    if (swap.vaultVersion === 2) {
+    if (swap.protocolVersion === 2) {
         buildCallInput = {
             ...buildCallInput,
             sender: testAddress,

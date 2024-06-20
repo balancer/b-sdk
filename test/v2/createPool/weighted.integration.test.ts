@@ -69,7 +69,7 @@ describe('Create Weighted Pool tests', () => {
             swapFee: '0.01',
             poolOwnerAddress: txInput.testAddress, // Balancer DAO Multisig
             chainId,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     });
     test('Create Weighted Pool', async () => {

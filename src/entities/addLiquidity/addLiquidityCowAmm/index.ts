@@ -51,7 +51,7 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
             amountsIn,
             tokenInIndex,
             chainId: input.chainId,
-            vaultVersion: 0,
+            protocolVersion: 0,
         };
 
         return output;

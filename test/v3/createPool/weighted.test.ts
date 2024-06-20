@@ -33,7 +33,7 @@ describe('Create Weighted Pool tests', () => {
                 },
             ],
             chainId,
-            vaultVersion: 3,
+            protocolVersion: 3,
         };
     });
 

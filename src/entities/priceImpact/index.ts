@@ -201,7 +201,7 @@ export class PriceImpact {
                             pools: [poolState.id],
                             inputAmountRaw,
                             outputAmountRaw,
-                            vaultVersion: poolState.vaultVersion,
+                            protocolVersion: poolState.protocolVersion,
                         },
                     ],
                     swapKind,
@@ -295,7 +295,7 @@ export class PriceImpact {
             };
             const poolState: PoolState = {
                 ...pool,
-                vaultVersion: 2, // TODO: refactor to allow v3 on a separate PR
+                protocolVersion: 2, // TODO: refactor to allow v3 on a separate PR
             };
 
             // calculate individual price impact

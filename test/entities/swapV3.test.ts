@@ -32,7 +32,7 @@ describe('SwapV3', () => {
             ];
 
             const path1hop: Path = {
-                vaultVersion: 3,
+                protocolVersion: 3,
                 tokens: [tokens[0], tokens[3]],
                 pools: [
                     '0xc2aa60465bffa1a88f5ba471a59ca0435c3ec5c100020000000000000000062c',
@@ -41,7 +41,7 @@ describe('SwapV3', () => {
                 outputAmountRaw: 2000000n,
             };
             const path3hops: Path = {
-                vaultVersion: 3,
+                protocolVersion: 3,
                 tokens,
                 pools: [
                     '0xc2aa60465bffa1a88f5ba471a59ca0435c3ec5c100020000000000000000062c',
