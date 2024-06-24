@@ -45,6 +45,7 @@ export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
     swapFeeManager: Address;
     poolCreator: Address;
     swapFeePercentage: bigint;
+    poolHooksContract: Address;
 };
 
 export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
