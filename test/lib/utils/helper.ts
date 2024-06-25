@@ -132,28 +132,33 @@ export const approveTokens = async (
     tokens: Address[],
     vaultVersion: 2 | 3,
 ): Promise<boolean> => {
-    const approvals = await Promise.all(
-        tokens.map((token) =>
-            approveToken(client, accountAddress, token, vaultVersion),
-        ),
-    );
+    const approvals: boolean[] = [];
+    for (let i = 0; i < tokens.length; i++) {
+        const approved = await approveToken(
+            client,
+            accountAddress,
+            tokens[i],
+            vaultVersion,
+        );
+        approvals.push(approved);
+    }
     return approvals.every((approved) => approved);
 };
 
-export const approvePermit2OnTokens = async (
+export const approveSpenderOnTokens = async (
     client: Client & PublicActions & WalletActions,
     accountAddress: Address,
     tokens: Address[],
+    spender: Address,
     amounts?: bigint[],
 ): Promise<boolean> => {
-    const chainId = await client.getChainId();
     const approvals: boolean[] = [];
     for (let i = 0; i < tokens.length; i++) {
         const approved = await approveSpenderOnToken(
             client,
             accountAddress,
             tokens[i],
-            PERMIT2[chainId],
+            spender,
             amounts ? amounts[i] : undefined,
         );
         approvals.push(approved);
@@ -366,25 +371,15 @@ export const setTokenBalances = async (
     balances: bigint[],
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
 ): Promise<void> => {
-    // Get storage slot index
-
     for (let i = 0; i < tokens.length; i++) {
-        const slotBytes = pad(toBytes(slots[i]));
-        const accountAddressBytes = pad(toBytes(accountAddress));
-
-        let index: Address;
-        if (isVyperMapping[i]) {
-            index = keccak256(concat([slotBytes, accountAddressBytes])); // slot, key
-        } else {
-            index = keccak256(concat([accountAddressBytes, slotBytes])); // key, slot
-        }
-
-        // Manipulate local balance (needs to be bytes32 string)
-        await client.setStorageAt({
-            address: tokens[i],
-            index,
-            value: toHex(balances[i], { size: 32 }),
-        });
+        await setTokenBalance(
+            client,
+            accountAddress,
+            tokens[i],
+            slots[i],
+            balances[i],
+            isVyperMapping[i],
+        );
     }
 };
 
@@ -522,38 +517,24 @@ export const forkSetupCowAmm = async (
 ): Promise<void> => {
     await client.impersonateAccount({ address: accountAddress });
 
-    let _slots: number[];
-    if (
-        slots?.every((slot) => slot !== undefined) &&
-        slots.length === tokens.length
-    ) {
-        _slots = slots;
-    } else {
-        _slots = await Promise.all(
-            tokens.map(async (token, i) =>
-                findTokenBalanceSlot(
-                    client,
-                    accountAddress,
-                    token,
-                    isVyperMapping[i],
-                ),
-            ),
-        );
-        console.log(`slots: ${_slots}`);
-    }
+    const _slots = await getSlots(
+        slots,
+        tokens,
+        client,
+        accountAddress,
+        isVyperMapping,
+    );
+
+    await setTokenBalances(
+        client,
+        accountAddress,
+        tokens,
+        _slots,
+        balances,
+        isVyperMapping,
+    );
 
     for (let i = 0; i < tokens.length; i++) {
-        // Set initial account balance for each token that will be used to add
-        // liquidity to the pool
-        await setTokenBalance(
-            client,
-            accountAddress,
-            tokens[i],
-            _slots[i],
-            balances[i],
-            isVyperMapping[i],
-        );
-
         await approveSpenderOnToken(client, accountAddress, tokens[i], pool);
     }
 };

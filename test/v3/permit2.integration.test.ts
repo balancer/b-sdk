@@ -19,6 +19,7 @@ import {
     ChainId,
     Hex,
     InputAmount,
+    PERMIT2,
     PoolState,
     PoolType,
     Slippage,
@@ -27,7 +28,7 @@ import {
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityTxInput,
-    approvePermit2OnTokens,
+    approveSpenderOnTokens,
     assertAddLiquidityUnbalanced,
     doAddLiquidityWithSignature,
     POOLS,
@@ -102,10 +103,11 @@ describe('permit and permit 2 integration tests', () => {
             ],
         );
 
-        await approvePermit2OnTokens(
+        await approveSpenderOnTokens(
             txInput.client,
             txInput.testAddress,
             tokens,
+            PERMIT2[chainId],
         );
     });
 
