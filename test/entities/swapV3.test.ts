@@ -66,6 +66,7 @@ describe('SwapV3', () => {
                             {
                                 pool: path1hop.pools[0],
                                 tokenOut: path1hop.tokens[1].address,
+                                isBuffer: false,
                             },
                         ],
                     };
@@ -76,14 +77,17 @@ describe('SwapV3', () => {
                             {
                                 pool: path3hops.pools[0],
                                 tokenOut: path3hops.tokens[1].address,
+                                isBuffer: false,
                             },
                             {
                                 pool: path3hops.pools[1],
                                 tokenOut: path3hops.tokens[2].address,
+                                isBuffer: false,
                             },
                             {
                                 pool: path3hops.pools[2],
                                 tokenOut: path3hops.tokens[3].address,
+                                isBuffer: false,
                             },
                         ],
                     };
@@ -108,6 +112,7 @@ describe('SwapV3', () => {
                             {
                                 pool: path1hop.pools[0],
                                 tokenOut: path1hop.tokens[1].address,
+                                isBuffer: false,
                             },
                         ],
                     };
@@ -118,14 +123,17 @@ describe('SwapV3', () => {
                             {
                                 pool: path3hops.pools[0],
                                 tokenOut: path3hops.tokens[1].address,
+                                isBuffer: false,
                             },
                             {
                                 pool: path3hops.pools[1],
                                 tokenOut: path3hops.tokens[2].address,
+                                isBuffer: false,
                             },
                             {
                                 pool: path3hops.pools[2],
                                 tokenOut: path3hops.tokens[3].address,
+                                isBuffer: false,
                             },
                         ],
                     };
