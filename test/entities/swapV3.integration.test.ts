@@ -40,7 +40,7 @@ import { Path } from '@/entities/swap/paths/types';
 const vaultVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
-const blockNo = 6001201n;
+const blockNo = 6178561n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
@@ -118,7 +118,7 @@ describe('SwapV3', () => {
                     WETH.decimals,
                 );
                 expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountOut.amount).to.eq(103365122n);
+                expect(expected.expectedAmountOut.amount).to.eq(123749996n);
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -133,7 +133,7 @@ describe('SwapV3', () => {
 
                 const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
-                expect(expected.expectedAmountIn.amount).to.eq(96734829986472n);
+                expect(expected.expectedAmountIn.amount).to.eq(80801616032325n);
             });
         });
         describe('swap should be executed correctly', () => {
