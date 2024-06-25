@@ -27,14 +27,14 @@ import {
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityTxInput,
+    approvePermit2OnTokens,
     assertAddLiquidityUnbalanced,
     doAddLiquidityWithSignature,
-    forkSetup,
     POOLS,
-    RemoveLiquidityTxInput,
+    setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
-import { Permit2Details, getDetails, signPermit2 } from '@/entities/permit2';
+import { PermitDetails, getDetails, signPermit2 } from '@/entities/permit2';
 
 const vaultVersion = 3;
 
@@ -45,9 +45,8 @@ const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
 
-describe('remove liquidity test', () => {
-    let prepTxInput: AddLiquidityTxInput;
-    let txInput: RemoveLiquidityTxInput;
+describe('permit and permit 2 integration tests', () => {
+    let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
     beforeAll(async () => {
         // setup mock api
@@ -65,6 +64,7 @@ describe('remove liquidity test', () => {
             .extend(walletActions);
 
         const testAddress = (await client.getAddresses())[0];
+        // const testAddress = '0x027917095a4d4964eFF7280676F405126BF9A6b5';
 
         const addLiquidityInput: AddLiquidityUnbalancedInput = {
             chainId,
@@ -79,7 +79,7 @@ describe('remove liquidity test', () => {
             }),
         };
 
-        prepTxInput = {
+        txInput = {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
@@ -88,30 +88,34 @@ describe('remove liquidity test', () => {
             addLiquidityInput,
         };
 
-        // setup by performing an add liquidity so it's possible to remove after that
-        await forkSetup(
+        const tokens = [...txInput.poolState.tokens.map((t) => t.address)];
+
+        await setTokenBalances(
             txInput.client,
             txInput.testAddress,
-            [...txInput.poolState.tokens.map((t) => t.address)],
+            tokens,
             [WETH.slot, BAL.slot] as number[],
             [
                 ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
                 ),
             ],
-            undefined,
-            vaultVersion,
-            false,
+        );
+
+        await approvePermit2OnTokens(
+            txInput.client,
+            txInput.testAddress,
+            tokens,
         );
     });
 
-    describe('add liquidity unbalanced, then remove liquidity proportional', () => {
+    describe('permit2', () => {
         let addLiquidityInput: AddLiquidityUnbalancedInput;
         let amountsIn: InputAmount[];
 
         beforeAll(() => {
-            amountsIn = prepTxInput.poolState.tokens.map((t) => ({
-                rawAmount: parseUnits('10', t.decimals),
+            amountsIn = txInput.poolState.tokens.map((t) => ({
+                rawAmount: parseUnits('0.1', t.decimals),
                 decimals: t.decimals,
                 address: t.address,
             }));
@@ -122,38 +126,37 @@ describe('remove liquidity test', () => {
                 amountsIn,
             };
         });
-        test('token inputs', async () => {
-            const details: Permit2Details[] = [];
+        test('add liquidity unbalanced', async () => {
+            const details: PermitDetails[] = [];
             for (const amountIn of amountsIn) {
                 details.push(
                     await getDetails(
-                        prepTxInput.client,
+                        txInput.client,
                         amountIn.address,
-                        prepTxInput.testAddress,
+                        txInput.testAddress,
                         BALANCER_ROUTER[chainId],
-                        amountIn.rawAmount,
                     ),
                 );
             }
             const { permit2Batch, permit2Signature } = await signPermit2(
-                prepTxInput.client,
-                prepTxInput.testAddress,
+                txInput.client,
+                txInput.testAddress,
                 BALANCER_ROUTER[chainId],
                 details,
             );
 
             const addLiquidityOutput = await doAddLiquidityWithSignature({
-                ...prepTxInput,
+                ...txInput,
                 addLiquidityInput,
                 permit2Batch,
                 permit2Signature,
             });
 
             assertAddLiquidityUnbalanced(
-                prepTxInput.poolState,
+                txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,
-                prepTxInput.slippage,
+                txInput.slippage,
                 vaultVersion,
             );
         });

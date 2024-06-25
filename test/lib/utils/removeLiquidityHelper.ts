@@ -22,7 +22,7 @@ import {
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import {
-    PermitBatchAndSignatures,
+    PermitBatchAndSignature,
     RemoveLiquidityTxInput,
     RemoveLiquidityWithSignatureTxInput,
 } from './types';
@@ -45,7 +45,7 @@ export const sdkRemoveLiquidity = async (
         wethIsEth,
         toInternalBalance,
     }: Omit<RemoveLiquidityTxInput, 'client'>,
-    permitInputs?: PermitBatchAndSignatures,
+    permitInputs?: PermitBatchAndSignature,
 ): Promise<{
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;

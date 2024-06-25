@@ -93,7 +93,7 @@ export const approveToken = async (
         );
     } else {
         // Approve Permit2 to spend account tokens
-        const approvedOnToken = await approveSpenderOnToken(
+        const permit2ApprovedOnToken = await approveSpenderOnToken(
             client,
             accountAddress,
             tokenAddress,
@@ -119,11 +119,46 @@ export const approveToken = async (
             deadline,
         );
         approved =
-            approvedOnToken &&
+            permit2ApprovedOnToken &&
             routerApprovedOnPermit2 &&
             batchRouterApprovedOnPermit2;
     }
     return approved;
+};
+
+export const approveTokens = async (
+    client: Client & PublicActions & WalletActions,
+    accountAddress: Address,
+    tokens: Address[],
+    vaultVersion: 2 | 3,
+): Promise<boolean> => {
+    const approvals = await Promise.all(
+        tokens.map((token) =>
+            approveToken(client, accountAddress, token, vaultVersion),
+        ),
+    );
+    return approvals.every((approved) => approved);
+};
+
+export const approvePermit2OnTokens = async (
+    client: Client & PublicActions & WalletActions,
+    accountAddress: Address,
+    tokens: Address[],
+    amounts?: bigint[],
+): Promise<boolean> => {
+    const chainId = await client.getChainId();
+    const approvals: boolean[] = [];
+    for (let i = 0; i < tokens.length; i++) {
+        const approved = await approveSpenderOnToken(
+            client,
+            accountAddress,
+            tokens[i],
+            PERMIT2[chainId],
+            amounts ? amounts[i] : undefined,
+        );
+        approvals.push(approved);
+    }
+    return approvals.every((approved) => approved);
 };
 
 export const approveSpenderOnToken = async (
@@ -314,6 +349,46 @@ export const setTokenBalance = async (
 };
 
 /**
+ * Set local ERC20 token balance for a given account address (used for testing)
+ *
+ * @param client client that will perform the setStorageAt call
+ * @param accountAddress Account address that will have token balance set
+ * @param tokens Token addresses which balance will be set
+ * @param slots Slot memories that stores balance - use npm package `slot20` to identify which slot to provide
+ * @param balances Balances in EVM amount
+ * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
+ */
+export const setTokenBalances = async (
+    client: Client & TestActions,
+    accountAddress: Address,
+    tokens: Address[],
+    slots: number[],
+    balances: bigint[],
+    isVyperMapping: boolean[] = Array(tokens.length).fill(false),
+): Promise<void> => {
+    // Get storage slot index
+
+    for (let i = 0; i < tokens.length; i++) {
+        const slotBytes = pad(toBytes(slots[i]));
+        const accountAddressBytes = pad(toBytes(accountAddress));
+
+        let index: Address;
+        if (isVyperMapping[i]) {
+            index = keccak256(concat([slotBytes, accountAddressBytes])); // slot, key
+        } else {
+            index = keccak256(concat([accountAddressBytes, slotBytes])); // key, slot
+        }
+
+        // Manipulate local balance (needs to be bytes32 string)
+        await client.setStorageAt({
+            address: tokens[i],
+            index,
+            value: toHex(balances[i], { size: 32 }),
+        });
+    }
+};
+
+/**
  * Find ERC20 token balance storage slot (to be used on setTokenBalance)
  *
  * @param client client that will perform contract calls
@@ -402,46 +477,27 @@ export const forkSetup = async (
     balances: bigint[],
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
     vaultVersion: 2 | 3 = 2,
-    approveTokens = true,
 ): Promise<void> => {
     await client.impersonateAccount({ address: accountAddress });
 
-    let _slots: number[];
-    if (
-        slots?.every((slot) => slot !== undefined) &&
-        slots.length === tokens.length
-    ) {
-        _slots = slots;
-    } else {
-        _slots = await Promise.all(
-            tokens.map(async (token, i) =>
-                findTokenBalanceSlot(
-                    client,
-                    accountAddress,
-                    token,
-                    isVyperMapping[i],
-                ),
-            ),
-        );
-        console.log(`slots: ${_slots}`);
-    }
+    const _slots = await getSlots(
+        slots,
+        tokens,
+        client,
+        accountAddress,
+        isVyperMapping,
+    );
 
-    for (let i = 0; i < tokens.length; i++) {
-        // Set initial account balance for each token that will be used to add
-        // liquidity to the pool
-        await setTokenBalance(
-            client,
-            accountAddress,
-            tokens[i],
-            _slots[i],
-            balances[i],
-            isVyperMapping[i],
-        );
+    await setTokenBalances(
+        client,
+        accountAddress,
+        tokens,
+        _slots,
+        balances,
+        isVyperMapping,
+    );
 
-        if (approveTokens) {
-            await approveToken(client, accountAddress, tokens[i], vaultVersion);
-        }
-    }
+    await approveTokens(client, accountAddress, tokens, vaultVersion);
 };
 
 /**
@@ -500,4 +556,29 @@ export const forkSetupCowAmm = async (
 
         await approveSpenderOnToken(client, accountAddress, tokens[i], pool);
     }
+};
+export const getSlots = async (
+    slots: number[] | undefined,
+    tokens: Address[],
+    client: Client & PublicActions & TestActions & WalletActions,
+    accountAddress: Address,
+    isVyperMapping: boolean[],
+): Promise<number[]> => {
+    let _slots: number[];
+    if (slots?.length === tokens.length) {
+        _slots = slots;
+    } else {
+        _slots = await Promise.all(
+            tokens.map(async (token, i) =>
+                findTokenBalanceSlot(
+                    client,
+                    accountAddress,
+                    token,
+                    isVyperMapping[i],
+                ),
+            ),
+        );
+        console.log(`slots: ${_slots}`);
+    }
+    return _slots;
 };

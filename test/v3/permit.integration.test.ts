@@ -32,13 +32,14 @@ import {
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityTxInput,
+    approvePermit2OnTokens,
     assertAddLiquidityUnbalanced,
     assertRemoveLiquidityProportional,
     doAddLiquidityWithSignature,
     doRemoveLiquidityWithSignature,
-    forkSetup,
     POOLS,
     RemoveLiquidityTxInput,
+    setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
 import { signPermit } from '@/entities/permit';
@@ -105,20 +106,24 @@ describe('remove liquidity test', () => {
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
 
-        // setup by performing an add liquidity so it's possible to remove after that
-        await forkSetup(
+        const tokens = [...txInput.poolState.tokens.map((t) => t.address)];
+
+        await setTokenBalances(
             txInput.client,
             txInput.testAddress,
-            [...txInput.poolState.tokens.map((t) => t.address)],
+            tokens,
             [WETH.slot, BAL.slot] as number[],
             [
                 ...txInput.poolState.tokens.map((t) =>
                     parseUnits('100', t.decimals),
                 ),
             ],
-            undefined,
-            vaultVersion,
-            false,
+        );
+
+        await approvePermit2OnTokens(
+            txInput.client,
+            txInput.testAddress,
+            tokens,
         );
     });
 
@@ -195,7 +200,6 @@ describe('remove liquidity test', () => {
                 BALANCER_ROUTER[chainId],
                 bptIn.rawAmount,
             );
-            console.log(permitApproval, permitSignature);
 
             const removeLiquidityOutput = await doRemoveLiquidityWithSignature({
                 ...txInput,
