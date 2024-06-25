@@ -22,15 +22,16 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     VAULT,
-} from '../../src';
-import { forkSetup } from '../lib/utils/helper';
-import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
+} from '@/index';
+import { Path } from '@/entities/swap/paths/types';
+
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
+import { forkSetup } from 'test/lib/utils/helper';
 import { TOKENS } from 'test/lib/utils/addresses';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
 } from 'test/lib/utils/swapHelpers';
-import { Path } from '@/entities/swap/paths/types';
 
 const vaultVersion = 2;
 const chainId = ChainId.MAINNET;

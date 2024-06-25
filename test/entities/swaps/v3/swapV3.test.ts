@@ -1,13 +1,14 @@
 // pnpm test -- swapV3.test.ts
-import { ChainId } from '../../src';
+import { ChainId } from '@/index';
 import { SwapKind } from '@/types';
-import { TOKENS } from '../lib/utils/addresses';
 import {
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
     SwapV3,
 } from '@/entities/swap/swaps/v3';
 import { Path, TokenApi } from '@/entities/swap/paths/types';
+
+import { TOKENS } from 'test/lib/utils/addresses';
 
 describe('SwapV3', () => {
     describe('getSwaps', () => {
