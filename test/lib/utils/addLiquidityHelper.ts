@@ -255,7 +255,7 @@ export function assertAddLiquidityUnbalanced(
     addLiquidityInput: AddLiquidityUnbalancedInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    vaultVersion: 0 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -323,7 +323,7 @@ export function assertAddLiquiditySingleToken(
     addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    vaultVersion: 0 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
