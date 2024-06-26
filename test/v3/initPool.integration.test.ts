@@ -70,9 +70,9 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
                 },
             ],
             swapFeePercentage: parseEther('0.01'),
+            poolHooksContract: zeroAddress,
             pauseManager: signerAddress,
             swapFeeManager: signerAddress,
-            poolCreator: signerAddress,
             chainId,
             vaultVersion: 3,
         };
