@@ -43,7 +43,6 @@ export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
     vaultVersion: 3;
     pauseManager: Address;
     swapFeeManager: Address;
-    poolCreator: Address;
     swapFeePercentage: bigint;
     poolHooksContract: Address;
 };

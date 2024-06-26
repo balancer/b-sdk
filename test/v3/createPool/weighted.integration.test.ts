@@ -68,7 +68,6 @@ describe('Create Weighted Pool tests', () => {
             poolHooksContract: zeroAddress,
             pauseManager: signerAddress,
             swapFeeManager: signerAddress,
-            poolCreator: signerAddress,
             chainId,
             vaultVersion: 3,
         };
