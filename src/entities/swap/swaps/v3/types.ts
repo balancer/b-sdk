@@ -17,6 +17,7 @@ export type SingleTokenExactOut = SingleStep & {
 export type SwapPathStep = {
     pool: Address;
     tokenOut: Address;
+    isBuffer: boolean;
 };
 
 type SwapPathBase = {
