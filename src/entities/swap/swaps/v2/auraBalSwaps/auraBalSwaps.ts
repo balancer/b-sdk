@@ -5,9 +5,10 @@ import { getLimitAmount } from '../../../limits';
 import { Slippage } from '@/entities/slippage';
 import { Token } from '@/entities/token';
 import { BALANCER_RELAYER, CHAINS } from '@/utils';
-import { validateInputs } from './validateInputs';
+import { isSupportedToken, validateInputs } from './validateInputs';
 import { queryJoinSwap, buildJoinSwapCall } from './joinSwap';
 import { buildSwapExitCall, querySwapExit } from './swapExit';
+import { auraBalToken } from './constants';
 
 export type AuraBalSwapQueryInput = {
     inputAmount: TokenAmount;
@@ -49,6 +50,29 @@ export class AuraBalSwap {
             transport: http(rpcUrl),
             chain: CHAINS[1],
         });
+    }
+
+    public isAuraBalSwap(
+        tokenIn: Token,
+        tokenOut: Token,
+    ): { isAuraBalSwap: boolean; kind: AuraBalSwapKind } {
+        if (
+            (auraBalToken.isSameAddress(tokenIn.address) ||
+                auraBalToken.isSameAddress(tokenOut.address)) &&
+            (isSupportedToken(tokenIn) || isSupportedToken(tokenOut))
+        ) {
+            return {
+                isAuraBalSwap: true,
+                kind: auraBalToken.isSameAddress(tokenIn.address)
+                    ? AuraBalSwapKind.FromAuraBal
+                    : AuraBalSwapKind.ToAuraBal,
+            };
+        }
+
+        return {
+            isAuraBalSwap: false,
+            kind: AuraBalSwapKind.FromAuraBal,
+        };
     }
 
     public async query(

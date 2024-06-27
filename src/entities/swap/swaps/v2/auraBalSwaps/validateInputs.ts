@@ -39,6 +39,6 @@ export function validateInputs(
         );
 }
 
-function isSupportedToken(token: Token): boolean {
+export function isSupportedToken(token: Token): boolean {
     return supportedTokens.some((t) => token.isSameAddress(t as Address));
 }

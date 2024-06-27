@@ -73,7 +73,6 @@ async function testToAuraBal(fromToken: Token, slot: number, rpcUrl: string) {
         kind: AuraBalSwapKind.ToAuraBal,
     });
 
-    // build add liquidity call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
 
     const relayerApprovalSignature = await Relayer.signRelayerApproval(
