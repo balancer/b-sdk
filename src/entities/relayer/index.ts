@@ -82,4 +82,12 @@ export class Relayer {
 
         return encodedSignature;
     };
+
+    static encodeApproveVault(tokenAddress: Address, maxAmount: bigint): Hex {
+        return encodeFunctionData({
+            abi: batchRelayerLibraryAbi,
+            functionName: 'approveVault',
+            args: [tokenAddress, maxAmount],
+        });
+    }
 }
