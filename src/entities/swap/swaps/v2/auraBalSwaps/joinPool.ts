@@ -13,7 +13,7 @@ import { balWethAssets, balWethId } from './constants';
 
 export function getJoinData(
     token: Token,
-    address: Address,
+    sender: Address,
     inputAmount: bigint,
     value: bigint,
 ): { joinPoolData: Hex; joinPoolOpRef: bigint } {
@@ -45,7 +45,7 @@ export function getJoinData(
         args: [
             balWethId,
             poolKind,
-            address, // Join tokens come from the user
+            sender, // Join tokens come from the user
             BALANCER_RELAYER[1], // BPT goes to the Relayer (so we can approve for swap)
             joinPoolRequest,
             value,

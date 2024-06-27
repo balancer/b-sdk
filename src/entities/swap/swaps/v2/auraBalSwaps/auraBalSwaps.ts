@@ -7,6 +7,7 @@ import { Token } from '@/entities/token';
 import { BALANCER_RELAYER, CHAINS } from '@/utils';
 import { validateInputs } from './validateInputs';
 import { queryJoinSwap, buildJoinSwapCall } from './joinSwap';
+import { buildSwapExitCall, querySwapExit } from './swapExit';
 
 export type AuraBalSwapQueryInput = {
     inputAmount: TokenAmount;
@@ -59,7 +60,7 @@ export class AuraBalSwap {
         if (kind === AuraBalSwapKind.ToAuraBal)
             return queryJoinSwap({ ...input, client: this.client });
 
-        throw new Error('FromAuraBal Not Supported');
+        return querySwapExit({ ...input, client: this.client });
     }
 
     /**
@@ -75,22 +76,30 @@ export class AuraBalSwap {
             input.queryOutput.expectedAmountOut,
         );
 
+        let callData: Hex;
         if (input.queryOutput.kind === AuraBalSwapKind.ToAuraBal) {
-            const callData = buildJoinSwapCall(
+            callData = buildJoinSwapCall(
                 input.user,
                 input.queryOutput.inputAmount.amount,
                 limitAmount.amount,
                 input.queryOutput.inputAmount.token,
                 input.relayerApprovalSignature,
             );
-            return {
-                to: BALANCER_RELAYER[1],
-                callData,
-                value: 0n,
-                minAmountOut: limitAmount,
-            };
+        } else {
+            callData = buildSwapExitCall(
+                input.user,
+                input.queryOutput.inputAmount.amount,
+                limitAmount.amount,
+                input.queryOutput.expectedAmountOut.token,
+                input.relayerApprovalSignature,
+            );
         }
 
-        throw new Error('FromAuraBal Not Supported');
+        return {
+            to: BALANCER_RELAYER[1],
+            callData,
+            value: 0n,
+            minAmountOut: limitAmount,
+        };
     }
 }

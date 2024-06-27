@@ -2,21 +2,24 @@ import { Address, encodeFunctionData, Hex } from 'viem';
 import { MAX_UINT256 } from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
-import { auraBalStableId, balWethAddress, auraBAL } from './constants';
+import { auraBalStableId } from './constants';
 
 export function getSwapData(
-    joinPoolOpRef: bigint,
+    amount: bigint,
+    assetIn: Address,
+    assetOut: Address,
     sender: Address,
     recipient: Address,
     limit: bigint,
     value: bigint,
+    isTempRef: boolean,
 ): { swapData: Hex; swapOpRef: bigint } {
     const singleSwap = {
         poolId: auraBalStableId as Hex,
         kind: 0,
-        assetIn: balWethAddress,
-        assetOut: auraBAL as Address,
-        amount: joinPoolOpRef,
+        assetIn,
+        assetOut,
+        amount, // Note - this can be an opRef
         userData: '0x' as Hex,
     };
     const funds = {
@@ -25,7 +28,9 @@ export function getSwapData(
         fromInternalBalance: false,
         toInternalBalance: false,
     };
-    const swapOpRef = Relayer.toChainedReference(2n);
+
+    // When its not a temp ref it can be read more than once
+    const swapOpRef = Relayer.toChainedReference(2n, isTempRef);
 
     const swapData = encodeFunctionData({
         abi: batchRelayerLibraryAbi,

@@ -11,47 +11,47 @@ import { BALANCER_RELAYER } from '@/utils';
 import { balancerRelayerAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
-import { getJoinData } from './joinPool';
 import { getSwapData } from './swap';
 import { AuraBalSwapQueryInput, AuraBalSwapQueryOutput } from './auraBalSwaps';
 import { Token } from '@/entities/token';
+import { getExitData } from './exitPool';
 
-// token[join]8020BPT[swap]auraBAL
-export async function queryJoinSwap(
+// auraBal[swap]8020Bpt[exit]token
+export async function querySwapExit(
     input: AuraBalSwapQueryInput & { client },
 ): Promise<AuraBalSwapQueryOutput> {
-    const { swapToken: joinToken, inputAmount, kind, client } = input;
+    const { swapToken: exitToken, inputAmount, kind, client } = input;
     const value = 0n;
 
-    // join BAL-WETH 80/20 Pool with joinToken and get 8020BPT in return
-    const { joinPoolData, joinPoolOpRef } = getJoinData(
-        joinToken,
-        zeroAddress, // Note zeroAddress used for query but not for build
-        inputAmount.amount,
-        value,
-    );
-
-    // swap 8020BPT>aurABL through auraBal/8020BPT stable pool
-    // For query we set limit to 0
+    // swap aurABL>8020BPT through auraBal/8020BPT stable pool
     const { swapData, swapOpRef } = getSwapData(
-        joinPoolOpRef,
-        balWethAddress,
+        inputAmount.amount,
         auraBAL as Address,
-        zeroAddress,
+        balWethAddress,
+        zeroAddress, // Note zeroAddress used for query but not for build
         zeroAddress,
         0n,
         value,
         true,
     );
 
+    // exit BAL-WETH 80/20 Pool to exitToken
+    // For query we set limit to 0
+    const { exitPoolData, exitPoolOpRef } = getExitData(
+        exitToken,
+        zeroAddress, // Note zeroAddress used for query but not for build
+        swapOpRef,
+        0n,
+    );
+
     // peek call is used to read final result
-    const peekData = Relayer.encodePeekChainedReferenceValue(swapOpRef);
+    const peekData = Relayer.encodePeekChainedReferenceValue(exitPoolOpRef);
 
     // vaultActionsQueryMulticall allows us to query even if user has no balance/allowance
     const encodedMulticall = encodeFunctionData({
         abi: balancerRelayerAbi,
         functionName: 'vaultActionsQueryMulticall',
-        args: [[joinPoolData, swapData, peekData]],
+        args: [[swapData, exitPoolData, peekData]],
     });
 
     const { data } = await client.call({
@@ -69,48 +69,49 @@ export async function queryJoinSwap(
         [{ type: 'uint256' }],
         result[result.length - 1],
     )[0];
+
     return {
-        inputAmount: TokenAmount.fromRawAmount(joinToken, inputAmount.amount),
-        expectedAmountOut: TokenAmount.fromRawAmount(auraBalToken, peekedValue),
+        inputAmount: TokenAmount.fromRawAmount(
+            auraBalToken,
+            inputAmount.amount,
+        ),
+        expectedAmountOut: TokenAmount.fromRawAmount(exitToken, peekedValue),
         kind,
     };
 }
 
-export function buildJoinSwapCall(
-    userAddress: Address,
+export function buildSwapExitCall(
+    user: Address,
     inputAmount: bigint,
-    swapLimit: bigint,
-    joinToken: Token,
+    exitLimit: bigint,
+    exitToken: Token,
     relayerApprovalSignature?: Hex,
 ): Hex {
     const value = 0n;
 
-    // join BAL-WETH 80/20 Pool with joinToken and get 8020BPT in return (to the RELAYER)
-    const { joinPoolData, joinPoolOpRef } = getJoinData(
-        joinToken,
-        userAddress,
+    // swap aurABL>8020BPT through auraBal/8020BPT stable pool
+    // swap sends from the user to the RELAYER.
+    // swap limit as 0 because swap is first step (unsafe otherwise)
+    // opRef must be non-temp so approval and exit can use it
+    const { swapData, swapOpRef } = getSwapData(
         inputAmount,
-        value,
-    );
-
-    // Older pools don't have pre-approval so need to add this as a step, approves Vault to spend on RELAYERS behalf
-    const approval = Relayer.encodeApproveVault(balWethAddress, joinPoolOpRef);
-
-    // swap 8020BPT>aurABL through auraBal/8020BPT stable pool
-    // swap sends from the RELAYER to the user
-    // swap is last action so uses limit defined with user slippage
-    const { swapData } = getSwapData(
-        joinPoolOpRef,
-        balWethAddress,
         auraBAL as Address,
+        balWethAddress,
+        user,
         BALANCER_RELAYER[1],
-        userAddress,
-        swapLimit,
+        0n,
         value,
-        true,
+        false,
     );
 
-    const encodedCalls = [joinPoolData, approval, swapData];
+    // Older pools don't have pre-approval so need to add this as a step
+    const approval = Relayer.encodeApproveVault(balWethAddress, swapOpRef);
+
+    // exit BAL-WETH 80/20 Pool to exitToken
+    // exit is last action so uses limit defined with user slippage
+    const { exitPoolData } = getExitData(exitToken, user, swapOpRef, exitLimit);
+
+    const encodedCalls = [swapData, approval, exitPoolData];
 
     // prepend relayer approval if provided
     if (relayerApprovalSignature !== undefined) {
