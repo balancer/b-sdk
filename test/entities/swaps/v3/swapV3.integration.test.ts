@@ -41,7 +41,7 @@ import {
 const vaultVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
-const blockNo = 6001201n;
+const blockNo = 6188394n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
@@ -119,7 +119,7 @@ describe('SwapV3', () => {
                     WETH.decimals,
                 );
                 expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountOut.amount).to.eq(103365122n);
+                expect(expected.expectedAmountOut.amount).to.eq(123749996n);
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -134,7 +134,7 @@ describe('SwapV3', () => {
 
                 const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
-                expect(expected.expectedAmountIn.amount).to.eq(96734829986472n);
+                expect(expected.expectedAmountIn.amount).to.eq(80801616032325n);
             });
         });
         describe('swap should be executed correctly', () => {
@@ -323,9 +323,9 @@ describe('SwapV3', () => {
                     USDC.decimals,
                 );
                 expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                expect(expected.pathAmounts).to.deep.eq([90214n, 770252n]);
+                expect(expected.pathAmounts).to.deep.eq([151734n, 779073n]);
                 expect(expected.expectedAmountOut.token).to.deep.eq(usdcToken);
-                expect(expected.expectedAmountOut.amount).to.eq(860466n);
+                expect(expected.expectedAmountOut.amount).to.eq(930807n);
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -345,12 +345,12 @@ describe('SwapV3', () => {
                 );
                 expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                 expect(expected.pathAmounts).to.deep.eq([
-                    2286265697052729n,
-                    831382813409707n,
+                    1827358022063780n,
+                    841746490376824n,
                 ]);
                 expect(expected.expectedAmountIn.token).to.deep.eq(wethToken);
                 expect(expected.expectedAmountIn.amount).to.eq(
-                    3117648510462436n,
+                    2669104512440604n,
                 );
             });
         });

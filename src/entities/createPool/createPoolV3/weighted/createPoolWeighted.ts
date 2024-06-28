@@ -1,5 +1,5 @@
 import { getRandomBytes32 } from '@/entities/utils/getRandomBytes32';
-import { encodeFunctionData } from 'viem';
+import { encodeFunctionData, zeroAddress } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolV3WeightedInput,
@@ -49,7 +49,7 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
             swapFeeManager: input.swapFeeManager,
-            poolCreator: input.poolCreator,
+            poolCreator: zeroAddress,
         };
 
         const args = [
@@ -59,6 +59,7 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
             normalizedWeights,
             roleAccounts,
             input.swapFeePercentage,
+            input.poolHooksContract,
             input.salt || getRandomBytes32(),
         ] as const;
 
