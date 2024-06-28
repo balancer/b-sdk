@@ -43,6 +43,7 @@ export async function querySwapExit(
         zeroAddress, // Note zeroAddress used for query but not for build
         swapOpRef,
         0n,
+        false, // always use weth for query
     );
 
     // peek call is used to read final result
@@ -86,6 +87,7 @@ export function buildSwapExitCall(
     inputAmount: bigint,
     exitLimit: bigint,
     exitToken: Token,
+    wethIsEth: boolean,
     relayerApprovalSignature?: Hex,
 ): Hex {
     const value = 0n;
@@ -110,7 +112,13 @@ export function buildSwapExitCall(
 
     // exit BAL-WETH 80/20 Pool to exitToken
     // exit is last action so uses limit defined with user slippage
-    const { exitPoolData } = getExitData(exitToken, user, swapOpRef, exitLimit);
+    const { exitPoolData } = getExitData(
+        exitToken,
+        user,
+        swapOpRef,
+        exitLimit,
+        wethIsEth,
+    );
 
     const encodedCalls = [swapData, approval, exitPoolData];
 

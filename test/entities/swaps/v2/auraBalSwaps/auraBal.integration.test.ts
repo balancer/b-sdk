@@ -50,6 +50,10 @@ describe('auraBalSwaps:Integration tests', () => {
         test('to weth', async () => {
             await testAuraBalSwap(auraBalToken, weth, 0, rpcUrl);
         });
+
+        test('to weth, wethIsEth=true', async () => {
+            await testAuraBalSwap(auraBalToken, weth, 0, rpcUrl, true);
+        });
     });
 });
 
@@ -110,14 +114,23 @@ async function testAuraBalSwap(
             call.callData,
             call.value,
         );
-    if (!wethIsEth) {
+
+    expect(transactionReceipt.status).to.equal('success');
+
+    if (wethIsEth && tokenIn.isUnderlyingEqual(NATIVE_ASSETS[1])) {
+        expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[2]);
+        expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
+        expect(call.value).to.eq(queryOutput.inputAmount.amount);
+        expect(balanceDeltas[0]).to.eq(0n);
+    } else if (wethIsEth && tokenOut.isUnderlyingEqual(NATIVE_ASSETS[1])) {
+        expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[0]);
+        expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[2]);
+        expect(call.value).to.eq(0n);
+        expect(balanceDeltas[1]).to.eq(0n);
+    } else {
+        expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[0]);
+        expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
         expect(call.value).to.eq(0n);
         expect(balanceDeltas[2]).to.eq(0n);
     }
-    if (wethIsEth && tokenIn.isUnderlyingEqual(NATIVE_ASSETS[1])) {
-        expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[2]);
-    } else expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[0]);
-
-    expect(transactionReceipt.status).to.equal('success');
-    expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
 }

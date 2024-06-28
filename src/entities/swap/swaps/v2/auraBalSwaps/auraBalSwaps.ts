@@ -99,6 +99,7 @@ export class AuraBalSwap {
                 input.queryOutput.inputAmount.amount,
                 limitAmount.amount,
                 input.queryOutput.expectedAmountOut.token,
+                input.wethIsEth,
                 input.relayerApprovalSignature,
             );
         }

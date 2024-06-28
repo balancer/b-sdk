@@ -10,12 +10,14 @@ import { BALANCER_RELAYER } from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { balWethAssets, balWethId } from './constants';
+import { replaceWrapped } from './replaceWrapped';
 
 export function getExitData(
     token: Token,
     userAddress: Address,
     swapOpRef: bigint,
     limit: bigint,
+    wethIsEth: boolean,
 ): { exitPoolData: Hex; exitPoolOpRef: bigint } {
     const tokenOutIndex = balWethAssets.findIndex((t) =>
         token.isSameAddress(t),
@@ -35,7 +37,7 @@ export function getExitData(
     );
 
     const exitPoolRequest = {
-        assets: balWethAssets,
+        assets: wethIsEth ? replaceWrapped(balWethAssets, 1) : balWethAssets,
         minAmountsOut,
         userData,
         toInternalBalance: false,

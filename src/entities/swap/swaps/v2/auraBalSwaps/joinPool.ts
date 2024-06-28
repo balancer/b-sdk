@@ -6,10 +6,11 @@ import {
     Hex,
 } from 'viem';
 import { Token } from '@/entities/token';
-import { BALANCER_RELAYER, NATIVE_ASSETS, ZERO_ADDRESS } from '@/utils';
+import { BALANCER_RELAYER, NATIVE_ASSETS } from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { balWethAssets, balWethId } from './constants';
+import { replaceWrapped } from './replaceWrapped';
 
 export function getJoinData(
     token: Token,
@@ -65,15 +66,4 @@ export function getJoinData(
         joinPoolOpRef,
         value,
     };
-}
-
-function replaceWrapped(tokens: Address[], chainId: number): Address[] {
-    return tokens.map((token) => {
-        if (
-            NATIVE_ASSETS[chainId].wrapped.toLowerCase() === token.toLowerCase()
-        ) {
-            return ZERO_ADDRESS;
-        }
-        return token;
-    });
 }
