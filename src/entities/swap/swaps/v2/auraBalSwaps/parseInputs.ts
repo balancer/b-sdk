@@ -1,6 +1,6 @@
 import { Address } from 'viem';
 import { Token } from '@/entities/token';
-import { AuraBalSwapKind, SwapQueryInput } from './auraBalSwaps';
+import { AuraBalSwapKind, SwapQueryInput } from './types';
 import { supportedTokens, auraBalToken } from './constants';
 import { SwapKind } from '@/types';
 import { TokenAmount } from '@/entities/tokenAmount';

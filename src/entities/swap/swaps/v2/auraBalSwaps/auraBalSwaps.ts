@@ -3,24 +3,15 @@ import { SwapKind, Hex } from '../../../../../types';
 import { Address, PublicClient, createPublicClient, http } from 'viem';
 import { getLimitAmount } from '../../../limits';
 import { Slippage } from '@/entities/slippage';
-import { Token } from '@/entities/token';
 import { BALANCER_RELAYER, CHAINS } from '@/utils';
 import { isAuraBalSwap, parseInputs } from './parseInputs';
 import { queryJoinSwap, buildJoinSwapCall } from './joinSwap';
 import { buildSwapExitCall, querySwapExit } from './swapExit';
-
-export type SwapQueryInput = {
-    tokenIn: Token;
-    tokenOut: Token;
-    kind: SwapKind;
-    swapAmount: TokenAmount;
-};
-
-export type AuraBalSwapQueryOutput = {
-    inputAmount: TokenAmount;
-    expectedAmountOut: TokenAmount;
-    kind: AuraBalSwapKind;
-};
+import {
+    AuraBalSwapQueryOutput,
+    SwapQueryInput,
+    AuraBalSwapKind,
+} from './types';
 
 type AuraBalSwapBuildCallInput = {
     slippage: Slippage;
@@ -36,11 +27,6 @@ type AuraBalSwapBuildOutput = {
     value: bigint;
     minAmountOut: TokenAmount;
 };
-
-export enum AuraBalSwapKind {
-    FromAuraBal = 0,
-    ToAuraBal = 1,
-}
 
 export class AuraBalSwap {
     public client: PublicClient;
