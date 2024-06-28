@@ -13,8 +13,9 @@ import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
 import { getJoinData } from './joinPool';
 import { getSwapData } from './swap';
-import { AuraBalSwapQueryInput, AuraBalSwapQueryOutput } from './auraBalSwaps';
+import { AuraBalSwapQueryOutput } from './auraBalSwaps';
 import { Token } from '@/entities/token';
+import { AuraBalSwapQueryInput } from './parseInputs';
 
 // token[join]8020BPT[swap]auraBAL
 export async function queryJoinSwap(

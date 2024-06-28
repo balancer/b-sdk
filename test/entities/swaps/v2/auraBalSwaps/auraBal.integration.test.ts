@@ -1,10 +1,7 @@
 // pnpm test -- auraBal.integration.test.ts
 import { createTestClient, http, publicActions, walletActions } from 'viem';
 import { Relayer, Slippage, Token, TokenAmount } from '@/entities';
-import {
-    AuraBalSwap,
-    AuraBalSwapKind,
-} from '@/entities/swap/swaps/v2/auraBalSwaps/auraBalSwaps';
+import { AuraBalSwap } from '@/entities/swap/swaps/v2/auraBalSwaps/auraBalSwaps';
 import { BALANCER_RELAYER, CHAINS, NATIVE_ASSETS } from '@/utils';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -14,6 +11,7 @@ import {
     auraBalToken,
     BAL,
 } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
+import { SwapKind } from '@/types';
 
 const chainId = 1;
 const bal = new Token(1, BAL, 18);
@@ -58,19 +56,20 @@ async function testToAuraBal(fromToken: Token, slot: number, rpcUrl: string) {
 
     const testAddress = (await client.getAddresses())[0];
     const auraBalSwap = new AuraBalSwap(rpcUrl);
-    const inputAmount = TokenAmount.fromHumanAmount(fromToken, '1');
+    const swapAmount = TokenAmount.fromHumanAmount(fromToken, '1');
     await forkSetup(
         client,
         testAddress,
         [fromToken.address],
         [slot],
-        [inputAmount.amount],
+        [swapAmount.amount],
         // '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56' has slot 0
     );
     const output = await auraBalSwap.query({
-        inputAmount,
-        swapToken: fromToken,
-        kind: AuraBalSwapKind.ToAuraBal,
+        swapAmount,
+        tokenIn: fromToken,
+        tokenOut: auraBalToken,
+        kind: SwapKind.GivenIn,
     });
 
     const slippage = Slippage.fromPercentage('1'); // 1%
@@ -119,18 +118,19 @@ async function testFromAuraBal(toToken: Token, rpcUrl: string) {
 
     const testAddress = (await client.getAddresses())[0];
     const auraBalSwap = new AuraBalSwap(rpcUrl);
-    const inputAmount = TokenAmount.fromHumanAmount(auraBalToken, '1');
+    const swapAmount = TokenAmount.fromHumanAmount(auraBalToken, '1');
     await forkSetup(
         client,
         testAddress,
         [auraBalToken.address],
         [0],
-        [inputAmount.amount],
+        [swapAmount.amount],
     );
     const queryOutput = await auraBalSwap.query({
-        inputAmount,
-        swapToken: toToken,
-        kind: AuraBalSwapKind.FromAuraBal,
+        swapAmount,
+        tokenIn: auraBalToken,
+        tokenOut: toToken,
+        kind: SwapKind.GivenIn,
     });
 
     // build add liquidity call with expected minBpOut based on slippage

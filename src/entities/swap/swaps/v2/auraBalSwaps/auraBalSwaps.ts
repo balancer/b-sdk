@@ -5,15 +5,15 @@ import { getLimitAmount } from '../../../limits';
 import { Slippage } from '@/entities/slippage';
 import { Token } from '@/entities/token';
 import { BALANCER_RELAYER, CHAINS } from '@/utils';
-import { isSupportedToken, validateInputs } from './validateInputs';
+import { isAuraBalSwap, parseInputs } from './parseInputs';
 import { queryJoinSwap, buildJoinSwapCall } from './joinSwap';
 import { buildSwapExitCall, querySwapExit } from './swapExit';
-import { auraBalToken } from './constants';
 
-export type AuraBalSwapQueryInput = {
-    inputAmount: TokenAmount;
-    swapToken: Token;
-    kind: AuraBalSwapKind;
+export type SwapQueryInput = {
+    tokenIn: Token;
+    tokenOut: Token;
+    kind: SwapKind;
+    swapAmount: TokenAmount;
 };
 
 export type AuraBalSwapQueryOutput = {
@@ -52,39 +52,17 @@ export class AuraBalSwap {
         });
     }
 
-    public isAuraBalSwap(
-        tokenIn: Token,
-        tokenOut: Token,
-    ): { isAuraBalSwap: boolean; kind: AuraBalSwapKind } {
-        if (
-            (auraBalToken.isSameAddress(tokenIn.address) ||
-                auraBalToken.isSameAddress(tokenOut.address)) &&
-            (isSupportedToken(tokenIn) || isSupportedToken(tokenOut))
-        ) {
-            return {
-                isAuraBalSwap: true,
-                kind: auraBalToken.isSameAddress(tokenIn.address)
-                    ? AuraBalSwapKind.FromAuraBal
-                    : AuraBalSwapKind.ToAuraBal,
-            };
-        }
-
-        return {
-            isAuraBalSwap: false,
-            kind: AuraBalSwapKind.FromAuraBal,
-        };
+    public isAuraBalSwap(input: SwapQueryInput) {
+        return isAuraBalSwap(input);
     }
 
-    public async query(
-        input: AuraBalSwapQueryInput,
-    ): Promise<AuraBalSwapQueryOutput> {
-        const { inputAmount, swapToken, kind } = input;
-        validateInputs(inputAmount, swapToken, kind);
+    public async query(input: SwapQueryInput): Promise<AuraBalSwapQueryOutput> {
+        const inputs = parseInputs(input);
 
-        if (kind === AuraBalSwapKind.ToAuraBal)
-            return queryJoinSwap({ ...input, client: this.client });
+        if (inputs.kind === AuraBalSwapKind.ToAuraBal)
+            return queryJoinSwap({ ...inputs, client: this.client });
 
-        return querySwapExit({ ...input, client: this.client });
+        return querySwapExit({ ...inputs, client: this.client });
     }
 
     /**

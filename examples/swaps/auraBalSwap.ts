@@ -16,6 +16,7 @@ import {
     AuraBalSwap,
     Token,
     TokenAmount,
+    SwapKind,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import { makeForkTx } from 'examples/lib/makeForkTx';
@@ -32,16 +33,18 @@ const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
         '0xba100000625a3754423978a60c9317c58a424e3D', // BAL
         18,
     );
-    const inputAmount = TokenAmount.fromHumanAmount(tokenIn, '1');
-
     const tokenOut = auraBalToken;
+    const swapAmount = TokenAmount.fromHumanAmount(tokenIn, '1');
+    const kind = SwapKind.GivenIn;
 
     // Check if tokenIn>tokenOut is an AuraBalSwap
     // Only supports auraBal <> BAL/WETH/ETH on mainnet and ExactIn only
-    const { isAuraBalSwap, kind } = auraBalSwap.isAuraBalSwap(
+    const isAuraBalSwap = auraBalSwap.isAuraBalSwap({
         tokenIn,
         tokenOut,
-    );
+        swapAmount,
+        kind,
+    });
 
     if (!isAuraBalSwap) {
         console.log('Non-AuraBalSwap: Normal Swap service can be used.');
@@ -50,8 +53,9 @@ const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
 
     // Querys onchain to get result
     const queryOutput = await auraBalSwap.query({
-        inputAmount,
-        swapToken: tokenIn,
+        tokenIn,
+        tokenOut,
+        swapAmount,
         kind,
     });
 
@@ -84,7 +88,11 @@ const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
         `Min Amount Out: ${call.minAmountOut.amount} based off slippage of ${slippage.percentage}%`,
     );
 
-    return { call, inputAmount, outputAmount: queryOutput.expectedAmountOut };
+    return {
+        call,
+        inputAmount: swapAmount,
+        outputAmount: queryOutput.expectedAmountOut,
+    };
 };
 
 async function runAgainstFork() {

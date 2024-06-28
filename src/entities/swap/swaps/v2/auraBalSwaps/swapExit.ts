@@ -12,9 +12,10 @@ import { balancerRelayerAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
 import { getSwapData } from './swap';
-import { AuraBalSwapQueryInput, AuraBalSwapQueryOutput } from './auraBalSwaps';
+import { AuraBalSwapQueryOutput } from './auraBalSwaps';
 import { Token } from '@/entities/token';
 import { getExitData } from './exitPool';
+import { AuraBalSwapQueryInput } from './parseInputs';
 
 // auraBal[swap]8020Bpt[exit]token
 export async function querySwapExit(
