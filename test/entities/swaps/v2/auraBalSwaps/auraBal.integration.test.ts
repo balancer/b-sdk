@@ -7,7 +7,6 @@ import { BALANCER_RELAYER, CHAINS, NATIVE_ASSETS } from '@/utils';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
 import {
-    auraBAL,
     auraBalToken,
     BAL,
 } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
@@ -26,26 +25,31 @@ describe('auraBalSwaps:Integration tests', () => {
 
     describe('to auraBal', () => {
         test('from bal', async () => {
-            await testToAuraBal(bal, 1, rpcUrl);
+            await testAuraBalSwap(bal, auraBalToken, 1, rpcUrl);
         });
 
         test('from weth', async () => {
-            await testToAuraBal(weth, 3, rpcUrl);
+            await testAuraBalSwap(weth, auraBalToken, 3, rpcUrl);
         });
     });
 
     describe('from auraBal', () => {
         test('to bal', async () => {
-            await testFromAuraBal(bal, rpcUrl);
+            await testAuraBalSwap(auraBalToken, bal, 0, rpcUrl);
         });
 
         test('to weth', async () => {
-            await testFromAuraBal(weth, rpcUrl);
+            await testAuraBalSwap(auraBalToken, weth, 0, rpcUrl);
         });
     });
 });
 
-async function testToAuraBal(fromToken: Token, slot: number, rpcUrl: string) {
+async function testAuraBalSwap(
+    tokenIn: Token,
+    tokenOut: Token,
+    tokenInSlot: number,
+    rpcUrl: string,
+) {
     const client = createTestClient({
         mode: 'anvil',
         chain: CHAINS[chainId],
@@ -56,84 +60,22 @@ async function testToAuraBal(fromToken: Token, slot: number, rpcUrl: string) {
 
     const testAddress = (await client.getAddresses())[0];
     const auraBalSwap = new AuraBalSwap(rpcUrl);
-    const swapAmount = TokenAmount.fromHumanAmount(fromToken, '1');
+    const swapAmount = TokenAmount.fromHumanAmount(tokenIn, '1');
     await forkSetup(
         client,
         testAddress,
-        [fromToken.address],
-        [slot],
+        [tokenIn.address],
+        [tokenInSlot],
         [swapAmount.amount],
         // '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56' has slot 0
     );
-    const output = await auraBalSwap.query({
-        swapAmount,
-        tokenIn: fromToken,
-        tokenOut: auraBalToken,
-        kind: SwapKind.GivenIn,
-    });
-
-    const slippage = Slippage.fromPercentage('1'); // 1%
-
-    const relayerApprovalSignature = await Relayer.signRelayerApproval(
-        BALANCER_RELAYER[chainId],
-        testAddress,
-        client,
-    );
-
-    const call = auraBalSwap.buildCall({
-        queryOutput: output,
-        slippage,
-        wethIsEth: false,
-        user: testAddress,
-        relayerApprovalSignature,
-    });
-
-    // let tokensIn = queryOutput.amountsIn.map((a) => a.token);
-    // if (wethIsEth) {
-    //     tokensIn = replaceWrapped(tokensIn, chainId);
-    // }
-
-    const { transactionReceipt, balanceDeltas } =
-        await sendTransactionGetBalances(
-            [fromToken.address, auraBAL],
-            client,
-            testAddress,
-            call.to,
-            call.callData,
-            call.value,
-        );
-    expect(transactionReceipt.status).to.equal('success');
-    expect(output.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
-    expect(output.inputAmount.amount).to.equal(balanceDeltas[0]);
-}
-
-async function testFromAuraBal(toToken: Token, rpcUrl: string) {
-    const client = createTestClient({
-        mode: 'anvil',
-        chain: CHAINS[chainId],
-        transport: http(rpcUrl),
-    })
-        .extend(publicActions)
-        .extend(walletActions);
-
-    const testAddress = (await client.getAddresses())[0];
-    const auraBalSwap = new AuraBalSwap(rpcUrl);
-    const swapAmount = TokenAmount.fromHumanAmount(auraBalToken, '1');
-    await forkSetup(
-        client,
-        testAddress,
-        [auraBalToken.address],
-        [0],
-        [swapAmount.amount],
-    );
     const queryOutput = await auraBalSwap.query({
         swapAmount,
-        tokenIn: auraBalToken,
-        tokenOut: toToken,
+        tokenIn,
+        tokenOut,
         kind: SwapKind.GivenIn,
     });
 
-    // build add liquidity call with expected minBpOut based on slippage
     const slippage = Slippage.fromPercentage('1'); // 1%
 
     const relayerApprovalSignature = await Relayer.signRelayerApproval(
@@ -150,17 +92,21 @@ async function testFromAuraBal(toToken: Token, rpcUrl: string) {
         relayerApprovalSignature,
     });
 
+    // let tokensIn = queryOutput.amountsIn.map((a) => a.token);
+    // if (wethIsEth) {
+    //     tokensIn = replaceWrapped(tokensIn, chainId);
+    // }
+
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
-            [auraBAL, toToken.address],
+            [tokenIn.address, tokenOut.address],
             client,
             testAddress,
             call.to,
             call.callData,
             call.value,
         );
-
     expect(transactionReceipt.status).to.equal('success');
-    expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
     expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[0]);
+    expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
 }
