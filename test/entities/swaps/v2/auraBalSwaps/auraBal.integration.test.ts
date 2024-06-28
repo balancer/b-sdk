@@ -1,5 +1,11 @@
 // pnpm test -- auraBal.integration.test.ts
-import { createTestClient, http, publicActions, walletActions } from 'viem';
+import {
+    createTestClient,
+    http,
+    publicActions,
+    walletActions,
+    zeroAddress,
+} from 'viem';
 import { Relayer, Slippage, Token, TokenAmount } from '@/entities';
 import { AuraBalSwap } from '@/entities/swap/swaps/v2/auraBalSwaps/auraBalSwaps';
 import { BALANCER_RELAYER, CHAINS, NATIVE_ASSETS } from '@/utils';
@@ -31,6 +37,9 @@ describe('auraBalSwaps:Integration tests', () => {
         test('from weth', async () => {
             await testAuraBalSwap(weth, auraBalToken, 3, rpcUrl);
         });
+        test('from weth, wethIsEth=true', async () => {
+            await testAuraBalSwap(weth, auraBalToken, 3, rpcUrl, true);
+        });
     });
 
     describe('from auraBal', () => {
@@ -49,6 +58,7 @@ async function testAuraBalSwap(
     tokenOut: Token,
     tokenInSlot: number,
     rpcUrl: string,
+    wethIsEth = false,
 ) {
     const client = createTestClient({
         mode: 'anvil',
@@ -67,7 +77,6 @@ async function testAuraBalSwap(
         [tokenIn.address],
         [tokenInSlot],
         [swapAmount.amount],
-        // '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56' has slot 0
     );
     const queryOutput = await auraBalSwap.query({
         swapAmount,
@@ -87,26 +96,28 @@ async function testAuraBalSwap(
     const call = auraBalSwap.buildCall({
         queryOutput,
         slippage,
-        wethIsEth: false,
+        wethIsEth,
         user: testAddress,
         relayerApprovalSignature,
     });
 
-    // let tokensIn = queryOutput.amountsIn.map((a) => a.token);
-    // if (wethIsEth) {
-    //     tokensIn = replaceWrapped(tokensIn, chainId);
-    // }
-
     const { transactionReceipt, balanceDeltas } =
         await sendTransactionGetBalances(
-            [tokenIn.address, tokenOut.address],
+            [tokenIn.address, tokenOut.address, zeroAddress],
             client,
             testAddress,
             call.to,
             call.callData,
             call.value,
         );
+    if (!wethIsEth) {
+        expect(call.value).to.eq(0n);
+        expect(balanceDeltas[2]).to.eq(0n);
+    }
+    if (wethIsEth && tokenIn.isUnderlyingEqual(NATIVE_ASSETS[1])) {
+        expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[2]);
+    } else expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[0]);
+
     expect(transactionReceipt.status).to.equal('success');
-    expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[0]);
     expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
 }

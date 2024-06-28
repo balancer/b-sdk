@@ -29,7 +29,7 @@ export async function queryJoinSwap(
         joinToken,
         zeroAddress, // Note zeroAddress used for query but not for build
         inputAmount.amount,
-        value,
+        false, // for query we always use WETH
     );
 
     // swap 8020BPT>aurABL through auraBal/8020BPT stable pool
@@ -82,22 +82,21 @@ export function buildJoinSwapCall(
     inputAmount: bigint,
     swapLimit: bigint,
     joinToken: Token,
+    wethIsEth: boolean,
     relayerApprovalSignature?: Hex,
-): Hex {
-    const value = 0n;
-
+): { callData: Hex; value: bigint } {
     // join BAL-WETH 80/20 Pool with joinToken and get 8020BPT in return (to the RELAYER)
-    const { joinPoolData, joinPoolOpRef } = getJoinData(
+    const { joinPoolData, joinPoolOpRef, value } = getJoinData(
         joinToken,
         userAddress,
         inputAmount,
-        value,
+        wethIsEth,
     );
 
     // Older pools don't have pre-approval so need to add this as a step, approves Vault to spend on RELAYERS behalf
     const approval = Relayer.encodeApproveVault(balWethAddress, joinPoolOpRef);
 
-    // swap 8020BPT>aurABL through auraBal/8020BPT stable pool
+    // swap 8020BPT>auraBAL through auraBal/8020BPT stable pool
     // swap sends from the RELAYER to the user
     // swap is last action so uses limit defined with user slippage
     const { swapData } = getSwapData(
@@ -107,7 +106,7 @@ export function buildJoinSwapCall(
         BALANCER_RELAYER[1],
         userAddress,
         swapLimit,
-        value,
+        0n, // always 0 value
         true,
     );
 
@@ -130,5 +129,5 @@ export function buildJoinSwapCall(
         args: [encodedCalls],
     });
 
-    return encodedMulticall;
+    return { callData: encodedMulticall, value };
 }

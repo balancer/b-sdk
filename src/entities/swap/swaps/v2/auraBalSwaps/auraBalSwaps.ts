@@ -79,14 +79,20 @@ export class AuraBalSwap {
         );
 
         let callData: Hex;
+        let value = 0n;
         if (input.queryOutput.kind === AuraBalSwapKind.ToAuraBal) {
-            callData = buildJoinSwapCall(
+            if (input.wethIsEth) value = input.queryOutput.inputAmount.amount;
+
+            const buildOutput = buildJoinSwapCall(
                 input.user,
                 input.queryOutput.inputAmount.amount,
                 limitAmount.amount,
                 input.queryOutput.inputAmount.token,
+                input.wethIsEth,
                 input.relayerApprovalSignature,
             );
+            callData = buildOutput.callData;
+            value = buildOutput.value;
         } else {
             callData = buildSwapExitCall(
                 input.user,
@@ -100,7 +106,7 @@ export class AuraBalSwap {
         return {
             to: BALANCER_RELAYER[1],
             callData,
-            value: 0n,
+            value,
             minAmountOut: limitAmount,
         };
     }
