@@ -9,6 +9,12 @@ export type SwapQueryInput = {
     swapAmount: TokenAmount;
 };
 
+export interface AuraBalSwapQueryInput {
+    kind: AuraBalSwapKind;
+    swapToken: Token;
+    inputAmount: TokenAmount;
+}
+
 export type AuraBalSwapQueryOutput = {
     inputAmount: TokenAmount;
     expectedAmountOut: TokenAmount;

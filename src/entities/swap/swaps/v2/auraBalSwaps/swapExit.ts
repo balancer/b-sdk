@@ -7,15 +7,14 @@ import {
     Hex,
 } from 'viem';
 import { TokenAmount } from '../../../../tokenAmount';
-import { BALANCER_RELAYER } from '@/utils';
+import { BALANCER_RELAYER, ChainId } from '@/utils';
 import { balancerRelayerAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
-import { getSwapData } from './swap';
-import { AuraBalSwapQueryOutput } from './auraBalSwaps';
+import { encodeSwapData } from './swap';
+import { AuraBalSwapQueryOutput, AuraBalSwapQueryInput } from './types';
 import { Token } from '@/entities/token';
-import { getExitData } from './exitPool';
-import { AuraBalSwapQueryInput } from './parseInputs';
+import { encodeExitData } from './exitPool';
 
 // auraBal[swap]8020Bpt[exit]token
 export async function querySwapExit(
@@ -25,7 +24,7 @@ export async function querySwapExit(
     const value = 0n;
 
     // swap aurABL>8020BPT through auraBal/8020BPT stable pool
-    const { swapData, swapOpRef } = getSwapData(
+    const { swapData, swapOpRef } = encodeSwapData(
         inputAmount.amount,
         auraBAL as Address,
         balWethAddress,
@@ -38,7 +37,7 @@ export async function querySwapExit(
 
     // exit BAL-WETH 80/20 Pool to exitToken
     // For query we set limit to 0
-    const { exitPoolData, exitPoolOpRef } = getExitData(
+    const { exitPoolData, exitPoolOpRef } = encodeExitData(
         exitToken,
         zeroAddress, // Note zeroAddress used for query but not for build
         swapOpRef,
@@ -57,7 +56,7 @@ export async function querySwapExit(
     });
 
     const { data } = await client.call({
-        to: BALANCER_RELAYER[1],
+        to: BALANCER_RELAYER[ChainId.MAINNET],
         data: encodedMulticall,
     });
 
@@ -96,12 +95,12 @@ export function buildSwapExitCall(
     // swap sends from the user to the RELAYER.
     // swap limit as 0 because swap is first step (unsafe otherwise)
     // opRef must be non-temp so approval and exit can use it
-    const { swapData, swapOpRef } = getSwapData(
+    const { swapData, swapOpRef } = encodeSwapData(
         inputAmount,
         auraBAL as Address,
         balWethAddress,
         user,
-        BALANCER_RELAYER[1],
+        BALANCER_RELAYER[ChainId.MAINNET],
         0n,
         value,
         false,
@@ -112,7 +111,7 @@ export function buildSwapExitCall(
 
     // exit BAL-WETH 80/20 Pool to exitToken
     // exit is last action so uses limit defined with user slippage
-    const { exitPoolData } = getExitData(
+    const { exitPoolData } = encodeExitData(
         exitToken,
         user,
         swapOpRef,
@@ -126,7 +125,7 @@ export function buildSwapExitCall(
     if (relayerApprovalSignature !== undefined) {
         encodedCalls.unshift(
             Relayer.encodeSetRelayerApproval(
-                BALANCER_RELAYER[1],
+                BALANCER_RELAYER[ChainId.MAINNET],
                 true,
                 relayerApprovalSignature,
             ),

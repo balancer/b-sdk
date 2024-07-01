@@ -3,7 +3,7 @@ import { SwapKind, Hex } from '../../../../../types';
 import { Address, PublicClient, createPublicClient, http } from 'viem';
 import { getLimitAmount } from '../../../limits';
 import { Slippage } from '@/entities/slippage';
-import { BALANCER_RELAYER, CHAINS } from '@/utils';
+import { BALANCER_RELAYER, CHAINS, ChainId } from '@/utils';
 import { isAuraBalSwap, parseInputs } from './parseInputs';
 import { queryJoinSwap, buildJoinSwapCall } from './joinSwap';
 import { buildSwapExitCall, querySwapExit } from './swapExit';
@@ -34,7 +34,7 @@ export class AuraBalSwap {
     constructor(rpcUrl: string) {
         this.client = createPublicClient({
             transport: http(rpcUrl),
-            chain: CHAINS[1],
+            chain: CHAINS[ChainId.MAINNET],
         });
     }
 
@@ -67,8 +67,6 @@ export class AuraBalSwap {
         let callData: Hex;
         let value = 0n;
         if (input.queryOutput.kind === AuraBalSwapKind.ToAuraBal) {
-            if (input.wethIsEth) value = input.queryOutput.inputAmount.amount;
-
             const buildOutput = buildJoinSwapCall(
                 input.user,
                 input.queryOutput.inputAmount.amount,
@@ -91,7 +89,7 @@ export class AuraBalSwap {
         }
 
         return {
-            to: BALANCER_RELAYER[1],
+            to: BALANCER_RELAYER[ChainId.MAINNET],
             callData,
             value,
             minAmountOut: limitAmount,

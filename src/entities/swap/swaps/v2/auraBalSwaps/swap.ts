@@ -4,7 +4,7 @@ import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalStableId } from './constants';
 
-export function getSwapData(
+export function encodeSwapData(
     amount: bigint,
     assetIn: Address,
     assetOut: Address,

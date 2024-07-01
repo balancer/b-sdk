@@ -6,13 +6,13 @@ import {
     Hex,
 } from 'viem';
 import { Token } from '@/entities/token';
-import { BALANCER_RELAYER, NATIVE_ASSETS } from '@/utils';
+import { BALANCER_RELAYER, ChainId, NATIVE_ASSETS } from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { balWethAssets, balWethId } from './constants';
 import { replaceWrapped } from './replaceWrapped';
 
-export function getJoinData(
+export function encodeJoinData(
     token: Token,
     sender: Address,
     inputAmount: bigint,
@@ -23,7 +23,7 @@ export function getJoinData(
         throw new Error(`Join token not in BAL-WETH pool ${token.address}`);
 
     const useNativeAsset =
-        wethIsEth && token.isUnderlyingEqual(NATIVE_ASSETS[1]);
+        wethIsEth && token.isUnderlyingEqual(NATIVE_ASSETS[ChainId.MAINNET]);
 
     const maxAmountsIn = Array(balWethAssets.length).fill(0n);
     maxAmountsIn[tokenInIndex] = inputAmount;
@@ -38,7 +38,7 @@ export function getJoinData(
     );
     const joinPoolRequest = {
         assets: useNativeAsset
-            ? replaceWrapped(balWethAssets, 1)
+            ? replaceWrapped(balWethAssets, ChainId.MAINNET)
             : balWethAssets,
         maxAmountsIn,
         userData,
@@ -54,7 +54,7 @@ export function getJoinData(
             balWethId,
             poolKind,
             sender, // Join tokens come from the user
-            BALANCER_RELAYER[1], // BPT goes to the Relayer (so we can approve for swap)
+            BALANCER_RELAYER[ChainId.MAINNET], // BPT goes to the Relayer (so we can approve for swap)
             joinPoolRequest,
             value,
             joinPoolOpRef,

@@ -6,21 +6,29 @@ import {
     walletActions,
     zeroAddress,
 } from 'viem';
-import { Relayer, Slippage, Token, TokenAmount } from '@/entities';
-import { AuraBalSwap } from '@/entities/swap/swaps/v2/auraBalSwaps/auraBalSwaps';
-import { BALANCER_RELAYER, CHAINS, NATIVE_ASSETS } from '@/utils';
+import {
+    Relayer,
+    Slippage,
+    Token,
+    TokenAmount,
+    AuraBalSwap,
+    BALANCER_RELAYER,
+    CHAINS,
+    NATIVE_ASSETS,
+    SwapKind,
+    ChainId,
+} from '@/index';
 
-import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
-import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
 import {
     auraBalToken,
     BAL,
 } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
-import { SwapKind } from '@/types';
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
+import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
 
-const chainId = 1;
-const bal = new Token(1, BAL, 18);
-const weth = new Token(1, NATIVE_ASSETS[1].wrapped, 18);
+const chainId = ChainId.MAINNET;
+const bal = new Token(chainId, BAL, 18);
+const weth = new Token(chainId, NATIVE_ASSETS[chainId].wrapped, 18);
 
 describe('auraBalSwaps:Integration tests', () => {
     let rpcUrl: string;
@@ -117,12 +125,18 @@ async function testAuraBalSwap(
 
     expect(transactionReceipt.status).to.equal('success');
 
-    if (wethIsEth && tokenIn.isUnderlyingEqual(NATIVE_ASSETS[1])) {
+    if (
+        wethIsEth &&
+        tokenIn.isUnderlyingEqual(NATIVE_ASSETS[ChainId.MAINNET])
+    ) {
         expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[2]);
         expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
         expect(call.value).to.eq(queryOutput.inputAmount.amount);
         expect(balanceDeltas[0]).to.eq(0n);
-    } else if (wethIsEth && tokenOut.isUnderlyingEqual(NATIVE_ASSETS[1])) {
+    } else if (
+        wethIsEth &&
+        tokenOut.isUnderlyingEqual(NATIVE_ASSETS[ChainId.MAINNET])
+    ) {
         expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[0]);
         expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[2]);
         expect(call.value).to.eq(0n);

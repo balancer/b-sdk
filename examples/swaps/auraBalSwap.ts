@@ -18,10 +18,10 @@ import {
     TokenAmount,
     SwapKind,
 } from '../../src';
+
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import { makeForkTx } from 'examples/lib/makeForkTx';
 import { getSlot } from 'examples/lib/getSlot';
-import { auraBalToken } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
 import { exit } from 'process';
 
 const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
@@ -29,11 +29,17 @@ const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
     const auraBalSwap = new AuraBalSwap(rpcUrl as string);
 
     const tokenIn = new Token(
-        1,
+        ChainId.MAINNET,
         '0xba100000625a3754423978a60c9317c58a424e3D', // BAL
         18,
     );
-    const tokenOut = auraBalToken;
+
+    const tokenOut = new Token(
+        ChainId.MAINNET,
+        '0x616e8BfA43F920657B3497DBf40D6b1A02D4608d', // auraBal
+        18,
+    );
+
     const swapAmount = TokenAmount.fromHumanAmount(tokenIn, '1');
     const kind = SwapKind.GivenIn;
 

@@ -7,15 +7,14 @@ import {
     Hex,
 } from 'viem';
 import { TokenAmount } from '../../../../tokenAmount';
-import { BALANCER_RELAYER } from '@/utils';
+import { BALANCER_RELAYER, ChainId } from '@/utils';
 import { balancerRelayerAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
-import { getJoinData } from './joinPool';
-import { getSwapData } from './swap';
-import { AuraBalSwapQueryOutput } from './auraBalSwaps';
+import { encodeJoinData } from './joinPool';
+import { encodeSwapData } from './swap';
+import { AuraBalSwapQueryOutput, AuraBalSwapQueryInput } from './types';
 import { Token } from '@/entities/token';
-import { AuraBalSwapQueryInput } from './parseInputs';
 
 // token[join]8020BPT[swap]auraBAL
 export async function queryJoinSwap(
@@ -25,7 +24,7 @@ export async function queryJoinSwap(
     const value = 0n;
 
     // join BAL-WETH 80/20 Pool with joinToken and get 8020BPT in return
-    const { joinPoolData, joinPoolOpRef } = getJoinData(
+    const { joinPoolData, joinPoolOpRef } = encodeJoinData(
         joinToken,
         zeroAddress, // Note zeroAddress used for query but not for build
         inputAmount.amount,
@@ -34,7 +33,7 @@ export async function queryJoinSwap(
 
     // swap 8020BPT>aurABL through auraBal/8020BPT stable pool
     // For query we set limit to 0
-    const { swapData, swapOpRef } = getSwapData(
+    const { swapData, swapOpRef } = encodeSwapData(
         joinPoolOpRef,
         balWethAddress,
         auraBAL as Address,
@@ -56,7 +55,7 @@ export async function queryJoinSwap(
     });
 
     const { data } = await client.call({
-        to: BALANCER_RELAYER[1],
+        to: BALANCER_RELAYER[ChainId.MAINNET],
         data: encodedMulticall,
     });
 
@@ -86,7 +85,7 @@ export function buildJoinSwapCall(
     relayerApprovalSignature?: Hex,
 ): { callData: Hex; value: bigint } {
     // join BAL-WETH 80/20 Pool with joinToken and get 8020BPT in return (to the RELAYER)
-    const { joinPoolData, joinPoolOpRef, value } = getJoinData(
+    const { joinPoolData, joinPoolOpRef, value } = encodeJoinData(
         joinToken,
         userAddress,
         inputAmount,
@@ -99,11 +98,11 @@ export function buildJoinSwapCall(
     // swap 8020BPT>auraBAL through auraBal/8020BPT stable pool
     // swap sends from the RELAYER to the user
     // swap is last action so uses limit defined with user slippage
-    const { swapData } = getSwapData(
+    const { swapData } = encodeSwapData(
         joinPoolOpRef,
         balWethAddress,
         auraBAL as Address,
-        BALANCER_RELAYER[1],
+        BALANCER_RELAYER[ChainId.MAINNET],
         userAddress,
         swapLimit,
         0n, // always 0 value
@@ -116,7 +115,7 @@ export function buildJoinSwapCall(
     if (relayerApprovalSignature !== undefined) {
         encodedCalls.unshift(
             Relayer.encodeSetRelayerApproval(
-                BALANCER_RELAYER[1],
+                BALANCER_RELAYER[ChainId.MAINNET],
                 true,
                 relayerApprovalSignature,
             ),

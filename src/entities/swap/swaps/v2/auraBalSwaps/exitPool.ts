@@ -6,13 +6,13 @@ import {
     Hex,
 } from 'viem';
 import { Token } from '@/entities/token';
-import { BALANCER_RELAYER } from '@/utils';
+import { BALANCER_RELAYER, ChainId } from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { balWethAssets, balWethId } from './constants';
 import { replaceWrapped } from './replaceWrapped';
 
-export function getExitData(
+export function encodeExitData(
     token: Token,
     userAddress: Address,
     swapOpRef: bigint,
@@ -37,7 +37,9 @@ export function getExitData(
     );
 
     const exitPoolRequest = {
-        assets: wethIsEth ? replaceWrapped(balWethAssets, 1) : balWethAssets,
+        assets: wethIsEth
+            ? replaceWrapped(balWethAssets, ChainId.MAINNET)
+            : balWethAssets,
         minAmountsOut,
         userData,
         toInternalBalance: false,

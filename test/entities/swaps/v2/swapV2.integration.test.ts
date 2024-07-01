@@ -22,8 +22,8 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     VAULT,
+    Path,
 } from '@/index';
-import { Path } from '@/entities/swap/paths/types';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup } from 'test/lib/utils/helper';
