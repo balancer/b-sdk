@@ -28,9 +28,17 @@ import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportio
 import { encodeRemoveLiquiditySingleTokenExactOut } from './encodeRemoveLiquiditySingleTokenExactOut';
 import { encodeRemoveLiquiditySingleTokenExactIn } from './encodeRemoveLiquiditySingleTokenExactIn';
 import { encodeRemoveLiquidityProportional } from './encodeRemoveLiquidityProportional';
-import { createPublicClient, formatEther, formatUnits, http } from 'viem';
+import {
+    createPublicClient,
+    encodeFunctionData,
+    formatEther,
+    formatUnits,
+    http,
+} from 'viem';
 import { getPoolTokensV2, getTotalSupply } from '@/utils/tokens';
 import { HumanAmount } from '@/data';
+import { balancerRouterAbi } from '@/abi';
+import { PermitApproval } from '@/entities/permit';
 
 export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
@@ -212,6 +220,33 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
             minAmountsOut: input.amountsOut.map((a, i) =>
                 TokenAmount.fromRawAmount(a.token, amounts.minAmountsOut[i]),
             ),
+        };
+    }
+
+    public buildCallWithPermit(
+        input: RemoveLiquidityBaseBuildCallInput,
+        permitBatch: PermitApproval,
+        permitSignature: Hex,
+    ): RemoveLiquidityBuildCallOutput {
+        const buildCallOutput = this.buildCall(input);
+
+        const args = [
+            [permitBatch],
+            [permitSignature],
+            { details: [], spender: '0x', sigDeadline: 0n },
+            '0x',
+            [buildCallOutput.callData],
+        ] as const;
+
+        const callData = encodeFunctionData({
+            abi: balancerRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
+        });
+
+        return {
+            ...buildCallOutput,
+            callData,
         };
     }
 }

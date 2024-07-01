@@ -212,9 +212,9 @@ export const permit2Abi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
+            { internalType: 'address', name: '', type: 'address' }, // account
+            { internalType: 'address', name: '', type: 'address' }, // token
+            { internalType: 'address', name: '', type: 'address' }, // spender
         ],
         name: 'allowance',
         outputs: [
