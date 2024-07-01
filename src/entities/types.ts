@@ -7,7 +7,7 @@ export type PoolState = {
     address: Address;
     type: string;
     tokens: MinimalToken[];
-    protocolVersion: 0 | 2 | 3;
+    protocolVersion: 1 | 2 | 3;
 };
 
 export type PoolStateWithBalances = {
@@ -16,7 +16,7 @@ export type PoolStateWithBalances = {
     type: string;
     tokens: PoolTokenWithBalance[];
     totalShares: HumanAmount;
-    protocolVersion: 0 | 2 | 3;
+    protocolVersion: 1 | 2 | 3;
 };
 
 export type AddLiquidityAmounts = {

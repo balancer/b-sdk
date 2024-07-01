@@ -25,7 +25,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     ): Promise<RemoveLiquidityQueryOutput> {
         this.inputValidator.validateRemoveLiquidity(input, poolState);
         switch (poolState.protocolVersion) {
-            case 0: {
+            case 1: {
                 const removeLiquidity = new RemoveLiquidityCowAmm();
                 return removeLiquidity.query(
                     input as RemoveLiquidityProportionalInput,
@@ -55,7 +55,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     ): Promise<RemoveLiquidityQueryOutput> {
         this.inputValidator.validateRemoveLiquidityRecovery(input, poolState);
         switch (poolState.protocolVersion) {
-            case 0: {
+            case 1: {
                 const removeLiquidity = new RemoveLiquidityCowAmm();
                 return removeLiquidity.queryRemoveLiquidityRecovery();
             }
@@ -81,7 +81,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     ): RemoveLiquidityBuildCallOutput {
         const isV2Input = 'sender' in input;
         switch (input.protocolVersion) {
-            case 0: {
+            case 1: {
                 const removeLiquidity = new RemoveLiquidityCowAmm();
                 return removeLiquidity.buildCall(input);
             }

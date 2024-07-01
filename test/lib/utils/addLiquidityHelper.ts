@@ -310,7 +310,7 @@ export function assertAddLiquidityProportional(
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
-    protocolVersion: 0 | 2 | 3 = 2,
+    protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -429,7 +429,7 @@ function assertAddLiquidityBuildCallOutput(
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput,
     isExactIn: boolean,
     slippage: Slippage,
-    protocolVersion: 0 | 2 | 3 = 2,
+    protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
@@ -449,7 +449,7 @@ function assertAddLiquidityBuildCallOutput(
 
     let to: Address;
     switch (protocolVersion) {
-        case 0:
+        case 1:
             to = addLiquidityQueryOutput.poolId;
             break;
         case 2:

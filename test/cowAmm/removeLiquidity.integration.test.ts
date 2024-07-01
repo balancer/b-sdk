@@ -42,7 +42,7 @@ import {
     TOKENS,
 } from 'test/lib/utils';
 
-const protocolVersion = 0;
+const protocolVersion = 1;
 
 const chainId = ChainId.SEPOLIA;
 const poolId = POOLS[chainId].MOCK_COW_AMM_POOL.address;

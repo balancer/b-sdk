@@ -63,7 +63,7 @@ export type RemoveLiquidityBaseQueryOutput = {
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
     tokenOutIndex?: number;
-    protocolVersion: 0 | 2 | 3;
+    protocolVersion: 1 | 2 | 3;
     chainId: number;
 };
 

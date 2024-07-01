@@ -386,7 +386,7 @@ export function assertRemoveLiquidityProportional(
     removeLiquidityInput: RemoveLiquidityProportionalInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    protocolVersion: 0 | 2 | 3 = 2,
+    protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const {
@@ -507,7 +507,7 @@ export function assertRemoveLiquidityBuildCallOutput(
     RemoveLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput,
     isExactIn: boolean,
     slippage: Slippage,
-    protocolVersion: 0 | 2 | 3 = 2,
+    protocolVersion: 1 | 2 | 3 = 2,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
     // slippage.applyTo(a.amount, -1)
@@ -530,7 +530,7 @@ export function assertRemoveLiquidityBuildCallOutput(
 
     let to: Address;
     switch (protocolVersion) {
-        case 0:
+        case 1:
             to = removeLiquidityQueryOutput.poolId;
             break;
         case 2:
