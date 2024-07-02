@@ -1,13 +1,14 @@
 // pnpm test -- swapV3.test.ts
-import { ChainId } from '../../src';
+import { ChainId } from '@/index';
 import { SwapKind } from '@/types';
-import { TOKENS } from '../lib/utils/addresses';
 import {
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
     SwapV3,
 } from '@/entities/swap/swaps/v3';
 import { Path, TokenApi } from '@/entities/swap/paths/types';
+
+import { TOKENS } from 'test/lib/utils/addresses';
 
 describe('SwapV3', () => {
     describe('getSwaps', () => {
@@ -66,6 +67,7 @@ describe('SwapV3', () => {
                             {
                                 pool: path1hop.pools[0],
                                 tokenOut: path1hop.tokens[1].address,
+                                isBuffer: false,
                             },
                         ],
                     };
@@ -76,14 +78,17 @@ describe('SwapV3', () => {
                             {
                                 pool: path3hops.pools[0],
                                 tokenOut: path3hops.tokens[1].address,
+                                isBuffer: false,
                             },
                             {
                                 pool: path3hops.pools[1],
                                 tokenOut: path3hops.tokens[2].address,
+                                isBuffer: false,
                             },
                             {
                                 pool: path3hops.pools[2],
                                 tokenOut: path3hops.tokens[3].address,
+                                isBuffer: false,
                             },
                         ],
                     };
@@ -108,6 +113,7 @@ describe('SwapV3', () => {
                             {
                                 pool: path1hop.pools[0],
                                 tokenOut: path1hop.tokens[1].address,
+                                isBuffer: false,
                             },
                         ],
                     };
@@ -118,14 +124,17 @@ describe('SwapV3', () => {
                             {
                                 pool: path3hops.pools[0],
                                 tokenOut: path3hops.tokens[1].address,
+                                isBuffer: false,
                             },
                             {
                                 pool: path3hops.pools[1],
                                 tokenOut: path3hops.tokens[2].address,
+                                isBuffer: false,
                             },
                             {
                                 pool: path3hops.pools[2],
                                 tokenOut: path3hops.tokens[3].address,
+                                isBuffer: false,
                             },
                         ],
                     };

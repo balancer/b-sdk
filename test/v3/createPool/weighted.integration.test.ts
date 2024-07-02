@@ -65,9 +65,9 @@ describe('Create Weighted Pool tests', () => {
                 },
             ],
             swapFeePercentage: parseEther('0.01'),
+            poolHooksContract: zeroAddress,
             pauseManager: signerAddress,
             swapFeeManager: signerAddress,
-            poolCreator: signerAddress,
             chainId,
             protocolVersion: 3,
         };

@@ -1,5 +1,17 @@
 # @balancer/sdk
 
+## 0.18.0
+
+### Minor Changes
+
+- 2e0ddce: Updates for 5th testnet release of v3 contracts on Sepolia
+
+## 0.17.0
+
+### Minor Changes
+
+- 73dc1bc: Add support for add/remove liquidity on CoWAMM pools
+
 ## 0.16.0
 
 ### Minor Changes

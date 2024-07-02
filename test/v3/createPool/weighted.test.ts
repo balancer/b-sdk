@@ -32,6 +32,10 @@ describe('Create Weighted Pool tests', () => {
                     tokenType: TokenType.STANDARD,
                 },
             ],
+            swapFeePercentage: parseEther('0.01'),
+            poolHooksContract: zeroAddress,
+            pauseManager: zeroAddress,
+            swapFeeManager: zeroAddress,
             chainId,
             protocolVersion: 3,
         };
