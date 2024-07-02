@@ -23,19 +23,20 @@ import {
     ExactOutQueryOutput,
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
-} from '../../src';
-import { forkSetup } from '../lib/utils/helper';
+} from '@/index';
+import { Path } from '@/entities/swap/paths/types';
+
+import { forkSetup } from 'test/lib/utils/helper';
 import {
     ANVIL_NETWORKS,
     startFork,
     stopAnvilFork,
-} from '../anvil/anvil-global-setup';
+} from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
 } from 'test/lib/utils/swapHelpers';
-import { Path } from '@/entities/swap/paths/types';
 
 const vaultVersion = 3;
 const chainId = ChainId.SEPOLIA;

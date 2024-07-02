@@ -1,5 +1,5 @@
 // pnpm test -- swap.test.ts
-import { ChainId, Slippage } from '../../src';
+import { ChainId, Slippage } from '@/index';
 import { SwapKind } from '@/types';
 import {
     Swap,
@@ -8,8 +8,9 @@ import {
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
 } from '@/entities';
-import { TOKENS } from '../lib/utils/addresses';
 import { Path, TokenApi } from '@/entities/swap/paths/types';
+
+import { TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.MAINNET;
 const wethIsEth = false;
