@@ -1,4 +1,4 @@
-import { Client, PublicActions, WalletActions, hexToNumber, slice } from 'viem';
+import { Client, PublicActions, WalletActions } from 'viem';
 
 import { weightedPoolAbi_V3 } from '@/abi';
 import { Hex } from '@/types';
@@ -81,43 +81,23 @@ export const signPermit = async (
     return { permitApproval, permitSignature };
 };
 
-/** decode signature */
-export const decodeSignature = (signature: Hex): PermitSignature => {
-    const [r, s, v] = [
-        slice(signature, 0, 32),
-        slice(signature, 32, 64),
-        slice(signature, 64, 65),
-    ];
-    return { r, s, v: hexToNumber(v) };
-};
-
 const getDomain = async (
     client: Client & WalletActions & PublicActions,
     token: Hex,
 ) => {
-    const [
-        fields,
-        name,
-        version,
-        chainId,
-        verifyingContract,
-        salt,
-        extensions,
-    ] = await client.readContract({
-        abi: weightedPoolAbi_V3,
-        address: token,
-        functionName: 'eip712Domain',
-        args: [],
-    });
+    const [, name, version, chainId, verifyingContract, , ,] =
+        await client.readContract({
+            abi: weightedPoolAbi_V3,
+            address: token,
+            functionName: 'eip712Domain',
+            args: [],
+        });
 
     const domain = {
-        fields,
         name,
         version,
         chainId: Number(chainId),
         verifyingContract,
-        salt,
-        extensions,
     };
 
     return domain;

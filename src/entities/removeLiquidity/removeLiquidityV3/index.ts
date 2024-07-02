@@ -34,6 +34,7 @@ import {
     formatEther,
     formatUnits,
     http,
+    zeroAddress,
 } from 'viem';
 import { getPoolTokensV2, getTotalSupply } from '@/utils/tokens';
 import { HumanAmount } from '@/data';
@@ -233,7 +234,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         const args = [
             [permitBatch],
             [permitSignature],
-            { details: [], spender: '0x', sigDeadline: 0n },
+            { details: [], spender: zeroAddress, sigDeadline: 0n },
             '0x',
             [buildCallOutput.callData],
         ] as const;

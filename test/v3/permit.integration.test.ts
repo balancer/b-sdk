@@ -6,6 +6,7 @@ import {
     createTestClient,
     http,
     parseEther,
+    parseSignature,
     parseUnits,
     publicActions,
     walletActions,
@@ -15,19 +16,22 @@ import {
     AddLiquidity,
     AddLiquidityKind,
     AddLiquidityUnbalancedInput,
-    CHAINS,
+    BALANCER_ROUTER,
     ChainId,
+    CHAINS,
+    getDetails,
     Hex,
-    InputAmount,
+    PERMIT2,
+    PermitDetails,
     PoolState,
     PoolType,
-    Slippage,
     RemoveLiquidity,
     RemoveLiquidityKind,
-    RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
-    BALANCER_ROUTER,
-    PERMIT2,
+    signPermit,
+    signPermit2,
+    Slippage,
+    weightedPoolAbi_V3,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -43,8 +47,6 @@ import {
     setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
-import { signPermit } from '@/entities/permit';
-import { PermitDetails, getDetails, signPermit2 } from '@/entities/permit2';
 
 const vaultVersion = 3;
 
@@ -56,10 +58,13 @@ const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
 
 // behavior changed on testnet deployment 5 - skipping tests for now - get back to it after SDK is updated
-describe.skip('remove liquidity test', () => {
-    let prepTxInput: AddLiquidityTxInput;
-    let txInput: RemoveLiquidityTxInput;
+describe('permit integration test', () => {
     let poolState: PoolState;
+    let addLiquidityTxInput: AddLiquidityTxInput;
+    let removeLiquidityTxInput: RemoveLiquidityTxInput;
+    let addLiquidityInput: AddLiquidityUnbalancedInput;
+    let removeLiquidityInput: RemoveLiquidityProportionalInput;
+
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
@@ -77,20 +82,29 @@ describe.skip('remove liquidity test', () => {
 
         const testAddress = (await client.getAddresses())[0];
 
-        const addLiquidityInput: AddLiquidityUnbalancedInput = {
+        addLiquidityInput = {
             chainId,
             rpcUrl,
             kind: AddLiquidityKind.Unbalanced,
-            amountsIn: poolState.tokens.map((t) => {
-                return {
-                    rawAmount: parseUnits('10', t.decimals),
-                    decimals: t.decimals,
-                    address: t.address,
-                };
-            }),
+            amountsIn: poolState.tokens.map((t) => ({
+                rawAmount: parseUnits('10', t.decimals),
+                decimals: t.decimals,
+                address: t.address,
+            })),
         };
 
-        prepTxInput = {
+        removeLiquidityInput = {
+            chainId,
+            rpcUrl,
+            kind: RemoveLiquidityKind.Proportional,
+            bptIn: {
+                rawAmount: parseEther('0.1'),
+                decimals: 18,
+                address: poolState.address,
+            },
+        };
+
+        addLiquidityTxInput = {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
@@ -99,126 +113,126 @@ describe.skip('remove liquidity test', () => {
             addLiquidityInput,
         };
 
-        txInput = {
+        removeLiquidityTxInput = {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
             poolState,
             testAddress,
-            removeLiquidityInput: {} as RemoveLiquidityInput,
+            removeLiquidityInput,
         };
 
-        const tokens = [...txInput.poolState.tokens.map((t) => t.address)];
+        const tokens = [...poolState.tokens.map((t) => t.address)];
 
         await setTokenBalances(
-            txInput.client,
-            txInput.testAddress,
+            removeLiquidityTxInput.client,
+            removeLiquidityTxInput.testAddress,
             tokens,
             [WETH.slot, BAL.slot] as number[],
-            [
-                ...txInput.poolState.tokens.map((t) =>
-                    parseUnits('100', t.decimals),
-                ),
-            ],
+            [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
         );
 
         await approveSpenderOnTokens(
-            txInput.client,
-            txInput.testAddress,
+            removeLiquidityTxInput.client,
+            removeLiquidityTxInput.testAddress,
             tokens,
             PERMIT2[chainId],
         );
     });
 
-    describe('add liquidity unbalanced, then remove liquidity proportional', () => {
-        let addLiquidityInput: AddLiquidityUnbalancedInput;
-        let removeLiquidityInput: RemoveLiquidityProportionalInput;
-        let amountsIn: InputAmount[];
-        let bptIn: InputAmount;
+    test('permit should succeed', async () => {
+        const { permitApproval, permitSignature } = await signPermit(
+            removeLiquidityTxInput.client,
+            poolState.address,
+            removeLiquidityTxInput.testAddress,
+            BALANCER_ROUTER[chainId],
+            removeLiquidityInput.bptIn.rawAmount,
+        );
 
-        beforeAll(() => {
-            amountsIn = prepTxInput.poolState.tokens.map((t) => ({
-                rawAmount: parseUnits('10', t.decimals),
-                decimals: t.decimals,
-                address: t.address,
-            }));
-            addLiquidityInput = {
-                chainId,
-                rpcUrl,
-                kind: AddLiquidityKind.Unbalanced,
-                amountsIn,
-            };
+        const { r, s, v } = parseSignature(permitSignature);
 
-            bptIn = {
-                rawAmount: parseEther('1'),
-                decimals: 18,
-                address: poolState.address,
-            };
-            removeLiquidityInput = {
-                bptIn,
-                chainId,
-                rpcUrl,
-                kind: RemoveLiquidityKind.Proportional,
-            };
+        const args = [
+            permitApproval.owner,
+            permitApproval.spender,
+            permitApproval.amount,
+            permitApproval.deadline,
+            Number(v),
+            r,
+            s,
+        ] as const;
+
+        const hash = await removeLiquidityTxInput.client.writeContract({
+            account: removeLiquidityTxInput.testAddress,
+            chain: CHAINS[chainId],
+            address: poolState.address,
+            abi: weightedPoolAbi_V3,
+            functionName: 'permit',
+            args,
         });
-        test('token inputs', async () => {
-            const details: PermitDetails[] = [];
-            for (const amountIn of amountsIn) {
-                details.push(
-                    await getDetails(
-                        prepTxInput.client,
-                        amountIn.address,
-                        prepTxInput.testAddress,
-                        BALANCER_ROUTER[chainId],
-                        amountIn.rawAmount,
-                    ),
-                );
-            }
-            const { permit2Batch, permit2Signature } = await signPermit2(
-                prepTxInput.client,
-                prepTxInput.testAddress,
-                BALANCER_ROUTER[chainId],
-                details,
-            );
-
-            const addLiquidityOutput = await doAddLiquidityWithSignature({
-                ...prepTxInput,
-                addLiquidityInput,
-                permit2Batch,
-                permit2Signature,
+        const transactionReceipt =
+            await removeLiquidityTxInput.client.waitForTransactionReceipt({
+                hash,
             });
+        expect(transactionReceipt.status).to.eq('success');
+    });
 
-            assertAddLiquidityUnbalanced(
-                prepTxInput.poolState,
-                addLiquidityInput,
-                addLiquidityOutput,
-                prepTxInput.slippage,
-                vaultVersion,
+    test('add liquidity with permit2, then remove liquidity using permit', async () => {
+        const details: PermitDetails[] = [];
+        for (const amountIn of addLiquidityInput.amountsIn) {
+            details.push(
+                await getDetails(
+                    addLiquidityTxInput.client,
+                    amountIn.address,
+                    addLiquidityTxInput.testAddress,
+                    BALANCER_ROUTER[chainId],
+                    amountIn.rawAmount,
+                ),
             );
+        }
+        const { permit2Batch, permit2Signature } = await signPermit2(
+            addLiquidityTxInput.client,
+            addLiquidityTxInput.testAddress,
+            BALANCER_ROUTER[chainId],
+            details,
+        );
 
-            const { permitApproval, permitSignature } = await signPermit(
-                txInput.client,
-                poolState.address,
-                txInput.testAddress,
-                BALANCER_ROUTER[chainId],
-                bptIn.rawAmount,
-            );
-
-            const removeLiquidityOutput = await doRemoveLiquidityWithSignature({
-                ...txInput,
-                removeLiquidityInput,
-                permitBatch: permitApproval,
-                permitSignature: permitSignature,
-            });
-
-            assertRemoveLiquidityProportional(
-                txInput.poolState,
-                removeLiquidityInput,
-                removeLiquidityOutput,
-                txInput.slippage,
-                vaultVersion,
-            );
+        const addLiquidityOutput = await doAddLiquidityWithSignature({
+            ...addLiquidityTxInput,
+            addLiquidityInput,
+            permit2Batch,
+            permit2Signature,
         });
+
+        assertAddLiquidityUnbalanced(
+            addLiquidityTxInput.poolState,
+            addLiquidityInput,
+            addLiquidityOutput,
+            addLiquidityTxInput.slippage,
+            vaultVersion,
+        );
+
+        const { permitApproval, permitSignature } = await signPermit(
+            removeLiquidityTxInput.client,
+            poolState.address,
+            removeLiquidityTxInput.testAddress,
+            BALANCER_ROUTER[chainId],
+            removeLiquidityInput.bptIn.rawAmount,
+        );
+
+        const removeLiquidityOutput = await doRemoveLiquidityWithSignature({
+            ...removeLiquidityTxInput,
+            removeLiquidityInput,
+            permitBatch: permitApproval,
+            permitSignature: permitSignature,
+        });
+
+        assertRemoveLiquidityProportional(
+            removeLiquidityTxInput.poolState,
+            removeLiquidityInput,
+            removeLiquidityOutput,
+            removeLiquidityTxInput.slippage,
+            vaultVersion,
+        );
     });
 });
 
