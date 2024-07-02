@@ -226,13 +226,13 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
 
     public buildCallWithPermit(
         input: RemoveLiquidityBaseBuildCallInput,
-        permitBatch: PermitApproval,
+        permitApproval: PermitApproval,
         permitSignature: Hex,
     ): RemoveLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);
 
         const args = [
-            [permitBatch],
+            [permitApproval],
             [permitSignature],
             { details: [], spender: zeroAddress, sigDeadline: 0n },
             '0x',

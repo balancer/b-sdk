@@ -103,7 +103,7 @@ export interface RemoveLiquidityBase {
     ): RemoveLiquidityBuildCallOutput;
     buildCallWithPermit(
         input: RemoveLiquidityBuildCallInput,
-        permitBatch: PermitApproval,
+        permitApproval: PermitApproval,
         permitSignature: Hex,
     ): RemoveLiquidityBuildCallOutput;
 }

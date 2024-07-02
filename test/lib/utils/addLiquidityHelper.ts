@@ -19,7 +19,7 @@ import {
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
-import { AddLiquidityTxInput, AddLiquidityWithSignatureTxInput } from './types';
+import { AddLiquidityTxInput, AddLiquidityWithPermit2TxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
 
@@ -78,7 +78,7 @@ async function sdkAddLiquidity({
     };
 }
 
-async function sdkAddLiquidityWithSignature({
+async function sdkAddLiquidityWithPermit2({
     addLiquidity,
     addLiquidityInput,
     poolState,
@@ -86,7 +86,7 @@ async function sdkAddLiquidityWithSignature({
     wethIsEth,
     permit2Batch,
     permit2Signature,
-}: Omit<AddLiquidityWithSignatureTxInput, 'client'>): Promise<{
+}: Omit<AddLiquidityWithPermit2TxInput, 'client'>): Promise<{
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
 }> {
@@ -204,8 +204,8 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
  *      @param client: Client & PublicActions & WalletActions - The RPC client
  *      @param slippage: Slippage - The slippage tolerance for the transaction
  */
-export async function doAddLiquidityWithSignature(
-    txInput: AddLiquidityWithSignatureTxInput,
+export async function doAddLiquidityWithPermit2(
+    txInput: AddLiquidityWithPermit2TxInput,
 ) {
     const {
         addLiquidity,
@@ -220,7 +220,7 @@ export async function doAddLiquidityWithSignature(
     } = txInput;
 
     const { addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
-        await sdkAddLiquidityWithSignature({
+        await sdkAddLiquidityWithPermit2({
             addLiquidity,
             addLiquidityInput,
             poolState,

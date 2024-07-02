@@ -40,8 +40,8 @@ import {
     approveSpenderOnTokens,
     assertAddLiquidityUnbalanced,
     assertRemoveLiquidityProportional,
-    doAddLiquidityWithSignature,
-    doRemoveLiquidityWithSignature,
+    doAddLiquidityWithPermit2,
+    doRemoveLiquidityWithPermit,
     POOLS,
     RemoveLiquidityTxInput,
     setTokenBalances,
@@ -57,8 +57,7 @@ const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
 
-// behavior changed on testnet deployment 5 - skipping tests for now - get back to it after SDK is updated
-describe('permit integration test', () => {
+describe('permit and permit2 integration tests', () => {
     let poolState: PoolState;
     let addLiquidityTxInput: AddLiquidityTxInput;
     let removeLiquidityTxInput: RemoveLiquidityTxInput;
@@ -196,7 +195,7 @@ describe('permit integration test', () => {
             details,
         );
 
-        const addLiquidityOutput = await doAddLiquidityWithSignature({
+        const addLiquidityOutput = await doAddLiquidityWithPermit2({
             ...addLiquidityTxInput,
             addLiquidityInput,
             permit2Batch,
@@ -219,11 +218,11 @@ describe('permit integration test', () => {
             removeLiquidityInput.bptIn.rawAmount,
         );
 
-        const removeLiquidityOutput = await doRemoveLiquidityWithSignature({
+        const removeLiquidityOutput = await doRemoveLiquidityWithPermit({
             ...removeLiquidityTxInput,
             removeLiquidityInput,
-            permitBatch: permitApproval,
-            permitSignature: permitSignature,
+            permitApproval,
+            permitSignature,
         });
 
         assertRemoveLiquidityProportional(

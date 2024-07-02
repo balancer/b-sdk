@@ -24,7 +24,7 @@ import { sendTransactionGetBalances, TxOutput } from './helper';
 import {
     PermitBatchAndSignature,
     RemoveLiquidityTxInput,
-    RemoveLiquidityWithSignatureTxInput,
+    RemoveLiquidityWithPermitTxInput,
 } from './types';
 import { RemoveLiquidityV2BaseBuildCallInput } from '@/entities/removeLiquidity/removeLiquidityV2/types';
 import { RemoveLiquidityV2ComposableStableQueryOutput } from '@/entities/removeLiquidity/removeLiquidityV2/composableStable/types';
@@ -73,7 +73,7 @@ export const sdkRemoveLiquidity = async (
         permitInputs !== undefined
             ? removeLiquidity.buildCallWithPermit(
                   removeLiquidityBuildInput,
-                  permitInputs.permitBatch,
+                  permitInputs.permitApproval,
                   permitInputs.permitSignature,
               )
             : removeLiquidity.buildCall(removeLiquidityBuildInput);
@@ -84,15 +84,15 @@ export const sdkRemoveLiquidity = async (
     };
 };
 
-export const sdkRemoveLiquidityWithSignature = async ({
+export const sdkRemoveLiquidityWithPermit = async ({
     removeLiquidity,
     removeLiquidityInput,
     poolState,
     slippage,
     wethIsEth,
-    permitBatch,
+    permitApproval,
     permitSignature,
-}: Omit<RemoveLiquidityWithSignatureTxInput, 'client'>): Promise<{
+}: Omit<RemoveLiquidityWithPermitTxInput, 'client'>): Promise<{
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
@@ -109,7 +109,7 @@ export const sdkRemoveLiquidityWithSignature = async ({
 
     const removeLiquidityBuildCallOutput = removeLiquidity.buildCallWithPermit(
         removeLiquidityBuildInput,
-        permitBatch,
+        permitApproval,
         permitSignature,
     );
 
@@ -206,8 +206,8 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
     };
 }
 
-export async function doRemoveLiquidityWithSignature(
-    txInput: RemoveLiquidityWithSignatureTxInput,
+export async function doRemoveLiquidityWithPermit(
+    txInput: RemoveLiquidityWithPermitTxInput,
 ) {
     const {
         removeLiquidity,
@@ -217,19 +217,19 @@ export async function doRemoveLiquidityWithSignature(
         client,
         slippage,
         wethIsEth,
-        permitBatch,
+        permitApproval,
         permitSignature,
     } = txInput;
 
     const { removeLiquidityQueryOutput, removeLiquidityBuildCallOutput } =
-        await sdkRemoveLiquidityWithSignature({
+        await sdkRemoveLiquidityWithPermit({
             removeLiquidity,
             removeLiquidityInput,
             poolState,
             slippage,
             testAddress,
             wethIsEth,
-            permitBatch,
+            permitApproval,
             permitSignature,
         });
 

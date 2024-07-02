@@ -30,7 +30,7 @@ export type AddLiquidityTxInput = {
     fromInternalBalance?: boolean;
 };
 
-export type AddLiquidityWithSignatureTxInput = AddLiquidityTxInput &
+export type AddLiquidityWithPermit2TxInput = AddLiquidityTxInput &
     Permit2BatchAndSignature;
 
 export type InitPoolTxInput = Omit<
@@ -60,7 +60,7 @@ export type RemoveLiquidityRecoveryTxInput = RemoveLiquidityTxInputBase & {
 };
 
 export type PermitBatchAndSignature = {
-    permitBatch: PermitApproval;
+    permitApproval: PermitApproval;
     permitSignature: Hex;
 };
 
@@ -69,7 +69,7 @@ export type Permit2BatchAndSignature = {
     permit2Signature: Hex;
 };
 
-export type RemoveLiquidityWithSignatureTxInput = RemoveLiquidityTxInput &
+export type RemoveLiquidityWithPermitTxInput = RemoveLiquidityTxInput &
     PermitBatchAndSignature;
 
 export type CreatePoolTxInput = {
