@@ -48,7 +48,7 @@ import {
     TOKENS,
 } from 'test/lib/utils';
 
-const vaultVersion = 3;
+const protocolVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
@@ -123,7 +123,7 @@ describe('remove liquidity test', () => {
                 ),
             ],
             undefined,
-            vaultVersion,
+            protocolVersion,
         );
 
         await approveSpenderOnToken(
@@ -188,7 +188,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
             );
         });
 
@@ -205,7 +205,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
                 wethIsEth,
             );
         });
@@ -239,7 +239,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
             );
         });
 
@@ -256,7 +256,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
                 wethIsEth,
             );
         });
@@ -288,7 +288,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
             );
         });
         test('with native', async () => {
@@ -303,7 +303,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
                 wethIsEth,
             );
         });
@@ -332,7 +332,7 @@ class MockApi {
             address: id,
             type: PoolType.Weighted,
             tokens,
-            vaultVersion,
+            protocolVersion,
         };
     }
 }

@@ -50,7 +50,7 @@ export class Pools {
             id,
             address: id,
             type: poolType,
-            vaultVersion: 3,
+            protocolVersion: 3,
             tokens: poolTokens.map((t, i) => {
                 return {
                     index: i,

@@ -337,7 +337,7 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.Weighted,
             tokens,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 }

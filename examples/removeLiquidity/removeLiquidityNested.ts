@@ -153,7 +153,7 @@ const removeLiquidityNested = async ({
     });
     return {
         ...call,
-        vaultVersion: 2,
+        protocolVersion: 2,
     };
 };
 

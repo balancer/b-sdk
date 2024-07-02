@@ -75,14 +75,14 @@ export const approveToken = async (
     client: Client & PublicActions & WalletActions,
     accountAddress: Address,
     tokenAddress: Address,
-    vaultVersion: 2 | 3,
+    protocolVersion: 2 | 3,
     amount?: bigint,
     deadline?: bigint,
 ): Promise<boolean> => {
     const chainId = await client.getChainId();
 
     let approved = false;
-    if (vaultVersion === 2) {
+    if (protocolVersion === 2) {
         // Approve Vault V2 to spend account tokens
         approved = await approveSpenderOnToken(
             client,
@@ -392,7 +392,7 @@ export async function findTokenBalanceSlot(
  * @param slots Slot that stores token balance in memory - use npm package `slot20` to identify which slot to provide
  * @param balances Balances in EVM amounts
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
- * @param vaultVersion Balancer vault version
+ * @param protocolVersion Balancer vault version
  */
 export const forkSetup = async (
     client: Client & PublicActions & TestActions & WalletActions,
@@ -401,7 +401,7 @@ export const forkSetup = async (
     slots: number[] | undefined,
     balances: bigint[],
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
-    vaultVersion: 2 | 3 = 2,
+    protocolVersion: 2 | 3 = 2,
 ): Promise<void> => {
     await client.impersonateAccount({ address: accountAddress });
 
@@ -437,7 +437,7 @@ export const forkSetup = async (
             isVyperMapping[i],
         );
 
-        await approveToken(client, accountAddress, tokens[i], vaultVersion);
+        await approveToken(client, accountAddress, tokens[i], protocolVersion);
     }
 };
 

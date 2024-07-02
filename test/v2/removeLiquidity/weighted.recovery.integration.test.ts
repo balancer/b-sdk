@@ -149,7 +149,7 @@ class MockApi {
             address: testPool.address,
             type: testPool.type,
             tokens,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 }

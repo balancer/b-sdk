@@ -53,7 +53,7 @@ export const sdkRemoveLiquidity = async ({
         slippage,
         wethIsEth: !!wethIsEth,
     };
-    if (poolState.vaultVersion === 2) {
+    if (poolState.protocolVersion === 2) {
         (removeLiquidityBuildInput as RemoveLiquidityV2BaseBuildCallInput) = {
             ...removeLiquidityBuildInput,
             sender: testAddress,
@@ -197,7 +197,7 @@ export function assertRemoveLiquidityUnbalanced(
         poolId: poolState.id,
         poolType: poolState.type,
         removeLiquidityKind: removeLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
+        protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityInput.chainId,
     };
 
@@ -229,7 +229,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
     removeLiquidityInput: RemoveLiquiditySingleTokenExactOutInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const {
@@ -269,7 +269,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         poolId: poolState.id,
         poolType: poolState.type,
         removeLiquidityKind: removeLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
+        protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityInput.chainId,
     };
 
@@ -285,7 +285,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         removeLiquidityBuildCallOutput,
         false,
         slippage,
-        vaultVersion,
+        protocolVersion,
     );
 
     assertTokenDeltas(
@@ -302,7 +302,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     removeLiquidityInput: RemoveLiquiditySingleTokenExactInInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const {
@@ -340,7 +340,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         poolId: poolState.id,
         poolType: poolState.type,
         removeLiquidityKind: removeLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
+        protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityInput.chainId,
     };
 
@@ -352,7 +352,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     // (Note removeLiquidityQueryOutput also has value for bpt if pre-minted)
     removeLiquidityQueryOutput.amountsOut.forEach((a) => {
         if (
-            vaultVersion === 2 &&
+            protocolVersion === 2 &&
             wethIsEth &&
             a.token.address === zeroAddress
         ) {
@@ -369,7 +369,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         removeLiquidityBuildCallOutput,
         true,
         slippage,
-        vaultVersion,
+        protocolVersion,
     );
 
     assertTokenDeltas(
@@ -386,7 +386,7 @@ export function assertRemoveLiquidityProportional(
     removeLiquidityInput: RemoveLiquidityProportionalInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 0 | 2 | 3 = 2,
+    protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const {
@@ -416,7 +416,7 @@ export function assertRemoveLiquidityProportional(
         poolId: poolState.id,
         poolType: poolState.type,
         removeLiquidityKind: removeLiquidityInput.kind,
-        vaultVersion: poolState.vaultVersion,
+        protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityInput.chainId,
     };
 
@@ -445,7 +445,7 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityBuildCallOutput,
         true,
         slippage,
-        vaultVersion,
+        protocolVersion,
     );
 
     assertTokenDeltas(
@@ -507,7 +507,7 @@ export function assertRemoveLiquidityBuildCallOutput(
     RemoveLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput,
     isExactIn: boolean,
     slippage: Slippage,
-    vaultVersion: 0 | 2 | 3 = 2,
+    protocolVersion: 1 | 2 | 3 = 2,
 ) {
     // if exactIn minAmountsOut should use amountsOut with slippage applied, else should use same amountsOut as input
     // slippage.applyTo(a.amount, -1)
@@ -529,8 +529,8 @@ export function assertRemoveLiquidityBuildCallOutput(
           );
 
     let to: Address;
-    switch (vaultVersion) {
-        case 0:
+    switch (protocolVersion) {
+        case 1:
             to = removeLiquidityQueryOutput.poolId;
             break;
         case 2:

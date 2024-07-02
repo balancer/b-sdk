@@ -66,7 +66,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
             amountsIn,
             chainId: input.chainId,
             tokenInIndex: amounts.tokenInIndex,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 

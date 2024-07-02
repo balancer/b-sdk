@@ -36,7 +36,7 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 
-const vaultVersion = 3;
+const protocolVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.id;
@@ -90,7 +90,7 @@ describe('add liquidity test', () => {
                 ),
             ],
             undefined,
-            vaultVersion,
+            protocolVersion,
         );
     });
 
@@ -123,7 +123,7 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
             );
         });
 
@@ -143,7 +143,7 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
                 wethIsEth,
             );
         });
@@ -177,7 +177,7 @@ describe('add liquidity test', () => {
                 input,
                 addLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
             );
         });
 
@@ -197,7 +197,7 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
                 wethIsEth,
             );
         });
@@ -225,7 +225,7 @@ class MockApi {
             address: id,
             type: PoolType.Weighted,
             tokens,
-            vaultVersion,
+            protocolVersion,
         };
     }
 }

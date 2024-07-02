@@ -9,7 +9,7 @@ export class Pools {
         id
         address
         type
-        vaultVersion
+        protocolVersion
         poolTokens {
           index
           address
@@ -24,7 +24,7 @@ export class Pools {
         id
         address
         type
-        vaultVersion
+        protocolVersion
         poolTokens {
           index
           address

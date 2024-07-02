@@ -48,7 +48,7 @@ export type AddLiquidityBaseQueryOutput = {
     amountsIn: TokenAmount[];
     chainId: number;
     tokenInIndex?: number;
-    vaultVersion: 0 | 2 | 3;
+    protocolVersion: 1 | 2 | 3;
 };
 
 export type AddLiquidityQueryOutput =

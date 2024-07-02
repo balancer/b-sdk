@@ -19,13 +19,13 @@ export * from './paths';
 // A Swap can be a single or multiple paths
 export class Swap {
     private readonly swap: SwapBase;
-    public vaultVersion: 2 | 3;
+    public protocolVersion: 2 | 3;
 
     public constructor(swapInput: SwapInput) {
         validatePaths(swapInput.paths);
-        const _vaultVersion = swapInput.paths[0].vaultVersion;
+        const _protocolVersion = swapInput.paths[0].protocolVersion;
 
-        switch (_vaultVersion) {
+        switch (_protocolVersion) {
             case 2:
                 this.swap = new SwapV2(swapInput);
                 break;
@@ -34,10 +34,10 @@ export class Swap {
                 break;
             default:
                 throw Error(
-                    `SDK does not support swap for vault version: ${_vaultVersion}`,
+                    `SDK does not support swap for vault version: ${_protocolVersion}`,
                 );
         }
-        this.vaultVersion = _vaultVersion;
+        this.protocolVersion = _protocolVersion;
     }
 
     public get quote(): TokenAmount {
@@ -76,10 +76,10 @@ export class Swap {
         input: SwapBuildCallInput,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
         const isV2Input = 'sender' in input;
-        if (this.vaultVersion === 3 && isV2Input)
+        if (this.protocolVersion === 3 && isV2Input)
             throw Error('Cannot define sender/recipient in V3');
 
-        if (this.vaultVersion === 2 && !isV2Input)
+        if (this.protocolVersion === 2 && !isV2Input)
             throw Error('Sender/recipient must be defined in V2');
 
         return this.swap.buildCall(input);

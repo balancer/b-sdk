@@ -37,7 +37,7 @@ describe('Create Weighted Pool tests', () => {
             pauseManager: zeroAddress,
             swapFeeManager: zeroAddress,
             chainId,
-            vaultVersion: 3,
+            protocolVersion: 3,
         };
     });
 

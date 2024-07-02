@@ -65,7 +65,7 @@ async function runAgainstFork() {
             })),
         },
         [...amountsIn.map((a) => a.address), pool.address],
-        call.vaultVersion,
+        call.protocolVersion,
     );
 }
 
@@ -126,7 +126,7 @@ const addLiquidity = async ({
 
     return {
         ...call,
-        vaultVersion: queryOutput.vaultVersion,
+        protocolVersion: queryOutput.protocolVersion,
     };
 };
 

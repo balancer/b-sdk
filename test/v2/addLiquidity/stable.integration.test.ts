@@ -135,7 +135,7 @@ describe('add liquidity stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
-                poolState.vaultVersion,
+                poolState.protocolVersion,
                 wethIsEth,
             );
         });
@@ -186,7 +186,7 @@ describe('add liquidity stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
-                poolState.vaultVersion,
+                poolState.protocolVersion,
                 wethIsEth,
             );
         });
@@ -244,7 +244,7 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.MetaStable,
             tokens,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 }
