@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.19.1
+
+### Patch Changes
+
+- 654af8c: Expose isAuraBalSwap helper.
+
 ## 0.19.0
 
 ### Minor Changes
