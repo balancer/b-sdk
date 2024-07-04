@@ -1,16 +1,20 @@
-import { TokenAmount } from '../tokenAmount';
+import { Address, Client, PublicActions, WalletActions } from 'viem';
+
 import { SwapKind } from '../../types';
+import { TokenAmount } from '../tokenAmount';
+import { Permit2BatchAndSignature } from '../permit2';
+import { Slippage } from '../slippage';
 import { validatePaths } from './paths';
 import { SwapV2 } from './swaps/v2';
 import { SwapV3 } from './swaps/v3';
 import { SwapBase } from './swaps/types';
 import {
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
     SwapBuildCallInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
-    ExactOutQueryOutput,
-    ExactInQueryOutput,
 } from './types';
 
 export * from './types';
@@ -83,5 +87,26 @@ export class Swap {
             throw Error('Sender/recipient must be defined in V2');
 
         return this.swap.buildCall(input);
+    }
+
+    async getPermit2BatchAndSignature(
+        client: Client & PublicActions & WalletActions,
+        owner: Address,
+        slippage: Slippage,
+    ): Promise<Permit2BatchAndSignature> {
+        return this.swap.getPermit2BatchAndSignature(client, owner, slippage);
+    }
+
+    buildCallWithPermit2(
+        input: SwapBuildCallInput,
+        permit2: Permit2BatchAndSignature,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        if (this.vaultVersion === 3) {
+            return this.swap.buildCallWithPermit2(input, permit2);
+        }
+
+        throw Error(
+            'buildCall with Permit2 signatures is only available for v3',
+        );
     }
 }

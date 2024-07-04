@@ -300,6 +300,14 @@ export class SwapV2 implements SwapBase {
         };
     }
 
+    getPermit2BatchAndSignature(): Promise<never> {
+        throw new Error('getPermit2BatchAndSignature is not supported on v2');
+    }
+
+    buildCallWithPermit2(): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        throw new Error('buildCallWithPermit2 is not supported on v2');
+    }
+
     /**
      * Returns the native assset value to be sent to the vault contract based on the swap kind and the limit
      *

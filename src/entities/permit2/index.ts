@@ -18,16 +18,18 @@ export * from './signatureTransfer';
 export * from './providers';
 export * from './constants';
 
+export type Permit2BatchAndSignature = {
+    permit2Batch: Permit2Batch;
+    permit2Signature: Hex;
+};
+
 export const signPermit2 = async (
-    client: Client & WalletActions & PublicActions,
+    client: Client & WalletActions,
     owner: Address,
     spender: Address,
     details: PermitDetails[],
     sigDeadline = MaxSigDeadline,
-): Promise<{
-    permit2Batch: Permit2Batch;
-    permit2Signature: Hex;
-}> => {
+): Promise<Permit2BatchAndSignature> => {
     const permit2Batch: Permit2Batch = {
         details,
         spender,

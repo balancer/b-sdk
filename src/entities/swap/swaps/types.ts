@@ -2,6 +2,8 @@ import { TokenAmount } from '../../tokenAmount';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
+    Permit2BatchAndSignature,
+    Slippage,
     SwapBuildCallInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
@@ -14,6 +16,7 @@ import {
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from '../swaps/v3';
+import { Address, Client, PublicActions, WalletActions } from 'viem';
 
 export interface SwapBase {
     chainId: number;
@@ -38,4 +41,13 @@ export interface SwapBase {
     buildCall(
         input: SwapBuildCallInput,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
+    buildCallWithPermit2(
+        input: SwapBuildCallInput,
+        permit2: Permit2BatchAndSignature,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
+    getPermit2BatchAndSignature(
+        client: Client & PublicActions & WalletActions,
+        owner: Address,
+        slippage: Slippage,
+    ): Promise<Permit2BatchAndSignature>;
 }

@@ -1,5 +1,9 @@
 import {
+    Address,
+    Client,
+    PublicActions,
     PublicClient,
+    WalletActions,
     createPublicClient,
     encodeFunctionData,
     getContract,
@@ -37,6 +41,13 @@ import {
 import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
 import { SwapBase } from '../types';
 import { getLimitAmount, getPathLimits } from '../../limits';
+import {
+    Permit2BatchAndSignature,
+    PermitDetails,
+    getDetails,
+    signPermit2,
+} from '@/entities/permit2';
+import { Slippage } from '@/entities/slippage';
 
 export * from './types';
 
@@ -188,7 +199,7 @@ export class SwapV3 implements SwapBase {
         block?: bigint,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         // Note - batchSwaps are made via the Batch Router
-        const routerContract = getContract({
+        const batchRouterContract = getContract({
             address: BALANCER_BATCH_ROUTER[this.chainId],
             abi: balancerBatchRouterAbi,
             client,
@@ -200,13 +211,14 @@ export class SwapV3 implements SwapBase {
         const swapsWithLimits = this.getSwapsWithLimits();
 
         if (this.swapKind === SwapKind.GivenIn) {
-            const { result } = await routerContract.simulate.querySwapExactIn(
-                [
-                    swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
-                    DEFAULT_USERDATA,
-                ],
-                { blockNumber: block },
-            );
+            const { result } =
+                await batchRouterContract.simulate.querySwapExactIn(
+                    [
+                        swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                        DEFAULT_USERDATA,
+                    ],
+                    { blockNumber: block },
+                );
 
             if (result[1].length !== 1)
                 throw Error(
@@ -223,7 +235,7 @@ export class SwapV3 implements SwapBase {
             };
         }
 
-        const { result } = await routerContract.simulate.querySwapExactOut(
+        const { result } = await batchRouterContract.simulate.querySwapExactOut(
             [
                 swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
                 DEFAULT_USERDATA,
@@ -328,7 +340,7 @@ export class SwapV3 implements SwapBase {
         }
         if (!this.isBatchSwap) {
             call = {
-                to: BALANCER_ROUTER[this.chainId],
+                to: this.to(),
                 callData: this.callDataSingleSwap(
                     limitAmount,
                     input.deadline ?? MAX_UINT256,
@@ -347,7 +359,7 @@ export class SwapV3 implements SwapBase {
                     'V3 BatchSwaps need path limits for call construction',
                 );
             call = {
-                to: BALANCER_BATCH_ROUTER[this.chainId],
+                to: this.to(),
                 callData: this.callDataBatchSwap(
                     limitAmount.amount,
                     pathLimits,
@@ -366,6 +378,60 @@ export class SwapV3 implements SwapBase {
         return {
             ...call,
             maxAmountIn: limitAmount,
+        };
+    }
+
+    // TODO: check if this is helpful or if we should let FE deal with getting permit signatures
+    public async getPermit2BatchAndSignature(
+        client: Client & PublicActions & WalletActions,
+        owner: Address,
+        slippage: Slippage,
+    ): Promise<Permit2BatchAndSignature> {
+        let maxAmountIn: bigint;
+        if (this.swapKind === SwapKind.GivenIn) {
+            maxAmountIn = this.inputAmount.amount;
+        } else {
+            maxAmountIn = getLimitAmount(
+                slippage,
+                SwapKind.GivenOut,
+                this.inputAmount,
+            ).amount;
+        }
+        const details: PermitDetails[] = [
+            await getDetails(
+                client,
+                this.inputAmount.token.address,
+                owner,
+                this.to(),
+                maxAmountIn,
+            ),
+        ];
+        const permit2 = await signPermit2(client, owner, this.to(), details);
+        return permit2;
+    }
+
+    buildCallWithPermit2(
+        input: SwapBuildCallInput,
+        permit2: Permit2BatchAndSignature,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        const buildCallOutput = this.buildCall(input);
+        const args = [
+            [],
+            [],
+            permit2.permit2Batch,
+            permit2.permit2Signature,
+            [buildCallOutput.callData],
+        ] as const;
+
+        const callData = encodeFunctionData({
+            abi: balancerBatchRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
+        });
+
+        return {
+            ...buildCallOutput,
+            callData,
         };
     }
 
@@ -576,5 +642,11 @@ export class SwapV3 implements SwapBase {
             }
         }
         return swaps;
+    }
+
+    private to(): Address {
+        return this.isBatchSwap
+            ? BALANCER_BATCH_ROUTER[this.chainId]
+            : BALANCER_ROUTER[this.chainId];
     }
 }
