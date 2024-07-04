@@ -35,3 +35,7 @@ export const removeLiquidityProportionalOnlyError = (
     Error(
         `Remove Liquidity ${kind} not supported for pool ${poolType}. Use Remove Liquidity Proportional`,
     );
+
+export const swapETHBuildCallWithPermit2Error = Error(
+    'buildCallWithPermit2 not supported when swapping ETH - please use buildCall instead',
+);

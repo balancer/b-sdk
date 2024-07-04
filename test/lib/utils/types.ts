@@ -1,23 +1,22 @@
 import { Client, PublicActions, TestActions, WalletActions } from 'viem';
 import {
-    Address,
+    AddLiquidity,
     AddLiquidityInput,
+    Address,
+    ChainId,
+    CreatePool,
+    CreatePoolInput,
+    InitPool,
+    InitPoolInput,
+    NestedPoolState,
+    PermitApprovalAndSignature,
+    Permit2BatchAndSignature,
+    PoolState,
     RemoveLiquidityInput,
     RemoveLiquidity,
-    AddLiquidity,
-    PoolState,
     Slippage,
-    ChainId,
-    NestedPoolState,
     RemoveLiquidityRecoveryInput,
-    Hex,
 } from '@/.';
-import { CreatePool } from '@/entities/createPool';
-import { CreatePoolInput } from '@/entities/createPool/types';
-import { InitPool } from '@/entities/initPool';
-import { InitPoolInput } from '@/entities/initPool/types';
-import { PermitApproval } from '@/entities/permit';
-import { Permit2BatchAndSignature } from '@/entities/permit2';
 
 export type AddLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
@@ -57,16 +56,6 @@ export type RemoveLiquidityTxInput = RemoveLiquidityTxInputBase & {
 
 export type RemoveLiquidityRecoveryTxInput = RemoveLiquidityTxInputBase & {
     removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput;
-};
-
-export type PermitApprovalAndSignature = {
-    permitApproval: PermitApproval;
-    permitSignature: Hex;
-};
-
-export type PermitBatchAndSignatures = {
-    permitBatch: PermitApproval[];
-    permitSignatures: Hex[];
 };
 
 export type RemoveLiquidityWithPermitTxInput = RemoveLiquidityTxInput &

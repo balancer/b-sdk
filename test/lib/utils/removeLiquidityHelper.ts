@@ -18,11 +18,11 @@ import {
     Token,
     TokenAmount,
     VAULT,
+    PermitApprovalAndSignature,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import {
-    PermitApprovalAndSignature,
     RemoveLiquidityTxInput,
     RemoveLiquidityWithPermitTxInput,
 } from './types';

@@ -26,6 +26,16 @@ export type PermitApproval = {
     deadline: bigint;
 };
 
+export type PermitApprovalAndSignature = {
+    permitApproval: PermitApproval;
+    permitSignature: Hex;
+};
+
+export type PermitBatchAndSignatures = {
+    permitBatch: PermitApproval[];
+    permitSignatures: Hex[];
+};
+
 /**
  * Signs a permit for a given ERC-2612 ERC20 token using the specified parameters.
  *

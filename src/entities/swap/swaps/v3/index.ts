@@ -387,6 +387,7 @@ export class SwapV3 implements SwapBase {
         owner: Address,
         slippage: Slippage,
     ): Promise<Permit2BatchAndSignature> {
+        // get maxAmountIn
         let maxAmountIn: bigint;
         if (this.swapKind === SwapKind.GivenIn) {
             maxAmountIn = this.inputAmount.amount;
@@ -397,6 +398,8 @@ export class SwapV3 implements SwapBase {
                 this.inputAmount,
             ).amount;
         }
+
+        // build permit details
         const details: PermitDetails[] = [
             await getDetails(
                 client,
@@ -406,7 +409,10 @@ export class SwapV3 implements SwapBase {
                 maxAmountIn,
             ),
         ];
+
+        // sign permit2
         const permit2 = await signPermit2(client, owner, this.to(), details);
+
         return permit2;
     }
 

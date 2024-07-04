@@ -272,7 +272,6 @@ export async function assertSwapExactOutWithPermit2(
     chainId: ChainId,
     swap: Swap,
     wethIsEth: boolean,
-    permit2: Permit2BatchAndSignature,
 ) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
@@ -282,6 +281,8 @@ export async function assertSwapExactOutWithPermit2(
     if (expected.swapKind !== SwapKind.GivenOut)
         throw Error('Expected GivenOut');
 
+    expect(expected.expectedAmountIn.amount > 0n).to.be.true;
+
     const buildCallInput: SwapBuildCallInput = {
         slippage,
         deadline,
@@ -289,7 +290,11 @@ export async function assertSwapExactOutWithPermit2(
         wethIsEth,
     };
 
-    expect(expected.expectedAmountIn.amount > 0n).to.be.true;
+    const permit2 = await swap.getPermit2BatchAndSignature(
+        client,
+        testAddress,
+        slippage,
+    );
 
     const call = swap.buildCallWithPermit2(
         buildCallInput,

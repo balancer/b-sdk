@@ -39,15 +39,12 @@ import {
     signPermit2,
     Slippage,
     Swap,
+    swapETHBuildCallWithPermit2Error,
     SwapInput,
     SwapKind,
 } from 'src';
 
-import {
-    ANVIL_NETWORKS,
-    startFork,
-    stopAnvilFork,
-} from 'test/anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityTxInput,
     approveSpenderOnTokens,
@@ -93,7 +90,6 @@ describe('permit and permit2 integration tests', () => {
 
     // reset fork
     beforeEach(async () => {
-        await stopAnvilFork(ANVIL_NETWORKS.SEPOLIA);
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
 
         client = createTestClient({
@@ -103,8 +99,6 @@ describe('permit and permit2 integration tests', () => {
         })
             .extend(publicActions)
             .extend(walletActions);
-
-        // setup client done
 
         testAddress = (await client.getAddresses())[0];
 
@@ -232,7 +226,6 @@ describe('permit and permit2 integration tests', () => {
     describe('swap tests', () => {
         let pathMultiSwap: Path;
         let pathWithExit: Path;
-        let permit2: Permit2BatchAndSignature;
         let swapParams: SwapInput;
 
         beforeEach(async () => {
@@ -292,13 +285,13 @@ describe('permit and permit2 integration tests', () => {
 
             swapParams = {
                 chainId,
-                paths: [pathMultiSwap],
+                paths: [pathMultiSwap, pathWithExit],
                 swapKind: SwapKind.GivenIn,
             };
         });
 
         describe('wethIsEth: false', () => {
-            test.only('GivenIn', async () => {
+            test('GivenIn', async () => {
                 const swap = new Swap({
                     ...swapParams,
                     swapKind: SwapKind.GivenIn,
@@ -325,41 +318,41 @@ describe('permit and permit2 integration tests', () => {
                     chainId,
                     swap,
                     false,
-                    permit2,
                 );
             });
         });
         describe('wethIsEth: true', () => {
             test('GivenIn', async () => {
                 const swap = new Swap({
-                    chainId,
-                    paths: [pathMultiSwap, pathWithExit],
+                    ...swapParams,
                     swapKind: SwapKind.GivenIn,
                 });
-                await assertSwapExactInWithPermit2(
-                    BALANCER_BATCH_ROUTER[chainId],
-                    client,
-                    rpcUrl,
-                    chainId,
-                    swap,
-                    true,
-                );
+                await expect(() =>
+                    assertSwapExactInWithPermit2(
+                        BALANCER_BATCH_ROUTER[chainId],
+                        client,
+                        rpcUrl,
+                        chainId,
+                        swap,
+                        true,
+                    ),
+                ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
-                    chainId,
-                    paths: [pathMultiSwap, pathWithExit],
+                    ...swapParams,
                     swapKind: SwapKind.GivenOut,
                 });
-                await assertSwapExactOutWithPermit2(
-                    BALANCER_BATCH_ROUTER[chainId],
-                    client,
-                    rpcUrl,
-                    chainId,
-                    swap,
-                    true,
-                    permit2,
-                );
+                await expect(() =>
+                    assertSwapExactOutWithPermit2(
+                        BALANCER_BATCH_ROUTER[chainId],
+                        client,
+                        rpcUrl,
+                        chainId,
+                        swap,
+                        true,
+                    ),
+                ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
             });
         });
     });

@@ -16,6 +16,7 @@ import {
     SwapBuildOutputExactOut,
     SwapInput,
 } from './types';
+import { swapETHBuildCallWithPermit2Error } from '@/utils';
 
 export * from './types';
 export * from './paths';
@@ -101,6 +102,10 @@ export class Swap {
         input: SwapBuildCallInput,
         permit2: Permit2BatchAndSignature,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        if (input.wethIsEth) {
+            throw swapETHBuildCallWithPermit2Error;
+        }
+
         if (this.vaultVersion === 3) {
             return this.swap.buildCallWithPermit2(input, permit2);
         }
