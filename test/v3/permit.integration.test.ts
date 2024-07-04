@@ -28,7 +28,6 @@ import {
     Hex,
     Path,
     PERMIT2,
-    Permit2BatchAndSignature,
     PermitDetails,
     PoolState,
     PoolType,

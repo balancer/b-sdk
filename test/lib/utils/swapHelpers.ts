@@ -17,7 +17,6 @@ import {
     SwapKind,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
-import { Permit2BatchAndSignature } from '@/entities/permit2';
 
 export async function assertSwapExactIn(
     contractToCall: Address,
