@@ -4,7 +4,6 @@ import {
     ExactOutQueryOutput,
     Permit2BatchAndSignature,
     SwapBuildCallInput,
-    SwapBuildCallInputBase,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
 } from '../../..';
@@ -16,7 +15,6 @@ import {
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from '../swaps/v3';
-import { Address, Client, PublicActions, WalletActions } from 'viem';
 
 export interface SwapBase {
     chainId: number;
@@ -45,10 +43,4 @@ export interface SwapBase {
         input: SwapBuildCallInput,
         permit2: Permit2BatchAndSignature,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
-    getPermit2BatchAndSignature(
-        input: SwapBuildCallInputBase & {
-            client: Client & PublicActions & WalletActions;
-            owner: Address;
-        },
-    ): Promise<Permit2BatchAndSignature>;
 }

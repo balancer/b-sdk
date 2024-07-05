@@ -1,5 +1,3 @@
-import { Address, Client, PublicActions, WalletActions } from 'viem';
-
 import { SwapKind } from '../../types';
 import { TokenAmount } from '../tokenAmount';
 import { Permit2BatchAndSignature } from '../permit2';
@@ -11,7 +9,6 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     SwapBuildCallInput,
-    SwapBuildCallInputBase,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
@@ -88,15 +85,6 @@ export class Swap {
             throw Error('Sender/recipient must be defined in V2');
 
         return this.swap.buildCall(input);
-    }
-
-    async getPermit2BatchAndSignature(
-        input: SwapBuildCallInputBase & {
-            client: Client & PublicActions & WalletActions;
-            owner: Address;
-        },
-    ): Promise<Permit2BatchAndSignature> {
-        return this.swap.getPermit2BatchAndSignature(input);
     }
 
     buildCallWithPermit2(

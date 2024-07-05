@@ -15,6 +15,7 @@ import {
     SwapBuildOutputExactIn,
     SwapBuildCallInput,
     SwapKind,
+    getPermit2BatchAndSignatureSwap,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
@@ -121,7 +122,7 @@ export async function assertSwapExactInWithPermit2(
         wethIsEth,
     };
 
-    const permit2 = await swap.getPermit2BatchAndSignature({
+    const permit2 = await getPermit2BatchAndSignatureSwap({
         ...buildCallInput,
         client,
         owner: testAddress,
@@ -289,7 +290,7 @@ export async function assertSwapExactOutWithPermit2(
         wethIsEth,
     };
 
-    const permit2 = await swap.getPermit2BatchAndSignature({
+    const permit2 = await getPermit2BatchAndSignatureSwap({
         ...buildCallInput,
         client,
         owner: testAddress,

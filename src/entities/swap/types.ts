@@ -43,10 +43,12 @@ export type QueryOutputBase = {
 
 export type ExactInQueryOutput = QueryOutputBase & {
     swapKind: SwapKind.GivenIn;
+    amountIn: TokenAmount;
     expectedAmountOut: TokenAmount;
 };
 
 export type ExactOutQueryOutput = QueryOutputBase & {
     swapKind: SwapKind.GivenOut;
+    amountOut: TokenAmount;
     expectedAmountIn: TokenAmount;
 };

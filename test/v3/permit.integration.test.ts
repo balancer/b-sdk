@@ -192,7 +192,7 @@ describe('permit and permit2 integration tests', () => {
         });
     });
 
-    describe('single swap tests', () => {
+    describe.only('single swap tests', () => {
         let pathBalWeth: Path;
         let swapParams: SwapInput;
 

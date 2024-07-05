@@ -1,9 +1,6 @@
 import {
     Address,
-    Client,
-    PublicActions,
     PublicClient,
-    WalletActions,
     createPublicClient,
     encodeFunctionData,
     getContract,
@@ -24,7 +21,6 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     SwapBuildCallInput,
-    SwapBuildCallInputBase,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
@@ -42,12 +38,7 @@ import {
 import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
 import { SwapBase } from '../types';
 import { getLimitAmount, getPathLimits } from '../../limits';
-import {
-    Permit2BatchAndSignature,
-    PermitDetails,
-    getDetails,
-    signPermit2,
-} from '@/entities/permit2';
+import { Permit2BatchAndSignature } from '@/entities/permit2';
 
 export * from './types';
 
@@ -136,6 +127,7 @@ export class SwapV3 implements SwapBase {
                     this.outputAmount.token,
                     result,
                 ),
+                amountIn: this.inputAmount,
             };
         }
         if ('exactAmountOut' in this.swaps) {
@@ -156,6 +148,7 @@ export class SwapV3 implements SwapBase {
                     this.inputAmount.token,
                     result,
                 ),
+                amountOut: this.outputAmount,
             };
         }
         throw Error('Unsupported V3 Query');
@@ -231,6 +224,7 @@ export class SwapV3 implements SwapBase {
                     this.outputAmount.token,
                     result[2][0],
                 ),
+                amountIn: this.inputAmount,
                 pathAmounts: result[0] as bigint[],
             };
         }
@@ -254,6 +248,7 @@ export class SwapV3 implements SwapBase {
                 this.inputAmount.token,
                 result[2][0],
             ),
+            amountOut: this.outputAmount,
             pathAmounts: result[0] as bigint[],
         };
     }
@@ -379,48 +374,6 @@ export class SwapV3 implements SwapBase {
             ...call,
             maxAmountIn: limitAmount,
         };
-    }
-
-    // TODO: check if this is helpful or if we should let FE deal with getting permit signatures
-    public async getPermit2BatchAndSignature(
-        input: SwapBuildCallInputBase & {
-            client: Client & PublicActions & WalletActions;
-            owner: Address;
-        },
-    ): Promise<Permit2BatchAndSignature> {
-        // get maxAmountIn
-        let maxAmountIn: bigint;
-        if (this.swapKind === SwapKind.GivenIn) {
-            maxAmountIn = this.inputAmount.amount;
-        } else {
-            const queryOutput = input.queryOutput as ExactOutQueryOutput;
-            maxAmountIn = getLimitAmount(
-                input.slippage,
-                SwapKind.GivenOut,
-                queryOutput.expectedAmountIn,
-            ).amount;
-        }
-
-        // build permit details
-        const details: PermitDetails[] = [
-            await getDetails(
-                input.client,
-                this.inputAmount.token.address,
-                input.owner,
-                this.to(),
-                maxAmountIn,
-            ),
-        ];
-
-        // sign permit2
-        const permit2 = await signPermit2(
-            input.client,
-            input.owner,
-            this.to(),
-            details,
-        );
-
-        return permit2;
     }
 
     buildCallWithPermit2(

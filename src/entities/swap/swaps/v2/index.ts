@@ -124,6 +124,7 @@ export class SwapV2 implements SwapBase {
                     this.outputAmount.token,
                     result,
                 ),
+                amountIn: this.inputAmount,
             };
         }
         return {
@@ -132,6 +133,7 @@ export class SwapV2 implements SwapBase {
                 this.inputAmount.token,
                 result,
             ),
+            amountOut: this.outputAmount,
         };
     }
 
@@ -162,6 +164,7 @@ export class SwapV2 implements SwapBase {
                         ],
                     ),
                 ),
+                amountIn: this.inputAmount,
             };
         }
         return {
@@ -172,6 +175,7 @@ export class SwapV2 implements SwapBase {
                     result[this.assets.indexOf(this.inputAmount.token.address)],
                 ),
             ),
+            amountOut: this.outputAmount,
         };
     }
 

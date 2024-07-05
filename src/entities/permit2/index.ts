@@ -1,4 +1,4 @@
-import { Address, Hex } from '@/types';
+import { Address, Hex, SwapKind } from '@/types';
 import { Client, PublicActions, WalletActions } from 'viem';
 import {
     AllowanceTransfer,
@@ -6,13 +6,20 @@ import {
     PermitDetails,
 } from './allowanceTransfer';
 import { AllowanceProvider } from './providers';
-import { BALANCER_ROUTER, PERMIT2 } from '@/utils';
+import { BALANCER_BATCH_ROUTER, BALANCER_ROUTER, PERMIT2 } from '@/utils';
 import {
     MaxAllowanceExpiration,
     MaxAllowanceTransferAmount,
     MaxSigDeadline,
 } from './constants';
 import { AddLiquidityBaseBuildCallInput } from '../addLiquidity/types';
+import {
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
+    SwapBuildCallInputBase,
+} from '../swap';
+import { getLimitAmount } from '../swap/limits';
+import { TokenAmount } from '../tokenAmount';
 
 export * from './allowanceTransfer';
 export * from './signatureTransfer';
@@ -44,6 +51,54 @@ export const getPermit2BatchAndSignatureAddLiquidity = async (
         );
     }
     return signPermit2(input.client, input.owner, spender, details);
+};
+
+// TODO: check if this is helpful or if we should let FE deal with getting permit signatures
+export const getPermit2BatchAndSignatureSwap = async (
+    input: SwapBuildCallInputBase & {
+        client: Client & PublicActions & WalletActions;
+        owner: Address;
+    },
+): Promise<Permit2BatchAndSignature> => {
+    // get maxAmountIn
+    let maxAmountIn: TokenAmount;
+    if (input.queryOutput.swapKind === SwapKind.GivenIn) {
+        const queryOutput = input.queryOutput as ExactInQueryOutput;
+        maxAmountIn = queryOutput.amountIn;
+    } else {
+        const queryOutput = input.queryOutput as ExactOutQueryOutput;
+        maxAmountIn = getLimitAmount(
+            input.slippage,
+            SwapKind.GivenOut,
+            queryOutput.expectedAmountIn,
+        );
+    }
+
+    const chainId = await input.client.getChainId();
+    const spender = input.queryOutput.pathAmounts
+        ? BALANCER_BATCH_ROUTER[chainId]
+        : BALANCER_ROUTER[chainId];
+
+    // build permit details
+    const details: PermitDetails[] = [
+        await getDetails(
+            input.client,
+            maxAmountIn.token.address,
+            input.owner,
+            spender,
+            maxAmountIn.amount,
+        ),
+    ];
+
+    // sign permit2
+    const permit2 = await signPermit2(
+        input.client,
+        input.owner,
+        spender,
+        details,
+    );
+
+    return permit2;
 };
 
 export const signPermit2 = async (
