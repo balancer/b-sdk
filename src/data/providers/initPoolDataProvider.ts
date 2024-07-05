@@ -46,9 +46,9 @@ export class InitPoolDataProvider {
     public async getInitPoolData(
         poolAddress: Address,
         poolType: string,
-        vaultVersion: 2 | 3,
+        protocolVersion: 2 | 3,
     ): Promise<PoolState> {
-        if (vaultVersion === 2) {
+        if (protocolVersion === 2) {
             return this.getInitPoolDataV2(poolAddress, poolType);
         }
         return this.getInitPoolDataV3(poolAddress, poolType);
@@ -81,7 +81,7 @@ export class InitPoolDataProvider {
             address: poolAddress.toLowerCase() as Address,
             type: poolType,
             tokens: poolTokens,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 
@@ -109,7 +109,7 @@ export class InitPoolDataProvider {
             address: poolAddress.toLowerCase() as Address,
             type: poolType,
             tokens: poolTokens,
-            vaultVersion: 3,
+            protocolVersion: 3,
         };
     }
 }

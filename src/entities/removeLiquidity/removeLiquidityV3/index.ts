@@ -102,7 +102,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 TokenAmount.fromRawAmount(t, minAmountsOut[i]),
             ),
             tokenOutIndex: amounts.tokenOutIndex,
-            vaultVersion: poolState.vaultVersion,
+            protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
         };
 
@@ -166,7 +166,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: undefined,
-            vaultVersion: poolState.vaultVersion,
+            protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
         };
     }

@@ -27,7 +27,7 @@ export class InputValidatorBase {
             initPoolInput.amountsIn.map((a) => a.address),
             poolState.tokens.map((t) => t.address),
         );
-        if (poolState.vaultVersion === 3) {
+        if (poolState.protocolVersion === 3) {
             this.validateWethIsEth(initPoolInput as InitPoolInputV3);
         }
     }
@@ -39,7 +39,7 @@ export class InputValidatorBase {
             | CreatePoolV2ComposableStableInput,
     ) {
         validateCreatePoolTokens(input.tokens);
-        if (input.vaultVersion === 3) {
+        if (input.protocolVersion === 3) {
             input.tokens.forEach(({ tokenType, rateProvider }) => {
                 if (
                     tokenType !== TokenType.STANDARD &&

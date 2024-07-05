@@ -23,21 +23,22 @@ import {
     ExactOutQueryOutput,
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
-} from '../../src';
-import { forkSetup } from '../lib/utils/helper';
+} from '@/index';
+import { Path } from '@/entities/swap/paths/types';
+
+import { forkSetup } from 'test/lib/utils/helper';
 import {
     ANVIL_NETWORKS,
     startFork,
     stopAnvilFork,
-} from '../anvil/anvil-global-setup';
+} from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
 } from 'test/lib/utils/swapHelpers';
-import { Path } from '@/entities/swap/paths/types';
 
-const vaultVersion = 3;
+const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
 const blockNo = 6188394n;
@@ -79,13 +80,13 @@ describe('SwapV3', () => {
             [WETH.slot as number, BAL.slot as number, USDC.slot as number],
             [parseEther('100'), parseEther('100'), 100000000n],
             undefined,
-            vaultVersion,
+            protocolVersion,
         );
     });
 
     describe('single swap', () => {
         const pathBalWeth: Path = {
-            vaultVersion: 3,
+            protocolVersion: 3,
             tokens: [
                 {
                     address: BAL.address,
@@ -252,7 +253,7 @@ describe('SwapV3', () => {
     describe('multi-hop swap', () => {
         // weth > bal > dai > usdc
         const pathMultiSwap: Path = {
-            vaultVersion: 3,
+            protocolVersion: 3,
             tokens: [
                 {
                     address: WETH.address,
@@ -281,7 +282,7 @@ describe('SwapV3', () => {
         };
         // weth > bpt > usdc
         const pathWithExit: Path = {
-            vaultVersion: 3,
+            protocolVersion: 3,
             tokens: [
                 {
                     address: WETH.address,

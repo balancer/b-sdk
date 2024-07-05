@@ -34,8 +34,8 @@ export function validatePaths(paths: Path[]) {
     if (paths.length === 0)
         throw new Error('Invalid swap: must contain at least 1 path.');
 
-    const vaultVersion = paths[0].vaultVersion;
-    if (!paths.every((p) => p.vaultVersion === vaultVersion))
+    const protocolVersion = paths[0].protocolVersion;
+    if (!paths.every((p) => p.protocolVersion === protocolVersion))
         throw new Error(
             'Unsupported swap: all paths must use same Balancer version.',
         );

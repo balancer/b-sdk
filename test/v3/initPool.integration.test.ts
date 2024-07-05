@@ -74,7 +74,7 @@ describe('Initialize Pool V3 - Weighted Pool', async () => {
             pauseManager: signerAddress,
             swapFeeManager: signerAddress,
             chainId,
-            vaultVersion: 3,
+            protocolVersion: 3,
         };
 
         createTxInput = {

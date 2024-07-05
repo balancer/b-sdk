@@ -17,7 +17,6 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
-    PriceImpact,
 } from '../../src';
 
 const swap = async () => {
@@ -76,11 +75,6 @@ const swap = async () => {
     console.log(
         `Output token: ${swap.outputAmount.token.address}, Amount: ${swap.outputAmount.amount}`,
     );
-
-    // Get price impact
-    const priceImpact = await PriceImpact.swap(swapInput);
-
-    console.log(`Price Impact: ${priceImpact.percentage.toFixed(2)}%`);
 
     // Get up to date swap result by querying onchain
     const queryOutput = await swap.query(rpcUrl);

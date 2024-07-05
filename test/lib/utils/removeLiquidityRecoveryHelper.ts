@@ -43,7 +43,7 @@ export const sdkRemoveLiquidityRecovery = async ({
         slippage,
         wethIsEth: !!wethIsEth,
     };
-    if (poolState.vaultVersion === 2) {
+    if (poolState.protocolVersion === 2) {
         (removeLiquidityBuildInput as RemoveLiquidityV2BaseBuildCallInput) = {
             ...removeLiquidityBuildInput,
             sender: testAddress,
@@ -120,7 +120,7 @@ export function assertRemoveLiquidityRecovery(
     removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
-    vaultVersion: 2 | 3 = 2,
+    protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const {
@@ -150,7 +150,7 @@ export function assertRemoveLiquidityRecovery(
         poolId: poolState.id,
         poolType: poolState.type,
         removeLiquidityKind: removeLiquidityRecoveryInput.kind,
-        vaultVersion: poolState.vaultVersion,
+        protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityRecoveryInput.chainId,
     };
 
@@ -179,7 +179,7 @@ export function assertRemoveLiquidityRecovery(
         removeLiquidityBuildCallOutput,
         true,
         slippage,
-        vaultVersion,
+        protocolVersion,
     );
 
     assertTokenDeltas(

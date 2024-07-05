@@ -19,7 +19,7 @@ export class InitPool {
 
     buildCall(input: InitPoolInput, poolState: PoolState): InitPoolBuildOutput {
         this.inputValidator.validateInitPool(input, poolState);
-        switch (poolState.vaultVersion) {
+        switch (poolState.protocolVersion) {
             case 2:
                 return new InitPoolV2().buildCall(
                     input as InitPoolInputV2,
@@ -32,7 +32,7 @@ export class InitPool {
                 );
             default:
                 throw Error(
-                    `SDK does not support init for vault version: ${poolState.vaultVersion}`,
+                    `SDK does not support init for vault version: ${poolState.protocolVersion}`,
                 );
         }
     }

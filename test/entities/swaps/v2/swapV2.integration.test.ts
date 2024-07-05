@@ -22,17 +22,18 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     VAULT,
-} from '../../src';
-import { forkSetup } from '../lib/utils/helper';
-import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
+    Path,
+} from '@/index';
+
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
+import { forkSetup } from 'test/lib/utils/helper';
 import { TOKENS } from 'test/lib/utils/addresses';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
 } from 'test/lib/utils/swapHelpers';
-import { Path } from '@/entities/swap/paths/types';
 
-const vaultVersion = 2;
+const protocolVersion = 2;
 const chainId = ChainId.MAINNET;
 const blockNo = 18980070n;
 
@@ -46,7 +47,7 @@ describe('SwapV2', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
     let testAddress: Address;
     const pathBalWeth: Path = {
-        vaultVersion: 2,
+        protocolVersion: 2,
         tokens: [
             {
                 address: TOKENS[chainId].BAL.address,
@@ -84,7 +85,7 @@ describe('SwapV2', () => {
             [WETH.slot as number, BAL.slot as number],
             [parseEther('100'), parseEther('100')],
             undefined,
-            vaultVersion,
+            protocolVersion,
         );
     });
 

@@ -67,7 +67,7 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
             swapFee: '0.01',
             poolOwnerAddress: signerAddress, // Balancer DAO Multisig
             chainId,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
 
         createTxInput = {

@@ -23,8 +23,8 @@ export class AddLiquidity implements AddLiquidityBase {
         poolState: PoolState,
     ): Promise<AddLiquidityQueryOutput> {
         this.inputValidator.validateAddLiquidity(input, poolState);
-        switch (poolState.vaultVersion) {
-            case 0: {
+        switch (poolState.protocolVersion) {
+            case 1: {
                 const addLiquidity = new AddLiquidityCowAmm();
                 return addLiquidity.query(
                     input as AddLiquidityProportionalInput,
@@ -43,8 +43,8 @@ export class AddLiquidity implements AddLiquidityBase {
     }
 
     buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput {
-        switch (input.vaultVersion) {
-            case 0: {
+        switch (input.protocolVersion) {
+            case 1: {
                 const addLiquidity = new AddLiquidityCowAmm();
                 return addLiquidity.buildCall(input);
             }

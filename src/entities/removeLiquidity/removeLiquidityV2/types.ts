@@ -21,7 +21,7 @@ export type RemoveLiquidityV2BuildCallInput =
 
 export type RemoveLiquidityV2BaseQueryOutput =
     RemoveLiquidityBaseQueryOutput & {
-        vaultVersion: 2;
+        protocolVersion: 2;
     };
 
 export type RemoveLiquidityV2QueryOutput =

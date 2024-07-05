@@ -69,7 +69,7 @@ describe('Create Weighted Pool tests', () => {
             pauseManager: signerAddress,
             swapFeeManager: signerAddress,
             chainId,
-            vaultVersion: 3,
+            protocolVersion: 3,
         };
     });
     test('Create Weighted Pool', async () => {

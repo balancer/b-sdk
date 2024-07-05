@@ -78,7 +78,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
             bptIndex,
-            vaultVersion: poolState.vaultVersion,
+            protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
         };
     }
@@ -141,7 +141,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: undefined,
-            vaultVersion: poolState.vaultVersion,
+            protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
         };
     }

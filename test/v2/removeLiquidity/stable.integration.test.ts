@@ -245,7 +245,7 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.Stable,
             tokens,
-            vaultVersion: 2,
+            protocolVersion: 2,
         };
     }
 }

@@ -37,7 +37,7 @@ export async function makeForkTx(
         forkTokens: ForkToken[];
     },
     tokensForBalanceCheck: Address[],
-    vaultVersion: 2 | 3,
+    protocolVersion: 2 | 3,
 ) {
     const client = createTestClient({
         mode: 'anvil',
@@ -54,7 +54,7 @@ export async function makeForkTx(
         forkConfig.forkTokens.map((t) => t.slot),
         forkConfig.forkTokens.map((t) => t.rawBalance),
         undefined,
-        vaultVersion,
+        protocolVersion,
     );
 
     console.log('\nSending tx...');

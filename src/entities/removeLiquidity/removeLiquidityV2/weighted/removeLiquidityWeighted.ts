@@ -69,7 +69,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: amounts.tokenOutIndex,
-            vaultVersion: poolState.vaultVersion,
+            protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
         };
     }
@@ -121,7 +121,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             bptIn,
             amountsOut,
             tokenOutIndex: undefined,
-            vaultVersion: poolState.vaultVersion,
+            protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
         };
     }

@@ -20,7 +20,7 @@ export type AddLiquidityV2BuildCallInput =
     | AddLiquidityV2ComposableStableBuildCallInput;
 
 export type AddLiquidityV2BaseQueryOutput = AddLiquidityBaseQueryOutput & {
-    vaultVersion: 2;
+    protocolVersion: 2;
 };
 
 export type AddLiquidityV2QueryOutput =

@@ -36,7 +36,7 @@ import {
     TOKENS,
 } from 'test/lib/utils';
 
-const vaultVersion = 0;
+const protocolVersion = 1;
 
 const chainId = ChainId.SEPOLIA;
 const poolId = POOLS[chainId].MOCK_COW_AMM_POOL.id;
@@ -122,7 +122,7 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
-                vaultVersion,
+                protocolVersion,
             );
         });
     });
@@ -180,7 +180,7 @@ class MockApi {
             address: id,
             type: PoolType.CowAmm,
             tokens,
-            vaultVersion,
+            protocolVersion,
         };
     }
 }

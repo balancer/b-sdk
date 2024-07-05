@@ -38,7 +38,7 @@ export async function doCreatePool(
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: abis[createPoolInput.vaultVersion][createPoolInput.poolType],
+        abi: abis[createPoolInput.protocolVersion][createPoolInput.poolType],
         to,
     });
 
