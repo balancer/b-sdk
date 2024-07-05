@@ -2,8 +2,10 @@ import { Client, PublicActions, WalletActions } from 'viem';
 
 import { weightedPoolAbi_V3 } from '@/abi';
 import { Hex } from '@/types';
-import { MAX_UINT256 } from '@/utils';
+import { BALANCER_ROUTER, MAX_UINT256 } from '@/utils';
 import { getNonce } from './helper';
+import { RemoveLiquidityBaseBuildCallInput } from '../removeLiquidity/types';
+import { getAmountsCall } from '../removeLiquidity/helper';
 
 export type PermitSignature = {
     r: Hex;
@@ -34,6 +36,23 @@ export type PermitApprovalAndSignature = {
 export type PermitBatchAndSignatures = {
     permitBatch: PermitApproval[];
     permitSignatures: Hex[];
+};
+
+export const getPermitApprovalAndSignatureRemoveLiquidity = async (
+    input: RemoveLiquidityBaseBuildCallInput & {
+        client: Client & WalletActions & PublicActions;
+        owner: Hex;
+    },
+): Promise<PermitApprovalAndSignature> => {
+    const amounts = getAmountsCall(input);
+    const { permitApproval, permitSignature } = await signPermit(
+        input.client,
+        input.bptIn.token.address,
+        input.owner,
+        BALANCER_ROUTER[input.chainId],
+        amounts.maxBptAmountIn,
+    );
+    return { permitApproval, permitSignature };
 };
 
 /**

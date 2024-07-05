@@ -32,7 +32,6 @@ import {
     RemoveLiquidity,
     RemoveLiquidityKind,
     RemoveLiquidityProportionalInput,
-    signPermit,
     Slippage,
     Swap,
     swapETHBuildCallWithPermit2Error,
@@ -178,19 +177,9 @@ describe('permit and permit2 integration tests', () => {
                 vaultVersion,
             );
 
-            const { permitApproval, permitSignature } = await signPermit(
-                removeLiquidityTxInput.client,
-                poolState.address,
-                removeLiquidityTxInput.testAddress,
-                BALANCER_ROUTER[chainId],
-                removeLiquidityInput.bptIn.rawAmount,
-            );
-
             const removeLiquidityOutput = await doRemoveLiquidityWithPermit({
                 ...removeLiquidityTxInput,
                 removeLiquidityInput,
-                permitApproval,
-                permitSignature,
             });
 
             assertRemoveLiquidityProportional(

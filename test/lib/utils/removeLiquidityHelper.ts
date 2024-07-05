@@ -19,13 +19,11 @@ import {
     TokenAmount,
     VAULT,
     PermitApprovalAndSignature,
+    getPermitApprovalAndSignatureRemoveLiquidity,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
-import {
-    RemoveLiquidityTxInput,
-    RemoveLiquidityWithPermitTxInput,
-} from './types';
+import { RemoveLiquidityTxInput } from './types';
 import { RemoveLiquidityV2BaseBuildCallInput } from '@/entities/removeLiquidity/removeLiquidityV2/types';
 import { RemoveLiquidityV2ComposableStableQueryOutput } from '@/entities/removeLiquidity/removeLiquidityV2/composableStable/types';
 
@@ -90,9 +88,9 @@ export const sdkRemoveLiquidityWithPermit = async ({
     poolState,
     slippage,
     wethIsEth,
-    permitApproval,
-    permitSignature,
-}: Omit<RemoveLiquidityWithPermitTxInput, 'client'>): Promise<{
+    client,
+    testAddress,
+}: RemoveLiquidityTxInput): Promise<{
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
@@ -106,6 +104,13 @@ export const sdkRemoveLiquidityWithPermit = async ({
         slippage,
         wethIsEth: !!wethIsEth,
     };
+
+    const { permitApproval, permitSignature } =
+        await getPermitApprovalAndSignatureRemoveLiquidity({
+            ...removeLiquidityBuildInput,
+            client,
+            owner: testAddress,
+        });
 
     const removeLiquidityBuildCallOutput = removeLiquidity.buildCallWithPermit(
         removeLiquidityBuildInput,
@@ -207,7 +212,7 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
 }
 
 export async function doRemoveLiquidityWithPermit(
-    txInput: RemoveLiquidityWithPermitTxInput,
+    txInput: RemoveLiquidityTxInput,
 ) {
     const {
         removeLiquidity,
@@ -217,8 +222,6 @@ export async function doRemoveLiquidityWithPermit(
         client,
         slippage,
         wethIsEth,
-        permitApproval,
-        permitSignature,
     } = txInput;
 
     const { removeLiquidityQueryOutput, removeLiquidityBuildCallOutput } =
@@ -229,8 +232,7 @@ export async function doRemoveLiquidityWithPermit(
             slippage,
             testAddress,
             wethIsEth,
-            permitApproval,
-            permitSignature,
+            client,
         });
 
     // get tokens for balance change - pool tokens, BPT, native
