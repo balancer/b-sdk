@@ -3,7 +3,6 @@ import { Address, Client, PublicActions, WalletActions } from 'viem';
 import { SwapKind } from '../../types';
 import { TokenAmount } from '../tokenAmount';
 import { Permit2BatchAndSignature } from '../permit2';
-import { Slippage } from '../slippage';
 import { validatePaths } from './paths';
 import { SwapV2 } from './swaps/v2';
 import { SwapV3 } from './swaps/v3';
@@ -12,11 +11,12 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     SwapBuildCallInput,
+    SwapBuildCallInputBase,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
 } from './types';
-import { swapETHBuildCallWithPermit2Error } from '@/utils';
+import { NATIVE_ASSETS, swapETHBuildCallWithPermit2Error } from '@/utils';
 
 export * from './types';
 export * from './paths';
@@ -91,18 +91,23 @@ export class Swap {
     }
 
     async getPermit2BatchAndSignature(
-        client: Client & PublicActions & WalletActions,
-        owner: Address,
-        slippage: Slippage,
+        input: SwapBuildCallInputBase & {
+            client: Client & PublicActions & WalletActions;
+            owner: Address;
+        },
     ): Promise<Permit2BatchAndSignature> {
-        return this.swap.getPermit2BatchAndSignature(client, owner, slippage);
+        return this.swap.getPermit2BatchAndSignature(input);
     }
 
     buildCallWithPermit2(
         input: SwapBuildCallInput,
         permit2: Permit2BatchAndSignature,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
-        if (input.wethIsEth) {
+        if (
+            input.wethIsEth &&
+            this.inputAmount.token.address ===
+                NATIVE_ASSETS[this.swap.chainId].wrapped
+        ) {
             throw swapETHBuildCallWithPermit2Error;
         }
 

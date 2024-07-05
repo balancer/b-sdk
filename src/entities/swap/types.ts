@@ -11,7 +11,7 @@ export type SwapInput = {
     swapKind: SwapKind;
 };
 
-type SwapBuildCallInputBase = {
+export type SwapBuildCallInputBase = {
     deadline?: bigint;
     slippage: Slippage;
     wethIsEth?: boolean;

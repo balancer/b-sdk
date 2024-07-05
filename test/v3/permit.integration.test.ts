@@ -43,7 +43,11 @@ import {
     SwapKind,
 } from 'src';
 
-import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
+import {
+    ANVIL_NETWORKS,
+    startFork,
+    stopAnvilFork,
+} from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityTxInput,
     approveSpenderOnTokens,
@@ -89,6 +93,7 @@ describe('permit and permit2 integration tests', () => {
 
     // reset fork
     beforeEach(async () => {
+        await stopAnvilFork(ANVIL_NETWORKS.SEPOLIA);
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
 
         client = createTestClient({
@@ -222,7 +227,147 @@ describe('permit and permit2 integration tests', () => {
         });
     });
 
-    describe('swap tests', () => {
+    describe('single swap tests', () => {
+        let pathBalWeth: Path;
+        let swapParams: SwapInput;
+
+        beforeEach(async () => {
+            // weth > bal
+            pathBalWeth = {
+                vaultVersion: 3,
+                tokens: [
+                    {
+                        address: BAL.address,
+                        decimals: BAL.decimals,
+                    },
+                    {
+                        address: WETH.address,
+                        decimals: WETH.decimals,
+                    },
+                ],
+                pools: [POOLS[chainId].MOCK_WETH_BAL_POOL.id],
+                inputAmountRaw: 100000000000n,
+                outputAmountRaw: 100000000000n,
+            };
+
+            swapParams = {
+                chainId,
+                paths: [pathBalWeth],
+                swapKind: SwapKind.GivenIn,
+            };
+        });
+
+        describe('wethIsEth: false', () => {
+            test('GivenIn', async () => {
+                const swap = new Swap({
+                    ...swapParams,
+                    swapKind: SwapKind.GivenIn,
+                });
+                await assertSwapExactInWithPermit2(
+                    BALANCER_ROUTER[chainId],
+                    client,
+                    rpcUrl,
+                    chainId,
+                    swap,
+                    false,
+                );
+            });
+            test('GivenOut', async () => {
+                const swap = new Swap({
+                    ...swapParams,
+                    swapKind: SwapKind.GivenOut,
+                });
+                await assertSwapExactOutWithPermit2(
+                    BALANCER_ROUTER[chainId],
+                    client,
+                    rpcUrl,
+                    chainId,
+                    swap,
+                    false,
+                );
+            });
+        });
+        describe('wethIsEth: true', () => {
+            describe('eth out', async () => {
+                test('GivenIn', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathBalWeth],
+                        swapKind: SwapKind.GivenIn,
+                    });
+                    await assertSwapExactInWithPermit2(
+                        BALANCER_ROUTER[chainId],
+                        client,
+                        rpcUrl,
+                        chainId,
+                        swap,
+                        true,
+                    );
+                });
+                test('GivenOut', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathBalWeth],
+                        swapKind: SwapKind.GivenOut,
+                    });
+                    await assertSwapExactOutWithPermit2(
+                        BALANCER_ROUTER[chainId],
+                        client,
+                        rpcUrl,
+                        chainId,
+                        swap,
+                        true,
+                    );
+                });
+            });
+            describe('eth in', () => {
+                test('GivenIn', async () => {
+                    const pathWethBal = {
+                        ...pathBalWeth,
+                        tokens: [...pathBalWeth.tokens].reverse(),
+                    };
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathWethBal],
+                        swapKind: SwapKind.GivenIn,
+                    });
+                    await expect(() =>
+                        assertSwapExactInWithPermit2(
+                            BALANCER_ROUTER[chainId],
+                            client,
+                            rpcUrl,
+                            chainId,
+                            swap,
+                            true,
+                        ),
+                    ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
+                });
+                test('GivenOut', async () => {
+                    const pathWethBal = {
+                        ...pathBalWeth,
+                        tokens: [...pathBalWeth.tokens].reverse(),
+                    };
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathWethBal],
+                        swapKind: SwapKind.GivenOut,
+                    });
+                    await expect(() =>
+                        assertSwapExactOutWithPermit2(
+                            BALANCER_ROUTER[chainId],
+                            client,
+                            rpcUrl,
+                            chainId,
+                            swap,
+                            true,
+                        ),
+                    ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
+                });
+            });
+        });
+    });
+
+    describe('multi-hop swap tests', () => {
         let pathMultiSwap: Path;
         let pathWithExit: Path;
         let swapParams: SwapInput;

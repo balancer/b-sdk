@@ -3,8 +3,8 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     Permit2BatchAndSignature,
-    Slippage,
     SwapBuildCallInput,
+    SwapBuildCallInputBase,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
 } from '../../..';
@@ -46,8 +46,9 @@ export interface SwapBase {
         permit2: Permit2BatchAndSignature,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
     getPermit2BatchAndSignature(
-        client: Client & PublicActions & WalletActions,
-        owner: Address,
-        slippage: Slippage,
+        input: SwapBuildCallInputBase & {
+            client: Client & PublicActions & WalletActions;
+            owner: Address;
+        },
     ): Promise<Permit2BatchAndSignature>;
 }

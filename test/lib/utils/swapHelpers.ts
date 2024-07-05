@@ -121,11 +121,11 @@ export async function assertSwapExactInWithPermit2(
         wethIsEth,
     };
 
-    const permit2 = await swap.getPermit2BatchAndSignature(
+    const permit2 = await swap.getPermit2BatchAndSignature({
+        ...buildCallInput,
         client,
-        testAddress,
-        slippage,
-    );
+        owner: testAddress,
+    });
 
     const call = swap.buildCallWithPermit2(
         buildCallInput,
@@ -289,11 +289,11 @@ export async function assertSwapExactOutWithPermit2(
         wethIsEth,
     };
 
-    const permit2 = await swap.getPermit2BatchAndSignature(
+    const permit2 = await swap.getPermit2BatchAndSignature({
+        ...buildCallInput,
         client,
-        testAddress,
-        slippage,
-    );
+        owner: testAddress,
+    });
 
     const call = swap.buildCallWithPermit2(
         buildCallInput,

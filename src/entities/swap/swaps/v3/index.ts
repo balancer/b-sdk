@@ -24,6 +24,7 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     SwapBuildCallInput,
+    SwapBuildCallInputBase,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
@@ -47,7 +48,6 @@ import {
     getDetails,
     signPermit2,
 } from '@/entities/permit2';
-import { Slippage } from '@/entities/slippage';
 
 export * from './types';
 
@@ -383,35 +383,42 @@ export class SwapV3 implements SwapBase {
 
     // TODO: check if this is helpful or if we should let FE deal with getting permit signatures
     public async getPermit2BatchAndSignature(
-        client: Client & PublicActions & WalletActions,
-        owner: Address,
-        slippage: Slippage,
+        input: SwapBuildCallInputBase & {
+            client: Client & PublicActions & WalletActions;
+            owner: Address;
+        },
     ): Promise<Permit2BatchAndSignature> {
         // get maxAmountIn
         let maxAmountIn: bigint;
         if (this.swapKind === SwapKind.GivenIn) {
             maxAmountIn = this.inputAmount.amount;
         } else {
+            const queryOutput = input.queryOutput as ExactOutQueryOutput;
             maxAmountIn = getLimitAmount(
-                slippage,
+                input.slippage,
                 SwapKind.GivenOut,
-                this.inputAmount,
+                queryOutput.expectedAmountIn,
             ).amount;
         }
 
         // build permit details
         const details: PermitDetails[] = [
             await getDetails(
-                client,
+                input.client,
                 this.inputAmount.token.address,
-                owner,
+                input.owner,
                 this.to(),
                 maxAmountIn,
             ),
         ];
 
         // sign permit2
-        const permit2 = await signPermit2(client, owner, this.to(), details);
+        const permit2 = await signPermit2(
+            input.client,
+            input.owner,
+            this.to(),
+            details,
+        );
 
         return permit2;
     }
