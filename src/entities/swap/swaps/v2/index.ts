@@ -304,10 +304,6 @@ export class SwapV2 implements SwapBase {
         };
     }
 
-    getPermit2(): Promise<never> {
-        throw new Error('getPermit2 is not supported on v2');
-    }
-
     buildCallWithPermit2(): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
         throw new Error('buildCallWithPermit2 is not supported on v2');
     }

@@ -59,7 +59,7 @@ import {
     TOKENS,
 } from 'test/lib/utils';
 
-const vaultVersion = 3;
+const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
@@ -174,7 +174,7 @@ describe('permit and permit2 integration tests', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 addLiquidityTxInput.slippage,
-                vaultVersion,
+                protocolVersion,
             );
 
             const removeLiquidityOutput = await doRemoveLiquidityWithPermit({
@@ -187,7 +187,7 @@ describe('permit and permit2 integration tests', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 removeLiquidityTxInput.slippage,
-                vaultVersion,
+                protocolVersion,
             );
         });
     });
@@ -199,7 +199,7 @@ describe('permit and permit2 integration tests', () => {
         beforeEach(async () => {
             // weth > bal
             pathBalWeth = {
-                vaultVersion: 3,
+                protocolVersion: 3,
                 tokens: [
                     {
                         address: BAL.address,
@@ -340,7 +340,7 @@ describe('permit and permit2 integration tests', () => {
         beforeEach(async () => {
             // weth > bal > dai > usdc
             pathMultiSwap = {
-                vaultVersion: 3,
+                protocolVersion: 3,
                 tokens: [
                     {
                         address: WETH.address,
@@ -369,7 +369,7 @@ describe('permit and permit2 integration tests', () => {
             };
             // weth > bpt > usdc
             pathWithExit = {
-                vaultVersion: 3,
+                protocolVersion: 3,
                 tokens: [
                     {
                         address: WETH.address,
@@ -489,7 +489,7 @@ class MockApi {
             address: id,
             type: PoolType.Weighted,
             tokens,
-            vaultVersion,
+            protocolVersion,
         };
     }
 }

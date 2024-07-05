@@ -99,7 +99,7 @@ export class Swap {
             throw swapETHBuildCallWithPermit2Error;
         }
 
-        if (this.vaultVersion === 3) {
+        if (this.protocolVersion === 3) {
             return this.swap.buildCallWithPermit2(input, permit2);
         }
 

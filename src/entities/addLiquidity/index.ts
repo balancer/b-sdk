@@ -71,7 +71,7 @@ export class AddLiquidity implements AddLiquidityBase {
         input: AddLiquidityBuildCallInput,
         permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
-        if (input.vaultVersion === 3) {
+        if (input.protocolVersion === 3) {
             const addLiquidity = new AddLiquidityV3();
             return addLiquidity.buildCallWithPermit2(input, permit2);
         }

@@ -109,7 +109,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
         input: RemoveLiquidityBuildCallInput,
         permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
-        if (input.vaultVersion === 3) {
+        if (input.protocolVersion === 3) {
             const removeLiquidity = new RemoveLiquidityV3();
             return removeLiquidity.buildCallWithPermit(input, permit);
         }

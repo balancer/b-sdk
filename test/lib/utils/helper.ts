@@ -130,7 +130,7 @@ export const approveTokens = async (
     client: Client & PublicActions & WalletActions,
     accountAddress: Address,
     tokens: Address[],
-    vaultVersion: 2 | 3,
+    protocolVersion: 2 | 3,
 ): Promise<boolean> => {
     const approvals: boolean[] = [];
     for (let i = 0; i < tokens.length; i++) {
@@ -138,7 +138,7 @@ export const approveTokens = async (
             client,
             accountAddress,
             tokens[i],
-            vaultVersion,
+            protocolVersion,
         );
         approvals.push(approved);
     }

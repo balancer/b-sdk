@@ -17,7 +17,7 @@ import {
     Token,
     TokenAmount,
     SwapKind,
-    isAuraBalSwap
+    isAuraBalSwap,
 } from '../../src';
 
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';

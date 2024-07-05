@@ -9,7 +9,6 @@ import {
     InitPool,
     InitPoolInput,
     NestedPoolState,
-    PermitApprovalAndSignature,
     PoolState,
     RemoveLiquidityInput,
     RemoveLiquidity,
@@ -53,9 +52,6 @@ export type RemoveLiquidityTxInput = RemoveLiquidityTxInputBase & {
 export type RemoveLiquidityRecoveryTxInput = RemoveLiquidityTxInputBase & {
     removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput;
 };
-
-export type RemoveLiquidityWithPermitTxInput = RemoveLiquidityTxInput &
-    PermitApprovalAndSignature;
 
 export type CreatePoolTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
