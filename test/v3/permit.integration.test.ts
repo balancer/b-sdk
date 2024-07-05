@@ -24,18 +24,15 @@ import {
     BALANCER_ROUTER,
     ChainId,
     CHAINS,
-    getDetails,
     Hex,
     Path,
     PERMIT2,
-    PermitDetails,
     PoolState,
     PoolType,
     RemoveLiquidity,
     RemoveLiquidityKind,
     RemoveLiquidityProportionalInput,
     signPermit,
-    signPermit2,
     Slippage,
     Swap,
     swapETHBuildCallWithPermit2Error,
@@ -168,30 +165,9 @@ describe('permit and permit2 integration tests', () => {
                 removeLiquidityInput,
             };
 
-            const details: PermitDetails[] = [];
-            for (const amountIn of addLiquidityInput.amountsIn) {
-                details.push(
-                    await getDetails(
-                        addLiquidityTxInput.client,
-                        amountIn.address,
-                        addLiquidityTxInput.testAddress,
-                        BALANCER_ROUTER[chainId],
-                        amountIn.rawAmount,
-                    ),
-                );
-            }
-            const { permit2Batch, permit2Signature } = await signPermit2(
-                addLiquidityTxInput.client,
-                addLiquidityTxInput.testAddress,
-                BALANCER_ROUTER[chainId],
-                details,
-            );
-
             const addLiquidityOutput = await doAddLiquidityWithPermit2({
                 ...addLiquidityTxInput,
                 addLiquidityInput,
-                permit2Batch,
-                permit2Signature,
             });
 
             assertAddLiquidityUnbalanced(

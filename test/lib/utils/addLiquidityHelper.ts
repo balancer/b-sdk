@@ -16,10 +16,11 @@ import {
     Token,
     TokenAmount,
     VAULT,
+    getPermit2BatchAndSignatureAddLiquidity,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
-import { AddLiquidityTxInput, AddLiquidityWithPermit2TxInput } from './types';
+import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
 
@@ -84,9 +85,9 @@ async function sdkAddLiquidityWithPermit2({
     poolState,
     slippage,
     wethIsEth,
-    permit2Batch,
-    permit2Signature,
-}: Omit<AddLiquidityWithPermit2TxInput, 'client'>): Promise<{
+    client,
+    testAddress,
+}: AddLiquidityTxInput): Promise<{
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
 }> {
@@ -100,6 +101,13 @@ async function sdkAddLiquidityWithPermit2({
         slippage,
         wethIsEth: !!wethIsEth,
     };
+
+    const { permit2Batch, permit2Signature } =
+        await getPermit2BatchAndSignatureAddLiquidity({
+            ...addLiquidityBuildInput,
+            client,
+            owner: testAddress,
+        });
 
     const addLiquidityBuildCallOutput = addLiquidity.buildCallWithPermit2(
         addLiquidityBuildInput,
@@ -204,9 +212,7 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
  *      @param client: Client & PublicActions & WalletActions - The RPC client
  *      @param slippage: Slippage - The slippage tolerance for the transaction
  */
-export async function doAddLiquidityWithPermit2(
-    txInput: AddLiquidityWithPermit2TxInput,
-) {
+export async function doAddLiquidityWithPermit2(txInput: AddLiquidityTxInput) {
     const {
         addLiquidity,
         poolState,
@@ -215,8 +221,6 @@ export async function doAddLiquidityWithPermit2(
         client,
         slippage,
         wethIsEth,
-        permit2Batch,
-        permit2Signature,
     } = txInput;
 
     const { addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -227,8 +231,7 @@ export async function doAddLiquidityWithPermit2(
             slippage,
             testAddress,
             wethIsEth,
-            permit2Batch,
-            permit2Signature,
+            client,
         });
 
     const tokens = getTokensForBalanceCheck(poolState);

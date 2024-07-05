@@ -6,12 +6,13 @@ import {
     PermitDetails,
 } from './allowanceTransfer';
 import { AllowanceProvider } from './providers';
-import { PERMIT2 } from '@/utils';
+import { BALANCER_ROUTER, PERMIT2 } from '@/utils';
 import {
     MaxAllowanceExpiration,
     MaxAllowanceTransferAmount,
     MaxSigDeadline,
 } from './constants';
+import { AddLiquidityBaseBuildCallInput } from '../addLiquidity/types';
 
 export * from './allowanceTransfer';
 export * from './signatureTransfer';
@@ -21,6 +22,28 @@ export * from './constants';
 export type Permit2BatchAndSignature = {
     permit2Batch: Permit2Batch;
     permit2Signature: Hex;
+};
+
+export const getPermit2BatchAndSignatureAddLiquidity = async (
+    input: AddLiquidityBaseBuildCallInput & {
+        client: Client & WalletActions & PublicActions;
+        owner: Address;
+    },
+): Promise<Permit2BatchAndSignature> => {
+    const spender = BALANCER_ROUTER[input.chainId];
+    const details: PermitDetails[] = [];
+    for (const amountIn of input.amountsIn) {
+        details.push(
+            await getDetails(
+                input.client,
+                amountIn.token.address,
+                input.owner,
+                spender,
+                amountIn.amount,
+            ),
+        );
+    }
+    return signPermit2(input.client, input.owner, spender, details);
 };
 
 export const signPermit2 = async (

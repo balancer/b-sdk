@@ -10,7 +10,6 @@ import {
     InitPoolInput,
     NestedPoolState,
     PermitApprovalAndSignature,
-    Permit2BatchAndSignature,
     PoolState,
     RemoveLiquidityInput,
     RemoveLiquidity,
@@ -28,9 +27,6 @@ export type AddLiquidityTxInput = {
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;
 };
-
-export type AddLiquidityWithPermit2TxInput = AddLiquidityTxInput &
-    Permit2BatchAndSignature;
 
 export type InitPoolTxInput = Omit<
     AddLiquidityTxInput,
