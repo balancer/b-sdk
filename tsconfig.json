@@ -24,6 +24,6 @@
         "paths": {
             "@/*": ["./src/*"],
             "@balancer/sdk": ["src/index.ts"]
-        },
+        }
     }
 }
