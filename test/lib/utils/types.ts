@@ -25,6 +25,7 @@ export type AddLiquidityTxInput = {
     testAddress: Address;
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;
+    usePermit2Signatures?: boolean;
 };
 
 export type InitPoolTxInput = Omit<
@@ -43,6 +44,7 @@ export type RemoveLiquidityTxInputBase = {
     testAddress: Address;
     wethIsEth?: boolean;
     toInternalBalance?: boolean;
+    usePermitSignatures?: boolean;
 };
 
 export type RemoveLiquidityTxInput = RemoveLiquidityTxInputBase & {

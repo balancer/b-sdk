@@ -49,10 +49,10 @@ import {
     approveSpenderOnTokens,
     assertAddLiquidityUnbalanced,
     assertRemoveLiquidityProportional,
-    assertSwapExactInWithPermit2,
-    assertSwapExactOutWithPermit2,
-    doAddLiquidityWithPermit2,
-    doRemoveLiquidityWithPermit,
+    assertSwapExactIn,
+    assertSwapExactOut,
+    doAddLiquidity,
+    doRemoveLiquidity,
     POOLS,
     RemoveLiquidityTxInput,
     setTokenBalances,
@@ -61,6 +61,8 @@ import {
 
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
+const usePermit2Signatures = true;
+const usePermitSignatures = true;
 
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 const WETH = TOKENS[chainId].WETH;
@@ -164,9 +166,10 @@ describe('permit and permit2 integration tests', () => {
                 removeLiquidityInput,
             };
 
-            const addLiquidityOutput = await doAddLiquidityWithPermit2({
+            const addLiquidityOutput = await doAddLiquidity({
                 ...addLiquidityTxInput,
                 addLiquidityInput,
+                usePermit2Signatures,
             });
 
             assertAddLiquidityUnbalanced(
@@ -177,9 +180,10 @@ describe('permit and permit2 integration tests', () => {
                 protocolVersion,
             );
 
-            const removeLiquidityOutput = await doRemoveLiquidityWithPermit({
+            const removeLiquidityOutput = await doRemoveLiquidity({
                 ...removeLiquidityTxInput,
                 removeLiquidityInput,
+                usePermitSignatures,
             });
 
             assertRemoveLiquidityProportional(
@@ -228,13 +232,14 @@ describe('permit and permit2 integration tests', () => {
                     ...swapParams,
                     swapKind: SwapKind.GivenIn,
                 });
-                await assertSwapExactInWithPermit2(
+                await assertSwapExactIn(
                     BALANCER_ROUTER[chainId],
                     client,
                     rpcUrl,
                     chainId,
                     swap,
                     false,
+                    usePermit2Signatures,
                 );
             });
             test('GivenOut', async () => {
@@ -242,13 +247,14 @@ describe('permit and permit2 integration tests', () => {
                     ...swapParams,
                     swapKind: SwapKind.GivenOut,
                 });
-                await assertSwapExactOutWithPermit2(
+                await assertSwapExactOut(
                     BALANCER_ROUTER[chainId],
                     client,
                     rpcUrl,
                     chainId,
                     swap,
                     false,
+                    usePermit2Signatures,
                 );
             });
         });
@@ -260,13 +266,14 @@ describe('permit and permit2 integration tests', () => {
                         paths: [pathBalWeth],
                         swapKind: SwapKind.GivenIn,
                     });
-                    await assertSwapExactInWithPermit2(
+                    await assertSwapExactIn(
                         BALANCER_ROUTER[chainId],
                         client,
                         rpcUrl,
                         chainId,
                         swap,
                         true,
+                        usePermit2Signatures,
                     );
                 });
                 test('GivenOut', async () => {
@@ -275,13 +282,14 @@ describe('permit and permit2 integration tests', () => {
                         paths: [pathBalWeth],
                         swapKind: SwapKind.GivenOut,
                     });
-                    await assertSwapExactOutWithPermit2(
+                    await assertSwapExactOut(
                         BALANCER_ROUTER[chainId],
                         client,
                         rpcUrl,
                         chainId,
                         swap,
                         true,
+                        usePermit2Signatures,
                     );
                 });
             });
@@ -297,13 +305,14 @@ describe('permit and permit2 integration tests', () => {
                         swapKind: SwapKind.GivenIn,
                     });
                     await expect(() =>
-                        assertSwapExactInWithPermit2(
+                        assertSwapExactIn(
                             BALANCER_ROUTER[chainId],
                             client,
                             rpcUrl,
                             chainId,
                             swap,
                             true,
+                            usePermit2Signatures,
                         ),
                     ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
                 });
@@ -318,13 +327,14 @@ describe('permit and permit2 integration tests', () => {
                         swapKind: SwapKind.GivenOut,
                     });
                     await expect(() =>
-                        assertSwapExactOutWithPermit2(
+                        assertSwapExactOut(
                             BALANCER_ROUTER[chainId],
                             client,
                             rpcUrl,
                             chainId,
                             swap,
                             true,
+                            usePermit2Signatures,
                         ),
                     ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
                 });
@@ -406,7 +416,7 @@ describe('permit and permit2 integration tests', () => {
                     swapKind: SwapKind.GivenIn,
                 });
 
-                await assertSwapExactInWithPermit2(
+                await assertSwapExactIn(
                     BALANCER_BATCH_ROUTER[chainId],
                     client,
                     rpcUrl,
@@ -420,7 +430,7 @@ describe('permit and permit2 integration tests', () => {
                     ...swapParams,
                     swapKind: SwapKind.GivenOut,
                 });
-                await assertSwapExactOutWithPermit2(
+                await assertSwapExactOut(
                     BALANCER_BATCH_ROUTER[chainId],
                     client,
                     rpcUrl,
@@ -437,7 +447,7 @@ describe('permit and permit2 integration tests', () => {
                     swapKind: SwapKind.GivenIn,
                 });
                 await expect(() =>
-                    assertSwapExactInWithPermit2(
+                    assertSwapExactIn(
                         BALANCER_BATCH_ROUTER[chainId],
                         client,
                         rpcUrl,
@@ -453,7 +463,7 @@ describe('permit and permit2 integration tests', () => {
                     swapKind: SwapKind.GivenOut,
                 });
                 await expect(() =>
-                    assertSwapExactOutWithPermit2(
+                    assertSwapExactOut(
                         BALANCER_BATCH_ROUTER[chainId],
                         client,
                         rpcUrl,

@@ -18,7 +18,6 @@ import {
     Token,
     TokenAmount,
     VAULT,
-    Permit,
     PermitHelper,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
@@ -33,18 +32,17 @@ export type RemoveLiquidityOutput = {
     txOutput: TxOutput;
 };
 
-export const sdkRemoveLiquidity = async (
-    {
-        removeLiquidity,
-        removeLiquidityInput,
-        poolState,
-        slippage,
-        testAddress,
-        wethIsEth,
-        toInternalBalance,
-    }: Omit<RemoveLiquidityTxInput, 'client'>,
-    permit?: Permit,
-): Promise<{
+export const sdkRemoveLiquidity = async ({
+    removeLiquidity,
+    removeLiquidityInput,
+    poolState,
+    slippage,
+    testAddress,
+    wethIsEth,
+    toInternalBalance,
+    client,
+    usePermitSignatures,
+}: RemoveLiquidityTxInput): Promise<{
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
@@ -67,53 +65,23 @@ export const sdkRemoveLiquidity = async (
         };
     }
 
-    const removeLiquidityBuildCallOutput =
-        permit !== undefined
-            ? removeLiquidity.buildCallWithPermit(
-                  removeLiquidityBuildInput,
-                  permit,
-              )
-            : removeLiquidity.buildCall(removeLiquidityBuildInput);
+    let removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
+    if (usePermitSignatures) {
+        const permit = await PermitHelper.signRemoveLiquidityApproval({
+            ...removeLiquidityBuildInput,
+            client,
+            owner: testAddress,
+        });
 
-    return {
-        removeLiquidityBuildCallOutput,
-        removeLiquidityQueryOutput,
-    };
-};
-
-export const sdkRemoveLiquidityWithPermit = async ({
-    removeLiquidity,
-    removeLiquidityInput,
-    poolState,
-    slippage,
-    wethIsEth,
-    client,
-    testAddress,
-}: RemoveLiquidityTxInput): Promise<{
-    removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
-    removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
-}> => {
-    const removeLiquidityQueryOutput = await removeLiquidity.query(
-        removeLiquidityInput,
-        poolState,
-    );
-
-    const removeLiquidityBuildInput: RemoveLiquidityBuildCallInput = {
-        ...removeLiquidityQueryOutput,
-        slippage,
-        wethIsEth: !!wethIsEth,
-    };
-
-    const permit = await PermitHelper.signRemoveLiquidityApproval({
-        ...removeLiquidityBuildInput,
-        client,
-        owner: testAddress,
-    });
-
-    const removeLiquidityBuildCallOutput = removeLiquidity.buildCallWithPermit(
-        removeLiquidityBuildInput,
-        permit,
-    );
+        removeLiquidityBuildCallOutput = removeLiquidity.buildCallWithPermit(
+            removeLiquidityBuildInput,
+            permit,
+        );
+    } else {
+        removeLiquidityBuildCallOutput = removeLiquidity.buildCall(
+            removeLiquidityBuildInput,
+        );
+    }
 
     return {
         removeLiquidityBuildCallOutput,
@@ -176,6 +144,7 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
         client,
         slippage,
         wethIsEth,
+        usePermitSignatures,
     } = txInput;
 
     const { removeLiquidityQueryOutput, removeLiquidityBuildCallOutput } =
@@ -186,50 +155,8 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
             slippage,
             testAddress,
             wethIsEth,
-        });
-
-    // get tokens for balance change - pool tokens, BPT, native
-    const tokens = getTokensForBalanceCheck(poolState);
-
-    // send transaction and calculate balance changes
-    const txOutput = await sendTransactionGetBalances(
-        tokens,
-        client,
-        testAddress,
-        removeLiquidityBuildCallOutput.to,
-        removeLiquidityBuildCallOutput.callData,
-        removeLiquidityBuildCallOutput.value,
-    );
-
-    return {
-        removeLiquidityQueryOutput,
-        removeLiquidityBuildCallOutput,
-        txOutput,
-    };
-}
-
-export async function doRemoveLiquidityWithPermit(
-    txInput: RemoveLiquidityTxInput,
-) {
-    const {
-        removeLiquidity,
-        poolState,
-        removeLiquidityInput,
-        testAddress,
-        client,
-        slippage,
-        wethIsEth,
-    } = txInput;
-
-    const { removeLiquidityQueryOutput, removeLiquidityBuildCallOutput } =
-        await sdkRemoveLiquidityWithPermit({
-            removeLiquidity,
-            removeLiquidityInput,
-            poolState,
-            slippage,
-            testAddress,
-            wethIsEth,
             client,
+            usePermitSignatures,
         });
 
     // get tokens for balance change - pool tokens, BPT, native

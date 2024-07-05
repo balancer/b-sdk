@@ -23,6 +23,7 @@ import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
+import { Client, PublicActions, WalletActions } from 'viem';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -38,6 +39,8 @@ async function sdkAddLiquidity({
     testAddress,
     wethIsEth,
     fromInternalBalance,
+    client,
+    usePermit2Signatures,
 }: {
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
@@ -46,6 +49,8 @@ async function sdkAddLiquidity({
     testAddress: Address;
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;
+    client: Client & PublicActions & WalletActions;
+    usePermit2Signatures?: boolean;
 }): Promise<{
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -69,49 +74,24 @@ async function sdkAddLiquidity({
         };
     }
 
-    const addLiquidityBuildCallOutput = addLiquidity.buildCall(
-        addLiquidityBuildInput,
-    );
+    let addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
 
-    return {
-        addLiquidityBuildCallOutput,
-        addLiquidityQueryOutput,
-    };
-}
+    if (usePermit2Signatures) {
+        const permit2 = await Permit2Helper.signAddLiquidityApproval({
+            ...addLiquidityBuildInput,
+            client,
+            owner: testAddress,
+        });
 
-async function sdkAddLiquidityWithPermit2({
-    addLiquidity,
-    addLiquidityInput,
-    poolState,
-    slippage,
-    wethIsEth,
-    client,
-    testAddress,
-}: AddLiquidityTxInput): Promise<{
-    addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
-    addLiquidityQueryOutput: AddLiquidityQueryOutput;
-}> {
-    const addLiquidityQueryOutput = await addLiquidity.query(
-        addLiquidityInput,
-        poolState,
-    );
-
-    const addLiquidityBuildInput: AddLiquidityBuildCallInput = {
-        ...addLiquidityQueryOutput,
-        slippage,
-        wethIsEth: !!wethIsEth,
-    };
-
-    const permit2 = await Permit2Helper.signAddLiquidityApproval({
-        ...addLiquidityBuildInput,
-        client,
-        owner: testAddress,
-    });
-
-    const addLiquidityBuildCallOutput = addLiquidity.buildCallWithPermit2(
-        addLiquidityBuildInput,
-        permit2,
-    );
+        addLiquidityBuildCallOutput = addLiquidity.buildCallWithPermit2(
+            addLiquidityBuildInput,
+            permit2,
+        );
+    } else {
+        addLiquidityBuildCallOutput = addLiquidity.buildCall(
+            addLiquidityBuildInput,
+        );
+    }
 
     return {
         addLiquidityBuildCallOutput,
@@ -169,6 +149,7 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
         client,
         slippage,
         wethIsEth,
+        usePermit2Signatures,
     } = txInput;
 
     const { addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -179,56 +160,7 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
             slippage,
             testAddress,
             wethIsEth,
-        });
-
-    const tokens = getTokensForBalanceCheck(poolState);
-
-    // send transaction and calculate balance changes
-    const txOutput = await sendTransactionGetBalances(
-        tokens,
-        client,
-        testAddress,
-        addLiquidityBuildCallOutput.to,
-        addLiquidityBuildCallOutput.callData,
-        addLiquidityBuildCallOutput.value,
-    );
-
-    return {
-        addLiquidityQueryOutput,
-        addLiquidityBuildCallOutput,
-        txOutput,
-    };
-}
-
-/**
- * Create and submit add liquidity transaction.
- * @param txInput
- *      @param addLiquidity: AddLiquidity - The add liquidity class, used to query outputs and build transaction call
- *      @param poolInput: PoolState - The state of the pool
- *      @param addLiquidityInput: AddLiquidityInput - The parameters of the transaction, example: bptOut, amountsIn, etc.
- *      @param testAddress: Address - The address to send the transaction from
- *      @param client: Client & PublicActions & WalletActions - The RPC client
- *      @param slippage: Slippage - The slippage tolerance for the transaction
- */
-export async function doAddLiquidityWithPermit2(txInput: AddLiquidityTxInput) {
-    const {
-        addLiquidity,
-        poolState,
-        addLiquidityInput,
-        testAddress,
-        client,
-        slippage,
-        wethIsEth,
-    } = txInput;
-
-    const { addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
-        await sdkAddLiquidityWithPermit2({
-            addLiquidity,
-            addLiquidityInput,
-            poolState,
-            slippage,
-            testAddress,
-            wethIsEth,
+            usePermit2Signatures,
             client,
         });
 

@@ -26,6 +26,7 @@ export async function assertSwapExactIn(
     chainId: ChainId,
     swap: Swap,
     wethIsEth: boolean,
+    usePermit2Signatures = false,
 ) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
@@ -49,89 +50,22 @@ export async function assertSwapExactIn(
             recipient: testAddress,
         };
     }
-    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
 
-    const isEthInput =
-        wethIsEth &&
-        swap.inputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
-
-    const expectedValue = isEthInput ? swap.inputAmount.amount : 0n;
-
-    expect(call.to).to.eq(contractToCall);
-    expect(call.value).to.eq(expectedValue);
-    // send swap transaction and check balance changes
-    const { transactionReceipt, balanceDeltas } =
-        await sendTransactionGetBalances(
-            [
-                ZERO_ADDRESS,
-                swap.inputAmount.token.address,
-                swap.outputAmount.token.address,
-            ],
+    let call: SwapBuildOutputExactIn;
+    if (usePermit2Signatures) {
+        const permit2 = await Permit2Helper.signSwapApproval({
+            ...buildCallInput,
             client,
-            testAddress,
-            call.to,
-            call.callData,
-            call.value,
-        );
-    expect(transactionReceipt.status).to.eq('success');
+            owner: testAddress,
+        });
 
-    const isEthOutput =
-        wethIsEth &&
-        swap.outputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
-    let expectedEthDelta = 0n;
-    let expectedTokenInDelta = swap.inputAmount.amount;
-    let expectedTokenOutDelta = expected.expectedAmountOut.amount;
-    if (isEthInput) {
-        // Should send eth instead of tokenIn (weth)
-        expectedEthDelta = swap.inputAmount.amount;
-        expectedTokenInDelta = 0n;
+        call = swap.buildCallWithPermit2(
+            buildCallInput,
+            permit2,
+        ) as SwapBuildOutputExactIn;
+    } else {
+        call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
     }
-    if (isEthOutput) {
-        // should receive eth instead of tokenOut (weth)
-        expectedEthDelta = expected.expectedAmountOut.amount;
-        expectedTokenOutDelta = 0n;
-    }
-
-    expect(balanceDeltas).to.deep.eq([
-        expectedEthDelta,
-        expectedTokenInDelta,
-        expectedTokenOutDelta,
-    ]);
-}
-
-export async function assertSwapExactInWithPermit2(
-    contractToCall: Address,
-    client: Client & PublicActions & TestActions & WalletActions,
-    rpcUrl: string,
-    chainId: ChainId,
-    swap: Swap,
-    wethIsEth: boolean,
-) {
-    const testAddress = (await client.getAddresses())[0];
-    const slippage = Slippage.fromPercentage('0.1');
-    const deadline = 999999999999999999n;
-
-    const expected = await swap.query(rpcUrl);
-    if (expected.swapKind !== SwapKind.GivenIn) throw Error('Expected GivenIn');
-    expect(expected.expectedAmountOut.amount > 0n).to.be.true;
-
-    const buildCallInput: SwapBuildCallInput = {
-        slippage,
-        deadline,
-        queryOutput: expected,
-        wethIsEth,
-    };
-
-    const permit2 = await Permit2Helper.signSwapApproval({
-        ...buildCallInput,
-        client,
-        owner: testAddress,
-    });
-
-    const call = swap.buildCallWithPermit2(
-        buildCallInput,
-        permit2,
-    ) as SwapBuildOutputExactIn;
 
     const isEthInput =
         wethIsEth &&
@@ -188,6 +122,7 @@ export async function assertSwapExactOut(
     chainId: ChainId,
     swap: Swap,
     wethIsEth: boolean,
+    usePermit2Signatures = false,
 ) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
@@ -213,93 +148,21 @@ export async function assertSwapExactOut(
     }
     expect(expected.expectedAmountIn.amount > 0n).to.be.true;
 
-    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
-
-    const isEthInput =
-        wethIsEth &&
-        swap.inputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
-
-    // Caller must send amountIn + slippage if ETH
-    const expectedValue = isEthInput ? call.maxAmountIn.amount : 0n;
-
-    expect(call.to).to.eq(contractToCall);
-    expect(call.value).to.eq(expectedValue);
-    // send swap transaction and check balance changes
-    const { transactionReceipt, balanceDeltas } =
-        await sendTransactionGetBalances(
-            [
-                ZERO_ADDRESS,
-                swap.inputAmount.token.address,
-                swap.outputAmount.token.address,
-            ],
+    let call: SwapBuildOutputExactOut;
+    if (usePermit2Signatures) {
+        const permit2 = await Permit2Helper.signSwapApproval({
+            ...buildCallInput,
             client,
-            testAddress,
-            call.to,
-            call.callData,
-            call.value,
-        );
+            owner: testAddress,
+        });
 
-    expect(transactionReceipt.status).to.eq('success');
-
-    const isEthOutput =
-        wethIsEth &&
-        swap.outputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
-    let expectedEthDelta = 0n;
-    let expectedTokenInDelta = expected.expectedAmountIn.amount;
-    let expectedTokenOutDelta = swap.outputAmount.amount;
-    if (isEthInput) {
-        // Should send eth instead of tokenIn (weth)
-        expectedEthDelta = expected.expectedAmountIn.amount;
-        expectedTokenInDelta = 0n;
+        call = swap.buildCallWithPermit2(
+            buildCallInput,
+            permit2,
+        ) as SwapBuildOutputExactOut;
+    } else {
+        call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
     }
-    if (isEthOutput) {
-        // should receive eth instead of tokenOut (weth)
-        expectedEthDelta = swap.outputAmount.amount;
-        expectedTokenOutDelta = 0n;
-    }
-
-    expect(balanceDeltas).to.deep.eq([
-        expectedEthDelta,
-        expectedTokenInDelta,
-        expectedTokenOutDelta,
-    ]);
-}
-
-export async function assertSwapExactOutWithPermit2(
-    contractToCall: Address,
-    client: Client & PublicActions & TestActions & WalletActions,
-    rpcUrl: string,
-    chainId: ChainId,
-    swap: Swap,
-    wethIsEth: boolean,
-) {
-    const testAddress = (await client.getAddresses())[0];
-    const slippage = Slippage.fromPercentage('0.1');
-    const deadline = 999999999999999999n;
-
-    const expected = await swap.query(rpcUrl);
-    if (expected.swapKind !== SwapKind.GivenOut)
-        throw Error('Expected GivenOut');
-
-    expect(expected.expectedAmountIn.amount > 0n).to.be.true;
-
-    const buildCallInput: SwapBuildCallInput = {
-        slippage,
-        deadline,
-        queryOutput: expected,
-        wethIsEth,
-    };
-
-    const permit2 = await Permit2Helper.signSwapApproval({
-        ...buildCallInput,
-        client,
-        owner: testAddress,
-    });
-
-    const call = swap.buildCallWithPermit2(
-        buildCallInput,
-        permit2,
-    ) as SwapBuildOutputExactOut;
 
     const isEthInput =
         wethIsEth &&
