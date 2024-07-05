@@ -1,12 +1,12 @@
 import { TokenAmount } from '../tokenAmount';
 import { Slippage } from '../slippage';
-import { Address, Hex, InputAmount } from '../../types';
+import { Address, InputAmount } from '../../types';
 import { PoolState } from '../types';
 import {
     RemoveLiquidityV2BuildCallInput,
     RemoveLiquidityV2QueryOutput,
 } from './removeLiquidityV2/types';
-import { PermitApproval } from '../permit';
+import { Permit } from '../permit';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
@@ -103,8 +103,7 @@ export interface RemoveLiquidityBase {
     ): RemoveLiquidityBuildCallOutput;
     buildCallWithPermit(
         input: RemoveLiquidityBuildCallInput,
-        permitApproval: PermitApproval,
-        permitSignature: Hex,
+        permit: Permit,
     ): RemoveLiquidityBuildCallOutput;
 }
 

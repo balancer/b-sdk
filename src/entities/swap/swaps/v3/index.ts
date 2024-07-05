@@ -38,7 +38,7 @@ import {
 import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
 import { SwapBase } from '../types';
 import { getLimitAmount, getPathLimits } from '../../limits';
-import { Permit2BatchAndSignature } from '@/entities/permit2';
+import { Permit2 } from '@/entities/permit2';
 
 export * from './types';
 
@@ -378,14 +378,14 @@ export class SwapV3 implements SwapBase {
 
     buildCallWithPermit2(
         input: SwapBuildCallInput,
-        permit2: Permit2BatchAndSignature,
+        permit2: Permit2,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
         const buildCallOutput = this.buildCall(input);
         const args = [
             [],
             [],
-            permit2.permit2Batch,
-            permit2.permit2Signature,
+            permit2.batch,
+            permit2.signature,
             [buildCallOutput.callData],
         ] as const;
 

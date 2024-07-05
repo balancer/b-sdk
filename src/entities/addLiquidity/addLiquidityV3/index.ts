@@ -23,7 +23,7 @@ import {
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
 import { getValue } from '@/entities/utils/getValue';
-import { Permit2Batch } from '@/entities/permit2';
+import { Permit2 } from '@/entities/permit2';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -152,16 +152,15 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
     public buildCallWithPermit2(
         input: AddLiquidityBaseBuildCallInput,
-        permit2Batch: Permit2Batch,
-        permit2Signature: Hex,
+        permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);
 
         const args = [
             [],
             [],
-            permit2Batch,
-            permit2Signature,
+            permit2.batch,
+            permit2.signature,
             [buildCallOutput.callData],
         ] as const;
 

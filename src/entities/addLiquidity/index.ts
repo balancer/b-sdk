@@ -12,8 +12,7 @@ import { AddLiquidityV2 } from './addLiquidityV2';
 import { AddLiquidityV3 } from './addLiquidityV3';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { AddLiquidityCowAmm } from './addLiquidityCowAmm';
-import { Permit2Batch } from '../permit2';
-import { Hex } from '@/types';
+import { Permit2 } from '../permit2';
 
 export class AddLiquidity implements AddLiquidityBase {
     constructor(public config?: AddLiquidityConfig) {}
@@ -70,16 +69,11 @@ export class AddLiquidity implements AddLiquidityBase {
 
     buildCallWithPermit2(
         input: AddLiquidityBuildCallInput,
-        permit2Batch: Permit2Batch,
-        permit2Signature: Hex,
+        permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
         if (input.vaultVersion === 3) {
             const addLiquidity = new AddLiquidityV3();
-            return addLiquidity.buildCallWithPermit2(
-                input,
-                permit2Batch,
-                permit2Signature,
-            );
+            return addLiquidity.buildCallWithPermit2(input, permit2);
         }
         throw Error(
             'buildCall with Permit2 signatures is only available for v3',

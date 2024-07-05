@@ -39,7 +39,7 @@ import {
 import { getPoolTokensV2, getTotalSupply } from '@/utils/tokens';
 import { HumanAmount } from '@/data';
 import { balancerRouterAbi } from '@/abi';
-import { PermitApproval } from '@/entities/permit';
+import { Permit } from '@/entities/permit';
 
 export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
@@ -226,14 +226,13 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
 
     public buildCallWithPermit(
         input: RemoveLiquidityBaseBuildCallInput,
-        permitApproval: PermitApproval,
-        permitSignature: Hex,
+        permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);
 
         const args = [
-            [permitApproval],
-            [permitSignature],
+            permit.batch,
+            permit.signatures,
             { details: [], spender: zeroAddress, sigDeadline: 0n },
             '0x',
             [buildCallOutput.callData],

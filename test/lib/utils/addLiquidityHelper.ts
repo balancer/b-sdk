@@ -16,7 +16,7 @@ import {
     Token,
     TokenAmount,
     VAULT,
-    getPermit2BatchAndSignatureAddLiquidity,
+    Permit2Helper,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
@@ -102,17 +102,15 @@ async function sdkAddLiquidityWithPermit2({
         wethIsEth: !!wethIsEth,
     };
 
-    const { permit2Batch, permit2Signature } =
-        await getPermit2BatchAndSignatureAddLiquidity({
-            ...addLiquidityBuildInput,
-            client,
-            owner: testAddress,
-        });
+    const permit2 = await Permit2Helper.signAddLiquidityApproval({
+        ...addLiquidityBuildInput,
+        client,
+        owner: testAddress,
+    });
 
     const addLiquidityBuildCallOutput = addLiquidity.buildCallWithPermit2(
         addLiquidityBuildInput,
-        permit2Batch,
-        permit2Signature,
+        permit2,
     );
 
     return {

@@ -304,8 +304,8 @@ export class SwapV2 implements SwapBase {
         };
     }
 
-    getPermit2BatchAndSignature(): Promise<never> {
-        throw new Error('getPermit2BatchAndSignature is not supported on v2');
+    getPermit2(): Promise<never> {
+        throw new Error('getPermit2 is not supported on v2');
     }
 
     buildCallWithPermit2(): SwapBuildOutputExactIn | SwapBuildOutputExactOut {

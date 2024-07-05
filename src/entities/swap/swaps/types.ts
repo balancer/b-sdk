@@ -2,7 +2,7 @@ import { TokenAmount } from '../../tokenAmount';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
-    Permit2BatchAndSignature,
+    Permit2,
     SwapBuildCallInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
@@ -41,6 +41,6 @@ export interface SwapBase {
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
     buildCallWithPermit2(
         input: SwapBuildCallInput,
-        permit2: Permit2BatchAndSignature,
+        permit2: Permit2,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
 }

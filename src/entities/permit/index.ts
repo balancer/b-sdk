@@ -28,39 +28,36 @@ export type PermitApproval = {
     deadline: bigint;
 };
 
-export type PermitApprovalAndSignature = {
-    permitApproval: PermitApproval;
-    permitSignature: Hex;
+export type Permit = {
+    batch: PermitApproval[];
+    signatures: Hex[];
 };
 
-export type PermitBatchAndSignatures = {
-    permitBatch: PermitApproval[];
-    permitSignatures: Hex[];
-};
-
-export const getPermitApprovalAndSignatureRemoveLiquidity = async (
-    input: RemoveLiquidityBaseBuildCallInput & {
-        client: Client & WalletActions & PublicActions;
-        owner: Hex;
-    },
-): Promise<PermitApprovalAndSignature> => {
-    const amounts = getAmountsCall(input);
-    const { permitApproval, permitSignature } = await signPermit(
-        input.client,
-        input.bptIn.token.address,
-        input.owner,
-        BALANCER_ROUTER[input.chainId],
-        amounts.maxBptAmountIn,
-    );
-    return { permitApproval, permitSignature };
-};
+export class PermitHelper {
+    static signRemoveLiquidityApproval = async (
+        input: RemoveLiquidityBaseBuildCallInput & {
+            client: Client & WalletActions & PublicActions;
+            owner: Hex;
+        },
+    ): Promise<Permit> => {
+        const amounts = getAmountsCall(input);
+        const { permitApproval, permitSignature } = await signPermit(
+            input.client,
+            input.bptIn.token.address,
+            input.owner,
+            BALANCER_ROUTER[input.chainId],
+            amounts.maxBptAmountIn,
+        );
+        return { batch: [permitApproval], signatures: [permitSignature] };
+    };
+}
 
 /**
  * Signs a permit for a given ERC-2612 ERC20 token using the specified parameters.
  *
  * @param { Client & WalletActions & PublicActions } client - Wallet client to invoke for signing the permit message
  */
-export const signPermit = async (
+const signPermit = async (
     client: Client & WalletActions & PublicActions,
     token: Hex,
     owner: Hex,

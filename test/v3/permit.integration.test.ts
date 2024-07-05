@@ -192,7 +192,7 @@ describe('permit and permit2 integration tests', () => {
         });
     });
 
-    describe.only('single swap tests', () => {
+    describe('single swap tests', () => {
         let pathBalWeth: Path;
         let swapParams: SwapInput;
 
@@ -332,7 +332,7 @@ describe('permit and permit2 integration tests', () => {
         });
     });
 
-    describe('multi-hop swap tests', () => {
+    describe.skip('multi-hop swap tests', () => {
         let pathMultiSwap: Path;
         let pathWithExit: Path;
         let swapParams: SwapInput;

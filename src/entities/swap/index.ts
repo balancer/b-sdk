@@ -1,6 +1,6 @@
 import { SwapKind } from '../../types';
 import { TokenAmount } from '../tokenAmount';
-import { Permit2BatchAndSignature } from '../permit2';
+import { Permit2 } from '../permit2';
 import { validatePaths } from './paths';
 import { SwapV2 } from './swaps/v2';
 import { SwapV3 } from './swaps/v3';
@@ -89,7 +89,7 @@ export class Swap {
 
     buildCallWithPermit2(
         input: SwapBuildCallInput,
-        permit2: Permit2BatchAndSignature,
+        permit2: Permit2,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
         if (
             input.wethIsEth &&

@@ -13,8 +13,7 @@ import { InputValidator } from '../inputValidator/inputValidator';
 import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
 import { RemoveLiquidityCowAmm } from './removeLiquidityCowAmm';
-import { PermitApproval } from '../permit';
-import { Hex } from '@/types';
+import { Permit } from '../permit';
 
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -108,16 +107,11 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
 
     public buildCallWithPermit(
         input: RemoveLiquidityBuildCallInput,
-        permitApproval: PermitApproval,
-        permitSignature: Hex,
+        permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
         if (input.vaultVersion === 3) {
             const removeLiquidity = new RemoveLiquidityV3();
-            return removeLiquidity.buildCallWithPermit(
-                input,
-                permitApproval,
-                permitSignature,
-            );
+            return removeLiquidity.buildCallWithPermit(input, permit);
         }
 
         throw Error(

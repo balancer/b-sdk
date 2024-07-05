@@ -18,8 +18,8 @@ import {
     Token,
     TokenAmount,
     VAULT,
-    PermitApprovalAndSignature,
-    getPermitApprovalAndSignatureRemoveLiquidity,
+    Permit,
+    PermitHelper,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
@@ -43,7 +43,7 @@ export const sdkRemoveLiquidity = async (
         wethIsEth,
         toInternalBalance,
     }: Omit<RemoveLiquidityTxInput, 'client'>,
-    permitInputs?: PermitApprovalAndSignature,
+    permit?: Permit,
 ): Promise<{
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
@@ -68,11 +68,10 @@ export const sdkRemoveLiquidity = async (
     }
 
     const removeLiquidityBuildCallOutput =
-        permitInputs !== undefined
+        permit !== undefined
             ? removeLiquidity.buildCallWithPermit(
                   removeLiquidityBuildInput,
-                  permitInputs.permitApproval,
-                  permitInputs.permitSignature,
+                  permit,
               )
             : removeLiquidity.buildCall(removeLiquidityBuildInput);
 
@@ -105,17 +104,15 @@ export const sdkRemoveLiquidityWithPermit = async ({
         wethIsEth: !!wethIsEth,
     };
 
-    const { permitApproval, permitSignature } =
-        await getPermitApprovalAndSignatureRemoveLiquidity({
-            ...removeLiquidityBuildInput,
-            client,
-            owner: testAddress,
-        });
+    const permit = await PermitHelper.signRemoveLiquidityApproval({
+        ...removeLiquidityBuildInput,
+        client,
+        owner: testAddress,
+    });
 
     const removeLiquidityBuildCallOutput = removeLiquidity.buildCallWithPermit(
         removeLiquidityBuildInput,
-        permitApproval,
-        permitSignature,
+        permit,
     );
 
     return {

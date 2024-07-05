@@ -6,7 +6,7 @@ import {
     AddLiquidityV2BuildCallInput,
     AddLiquidityV2QueryOutput,
 } from './addLiquidityV2/types';
-import { Permit2Batch } from '../permit2';
+import { Permit2 } from '../permit2';
 
 export enum AddLiquidityKind {
     Unbalanced = 'Unbalanced',
@@ -73,8 +73,7 @@ export interface AddLiquidityBase {
     buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput;
     buildCallWithPermit2(
         input: AddLiquidityBuildCallInput,
-        permit2Batch: Permit2Batch,
-        permit2Signature: Hex,
+        permit2: Permit2,
     ): AddLiquidityBuildCallOutput;
 }
 
