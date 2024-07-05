@@ -1,4 +1,3 @@
-import invariant from 'tiny-invariant';
 import { Address, TypedData, TypedDataDomain, hashTypedData } from 'viem';
 
 import {
@@ -82,10 +81,9 @@ export abstract class AllowanceTransfer {
         permit2Address: Address,
         chainId: number,
     ) {
-        invariant(
-            MaxSigDeadline >= permit.sigDeadline,
-            'SIG_DEADLINE_OUT_OF_RANGE',
-        );
+        if (permit.sigDeadline > MaxSigDeadline) {
+            throw new Error('SIG_DEADLINE_OUT_OF_RANGE');
+        }
 
         const domain = permit2Domain(permit2Address, chainId);
         validatePermitDetails(permit.details);
@@ -103,10 +101,9 @@ export abstract class AllowanceTransfer {
         permit2Address: Address,
         chainId: number,
     ) {
-        invariant(
-            MaxSigDeadline >= permit.sigDeadline,
-            'SIG_DEADLINE_OUT_OF_RANGE',
-        );
+        if (permit.sigDeadline > MaxSigDeadline) {
+            throw new Error('SIG_DEADLINE_OUT_OF_RANGE');
+        }
 
         const domain = permit2Domain(permit2Address, chainId);
         permit.details.forEach(validatePermitDetails);
@@ -124,10 +121,9 @@ export abstract class AllowanceTransfer {
         permit2Address: Address,
         chainId: number,
     ): PermitSingleData | PermitBatchData {
-        invariant(
-            MaxSigDeadline >= permit.sigDeadline,
-            'SIG_DEADLINE_OUT_OF_RANGE',
-        );
+        if (permit.sigDeadline > MaxSigDeadline) {
+            throw new Error('SIG_DEADLINE_OUT_OF_RANGE');
+        }
 
         const domain = permit2Domain(permit2Address, chainId);
         if (isPermit(permit)) {
@@ -185,13 +181,13 @@ export abstract class AllowanceTransfer {
 }
 
 function validatePermitDetails(details: PermitDetails) {
-    invariant(MaxOrderedNonce >= details.nonce, 'NONCE_OUT_OF_RANGE');
-    invariant(
-        MaxAllowanceTransferAmount >= details.amount,
-        'AMOUNT_OUT_OF_RANGE',
-    );
-    invariant(
-        MaxAllowanceExpiration >= details.expiration,
-        'EXPIRATION_OUT_OF_RANGE',
-    );
+    if (details.nonce > MaxOrderedNonce) {
+        throw new Error('NONCE_OUT_OF_RANGE');
+    }
+    if (details.amount > MaxAllowanceTransferAmount) {
+        throw new Error('AMOUNT_OUT_OF_RANGE');
+    }
+    if (details.expiration > MaxAllowanceExpiration) {
+        throw new Error('EXPIRATION_OUT_OF_RANGE');
+    }
 }

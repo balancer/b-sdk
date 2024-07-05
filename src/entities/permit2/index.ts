@@ -5,7 +5,6 @@ import {
     Permit2Batch,
     PermitDetails,
 } from './allowanceTransfer';
-import { AllowanceProvider } from './providers';
 import { BALANCER_BATCH_ROUTER, BALANCER_ROUTER, PERMIT2 } from '@/utils';
 import {
     MaxAllowanceExpiration,
@@ -20,10 +19,9 @@ import {
 } from '../swap';
 import { getLimitAmount } from '../swap/limits';
 import { TokenAmount } from '../tokenAmount';
+import { permit2Abi } from '@/abi';
 
 export * from './allowanceTransfer';
-export * from './signatureTransfer';
-export * from './providers';
 export * from './constants';
 
 export type Permit2 = {
@@ -145,9 +143,7 @@ const getDetails = async (
 ) => {
     let _nonce: number;
     if (nonce === undefined) {
-        const chainId = await client.getChainId();
-        const provider = new AllowanceProvider(client, PERMIT2[chainId]);
-        _nonce = await provider.getNonce(token, owner, spender);
+        _nonce = await getNonce(client, token, owner, spender);
     } else {
         _nonce = nonce;
     }
@@ -159,4 +155,22 @@ const getDetails = async (
     };
 
     return details;
+};
+
+const getNonce = async (
+    client: Client & PublicActions,
+    token: Address,
+    owner: Address,
+    spender: Address,
+): Promise<number> => {
+    const chainId = await client.getChainId();
+    const result = await client.readContract({
+        abi: permit2Abi,
+        address: PERMIT2[chainId],
+        functionName: 'allowance',
+        args: [owner, token, spender],
+    });
+    const nonce = result[1];
+
+    return nonce;
 };
