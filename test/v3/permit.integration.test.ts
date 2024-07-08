@@ -124,6 +124,7 @@ describe('permit and permit2 integration tests', () => {
 
     describe('add and remove liquidity tests', () => {
         // TODO: test add/remove with ETH?
+        // TODO: move tests to add/remove/swap integration tests so we make sure we're testing all possible scenarios - will help catch maxAmountsIn issues for example
 
         test('add liquidity with permit2, then remove liquidity using permit', async () => {
             addLiquidityInput = {

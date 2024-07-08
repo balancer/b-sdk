@@ -20,6 +20,7 @@ import {
 import { getLimitAmount } from '../swap/limits';
 import { TokenAmount } from '../tokenAmount';
 import { permit2Abi } from '@/abi';
+import { getAmountsCall } from '../addLiquidity/helpers';
 
 export * from './allowanceTransfer';
 export * from './constants';
@@ -36,16 +37,17 @@ export class Permit2Helper {
             owner: Address;
         },
     ): Promise<Permit2> {
+        const amounts = getAmountsCall(input);
         const spender = BALANCER_ROUTER[input.chainId];
         const details: PermitDetails[] = [];
-        for (const amountIn of input.amountsIn) {
+        for (let i = 0; i < input.amountsIn.length; i++) {
             details.push(
                 await getDetails(
                     input.client,
-                    amountIn.token.address,
+                    input.amountsIn[i].token.address,
                     input.owner,
                     spender,
-                    amountIn.amount,
+                    amounts.maxAmountsIn[i],
                 ),
             );
         }
