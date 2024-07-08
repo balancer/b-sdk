@@ -170,7 +170,7 @@ export class RelayerAuthorization {
                 abi: vaultV2Abi,
                 address: verifyingContract,
                 functionName: 'getNextNonce',
-                args: [allowedSender],
+                args: [signerAddress],
             });
         }
 
