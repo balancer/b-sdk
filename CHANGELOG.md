@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.19.2
+
+### Patch Changes
+
+- 835d023: Relayer auth read signers nonce.
+
 ## 0.19.1
 
 ### Patch Changes
