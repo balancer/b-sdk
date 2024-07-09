@@ -1,5 +1,6 @@
 export * from './authorizer';
 export * from './balancerQueries';
+export * from './balancerBatchRouter';
 export * from './balancerRelayer';
 export * from './balancerRouter';
 export * from './batchRelayerLibrary';

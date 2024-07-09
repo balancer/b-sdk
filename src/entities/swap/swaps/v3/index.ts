@@ -54,6 +54,7 @@ export class SwapV3 implements SwapBase {
                     p.pools,
                     p.inputAmountRaw,
                     p.outputAmountRaw,
+                    p.isBuffer,
                 ),
         );
 
@@ -532,7 +533,7 @@ export class SwapV3 implements SwapBase {
                             return {
                                 pool: pool,
                                 tokenOut: p.tokens[i + 1].address,
-                                isBuffer: false,
+                                isBuffer: p.isBuffer[i],
                             };
                         }),
                     };
@@ -548,7 +549,7 @@ export class SwapV3 implements SwapBase {
                             return {
                                 pool: pool,
                                 tokenOut: p.tokens[i + 1].address,
-                                isBuffer: false,
+                                isBuffer: p.isBuffer[i],
                             };
                         }),
                     };
