@@ -45,6 +45,102 @@ export const balancerBatchRouterAbi = [
         type: 'function',
     },
     {
+        inputs: [{ internalType: 'bytes[]', name: 'data', type: 'bytes[]' }],
+        name: 'multicall',
+        outputs: [
+            { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    { internalType: 'address', name: 'token', type: 'address' },
+                    { internalType: 'address', name: 'owner', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'spender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amount',
+                        type: 'uint256',
+                    },
+                    { internalType: 'uint256', name: 'nonce', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'deadline',
+                        type: 'uint256',
+                    },
+                ],
+                internalType: 'struct IRouterCommon.PermitApproval[]',
+                name: 'permitBatch',
+                type: 'tuple[]',
+            },
+            {
+                internalType: 'bytes[]',
+                name: 'permitSignatures',
+                type: 'bytes[]',
+            },
+            {
+                components: [
+                    {
+                        components: [
+                            {
+                                internalType: 'address',
+                                name: 'token',
+                                type: 'address',
+                            },
+                            {
+                                internalType: 'uint160',
+                                name: 'amount',
+                                type: 'uint160',
+                            },
+                            {
+                                internalType: 'uint48',
+                                name: 'expiration',
+                                type: 'uint48',
+                            },
+                            {
+                                internalType: 'uint48',
+                                name: 'nonce',
+                                type: 'uint48',
+                            },
+                        ],
+                        internalType:
+                            'struct IAllowanceTransfer.PermitDetails[]',
+                        name: 'details',
+                        type: 'tuple[]',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'spender',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'sigDeadline',
+                        type: 'uint256',
+                    },
+                ],
+                internalType: 'struct IAllowanceTransfer.PermitBatch',
+                name: 'permit2Batch',
+                type: 'tuple',
+            },
+            { internalType: 'bytes', name: 'permit2Signature', type: 'bytes' },
+            { internalType: 'bytes[]', name: 'multicallData', type: 'bytes[]' },
+        ],
+        name: 'permitBatchAndCall',
+        outputs: [
+            { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
         inputs: [
             {
                 components: [
@@ -191,7 +287,7 @@ export const balancerBatchRouterAbi = [
                 type: 'uint256[]',
             },
         ],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -333,7 +429,7 @@ export const balancerBatchRouterAbi = [
             { internalType: 'address[]', name: 'tokensIn', type: 'address[]' },
             { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
         ],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -485,7 +581,7 @@ export const balancerBatchRouterAbi = [
                 type: 'uint256[]',
             },
         ],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -629,7 +725,7 @@ export const balancerBatchRouterAbi = [
             { internalType: 'address[]', name: 'tokensIn', type: 'address[]' },
             { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
         ],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     { stateMutability: 'payable', type: 'receive' },

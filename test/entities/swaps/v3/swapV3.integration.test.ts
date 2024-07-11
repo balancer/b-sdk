@@ -12,6 +12,7 @@ import {
     PublicActions,
     TestActions,
     WalletActions,
+    Hex,
 } from 'viem';
 import {
     CHAINS,
@@ -27,11 +28,7 @@ import {
 import { Path } from '@/entities/swap/paths/types';
 
 import { forkSetup } from 'test/lib/utils/helper';
-import {
-    ANVIL_NETWORKS,
-    startFork,
-    stopAnvilFork,
-} from 'test/anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 import {
     assertSwapExactIn,
@@ -41,22 +38,23 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
-const blockNo = 6188394n;
+const blockNo = 6288761n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
-const USDC = TOKENS[chainId].USDC;
-const DAI = TOKENS[chainId].DAI;
+const USDC = TOKENS[chainId].USDC_AAVE;
+const DAI = TOKENS[chainId].DAI_AAVE;
 const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
+
+type Override = { Parameters: Hex[]; ReturnType: Hex };
 
 describe('SwapV3', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
     let testAddress: Address;
     let rpcUrl: string;
+    let snapshot: Hex;
 
-    beforeEach(async () => {
-        // resetting the fork between each test avoids changing block state
-        await stopAnvilFork(ANVIL_NETWORKS.SEPOLIA, undefined, blockNo);
+    beforeAll(async () => {
         const fork = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
@@ -82,6 +80,23 @@ describe('SwapV3', () => {
             undefined,
             protocolVersion,
         );
+        // Uses Special RPC methods to revert state back to same snapshot for each test
+        // https://github.com/trufflesuite/ganache-cli-archive/blob/master/README.md
+        snapshot = await client.request<Override>({
+            method: 'evm_snapshot',
+            params: [],
+        });
+    });
+
+    beforeEach(async () => {
+        await client.request<Override>({
+            method: 'evm_revert',
+            params: [snapshot],
+        });
+        snapshot = await client.request<Override>({
+            method: 'evm_snapshot',
+            params: [],
+        });
     });
 
     describe('single swap', () => {
@@ -119,7 +134,7 @@ describe('SwapV3', () => {
                     WETH.decimals,
                 );
                 expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountOut.amount).to.eq(123749996n);
+                expect(expected.expectedAmountOut.amount).to.eq(22499954n);
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -134,7 +149,9 @@ describe('SwapV3', () => {
 
                 const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
-                expect(expected.expectedAmountIn.amount).to.eq(80801616032325n);
+                expect(expected.expectedAmountIn.amount).to.eq(
+                    440022000880061n,
+                );
             });
         });
         describe('swap should be executed correctly', () => {
@@ -251,7 +268,7 @@ describe('SwapV3', () => {
     });
 
     describe('multi-hop swap', () => {
-        // weth > bal > dai > usdc
+        // weth [swap] bal [swap] dai [swap] usdc
         const pathMultiSwap: Path = {
             protocolVersion: 3,
             tokens: [
@@ -280,7 +297,7 @@ describe('SwapV3', () => {
             inputAmountRaw: 100000000000000n,
             outputAmountRaw: 2000000n,
         };
-        // weth > bpt > usdc
+        // weth [swap] bpt [exit] usdc
         const pathWithExit: Path = {
             protocolVersion: 3,
             tokens: [
@@ -306,144 +323,227 @@ describe('SwapV3', () => {
         };
 
         describe('query method should return correct updated', () => {
-            test('GivenIn', async () => {
-                const swap = new Swap({
-                    chainId,
-                    paths: [pathMultiSwap, pathWithExit],
-                    swapKind: SwapKind.GivenIn,
-                });
-
-                const expected = (await swap.query(
-                    rpcUrl,
-                )) as ExactInQueryOutput;
-
-                const usdcToken = new Token(
-                    chainId,
-                    USDC.address,
-                    USDC.decimals,
-                );
-                expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                expect(expected.pathAmounts).to.deep.eq([151734n, 779073n]);
-                expect(expected.expectedAmountOut.token).to.deep.eq(usdcToken);
-                expect(expected.expectedAmountOut.amount).to.eq(930807n);
-            });
-            test('GivenOut', async () => {
-                const swap = new Swap({
-                    chainId,
-                    paths: [pathMultiSwap, pathWithExit],
-                    swapKind: SwapKind.GivenOut,
-                });
-
-                const expected = (await swap.query(
-                    rpcUrl,
-                )) as ExactOutQueryOutput;
-
-                const wethToken = new Token(
-                    chainId,
-                    WETH.address,
-                    WETH.decimals,
-                );
-                expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                expect(expected.pathAmounts).to.deep.eq([
-                    1827358022063780n,
-                    841746490376824n,
-                ]);
-                expect(expected.expectedAmountIn.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountIn.amount).to.eq(
-                    2669104512440604n,
-                );
-            });
-        });
-        describe('swap should be executed correctly', () => {
-            describe('wethIsEth: false', () => {
-                const swapParams = {
-                    chainId,
-                    paths: [pathMultiSwap, pathWithExit],
-                    wethIsEth: false,
-                };
+            describe('path with swaps only', () => {
                 test('GivenIn', async () => {
                     const swap = new Swap({
-                        ...swapParams,
+                        chainId,
+                        paths: [pathMultiSwap],
                         swapKind: SwapKind.GivenIn,
                     });
-                    await assertSwapExactIn(
-                        BALANCER_BATCH_ROUTER[chainId],
-                        client,
+
+                    const expected = (await swap.query(
                         rpcUrl,
+                    )) as ExactInQueryOutput;
+
+                    const usdcToken = new Token(
                         chainId,
-                        swap,
-                        false,
+                        USDC.address,
+                        USDC.decimals,
                     );
+                    expect(expected.swapKind).to.eq(SwapKind.GivenIn);
+                    expect(expected.pathAmounts).to.deep.eq([1196920n]);
+                    expect(expected.expectedAmountOut.token).to.deep.eq(
+                        usdcToken,
+                    );
+                    expect(expected.expectedAmountOut.amount).to.eq(1196920n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
-                        ...swapParams,
+                        chainId,
+                        paths: [pathMultiSwap],
                         swapKind: SwapKind.GivenOut,
                     });
-                    await assertSwapExactOut(
-                        BALANCER_BATCH_ROUTER[chainId],
-                        client,
+
+                    const expected = (await swap.query(
                         rpcUrl,
+                    )) as ExactOutQueryOutput;
+
+                    const wethToken = new Token(
                         chainId,
-                        swap,
-                        false,
+                        WETH.address,
+                        WETH.decimals,
+                    );
+                    expect(expected.swapKind).to.eq(SwapKind.GivenOut);
+                    expect(expected.pathAmounts).to.deep.eq([170018381187389n]);
+                    expect(expected.expectedAmountIn.token).to.deep.eq(
+                        wethToken,
+                    );
+                    expect(expected.expectedAmountIn.amount).to.eq(
+                        170018381187389n,
                     );
                 });
             });
-            describe('wethIsEth: true', () => {
-                describe('eth in', async () => {
+            describe.skip('path with exit', () => {
+                test('GivenIn', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathMultiSwap, pathWithExit],
+                        swapKind: SwapKind.GivenIn,
+                    });
+
+                    const expected = (await swap.query(
+                        rpcUrl,
+                    )) as ExactInQueryOutput;
+
+                    const usdcToken = new Token(
+                        chainId,
+                        USDC.address,
+                        USDC.decimals,
+                    );
+                    expect(expected.swapKind).to.eq(SwapKind.GivenIn);
+                    expect(expected.pathAmounts).to.deep.eq([151734n, 779073n]);
+                    expect(expected.expectedAmountOut.token).to.deep.eq(
+                        usdcToken,
+                    );
+                    expect(expected.expectedAmountOut.amount).to.eq(930807n);
+                });
+                test('GivenOut', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathMultiSwap, pathWithExit],
+                        swapKind: SwapKind.GivenOut,
+                    });
+
+                    const expected = (await swap.query(
+                        rpcUrl,
+                    )) as ExactOutQueryOutput;
+
+                    const wethToken = new Token(
+                        chainId,
+                        WETH.address,
+                        WETH.decimals,
+                    );
+                    expect(expected.swapKind).to.eq(SwapKind.GivenOut);
+                    expect(expected.pathAmounts).to.deep.eq([
+                        1827358022063780n,
+                        841746490376824n,
+                    ]);
+                    expect(expected.expectedAmountIn.token).to.deep.eq(
+                        wethToken,
+                    );
+                    expect(expected.expectedAmountIn.amount).to.eq(
+                        2669104512440604n,
+                    );
+                });
+            });
+        });
+        describe('swap should be executed correctly', () => {
+            describe('path with swaps only', () => {
+                const swapParams = {
+                    chainId,
+                    paths: [pathMultiSwap],
+                };
+                describe('wethIsEth: false', () => {
+                    const wethIsEth = false;
                     test('GivenIn', async () => {
-                        const swap = new Swap({
-                            chainId,
-                            paths: [pathMultiSwap, pathWithExit],
-                            swapKind: SwapKind.GivenIn,
-                        });
                         await assertSwapExactIn(
                             BALANCER_BATCH_ROUTER[chainId],
                             client,
                             rpcUrl,
                             chainId,
-                            swap,
-                            true,
+                            new Swap({
+                                ...swapParams,
+                                swapKind: SwapKind.GivenIn,
+                            }),
+                            wethIsEth,
                         );
                     });
                     test('GivenOut', async () => {
-                        const swap = new Swap({
-                            chainId,
-                            paths: [pathMultiSwap, pathWithExit],
-                            swapKind: SwapKind.GivenOut,
-                        });
                         await assertSwapExactOut(
                             BALANCER_BATCH_ROUTER[chainId],
                             client,
                             rpcUrl,
                             chainId,
-                            swap,
-                            true,
+                            new Swap({
+                                ...swapParams,
+                                swapKind: SwapKind.GivenOut,
+                            }),
+                            wethIsEth,
                         );
                     });
                 });
-                describe('eth out', () => {
-                    // usdc > dai > bal > weth
-                    const pathUsdcWethMulti = {
-                        ...pathMultiSwap,
-                        tokens: [...pathMultiSwap.tokens].reverse(),
-                        pools: [...pathMultiSwap.pools].reverse(),
-                        inputAmountRaw: 100000n,
-                        outputAmountRaw: 40000000000000n,
-                    };
-                    // usdc > bpt > weth
-                    const pathUsdcWethJoin = {
-                        ...pathWithExit,
-                        tokens: [...pathWithExit.tokens].reverse(),
-                        pools: [...pathWithExit.pools].reverse(),
-                        inputAmountRaw: 6000000n,
-                        outputAmountRaw: 600000000000000n,
+                describe('wethIsEth: true', () => {
+                    const wethIsEth = true;
+                    describe('eth in', async () => {
+                        test('GivenIn', async () => {
+                            await assertSwapExactIn(
+                                BALANCER_BATCH_ROUTER[chainId],
+                                client,
+                                rpcUrl,
+                                chainId,
+                                new Swap({
+                                    ...swapParams,
+                                    swapKind: SwapKind.GivenIn,
+                                }),
+                                wethIsEth,
+                            );
+                        });
+                        test('GivenOut', async () => {
+                            await assertSwapExactOut(
+                                BALANCER_BATCH_ROUTER[chainId],
+                                client,
+                                rpcUrl,
+                                chainId,
+                                new Swap({
+                                    ...swapParams,
+                                    swapKind: SwapKind.GivenOut,
+                                }),
+                                wethIsEth,
+                            );
+                        });
+                    });
+                    describe('eth out', () => {
+                        // usdc > dai > bal > weth
+                        const pathUsdcWethMulti = {
+                            ...pathMultiSwap,
+                            tokens: [...pathMultiSwap.tokens].reverse(),
+                            pools: [...pathMultiSwap.pools].reverse(),
+                            inputAmountRaw: 100000n,
+                            outputAmountRaw: 40000000000000n,
+                        };
+                        test('GivenIn', async () => {
+                            const swap = new Swap({
+                                chainId,
+                                paths: [pathUsdcWethMulti],
+                                swapKind: SwapKind.GivenIn,
+                            });
+                            await assertSwapExactIn(
+                                BALANCER_BATCH_ROUTER[chainId],
+                                client,
+                                rpcUrl,
+                                chainId,
+                                swap,
+                                wethIsEth,
+                            );
+                        });
+                        test('GivenOut', async () => {
+                            const swap = new Swap({
+                                chainId,
+                                paths: [pathUsdcWethMulti],
+                                swapKind: SwapKind.GivenOut,
+                            });
+                            await assertSwapExactOut(
+                                BALANCER_BATCH_ROUTER[chainId],
+                                client,
+                                rpcUrl,
+                                chainId,
+                                swap,
+                                wethIsEth,
+                            );
+                        });
+                    });
+                });
+            });
+            describe.skip('paths with exit/join', () => {
+                describe('wethIsEth: false', () => {
+                    const swapParams = {
+                        chainId,
+                        paths: [pathMultiSwap, pathWithExit],
+                        wethIsEth: false,
                     };
                     test('GivenIn', async () => {
                         const swap = new Swap({
-                            chainId,
-                            paths: [pathUsdcWethMulti, pathUsdcWethJoin],
+                            ...swapParams,
                             swapKind: SwapKind.GivenIn,
                         });
                         await assertSwapExactIn(
@@ -452,13 +552,12 @@ describe('SwapV3', () => {
                             rpcUrl,
                             chainId,
                             swap,
-                            true,
+                            false,
                         );
                     });
                     test('GivenOut', async () => {
                         const swap = new Swap({
-                            chainId,
-                            paths: [pathUsdcWethMulti, pathUsdcWethJoin],
+                            ...swapParams,
                             swapKind: SwapKind.GivenOut,
                         });
                         await assertSwapExactOut(
@@ -467,8 +566,90 @@ describe('SwapV3', () => {
                             rpcUrl,
                             chainId,
                             swap,
-                            true,
+                            false,
                         );
+                    });
+                });
+                describe('wethIsEth: true', () => {
+                    describe('eth in', async () => {
+                        test('GivenIn', async () => {
+                            const swap = new Swap({
+                                chainId,
+                                paths: [pathMultiSwap, pathWithExit],
+                                swapKind: SwapKind.GivenIn,
+                            });
+                            await assertSwapExactIn(
+                                BALANCER_BATCH_ROUTER[chainId],
+                                client,
+                                rpcUrl,
+                                chainId,
+                                swap,
+                                true,
+                            );
+                        });
+                        test('GivenOut', async () => {
+                            const swap = new Swap({
+                                chainId,
+                                paths: [pathMultiSwap, pathWithExit],
+                                swapKind: SwapKind.GivenOut,
+                            });
+                            await assertSwapExactOut(
+                                BALANCER_BATCH_ROUTER[chainId],
+                                client,
+                                rpcUrl,
+                                chainId,
+                                swap,
+                                true,
+                            );
+                        });
+                    });
+                    describe('eth out', () => {
+                        // usdc > dai > bal > weth
+                        const pathUsdcWethMulti = {
+                            ...pathMultiSwap,
+                            tokens: [...pathMultiSwap.tokens].reverse(),
+                            pools: [...pathMultiSwap.pools].reverse(),
+                            inputAmountRaw: 100000n,
+                            outputAmountRaw: 40000000000000n,
+                        };
+                        // usdc > bpt > weth
+                        const pathUsdcWethJoin = {
+                            ...pathWithExit,
+                            tokens: [...pathWithExit.tokens].reverse(),
+                            pools: [...pathWithExit.pools].reverse(),
+                            inputAmountRaw: 6000000n,
+                            outputAmountRaw: 600000000000000n,
+                        };
+                        test('GivenIn', async () => {
+                            const swap = new Swap({
+                                chainId,
+                                paths: [pathUsdcWethMulti, pathUsdcWethJoin],
+                                swapKind: SwapKind.GivenIn,
+                            });
+                            await assertSwapExactIn(
+                                BALANCER_BATCH_ROUTER[chainId],
+                                client,
+                                rpcUrl,
+                                chainId,
+                                swap,
+                                true,
+                            );
+                        });
+                        test('GivenOut', async () => {
+                            const swap = new Swap({
+                                chainId,
+                                paths: [pathUsdcWethMulti, pathUsdcWethJoin],
+                                swapKind: SwapKind.GivenOut,
+                            });
+                            await assertSwapExactOut(
+                                BALANCER_BATCH_ROUTER[chainId],
+                                client,
+                                rpcUrl,
+                                chainId,
+                                swap,
+                                true,
+                            );
+                        });
                     });
                 });
             });

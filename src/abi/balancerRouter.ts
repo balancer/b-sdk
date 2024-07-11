@@ -109,7 +109,7 @@ export const balancerRouterAbi = [
             { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
             { internalType: 'bytes', name: 'returnData', type: 'bytes' },
         ],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -235,6 +235,18 @@ export const balancerRouterAbi = [
         type: 'function',
     },
     {
+        inputs: [
+            { internalType: 'address', name: 'pool', type: 'address' },
+            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
+            { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+        ],
+        name: 'donate',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
         inputs: [],
         name: 'getSender',
         outputs: [{ internalType: 'address', name: '', type: 'address' }],
@@ -306,7 +318,7 @@ export const balancerRouterAbi = [
         outputs: [
             { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
         ],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -341,7 +353,7 @@ export const balancerRouterAbi = [
                         type: 'uint256',
                     },
                 ],
-                internalType: 'struct IRouter.PermitApproval[]',
+                internalType: 'struct IRouterCommon.PermitApproval[]',
                 name: 'permitBatch',
                 type: 'tuple[]',
             },
@@ -1163,7 +1175,7 @@ export const balancerRouterAbi = [
         ],
         name: 'swapSingleTokenHook',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     { stateMutability: 'payable', type: 'receive' },

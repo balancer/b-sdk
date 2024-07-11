@@ -70,6 +70,7 @@ describe('Create Weighted Pool tests', () => {
             swapFeeManager: signerAddress,
             chainId,
             protocolVersion: 3,
+            enableDonation: false,
         };
     });
     test('Create Weighted Pool', async () => {
