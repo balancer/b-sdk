@@ -116,6 +116,16 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
             slot: 0,
         },
+        USDC_AAVE: {
+            address: '0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8',
+            decimals: 6,
+            slot: 0,
+        },
+        DAI_AAVE: {
+            address: '0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357',
+            decimals: 18,
+            slot: 0,
+        },
     },
 };
 
