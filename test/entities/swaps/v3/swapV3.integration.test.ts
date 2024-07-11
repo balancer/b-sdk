@@ -12,6 +12,7 @@ import {
     PublicActions,
     TestActions,
     WalletActions,
+    Hex,
 } from 'viem';
 import {
     CHAINS,
@@ -27,11 +28,7 @@ import {
 import { Path } from '@/entities/swap/paths/types';
 
 import { forkSetup } from 'test/lib/utils/helper';
-import {
-    ANVIL_NETWORKS,
-    startFork,
-    stopAnvilFork,
-} from 'test/anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
 import {
     assertSwapExactIn,
@@ -49,14 +46,15 @@ const USDC = TOKENS[chainId].USDC;
 const DAI = TOKENS[chainId].DAI;
 const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
 
+type Override = { Parameters: Hex[]; ReturnType: Hex };
+
 describe('SwapV3', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
     let testAddress: Address;
     let rpcUrl: string;
+    let snapshot: Hex;
 
-    beforeEach(async () => {
-        // resetting the fork between each test avoids changing block state
-        await stopAnvilFork(ANVIL_NETWORKS.SEPOLIA, undefined, blockNo);
+    beforeAll(async () => {
         const fork = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
@@ -82,6 +80,23 @@ describe('SwapV3', () => {
             undefined,
             protocolVersion,
         );
+        // Uses Special RPC methods to revert state back to same snapshot for each test
+        // https://github.com/trufflesuite/ganache-cli-archive/blob/master/README.md
+        snapshot = await client.request<Override>({
+            method: 'evm_snapshot',
+            params: [],
+        });
+    });
+
+    beforeEach(async () => {
+        await client.request<Override>({
+            method: 'evm_revert',
+            params: [snapshot],
+        });
+        snapshot = await client.request<Override>({
+            method: 'evm_snapshot',
+            params: [],
+        });
     });
 
     describe('single swap', () => {
