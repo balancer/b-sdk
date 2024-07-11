@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.20.0
+
+### Minor Changes
+
+- 07b6eaa: Update to use deploy 6.
+
 ## 0.19.2
 
 ### Patch Changes
