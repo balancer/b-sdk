@@ -55,6 +55,7 @@ export class SwapV2 implements SwapBase {
                     p.pools.map((pool) => pool.toLowerCase() as Address),
                     p.inputAmountRaw,
                     p.outputAmountRaw,
+                    undefined,
                 ),
         );
 
