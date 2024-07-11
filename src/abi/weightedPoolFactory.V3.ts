@@ -99,6 +99,7 @@ export const weightedPoolFactoryAbi_V3 = [
                 name: 'poolHooksContract',
                 type: 'address',
             },
+            { internalType: 'bool', name: 'enableDonation', type: 'bool' },
             { internalType: 'bytes32', name: 'salt', type: 'bytes32' },
         ],
         name: 'create',
@@ -148,6 +149,11 @@ export const weightedPoolFactoryAbi_V3 = [
                     {
                         internalType: 'bool',
                         name: 'enableRemoveLiquidityCustom',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'enableDonation',
                         type: 'bool',
                     },
                 ],
