@@ -17,6 +17,7 @@ import {
     Token,
     TokenAmount,
     SwapKind,
+    isAuraBalSwap,
 } from '../../src';
 
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
@@ -25,9 +26,6 @@ import { getSlot } from 'examples/lib/getSlot';
 import { exit } from 'process';
 
 const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
-    // Create AuraBalSwap instance which can be used to query & buildCalls
-    const auraBalSwap = new AuraBalSwap(rpcUrl as string);
-
     const tokenIn = new Token(
         ChainId.MAINNET,
         '0xba100000625a3754423978a60c9317c58a424e3D', // BAL
@@ -45,17 +43,20 @@ const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
 
     // Check if tokenIn>tokenOut is an AuraBalSwap
     // Only supports auraBal <> BAL/WETH/ETH on mainnet and ExactIn only
-    const isAuraBalSwap = auraBalSwap.isAuraBalSwap({
+    const isAuraBalSwapCheck = isAuraBalSwap({
         tokenIn,
         tokenOut,
         swapAmount,
         kind,
     });
 
-    if (!isAuraBalSwap) {
+    if (!isAuraBalSwapCheck) {
         console.log('Non-AuraBalSwap: Normal Swap service can be used.');
         exit();
     }
+
+    // Create AuraBalSwap instance which can be used to query & buildCalls
+    const auraBalSwap = new AuraBalSwap(rpcUrl as string);
 
     // Querys onchain to get result
     const queryOutput = await auraBalSwap.query({

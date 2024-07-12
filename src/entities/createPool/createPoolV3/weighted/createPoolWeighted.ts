@@ -60,6 +60,7 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
             roleAccounts,
             input.swapFeePercentage,
             input.poolHooksContract,
+            input.enableDonation,
             input.salt || getRandomBytes32(),
         ] as const;
 

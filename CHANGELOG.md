@@ -1,5 +1,23 @@
 # @balancer/sdk
 
+## 0.20.0
+
+### Minor Changes
+
+- 07b6eaa: Update to use deploy 6.
+
+## 0.19.2
+
+### Patch Changes
+
+- 835d023: Relayer auth read signers nonce.
+
+## 0.19.1
+
+### Patch Changes
+
+- 654af8c: Expose isAuraBalSwap helper.
+
 ## 0.19.0
 
 ### Minor Changes

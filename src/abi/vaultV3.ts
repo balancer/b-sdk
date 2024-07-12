@@ -79,6 +79,7 @@ export const vaultV3Abi = [
     { inputs: [], name: 'CannotReceiveEth', type: 'error' },
     { inputs: [], name: 'CannotSwapSameToken', type: 'error' },
     { inputs: [], name: 'DoesNotSupportAddLiquidityCustom', type: 'error' },
+    { inputs: [], name: 'DoesNotSupportDonation', type: 'error' },
     { inputs: [], name: 'DoesNotSupportRemoveLiquidityCustom', type: 'error' },
     { inputs: [], name: 'DoesNotSupportUnbalancedLiquidity', type: 'error' },
     { inputs: [], name: 'DynamicSwapFeeHookFailed', type: 'error' },
@@ -125,6 +126,32 @@ export const vaultV3Abi = [
         type: 'error',
     },
     { inputs: [], name: 'FailedInnerCall', type: 'error' },
+    {
+        inputs: [
+            { internalType: 'contract IERC20', name: 'token', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+        ],
+        name: 'HookAdjustedAmountInAboveMax',
+        type: 'error',
+    },
+    {
+        inputs: [
+            { internalType: 'contract IERC20', name: 'token', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+        ],
+        name: 'HookAdjustedAmountOutBelowMin',
+        type: 'error',
+    },
+    {
+        inputs: [
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+        ],
+        name: 'HookAdjustedSwapLimit',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -234,7 +261,13 @@ export const vaultV3Abi = [
         name: 'TokenAlreadyRegistered',
         type: 'error',
     },
-    { inputs: [], name: 'TokenNotRegistered', type: 'error' },
+    {
+        inputs: [
+            { internalType: 'contract IERC20', name: 'token', type: 'address' },
+        ],
+        name: 'TokenNotRegistered',
+        type: 'error',
+    },
     {
         inputs: [
             { internalType: 'address', name: 'pool', type: 'address' },
@@ -331,6 +364,80 @@ export const vaultV3Abi = [
             },
         ],
         name: 'AuthorizerChanged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'sharesOwner',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountWrapped',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountUnderlying',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
+        ],
+        name: 'LiquidityAddedToBuffer',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'sharesOwner',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountWrapped',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountUnderlying',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'removedShares',
+                type: 'uint256',
+            },
+        ],
+        name: 'LiquidityRemovedFromBuffer',
         type: 'event',
     },
     {
@@ -491,6 +598,11 @@ export const vaultV3Abi = [
                 components: [
                     {
                         internalType: 'bool',
+                        name: 'enableHookAdjustedAmounts',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
                         name: 'shouldCallBeforeInitialize',
                         type: 'bool',
                     },
@@ -560,6 +672,11 @@ export const vaultV3Abi = [
                     {
                         internalType: 'bool',
                         name: 'enableRemoveLiquidityCustom',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'enableDonation',
                         type: 'bool',
                     },
                 ],
@@ -876,19 +993,6 @@ export const vaultV3Abi = [
     },
     {
         inputs: [],
-        name: 'getProtocolFeeController',
-        outputs: [
-            {
-                internalType: 'contract IProtocolFeeController',
-                name: '',
-                type: 'address',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
         name: 'getVaultExtension',
         outputs: [{ internalType: 'address', name: '', type: 'address' }],
         stateMutability: 'view',
@@ -956,9 +1060,10 @@ export const vaultV3Abi = [
     {
         inputs: [
             { internalType: 'contract IERC20', name: 'token', type: 'address' },
+            { internalType: 'uint256', name: 'amountHint', type: 'uint256' },
         ],
         name: 'settle',
-        outputs: [{ internalType: 'uint256', name: 'paid', type: 'uint256' }],
+        outputs: [{ internalType: 'uint256', name: 'credit', type: 'uint256' }],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -1016,7 +1121,7 @@ export const vaultV3Abi = [
         inputs: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
         name: 'unlock',
         outputs: [{ internalType: 'bytes', name: 'result', type: 'bytes' }],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     { stateMutability: 'payable', type: 'receive' },
