@@ -45,6 +45,8 @@ const WETH = TOKENS[chainId].WETH;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const DAI = TOKENS[chainId].DAI_AAVE;
 const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
+const stataUSDC = TOKENS[chainId].stataUSDC;
+const stataDAI = TOKENS[chainId].stataDAI;
 
 type Override = { Parameters: Hex[]; ReturnType: Hex };
 
@@ -76,7 +78,7 @@ describe('SwapV3', () => {
             [WETH.address, BAL.address, USDC.address],
             // [WETH.slot as number, BAL.slot as number, undefined],
             [WETH.slot as number, BAL.slot as number, USDC.slot as number],
-            [parseEther('100'), parseEther('100'), 100000000n],
+            [parseEther('100'), parseEther('100'), 10000000000n],
             undefined,
             protocolVersion,
         );
@@ -651,6 +653,148 @@ describe('SwapV3', () => {
                             );
                         });
                     });
+                });
+            });
+        });
+    });
+
+    describe('boosted', () => {
+        describe('multi-hop swap', () => {
+            // USDC[wrap]aUSDC[swap]aDAI[unwrap]DAI
+            const pathWithBuffers = {
+                protocolVersion: 3,
+                tokens: [
+                    {
+                        address: USDC.address,
+                        decimals: USDC.decimals,
+                    },
+                    {
+                        address: stataUSDC.address,
+                        decimals: stataUSDC.decimals,
+                    },
+                    {
+                        address: stataDAI.address,
+                        decimals: stataDAI.decimals,
+                    },
+                    {
+                        address: DAI.address,
+                        decimals: DAI.decimals,
+                    },
+                ],
+                pools: [
+                    stataUSDC.address,
+                    POOLS[chainId].MOCK_BOOSTED_POOL.id,
+                    stataDAI.address,
+                ],
+                isBuffer: [true, false, true],
+            };
+
+            describe('query method should return correct updated', () => {
+                test('GivenIn', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [
+                            {
+                                ...pathWithBuffers,
+                                inputAmountRaw: 100000000n,
+                                outputAmountRaw: 0n,
+                            } as Path,
+                        ],
+                        swapKind: SwapKind.GivenIn,
+                    });
+
+                    const expected = (await swap.query(
+                        rpcUrl,
+                    )) as ExactInQueryOutput;
+
+                    const daiToken = new Token(
+                        chainId,
+                        DAI.address,
+                        DAI.decimals,
+                    );
+                    expect(expected.swapKind).to.eq(SwapKind.GivenIn);
+                    expect(expected.pathAmounts).to.deep.eq([
+                        98985649125345246328n,
+                    ]);
+                    expect(expected.expectedAmountOut.token).to.deep.eq(
+                        daiToken,
+                    );
+                    expect(expected.expectedAmountOut.amount).to.eq(
+                        98985649125345246328n,
+                    );
+                });
+                test('GivenOut', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [
+                            {
+                                ...pathWithBuffers,
+                                inputAmountRaw: 0n,
+                                outputAmountRaw: 100000000000000000000n,
+                            } as Path,
+                        ],
+                        swapKind: SwapKind.GivenOut,
+                    });
+
+                    const expected = (await swap.query(
+                        rpcUrl,
+                    )) as ExactOutQueryOutput;
+
+                    const usdcToken = new Token(
+                        chainId,
+                        USDC.address,
+                        USDC.decimals,
+                    );
+                    expect(expected.swapKind).to.eq(SwapKind.GivenOut);
+                    expect(expected.pathAmounts).to.deep.eq([101014646n]);
+                    expect(expected.expectedAmountIn.token).to.deep.eq(
+                        usdcToken,
+                    );
+                    expect(expected.expectedAmountIn.amount).to.eq(101014646n);
+                });
+            });
+            describe('swap should be executed correctly', () => {
+                test('GivenIn', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [
+                            {
+                                ...pathWithBuffers,
+                                inputAmountRaw: 100000000n,
+                                outputAmountRaw: 0n,
+                            } as Path,
+                        ],
+                        swapKind: SwapKind.GivenIn,
+                    });
+                    await assertSwapExactIn(
+                        BALANCER_BATCH_ROUTER[chainId],
+                        client,
+                        rpcUrl,
+                        chainId,
+                        swap,
+                        false,
+                    );
+                });
+                test('GivenOut', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [
+                            {
+                                ...pathWithBuffers,
+                                inputAmountRaw: 0n,
+                                outputAmountRaw: 100000000000000000000n,
+                            } as Path,
+                        ],
+                        swapKind: SwapKind.GivenOut,
+                    });
+                    await assertSwapExactOut(
+                        BALANCER_BATCH_ROUTER[chainId],
+                        client,
+                        rpcUrl,
+                        chainId,
+                        swap,
+                        false,
+                    );
                 });
             });
         });

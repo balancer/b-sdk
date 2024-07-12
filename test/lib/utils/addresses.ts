@@ -255,8 +255,8 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             slot: 0,
         },
         MOCK_BOOSTED_POOL: {
-            address: '0x90a46864cb1f042060554592038367e9c97e17f3',
-            id: '0x90a46864cb1f042060554592038367e9c97e17f3',
+            address: '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c',
+            id: '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c',
             type: PoolType.Stable,
             decimals: 18,
             slot: 0,
