@@ -1,4 +1,5 @@
 export * from './authorizer';
+export * from './balancerBatchRouter'
 export * from './balancerQueries';
 export * from './balancerRelayer';
 export * from './balancerRouter';
