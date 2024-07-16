@@ -1,5 +1,13 @@
 # @balancer/sdk
 
+## 0.20.1
+
+### Patch Changes
+
+- 5c353a3: Add support for chain: Fraxtal
+- dc5a323: Add support for chain: Mode
+- 42d3d71: Expose Batch Router ABI
+
 ## 0.20.0
 
 ### Minor Changes
