@@ -14,7 +14,13 @@ type NetworkSetup = {
 
 type NetworksWithFork = Extract<
     keyof typeof ChainId,
-    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA' | 'OPTIMISM' | 'MODE'
+    | 'MAINNET'
+    | 'POLYGON'
+    | 'FANTOM'
+    | 'SEPOLIA'
+    | 'OPTIMISM'
+    | 'MODE'
+    | 'FRAXTAL'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -25,6 +31,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     SEPOLIA: 8945,
     OPTIMISM: 9045,
     MODE: 9145,
+    FRAXTAL: 9245,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -66,6 +73,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: 'https://mode.gateway.tenderly.co/',
         port: ANVIL_PORTS.MODE,
         forkBlockNumber: 10484897n,
+    },
+    FRAXTAL: {
+        rpcEnv: 'FRAXTAL_RPC_URL',
+        fallBackRpc: 'https://fraxtal.gateway.tenderly.co/',
+        port: ANVIL_PORTS.FRAXTAL,
+        forkBlockNumber: 7164945n,
     },
 };
 

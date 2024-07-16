@@ -139,6 +139,13 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 51,
         },
     },
+    [ChainId.FRAXTAL]: {
+        sFRAX: {
+            address: '0xfc00000000000000000000000000000000000008',
+            decimals: 18,
+            slot: 0,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };
