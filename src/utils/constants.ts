@@ -16,6 +16,7 @@ import {
     zkSyncTestnet,
     fantom,
     sepolia,
+    mode,
 } from 'viem/chains';
 
 export const ZERO_ADDRESS: Address =
@@ -63,6 +64,7 @@ export enum ChainId {
     ZKSYNC = 324,
     ZKEVM = 1101,
     BASE = 8453,
+    MODE = 34443,
     ARBITRUM_ONE = 42161,
     AVALANCHE = 43114,
     BASE_GOERLI = 84531,
@@ -80,6 +82,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.ZKSYNC]: zkSync,
     [ChainId.ZKEVM]: polygonZkEvm,
     [ChainId.BASE]: base,
+    [ChainId.MODE]: mode,
     [ChainId.ARBITRUM_ONE]: arbitrum,
     [ChainId.AVALANCHE]: avalanche,
     [ChainId.BASE_GOERLI]: baseGoerli,
@@ -106,6 +109,8 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zkevm-v2',
     [ChainId.BASE]:
         'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
+    [ChainId.MODE]:
+        'https://api.studio.thegraph.com/query/75376/balancer-mode-v2/version/latest',
     [ChainId.ARBITRUM_ONE]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
     [ChainId.AVALANCHE]:
@@ -126,6 +131,7 @@ export const BATCHSIZE: Record<number, number> = {
     [ChainId.ZKEVM]: 128,
     [ChainId.FANTOM]: 128,
     [ChainId.BASE]: 800,
+    [ChainId.MODE]: 800,
 };
 
 /**
@@ -145,6 +151,7 @@ export const BALANCER_RELAYER: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0x7852fB9d0895e6e8b3EedA553c03F6e2F9124dF9',
     [ChainId.ZKEVM]: '0x8e620FfCa2580ed87241D7e10F85EE75d0a906F5',
     [ChainId.BASE]: '0x76f7204b62f554b79d444588edac9dfa7032c71a',
+    [ChainId.MODE]: '0xb541765f540447646a9545e0a4800a0bacf9e13d',
 };
 
 export const VAULT: Record<number, Address> = {
@@ -157,6 +164,7 @@ export const VAULT: Record<number, Address> = {
     [ChainId.ZKEVM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.FANTOM]: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
     [ChainId.BASE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.MODE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
 export const VAULT_V3: Record<number, Address> = {
@@ -173,6 +181,7 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
     [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
     [ChainId.BASE]: '0x300ab2038eac391f26d9f895dc61f8f66a548833',
+    [ChainId.MODE]: '0x36caC20dd805d128c1a6Dd16eeA845C574b5A17C',
 };
 
 export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
@@ -184,6 +193,7 @@ export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
     [ChainId.POLYGON]: '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
     [ChainId.BASE]: '0x4c32a8a8fda4e24139b51b456b42290f51d6a1c4',
+    [ChainId.MODE]: '0xc3ccacE87f6d3A81724075ADcb5ddd85a8A1bB68',
 };
 export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0x39aB047f64D198288a1348ce746cA8457435a742',
@@ -197,6 +207,7 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
     [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
     [ChainId.BASE]: '0x8df317a729fcaa260306d7de28888932cb579b88',
+    [ChainId.MODE]: '0x5DbAd78818D4c8958EfF2d5b95b28385A22113Cd',
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
@@ -282,6 +293,14 @@ export const NATIVE_ASSETS = {
     ),
     [ChainId.BASE]: new Token(
         ChainId.BASE,
+        NATIVE_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0x4200000000000000000000000000000000000006',
+    ),
+    [ChainId.MODE]: new Token(
+        ChainId.MODE,
         NATIVE_ADDRESS,
         18,
         'ETH',

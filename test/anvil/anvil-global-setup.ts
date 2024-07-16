@@ -14,7 +14,7 @@ type NetworkSetup = {
 
 type NetworksWithFork = Extract<
     keyof typeof ChainId,
-    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA' | 'OPTIMISM'
+    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA' | 'OPTIMISM' | 'MODE'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -24,6 +24,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     FANTOM: 8845,
     SEPOLIA: 8945,
     OPTIMISM: 9045,
+    MODE: 9145,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -59,6 +60,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: 'https://optimism.gateway.tenderly.co',
         port: ANVIL_PORTS.OPTIMISM,
         forkBlockNumber: 117374265n,
+    },
+    MODE: {
+        rpcEnv: 'MODE_RPC_URL',
+        fallBackRpc: 'https://mode.gateway.tenderly.co/',
+        port: ANVIL_PORTS.MODE,
+        forkBlockNumber: 10484897n,
     },
 };
 
