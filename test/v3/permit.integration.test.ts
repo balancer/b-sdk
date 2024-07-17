@@ -39,11 +39,7 @@ import {
     SwapKind,
 } from 'src';
 
-import {
-    ANVIL_NETWORKS,
-    startFork,
-    stopAnvilFork,
-} from 'test/anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityTxInput,
     approveSpenderOnTokens,
@@ -67,9 +63,9 @@ const usePermitSignatures = true;
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
-const USDC = TOKENS[chainId].USDC;
-const DAI = TOKENS[chainId].DAI;
-const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
+const USDC = TOKENS[chainId].USDC_AAVE;
+const DAI = TOKENS[chainId].DAI_AAVE;
+// const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
 
 describe('permit and permit2 integration tests', () => {
     let rpcUrl: string;
@@ -80,6 +76,7 @@ describe('permit and permit2 integration tests', () => {
     let removeLiquidityTxInput: RemoveLiquidityTxInput;
     let addLiquidityInput: AddLiquidityUnbalancedInput;
     let removeLiquidityInput: RemoveLiquidityProportionalInput;
+    let snapshot: Hex;
 
     beforeAll(async () => {
         // setup mock api
@@ -87,11 +84,7 @@ describe('permit and permit2 integration tests', () => {
 
         // get pool state from api
         poolState = await api.getPool(poolId);
-    });
 
-    // reset fork
-    beforeEach(async () => {
-        await stopAnvilFork(ANVIL_NETWORKS.SEPOLIA);
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
 
         client = createTestClient({
@@ -120,6 +113,17 @@ describe('permit and permit2 integration tests', () => {
             tokens,
             PERMIT2[chainId],
         );
+
+        // Uses Special RPC methods to revert state back to same snapshot for each test
+        snapshot = await client.snapshot();
+    });
+
+    // reset fork
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
     });
 
     describe('add and remove liquidity tests', () => {
@@ -343,9 +347,9 @@ describe('permit and permit2 integration tests', () => {
         });
     });
 
-    describe.skip('multi-hop swap tests', () => {
+    describe('multi-hop swap tests', () => {
         let pathMultiSwap: Path;
-        let pathWithExit: Path;
+        // let pathWithExit: Path;
         let swapParams: SwapInput;
 
         beforeEach(async () => {
@@ -379,33 +383,33 @@ describe('permit and permit2 integration tests', () => {
                 outputAmountRaw: 2000000n,
             };
             // weth > bpt > usdc
-            pathWithExit = {
-                protocolVersion: 3,
-                tokens: [
-                    {
-                        address: WETH.address,
-                        decimals: WETH.decimals,
-                    },
-                    {
-                        address: USDC_DAI_BPT.address,
-                        decimals: USDC_DAI_BPT.decimals,
-                    },
-                    {
-                        address: USDC.address,
-                        decimals: USDC.decimals,
-                    },
-                ],
-                pools: [
-                    POOLS[chainId].MOCK_NESTED_POOL.id,
-                    POOLS[chainId].MOCK_USDC_DAI_POOL.id,
-                ],
-                inputAmountRaw: 100000000000000n,
-                outputAmountRaw: 6000000n,
-            };
+            // pathWithExit = {
+            //     protocolVersion: 3,
+            //     tokens: [
+            //         {
+            //             address: WETH.address,
+            //             decimals: WETH.decimals,
+            //         },
+            //         {
+            //             address: USDC_DAI_BPT.address,
+            //             decimals: USDC_DAI_BPT.decimals,
+            //         },
+            //         {
+            //             address: USDC.address,
+            //             decimals: USDC.decimals,
+            //         },
+            //     ],
+            //     pools: [
+            //         POOLS[chainId].MOCK_NESTED_POOL.id,
+            //         POOLS[chainId].MOCK_USDC_DAI_POOL.id,
+            //     ],
+            //     inputAmountRaw: 100000000000000n,
+            //     outputAmountRaw: 6000000n,
+            // };
 
             swapParams = {
                 chainId,
-                paths: [pathMultiSwap, pathWithExit],
+                paths: [pathMultiSwap], // TODO: add poolWithExit after it's seeded with liquidity by the data team
                 swapKind: SwapKind.GivenIn,
             };
         });
@@ -424,6 +428,7 @@ describe('permit and permit2 integration tests', () => {
                     chainId,
                     swap,
                     false,
+                    true,
                 );
             });
             test('GivenOut', async () => {
@@ -438,6 +443,7 @@ describe('permit and permit2 integration tests', () => {
                     chainId,
                     swap,
                     false,
+                    true,
                 );
             });
         });
@@ -455,6 +461,7 @@ describe('permit and permit2 integration tests', () => {
                         chainId,
                         swap,
                         true,
+                        true,
                     ),
                 ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
             });
@@ -470,6 +477,7 @@ describe('permit and permit2 integration tests', () => {
                         rpcUrl,
                         chainId,
                         swap,
+                        true,
                         true,
                     ),
                 ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);

@@ -46,8 +46,6 @@ const USDC = TOKENS[chainId].USDC_AAVE;
 const DAI = TOKENS[chainId].DAI_AAVE;
 const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
 
-type Override = { Parameters: Hex[]; ReturnType: Hex };
-
 describe('SwapV3', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
     let testAddress: Address;
@@ -82,21 +80,14 @@ describe('SwapV3', () => {
         );
         // Uses Special RPC methods to revert state back to same snapshot for each test
         // https://github.com/trufflesuite/ganache-cli-archive/blob/master/README.md
-        snapshot = await client.request<Override>({
-            method: 'evm_snapshot',
-            params: [],
-        });
+        snapshot = await client.snapshot();
     });
 
     beforeEach(async () => {
-        await client.request<Override>({
-            method: 'evm_revert',
-            params: [snapshot],
+        await client.revert({
+            id: snapshot,
         });
-        snapshot = await client.request<Override>({
-            method: 'evm_snapshot',
-            params: [],
-        });
+        snapshot = await client.snapshot();
     });
 
     describe('single swap', () => {
