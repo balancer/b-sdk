@@ -25,6 +25,7 @@ import {
     AddLiquidityInput,
     InputAmount,
     PoolType,
+    AddLiquidityProportionalInput,
 } from '../../src';
 import { forkSetup } from '../lib/utils/helper';
 import { AddLiquidityTxInput } from '../lib/utils/types';
@@ -32,6 +33,7 @@ import {
     doAddLiquidity,
     assertAddLiquidityUnbalanced,
     assertAddLiquiditySingleToken,
+    assertAddLiquidityProportional,
 } from '../lib/utils/addLiquidityHelper';
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';
@@ -193,6 +195,66 @@ describe('add liquidity test', () => {
             });
 
             assertAddLiquiditySingleToken(
+                txInput.poolState,
+                addLiquidityInput,
+                addLiquidityOutput,
+                txInput.slippage,
+                protocolVersion,
+                wethIsEth,
+            );
+        });
+    });
+
+    describe('add liquidity proportional', () => {
+        let input: AddLiquidityProportionalInput;
+        beforeAll(() => {
+            const bptOut: InputAmount = {
+                rawAmount: parseEther('1'),
+                decimals: 18,
+                address: poolState.address,
+            };
+
+            input = {
+                bptOut: bptOut,
+                kind: AddLiquidityKind.Proportional,
+                chainId: chainId,
+                rpcUrl: rpcUrl,
+            };
+        });
+        test('with token', async () => {
+            const addLiquidityInput = {
+                ...input,
+            };
+
+            // call the addLiquidity function
+            // assert the output
+            const addLiquidityOutput = await doAddLiquidity({
+                ...txInput,
+                addLiquidityInput: input,
+            });
+
+            assertAddLiquidityProportional(
+                txInput.poolState,
+                addLiquidityInput,
+                addLiquidityOutput,
+                txInput.slippage,
+                protocolVersion,
+            );
+        });
+        test('with native', async () => {
+            // call the addLiquidity function
+            // assert the output
+            const wethIsEth = true;
+            const addLiquidityInput = {
+                ...input,
+            };
+            const addLiquidityOutput = await doAddLiquidity({
+                ...txInput,
+                addLiquidityInput,
+                wethIsEth,
+            });
+
+            assertAddLiquidityProportional(
                 txInput.poolState,
                 addLiquidityInput,
                 addLiquidityOutput,

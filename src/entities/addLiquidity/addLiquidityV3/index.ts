@@ -7,7 +7,6 @@ import { getAmounts, getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
-    addLiquidityProportionalUnavailableError,
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
 } from '@/utils';
 
@@ -22,6 +21,7 @@ import {
 } from '../types';
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
+import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
 import { getValue } from '@/entities/utils/getValue';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
@@ -37,8 +37,43 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         let tokenInIndex: number | undefined;
 
         switch (input.kind) {
-            case AddLiquidityKind.Proportional:
-                throw addLiquidityProportionalUnavailableError;
+            case AddLiquidityKind.Proportional: {
+                // APPROACH 1 - create maxAmountsIn data
+                // queryAddLiquidityProportional requires a maxAmountsParameter, which is not
+                // available in the AddLiquidityInput. In order to query the Vault, this
+                // value needs to be available.
+                // TODO: Solve to not have maxAmountsIn be a static number
+                const bigIntValue = BigInt(300000000000000000000);
+                const maxAmountsIn: bigint[] = new Array(
+                    sortedTokens.length,
+                ).fill(bigIntValue);
+
+                // proportional join query returns exactAmountsIn for exactBptOut
+                const amountsInNumbers = await doAddLiquidityProportionalQuery(
+                    input,
+                    poolState.address,
+                    maxAmountsIn,
+                    input.bptOut.rawAmount,
+                );
+
+                amountsIn = sortedTokens.map((t, i) =>
+                    TokenAmount.fromRawAmount(t, amountsInNumbers[i]),
+                );
+
+                // APPRAOCH 2 - Fetch maxAmountsIn data by changing the AddLiquidityProportional type?
+                /* const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
+                amountsIn = sortedTokens.map((t, i) =>
+                    TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
+                ); */
+
+                bptOut = TokenAmount.fromRawAmount(
+                    bptToken,
+                    input.bptOut.rawAmount,
+                );
+
+                tokenInIndex = undefined;
+                break;
+            }
             case AddLiquidityKind.Unbalanced: {
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
@@ -97,7 +132,20 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         let callData: Hex;
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Proportional:
-                throw addLiquidityProportionalUnavailableError;
+                {
+                    callData = encodeFunctionData({
+                        abi: balancerRouterAbi,
+                        functionName: 'addLiquidityProportional',
+                        args: [
+                            input.poolId,
+                            amounts.maxAmountsIn,
+                            amounts.minimumBpt,
+                            !!input.wethIsEth,
+                            '0x',
+                        ],
+                    });
+                }
+                break;
             case AddLiquidityKind.Unbalanced:
                 {
                     callData = encodeFunctionData({
