@@ -14,7 +14,13 @@ type NetworkSetup = {
 
 type NetworksWithFork = Extract<
     keyof typeof ChainId,
-    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA' | 'OPTIMISM'
+    | 'MAINNET'
+    | 'POLYGON'
+    | 'FANTOM'
+    | 'SEPOLIA'
+    | 'OPTIMISM'
+    | 'MODE'
+    | 'FRAXTAL'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -24,6 +30,8 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     FANTOM: 8845,
     SEPOLIA: 8945,
     OPTIMISM: 9045,
+    MODE: 9145,
+    FRAXTAL: 9245,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -52,13 +60,25 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'SEPOLIA_RPC_URL',
         fallBackRpc: 'https://sepolia.gateway.tenderly.co',
         port: ANVIL_PORTS.SEPOLIA,
-        forkBlockNumber: 6244640n,
+        forkBlockNumber: 6288761n,
     },
     OPTIMISM: {
         rpcEnv: 'OPTIMISM_RPC_URL',
         fallBackRpc: 'https://optimism.gateway.tenderly.co',
         port: ANVIL_PORTS.OPTIMISM,
         forkBlockNumber: 117374265n,
+    },
+    MODE: {
+        rpcEnv: 'MODE_RPC_URL',
+        fallBackRpc: 'https://mode.gateway.tenderly.co/',
+        port: ANVIL_PORTS.MODE,
+        forkBlockNumber: 10484897n,
+    },
+    FRAXTAL: {
+        rpcEnv: 'FRAXTAL_RPC_URL',
+        fallBackRpc: 'https://fraxtal.gateway.tenderly.co/',
+        port: ANVIL_PORTS.FRAXTAL,
+        forkBlockNumber: 7164945n,
     },
 };
 

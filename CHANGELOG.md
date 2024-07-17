@@ -1,5 +1,25 @@
 # @balancer/sdk
 
+## 0.20.2
+
+### Patch Changes
+
+- 9aa847e: Fix Balancer Queries address for Avalanche
+
+## 0.20.1
+
+### Patch Changes
+
+- 5c353a3: Add support for chain: Fraxtal
+- dc5a323: Add support for chain: Mode
+- 42d3d71: Expose Batch Router ABI
+
+## 0.20.0
+
+### Minor Changes
+
+- 07b6eaa: Update to use deploy 6.
+
 ## 0.19.2
 
 ### Patch Changes

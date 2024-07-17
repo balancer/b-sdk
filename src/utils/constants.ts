@@ -16,6 +16,8 @@ import {
     zkSyncTestnet,
     fantom,
     sepolia,
+    mode,
+    fraxtal,
 } from 'viem/chains';
 
 export const ZERO_ADDRESS: Address =
@@ -60,9 +62,11 @@ export enum ChainId {
     POLYGON = 137,
     ZKSYNC_TESTNET = 280,
     FANTOM = 250,
+    FRAXTAL = 252,
     ZKSYNC = 324,
     ZKEVM = 1101,
     BASE = 8453,
+    MODE = 34443,
     ARBITRUM_ONE = 42161,
     AVALANCHE = 43114,
     BASE_GOERLI = 84531,
@@ -77,13 +81,15 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.GNOSIS_CHAIN]: gnosis,
     [ChainId.POLYGON]: polygon,
     [ChainId.ZKSYNC_TESTNET]: zkSyncTestnet,
+    [ChainId.FANTOM]: fantom,
+    [ChainId.FRAXTAL]: fraxtal,
     [ChainId.ZKSYNC]: zkSync,
     [ChainId.ZKEVM]: polygonZkEvm,
     [ChainId.BASE]: base,
+    [ChainId.MODE]: mode,
     [ChainId.ARBITRUM_ONE]: arbitrum,
     [ChainId.AVALANCHE]: avalanche,
     [ChainId.BASE_GOERLI]: baseGoerli,
-    [ChainId.FANTOM]: fantom,
     [ChainId.SEPOLIA]: sepolia,
 };
 
@@ -100,32 +106,24 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [ChainId.ZKSYNC_TESTNET]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zktestnet-v2',
+    [ChainId.FANTOM]:
+        'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
+    [ChainId.FRAXTAL]:
+        'https://api.goldsky.com/api/public/project_clwhu1vopoigi01wmbn514m1z/subgraphs/balancer-fraxtal-v2/1.0.0/gn',
     [ChainId.ZKSYNC]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zksync-v2',
     [ChainId.ZKEVM]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-zkevm-v2',
     [ChainId.BASE]:
         'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
+    [ChainId.MODE]:
+        'https://api.studio.thegraph.com/query/75376/balancer-mode-v2/version/latest',
     [ChainId.ARBITRUM_ONE]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
     [ChainId.AVALANCHE]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2',
     [ChainId.BASE_GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-base-goerli-v2',
-    [ChainId.FANTOM]:
-        'https://api.thegraph.com/subgraphs/name/beethovenxfi/beethovenx-v2-fantom',
-};
-
-export const BATCHSIZE: Record<number, number> = {
-    [ChainId.ARBITRUM_ONE]: 800,
-    [ChainId.AVALANCHE]: 800,
-    [ChainId.GNOSIS_CHAIN]: 800,
-    [ChainId.MAINNET]: 800,
-    [ChainId.OPTIMISM]: 800,
-    [ChainId.POLYGON]: 800,
-    [ChainId.ZKEVM]: 128,
-    [ChainId.FANTOM]: 128,
-    [ChainId.BASE]: 800,
 };
 
 /**
@@ -136,75 +134,85 @@ export const BATCHSIZE: Record<number, number> = {
 export const BALANCER_RELAYER: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0x9B892E515D2Ab8869F17488d64B3b918731cc70d',
     [ChainId.AVALANCHE]: '0xA084c11cb55e67C9becf9607f1DBB20ec4D5E7b2',
+    [ChainId.BASE]: '0x76f7204b62f554b79d444588edac9dfa7032c71a',
     [ChainId.BSC]: '0xf41D6De4bbE9919d87BC1E5cc3335549e2A1A6c0',
+    [ChainId.FRAXTAL]: '0xb541765F540447646A9545E0A4800A0Bacf9E13D',
     [ChainId.GNOSIS_CHAIN]: '0x2163c2FcD0940e84B8a68991bF926eDfB0Cd926C',
     [ChainId.GOERLI]: '0x7f36A11750F225De646b0de7b26BC74e797c310B',
     [ChainId.MAINNET]: '0x35Cea9e57A393ac66Aaa7E25C391D52C74B5648f',
+    [ChainId.MODE]: '0xb541765f540447646a9545e0a4800a0bacf9e13d',
     [ChainId.OPTIMISM]: '0x015ACA20a1422F3c729086c17f15F10e0CfbC75A',
     [ChainId.POLYGON]: '0xB1ED8d3b5059b3281D43306cC9D043cE8B22599b',
     [ChainId.SEPOLIA]: '0x7852fB9d0895e6e8b3EedA553c03F6e2F9124dF9',
     [ChainId.ZKEVM]: '0x8e620FfCa2580ed87241D7e10F85EE75d0a906F5',
-    [ChainId.BASE]: '0x76f7204b62f554b79d444588edac9dfa7032c71a',
 };
 
 export const VAULT: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.AVALANCHE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.BASE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.FANTOM]: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
+    [ChainId.FRAXTAL]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.GNOSIS_CHAIN]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.MAINNET]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.MODE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.OPTIMISM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.POLYGON]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.ZKEVM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    [ChainId.FANTOM]: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
-    [ChainId.BASE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xD5584b37D1845fFeD958C2d94bC675603DdCce68',
+    [ChainId.SEPOLIA]: '0x92B5c1CB2999c45804A60d6529D77DeEF00fb839',
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
-    [ChainId.AVALANCHE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.AVALANCHE]: '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD',
+    [ChainId.BASE]: '0x300ab2038eac391f26d9f895dc61f8f66a548833',
+    [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
+    [ChainId.FRAXTAL]: '0x4132f7AcC9dB7A6cF7BE2Dd3A9DC8b30C7E6E6c8',
     [ChainId.GNOSIS_CHAIN]: '0x0f3e0c4218b7b0108a3643cfe9d3ec0d4f57c54e',
     [ChainId.MAINNET]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+    [ChainId.MODE]: '0x36caC20dd805d128c1a6Dd16eeA845C574b5A17C',
     [ChainId.OPTIMISM]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
-    [ChainId.FANTOM]: '0x1B0A42663DF1edeA171cD8732d288a81EFfF6d23',
-    [ChainId.BASE]: '0x300ab2038eac391f26d9f895dc61f8f66a548833',
 };
 
 export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xc7e5ed1054a24ef31d827e6f86caa58b3bc168d7',
     [ChainId.AVALANCHE]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
+    [ChainId.BASE]: '0x4c32a8a8fda4e24139b51b456b42290f51d6a1c4',
+    [ChainId.FRAXTAL]: '0x9dA18982a33FD0c7051B19F0d7C76F2d5E7e017c',
     [ChainId.GNOSIS_CHAIN]: '0x6cad2ea22bfa7f4c14aae92e47f510cd5c509bc7',
     [ChainId.MAINNET]: '0x897888115ada5773e02aa29f775430bfb5f34c51',
+    [ChainId.MODE]: '0xc3ccacE87f6d3A81724075ADcb5ddd85a8A1bB68',
     [ChainId.OPTIMISM]: '0x230a59f4d9adc147480f03b0d3fffecd56c3289a',
     [ChainId.POLYGON]: '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
-    [ChainId.BASE]: '0x4c32a8a8fda4e24139b51b456b42290f51d6a1c4',
 };
 export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x332694Ef46D880DF6Ea9593e04CB8ABEE5F81D99',
+    [ChainId.SEPOLIA]: '0x39aB047f64D198288a1348ce746cA8457435a742',
 };
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
     [ChainId.AVALANCHE]: '0xe42ffa682a26ef8f25891db4882932711d42e467',
+    [ChainId.BASE]: '0x8df317a729fcaa260306d7de28888932cb579b88',
+    [ChainId.FRAXTAL]: '0x4bdCc2fb18AEb9e2d281b0278D946445070EAda7',
     [ChainId.GNOSIS_CHAIN]: '0x4bdcc2fb18aeb9e2d281b0278d946445070eada7',
     [ChainId.MAINNET]: '0xdb8d758bcb971e482b2c45f7f8a7740283a1bd3a',
+    [ChainId.MODE]: '0x5DbAd78818D4c8958EfF2d5b95b28385A22113Cd',
     [ChainId.OPTIMISM]: '0x043a2dad730d585c44fb79d2614f295d2d625412',
     [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
     [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
-    [ChainId.BASE]: '0x8df317a729fcaa260306d7de28888932cb579b88',
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x1c58cc548a23956469c7C528Bb3a846c842dfaF9',
+    [ChainId.SEPOLIA]: '0xa12Da7dfD0792a10a5b05B575545Bd685798Ce35',
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xB9605cA208cD9b7b5f56c9825Dace7FB92203328',
+    [ChainId.SEPOLIA]: '0x90e065b28c9B7464B44f185f5a6b8e4B4c827f2a',
 };
 
 export const PERMIT2: Record<number, Address> = {
@@ -216,38 +224,6 @@ export const PERMIT2: Record<number, Address> = {
  */
 
 export const NATIVE_ASSETS = {
-    [ChainId.MAINNET]: new Token(
-        ChainId.MAINNET,
-        NATIVE_ADDRESS,
-        18,
-        'ETH',
-        'Ether',
-        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    ),
-    [ChainId.GOERLI]: new Token(
-        ChainId.GOERLI,
-        NATIVE_ADDRESS,
-        18,
-        'ETH',
-        'Ether',
-        '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
-    ),
-    [ChainId.GNOSIS_CHAIN]: new Token(
-        ChainId.GNOSIS_CHAIN,
-        NATIVE_ADDRESS,
-        18,
-        'xDAI',
-        'xDAI',
-        '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
-    ),
-    [ChainId.POLYGON]: new Token(
-        ChainId.POLYGON,
-        NATIVE_ADDRESS,
-        18,
-        'MATIC',
-        'Matic',
-        '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-    ),
     [ChainId.ARBITRUM_ONE]: new Token(
         ChainId.ARBITRUM_ONE,
         NATIVE_ADDRESS,
@@ -256,8 +232,8 @@ export const NATIVE_ASSETS = {
         'Ether',
         '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
     ),
-    [ChainId.OPTIMISM]: new Token(
-        ChainId.OPTIMISM,
+    [ChainId.BASE]: new Token(
+        ChainId.BASE,
         NATIVE_ADDRESS,
         18,
         'ETH',
@@ -272,6 +248,62 @@ export const NATIVE_ASSETS = {
         'Fantom',
         '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
     ),
+    [ChainId.FRAXTAL]: new Token(
+        ChainId.FRAXTAL,
+        NATIVE_ADDRESS,
+        18,
+        'FRAXTAL',
+        'Fraxtal',
+        '0xfc00000000000000000000000000000000000006',
+    ),
+    [ChainId.GNOSIS_CHAIN]: new Token(
+        ChainId.GNOSIS_CHAIN,
+        NATIVE_ADDRESS,
+        18,
+        'xDAI',
+        'xDAI',
+        '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
+    ),
+    [ChainId.GOERLI]: new Token(
+        ChainId.GOERLI,
+        NATIVE_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    ),
+    [ChainId.MAINNET]: new Token(
+        ChainId.MAINNET,
+        NATIVE_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    ),
+    [ChainId.MODE]: new Token(
+        ChainId.MODE,
+        NATIVE_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0x4200000000000000000000000000000000000006',
+    ),
+    [ChainId.OPTIMISM]: new Token(
+        ChainId.OPTIMISM,
+        NATIVE_ADDRESS,
+        18,
+        'ETH',
+        'Ether',
+        '0x4200000000000000000000000000000000000006',
+    ),
+    [ChainId.POLYGON]: new Token(
+        ChainId.POLYGON,
+        NATIVE_ADDRESS,
+        18,
+        'MATIC',
+        'Matic',
+        '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+    ),
     [ChainId.SEPOLIA]: new Token(
         ChainId.SEPOLIA,
         NATIVE_ADDRESS,
@@ -279,14 +311,6 @@ export const NATIVE_ASSETS = {
         'ETH',
         'Ether',
         '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
-    ),
-    [ChainId.BASE]: new Token(
-        ChainId.BASE,
-        NATIVE_ADDRESS,
-        18,
-        'ETH',
-        'Ether',
-        '0x4200000000000000000000000000000000000006',
     ),
 };
 
