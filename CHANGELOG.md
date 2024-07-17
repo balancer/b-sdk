@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.20.2
+
+### Patch Changes
+
+- 9aa847e: Fix Balancer Queries address for Avalanche
+
 ## 0.20.1
 
 ### Patch Changes
