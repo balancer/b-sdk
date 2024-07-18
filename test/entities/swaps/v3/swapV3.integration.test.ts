@@ -51,47 +51,15 @@ describe('SwapV3', () => {
     let testAddress: Address;
     let rpcUrl: string;
     let snapshot: Hex;
+    let pathBalWeth: Path;
+    let pathMultiSwap: Path;
+    let pathUsdcWethMulti: Path;
+    let pathWithExit: Path;
+    let pathUsdcWethJoin: Path;
 
     beforeAll(async () => {
-        const fork = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            blockNo,
-        );
-        rpcUrl = fork.rpcUrl;
-        client = createTestClient({
-            mode: 'anvil',
-            chain: CHAINS[chainId],
-            transport: http(rpcUrl),
-        })
-            .extend(publicActions)
-            .extend(walletActions);
-
-        testAddress = (await client.getAddresses())[0];
-        await forkSetup(
-            client,
-            testAddress,
-            [WETH.address, BAL.address, USDC.address],
-            // [WETH.slot as number, BAL.slot as number, undefined],
-            [WETH.slot as number, BAL.slot as number, USDC.slot as number],
-            [parseEther('100'), parseEther('100'), 100000000n],
-            undefined,
-            protocolVersion,
-        );
-        // Uses Special RPC methods to revert state back to same snapshot for each test
-        // https://github.com/trufflesuite/ganache-cli-archive/blob/master/README.md
-        snapshot = await client.snapshot();
-    });
-
-    beforeEach(async () => {
-        await client.revert({
-            id: snapshot,
-        });
-        snapshot = await client.snapshot();
-    });
-
-    describe('single swap', () => {
-        const pathBalWeth: Path = {
+        // weth [swap] bal
+        pathBalWeth = {
             protocolVersion: 3,
             tokens: [
                 {
@@ -107,7 +75,121 @@ describe('SwapV3', () => {
             inputAmountRaw: 100000000000n,
             outputAmountRaw: 100000000000n,
         };
-        describe('query method should return correct updated', () => {
+
+        // weth [swap] bal [swap] dai [swap] usdc
+        pathMultiSwap = {
+            protocolVersion: 3,
+            tokens: [
+                {
+                    address: WETH.address,
+                    decimals: WETH.decimals,
+                },
+                {
+                    address: BAL.address,
+                    decimals: BAL.decimals,
+                },
+                {
+                    address: DAI.address,
+                    decimals: DAI.decimals,
+                },
+                {
+                    address: USDC.address,
+                    decimals: USDC.decimals,
+                },
+            ],
+            pools: [
+                POOLS[chainId].MOCK_WETH_BAL_POOL.id,
+                POOLS[chainId].MOCK_BAL_DAI_POOL.id,
+                POOLS[chainId].MOCK_USDC_DAI_POOL.id,
+            ],
+            inputAmountRaw: 100000000000000n,
+            outputAmountRaw: 2000000n,
+        };
+
+        // usdc [swap] dai [swap] bal [swap] weth
+        pathUsdcWethMulti = {
+            ...pathMultiSwap,
+            tokens: [...pathMultiSwap.tokens].reverse(),
+            pools: [...pathMultiSwap.pools].reverse(),
+            inputAmountRaw: 100000n,
+            outputAmountRaw: 40000000000000n,
+        };
+
+        // weth [swap] bpt [exit] usdc
+        pathWithExit = {
+            protocolVersion: 3,
+            tokens: [
+                {
+                    address: WETH.address,
+                    decimals: WETH.decimals,
+                },
+                {
+                    address: USDC_DAI_BPT.address,
+                    decimals: USDC_DAI_BPT.decimals,
+                },
+                {
+                    address: USDC.address,
+                    decimals: USDC.decimals,
+                },
+            ],
+            pools: [
+                POOLS[chainId].MOCK_NESTED_POOL.id,
+                POOLS[chainId].MOCK_USDC_DAI_POOL.id,
+            ],
+            inputAmountRaw: 100000000000000n,
+            outputAmountRaw: 6000000n,
+        };
+
+        // usdc [join] bpt [swap] weth
+        pathUsdcWethJoin = {
+            ...pathWithExit,
+            tokens: [...pathWithExit.tokens].reverse(),
+            pools: [...pathWithExit.pools].reverse(),
+            inputAmountRaw: 6000000n,
+            outputAmountRaw: 600000000000000n,
+        };
+
+        const fork = await startFork(
+            ANVIL_NETWORKS.SEPOLIA,
+            undefined,
+            blockNo,
+        );
+        rpcUrl = fork.rpcUrl;
+        client = createTestClient({
+            mode: 'anvil',
+            chain: CHAINS[chainId],
+            transport: http(rpcUrl),
+        })
+            .extend(publicActions)
+            .extend(walletActions);
+
+        testAddress = (await client.getAddresses())[0];
+
+        await forkSetup(
+            client,
+            testAddress,
+            [WETH.address, BAL.address, USDC.address],
+            // [WETH.slot as number, BAL.slot as number, undefined],
+            [WETH.slot as number, BAL.slot as number, USDC.slot as number],
+            [parseEther('100'), parseEther('100'), 100000000n],
+            undefined,
+            protocolVersion,
+        );
+
+        // Uses Special RPC methods to revert state back to same snapshot for each test
+        // https://github.com/trufflesuite/ganache-cli-archive/blob/master/README.md
+        snapshot = await client.snapshot();
+    });
+
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
+    });
+
+    describe('query method should return correct updated', () => {
+        describe('single swap', () => {
             test('GivenIn', async () => {
                 const swap = new Swap({
                     chainId,
@@ -145,175 +227,7 @@ describe('SwapV3', () => {
                 );
             });
         });
-        describe('swap should be executed correctly', () => {
-            describe('wethIsEth: false', () => {
-                const swapParams = {
-                    chainId,
-                    paths: [pathBalWeth],
-                    wethIsEth: false,
-                };
-                test('GivenIn', async () => {
-                    const swap = new Swap({
-                        ...swapParams,
-                        swapKind: SwapKind.GivenIn,
-                    });
-                    await assertSwapExactIn(
-                        BALANCER_ROUTER[chainId],
-                        client,
-                        rpcUrl,
-                        chainId,
-                        swap,
-                        false,
-                    );
-                });
-                test('GivenOut', async () => {
-                    const swap = new Swap({
-                        ...swapParams,
-                        swapKind: SwapKind.GivenOut,
-                    });
-                    await assertSwapExactOut(
-                        BALANCER_ROUTER[chainId],
-                        client,
-                        rpcUrl,
-                        chainId,
-                        swap,
-                        false,
-                    );
-                });
-            });
-            describe('wethIsEth: true', () => {
-                describe('eth out', async () => {
-                    test('GivenIn', async () => {
-                        const swap = new Swap({
-                            chainId,
-                            paths: [pathBalWeth],
-                            swapKind: SwapKind.GivenIn,
-                        });
-                        await assertSwapExactIn(
-                            BALANCER_ROUTER[chainId],
-                            client,
-                            rpcUrl,
-                            chainId,
-                            swap,
-                            true,
-                        );
-                    });
-                    test('GivenOut', async () => {
-                        const swap = new Swap({
-                            chainId,
-                            paths: [pathBalWeth],
-                            swapKind: SwapKind.GivenOut,
-                        });
-                        await assertSwapExactOut(
-                            BALANCER_ROUTER[chainId],
-                            client,
-                            rpcUrl,
-                            chainId,
-                            swap,
-                            true,
-                        );
-                    });
-                });
-                describe('eth in', () => {
-                    test('GivenIn', async () => {
-                        const pathWethBal = {
-                            ...pathBalWeth,
-                            tokens: [...pathBalWeth.tokens].reverse(),
-                        };
-                        const swap = new Swap({
-                            chainId,
-                            paths: [pathWethBal],
-                            swapKind: SwapKind.GivenIn,
-                        });
-                        await assertSwapExactIn(
-                            BALANCER_ROUTER[chainId],
-                            client,
-                            rpcUrl,
-                            chainId,
-                            swap,
-                            true,
-                        );
-                    });
-                    test('GivenOut', async () => {
-                        const pathWethBal = {
-                            ...pathBalWeth,
-                            tokens: [...pathBalWeth.tokens].reverse(),
-                        };
-                        const swap = new Swap({
-                            chainId,
-                            paths: [pathWethBal],
-                            swapKind: SwapKind.GivenOut,
-                        });
-                        await assertSwapExactOut(
-                            BALANCER_ROUTER[chainId],
-                            client,
-                            rpcUrl,
-                            chainId,
-                            swap,
-                            true,
-                        );
-                    });
-                });
-            });
-        });
-    });
-
-    describe('multi-hop swap', () => {
-        // weth [swap] bal [swap] dai [swap] usdc
-        const pathMultiSwap: Path = {
-            protocolVersion: 3,
-            tokens: [
-                {
-                    address: WETH.address,
-                    decimals: WETH.decimals,
-                },
-                {
-                    address: BAL.address,
-                    decimals: BAL.decimals,
-                },
-                {
-                    address: DAI.address,
-                    decimals: DAI.decimals,
-                },
-                {
-                    address: USDC.address,
-                    decimals: USDC.decimals,
-                },
-            ],
-            pools: [
-                POOLS[chainId].MOCK_WETH_BAL_POOL.id,
-                POOLS[chainId].MOCK_BAL_DAI_POOL.id,
-                POOLS[chainId].MOCK_USDC_DAI_POOL.id,
-            ],
-            inputAmountRaw: 100000000000000n,
-            outputAmountRaw: 2000000n,
-        };
-        // weth [swap] bpt [exit] usdc
-        const pathWithExit: Path = {
-            protocolVersion: 3,
-            tokens: [
-                {
-                    address: WETH.address,
-                    decimals: WETH.decimals,
-                },
-                {
-                    address: USDC_DAI_BPT.address,
-                    decimals: USDC_DAI_BPT.decimals,
-                },
-                {
-                    address: USDC.address,
-                    decimals: USDC.decimals,
-                },
-            ],
-            pools: [
-                POOLS[chainId].MOCK_NESTED_POOL.id,
-                POOLS[chainId].MOCK_USDC_DAI_POOL.id,
-            ],
-            inputAmountRaw: 100000000000000n,
-            outputAmountRaw: 6000000n,
-        };
-
-        describe('query method should return correct updated', () => {
+        describe('multi-hop swap', () => {
             describe('path with swaps only', () => {
                 test('GivenIn', async () => {
                     const swap = new Swap({
@@ -418,12 +332,122 @@ describe('SwapV3', () => {
                 });
             });
         });
+    });
+
+    describe('single swap', () => {
+        describe('swap should be executed correctly', () => {
+            describe('wethIsEth: false', () => {
+                test('GivenIn', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathBalWeth],
+                        swapKind: SwapKind.GivenIn,
+                    });
+                    await assertSwapExactIn(
+                        BALANCER_ROUTER[chainId],
+                        client,
+                        rpcUrl,
+                        chainId,
+                        swap,
+                        false,
+                    );
+                });
+                test('GivenOut', async () => {
+                    const swap = new Swap({
+                        chainId,
+                        paths: [pathBalWeth],
+                        swapKind: SwapKind.GivenOut,
+                    });
+                    await assertSwapExactOut(
+                        BALANCER_ROUTER[chainId],
+                        client,
+                        rpcUrl,
+                        chainId,
+                        swap,
+                        false,
+                    );
+                });
+            });
+            describe('wethIsEth: true', () => {
+                describe('eth out', async () => {
+                    test('GivenIn', async () => {
+                        const swap = new Swap({
+                            chainId,
+                            paths: [pathBalWeth],
+                            swapKind: SwapKind.GivenIn,
+                        });
+                        await assertSwapExactIn(
+                            BALANCER_ROUTER[chainId],
+                            client,
+                            rpcUrl,
+                            chainId,
+                            swap,
+                            true,
+                        );
+                    });
+                    test('GivenOut', async () => {
+                        const swap = new Swap({
+                            chainId,
+                            paths: [pathBalWeth],
+                            swapKind: SwapKind.GivenOut,
+                        });
+                        await assertSwapExactOut(
+                            BALANCER_ROUTER[chainId],
+                            client,
+                            rpcUrl,
+                            chainId,
+                            swap,
+                            true,
+                        );
+                    });
+                });
+                describe('eth in', () => {
+                    test('GivenIn', async () => {
+                        const pathWethBal = {
+                            ...pathBalWeth,
+                            tokens: [...pathBalWeth.tokens].reverse(),
+                        };
+                        const swap = new Swap({
+                            chainId,
+                            paths: [pathWethBal],
+                            swapKind: SwapKind.GivenIn,
+                        });
+                        await assertSwapExactIn(
+                            BALANCER_ROUTER[chainId],
+                            client,
+                            rpcUrl,
+                            chainId,
+                            swap,
+                            true,
+                        );
+                    });
+                    test('GivenOut', async () => {
+                        const pathWethBal = {
+                            ...pathBalWeth,
+                            tokens: [...pathBalWeth.tokens].reverse(),
+                        };
+                        const swap = new Swap({
+                            chainId,
+                            paths: [pathWethBal],
+                            swapKind: SwapKind.GivenOut,
+                        });
+                        await assertSwapExactOut(
+                            BALANCER_ROUTER[chainId],
+                            client,
+                            rpcUrl,
+                            chainId,
+                            swap,
+                            true,
+                        );
+                    });
+                });
+            });
+        });
+    });
+
+    describe('multi-hop swap', () => {
         describe('swap should be executed correctly', () => {
             describe('path with swaps only', () => {
-                const swapParams = {
-                    chainId,
-                    paths: [pathMultiSwap],
-                };
                 describe('wethIsEth: false', () => {
                     const wethIsEth = false;
                     test('GivenIn', async () => {
@@ -433,7 +457,8 @@ describe('SwapV3', () => {
                             rpcUrl,
                             chainId,
                             new Swap({
-                                ...swapParams,
+                                chainId,
+                                paths: [pathMultiSwap],
                                 swapKind: SwapKind.GivenIn,
                             }),
                             wethIsEth,
@@ -446,7 +471,8 @@ describe('SwapV3', () => {
                             rpcUrl,
                             chainId,
                             new Swap({
-                                ...swapParams,
+                                chainId,
+                                paths: [pathMultiSwap],
                                 swapKind: SwapKind.GivenOut,
                             }),
                             wethIsEth,
@@ -463,7 +489,8 @@ describe('SwapV3', () => {
                                 rpcUrl,
                                 chainId,
                                 new Swap({
-                                    ...swapParams,
+                                    chainId,
+                                    paths: [pathMultiSwap],
                                     swapKind: SwapKind.GivenIn,
                                 }),
                                 wethIsEth,
@@ -476,7 +503,8 @@ describe('SwapV3', () => {
                                 rpcUrl,
                                 chainId,
                                 new Swap({
-                                    ...swapParams,
+                                    chainId,
+                                    paths: [pathMultiSwap],
                                     swapKind: SwapKind.GivenOut,
                                 }),
                                 wethIsEth,
@@ -484,14 +512,6 @@ describe('SwapV3', () => {
                         });
                     });
                     describe('eth out', () => {
-                        // usdc > dai > bal > weth
-                        const pathUsdcWethMulti = {
-                            ...pathMultiSwap,
-                            tokens: [...pathMultiSwap.tokens].reverse(),
-                            pools: [...pathMultiSwap.pools].reverse(),
-                            inputAmountRaw: 100000n,
-                            outputAmountRaw: 40000000000000n,
-                        };
                         test('GivenIn', async () => {
                             const swap = new Swap({
                                 chainId,
@@ -527,14 +547,10 @@ describe('SwapV3', () => {
             });
             describe.skip('paths with exit/join', () => {
                 describe('wethIsEth: false', () => {
-                    const swapParams = {
-                        chainId,
-                        paths: [pathMultiSwap, pathWithExit],
-                        wethIsEth: false,
-                    };
                     test('GivenIn', async () => {
                         const swap = new Swap({
-                            ...swapParams,
+                            chainId,
+                            paths: [pathMultiSwap, pathWithExit],
                             swapKind: SwapKind.GivenIn,
                         });
                         await assertSwapExactIn(
@@ -548,7 +564,8 @@ describe('SwapV3', () => {
                     });
                     test('GivenOut', async () => {
                         const swap = new Swap({
-                            ...swapParams,
+                            chainId,
+                            paths: [pathMultiSwap, pathWithExit],
                             swapKind: SwapKind.GivenOut,
                         });
                         await assertSwapExactOut(
@@ -595,22 +612,6 @@ describe('SwapV3', () => {
                         });
                     });
                     describe('eth out', () => {
-                        // usdc > dai > bal > weth
-                        const pathUsdcWethMulti = {
-                            ...pathMultiSwap,
-                            tokens: [...pathMultiSwap.tokens].reverse(),
-                            pools: [...pathMultiSwap.pools].reverse(),
-                            inputAmountRaw: 100000n,
-                            outputAmountRaw: 40000000000000n,
-                        };
-                        // usdc > bpt > weth
-                        const pathUsdcWethJoin = {
-                            ...pathWithExit,
-                            tokens: [...pathWithExit.tokens].reverse(),
-                            pools: [...pathWithExit.pools].reverse(),
-                            inputAmountRaw: 6000000n,
-                            outputAmountRaw: 600000000000000n,
-                        };
                         test('GivenIn', async () => {
                             const swap = new Swap({
                                 chainId,
