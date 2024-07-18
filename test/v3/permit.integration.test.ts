@@ -7,7 +7,6 @@ import {
     Client,
     createTestClient,
     http,
-    parseEther,
     parseUnits,
     PublicActions,
     publicActions,
@@ -17,9 +16,6 @@ import {
 } from 'viem';
 
 import {
-    AddLiquidity,
-    AddLiquidityKind,
-    AddLiquidityUnbalancedInput,
     BALANCER_BATCH_ROUTER,
     BALANCER_ROUTER,
     ChainId,
@@ -29,10 +25,6 @@ import {
     PERMIT2,
     PoolState,
     PoolType,
-    RemoveLiquidity,
-    RemoveLiquidityKind,
-    RemoveLiquidityProportionalInput,
-    Slippage,
     Swap,
     buildCallWithPermit2ETHError,
     SwapInput,
@@ -41,16 +33,10 @@ import {
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
-    AddLiquidityTxInput,
     approveSpenderOnTokens,
-    assertAddLiquidityUnbalanced,
-    assertRemoveLiquidityProportional,
     assertSwapExactIn,
     assertSwapExactOut,
-    doAddLiquidity,
-    doRemoveLiquidity,
     POOLS,
-    RemoveLiquidityTxInput,
     setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
@@ -58,7 +44,6 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 const usePermit2Signatures = true;
-const usePermitSignatures = true;
 
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 const WETH = TOKENS[chainId].WETH;
@@ -72,10 +57,6 @@ describe('permit and permit2 integration tests', () => {
     let poolState: PoolState;
     let testAddress: Address;
     let client: Client & TestActions & WalletActions & PublicActions;
-    let addLiquidityTxInput: AddLiquidityTxInput;
-    let removeLiquidityTxInput: RemoveLiquidityTxInput;
-    let addLiquidityInput: AddLiquidityUnbalancedInput;
-    let removeLiquidityInput: RemoveLiquidityProportionalInput;
     let snapshot: Hex;
 
     beforeAll(async () => {
@@ -124,81 +105,6 @@ describe('permit and permit2 integration tests', () => {
             id: snapshot,
         });
         snapshot = await client.snapshot();
-    });
-
-    describe('add and remove liquidity tests', () => {
-        // TODO: test add/remove with ETH?
-        // TODO: move tests to add/remove/swap integration tests so we make sure we're testing all possible scenarios - will help catch maxAmountsIn issues for example
-
-        test('add liquidity with permit2, then remove liquidity using permit', async () => {
-            addLiquidityInput = {
-                chainId,
-                rpcUrl,
-                kind: AddLiquidityKind.Unbalanced,
-                amountsIn: poolState.tokens.map((t) => ({
-                    rawAmount: parseUnits('10', t.decimals),
-                    decimals: t.decimals,
-                    address: t.address,
-                })),
-            };
-
-            removeLiquidityInput = {
-                chainId,
-                rpcUrl,
-                kind: RemoveLiquidityKind.Proportional,
-                bptIn: {
-                    rawAmount: parseEther('0.1'),
-                    decimals: 18,
-                    address: poolState.address,
-                },
-            };
-
-            addLiquidityTxInput = {
-                client,
-                addLiquidity: new AddLiquidity(),
-                slippage: Slippage.fromPercentage('1'), // 1%
-                poolState,
-                testAddress,
-                addLiquidityInput,
-            };
-
-            removeLiquidityTxInput = {
-                client,
-                removeLiquidity: new RemoveLiquidity(),
-                slippage: Slippage.fromPercentage('1'), // 1%
-                poolState,
-                testAddress,
-                removeLiquidityInput,
-            };
-
-            const addLiquidityOutput = await doAddLiquidity({
-                ...addLiquidityTxInput,
-                addLiquidityInput,
-                usePermit2Signatures,
-            });
-
-            assertAddLiquidityUnbalanced(
-                addLiquidityTxInput.poolState,
-                addLiquidityInput,
-                addLiquidityOutput,
-                addLiquidityTxInput.slippage,
-                protocolVersion,
-            );
-
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...removeLiquidityTxInput,
-                removeLiquidityInput,
-                usePermitSignatures,
-            });
-
-            assertRemoveLiquidityProportional(
-                removeLiquidityTxInput.poolState,
-                removeLiquidityInput,
-                removeLiquidityOutput,
-                removeLiquidityTxInput.slippage,
-                protocolVersion,
-            );
-        });
     });
 
     describe('single swap tests', () => {
