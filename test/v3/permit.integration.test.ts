@@ -34,7 +34,7 @@ import {
     RemoveLiquidityProportionalInput,
     Slippage,
     Swap,
-    swapETHBuildCallWithPermit2Error,
+    buildCallWithPermit2ETHError,
     SwapInput,
     SwapKind,
 } from 'src';
@@ -319,7 +319,7 @@ describe('permit and permit2 integration tests', () => {
                             true,
                             usePermit2Signatures,
                         ),
-                    ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
+                    ).rejects.toThrowError(buildCallWithPermit2ETHError);
                 });
                 test('GivenOut', async () => {
                     const pathWethBal = {
@@ -341,7 +341,7 @@ describe('permit and permit2 integration tests', () => {
                             true,
                             usePermit2Signatures,
                         ),
-                    ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
+                    ).rejects.toThrowError(buildCallWithPermit2ETHError);
                 });
             });
         });
@@ -463,7 +463,7 @@ describe('permit and permit2 integration tests', () => {
                         true,
                         true,
                     ),
-                ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
+                ).rejects.toThrowError(buildCallWithPermit2ETHError);
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -480,7 +480,7 @@ describe('permit and permit2 integration tests', () => {
                         true,
                         true,
                     ),
-                ).rejects.toThrowError(swapETHBuildCallWithPermit2Error);
+                ).rejects.toThrowError(buildCallWithPermit2ETHError);
             });
         });
     });

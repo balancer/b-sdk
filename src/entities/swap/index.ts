@@ -13,7 +13,7 @@ import {
     SwapBuildOutputExactOut,
     SwapInput,
 } from './types';
-import { NATIVE_ASSETS, swapETHBuildCallWithPermit2Error } from '@/utils';
+import { InputValidator } from '../inputValidator/inputValidator';
 
 export * from './types';
 export * from './paths';
@@ -91,20 +91,11 @@ export class Swap {
         input: SwapBuildCallInput,
         permit2: Permit2,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
-        if (
-            input.wethIsEth &&
-            this.inputAmount.token.address ===
-                NATIVE_ASSETS[this.swap.chainId].wrapped
-        ) {
-            throw swapETHBuildCallWithPermit2Error;
-        }
+        InputValidator.validateBuildCallWithPermit2({
+            protocolVersion: this.protocolVersion,
+            wethIsEth: input.wethIsEth,
+        });
 
-        if (this.protocolVersion === 3) {
-            return this.swap.buildCallWithPermit2(input, permit2);
-        }
-
-        throw Error(
-            'buildCall with Permit2 signatures is only available for v3',
-        );
+        return this.swap.buildCallWithPermit2(input, permit2);
     }
 }
