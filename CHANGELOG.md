@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.20.4
+
+### Patch Changes
+
+- 1a41d80: Filter phantomBpt in mapPoolToNestedPoolState.
+
 ## 0.20.3
 
 ### Patch Changes
