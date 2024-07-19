@@ -3,6 +3,7 @@ import { NestedPool, NestedPoolState } from '../../../../../entities';
 import { MinimalToken } from '../../../../types';
 import { Address, Hex } from '../../../../../types';
 import { mapPoolType } from '@/utils/poolTypeMapper';
+import { isSameAddress } from '@/utils';
 
 type PoolGetPool = {
     id: Hex;
@@ -105,7 +106,12 @@ export function mapPoolToNestedPoolState(pool: PoolGetPool): NestedPoolState {
 
     pool.poolTokens.forEach((token) => {
         // Token represents nested pools only if they have a nestedPool property
-        if (!token.nestedPool) return;
+        // Filter out phantomBpt
+        if (
+            !token.nestedPool ||
+            isSameAddress(pool.address, token.nestedPool.address)
+        )
+            return;
 
         // map API result to NestedPool
         pools.push({
