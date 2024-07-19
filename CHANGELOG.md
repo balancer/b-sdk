@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.20.3
+
+### Patch Changes
+
+- 39db20c: Add missing config for Avalanche and ZkEvm.
+
 ## 0.20.2
 
 ### Patch Changes
