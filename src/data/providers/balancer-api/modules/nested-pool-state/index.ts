@@ -5,7 +5,7 @@ import { Address, Hex } from '../../../../../types';
 import { mapPoolType } from '@/utils/poolTypeMapper';
 import { isSameAddress } from '@/utils';
 
-type PoolGetPool = {
+export type PoolGetPool = {
     id: Hex;
     address: Address;
     type: string;
