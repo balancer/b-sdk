@@ -312,6 +312,22 @@ export const NATIVE_ASSETS = {
         'Ether',
         '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
     ),
+    [ChainId.AVALANCHE]: new Token(
+        ChainId.AVALANCHE,
+        NATIVE_ADDRESS,
+        18,
+        'AVAX',
+        'Avax',
+        '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+    ),
+    [ChainId.ZKEVM]: new Token(
+        ChainId.ZKEVM,
+        NATIVE_ADDRESS,
+        18,
+        'MATIC',
+        'Matic',
+        '0xa2036f0538221a77a3937f1379699f44945018d0',
+    ),
 };
 
 export const ETH = NATIVE_ASSETS[ChainId.MAINNET];
