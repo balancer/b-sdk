@@ -21,6 +21,7 @@ type NetworksWithFork = Extract<
     | 'OPTIMISM'
     | 'MODE'
     | 'FRAXTAL'
+    | 'AVALANCHE'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -32,6 +33,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     OPTIMISM: 9045,
     MODE: 9145,
     FRAXTAL: 9245,
+    AVALANCHE: 9345,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -79,6 +81,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: 'https://fraxtal.gateway.tenderly.co/',
         port: ANVIL_PORTS.FRAXTAL,
         forkBlockNumber: 7164945n,
+    },
+    AVALANCHE: {
+        rpcEnv: 'AVALANCHE_RPC_URL',
+        fallBackRpc: 'https://avalanche.gateway.tenderly.co/',
+        port: ANVIL_PORTS.AVALANCHE,
+        forkBlockNumber: 48164407n,
     },
 };
 
