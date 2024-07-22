@@ -1,4 +1,4 @@
-import { Address, TypedData, TypedDataDomain } from 'viem';
+import { Address, TypedDataDomain } from 'viem';
 
 const PERMIT2_DOMAIN_NAME = 'Permit2';
 
@@ -12,9 +12,3 @@ export function permit2Domain(
         verifyingContract: permit2Address,
     };
 }
-
-export type PermitData = {
-    domain: TypedDataDomain;
-    types: TypedData;
-    values: any;
-};
