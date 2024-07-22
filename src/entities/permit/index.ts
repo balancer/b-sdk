@@ -38,15 +38,26 @@ export class PermitHelper {
         input: RemoveLiquidityBaseBuildCallInput & {
             client: Client & WalletActions & PublicActions;
             owner: Hex;
+            nonce?: bigint;
+            deadline?: bigint;
         },
     ): Promise<Permit> => {
         const amounts = getAmountsCall(input);
+        const nonce =
+            input.nonce ??
+            (await getNonce(
+                input.client,
+                input.bptIn.token.address,
+                input.owner,
+            ));
         const { permitApproval, permitSignature } = await signPermit(
             input.client,
             input.bptIn.token.address,
             input.owner,
             BALANCER_ROUTER[input.chainId],
+            nonce,
             amounts.maxBptAmountIn,
+            input.deadline,
         );
         return { batch: [permitApproval], signatures: [permitSignature] };
     };
@@ -62,8 +73,8 @@ const signPermit = async (
     token: Hex,
     owner: Hex,
     spender: Hex,
+    nonce: bigint,
     amount = MAX_UINT256,
-    nonce?: bigint,
     deadline = MAX_UINT256,
 ): Promise<{
     permitApproval: PermitApproval;
@@ -79,12 +90,11 @@ const signPermit = async (
         ],
     };
 
-    const _nonce = nonce ?? (await getNonce(client, token, owner));
     const message = {
         owner,
         spender,
         value: amount,
-        nonce: _nonce,
+        nonce,
         deadline,
     };
 
@@ -101,7 +111,7 @@ const signPermit = async (
         owner,
         spender,
         amount,
-        nonce: _nonce,
+        nonce,
         deadline,
     };
     return { permitApproval, permitSignature };
