@@ -6,7 +6,7 @@ import {
     RemoveLiquidityV2BuildCallInput,
     RemoveLiquidityV2QueryOutput,
 } from './removeLiquidityV2/types';
-import { Permit } from '../permit';
+import { Permit } from '../permitHelper';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out

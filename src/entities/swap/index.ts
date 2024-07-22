@@ -1,6 +1,6 @@
 import { SwapKind } from '../../types';
 import { TokenAmount } from '../tokenAmount';
-import { Permit2 } from '../permit2';
+import { Permit2 } from '../permit2Helper';
 import { validatePaths } from './paths';
 import { SwapV2 } from './swaps/v2';
 import { SwapV3 } from './swaps/v3';

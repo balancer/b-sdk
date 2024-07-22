@@ -13,7 +13,7 @@ import { InputValidator } from '../inputValidator/inputValidator';
 import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
 import { RemoveLiquidityCowAmm } from './removeLiquidityCowAmm';
-import { Permit } from '../permit';
+import { Permit } from '../permitHelper';
 
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();

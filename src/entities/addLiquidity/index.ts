@@ -12,7 +12,7 @@ import { AddLiquidityV2 } from './addLiquidityV2';
 import { AddLiquidityV3 } from './addLiquidityV3';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { AddLiquidityCowAmm } from './addLiquidityCowAmm';
-import { Permit2 } from '../permit2';
+import { Permit2 } from '../permit2Helper';
 
 export class AddLiquidity implements AddLiquidityBase {
     constructor(public config?: AddLiquidityConfig) {}

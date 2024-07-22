@@ -6,7 +6,7 @@ import {
     AddLiquidityV2BuildCallInput,
     AddLiquidityV2QueryOutput,
 } from './addLiquidityV2/types';
-import { Permit2 } from '../permit2';
+import { Permit2 } from '../permit2Helper';
 
 export enum AddLiquidityKind {
     Unbalanced = 'Unbalanced',
