@@ -173,23 +173,34 @@ export const approveSpenderOnToken = async (
     spender: Address,
     amount = MAX_UINT256, // approve max by default
 ): Promise<boolean> => {
-    // approve token on the vault
-    await client.writeContract({
-        account,
-        chain: client.chain,
-        address: token,
-        abi: erc20Abi,
-        functionName: 'approve',
-        args: [spender, amount],
-    });
-
-    const approved = await hasApprovedToken(
+    let approved = await hasApprovedToken(
         client,
         account,
         token,
         spender,
         amount,
     );
+
+    if (!approved) {
+        // approve token on the vault
+        await client.writeContract({
+            account,
+            chain: client.chain,
+            address: token,
+            abi: erc20Abi,
+            functionName: 'approve',
+            args: [spender, amount],
+        });
+
+        approved = await hasApprovedToken(
+            client,
+            account,
+            token,
+            spender,
+            amount,
+        );
+    }
+
     return approved;
 };
 
@@ -202,22 +213,34 @@ export const approveSpenderOnPermit2 = async (
     deadline = maxUint48, // approve max by default
 ): Promise<boolean> => {
     const chainId = await client.getChainId();
-    await client.writeContract({
-        account,
-        chain: client.chain,
-        address: PERMIT2[chainId],
-        abi: permit2Abi,
-        functionName: 'approve',
-        args: [token, spender, amount, Number(deadline)],
-    });
 
-    const approved = await hasApprovedTokenOnPermit2(
+    let approved = await hasApprovedTokenOnPermit2(
         client,
         account,
         token,
         spender,
         amount,
     );
+
+    if (!approved) {
+        await client.writeContract({
+            account,
+            chain: client.chain,
+            address: PERMIT2[chainId],
+            abi: permit2Abi,
+            functionName: 'approve',
+            args: [token, spender, amount, Number(deadline)],
+        });
+
+        approved = await hasApprovedTokenOnPermit2(
+            client,
+            account,
+            token,
+            spender,
+            amount,
+        );
+    }
+
     return approved;
 };
 
