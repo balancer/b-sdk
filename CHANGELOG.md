@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.20.5
+
+### Patch Changes
+
+- a0edf51: Fix remove liquidity nested for ComposableStable pools
+
 ## 0.20.4
 
 ### Patch Changes
