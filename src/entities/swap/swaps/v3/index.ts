@@ -1,5 +1,4 @@
 import {
-    Address,
     PublicClient,
     createPublicClient,
     encodeFunctionData,
@@ -335,7 +334,7 @@ export class SwapV3 implements SwapBase {
         }
         if (!this.isBatchSwap) {
             call = {
-                to: this.to(),
+                to: BALANCER_ROUTER[this.chainId],
                 callData: this.callDataSingleSwap(
                     limitAmount,
                     input.deadline ?? MAX_UINT256,
@@ -354,7 +353,7 @@ export class SwapV3 implements SwapBase {
                     'V3 BatchSwaps need path limits for call construction',
                 );
             call = {
-                to: this.to(),
+                to: BALANCER_BATCH_ROUTER[this.chainId],
                 callData: this.callDataBatchSwap(
                     limitAmount.amount,
                     pathLimits,
@@ -608,11 +607,5 @@ export class SwapV3 implements SwapBase {
             }
         }
         return swaps;
-    }
-
-    private to(): Address {
-        return this.isBatchSwap
-            ? BALANCER_BATCH_ROUTER[this.chainId]
-            : BALANCER_ROUTER[this.chainId];
     }
 }

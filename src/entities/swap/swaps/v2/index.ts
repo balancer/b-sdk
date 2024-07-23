@@ -290,14 +290,14 @@ export class SwapV2 implements SwapBase {
         }
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: this.to(),
+                to: VAULT[this.chainId],
                 callData,
                 value: this.value(limitAmount, !!input.wethIsEth),
                 minAmountOut: limitAmount,
             };
         }
         return {
-            to: this.to(),
+            to: VAULT[this.chainId],
             callData,
             value: this.value(limitAmount, !!input.wethIsEth),
             maxAmountIn: limitAmount,
@@ -326,10 +326,6 @@ export class SwapV2 implements SwapBase {
             else value = limitAmount.amount;
         }
         return value;
-    }
-
-    private to(): Address {
-        return VAULT[this.chainId];
     }
 
     /**
