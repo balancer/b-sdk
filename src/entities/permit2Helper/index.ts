@@ -35,8 +35,21 @@ export class Permit2Helper {
         input: AddLiquidityBaseBuildCallInput & {
             client: Client & WalletActions & PublicActions;
             owner: Address;
+            nonces?: number[];
+            expirations?: number[];
         },
     ): Promise<Permit2> {
+        if (input.nonces && input.nonces.length !== input.amountsIn.length) {
+            throw new Error("Nonces length doesn't match amountsIn length");
+        }
+        if (
+            input.expirations &&
+            input.expirations.length !== input.amountsIn.length
+        ) {
+            throw new Error(
+                "Expirations length doesn't match amountsIn length",
+            );
+        }
         const amounts = getAmountsCall(input);
         const spender = BALANCER_ROUTER[input.chainId];
         const details: PermitDetails[] = [];
@@ -48,6 +61,8 @@ export class Permit2Helper {
                     input.owner,
                     spender,
                     amounts.maxAmountsIn[i],
+                    input.expirations ? input.expirations[i] : undefined,
+                    input.nonces ? input.nonces[i] : undefined,
                 ),
             );
         }
@@ -58,6 +73,8 @@ export class Permit2Helper {
         input: SwapBuildCallInputBase & {
             client: Client & WalletActions & PublicActions;
             owner: Address;
+            nonce?: number;
+            expiration?: number;
         },
     ): Promise<Permit2> {
         // get maxAmountIn
@@ -87,6 +104,8 @@ export class Permit2Helper {
                 input.owner,
                 spender,
                 maxAmountIn.amount,
+                input.expiration,
+                input.nonce,
             ),
         ];
 
