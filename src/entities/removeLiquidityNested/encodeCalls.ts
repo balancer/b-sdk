@@ -18,6 +18,7 @@ export const encodeCalls = (
             chainId,
             sortedTokens,
             poolId,
+            poolAddress,
             poolType,
             kind,
             sender,
@@ -39,8 +40,21 @@ export const encodeCalls = (
         if (isProportional) {
             userData = getUserDataProportional(poolType, bptAmountIn.amount);
         } else {
+            if (tokenOutIndex === undefined) {
+                throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+            }
+
+            // skip bpt index for ComposableStable pools
+            const bptIndex = sortedTokens.findIndex((t) =>
+                t.isSameAddress(poolAddress),
+            );
+            const tokenOutIndexWithoutBpt =
+                bptIndex === -1 || tokenOutIndex < bptIndex
+                    ? tokenOutIndex
+                    : tokenOutIndex - 1;
+
             userData = getUserDataSingleTokenExactIn(
-                tokenOutIndex,
+                tokenOutIndexWithoutBpt,
                 poolType,
                 bptAmountIn.amount,
             );
