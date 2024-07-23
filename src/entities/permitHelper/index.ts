@@ -7,13 +7,7 @@ import { getNonce } from './helper';
 import { RemoveLiquidityBaseBuildCallInput } from '../removeLiquidity/types';
 import { getAmountsCall } from '../removeLiquidity/helper';
 
-export type PermitSignature = {
-    r: Hex;
-    s: Hex;
-    v: number;
-};
-
-export type PermitApproval = {
+type PermitApproval = {
     /** Address of the token to approve */
     token: Hex;
     /** Owner of the tokens. Usually the currently connected address. */

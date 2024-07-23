@@ -38,7 +38,7 @@ import {
 import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
 import { SwapBase } from '../types';
 import { getLimitAmount, getPathLimits } from '../../limits';
-import { Permit2 } from '@/entities/permit2';
+import { Permit2 } from '@/entities/permit2Helper';
 
 export * from './types';
 
