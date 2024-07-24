@@ -68,7 +68,6 @@ describe('remove liquidity test', () => {
     let prepTxInput: AddLiquidityTxInput;
     let txInput: RemoveLiquidityTxInput;
     let poolState: PoolState;
-    let testAddress: Address;
 
     // create client here as it is needed in the remove liquidity recovery scope
     const client = createTestClient({
@@ -334,7 +333,11 @@ describe('remove liquidity test', () => {
                 kind: RemoveLiquidityKind.Recovery,
             };
             // the pool must be put into recovery mode for the queries & transaction to work
-            await putPoolIntoRecoveryMode(client, txInput.poolState);
+            await putPoolIntoRecoveryMode(
+                client,
+                txInput.poolState,
+                txInput.testAddress,
+            );
         });
         test('with tokens', async () => {
             // all preparations are done, now remove liquidity
@@ -384,7 +387,11 @@ class MockApi {
 /******************************************************************************/
 
 /*********************** Helper functions for this test ***********************/
-async function putPoolIntoRecoveryMode(client: any, poolState: PoolState) {
+async function putPoolIntoRecoveryMode(
+    client: any,
+    poolState: PoolState,
+    authorizedAddress: Address,
+) {
     // grant the testAddress the right to enable Recovery mode for pools
     const { request: grantRoleRequest } = await client.simulateContract({
         address: AUTHORIZER[chainId],
@@ -392,7 +399,7 @@ async function putPoolIntoRecoveryMode(client: any, poolState: PoolState) {
         functionName: 'grantRole',
         args: [
             ACTION_IDS_AND_ADMIN.grantRole.actionId,
-            (await client.getAddresses())[0], // the original test address
+            authorizedAddress, // the original test address
         ],
         account: ACTION_IDS_AND_ADMIN.grantRole.admin,
     });
@@ -416,7 +423,7 @@ async function putPoolIntoRecoveryMode(client: any, poolState: PoolState) {
             abi: parseAbi(['function enableRecoveryMode(address pool)']),
             functionName: 'enableRecoveryMode',
             args: [poolState.address],
-            account: (await client.getAddresses())[0],
+            account: authorizedAddress,
         });
     // put pool into recovery mode
     await client.writeContract(enableRecoveryModeRequest);
