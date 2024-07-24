@@ -1,5 +1,29 @@
 # @balancer/sdk
 
+## 0.20.5
+
+### Patch Changes
+
+- a0edf51: Fix remove liquidity nested for ComposableStable pools
+
+## 0.20.4
+
+### Patch Changes
+
+- 1a41d80: Filter phantomBpt in mapPoolToNestedPoolState.
+
+## 0.20.3
+
+### Patch Changes
+
+- 39db20c: Add missing config for Avalanche and ZkEvm.
+
+## 0.20.2
+
+### Patch Changes
+
+- 9aa847e: Fix Balancer Queries address for Avalanche
+
 ## 0.20.1
 
 ### Patch Changes

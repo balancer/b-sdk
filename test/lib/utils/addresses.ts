@@ -146,6 +146,18 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 0,
         },
     },
+    [ChainId.AVALANCHE]: {
+        sAVAX: {
+            address: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+            decimals: 18,
+            slot: 0,
+        },
+        WAAVAX: {
+            address: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+            decimals: 18,
+            slot: 0,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };
