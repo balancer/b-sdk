@@ -11,6 +11,10 @@ import {
     walletActions,
     parseAbi,
     Address,
+    Client,
+    PublicActions,
+    TestActions,
+    WalletActions,
 } from 'viem';
 
 import {
@@ -64,23 +68,26 @@ const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
 
+// Types
+type ExtendedClient = Client & PublicActions & TestActions & WalletActions;
+
 describe('remove liquidity test', () => {
     let prepTxInput: AddLiquidityTxInput;
     let txInput: RemoveLiquidityTxInput;
     let poolState: PoolState;
-
-    // create client here as it is needed in the remove liquidity recovery scope
-    const client = createTestClient({
-        mode: 'anvil',
-        chain: CHAINS[chainId],
-        transport: http(rpcUrl),
-    })
-        .extend(publicActions)
-        .extend(walletActions);
+    let client: ExtendedClient;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
+
+        client = createTestClient({
+            mode: 'anvil',
+            chain: CHAINS[chainId],
+            transport: http(rpcUrl),
+        })
+            .extend(publicActions)
+            .extend(walletActions);
 
         // get pool state from api
         poolState = await api.getPool(poolId);
