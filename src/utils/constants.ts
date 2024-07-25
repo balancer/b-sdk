@@ -341,7 +341,7 @@ export const ACTION_IDS_AND_ADMIN = {
     },
 };
 
-export default NATIVE_ASSETS[ChainId.MAINNET];
+export const ETH = NATIVE_ASSETS[ChainId.MAINNET];
 
 export const DEFAULT_FUND_MANAGMENT = {
     sender: ZERO_ADDRESS,
