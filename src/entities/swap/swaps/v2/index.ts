@@ -124,6 +124,7 @@ export class SwapV2 implements SwapBase {
                     this.outputAmount.token,
                     result,
                 ),
+                amountIn: this.inputAmount,
             };
         }
         return {
@@ -132,6 +133,7 @@ export class SwapV2 implements SwapBase {
                 this.inputAmount.token,
                 result,
             ),
+            amountOut: this.outputAmount,
         };
     }
 
@@ -162,6 +164,7 @@ export class SwapV2 implements SwapBase {
                         ],
                     ),
                 ),
+                amountIn: this.inputAmount,
             };
         }
         return {
@@ -172,6 +175,7 @@ export class SwapV2 implements SwapBase {
                     result[this.assets.indexOf(this.inputAmount.token.address)],
                 ),
             ),
+            amountOut: this.outputAmount,
         };
     }
 
@@ -286,18 +290,22 @@ export class SwapV2 implements SwapBase {
         }
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: this.to(),
+                to: VAULT[this.chainId],
                 callData,
                 value: this.value(limitAmount, !!input.wethIsEth),
                 minAmountOut: limitAmount,
             };
         }
         return {
-            to: this.to(),
+            to: VAULT[this.chainId],
             callData,
             value: this.value(limitAmount, !!input.wethIsEth),
             maxAmountIn: limitAmount,
         };
+    }
+
+    buildCallWithPermit2(): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        throw new Error('buildCallWithPermit2 is not supported on v2');
     }
 
     /**
@@ -318,10 +326,6 @@ export class SwapV2 implements SwapBase {
             else value = limitAmount.amount;
         }
         return value;
-    }
-
-    private to(): Address {
-        return VAULT[this.chainId];
     }
 
     /**

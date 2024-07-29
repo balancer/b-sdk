@@ -192,4 +192,8 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             ),
         };
     }
+
+    buildCallWithPermit(): RemoveLiquidityBuildCallOutput {
+        throw new Error('buildCallWithPermit is not supported on v2');
+    }
 }

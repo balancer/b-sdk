@@ -18,6 +18,7 @@ import {
     Token,
     TokenAmount,
     VAULT,
+    PermitHelper,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
@@ -39,7 +40,9 @@ export const sdkRemoveLiquidity = async ({
     testAddress,
     wethIsEth,
     toInternalBalance,
-}: Omit<RemoveLiquidityTxInput, 'client'>): Promise<{
+    client,
+    usePermitSignatures,
+}: RemoveLiquidityTxInput): Promise<{
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
@@ -62,9 +65,23 @@ export const sdkRemoveLiquidity = async ({
         };
     }
 
-    const removeLiquidityBuildCallOutput = removeLiquidity.buildCall(
-        removeLiquidityBuildInput,
-    );
+    let removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
+    if (usePermitSignatures) {
+        const permit = await PermitHelper.signRemoveLiquidityApproval({
+            ...removeLiquidityBuildInput,
+            client,
+            owner: testAddress,
+        });
+
+        removeLiquidityBuildCallOutput = removeLiquidity.buildCallWithPermit(
+            removeLiquidityBuildInput,
+            permit,
+        );
+    } else {
+        removeLiquidityBuildCallOutput = removeLiquidity.buildCall(
+            removeLiquidityBuildInput,
+        );
+    }
 
     return {
         removeLiquidityBuildCallOutput,
@@ -127,6 +144,7 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
         client,
         slippage,
         wethIsEth,
+        usePermitSignatures,
     } = txInput;
 
     const { removeLiquidityQueryOutput, removeLiquidityBuildCallOutput } =
@@ -137,6 +155,8 @@ export async function doRemoveLiquidity(txInput: RemoveLiquidityTxInput) {
             slippage,
             testAddress,
             wethIsEth,
+            client,
+            usePermitSignatures,
         });
 
     // get tokens for balance change - pool tokens, BPT, native

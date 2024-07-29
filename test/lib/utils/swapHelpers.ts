@@ -15,6 +15,7 @@ import {
     SwapBuildOutputExactIn,
     SwapBuildCallInput,
     SwapKind,
+    Permit2Helper,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
@@ -25,6 +26,7 @@ export async function assertSwapExactIn(
     chainId: ChainId,
     swap: Swap,
     wethIsEth: boolean,
+    usePermit2Signatures = false,
 ) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
@@ -48,7 +50,22 @@ export async function assertSwapExactIn(
             recipient: testAddress,
         };
     }
-    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
+
+    let call: SwapBuildOutputExactIn;
+    if (usePermit2Signatures) {
+        const permit2 = await Permit2Helper.signSwapApproval({
+            ...buildCallInput,
+            client,
+            owner: testAddress,
+        });
+
+        call = swap.buildCallWithPermit2(
+            buildCallInput,
+            permit2,
+        ) as SwapBuildOutputExactIn;
+    } else {
+        call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
+    }
 
     const isEthInput =
         wethIsEth &&
@@ -105,6 +122,7 @@ export async function assertSwapExactOut(
     chainId: ChainId,
     swap: Swap,
     wethIsEth: boolean,
+    usePermit2Signatures = false,
 ) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
@@ -130,7 +148,21 @@ export async function assertSwapExactOut(
     }
     expect(expected.expectedAmountIn.amount > 0n).to.be.true;
 
-    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
+    let call: SwapBuildOutputExactOut;
+    if (usePermit2Signatures) {
+        const permit2 = await Permit2Helper.signSwapApproval({
+            ...buildCallInput,
+            client,
+            owner: testAddress,
+        });
+
+        call = swap.buildCallWithPermit2(
+            buildCallInput,
+            permit2,
+        ) as SwapBuildOutputExactOut;
+    } else {
+        call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
+    }
 
     const isEthInput =
         wethIsEth &&

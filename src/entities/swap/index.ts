@@ -1,17 +1,19 @@
-import { TokenAmount } from '../tokenAmount';
 import { SwapKind } from '../../types';
+import { TokenAmount } from '../tokenAmount';
+import { Permit2 } from '../permit2Helper';
 import { validatePaths } from './paths';
 import { SwapV2 } from './swaps/v2';
 import { SwapV3 } from './swaps/v3';
 import { SwapBase } from './swaps/types';
 import {
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
     SwapBuildCallInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
     SwapInput,
-    ExactOutQueryOutput,
-    ExactInQueryOutput,
 } from './types';
+import { InputValidator } from '../inputValidator/inputValidator';
 
 export * from './types';
 export * from './paths';
@@ -83,5 +85,17 @@ export class Swap {
             throw Error('Sender/recipient must be defined in V2');
 
         return this.swap.buildCall(input);
+    }
+
+    buildCallWithPermit2(
+        input: SwapBuildCallInput,
+        permit2: Permit2,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        InputValidator.validateBuildCallWithPermit2({
+            protocolVersion: this.protocolVersion,
+            wethIsEth: input.wethIsEth,
+        });
+
+        return this.swap.buildCallWithPermit2(input, permit2);
     }
 }

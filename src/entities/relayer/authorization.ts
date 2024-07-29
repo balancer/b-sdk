@@ -1,8 +1,8 @@
 import {
     Client,
     concat,
-    hexToSignature,
     pad,
+    parseSignature,
     PublicActions,
     toHex,
     WalletActions,
@@ -33,8 +33,8 @@ export class RelayerAuthorization {
         signatureHex: Hex,
     ): Hex => {
         const encodedDeadline = pad(toHex(deadline), { size: 32 });
-        const { v, r, s } = hexToSignature(signatureHex);
-        const encodedV = pad(toHex(v), { size: 32 });
+        const { v, r, s } = parseSignature(signatureHex);
+        const encodedV = pad(toHex(v as bigint), { size: 32 });
         const encodedR = pad(r, { size: 32 });
         const encodedS = pad(s, { size: 32 });
         return concat([

@@ -62,4 +62,8 @@ export class RemoveLiquidityV2 implements RemoveLiquidityBase {
     ): RemoveLiquidityBuildCallOutput {
         return this.getRemoveLiquidity(input.poolType).buildCall(input);
     }
+
+    buildCallWithPermit(): RemoveLiquidityBuildCallOutput {
+        throw new Error('buildCallWithPermit is not supported on v2');
+    }
 }
