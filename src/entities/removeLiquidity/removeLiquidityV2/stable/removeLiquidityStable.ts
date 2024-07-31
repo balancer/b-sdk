@@ -101,16 +101,15 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
             totalShares: formatEther(totalShares) as HumanAmount,
         };
 
-        const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
+        const { tokenAmounts } = calculateProportionalAmounts(
             poolStateWithBalances,
             input.bptIn,
         );
-        const bptToken = new Token(
-            input.chainId,
-            bptAmount.address,
-            bptAmount.decimals,
+        const bptToken = new Token(input.chainId, poolState.address, 18);
+        const bptIn = TokenAmount.fromRawAmount(
+            bptToken,
+            input.bptIn.rawAmount,
         );
-        const bptIn = TokenAmount.fromRawAmount(bptToken, bptAmount.rawAmount);
         const amountsOut = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
                 new Token(input.chainId, amountIn.address, amountIn.decimals),

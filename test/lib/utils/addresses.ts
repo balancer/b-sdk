@@ -158,6 +158,16 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 0,
         },
     },
+    [ChainId.GNOSIS_CHAIN]: {
+        WETH: {
+            address: '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1',
+            decimals: 18,
+        },
+        wstETH: {
+            address: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
+            decimals: 18,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };
