@@ -1,5 +1,15 @@
 # @balancer/sdk
 
+## 0.21.0
+
+### Minor Changes
+
+- e3c6b5e: Add buildCallWithPermit variations for add/remove/swap operations
+
+### Patch Changes
+
+- f64866f: Round down calculateAmountsProportional amounts
+
 ## 0.20.5
 
 ### Patch Changes
