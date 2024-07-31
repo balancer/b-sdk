@@ -12,7 +12,7 @@ import { MathSol } from '@/utils';
  * may require more balance than the user has.
  * @param pool
  * @param referenceAmount
- * @returns
+ * @returns Proportional amounts rounded down to the nearest integer
  */
 export function calculateProportionalAmounts(
     pool: {
@@ -21,7 +21,6 @@ export function calculateProportionalAmounts(
         tokens: { address: Address; balance: HumanAmount; decimals: number }[];
     },
     referenceAmount: InputAmount,
-    roundDown = true,
 ): {
     tokenAmounts: InputAmount[];
     bptAmount: InputAmount;
@@ -57,19 +56,12 @@ export function calculateProportionalAmounts(
 
     // calculate proportional amounts
     const referenceTokenBalance = balances[referenceTokenIndex];
-    let proportionalAmounts: bigint[];
-    if (roundDown) {
-        proportionalAmounts = balances.map((b) =>
-            MathSol.divDownFixed(
-                MathSol.mulDownFixed(b, referenceAmount.rawAmount),
-                referenceTokenBalance,
-            ),
-        );
-    } else {
-        proportionalAmounts = balances.map(
-            (b) => (b * referenceAmount.rawAmount) / referenceTokenBalance,
-        );
-    }
+    const proportionalAmounts = balances.map((b) =>
+        MathSol.divDownFixed(
+            MathSol.mulDownFixed(b, referenceAmount.rawAmount),
+            referenceTokenBalance,
+        ),
+    );
 
     const amounts = tokensWithBpt.map(({ address, decimals }, index) => ({
         address,
