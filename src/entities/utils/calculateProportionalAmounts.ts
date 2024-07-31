@@ -5,6 +5,11 @@ import { MathSol } from '@/utils';
 
 /**
  * For a given pool, calculate all token amounts proportional to a given reference amount.
+ *
+ * Note: when using this helper to build an AddLiquidityProportional input,
+ * please mind that referenceAmount should be relative to the token that the user
+ * has the lowest balance compared to the pool's proportions. Otherwise the transaction
+ * may require more balance than the user has.
  * @param pool
  * @param referenceAmount
  * @returns
