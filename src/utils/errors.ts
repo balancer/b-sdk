@@ -35,3 +35,11 @@ export const removeLiquidityProportionalOnlyError = (
     Error(
         `Remove Liquidity ${kind} not supported for pool ${poolType}. Use Remove Liquidity Proportional`,
     );
+
+export const buildCallWithPermit2ETHError = Error(
+    'buildCallWithPermit2 does not support ETH as input - please use buildCall instead',
+);
+
+export const buildCallWithPermit2ProtocolVersionError = Error(
+    'buildCall with Permit2 signatures is only available for v3',
+);

@@ -13,6 +13,11 @@ import { InputValidatorGyro } from './gyro/inputValidatorGyro';
 import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
+import {
+    ChainId,
+    buildCallWithPermit2ETHError,
+    buildCallWithPermit2ProtocolVersionError,
+} from '@/utils';
 
 export class InputValidator {
     validators: Record<string, InputValidatorBase> = {};
@@ -41,6 +46,7 @@ export class InputValidator {
     }
 
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState) {
+        this.validateChain(initPoolInput.chainId);
         this.getValidator(poolState.type).validateInitPool(
             initPoolInput,
             poolState,
@@ -51,6 +57,7 @@ export class InputValidator {
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
+        this.validateChain(addLiquidityInput.chainId);
         this.getValidator(poolState.type).validateAddLiquidity(
             addLiquidityInput,
             poolState,
@@ -61,6 +68,7 @@ export class InputValidator {
         removeLiquidityInput: RemoveLiquidityInput,
         poolState: PoolState,
     ): void {
+        this.validateChain(removeLiquidityInput.chainId);
         this.getValidator(poolState.type).validateRemoveLiquidity(
             removeLiquidityInput,
             poolState,
@@ -71,6 +79,7 @@ export class InputValidator {
         removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
         poolState: PoolStateWithBalances,
     ): void {
+        this.validateChain(removeLiquidityRecoveryInput.chainId);
         this.getValidator(poolState.type).validateRemoveLiquidityRecovery(
             removeLiquidityRecoveryInput,
             poolState,
@@ -78,6 +87,25 @@ export class InputValidator {
     }
 
     validateCreatePool(input: CreatePoolInput): void {
+        this.validateChain(input.chainId);
         this.getValidator(input.poolType).validateCreatePool(input);
+    }
+
+    private validateChain(chainId: number): void {
+        if (chainId in ChainId) return;
+        throw new Error(`Unsupported ChainId: ${chainId}`);
+    }
+
+    static validateBuildCallWithPermit2(input: {
+        protocolVersion: number;
+        wethIsEth?: boolean;
+    }): void {
+        if (input.protocolVersion !== 3) {
+            throw buildCallWithPermit2ProtocolVersionError;
+        }
+
+        if (input.wethIsEth) {
+            throw buildCallWithPermit2ETHError;
+        }
     }
 }

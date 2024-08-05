@@ -137,6 +137,47 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 0,
         },
     },
+    [ChainId.MODE]: {
+        MODE: {
+            address: '0xDfc7C877a950e49D2610114102175A06C2e3167a',
+            decimals: 18,
+            slot: 0,
+        },
+        EZETH: {
+            address: '0x2416092f143378750bb29b79eD961ab195CcEea5',
+            decimals: 18,
+            slot: 51,
+        },
+    },
+    [ChainId.FRAXTAL]: {
+        sFRAX: {
+            address: '0xfc00000000000000000000000000000000000008',
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.AVALANCHE]: {
+        sAVAX: {
+            address: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+            decimals: 18,
+            slot: 0,
+        },
+        WAAVAX: {
+            address: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.GNOSIS_CHAIN]: {
+        WETH: {
+            address: '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1',
+            decimals: 18,
+        },
+        wstETH: {
+            address: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
+            decimals: 18,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };

@@ -1,5 +1,47 @@
 # @balancer/sdk
 
+## 0.21.0
+
+### Minor Changes
+
+- e3c6b5e: Add buildCallWithPermit variations for add/remove/swap operations
+
+### Patch Changes
+
+- f64866f: Round down calculateAmountsProportional amounts
+
+## 0.20.5
+
+### Patch Changes
+
+- a0edf51: Fix remove liquidity nested for ComposableStable pools
+
+## 0.20.4
+
+### Patch Changes
+
+- 1a41d80: Filter phantomBpt in mapPoolToNestedPoolState.
+
+## 0.20.3
+
+### Patch Changes
+
+- 39db20c: Add missing config for Avalanche and ZkEvm.
+
+## 0.20.2
+
+### Patch Changes
+
+- 9aa847e: Fix Balancer Queries address for Avalanche
+
+## 0.20.1
+
+### Patch Changes
+
+- 5c353a3: Add support for chain: Fraxtal
+- dc5a323: Add support for chain: Mode
+- 42d3d71: Expose Batch Router ABI
+
 ## 0.20.0
 
 ### Minor Changes

@@ -77,10 +77,7 @@ const addLiquidity = async ({
     slippage,
 }) => {
     // API is used to fetch relevant pool data
-    const balancerApi = new BalancerApi(
-        'https://backend-v3-canary.beets-ftm-node.com/graphql',
-        chainId,
-    );
+    const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
     const poolState = await balancerApi.pools.fetchPoolState(poolId);
 
     // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced

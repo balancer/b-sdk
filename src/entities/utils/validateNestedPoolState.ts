@@ -23,14 +23,20 @@ export function validateNestedPoolState(
         );
 
         if (poolsWithToken.length < 1)
-            throw 'NestedPoolState, main token must exist as a token of a pool';
+            throw new Error(
+                'NestedPoolState, main token must exist as a token of a pool',
+            );
 
         if (poolsWithToken.length > 1)
-            throw `NestedPoolState, main token can't be token of more than 1 pool`;
+            throw new Error(
+                `NestedPoolState, main token can't be token of more than 1 pool`,
+            );
 
         if (poolsWithToken[0]) {
             if (topLevel - poolsWithToken[0].level > 1)
-                throw 'NestedPoolState, main token only supported to a max of 1 level of nesting';
+                throw new Error(
+                    'NestedPoolState, main token only supported to a max of 1 level of nesting',
+                );
         }
     });
     return true;

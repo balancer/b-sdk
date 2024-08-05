@@ -37,6 +37,7 @@ import {
 import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
 import { SwapBase } from '../types';
 import { getLimitAmount, getPathLimits } from '../../limits';
+import { Permit2 } from '@/entities/permit2Helper';
 
 export * from './types';
 
@@ -126,6 +127,7 @@ export class SwapV3 implements SwapBase {
                     this.outputAmount.token,
                     result,
                 ),
+                amountIn: this.inputAmount,
             };
         }
         if ('exactAmountOut' in this.swaps) {
@@ -146,6 +148,7 @@ export class SwapV3 implements SwapBase {
                     this.inputAmount.token,
                     result,
                 ),
+                amountOut: this.outputAmount,
             };
         }
         throw Error('Unsupported V3 Query');
@@ -189,7 +192,7 @@ export class SwapV3 implements SwapBase {
         block?: bigint,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         // Note - batchSwaps are made via the Batch Router
-        const routerContract = getContract({
+        const batchRouterContract = getContract({
             address: BALANCER_BATCH_ROUTER[this.chainId],
             abi: balancerBatchRouterAbi,
             client,
@@ -201,13 +204,14 @@ export class SwapV3 implements SwapBase {
         const swapsWithLimits = this.getSwapsWithLimits();
 
         if (this.swapKind === SwapKind.GivenIn) {
-            const { result } = await routerContract.simulate.querySwapExactIn(
-                [
-                    swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
-                    DEFAULT_USERDATA,
-                ],
-                { blockNumber: block },
-            );
+            const { result } =
+                await batchRouterContract.simulate.querySwapExactIn(
+                    [
+                        swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                        DEFAULT_USERDATA,
+                    ],
+                    { blockNumber: block },
+                );
 
             if (result[1].length !== 1)
                 throw Error(
@@ -220,11 +224,12 @@ export class SwapV3 implements SwapBase {
                     this.outputAmount.token,
                     result[2][0],
                 ),
+                amountIn: this.inputAmount,
                 pathAmounts: result[0] as bigint[],
             };
         }
 
-        const { result } = await routerContract.simulate.querySwapExactOut(
+        const { result } = await batchRouterContract.simulate.querySwapExactOut(
             [
                 swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
                 DEFAULT_USERDATA,
@@ -243,6 +248,7 @@ export class SwapV3 implements SwapBase {
                 this.inputAmount.token,
                 result[2][0],
             ),
+            amountOut: this.outputAmount,
             pathAmounts: result[0] as bigint[],
         };
     }
@@ -367,6 +373,31 @@ export class SwapV3 implements SwapBase {
         return {
             ...call,
             maxAmountIn: limitAmount,
+        };
+    }
+
+    buildCallWithPermit2(
+        input: SwapBuildCallInput,
+        permit2: Permit2,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
+        const buildCallOutput = this.buildCall(input);
+        const args = [
+            [],
+            [],
+            permit2.batch,
+            permit2.signature,
+            [buildCallOutput.callData],
+        ] as const;
+
+        const callData = encodeFunctionData({
+            abi: balancerBatchRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
+        });
+
+        return {
+            ...buildCallOutput,
+            callData,
         };
     }
 

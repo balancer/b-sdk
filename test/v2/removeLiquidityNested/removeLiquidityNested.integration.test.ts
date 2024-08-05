@@ -142,9 +142,9 @@ describe('remove liquidity nested test', () => {
         );
     });
 
-    test('single token', async () => {
+    test('single token - token index > bptIndex', async () => {
         const amountIn = parseUnits('1', 18);
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
+        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // USDC
 
         const {
             transactionReceipt,
