@@ -991,7 +991,7 @@ describe('SwapV3', () => {
                         swap,
                         wethIsEth: false,
                         outputTest: {
-                            isExactOut: false,
+                            testExactOutAmount: false,
                             percentage: 0.001,
                         },
                     });
@@ -1016,7 +1016,7 @@ describe('SwapV3', () => {
                         swap,
                         wethIsEth: false,
                         inputTest: {
-                            isExactIn: false,
+                            testExactInAmount: false,
                             percentage: 0.001,
                         },
                     });

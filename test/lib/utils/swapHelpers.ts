@@ -43,7 +43,7 @@ export async function assertSwapExactIn({
     wethIsEth,
     usePermit2Signatures = false,
     outputTest = {
-        isExactOut: true,
+        testExactOutAmount: true,
         percentage: 0,
     },
 }: {
@@ -55,7 +55,7 @@ export async function assertSwapExactIn({
     wethIsEth: boolean;
     usePermit2Signatures?: boolean;
     outputTest?: {
-        isExactOut: boolean;
+        testExactOutAmount: boolean;
         percentage: number;
     };
 }) {
@@ -139,7 +139,7 @@ export async function assertSwapExactIn({
         expectedTokenOutDelta = 0n;
     }
 
-    if (outputTest.isExactOut)
+    if (outputTest.testExactOutAmount)
         expect(balanceDeltas).to.deep.eq([
             expectedEthDelta,
             expectedTokenInDelta,
@@ -169,7 +169,7 @@ export async function assertSwapExactOut({
     wethIsEth,
     usePermit2Signatures = false,
     inputTest = {
-        isExactIn: true,
+        testExactInAmount: true,
         percentage: 0,
     },
 }: {
@@ -181,7 +181,7 @@ export async function assertSwapExactOut({
     wethIsEth: boolean;
     usePermit2Signatures?: boolean;
     inputTest?: {
-        isExactIn: boolean;
+        testExactInAmount: boolean;
         percentage: number;
     };
 }) {
@@ -268,7 +268,7 @@ export async function assertSwapExactOut({
         expectedTokenOutDelta = 0n;
     }
 
-    if (inputTest.isExactIn)
+    if (inputTest.testExactInAmount)
         expect(balanceDeltas).to.deep.eq([
             expectedEthDelta,
             expectedTokenInDelta,
