@@ -137,28 +137,28 @@ describe('SwapV2', () => {
                     ...swapParams,
                     swapKind: SwapKind.GivenIn,
                 });
-                await assertSwapExactIn(
-                    vault,
+                await assertSwapExactIn({
+                    contractToCall: vault,
                     client,
                     rpcUrl,
                     chainId,
                     swap,
                     wethIsEth,
-                );
+                });
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
                     ...swapParams,
                     swapKind: SwapKind.GivenOut,
                 });
-                await assertSwapExactOut(
-                    vault,
+                await assertSwapExactOut({
+                    contractToCall: vault,
                     client,
                     rpcUrl,
                     chainId,
                     swap,
                     wethIsEth,
-                );
+                });
             });
         });
         describe('wethIsEth: true', () => {
@@ -170,14 +170,14 @@ describe('SwapV2', () => {
                         paths: [pathBalWeth],
                         swapKind: SwapKind.GivenIn,
                     });
-                    await assertSwapExactIn(
-                        vault,
+                    await assertSwapExactIn({
+                        contractToCall: vault,
                         client,
                         rpcUrl,
                         chainId,
                         swap,
                         wethIsEth,
-                    );
+                    });
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -185,14 +185,14 @@ describe('SwapV2', () => {
                         paths: [pathBalWeth],
                         swapKind: SwapKind.GivenOut,
                     });
-                    await assertSwapExactOut(
-                        vault,
+                    await assertSwapExactOut({
+                        contractToCall: vault,
                         client,
                         rpcUrl,
                         chainId,
                         swap,
                         wethIsEth,
-                    );
+                    });
                 });
             });
             describe('eth in', () => {
@@ -206,14 +206,14 @@ describe('SwapV2', () => {
                         paths: [pathWethBal],
                         swapKind: SwapKind.GivenIn,
                     });
-                    await assertSwapExactIn(
-                        vault,
+                    await assertSwapExactIn({
+                        contractToCall: vault,
                         client,
                         rpcUrl,
                         chainId,
                         swap,
                         wethIsEth,
-                    );
+                    });
                 });
                 test('GivenOut', async () => {
                     const pathWethBal = {
@@ -225,14 +225,14 @@ describe('SwapV2', () => {
                         paths: [pathWethBal],
                         swapKind: SwapKind.GivenOut,
                     });
-                    await assertSwapExactOut(
-                        vault,
+                    await assertSwapExactOut({
+                        contractToCall: vault,
                         client,
                         rpcUrl,
                         chainId,
                         swap,
                         wethIsEth,
-                    );
+                    });
                 });
             });
         });
