@@ -122,7 +122,17 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 0,
         },
         DAI_AAVE: {
-            address: '0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357',
+            address: '0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357',
+            decimals: 18,
+            slot: 0,
+        },
+        stataUSDC: {
+            address: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
+            decimals: 6,
+            slot: 0,
+        },
+        stataDAI: {
+            address: '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17',
             decimals: 18,
             slot: 0,
         },
@@ -282,6 +292,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             address: '0x8cc781653bda4643c84dec5d7ad3e19ea354a54a',
             id: '0x8cc781653bda4643c84dec5d7ad3e19ea354a54a',
             type: PoolType.CowAmm,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_BOOSTED_POOL: {
+            address: '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c',
+            id: '0x302b75a27e5e157f93c679dd7a25fdfcdbc1473c',
+            type: PoolType.Stable,
             decimals: 18,
             slot: 0,
         },
