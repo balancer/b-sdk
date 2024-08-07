@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.22.0
+
+### Minor Changes
+
+- c5b4287: Adds buffer/boosted pool support to swaps.
+
 ## 0.21.0
 
 ### Minor Changes
