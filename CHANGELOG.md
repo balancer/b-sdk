@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.22.2
+
+### Patch Changes
+
+- ec27a5c: Fix outputReference index being incorrectly consumed
+
 ## 0.22.1
 
 ### Patch Changes
