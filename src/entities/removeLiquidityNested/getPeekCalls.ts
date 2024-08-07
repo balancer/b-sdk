@@ -26,9 +26,13 @@ export const getPeekCalls = (
 
                 if (!isTokenBeingUsedAsInput) {
                     tokensOut.push(tokenOut);
+                    const readOnlyChainedReference = Relayer.toChainedReference(
+                        Relayer.fromChainedReference(outputReference.key),
+                        false,
+                    );
                     peekCalls.push(
                         Relayer.encodePeekChainedReferenceValue(
-                            outputReference.key,
+                            readOnlyChainedReference,
                         ),
                     );
                 }
@@ -40,10 +44,12 @@ export const getPeekCalls = (
         const tokenOut =
             lastCall.sortedTokens[lastCall.tokenOutIndex as number];
         tokensOut.push(tokenOut);
+        const readOnlyChainedReference = Relayer.toChainedReference(
+            Relayer.fromChainedReference(lastCall.outputReferences[0].key),
+            false,
+        );
         peekCalls.push(
-            Relayer.encodePeekChainedReferenceValue(
-                lastCall.outputReferences[0].key,
-            ),
+            Relayer.encodePeekChainedReferenceValue(readOnlyChainedReference),
         );
     }
 

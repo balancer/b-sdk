@@ -12,7 +12,7 @@ export const doRemoveLiquidityNestedQuery = async (
     chainId: ChainId,
     rpcUrl: string,
     encodedMulticall: Hex,
-    tokensOutLength: number,
+    tokensOutIndexes: number[],
 ): Promise<bigint[]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -30,11 +30,12 @@ export const doRemoveLiquidityNestedQuery = async (
         data: data as Hex,
     });
 
-    const resultsToPeek = result.slice(result.length - tokensOutLength);
+    const peekedValues: bigint[] = [];
 
-    const peekedValues = resultsToPeek.map(
-        (r) => decodeAbiParameters([{ type: 'uint256' }], r)[0],
-    );
+    result.forEach((r, i) => {
+        if (tokensOutIndexes.includes(i))
+            peekedValues.push(decodeAbiParameters([{ type: 'uint256' }], r)[0]);
+    });
 
     return peekedValues;
 };

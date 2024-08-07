@@ -41,8 +41,22 @@ export class RemoveLiquidityNested {
             isProportional,
         );
 
-        // append peek calls to get amountsOut
-        encodedCalls.push(...peekCalls);
+        // insert peek calls to get amountsOut
+        let tokensOutCount = 0;
+        const tokensOutIndexes: number[] = [];
+        callsAttributes.forEach((call, i) => {
+            tokensOut.forEach((tokenOut, j) => {
+                if (
+                    call.sortedTokens.some((t) =>
+                        t.isSameAddress(tokenOut.address),
+                    )
+                ) {
+                    tokensOutCount++;
+                    encodedCalls.splice(i + tokensOutCount, 0, peekCalls[j]);
+                    tokensOutIndexes.push(i + tokensOutCount);
+                }
+            });
+        });
 
         const encodedMulticall = encodeFunctionData({
             abi: balancerRelayerAbi,
@@ -54,7 +68,7 @@ export class RemoveLiquidityNested {
             input.chainId,
             input.rpcUrl,
             encodedMulticall,
-            tokensOut.length,
+            tokensOutIndexes,
         );
 
         const amountsOut = tokensOut.map((tokenOut, i) =>
