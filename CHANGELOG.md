@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.22.1
+
+### Patch Changes
+
+- 2fffd77: Fix remove liquidity nested query (peek) logic
+
 ## 0.22.0
 
 ### Minor Changes
