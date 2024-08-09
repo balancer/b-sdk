@@ -9,6 +9,7 @@ config();
 
 import {
     BalancerApi,
+    API_ENDPOINT,
     ChainId,
     Slippage,
     SwapKind,
@@ -47,10 +48,7 @@ const swap = async () => {
     const deadline = 999999999999999999n; // Infinity
 
     // API is used to fetch best path from available liquidity
-    const balancerApi = new BalancerApi(
-        'https://backend-v3-canary.beets-ftm-node.com/graphql',
-        chainId,
-    );
+    const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
 
     const sorPaths = await balancerApi.sorSwapPaths.fetchSorSwapPaths({
         chainId,
