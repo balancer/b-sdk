@@ -83,10 +83,7 @@ const removeLiquidity = async ({
     slippage,
 }) => {
     // API is used to fetch relevant pool data
-    const balancerApi = new BalancerApi(
-        API_ENDPOINT,
-        chainId,
-    );
+    const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
     const poolState: PoolState = await balancerApi.pools.fetchPoolState(poolId);
 
     // Construct the RemoveLiquidityInput, in this case a RemoveLiquiditySingleTokenExactIn
