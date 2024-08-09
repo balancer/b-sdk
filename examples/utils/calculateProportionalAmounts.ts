@@ -6,6 +6,7 @@
  */
 import {
     BalancerApi,
+    API_ENDPOINT,
     calculateProportionalAmounts,
     InputAmount,
     ChainId,
@@ -14,7 +15,7 @@ import {
 const calculateProportionalAmountsExample = async () => {
     const chainId = ChainId.MAINNET;
     const poolDataProvider = new BalancerApi(
-        'https://api-v3.balancer.fi/',
+        API_ENDPOINT,
         chainId,
     );
     const poolId =

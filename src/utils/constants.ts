@@ -305,3 +305,5 @@ export const DEFAULT_FUND_MANAGMENT = {
 };
 
 export const DEFAULT_USERDATA = '0x';
+
+export const API_ENDPOINT = 'https://api-v3.balancer.fi';

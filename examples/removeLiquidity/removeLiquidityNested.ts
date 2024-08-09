@@ -16,6 +16,7 @@ import {
     Address,
     BALANCER_RELAYER,
     BalancerApi,
+    API_ENDPOINT
     ChainId,
     CHAINS,
     PriceImpact,
@@ -97,7 +98,7 @@ const removeLiquidityNested = async ({
 }) => {
     // API is used to fetch relevant pool data
     const balancerApi = new BalancerApi(
-        'https://backend-v3-canary.beets-ftm-node.com/graphql',
+        API_ENDPOINT,
         chainId,
     );
     const nestedPoolState =

@@ -9,6 +9,7 @@ config();
 
 import {
     BalancerApi,
+    API_ENDPOINT
     ChainId,
     Slippage,
     SwapKind,
@@ -48,7 +49,7 @@ const swap = async () => {
 
     // API is used to fetch best path from available liquidity
     const balancerApi = new BalancerApi(
-        'https://backend-v3-canary.beets-ftm-node.com/graphql',
+        API_ENDPOINT,
         chainId,
     );
 
