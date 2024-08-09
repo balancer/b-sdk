@@ -72,6 +72,22 @@ export enum ChainId {
     SEPOLIA = 11155111,
 }
 
+// The Balancer API requires the chain to be passed as a specific string
+export const API_CHAIN_NAMES: Record<number, string> = {
+    [ChainId.MAINNET]: 'MAINNET',
+    [ChainId.OPTIMISM]: 'OPTIMISM',
+    [ChainId.GNOSIS_CHAIN]: 'GNOSIS',
+    [ChainId.POLYGON]: 'POLYGON',
+    [ChainId.FANTOM]: 'FANTOM',
+    [ChainId.FRAXTAL]: 'FRAXTAL',
+    [ChainId.ZKSYNC]: 'ZKEVM',
+    [ChainId.BASE]: 'BASE',
+    [ChainId.MODE]: 'MODE',
+    [ChainId.ARBITRUM_ONE]: 'ARBITRUM',
+    [ChainId.AVALANCHE]: 'AVALANCHE',
+    [ChainId.SEPOLIA]: 'SEPOLIA',
+};
+
 export const CHAINS: Record<number, Chain> = {
     [ChainId.MAINNET]: mainnet,
     [ChainId.GOERLI]: goerli,

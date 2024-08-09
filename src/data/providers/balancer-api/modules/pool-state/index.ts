@@ -2,10 +2,12 @@ import { BalancerApiClient } from '../../client';
 import { PoolState, PoolStateWithBalances } from '../../../../../entities';
 import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 
+import { API_CHAIN_NAMES } from '../../../../../utils/constants';
+
 export class Pools {
     readonly poolStateQuery = `
-    query GetPool($id: String!) {
-      poolGetPool(id:$id) {
+    query poolGetPool($id: String!, $chain: GqlChain!) {
+      poolGetPool(id: $id, chain:$chain) {
         id
         address
         type
@@ -19,8 +21,8 @@ export class Pools {
     }`;
 
     readonly poolStateWithRawTokensQuery = `
-    query GetPool($id: String!) {
-      poolGetPool(id:$id) {
+    query GetPool($id: String!, $chain: GqlChain!) {
+      poolGetPool(id:$id, chain:$chain) {
         id
         address
         type
@@ -44,6 +46,8 @@ export class Pools {
             query: this.poolStateQuery,
             variables: {
                 id: id.toLowerCase(),
+                // the API requires chain names to be sent as uppercase strings
+                chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
         const poolGetPool: PoolState = {
