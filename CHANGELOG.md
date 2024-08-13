@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.22.3
+
+### Patch Changes
+
+- 838f09e: Remove round down from calculateProportionalAmounts
+
 ## 0.22.2
 
 ### Patch Changes
