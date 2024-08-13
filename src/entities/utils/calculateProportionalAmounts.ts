@@ -1,10 +1,9 @@
 import { Address, parseUnits } from 'viem';
 import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
-import { MathSol } from '@/utils';
 
 /**
- * For a given pool, calculate all token amounts proportional to a given reference amount.
+ * For a given pool and reference token amount, calculate all token amounts proportional to their balances within the pool.
  *
  * Note: when using this helper to build an AddLiquidityProportional input,
  * please mind that referenceAmount should be relative to the token that the user
@@ -12,7 +11,7 @@ import { MathSol } from '@/utils';
  * may require more balance than the user has.
  * @param pool
  * @param referenceAmount
- * @returns Proportional amounts rounded down to the nearest integer
+ * @returns Proportional amounts
  */
 export function calculateProportionalAmounts(
     pool: {
@@ -56,11 +55,8 @@ export function calculateProportionalAmounts(
 
     // calculate proportional amounts
     const referenceTokenBalance = balances[referenceTokenIndex];
-    const proportionalAmounts = balances.map((b) =>
-        MathSol.divDownFixed(
-            MathSol.mulDownFixed(b, referenceAmount.rawAmount),
-            referenceTokenBalance,
-        ),
+    const proportionalAmounts = balances.map(
+        (b) => (b * referenceAmount.rawAmount) / referenceTokenBalance,
     );
 
     const amounts = tokensWithBpt.map(({ address, decimals }, index) => ({
