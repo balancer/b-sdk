@@ -65,6 +65,7 @@ export class Pools {
             query: this.poolStateWithRawTokensQuery,
             variables: {
                 id: id.toLowerCase(),
+                chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
         const poolStateWithBalances: PoolStateWithBalances = {
