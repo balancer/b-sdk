@@ -3,7 +3,10 @@ import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import { calculateProportionalAmounts } from '@/entities/utils';
+import {
+    calculateProportionalAmountsCowAmm,
+    getPoolStateWithBalancesCowAmm,
+} from '@/entities/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
@@ -14,7 +17,6 @@ import {
     AddLiquidityKind,
     AddLiquidityProportionalInput,
 } from '../types';
-import { getPoolStateWithBalancesCowAmm } from '@/entities/utils/cowAmmHelpers';
 
 export class AddLiquidityCowAmm implements AddLiquidityBase {
     async query(
@@ -27,7 +29,7 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
             input.rpcUrl,
         );
 
-        const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
+        const { tokenAmounts, bptAmount } = calculateProportionalAmountsCowAmm(
             poolStateWithBalances,
             input.bptOut,
         );
