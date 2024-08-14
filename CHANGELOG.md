@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.22.4
+
+### Patch Changes
+
+- de32a7c: Fix add liquidity proportional query for cow-amm
+
 ## 0.22.3
 
 ### Patch Changes
