@@ -143,7 +143,7 @@ export const VAULT: Record<number, Address> = {
 };
 
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x92B5c1CB2999c45804A60d6529D77DeEF00fb839',
+    [ChainId.SEPOLIA]: '0x7966FE92C59295EcE7FB5D9EfDB271967BFe2fbA',
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
@@ -173,7 +173,7 @@ export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
 };
 export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x39aB047f64D198288a1348ce746cA8457435a742',
+    [ChainId.SEPOLIA]: '0x765ce16dbb3D7e89a9beBc834C5D6894e7fAA93c',
 };
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
@@ -189,11 +189,11 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xa12Da7dfD0792a10a5b05B575545Bd685798Ce35',
+    [ChainId.SEPOLIA]: '0xDd10aDF05379D7C0Ee4bC9c72ecc5C01c40E25b8',
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x90e065b28c9B7464B44f185f5a6b8e4B4c827f2a',
+    [ChainId.SEPOLIA]: '0x48341a762AD5470f96F4B553681696d1e5eeac0A',
 };
 
 export const PERMIT2: Record<number, Address> = {

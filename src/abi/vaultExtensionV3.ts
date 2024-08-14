@@ -122,6 +122,7 @@ export const vaultExtensionV3Abi = [
     },
     { inputs: [], name: 'ErrorSelectorNotFound', type: 'error' },
     { inputs: [], name: 'FailedInnerCall', type: 'error' },
+    { inputs: [], name: 'FeePrecisionTooHigh', type: 'error' },
     {
         inputs: [
             { internalType: 'contract IERC20', name: 'token', type: 'address' },
@@ -287,6 +288,7 @@ export const vaultExtensionV3Abi = [
         name: 'TotalSupplyTooLow',
         type: 'error',
     },
+    { inputs: [], name: 'TradeAmountTooSmall', type: 'error' },
     { inputs: [], name: 'UserDataNotSupported', type: 'error' },
     { inputs: [], name: 'VaultBuffersArePaused', type: 'error' },
     { inputs: [], name: 'VaultIsNotUnlocked', type: 'error' },
@@ -918,34 +920,6 @@ export const vaultExtensionV3Abi = [
     },
     {
         inputs: [
-            {
-                internalType: 'enum WrappingDirection',
-                name: 'direction',
-                type: 'uint8',
-            },
-            { internalType: 'enum SwapKind', name: 'kind', type: 'uint8' },
-            {
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
-                type: 'address',
-            },
-            { internalType: 'uint256', name: 'amountGiven', type: 'uint256' },
-        ],
-        name: 'calculateBufferAmounts',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: 'amountCalculated',
-                type: 'uint256',
-            },
-            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
             { internalType: 'address', name: 'pool', type: 'address' },
             {
                 components: [
@@ -981,17 +955,17 @@ export const vaultExtensionV3Abi = [
                     },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct IBasePool.PoolSwapParams',
+                internalType: 'struct PoolSwapParams',
                 name: 'swapParams',
                 type: 'tuple',
             },
         ],
-        name: 'computeDynamicSwapFee',
+        name: 'computeDynamicSwapFeePercentage',
         outputs: [
             { internalType: 'bool', name: 'success', type: 'bool' },
             {
                 internalType: 'uint256',
-                name: 'dynamicSwapFee',
+                name: 'dynamicSwapFeePercentage',
                 type: 'uint256',
             },
         ],
@@ -1164,9 +1138,9 @@ export const vaultExtensionV3Abi = [
                         type: 'uint256',
                     },
                     {
-                        internalType: 'uint24',
+                        internalType: 'uint40',
                         name: 'tokenDecimalDiffs',
-                        type: 'uint24',
+                        type: 'uint40',
                     },
                     {
                         internalType: 'uint32',
@@ -1349,7 +1323,7 @@ export const vaultExtensionV3Abi = [
             },
             {
                 internalType: 'uint256[]',
-                name: 'lastLiveBalances',
+                name: 'lastBalancesLiveScaled18',
                 type: 'uint256[]',
             },
         ],

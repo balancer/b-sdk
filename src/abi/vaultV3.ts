@@ -126,6 +126,7 @@ export const vaultV3Abi = [
         type: 'error',
     },
     { inputs: [], name: 'FailedInnerCall', type: 'error' },
+    { inputs: [], name: 'FeePrecisionTooHigh', type: 'error' },
     {
         inputs: [
             { internalType: 'contract IERC20', name: 'token', type: 'address' },
@@ -171,6 +172,38 @@ export const vaultV3Abi = [
     { inputs: [], name: 'InvalidToken', type: 'error' },
     { inputs: [], name: 'InvalidTokenConfiguration', type: 'error' },
     { inputs: [], name: 'InvalidTokenType', type: 'error' },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'invariantRatio',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxInvariantRatio',
+                type: 'uint256',
+            },
+        ],
+        name: 'InvariantRatioAboveMax',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'invariantRatio',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minInvariantRatio',
+                type: 'uint256',
+            },
+        ],
+        name: 'InvariantRatioBelowMin',
+        type: 'error',
+    },
     { inputs: [], name: 'MaxTokens', type: 'error' },
     { inputs: [], name: 'MinTokens', type: 'error' },
     { inputs: [], name: 'MultipleNonZeroInputs', type: 'error' },
@@ -285,6 +318,7 @@ export const vaultV3Abi = [
         name: 'TotalSupplyTooLow',
         type: 'error',
     },
+    { inputs: [], name: 'TradeAmountTooSmall', type: 'error' },
     { inputs: [], name: 'UserDataNotSupported', type: 'error' },
     { inputs: [], name: 'VaultBuffersArePaused', type: 'error' },
     { inputs: [], name: 'VaultIsNotUnlocked', type: 'error' },

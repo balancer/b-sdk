@@ -23,14 +23,6 @@ export const balancerRouterAbi = [
         type: 'error',
     },
     { inputs: [], name: 'EthTransfer', type: 'error' },
-    {
-        inputs: [
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
-        ],
-        name: 'ExitBelowMin',
-        type: 'error',
-    },
     { inputs: [], name: 'FailedInnerCall', type: 'error' },
     { inputs: [], name: 'InsufficientEth', type: 'error' },
     { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
@@ -98,7 +90,7 @@ export const balancerRouterAbi = [
                     { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct IRouter.AddLiquidityHookParams',
+                internalType: 'struct IRouterCommon.AddLiquidityHookParams',
                 name: 'params',
                 type: 'tuple',
             },
@@ -414,7 +406,7 @@ export const balancerRouterAbi = [
         outputs: [
             { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
         ],
-        stateMutability: 'nonpayable',
+        stateMutability: 'payable',
         type: 'function',
     },
     {
@@ -469,7 +461,7 @@ export const balancerRouterAbi = [
                     { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct IRouter.AddLiquidityHookParams',
+                internalType: 'struct IRouterCommon.AddLiquidityHookParams',
                 name: 'params',
                 type: 'tuple',
             },
@@ -486,11 +478,6 @@ export const balancerRouterAbi = [
     {
         inputs: [
             { internalType: 'address', name: 'pool', type: 'address' },
-            {
-                internalType: 'uint256[]',
-                name: 'maxAmountsIn',
-                type: 'uint256[]',
-            },
             {
                 internalType: 'uint256',
                 name: 'exactBptAmountOut',
@@ -600,7 +587,7 @@ export const balancerRouterAbi = [
                     { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct IRouter.RemoveLiquidityHookParams',
+                internalType: 'struct IRouterCommon.RemoveLiquidityHookParams',
                 name: 'params',
                 type: 'tuple',
             },
@@ -939,7 +926,7 @@ export const balancerRouterAbi = [
                     { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct IRouter.RemoveLiquidityHookParams',
+                internalType: 'struct IRouterCommon.RemoveLiquidityHookParams',
                 name: 'params',
                 type: 'tuple',
             },
