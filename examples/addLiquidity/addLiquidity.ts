@@ -11,6 +11,7 @@ import {
     AddLiquidityKind,
     AddLiquidity,
     BalancerApi,
+    API_ENDPOINT,
     ChainId,
     PriceImpact,
     Slippage,
@@ -77,10 +78,7 @@ const addLiquidity = async ({
     slippage,
 }) => {
     // API is used to fetch relevant pool data
-    const balancerApi = new BalancerApi(
-        'https://test-api-v3.balancer.fi/',
-        chainId,
-    );
+    const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
     const poolState = await balancerApi.pools.fetchPoolState(poolId);
 
     // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced

@@ -6,6 +6,7 @@
  */
 import {
     BalancerApi,
+    API_ENDPOINT,
     calculateProportionalAmounts,
     InputAmount,
     ChainId,
@@ -13,10 +14,7 @@ import {
 
 const calculateProportionalAmountsExample = async () => {
     const chainId = ChainId.MAINNET;
-    const poolDataProvider = new BalancerApi(
-        'https://api-v3.balancer.fi/',
-        chainId,
-    );
+    const poolDataProvider = new BalancerApi(API_ENDPOINT, chainId);
     const poolId =
         '0xf01b0684c98cd7ada480bfdf6e43876422fa1fc10002000000000000000005de'; // Gyroscope ECLP wstETH/wETH
     const pool =
