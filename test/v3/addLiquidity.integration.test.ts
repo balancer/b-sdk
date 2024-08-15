@@ -8,7 +8,6 @@ import {
     Client,
     createTestClient,
     http,
-    parseEther,
     parseUnits,
     publicActions,
     PublicActions,
@@ -134,7 +133,7 @@ describe('add liquidity test', () => {
                     rpcUrl,
                     kind: AddLiquidityKind.Unbalanced,
                     amountsIn: txInput.poolState.tokens.map((t) => ({
-                        rawAmount: parseUnits('1', t.decimals),
+                        rawAmount: parseUnits('0.01', t.decimals),
                         decimals: t.decimals,
                         address: t.address,
                     })),
@@ -182,7 +181,7 @@ describe('add liquidity test', () => {
                     rpcUrl,
                     kind: AddLiquidityKind.SingleToken,
                     bptOut: {
-                        rawAmount: parseEther('1'),
+                        rawAmount: parseUnits('0.01', 18),
                         decimals: 18,
                         address: poolState.address,
                     },
@@ -238,7 +237,7 @@ describe('add liquidity test', () => {
                     rpcUrl,
                     kind: AddLiquidityKind.Unbalanced,
                     amountsIn: txInput.poolState.tokens.map((t) => ({
-                        rawAmount: parseUnits('1', t.decimals),
+                        rawAmount: parseUnits('0.01', t.decimals),
                         decimals: t.decimals,
                         address: t.address,
                     })),
@@ -280,7 +279,7 @@ describe('add liquidity test', () => {
                     rpcUrl,
                     kind: AddLiquidityKind.SingleToken,
                     bptOut: {
-                        rawAmount: parseEther('1'),
+                        rawAmount: parseUnits('1', 16),
                         decimals: 18,
                         address: poolState.address,
                     },

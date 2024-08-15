@@ -37,6 +37,137 @@ export const balancerBatchRouterAbi = [
         type: 'error',
     },
     { inputs: [], name: 'SwapDeadline', type: 'error' },
+    { inputs: [], name: 'TransientIndexOutOfBounds', type: 'error' },
+    {
+        inputs: [
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'maxAmountsIn',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'minBptAmountOut',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'enum AddLiquidityKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                ],
+                internalType: 'struct IRouterCommon.AddLiquidityHookParams',
+                name: 'params',
+                type: 'tuple',
+            },
+        ],
+        name: 'addLiquidityERC4626PoolProportionalHook',
+        outputs: [
+            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'maxAmountsIn',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'minBptAmountOut',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'enum AddLiquidityKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                ],
+                internalType: 'struct IRouterCommon.AddLiquidityHookParams',
+                name: 'params',
+                type: 'tuple',
+            },
+        ],
+        name: 'addLiquidityERC4626PoolUnbalancedHook',
+        outputs: [
+            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'uint256[]',
+                name: 'maxUnderlyingAmountsIn',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountOut',
+                type: 'uint256',
+            },
+            { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+        ],
+        name: 'addLiquidityProportionalToERC4626Pool',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'underlyingAmountsIn',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'uint256[]',
+                name: 'exactUnderlyingAmountsIn',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minBptAmountOut',
+                type: 'uint256',
+            },
+            { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+        ],
+        name: 'addLiquidityUnbalancedToERC4626Pool',
+        outputs: [
+            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
+        ],
+        stateMutability: 'payable',
+        type: 'function',
+    },
     {
         inputs: [],
         name: 'getSender',
@@ -136,6 +267,65 @@ export const balancerBatchRouterAbi = [
         name: 'permitBatchAndCall',
         outputs: [
             { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
+        ],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountOut',
+                type: 'uint256',
+            },
+            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+        ],
+        name: 'queryAddLiquidityProportionalToERC4626Pool',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'underlyingAmountsIn',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'uint256[]',
+                name: 'exactUnderlyingAmountsIn',
+                type: 'uint256[]',
+            },
+            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+        ],
+        name: 'queryAddLiquidityUnbalancedToERC4626Pool',
+        outputs: [
+            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountIn',
+                type: 'uint256',
+            },
+            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+        ],
+        name: 'queryRemoveLiquidityProportionalFromERC4626Pool',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'underlyingAmountsOut',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -430,6 +620,77 @@ export const balancerBatchRouterAbi = [
             { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
         ],
         stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'sender',
+                        type: 'address',
+                    },
+                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'minAmountsOut',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'maxBptAmountIn',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'enum RemoveLiquidityKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                ],
+                internalType: 'struct IRouterCommon.RemoveLiquidityHookParams',
+                name: 'params',
+                type: 'tuple',
+            },
+        ],
+        name: 'removeLiquidityERC4626PoolProportionalHook',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'amountsOut',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'uint256',
+                name: 'exactBptAmountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'minUnderlyingAmountsOut',
+                type: 'uint256[]',
+            },
+            { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+        ],
+        name: 'removeLiquidityProportionalFromERC4626Pool',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'underlyingAmountsOut',
+                type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'payable',
         type: 'function',
     },
     {
