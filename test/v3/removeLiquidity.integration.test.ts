@@ -94,7 +94,7 @@ describe('remove liquidity test', () => {
             kind: AddLiquidityKind.Unbalanced,
             amountsIn: poolState.tokens.map((t) => {
                 return {
-                    rawAmount: parseUnits('1', t.decimals - 2),
+                    rawAmount: parseUnits('0.01', t.decimals),
                     decimals: t.decimals,
                     address: t.address,
                 };
@@ -161,7 +161,7 @@ describe('remove liquidity test', () => {
             let amountsOut: InputAmount[];
             beforeAll(() => {
                 amountsOut = poolState.tokens.map((t) => ({
-                    rawAmount: parseUnits('1', t.decimals - 2),
+                    rawAmount: parseUnits('0.01', t.decimals),
                     decimals: t.decimals,
                     address: t.address,
                 }));
@@ -188,7 +188,7 @@ describe('remove liquidity test', () => {
             let input: RemoveLiquiditySingleTokenExactOutInput;
             beforeAll(() => {
                 const amountOut: InputAmount = {
-                    rawAmount: parseUnits('1', WETH.decimals - 3),
+                    rawAmount: parseUnits('0.001', WETH.decimals),
                     decimals: WETH.decimals,
                     address: WETH.address,
                 };
@@ -237,7 +237,7 @@ describe('remove liquidity test', () => {
             let input: RemoveLiquiditySingleTokenExactInInput;
             beforeAll(() => {
                 const bptIn: InputAmount = {
-                    rawAmount: parseUnits('1', 15),
+                    rawAmount: parseEther('0.001'),
                     decimals: 18,
                     address: poolState.address,
                 };
@@ -288,7 +288,7 @@ describe('remove liquidity test', () => {
             let input: RemoveLiquidityProportionalInput;
             beforeAll(() => {
                 const bptIn: InputAmount = {
-                    rawAmount: parseUnits('1', 16),
+                    rawAmount: parseEther('0.01'),
                     decimals: 18,
                     address: poolState.address,
                 };
@@ -344,7 +344,7 @@ describe('remove liquidity test', () => {
             let input: RemoveLiquidityProportionalInput;
             beforeAll(() => {
                 const bptIn: InputAmount = {
-                    rawAmount: parseUnits('1', 16),
+                    rawAmount: parseEther('0.01'),
                     decimals: 18,
                     address: poolState.address,
                 };
