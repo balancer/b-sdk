@@ -26,7 +26,7 @@ export const validateTokensAddLiquidity = (
             break;
         case AddLiquidityKind.Proportional:
             areTokensInArray(
-                [addLiquidityInput.bptOut.address],
+                [addLiquidityInput.referenceAmount.address],
                 [poolState.address],
             );
             break;

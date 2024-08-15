@@ -35,7 +35,7 @@ async function runAgainstFork() {
         address: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91' as Address,
     };
 
-    const referenceAmountIn = {
+    const referenceAmount = {
         rawAmount: 158708n,
         decimals: 6,
         address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
@@ -46,7 +46,7 @@ async function runAgainstFork() {
     const call = await addLiquidityProportional({
         rpcUrl,
         chainId,
-        referenceAmountIn,
+        referenceAmount,
         poolId: pool.id,
         slippage,
     });
@@ -73,7 +73,7 @@ const addLiquidityProportional = async ({
     rpcUrl,
     chainId,
     poolId,
-    referenceAmountIn,
+    referenceAmount,
     slippage,
 }) => {
     // API + on-chain calls are used to fetch relevant pool data
@@ -89,7 +89,7 @@ const addLiquidityProportional = async ({
 
     const { tokenAmounts, bptAmount } = calculateProportionalAmountsCowAmm(
         poolStateWithBalances,
-        referenceAmountIn,
+        referenceAmount,
     );
 
     console.log('Token Amounts:');
@@ -97,7 +97,7 @@ const addLiquidityProportional = async ({
 
     // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced
     const addLiquidityInput: AddLiquidityInput = {
-        bptOut: bptAmount,
+        referenceAmount: bptAmount,
         chainId,
         rpcUrl,
         kind: AddLiquidityKind.Proportional,

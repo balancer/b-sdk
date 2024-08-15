@@ -202,13 +202,13 @@ describe('add liquidity composable stable test', () => {
     describe('add liquidity proportional', () => {
         let input: AddLiquidityProportionalInput;
         beforeAll(() => {
-            const bptOut: InputAmount = {
+            const referenceAmount: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
                 address: poolState.address,
             };
             input = {
-                bptOut,
+                referenceAmount,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,

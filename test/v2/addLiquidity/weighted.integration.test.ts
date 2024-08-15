@@ -200,13 +200,13 @@ describe('add liquidity weighted test', () => {
     describe('add liquidity proportional', () => {
         let addLiquidityInput: AddLiquidityProportionalInput;
         beforeAll(() => {
-            const bptOut: InputAmount = {
+            const referenceAmount: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
                 address: poolState.address,
             };
             addLiquidityInput = {
-                bptOut,
+                referenceAmount,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,

@@ -32,7 +32,7 @@ export type AddLiquiditySingleTokenInput = AddLiquidityBaseInput & {
 };
 
 export type AddLiquidityProportionalInput = AddLiquidityBaseInput & {
-    bptOut: InputAmount;
+    referenceAmount: InputAmount;
     kind: AddLiquidityKind.Proportional;
 };
 

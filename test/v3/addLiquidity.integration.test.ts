@@ -225,14 +225,14 @@ describe('add liquidity test', () => {
         describe('add liquidity proportional', () => {
             let input: AddLiquidityProportionalInput;
             beforeAll(() => {
-                const bptOut: InputAmount = {
+                const referenceAmount: InputAmount = {
                     rawAmount: parseUnits('1', 18),
                     decimals: 18,
                     address: poolState.address,
                 };
 
                 input = {
-                    bptOut: bptOut,
+                    referenceAmount,
                     kind: AddLiquidityKind.Proportional,
                     chainId: chainId,
                     rpcUrl: rpcUrl,
@@ -388,14 +388,14 @@ describe('add liquidity test', () => {
         describe('add liquidity proportional', () => {
             let addLiquidityInput: AddLiquidityProportionalInput;
             beforeAll(() => {
-                const bptOut: InputAmount = {
+                const referenceAmount: InputAmount = {
                     rawAmount: parseUnits('1', 18),
                     decimals: 18,
                     address: poolState.address,
                 };
 
                 addLiquidityInput = {
-                    bptOut: bptOut,
+                    referenceAmount,
                     kind: AddLiquidityKind.Proportional,
                     chainId: chainId,
                     rpcUrl: rpcUrl,

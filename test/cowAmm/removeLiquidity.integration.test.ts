@@ -84,7 +84,7 @@ describe('remove liquidity test', () => {
             chainId,
             rpcUrl,
             kind: AddLiquidityKind.Proportional,
-            bptOut: {
+            referenceAmount: {
                 rawAmount: parseEther('1'),
                 decimals: 18,
                 address: poolState.address,

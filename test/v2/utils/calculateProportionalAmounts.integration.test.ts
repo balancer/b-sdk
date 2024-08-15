@@ -114,7 +114,7 @@ describe('add liquidity composable stable test', () => {
         let input: AddLiquidityProportionalInput;
         beforeAll(() => {
             input = {
-                bptOut: functionOutput.bptAmount,
+                referenceAmount: functionOutput.bptAmount,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,

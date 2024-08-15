@@ -93,13 +93,13 @@ describe('GyroE V2 add liquidity test', () => {
     describe('proportional', () => {
         let addLiquidityInput: AddLiquidityProportionalInput;
         beforeAll(() => {
-            const bptOut: InputAmount = {
+            const referenceAmount: InputAmount = {
                 rawAmount: parseEther('2'),
                 decimals: 18,
                 address: poolState.address,
             };
             addLiquidityInput = {
-                bptOut,
+                referenceAmount,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,

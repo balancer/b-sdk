@@ -116,7 +116,7 @@ function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
             return check;
         }
         // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-        const { amountsIn, bptIndex, ...check } =
+        const { bptIndex, ...check } =
             output as AddLiquidityV2ComposableStableQueryOutput;
         return check;
     }
@@ -125,8 +125,7 @@ function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
         const { bptOut, ...check } = output;
         return check;
     }
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { amountsIn, ...check } = output;
+    const { ...check } = output;
     return check;
 }
 
@@ -275,15 +274,13 @@ export function assertAddLiquiditySingleToken(
         (t) => t.address !== poolState.address,
     );
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'amountsIn' | 'bptIndex'
-    > = {
+    const expectedQueryOutput: Omit<AddLiquidityQueryOutput, 'bptIndex'> = {
         // Query should use same bpt out as user sets
         bptOut: TokenAmount.fromRawAmount(
             bptToken,
             addLiquidityInput.bptOut.rawAmount,
         ),
+        amountsIn: addLiquidityQueryOutput.amountsIn,
         tokenInIndex: tokensWithoutBpt.findIndex(
             (t) => t.address === addLiquidityInput.tokenIn,
         ),
@@ -340,21 +337,30 @@ export function assertAddLiquidityProportional(
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
-    const bptToken = new Token(
-        addLiquidityInput.chainId,
-        poolState.address,
-        18,
+    // replace referenceAmount into amountsIn or bptOut for comparison
+    const bptOut = addLiquidityQueryOutput.bptOut.token.isSameAddress(
+        addLiquidityInput.referenceAmount.address,
+    )
+        ? TokenAmount.fromRawAmount(
+              addLiquidityQueryOutput.bptOut.token,
+              addLiquidityInput.referenceAmount.rawAmount,
+          )
+        : addLiquidityQueryOutput.bptOut;
+    const amountsIn = addLiquidityOutput.addLiquidityQueryOutput.amountsIn.map(
+        (a) =>
+            a.token.isSameAddress(addLiquidityInput.referenceAmount.address) &&
+            !a.token.isSameAddress(poolState.address) // skip CSP BPT as token
+                ? TokenAmount.fromRawAmount(
+                      a.token,
+                      addLiquidityInput.referenceAmount.rawAmount,
+                  )
+                : a,
     );
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'amountsIn' | 'bptIndex'
-    > = {
-        // Query should use same bpt out as user sets
-        bptOut: TokenAmount.fromRawAmount(
-            bptToken,
-            addLiquidityInput.bptOut.rawAmount,
-        ),
+    const expectedQueryOutput: Omit<AddLiquidityQueryOutput, 'bptIndex'> = {
+        // Query should use same referenceAmount as user sets
+        bptOut,
+        amountsIn,
         // Only expect tokenInIndex for AddLiquiditySingleToken
         tokenInIndex: undefined,
         // Should match inputs

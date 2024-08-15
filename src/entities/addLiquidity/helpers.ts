@@ -40,8 +40,9 @@ export const getAmountsQuery = (
         }
         case AddLiquidityKind.Proportional: {
             const maxAmountsIn = Array(poolTokens.length).fill(MAX_UINT256);
+            // TODO: query pool state with balances to get bptOut from reference amount
             return {
-                minimumBpt: input.bptOut.rawAmount,
+                minimumBpt: input.referenceAmount.rawAmount,
                 maxAmountsIn,
                 tokenInIndex: undefined,
                 maxAmountsInWithoutBpt: removeIndex(maxAmountsIn, bptIndex),

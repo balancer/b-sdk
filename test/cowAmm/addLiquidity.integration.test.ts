@@ -105,7 +105,7 @@ describe('add liquidity test', () => {
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,
-                bptOut: {
+                referenceAmount: {
                     rawAmount: parseUnits('1', 18),
                     decimals: 18,
                     address: txInput.poolState.address,

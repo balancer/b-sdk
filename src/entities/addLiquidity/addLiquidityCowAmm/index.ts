@@ -32,7 +32,7 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
 
         const { tokenAmounts, bptAmount } = calculateProportionalAmountsCowAmm(
             poolStateWithBalances,
-            input.bptOut,
+            input.referenceAmount,
         );
         const bptOut = TokenAmount.fromRawAmount(
             new Token(input.chainId, bptAmount.address, bptAmount.decimals),
