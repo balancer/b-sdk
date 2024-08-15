@@ -1,4 +1,5 @@
 export * from './calculateProportionalAmounts';
+export * from './cowAmmHelpers';
 export * from './doAddLiquidityQuery';
 export * from './getAmounts';
 export * from './getSortedTokens';

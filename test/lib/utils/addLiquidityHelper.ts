@@ -16,12 +16,14 @@ import {
     Token,
     TokenAmount,
     VAULT,
+    Permit2Helper,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
+import { Client, PublicActions, WalletActions } from 'viem';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -37,6 +39,8 @@ async function sdkAddLiquidity({
     testAddress,
     wethIsEth,
     fromInternalBalance,
+    client,
+    usePermit2Signatures,
 }: {
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
@@ -45,6 +49,8 @@ async function sdkAddLiquidity({
     testAddress: Address;
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;
+    client: Client & PublicActions & WalletActions;
+    usePermit2Signatures?: boolean;
 }): Promise<{
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -68,9 +74,24 @@ async function sdkAddLiquidity({
         };
     }
 
-    const addLiquidityBuildCallOutput = addLiquidity.buildCall(
-        addLiquidityBuildInput,
-    );
+    let addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
+
+    if (usePermit2Signatures) {
+        const permit2 = await Permit2Helper.signAddLiquidityApproval({
+            ...addLiquidityBuildInput,
+            client,
+            owner: testAddress,
+        });
+
+        addLiquidityBuildCallOutput = addLiquidity.buildCallWithPermit2(
+            addLiquidityBuildInput,
+            permit2,
+        );
+    } else {
+        addLiquidityBuildCallOutput = addLiquidity.buildCall(
+            addLiquidityBuildInput,
+        );
+    }
 
     return {
         addLiquidityBuildCallOutput,
@@ -128,6 +149,7 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
         client,
         slippage,
         wethIsEth,
+        usePermit2Signatures,
     } = txInput;
 
     const { addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
@@ -138,6 +160,8 @@ export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
             slippage,
             testAddress,
             wethIsEth,
+            usePermit2Signatures,
+            client,
         });
 
     const tokens = getTokensForBalanceCheck(poolState);

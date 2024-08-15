@@ -3,11 +3,15 @@ import { config } from 'dotenv';
 config();
 
 import {
+    Client,
     createTestClient,
     http,
     parseEther,
     parseUnits,
+    PublicActions,
     publicActions,
+    TestActions,
+    WalletActions,
     walletActions,
     parseAbi,
     Address,
@@ -47,22 +51,22 @@ import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityTxInput,
     approveSpenderOnToken,
+    approveTokens,
     assertRemoveLiquidityProportional,
     assertRemoveLiquiditySingleTokenExactIn,
     assertRemoveLiquiditySingleTokenExactOut,
     assertRemoveLiquidityRecovery,
     doAddLiquidity,
     doRemoveLiquidity,
-    forkSetup,
     POOLS,
     RemoveLiquidityTxInput,
+    setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
 
 const protocolVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 
 const WETH = TOKENS[chainId].WETH;
@@ -72,14 +76,21 @@ const BAL = TOKENS[chainId].BAL;
 type ExtendedClient = Client & PublicActions & TestActions & WalletActions;
 
 describe('remove liquidity test', () => {
+    let client: Client & PublicActions & TestActions & WalletActions;
     let prepTxInput: AddLiquidityTxInput;
     let txInput: RemoveLiquidityTxInput;
     let poolState: PoolState;
-    let client: ExtendedClient;
+    let rpcUrl: string;
+    let snapshot: Hex;
 
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
+
+        // get pool state from api
+        poolState = await api.getPool(poolId);
+
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         client = createTestClient({
             mode: 'anvil',
@@ -99,7 +110,7 @@ describe('remove liquidity test', () => {
             kind: AddLiquidityKind.Unbalanced,
             amountsIn: poolState.tokens.map((t) => {
                 return {
-                    rawAmount: parseUnits('10', t.decimals),
+                    rawAmount: parseUnits('0.01', t.decimals),
                     decimals: t.decimals,
                     address: t.address,
                 };
@@ -123,204 +134,275 @@ describe('remove liquidity test', () => {
             testAddress,
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
+
+        // setup by performing an add liquidity so it's possible to remove after that
+        const tokens = [...poolState.tokens.map((t) => t.address)];
+        await setTokenBalances(
+            client,
+            testAddress,
+            tokens,
+            [WETH.slot, BAL.slot] as number[],
+            [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
+        );
+        await approveTokens(
+            client,
+            txInput.testAddress,
+            tokens,
+            protocolVersion,
+        );
+        await doAddLiquidity(prepTxInput);
+
+        snapshot = await client.snapshot();
     });
 
     beforeEach(async () => {
-        // setup by performing an add liquidity so it's possible to remove after that
-        await forkSetup(
-            txInput.client,
-            txInput.testAddress,
-            [...txInput.poolState.tokens.map((t) => t.address)],
-            [WETH.slot, BAL.slot] as number[],
-            [
-                ...txInput.poolState.tokens.map((t) =>
-                    parseUnits('100', t.decimals),
-                ),
-            ],
-            undefined,
-            protocolVersion,
-        );
-
-        await approveSpenderOnToken(
-            txInput.client,
-            txInput.testAddress,
-            txInput.poolState.address,
-            BALANCER_ROUTER[chainId],
-        );
-
-        await doAddLiquidity(prepTxInput);
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
     });
 
-    describe('unbalanced', async () => {
-        let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
-        let amountsOut: InputAmount[];
-        beforeAll(() => {
-            amountsOut = poolState.tokens.map((t) => ({
-                rawAmount: parseUnits('1', t.decimals),
-                decimals: t.decimals,
-                address: t.address,
-            }));
-            input = {
-                chainId,
-                rpcUrl,
-                kind: RemoveLiquidityKind.Unbalanced,
-            };
+    describe('permit direct approval', () => {
+        beforeEach(async () => {
+            await approveSpenderOnToken(
+                txInput.client,
+                txInput.testAddress,
+                txInput.poolState.address,
+                BALANCER_ROUTER[chainId],
+            );
         });
-        test('must throw remove liquidity kind not supported error', async () => {
-            const removeLiquidityInput = {
-                ...input,
-                amountsOut: amountsOut.slice(0, 1),
-            };
-            await expect(() =>
-                doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
-            ).rejects.toThrowError(removeLiquidityUnbalancedNotSupportedOnV3);
+
+        describe('unbalanced', async () => {
+            let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
+            let amountsOut: InputAmount[];
+            beforeAll(() => {
+                amountsOut = poolState.tokens.map((t) => ({
+                    rawAmount: parseUnits('0.01', t.decimals),
+                    decimals: t.decimals,
+                    address: t.address,
+                }));
+                input = {
+                    chainId,
+                    rpcUrl,
+                    kind: RemoveLiquidityKind.Unbalanced,
+                };
+            });
+            test('must throw remove liquidity kind not supported error', async () => {
+                const removeLiquidityInput = {
+                    ...input,
+                    amountsOut: amountsOut.slice(0, 1),
+                };
+                await expect(() =>
+                    doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
+                ).rejects.toThrowError(
+                    removeLiquidityUnbalancedNotSupportedOnV3,
+                );
+            });
+        });
+
+        describe('single token exact out', () => {
+            let input: RemoveLiquiditySingleTokenExactOutInput;
+            beforeAll(() => {
+                const amountOut: InputAmount = {
+                    rawAmount: parseUnits('0.001', WETH.decimals),
+                    decimals: WETH.decimals,
+                    address: WETH.address,
+                };
+                input = {
+                    chainId,
+                    rpcUrl,
+                    amountOut,
+                    kind: RemoveLiquidityKind.SingleTokenExactOut,
+                };
+            });
+            test('with wrapped', async () => {
+                const removeLiquidityOutput = await doRemoveLiquidity({
+                    ...txInput,
+                    removeLiquidityInput: input,
+                });
+
+                assertRemoveLiquiditySingleTokenExactOut(
+                    txInput.poolState,
+                    input,
+                    removeLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                );
+            });
+
+            test('with native', async () => {
+                const wethIsEth = true;
+                const removeLiquidityOutput = await doRemoveLiquidity({
+                    ...txInput,
+                    removeLiquidityInput: input,
+                    wethIsEth,
+                });
+
+                assertRemoveLiquiditySingleTokenExactOut(
+                    txInput.poolState,
+                    input,
+                    removeLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                    wethIsEth,
+                );
+            });
+        });
+
+        describe('single token exact in', () => {
+            let input: RemoveLiquiditySingleTokenExactInInput;
+            beforeAll(() => {
+                const bptIn: InputAmount = {
+                    rawAmount: parseEther('0.001'),
+                    decimals: 18,
+                    address: poolState.address,
+                };
+                const tokenOut = WETH.address;
+                input = {
+                    chainId,
+                    rpcUrl,
+                    bptIn,
+                    tokenOut,
+                    kind: RemoveLiquidityKind.SingleTokenExactIn,
+                };
+            });
+            test('with wrapped', async () => {
+                const removeLiquidityOutput = await doRemoveLiquidity({
+                    ...txInput,
+                    removeLiquidityInput: input,
+                });
+
+                assertRemoveLiquiditySingleTokenExactIn(
+                    txInput.poolState,
+                    input,
+                    removeLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                );
+            });
+
+            test('with native', async () => {
+                const wethIsEth = true;
+                const removeLiquidityOutput = await doRemoveLiquidity({
+                    ...txInput,
+                    removeLiquidityInput: input,
+                    wethIsEth,
+                });
+
+                assertRemoveLiquiditySingleTokenExactIn(
+                    txInput.poolState,
+                    input,
+                    removeLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                    wethIsEth,
+                );
+            });
+        });
+
+        describe('proportional', () => {
+            let input: RemoveLiquidityProportionalInput;
+            beforeAll(() => {
+                const bptIn: InputAmount = {
+                    rawAmount: parseEther('0.01'),
+                    decimals: 18,
+                    address: poolState.address,
+                };
+                input = {
+                    bptIn,
+                    chainId,
+                    rpcUrl,
+                    kind: RemoveLiquidityKind.Proportional,
+                };
+            });
+            test('with tokens', async () => {
+                const removeLiquidityOutput = await doRemoveLiquidity({
+                    ...txInput,
+                    removeLiquidityInput: input,
+                });
+
+                assertRemoveLiquidityProportional(
+                    txInput.poolState,
+                    input,
+                    removeLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                );
+            });
+            test('with native', async () => {
+                const wethIsEth = true;
+                const removeLiquidityOutput = await doRemoveLiquidity({
+                    ...txInput,
+                    removeLiquidityInput: input,
+                    wethIsEth,
+                });
+                assertRemoveLiquidityProportional(
+                    txInput.poolState,
+                    input,
+                    removeLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                    wethIsEth,
+                );
+            });
         });
     });
 
-    describe('single token exact out', () => {
-        let input: RemoveLiquiditySingleTokenExactOutInput;
-        beforeAll(() => {
-            const amountOut: InputAmount = {
-                rawAmount: parseUnits('1', WETH.decimals),
-                decimals: WETH.decimals,
-                address: WETH.address,
-            };
-            input = {
-                chainId,
-                rpcUrl,
-                amountOut,
-                kind: RemoveLiquidityKind.SingleTokenExactOut,
+    describe('permit signatures', () => {
+        beforeEach(async () => {
+            txInput = {
+                ...txInput,
+                usePermitSignatures: true,
             };
         });
-        test('with wrapped', async () => {
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...txInput,
-                removeLiquidityInput: input,
+
+        describe('proportional', () => {
+            let input: RemoveLiquidityProportionalInput;
+            beforeAll(() => {
+                const bptIn: InputAmount = {
+                    rawAmount: parseEther('0.01'),
+                    decimals: 18,
+                    address: poolState.address,
+                };
+                input = {
+                    bptIn,
+                    chainId,
+                    rpcUrl,
+                    kind: RemoveLiquidityKind.Proportional,
+                };
             });
+            test('with tokens', async () => {
+                const removeLiquidityOutput = await doRemoveLiquidity({
+                    ...txInput,
+                    removeLiquidityInput: input,
+                    usePermitSignatures: true,
+                });
 
-            assertRemoveLiquiditySingleTokenExactOut(
-                txInput.poolState,
-                input,
-                removeLiquidityOutput,
-                txInput.slippage,
-                protocolVersion,
-            );
-        });
-
-        test('with native', async () => {
-            const wethIsEth = true;
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...txInput,
-                removeLiquidityInput: input,
-                wethIsEth,
+                assertRemoveLiquidityProportional(
+                    txInput.poolState,
+                    input,
+                    removeLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                );
             });
-
-            assertRemoveLiquiditySingleTokenExactOut(
-                txInput.poolState,
-                input,
-                removeLiquidityOutput,
-                txInput.slippage,
-                protocolVersion,
-                wethIsEth,
-            );
-        });
-    });
-
-    describe('single token exact in', () => {
-        let input: RemoveLiquiditySingleTokenExactInInput;
-        beforeAll(() => {
-            const bptIn: InputAmount = {
-                rawAmount: parseEther('1'),
-                decimals: 18,
-                address: poolState.address,
-            };
-            const tokenOut = WETH.address;
-            input = {
-                chainId,
-                rpcUrl,
-                bptIn,
-                tokenOut,
-                kind: RemoveLiquidityKind.SingleTokenExactIn,
-            };
-        });
-        test('with wrapped', async () => {
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...txInput,
-                removeLiquidityInput: input,
+            test('with native', async () => {
+                const wethIsEth = true;
+                const removeLiquidityOutput = await doRemoveLiquidity({
+                    ...txInput,
+                    removeLiquidityInput: input,
+                    wethIsEth,
+                    usePermitSignatures: true,
+                });
+                assertRemoveLiquidityProportional(
+                    txInput.poolState,
+                    input,
+                    removeLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                    wethIsEth,
+                );
             });
-
-            assertRemoveLiquiditySingleTokenExactIn(
-                txInput.poolState,
-                input,
-                removeLiquidityOutput,
-                txInput.slippage,
-                protocolVersion,
-            );
-        });
-
-        test('with native', async () => {
-            const wethIsEth = true;
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...txInput,
-                removeLiquidityInput: input,
-                wethIsEth,
-            });
-
-            assertRemoveLiquiditySingleTokenExactIn(
-                txInput.poolState,
-                input,
-                removeLiquidityOutput,
-                txInput.slippage,
-                protocolVersion,
-                wethIsEth,
-            );
-        });
-    });
-
-    describe('proportional', () => {
-        let input: RemoveLiquidityProportionalInput;
-        beforeAll(() => {
-            const bptIn: InputAmount = {
-                rawAmount: parseEther('1'),
-                decimals: 18,
-                address: poolState.address,
-            };
-            input = {
-                bptIn,
-                chainId,
-                rpcUrl,
-                kind: RemoveLiquidityKind.Proportional,
-            };
-        });
-        test('with tokens', async () => {
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...txInput,
-                removeLiquidityInput: input,
-            });
-
-            assertRemoveLiquidityProportional(
-                txInput.poolState,
-                input,
-                removeLiquidityOutput,
-                txInput.slippage,
-                protocolVersion,
-            );
-        });
-        test('with native', async () => {
-            const wethIsEth = true;
-            const removeLiquidityOutput = await doRemoveLiquidity({
-                ...txInput,
-                removeLiquidityInput: input,
-                wethIsEth,
-            });
-            assertRemoveLiquidityProportional(
-                txInput.poolState,
-                input,
-                removeLiquidityOutput,
-                txInput.slippage,
-                protocolVersion,
-                wethIsEth,
-            );
         });
     });
     describe('recovery', () => {

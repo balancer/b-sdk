@@ -5,6 +5,8 @@ export * from './addLiquidityNested/types';
 export * from './createPool';
 export * from './encoders';
 export * from './initPool';
+export * from './permitHelper';
+export * from './permit2Helper';
 export * from './priceImpact/';
 export * from './priceImpactAmount';
 export * from './relayer';
