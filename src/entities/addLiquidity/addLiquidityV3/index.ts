@@ -7,7 +7,6 @@ import { getAmounts, getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
-    addLiquidityProportionalUnavailableError,
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
 } from '@/utils';
 
@@ -22,6 +21,7 @@ import {
 } from '../types';
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
+import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
 import { getValue } from '@/entities/utils/getValue';
 import { Permit2 } from '@/entities/permit2';
 
@@ -38,8 +38,26 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         let tokenInIndex: number | undefined;
 
         switch (input.kind) {
-            case AddLiquidityKind.Proportional:
-                throw addLiquidityProportionalUnavailableError;
+            case AddLiquidityKind.Proportional: {
+                // proportional join query returns exactAmountsIn for exactBptOut
+                const amountsInNumbers = await doAddLiquidityProportionalQuery(
+                    input,
+                    poolState.address,
+                    input.bptOut.rawAmount,
+                );
+
+                amountsIn = sortedTokens.map((t, i) =>
+                    TokenAmount.fromRawAmount(t, amountsInNumbers[i]),
+                );
+
+                bptOut = TokenAmount.fromRawAmount(
+                    bptToken,
+                    input.bptOut.rawAmount,
+                );
+
+                tokenInIndex = undefined;
+                break;
+            }
             case AddLiquidityKind.Unbalanced: {
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
@@ -98,7 +116,20 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         let callData: Hex;
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Proportional:
-                throw addLiquidityProportionalUnavailableError;
+                {
+                    callData = encodeFunctionData({
+                        abi: balancerRouterAbi,
+                        functionName: 'addLiquidityProportional',
+                        args: [
+                            input.poolId,
+                            amounts.maxAmountsIn,
+                            amounts.minimumBpt,
+                            !!input.wethIsEth,
+                            '0x',
+                        ],
+                    });
+                }
+                break;
             case AddLiquidityKind.Unbalanced:
                 {
                     callData = encodeFunctionData({

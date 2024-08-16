@@ -1,5 +1,15 @@
 # @balancer/sdk
 
+## 0.23.0
+
+### Minor Changes
+
+- a3fe914: update sdk to work with the seventh testnet deployment
+
+### Patch Changes
+
+- 6742fb5: Fix calculate proportional amounts rounding direction for Cow Amm
+
 ## 0.22.4
 
 ### Patch Changes

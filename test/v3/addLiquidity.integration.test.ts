@@ -19,6 +19,7 @@ import {
 import {
     AddLiquidityUnbalancedInput,
     AddLiquiditySingleTokenInput,
+    AddLiquidityProportionalInput,
     AddLiquidityKind,
     Slippage,
     Hex,
@@ -27,6 +28,7 @@ import {
     ChainId,
     AddLiquidity,
     AddLiquidityInput,
+    InputAmount,
     PoolType,
     PERMIT2,
     buildCallWithPermit2ETHError,
@@ -35,6 +37,7 @@ import {
     AddLiquidityTxInput,
     assertAddLiquidityUnbalanced,
     assertAddLiquiditySingleToken,
+    assertAddLiquidityProportional,
     doAddLiquidity,
     POOLS,
     TOKENS,
@@ -220,6 +223,65 @@ describe('add liquidity test', () => {
                 );
             });
         });
+        describe('add liquidity proportional', () => {
+            let input: AddLiquidityProportionalInput;
+            beforeAll(() => {
+                const bptOut: InputAmount = {
+                    rawAmount: parseUnits('1', 18),
+                    decimals: 18,
+                    address: poolState.address,
+                };
+
+                input = {
+                    bptOut: bptOut,
+                    kind: AddLiquidityKind.Proportional,
+                    chainId: chainId,
+                    rpcUrl: rpcUrl,
+                };
+            });
+            test('with token', async () => {
+                const addLiquidityInput = {
+                    ...input,
+                };
+
+                // call the addLiquidity function
+                // assert the output
+                const addLiquidityOutput = await doAddLiquidity({
+                    ...txInput,
+                    addLiquidityInput: input,
+                });
+
+                assertAddLiquidityProportional(
+                    txInput.poolState,
+                    addLiquidityInput,
+                    addLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                );
+            });
+            test('with native', async () => {
+                // call the addLiquidity function
+                // assert the output
+                const wethIsEth = true;
+                const addLiquidityInput = {
+                    ...input,
+                };
+                const addLiquidityOutput = await doAddLiquidity({
+                    ...txInput,
+                    addLiquidityInput,
+                    wethIsEth,
+                });
+
+                assertAddLiquidityProportional(
+                    txInput.poolState,
+                    addLiquidityInput,
+                    addLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                    wethIsEth,
+                );
+            });
+        });
     });
 
     describe('permit2 signatures', () => {
@@ -306,6 +368,53 @@ describe('add liquidity test', () => {
                     doAddLiquidity({
                         ...txInput,
                         addLiquidityInput,
+                        wethIsEth,
+                    }),
+                ).rejects.toThrowError(buildCallWithPermit2ETHError);
+            });
+        });
+        describe('add liquidity proportional', () => {
+            let input: AddLiquidityProportionalInput;
+            beforeAll(() => {
+                const bptOut: InputAmount = {
+                    rawAmount: parseUnits('1', 18),
+                    decimals: 18,
+                    address: poolState.address,
+                };
+
+                input = {
+                    bptOut: bptOut,
+                    kind: AddLiquidityKind.Proportional,
+                    chainId: chainId,
+                    rpcUrl: rpcUrl,
+                };
+            });
+            test('with token', async () => {
+                const addLiquidityInput = {
+                    ...input,
+                };
+
+                // call the addLiquidity function
+                // assert the output
+                const addLiquidityOutput = await doAddLiquidity({
+                    ...txInput,
+                    addLiquidityInput: input,
+                });
+
+                assertAddLiquidityProportional(
+                    txInput.poolState,
+                    addLiquidityInput,
+                    addLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                );
+            });
+            test('with native', async () => {
+                const wethIsEth = true;
+                await expect(() =>
+                    doAddLiquidity({
+                        ...txInput,
+                        addLiquidityInput: input,
                         wethIsEth,
                     }),
                 ).rejects.toThrowError(buildCallWithPermit2ETHError);
