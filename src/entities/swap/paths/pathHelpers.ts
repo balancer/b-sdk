@@ -34,6 +34,9 @@ export function validatePaths(paths: Path[]) {
     if (paths.length === 0)
         throw new Error('Invalid swap: must contain at least 1 path.');
 
+    validateBufferVersion(paths);
+    validateBufferLength(paths);
+
     const protocolVersion = paths[0].protocolVersion;
     if (!paths.every((p) => p.protocolVersion === protocolVersion))
         throw new Error(
@@ -53,6 +56,28 @@ export function validatePaths(paths: Path[]) {
     ) {
         throw new Error(
             'Unsupported swap: all paths must start/end with same token.',
+        );
+    }
+}
+
+function validateBufferVersion(paths: Path[]) {
+    if (
+        !paths.every((p) => {
+            return p.isBuffer ? p.protocolVersion === 3 : true;
+        })
+    ) {
+        throw new Error('Unsupported swap: buffers not supported in V2.');
+    }
+}
+
+function validateBufferLength(paths: Path[]) {
+    if (
+        !paths.every((p) => {
+            return p.isBuffer ? p.isBuffer.length === p.pools.length : true;
+        })
+    ) {
+        throw new Error(
+            'Unsupported swap: buffers and pools must have same length.',
         );
     }
 }

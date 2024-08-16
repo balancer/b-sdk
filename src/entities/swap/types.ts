@@ -11,7 +11,7 @@ export type SwapInput = {
     swapKind: SwapKind;
 };
 
-type SwapBuildCallInputBase = {
+export type SwapBuildCallInputBase = {
     deadline?: bigint;
     slippage: Slippage;
     wethIsEth?: boolean;
@@ -43,10 +43,12 @@ export type QueryOutputBase = {
 
 export type ExactInQueryOutput = QueryOutputBase & {
     swapKind: SwapKind.GivenIn;
+    amountIn: TokenAmount;
     expectedAmountOut: TokenAmount;
 };
 
 export type ExactOutQueryOutput = QueryOutputBase & {
     swapKind: SwapKind.GivenOut;
+    amountOut: TokenAmount;
     expectedAmountIn: TokenAmount;
 };

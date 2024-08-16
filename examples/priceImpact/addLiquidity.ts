@@ -17,6 +17,7 @@ import {
     BalancerApi,
     ChainId,
     PriceImpact,
+    API_ENDPOINT,
 } from 'src';
 
 const addLiquidityPriceImpact = async () => {
@@ -39,10 +40,7 @@ const addLiquidityPriceImpact = async () => {
     ];
 
     // API is used to fetch relevant pool data
-    const balancerApi = new BalancerApi(
-        'https://backend-v3-canary.beets-ftm-node.com/graphql',
-        chainId,
-    );
+    const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
     const poolState = await balancerApi.pools.fetchPoolState(poolId);
 
     // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced

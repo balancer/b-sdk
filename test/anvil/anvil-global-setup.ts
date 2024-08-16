@@ -21,6 +21,9 @@ type NetworksWithFork = Extract<
     | 'OPTIMISM'
     | 'MODE'
     | 'FRAXTAL'
+    | 'AVALANCHE'
+    | 'ARBITRUM_ONE'
+    | 'GNOSIS_CHAIN'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -32,6 +35,9 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     OPTIMISM: 9045,
     MODE: 9145,
     FRAXTAL: 9245,
+    AVALANCHE: 9345,
+    ARBITRUM_ONE: 9445,
+    GNOSIS_CHAIN: 9545,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -60,7 +66,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'SEPOLIA_RPC_URL',
         fallBackRpc: 'https://sepolia.gateway.tenderly.co',
         port: ANVIL_PORTS.SEPOLIA,
-        forkBlockNumber: 6288761n,
+        forkBlockNumber: 6497714n,
     },
     OPTIMISM: {
         rpcEnv: 'OPTIMISM_RPC_URL',
@@ -79,6 +85,24 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: 'https://fraxtal.gateway.tenderly.co/',
         port: ANVIL_PORTS.FRAXTAL,
         forkBlockNumber: 7164945n,
+    },
+    AVALANCHE: {
+        rpcEnv: 'AVALANCHE_RPC_URL',
+        fallBackRpc: 'https://avalanche.gateway.tenderly.co/',
+        port: ANVIL_PORTS.AVALANCHE,
+        forkBlockNumber: 48164407n,
+    },
+    ARBITRUM_ONE: {
+        rpcEnv: 'ARBITRUM_ONE_RPC_URL',
+        fallBackRpc: 'https://arbitrum.gateway.tenderly.co/',
+        port: ANVIL_PORTS.ARBITRUM_ONE,
+        forkBlockNumber: 234936318n,
+    },
+    GNOSIS_CHAIN: {
+        rpcEnv: 'GNOSIS_CHAIN_RPC_URL',
+        fallBackRpc: 'https://rpc.ankr.com/gnosis',
+        port: ANVIL_PORTS.GNOSIS_CHAIN,
+        forkBlockNumber: 35214423n,
     },
 };
 

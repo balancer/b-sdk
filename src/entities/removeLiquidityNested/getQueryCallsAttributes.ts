@@ -234,8 +234,11 @@ const getBptAmountIn = (
         previousCall = calls[calls.length - 1];
         outputReferenceIndex = 0;
     }
+    const previousCallOutputReference = previousCall.outputReferences.find(
+        (opRef) => opRef.index === BigInt(outputReferenceIndex),
+    ) as { key: bigint; index: bigint };
     return {
-        amount: previousCall.outputReferences[outputReferenceIndex].key,
+        amount: previousCallOutputReference.key,
         isRef: true,
     };
 };

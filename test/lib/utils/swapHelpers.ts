@@ -15,17 +15,50 @@ import {
     SwapBuildOutputExactIn,
     SwapBuildCallInput,
     SwapKind,
+    Permit2Helper,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
-export async function assertSwapExactIn(
-    contractToCall: Address,
-    client: Client & PublicActions & TestActions & WalletActions,
-    rpcUrl: string,
-    chainId: ChainId,
-    swap: Swap,
-    wethIsEth: boolean,
-) {
+// Helper function to check if two BigInts are within a given percentage
+function areBigIntsWithinPercent(
+    value1: bigint,
+    value2: bigint,
+    percent: number,
+): boolean {
+    if (percent < 0) {
+        throw new Error('Percent must be non-negative');
+    }
+    const difference = value1 > value2 ? value1 - value2 : value2 - value1;
+    const percentFactor = BigInt(Math.floor(percent * 1e8));
+    const tolerance = (value2 * percentFactor) / BigInt(1e10);
+    return difference <= tolerance;
+}
+
+export async function assertSwapExactIn({
+    contractToCall,
+    client,
+    rpcUrl,
+    chainId,
+    swap,
+    wethIsEth,
+    usePermit2Signatures = false,
+    outputTest = {
+        testExactOutAmount: true,
+        percentage: 0,
+    },
+}: {
+    contractToCall: Address;
+    client: Client & PublicActions & TestActions & WalletActions;
+    rpcUrl: string;
+    chainId: ChainId;
+    swap: Swap;
+    wethIsEth: boolean;
+    usePermit2Signatures?: boolean;
+    outputTest?: {
+        testExactOutAmount: boolean;
+        percentage: number;
+    };
+}) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
     const deadline = 999999999999999999n;
@@ -48,7 +81,22 @@ export async function assertSwapExactIn(
             recipient: testAddress,
         };
     }
-    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
+
+    let call: SwapBuildOutputExactIn;
+    if (usePermit2Signatures) {
+        const permit2 = await Permit2Helper.signSwapApproval({
+            ...buildCallInput,
+            client,
+            owner: testAddress,
+        });
+
+        call = swap.buildCallWithPermit2(
+            buildCallInput,
+            permit2,
+        ) as SwapBuildOutputExactIn;
+    } else {
+        call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
+    }
 
     const isEthInput =
         wethIsEth &&
@@ -91,21 +139,52 @@ export async function assertSwapExactIn(
         expectedTokenOutDelta = 0n;
     }
 
-    expect(balanceDeltas).to.deep.eq([
-        expectedEthDelta,
-        expectedTokenInDelta,
-        expectedTokenOutDelta,
-    ]);
+    if (outputTest.testExactOutAmount)
+        expect(balanceDeltas).to.deep.eq([
+            expectedEthDelta,
+            expectedTokenInDelta,
+            expectedTokenOutDelta,
+        ]);
+    else {
+        // Here we check that output diff is within an acceptable tolerance.
+        // !!! This should only be used in the case of buffers as all other cases can be equal
+        expect(balanceDeltas[0]).to.eq(expectedEthDelta);
+        expect(balanceDeltas[1]).to.eq(expectedTokenInDelta);
+        expect(
+            areBigIntsWithinPercent(
+                balanceDeltas[2],
+                expectedTokenOutDelta,
+                outputTest.percentage,
+            ),
+        ).toBe(true);
+    }
 }
 
-export async function assertSwapExactOut(
-    contractToCall: Address,
-    client: Client & PublicActions & TestActions & WalletActions,
-    rpcUrl: string,
-    chainId: ChainId,
-    swap: Swap,
-    wethIsEth: boolean,
-) {
+export async function assertSwapExactOut({
+    contractToCall,
+    client,
+    rpcUrl,
+    chainId,
+    swap,
+    wethIsEth,
+    usePermit2Signatures = false,
+    inputTest = {
+        testExactInAmount: true,
+        percentage: 0,
+    },
+}: {
+    contractToCall: Address;
+    client: Client & PublicActions & TestActions & WalletActions;
+    rpcUrl: string;
+    chainId: ChainId;
+    swap: Swap;
+    wethIsEth: boolean;
+    usePermit2Signatures?: boolean;
+    inputTest?: {
+        testExactInAmount: boolean;
+        percentage: number;
+    };
+}) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
     const deadline = 999999999999999999n;
@@ -130,7 +209,21 @@ export async function assertSwapExactOut(
     }
     expect(expected.expectedAmountIn.amount > 0n).to.be.true;
 
-    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
+    let call: SwapBuildOutputExactOut;
+    if (usePermit2Signatures) {
+        const permit2 = await Permit2Helper.signSwapApproval({
+            ...buildCallInput,
+            client,
+            owner: testAddress,
+        });
+
+        call = swap.buildCallWithPermit2(
+            buildCallInput,
+            permit2,
+        ) as SwapBuildOutputExactOut;
+    } else {
+        call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
+    }
 
     const isEthInput =
         wethIsEth &&
@@ -175,9 +268,23 @@ export async function assertSwapExactOut(
         expectedTokenOutDelta = 0n;
     }
 
-    expect(balanceDeltas).to.deep.eq([
-        expectedEthDelta,
-        expectedTokenInDelta,
-        expectedTokenOutDelta,
-    ]);
+    if (inputTest.testExactInAmount)
+        expect(balanceDeltas).to.deep.eq([
+            expectedEthDelta,
+            expectedTokenInDelta,
+            expectedTokenOutDelta,
+        ]);
+    else {
+        // Here we check that output diff is within an acceptable tolerance.
+        // !!! This should only be used in the case of buffers as all other cases can be equal
+        expect(balanceDeltas[0]).to.eq(expectedEthDelta);
+        expect(balanceDeltas[2]).to.eq(expectedTokenOutDelta);
+        expect(
+            areBigIntsWithinPercent(
+                balanceDeltas[1],
+                expectedTokenInDelta,
+                inputTest.percentage,
+            ),
+        ).toBe(true);
+    }
 }

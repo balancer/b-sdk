@@ -3,10 +3,15 @@ import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
 
 /**
- * For a given pool, calculate all token amounts proportional to a given reference amount.
+ * For a given pool and reference token amount, calculate all token amounts proportional to their balances within the pool.
+ *
+ * Note: when using this helper to build an AddLiquidityProportional input,
+ * please mind that referenceAmount should be relative to the token that the user
+ * has the lowest balance compared to the pool's proportions. Otherwise the transaction
+ * may require more balance than the user has.
  * @param pool
  * @param referenceAmount
- * @returns
+ * @returns Proportional amounts
  */
 export function calculateProportionalAmounts(
     pool: {

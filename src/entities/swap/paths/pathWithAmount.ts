@@ -5,6 +5,7 @@ import { TokenApi } from './types';
 
 export class PathWithAmount {
     public readonly pools: Address[];
+    public readonly isBuffer: boolean[];
     public readonly tokens: TokenApi[];
     public readonly outputAmount: TokenAmount;
     public readonly inputAmount: TokenAmount;
@@ -15,6 +16,7 @@ export class PathWithAmount {
         pools: Address[],
         inputAmountRaw: bigint,
         outputAmountRaw: bigint,
+        isBuffer: boolean[] | undefined,
     ) {
         if (pools.length === 0 || tokens.length < 2) {
             throw new Error(
@@ -38,6 +40,9 @@ export class PathWithAmount {
             tokens[tokens.length - 1].decimals,
         );
         this.pools = pools;
+        this.isBuffer = isBuffer
+            ? isBuffer
+            : new Array(this.pools.length).fill(false);
         this.tokens = tokens;
         this.inputAmount = TokenAmount.fromRawAmount(tokenIn, inputAmountRaw);
         this.outputAmount = TokenAmount.fromRawAmount(

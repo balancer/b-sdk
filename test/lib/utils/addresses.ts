@@ -122,7 +122,17 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 0,
         },
         DAI_AAVE: {
-            address: '0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357',
+            address: '0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357',
+            decimals: 18,
+            slot: 0,
+        },
+        stataUSDC: {
+            address: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
+            decimals: 6,
+            slot: 0,
+        },
+        stataDAI: {
+            address: '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17',
             decimals: 18,
             slot: 0,
         },
@@ -144,6 +154,28 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0xfc00000000000000000000000000000000000008',
             decimals: 18,
             slot: 0,
+        },
+    },
+    [ChainId.AVALANCHE]: {
+        sAVAX: {
+            address: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+            decimals: 18,
+            slot: 0,
+        },
+        WAAVAX: {
+            address: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.GNOSIS_CHAIN]: {
+        WETH: {
+            address: '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1',
+            decimals: 18,
+        },
+        wstETH: {
+            address: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
+            decimals: 18,
         },
     },
 };
@@ -229,29 +261,29 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
     },
     [ChainId.SEPOLIA]: {
         MOCK_WETH_BAL_POOL: {
-            address: '0x1b84ffc8c5052b0518a85f505ff2aa56d290fbbe',
-            id: '0x1b84ffc8c5052b0518a85f505ff2aa56d290fbbe',
+            address: '0xb9B098B07Bce6130139dF2B131ec500d2AAC3437',
+            id: '0xb9B098B07Bce6130139dF2B131ec500d2AAC3437',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         MOCK_BAL_DAI_POOL: {
-            address: '0x9B0C8FB62319B27080C9bfc791C20265dcC60318',
-            id: '0x9B0C8FB62319B27080C9bfc791C20265dcC60318',
+            address: '0x04b70fcba651E5EAa1180dC6942C94D464400D64',
+            id: '0x04b70fcba651E5EAa1180dC6942C94D464400D64',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         MOCK_USDC_DAI_POOL: {
-            address: '0xa7BD4D358F50691BE553df2a133EDa2b801330C2',
-            id: '0xa7BD4D358F50691BE553df2a133EDa2b801330C2',
+            address: '0x8587BE24505d6c44F7E1B9e42bD76C418a7d300A',
+            id: '0x8587BE24505d6c44F7E1B9e42bD76C418a7d300A',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         MOCK_NESTED_POOL: {
-            address: '0xf6c14c484d4669562c704ae09c9e09284c090c54',
-            id: '0xf6c14c484d4669562c704ae09c9e09284c090c54',
+            address: '0xC551a97f890F498E59EacfcDc493849B448B8e78',
+            id: '0xC551a97f890F498E59EacfcDc493849B448B8e78',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
@@ -260,6 +292,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             address: '0x8cc781653bda4643c84dec5d7ad3e19ea354a54a',
             id: '0x8cc781653bda4643c84dec5d7ad3e19ea354a54a',
             type: PoolType.CowAmm,
+            decimals: 18,
+            slot: 0,
+        },
+        MOCK_BOOSTED_POOL: {
+            address: '0xC2bbab82241816eb64B47B9a93AA6b2730ff24F9',
+            id: '0xC2bbab82241816eb64B47B9a93AA6b2730ff24F9',
+            type: PoolType.Stable,
             decimals: 18,
             slot: 0,
         },

@@ -2,6 +2,7 @@ import { TokenAmount } from '../../tokenAmount';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
+    Permit2,
     SwapBuildCallInput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
@@ -37,5 +38,9 @@ export interface SwapBase {
     queryCallData(): string;
     buildCall(
         input: SwapBuildCallInput,
+    ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
+    buildCallWithPermit2(
+        input: SwapBuildCallInput,
+        permit2: Permit2,
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut;
 }

@@ -1,5 +1,11 @@
 // pnpm test -- balancerApi.test.ts
-import { BalancerApi, ChainId, NestedPoolState, PoolState } from '../../../src';
+import {
+    BalancerApi,
+    ChainId,
+    NestedPoolState,
+    PoolState,
+    API_ENDPOINT,
+} from '../../../src';
 
 // Placeholder test to help validate the impact of API updates
 // Note: should not be included to CI checks
@@ -13,10 +19,7 @@ describe(
                 '0x93d199263632a4ef4bb438f1feb99e57b4b5f0bd0000000000000000000005c2';
 
             // API is used to fetch relevant pool data
-            const balancerApi = new BalancerApi(
-                'https://backend-v3-canary.beets-ftm-node.com/graphql',
-                chainId,
-            );
+            const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
             const poolStateInput: PoolState =
                 await balancerApi.pools.fetchPoolState(poolId);
 
@@ -43,10 +46,7 @@ describe(
                 '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0';
 
             // API is used to fetch relevant pool data
-            const balancerApi = new BalancerApi(
-                'https://backend-v3-canary.beets-ftm-node.com/graphql',
-                chainId,
-            );
+            const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
             const nestedPoolState: NestedPoolState =
                 await balancerApi.nestedPools.fetchNestedPoolState(poolId);
 

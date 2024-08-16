@@ -23,6 +23,7 @@ import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
 import { getValue } from '@/entities/utils/getValue';
+import { Permit2 } from '@/entities/permit2';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -194,6 +195,32 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             maxAmountsIn: input.amountsIn.map((a, i) =>
                 TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
             ),
+        };
+    }
+
+    public buildCallWithPermit2(
+        input: AddLiquidityBaseBuildCallInput,
+        permit2: Permit2,
+    ): AddLiquidityBuildCallOutput {
+        const buildCallOutput = this.buildCall(input);
+
+        const args = [
+            [],
+            [],
+            permit2.batch,
+            permit2.signature,
+            [buildCallOutput.callData],
+        ] as const;
+
+        const callData = encodeFunctionData({
+            abi: balancerRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
+        });
+
+        return {
+            ...buildCallOutput,
+            callData,
         };
     }
 }

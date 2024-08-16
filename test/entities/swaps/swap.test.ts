@@ -110,6 +110,73 @@ describe('Swap', () => {
                     'Unsupported swap: all paths must start/end with same token.',
                 );
             });
+            describe('buffers', () => {
+                const pathWithBuffers: Path = {
+                    protocolVersion: 3,
+                    tokens: [
+                        {
+                            address:
+                                '0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8',
+                            decimals: 18,
+                        }, // DAI
+                        {
+                            address:
+                                '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
+                            decimals: 18,
+                        }, // stataToken
+                        {
+                            address:
+                                '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17',
+                            decimals: 6,
+                        }, // stataToken
+                        {
+                            address:
+                                '0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357',
+                            decimals: 6,
+                        }, // USDC
+                    ],
+                    pools: [
+                        '0x8a88124522dbbf1e56352ba3de1d9f78c143751e', // buffer
+                        '0x90a46864cb1f042060554592038367e9c97e17f3',
+                        '0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17', // buffer
+                    ],
+                    isBuffer: [true, false, true],
+                    inputAmountRaw: 1000000000000000000n,
+                    outputAmountRaw: 1000000n,
+                };
+                test('should throw if buffers used for V2', () => {
+                    expect(() => {
+                        new Swap({
+                            chainId,
+                            paths: [
+                                {
+                                    ...pathWithBuffers,
+                                    protocolVersion: 2,
+                                },
+                            ],
+                            swapKind: SwapKind.GivenIn,
+                        });
+                    }).toThrowError(
+                        'Unsupported swap: buffers not supported in V2.',
+                    );
+                });
+                test('should throw if buffers not same length as pools', () => {
+                    expect(() => {
+                        new Swap({
+                            chainId,
+                            paths: [
+                                {
+                                    ...pathWithBuffers,
+                                    isBuffer: [true, false],
+                                },
+                            ],
+                            swapKind: SwapKind.GivenIn,
+                        });
+                    }).toThrowError(
+                        'Unsupported swap: buffers and pools must have same length.',
+                    );
+                });
+            });
         });
     });
 

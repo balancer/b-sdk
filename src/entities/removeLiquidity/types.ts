@@ -6,6 +6,7 @@ import {
     RemoveLiquidityV2BuildCallInput,
     RemoveLiquidityV2QueryOutput,
 } from './removeLiquidityV2/types';
+import { Permit } from '../permitHelper';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
@@ -99,6 +100,10 @@ export interface RemoveLiquidityBase {
     ): Promise<RemoveLiquidityQueryOutput>;
     buildCall(
         input: RemoveLiquidityBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput;
+    buildCallWithPermit(
+        input: RemoveLiquidityBuildCallInput,
+        permit: Permit,
     ): RemoveLiquidityBuildCallOutput;
 }
 

@@ -12,6 +12,7 @@ import { AddLiquidityV2 } from './addLiquidityV2';
 import { AddLiquidityV3 } from './addLiquidityV3';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { AddLiquidityCowAmm } from './addLiquidityCowAmm';
+import { Permit2 } from '../permit2Helper';
 
 export class AddLiquidity implements AddLiquidityBase {
     constructor(public config?: AddLiquidityConfig) {}
@@ -64,5 +65,15 @@ export class AddLiquidity implements AddLiquidityBase {
         }
 
         throw Error('buildCall input/version mis-match');
+    }
+
+    buildCallWithPermit2(
+        input: AddLiquidityBuildCallInput,
+        permit2: Permit2,
+    ): AddLiquidityBuildCallOutput {
+        InputValidator.validateBuildCallWithPermit2(input);
+
+        const addLiquidity = new AddLiquidityV3();
+        return addLiquidity.buildCallWithPermit2(input, permit2);
     }
 }

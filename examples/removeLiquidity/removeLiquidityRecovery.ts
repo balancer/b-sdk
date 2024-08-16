@@ -8,6 +8,7 @@
 import { Address, parseEther } from 'viem';
 import {
     BalancerApi,
+    API_ENDPOINT,
     ChainId,
     InputAmount,
     PoolState,
@@ -78,10 +79,7 @@ const removeLiquidity = async ({
     slippage,
 }) => {
     // API is used to fetch relevant pool data
-    const balancerApi = new BalancerApi(
-        'https://backend-v3-canary.beets-ftm-node.com/graphql',
-        chainId,
-    );
+    const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
     const poolState: PoolState = await balancerApi.pools.fetchPoolState(poolId);
 
     const removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput = {

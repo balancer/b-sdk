@@ -1,20 +1,20 @@
 import { Client, PublicActions, TestActions, WalletActions } from 'viem';
 import {
-    Address,
+    AddLiquidity,
     AddLiquidityInput,
+    Address,
+    ChainId,
+    CreatePool,
+    CreatePoolInput,
+    InitPool,
+    InitPoolInput,
+    NestedPoolState,
+    PoolState,
     RemoveLiquidityInput,
     RemoveLiquidity,
-    AddLiquidity,
-    PoolState,
     Slippage,
-    ChainId,
-    NestedPoolState,
     RemoveLiquidityRecoveryInput,
 } from '@/.';
-import { CreatePool } from '@/entities/createPool';
-import { CreatePoolInput } from '@/entities/createPool/types';
-import { InitPool } from '@/entities/initPool';
-import { InitPoolInput } from '@/entities/initPool/types';
 
 export type AddLiquidityTxInput = {
     client: Client & PublicActions & TestActions & WalletActions;
@@ -25,6 +25,7 @@ export type AddLiquidityTxInput = {
     testAddress: Address;
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;
+    usePermit2Signatures?: boolean;
 };
 
 export type InitPoolTxInput = Omit<
@@ -43,6 +44,7 @@ export type RemoveLiquidityTxInputBase = {
     testAddress: Address;
     wethIsEth?: boolean;
     toInternalBalance?: boolean;
+    usePermitSignatures?: boolean;
 };
 
 export type RemoveLiquidityTxInput = RemoveLiquidityTxInputBase & {

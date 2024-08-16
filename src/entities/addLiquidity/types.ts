@@ -6,6 +6,7 @@ import {
     AddLiquidityV2BuildCallInput,
     AddLiquidityV2QueryOutput,
 } from './addLiquidityV2/types';
+import { Permit2 } from '../permit2Helper';
 
 export enum AddLiquidityKind {
     Unbalanced = 'Unbalanced',
@@ -70,6 +71,10 @@ export interface AddLiquidityBase {
         poolState: PoolState,
     ): Promise<AddLiquidityQueryOutput>;
     buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput;
+    buildCallWithPermit2(
+        input: AddLiquidityBuildCallInput,
+        permit2: Permit2,
+    ): AddLiquidityBuildCallOutput;
 }
 
 export type AddLiquidityBuildCallOutput = {

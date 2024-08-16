@@ -1,5 +1,69 @@
 # @balancer/sdk
 
+## 0.22.4
+
+### Patch Changes
+
+- de32a7c: Fix add liquidity proportional query for cow-amm
+
+## 0.22.3
+
+### Patch Changes
+
+- 838f09e: Remove round down from calculateProportionalAmounts
+
+## 0.22.2
+
+### Patch Changes
+
+- ec27a5c: Fix outputReference index being incorrectly consumed
+
+## 0.22.1
+
+### Patch Changes
+
+- 2fffd77: Fix remove liquidity nested query (peek) logic
+
+## 0.22.0
+
+### Minor Changes
+
+- c5b4287: Adds buffer/boosted pool support to swaps.
+
+## 0.21.0
+
+### Minor Changes
+
+- e3c6b5e: Add buildCallWithPermit variations for add/remove/swap operations
+
+### Patch Changes
+
+- f64866f: Round down calculateAmountsProportional amounts
+
+## 0.20.5
+
+### Patch Changes
+
+- a0edf51: Fix remove liquidity nested for ComposableStable pools
+
+## 0.20.4
+
+### Patch Changes
+
+- 1a41d80: Filter phantomBpt in mapPoolToNestedPoolState.
+
+## 0.20.3
+
+### Patch Changes
+
+- 39db20c: Add missing config for Avalanche and ZkEvm.
+
+## 0.20.2
+
+### Patch Changes
+
+- 9aa847e: Fix Balancer Queries address for Avalanche
+
 ## 0.20.1
 
 ### Patch Changes
