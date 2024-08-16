@@ -7,7 +7,6 @@ import { Address } from '@/types';
 export const doAddLiquidityProportionalQuery = async (
     { rpcUrl, chainId }: AddLiquidityProportionalInput,
     poolAddress: Address,
-    maxAmountsIn: bigint[],
     bptOut: bigint,
 ): Promise<bigint[]> => {
     const client = createPublicClient({
@@ -19,7 +18,7 @@ export const doAddLiquidityProportionalQuery = async (
         address: BALANCER_ROUTER[chainId],
         abi: balancerRouterAbi,
         functionName: 'queryAddLiquidityProportional',
-        args: [poolAddress, maxAmountsIn, bptOut, '0x'],
+        args: [poolAddress, bptOut, '0x'],
     });
 
     return amountsIn;

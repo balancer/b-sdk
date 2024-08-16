@@ -39,33 +39,16 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
         switch (input.kind) {
             case AddLiquidityKind.Proportional: {
-                // APPROACH 1 - create maxAmountsIn data
-                // queryAddLiquidityProportional requires a maxAmountsParameter, which is not
-                // available in the AddLiquidityInput. In order to query the Vault, this
-                // value needs to be available.
-                // TODO: Solve to not have maxAmountsIn be a static number
-                const bigIntValue = BigInt(300000000000000000000);
-                const maxAmountsIn: bigint[] = new Array(
-                    sortedTokens.length,
-                ).fill(bigIntValue);
-
                 // proportional join query returns exactAmountsIn for exactBptOut
                 const amountsInNumbers = await doAddLiquidityProportionalQuery(
                     input,
                     poolState.address,
-                    maxAmountsIn,
                     input.bptOut.rawAmount,
                 );
 
                 amountsIn = sortedTokens.map((t, i) =>
                     TokenAmount.fromRawAmount(t, amountsInNumbers[i]),
                 );
-
-                // APPRAOCH 2 - Fetch maxAmountsIn data by changing the AddLiquidityProportional type?
-                /* const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
-                amountsIn = sortedTokens.map((t, i) =>
-                    TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
-                ); */
 
                 bptOut = TokenAmount.fromRawAmount(
                     bptToken,
