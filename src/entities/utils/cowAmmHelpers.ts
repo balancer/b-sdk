@@ -168,6 +168,7 @@ export function calculateProportionalAmountsCowAmm(
             decimals: 18,
         },
     ];
+    const bptIndex = tokensWithBpt.length - 1;
 
     // validate that input amount is relative to a token in the pool or its BPT
     const referenceTokenIndex = tokensWithBpt.findIndex(
@@ -187,8 +188,16 @@ export function calculateProportionalAmountsCowAmm(
 
     // calculate proportional amounts
     const referenceTokenBalance = balances[referenceTokenIndex];
-    const ratio = bdiv(referenceAmount.rawAmount, referenceTokenBalance);
-    const proportionalAmounts = balances.map((b) => bmul(b, ratio));
+
+    let ratio: bigint;
+    let proportionalAmounts: bigint[];
+    if (referenceTokenIndex === bptIndex) {
+        ratio = bdiv(referenceAmount.rawAmount, referenceTokenBalance);
+        proportionalAmounts = balances.map((b) => bmul(b, ratio));
+    } else {
+        ratio = bdivDown(referenceAmount.rawAmount, referenceTokenBalance);
+        proportionalAmounts = balances.map((b) => bmulDown(b, ratio));
+    }
 
     const amounts = tokensWithBpt.map(({ address, decimals }, index) => ({
         address,
@@ -221,6 +230,13 @@ function bmul(a: bigint, b: bigint): bigint {
     return c2;
 }
 
+function bmulDown(a: bigint, b: bigint): bigint {
+    const c0 = a * b;
+    const c1 = c0 - (b >> 1n);
+    const c2 = c1 / WAD;
+    return c2;
+}
+
 // from cow-amm solidity implementation [bdiv](https://github.com/balancer/cow-amm/blob/04c915d1ef6150b5334f4b69c7af7ddd59e050e2/src/contracts/BNum.sol#L107)
 function bdiv(a: bigint, b: bigint): bigint {
     if (b === 0n) {
@@ -240,4 +256,14 @@ function bdiv(a: bigint, b: bigint): bigint {
 
     const c2 = c1 / b;
     return c2;
+}
+
+function bdivDown(a: bigint, b: bigint): bigint {
+    if (b === 0n) {
+        throw new Error('BNum_DivZero');
+    }
+
+    const c0 = a * WAD;
+    const c1 = c0 - (WAD >> 1n);
+    return c1 / b;
 }
