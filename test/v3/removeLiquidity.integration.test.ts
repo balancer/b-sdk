@@ -3,15 +3,11 @@ import { config } from 'dotenv';
 config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseEther,
     parseUnits,
-    PublicActions,
     publicActions,
-    TestActions,
-    WalletActions,
     walletActions,
     parseAbi,
     Address,
@@ -71,9 +67,6 @@ const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
 
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
-
-// Types
-type ExtendedClient = Client & PublicActions & TestActions & WalletActions;
 
 describe('remove liquidity test', () => {
     let client: Client & PublicActions & TestActions & WalletActions;
