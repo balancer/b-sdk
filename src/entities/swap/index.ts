@@ -93,7 +93,6 @@ export class Swap {
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
         InputValidator.validateBuildCallWithPermit2({
             protocolVersion: this.protocolVersion,
-            wethIsEth: input.wethIsEth,
         });
 
         return this.swap.buildCallWithPermit2(input, permit2);
