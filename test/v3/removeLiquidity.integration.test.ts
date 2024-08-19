@@ -410,7 +410,7 @@ describe('remove liquidity test', () => {
         beforeEach(async () => {
             // set bptIn
             const bptIn: InputAmount = {
-                rawAmount: parseEther('1'),
+                rawAmount: parseEther('0.1'),
                 decimals: 18,
                 address: poolState.address,
             };
