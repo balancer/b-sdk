@@ -2,7 +2,11 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { StableEncoder } from '@/entities/encoders/stable';
-import { VAULT, ZERO_ADDRESS } from '@/utils';
+import {
+    buildCallWithPermit2ProtocolVersionError,
+    VAULT,
+    ZERO_ADDRESS,
+} from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
@@ -105,5 +109,9 @@ export class AddLiquidityStable implements AddLiquidityBase {
                 TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
             ),
         };
+    }
+
+    public buildCallWithPermit2(): AddLiquidityBuildCallOutput {
+        throw buildCallWithPermit2ProtocolVersionError;
     }
 }
