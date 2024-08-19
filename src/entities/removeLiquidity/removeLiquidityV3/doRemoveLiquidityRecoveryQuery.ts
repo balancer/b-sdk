@@ -14,15 +14,11 @@ export const doRemoveLiquidityRecoveryQuery = async (
         chain: CHAINS[chainId],
     });
 
-    // TODO: Implement this once new Router has been deployed.
-    /* const { result: amountsOut } = await client.simulateContract({
+    const { result: amountsOut } = await client.simulateContract({
         address: BALANCER_ROUTER[chainId],
         abi: balancerRouterAbi,
         functionName: 'queryRemoveLiquidityRecovery',
         args: [poolAddress, bptIn.rawAmount],
-    }); */
-    //return amountsOut;
-
-    // currently using sample data as the new Router has not been deployed
-    return [1047349725497226165n, 1178552501836039005n];
+    });
+    return amountsOut;
 };
