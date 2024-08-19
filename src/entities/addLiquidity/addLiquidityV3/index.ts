@@ -23,7 +23,7 @@ import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
 import { getValue } from '@/entities/utils/getValue';
-import { Permit2 } from '@/entities/permit2';
+import { Permit2 } from '@/entities/permit2Helper';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(

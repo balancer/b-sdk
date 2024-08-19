@@ -39,7 +39,7 @@ import {
 import { getPoolTokensV2, getTotalSupply } from '@/utils/tokens';
 import { HumanAmount } from '@/data';
 import { balancerRouterAbi } from '@/abi';
-import { Permit } from '@/entities/permit';
+import { Permit } from '@/entities/permitHelper';
 
 export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
