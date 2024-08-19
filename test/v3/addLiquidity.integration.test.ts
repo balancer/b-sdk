@@ -31,7 +31,6 @@ import {
     InputAmount,
     PoolType,
     PERMIT2,
-    buildCallWithPermit2ETHError,
 } from '../../src';
 import {
     AddLiquidityTxInput,
@@ -321,13 +320,19 @@ describe('add liquidity test', () => {
 
             test('with native', async () => {
                 const wethIsEth = true;
-                await expect(() =>
-                    doAddLiquidity({
-                        ...txInput,
-                        addLiquidityInput,
-                        wethIsEth,
-                    }),
-                ).rejects.toThrowError(buildCallWithPermit2ETHError);
+                const addLiquidityOutput = await doAddLiquidity({
+                    ...txInput,
+                    addLiquidityInput,
+                    wethIsEth,
+                });
+                assertAddLiquidityUnbalanced(
+                    txInput.poolState,
+                    addLiquidityInput,
+                    addLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                    wethIsEth,
+                );
             });
         });
 
@@ -364,17 +369,24 @@ describe('add liquidity test', () => {
 
             test('with native', async () => {
                 const wethIsEth = true;
-                await expect(() =>
-                    doAddLiquidity({
-                        ...txInput,
-                        addLiquidityInput,
-                        wethIsEth,
-                    }),
-                ).rejects.toThrowError(buildCallWithPermit2ETHError);
+                const addLiquidityOutput = await doAddLiquidity({
+                    ...txInput,
+                    addLiquidityInput,
+                    wethIsEth,
+                });
+
+                assertAddLiquiditySingleToken(
+                    txInput.poolState,
+                    addLiquidityInput,
+                    addLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                    wethIsEth,
+                );
             });
         });
         describe('add liquidity proportional', () => {
-            let input: AddLiquidityProportionalInput;
+            let addLiquidityInput: AddLiquidityProportionalInput;
             beforeAll(() => {
                 const bptOut: InputAmount = {
                     rawAmount: parseUnits('1', 18),
@@ -382,7 +394,7 @@ describe('add liquidity test', () => {
                     address: poolState.address,
                 };
 
-                input = {
+                addLiquidityInput = {
                     bptOut: bptOut,
                     kind: AddLiquidityKind.Proportional,
                     chainId: chainId,
@@ -390,15 +402,9 @@ describe('add liquidity test', () => {
                 };
             });
             test('with token', async () => {
-                const addLiquidityInput = {
-                    ...input,
-                };
-
-                // call the addLiquidity function
-                // assert the output
                 const addLiquidityOutput = await doAddLiquidity({
                     ...txInput,
-                    addLiquidityInput: input,
+                    addLiquidityInput,
                 });
 
                 assertAddLiquidityProportional(
@@ -411,13 +417,20 @@ describe('add liquidity test', () => {
             });
             test('with native', async () => {
                 const wethIsEth = true;
-                await expect(() =>
-                    doAddLiquidity({
-                        ...txInput,
-                        addLiquidityInput: input,
-                        wethIsEth,
-                    }),
-                ).rejects.toThrowError(buildCallWithPermit2ETHError);
+                const addLiquidityOutput = await doAddLiquidity({
+                    ...txInput,
+                    addLiquidityInput,
+                    wethIsEth,
+                });
+
+                assertAddLiquidityProportional(
+                    txInput.poolState,
+                    addLiquidityInput,
+                    addLiquidityOutput,
+                    txInput.slippage,
+                    protocolVersion,
+                    wethIsEth,
+                );
             });
         });
     });
