@@ -26,6 +26,7 @@ import {
     VAULT_V3,
     ACTION_IDS_AND_ADMIN,
     AUTHORIZER,
+    authorizerAbi,
     ChainId,
     Hex,
     InputAmount,
@@ -401,13 +402,11 @@ describe('remove liquidity test', () => {
     describe('recovery', () => {
         let input: RemoveLiquidityRecoveryInput;
         beforeEach(async () => {
-            // set bptIn
             const bptIn: InputAmount = {
                 rawAmount: parseEther('0.1'),
                 decimals: 18,
                 address: poolState.address,
             };
-            // set the input
             input = {
                 bptIn,
                 chainId,
@@ -422,12 +421,10 @@ describe('remove liquidity test', () => {
             );
         });
         test('with tokens', async () => {
-            // all preparations are done, now remove liquidity
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput: input,
             });
-            // assert now
             assertRemoveLiquidityRecovery(
                 txInput.poolState,
                 input,
@@ -477,7 +474,7 @@ async function putPoolIntoRecoveryMode(
     // grant the testAddress the right to enable Recovery mode for pools
     const { request: grantRoleRequest } = await client.simulateContract({
         address: AUTHORIZER[chainId],
-        abi: parseAbi(['function grantRole(bytes32 role, address account)']),
+        abi: authorizerAbi,
         functionName: 'grantRole',
         args: [
             ACTION_IDS_AND_ADMIN.grantRole.actionId,
