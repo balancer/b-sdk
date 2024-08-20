@@ -25,9 +25,11 @@ import {
 import { doRemoveLiquiditySingleTokenExactOutQuery } from './doRemoveLiquiditySingleTokenExactOutQuery';
 import { doRemoveLiquiditySingleTokenExactInQuery } from './doRemoveLiquiditySingleTokenExactInQuery';
 import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportionalQuery';
+import { doRemoveLiquidityRecoveryQuery } from './doRemoveLiquidityRecoveryQuery';
 import { encodeRemoveLiquiditySingleTokenExactOut } from './encodeRemoveLiquiditySingleTokenExactOut';
 import { encodeRemoveLiquiditySingleTokenExactIn } from './encodeRemoveLiquiditySingleTokenExactIn';
 import { encodeRemoveLiquidityProportional } from './encodeRemoveLiquidityProportional';
+import { encodeRemoveLiquidityRecovery } from './encodeRemoveLiquidityRecovery';
 import {
     createPublicClient,
     encodeFunctionData,
@@ -84,6 +86,15 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 {
                     maxBptAmountIn = amounts.maxBptAmountIn;
                     minAmountsOut = await doRemoveLiquidityProportionalQuery(
+                        input,
+                        poolState.address,
+                    );
+                }
+                break;
+            case RemoveLiquidityKind.Recovery:
+                {
+                    maxBptAmountIn = amounts.maxBptAmountIn;
+                    minAmountsOut = await doRemoveLiquidityRecoveryQuery(
                         input,
                         poolState.address,
                     );
@@ -205,9 +216,10 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 }
                 break;
             case RemoveLiquidityKind.Recovery:
-                throw new Error(
-                    'Pending smart contract implementation and Router ABI update',
-                );
+                {
+                    callData = encodeRemoveLiquidityRecovery(input);
+                }
+                break;
         }
 
         return {

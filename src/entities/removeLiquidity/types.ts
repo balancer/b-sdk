@@ -54,7 +54,8 @@ export type RemoveLiquidityInput =
     | RemoveLiquidityUnbalancedInput
     | RemoveLiquiditySingleTokenExactOutInput
     | RemoveLiquiditySingleTokenExactInInput
-    | RemoveLiquidityProportionalInput;
+    | RemoveLiquidityProportionalInput
+    | RemoveLiquidityRecoveryInput;
 
 // Returned from a remove liquidity query
 export type RemoveLiquidityBaseQueryOutput = {

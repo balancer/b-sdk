@@ -200,6 +200,9 @@ export const PERMIT2: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
 };
 
+export const AUTHORIZER: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0xa331d84ec860bf466b4cdccfb4ac09a1b43f3ae6',
+};
 /**
  * Native Assets
  */
@@ -309,6 +312,14 @@ export const NATIVE_ASSETS = {
         'Matic',
         '0xa2036f0538221a77a3937f1379699f44945018d0',
     ),
+};
+
+export const ACTION_IDS_AND_ADMIN = {
+    grantRole: {
+        actionId:
+            '0x89ac05fcc5f8d988ec0e8d12117301c9b69403c1cc7666180222f23eb0886f45',
+        admin: '0x171C0fF5943CE5f133130436A29bF61E26516003',
+    },
 };
 
 export const ETH = NATIVE_ASSETS[ChainId.MAINNET];

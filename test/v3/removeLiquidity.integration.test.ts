@@ -3,16 +3,18 @@ import { config } from 'dotenv';
 config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseEther,
     parseUnits,
-    PublicActions,
     publicActions,
+    walletActions,
+    parseAbi,
+    Address,
+    Client,
+    PublicActions,
     TestActions,
     WalletActions,
-    walletActions,
 } from 'viem';
 
 import {
@@ -21,6 +23,10 @@ import {
     AddLiquidityUnbalancedInput,
     BALANCER_ROUTER,
     CHAINS,
+    VAULT_V3,
+    ACTION_IDS_AND_ADMIN,
+    AUTHORIZER,
+    authorizerAbi,
     ChainId,
     Hex,
     InputAmount,
@@ -34,6 +40,7 @@ import {
     RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquiditySingleTokenExactOutInput,
     RemoveLiquidityUnbalancedInput,
+    RemoveLiquidityRecoveryInput,
     removeLiquidityUnbalancedNotSupportedOnV3,
 } from 'src';
 
@@ -45,6 +52,7 @@ import {
     assertRemoveLiquidityProportional,
     assertRemoveLiquiditySingleTokenExactIn,
     assertRemoveLiquiditySingleTokenExactOut,
+    assertRemoveLiquidityRecovery,
     doAddLiquidity,
     doRemoveLiquidity,
     POOLS,
@@ -86,8 +94,10 @@ describe('remove liquidity test', () => {
             .extend(publicActions)
             .extend(walletActions);
 
-        const testAddress = (await client.getAddresses())[0];
+        // get pool state from api
+        poolState = await api.getPool(poolId);
 
+        const testAddress = (await client.getAddresses())[0];
         const addLiquidityInput: AddLiquidityUnbalancedInput = {
             chainId,
             rpcUrl,
@@ -389,6 +399,41 @@ describe('remove liquidity test', () => {
             });
         });
     });
+    describe('recovery', () => {
+        let input: RemoveLiquidityRecoveryInput;
+        beforeEach(async () => {
+            const bptIn: InputAmount = {
+                rawAmount: parseEther('0.1'),
+                decimals: 18,
+                address: poolState.address,
+            };
+            input = {
+                bptIn,
+                chainId,
+                rpcUrl,
+                kind: RemoveLiquidityKind.Recovery,
+            };
+            // the pool must be put into recovery mode for the queries & transaction to work
+            await putPoolIntoRecoveryMode(
+                client,
+                txInput.poolState,
+                txInput.testAddress,
+            );
+        });
+        test('with tokens', async () => {
+            const removeLiquidityOutput = await doRemoveLiquidity({
+                ...txInput,
+                removeLiquidityInput: input,
+            });
+            assertRemoveLiquidityRecovery(
+                txInput.poolState,
+                input,
+                removeLiquidityOutput,
+                txInput.slippage,
+                protocolVersion,
+            );
+        });
+    });
 });
 
 /*********************** Mock To Represent API Requirements **********************/
@@ -418,4 +463,48 @@ class MockApi {
     }
 }
 
+/******************************************************************************/
+
+/*********************** Helper functions for this test ***********************/
+async function putPoolIntoRecoveryMode(
+    client: any,
+    poolState: PoolState,
+    authorizedAddress: Address,
+) {
+    // grant the testAddress the right to enable Recovery mode for pools
+    const { request: grantRoleRequest } = await client.simulateContract({
+        address: AUTHORIZER[chainId],
+        abi: authorizerAbi,
+        functionName: 'grantRole',
+        args: [
+            ACTION_IDS_AND_ADMIN.grantRole.actionId,
+            authorizedAddress, // the original test address
+        ],
+        account: ACTION_IDS_AND_ADMIN.grantRole.admin,
+    });
+
+    // the grantRole transaction must be sent by the "grantRole" admin
+    await client.impersonateAccount({
+        address: ACTION_IDS_AND_ADMIN.grantRole.admin,
+    });
+
+    // Do transaction to grand the testAccount the right to put pools into recovery mode
+    await client.writeContract(grantRoleRequest);
+
+    await client.stopImpersonatingAccount({
+        address: ACTION_IDS_AND_ADMIN.grantRole.admin,
+    });
+
+    // Test accounts enabled recovery mode. account is the testAddress
+    const { request: enableRecoveryModeRequest } =
+        await client.simulateContract({
+            address: VAULT_V3[chainId],
+            abi: parseAbi(['function enableRecoveryMode(address pool)']),
+            functionName: 'enableRecoveryMode',
+            args: [poolState.address],
+            account: authorizedAddress,
+        });
+    // put pool into recovery mode
+    await client.writeContract(enableRecoveryModeRequest);
+}
 /******************************************************************************/
