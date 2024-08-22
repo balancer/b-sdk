@@ -7,6 +7,7 @@ import {
     calculateProportionalAmountsCowAmm,
     getPoolStateWithBalancesCowAmm,
 } from '@/entities/utils';
+import { buildCallWithPermit2ProtocolVersionError } from '@/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
@@ -92,5 +93,9 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
                 TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
             ),
         };
+    }
+
+    public buildCallWithPermit2(): AddLiquidityBuildCallOutput {
+        throw buildCallWithPermit2ProtocolVersionError;
     }
 }

@@ -1,3 +1,4 @@
+import { buildCallWithPermit2ProtocolVersionError } from '@/utils';
 import {
     AddLiquidityBase,
     AddLiquidityBuildCallOutput,
@@ -49,5 +50,9 @@ export class AddLiquidityV2 implements AddLiquidityBase {
         input: AddLiquidityV2BuildCallInput,
     ): AddLiquidityBuildCallOutput {
         return this.getAddLiquidity(input.poolType).buildCall(input);
+    }
+
+    public buildCallWithPermit2(): AddLiquidityBuildCallOutput {
+        throw buildCallWithPermit2ProtocolVersionError;
     }
 }
