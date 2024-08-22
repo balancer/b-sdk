@@ -223,62 +223,105 @@ describe('add liquidity test', () => {
             });
         });
         describe('add liquidity proportional', () => {
-            let input: AddLiquidityProportionalInput;
-            beforeAll(() => {
-                const referenceAmount: InputAmount = {
-                    rawAmount: parseUnits('1', 18),
-                    decimals: 18,
-                    address: poolState.address,
-                };
+            let addLiquidityInput: AddLiquidityProportionalInput;
+            describe('with bptOut as referenceAmount', () => {
+                beforeAll(() => {
+                    const referenceAmount: InputAmount = {
+                        rawAmount: parseUnits('1', 18),
+                        decimals: 18,
+                        address: poolState.address,
+                    };
 
-                input = {
-                    referenceAmount,
-                    kind: AddLiquidityKind.Proportional,
-                    chainId: chainId,
-                    rpcUrl: rpcUrl,
-                };
-            });
-            test('with token', async () => {
-                const addLiquidityInput = {
-                    ...input,
-                };
-
-                // call the addLiquidity function
-                // assert the output
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput: input,
+                    addLiquidityInput = {
+                        referenceAmount,
+                        kind: AddLiquidityKind.Proportional,
+                        chainId: chainId,
+                        rpcUrl: rpcUrl,
+                    };
                 });
+                test('with token', async () => {
+                    // call the addLiquidity function
+                    // assert the output
+                    const addLiquidityOutput = await doAddLiquidity({
+                        ...txInput,
+                        addLiquidityInput,
+                    });
 
-                assertAddLiquidityProportional(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    protocolVersion,
-                );
-            });
-            test('with native', async () => {
-                // call the addLiquidity function
-                // assert the output
-                const wethIsEth = true;
-                const addLiquidityInput = {
-                    ...input,
-                };
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                    wethIsEth,
+                    assertAddLiquidityProportional(
+                        txInput.poolState,
+                        addLiquidityInput,
+                        addLiquidityOutput,
+                        txInput.slippage,
+                        protocolVersion,
+                    );
                 });
+                test('with native', async () => {
+                    // call the addLiquidity function
+                    // assert the output
+                    const wethIsEth = true;
+                    const addLiquidityOutput = await doAddLiquidity({
+                        ...txInput,
+                        addLiquidityInput,
+                        wethIsEth,
+                    });
 
-                assertAddLiquidityProportional(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    protocolVersion,
-                    wethIsEth,
-                );
+                    assertAddLiquidityProportional(
+                        txInput.poolState,
+                        addLiquidityInput,
+                        addLiquidityOutput,
+                        txInput.slippage,
+                        protocolVersion,
+                        wethIsEth,
+                    );
+                });
+            });
+            describe.only('with amountIn as referenceAmount', () => {
+                beforeAll(() => {
+                    const token = txInput.poolState.tokens[0];
+                    const referenceAmount: InputAmount = {
+                        rawAmount: parseUnits('0.01', token.decimals),
+                        decimals: token.decimals,
+                        address: token.address,
+                    };
+
+                    addLiquidityInput = {
+                        referenceAmount,
+                        kind: AddLiquidityKind.Proportional,
+                        chainId: chainId,
+                        rpcUrl: rpcUrl,
+                    };
+                });
+                test('with token', async () => {
+                    const addLiquidityOutput = await doAddLiquidity({
+                        ...txInput,
+                        addLiquidityInput,
+                    });
+
+                    assertAddLiquidityProportional(
+                        txInput.poolState,
+                        addLiquidityInput,
+                        addLiquidityOutput,
+                        txInput.slippage,
+                        protocolVersion,
+                    );
+                });
+                test('with native', async () => {
+                    const wethIsEth = true;
+                    const addLiquidityOutput = await doAddLiquidity({
+                        ...txInput,
+                        addLiquidityInput,
+                        wethIsEth,
+                    });
+
+                    assertAddLiquidityProportional(
+                        txInput.poolState,
+                        addLiquidityInput,
+                        addLiquidityOutput,
+                        txInput.slippage,
+                        protocolVersion,
+                        wethIsEth,
+                    );
+                });
             });
         });
     });

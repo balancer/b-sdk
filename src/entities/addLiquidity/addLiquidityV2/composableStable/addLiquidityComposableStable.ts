@@ -35,7 +35,8 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         const bptIndex = sortedTokens.findIndex(
             (t) => t.address === poolState.address,
         );
-        const amounts = getAmountsQuery(sortedTokens, input, bptIndex);
+
+        const amounts = await getAmountsQuery(input, poolState, bptIndex);
 
         const userData = ComposableStableEncoder.encodeAddLiquidityUserData(
             input.kind,

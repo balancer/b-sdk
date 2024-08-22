@@ -30,7 +30,7 @@ export class AddLiquidityStable implements AddLiquidityBase {
         poolState: PoolState,
     ): Promise<AddLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const amounts = getAmountsQuery(sortedTokens, input);
+        const amounts = await getAmountsQuery(input, poolState);
 
         const userData = StableEncoder.encodeAddLiquidityUserData(
             input.kind,

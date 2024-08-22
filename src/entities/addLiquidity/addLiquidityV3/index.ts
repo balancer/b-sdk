@@ -24,6 +24,7 @@ import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
 import { getValue } from '@/entities/utils/getValue';
 import { Permit2 } from '@/entities/permit2Helper';
+import { getBptAmountFromReferenceAmount } from '@/entities/utils/addLiquidityProportionalHelpers';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -39,11 +40,16 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
         switch (input.kind) {
             case AddLiquidityKind.Proportional: {
+                const bptAmount = await getBptAmountFromReferenceAmount(
+                    input,
+                    poolState,
+                );
+
                 // proportional join query returns exactAmountsIn for exactBptOut
                 const amountsInNumbers = await doAddLiquidityProportionalQuery(
                     input,
                     poolState.address,
-                    input.bptOut.rawAmount,
+                    bptAmount.rawAmount,
                 );
 
                 amountsIn = sortedTokens.map((t, i) =>
@@ -52,7 +58,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
                 bptOut = TokenAmount.fromRawAmount(
                     bptToken,
-                    input.bptOut.rawAmount,
+                    bptAmount.rawAmount,
                 );
 
                 tokenInIndex = undefined;

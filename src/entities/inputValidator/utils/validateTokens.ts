@@ -27,7 +27,7 @@ export const validateTokensAddLiquidity = (
         case AddLiquidityKind.Proportional:
             areTokensInArray(
                 [addLiquidityInput.referenceAmount.address],
-                [poolState.address],
+                [poolState.address, ...poolState.tokens.map((t) => t.address)], // reference amount can be any pool token or pool BPT
             );
             break;
         default:
