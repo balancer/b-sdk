@@ -1,5 +1,17 @@
 # @balancer/sdk
 
+## 0.24.0
+
+### Minor Changes
+
+- 0aecec7: added add liquidity proportional for v3
+- 2fd169e: added remove liq recovery
+
+### Patch Changes
+
+- ce5e764: Add support for v2 on sepolia
+- 1626f5f: Accept ETH as input on buildCallWithPermit
+
 ## 0.23.0
 
 ### Minor Changes
