@@ -1,6 +1,24 @@
-import { Address, parseUnits } from 'viem';
-import { InputAmount } from '@/types';
+import {
+    Address,
+    createPublicClient,
+    formatEther,
+    formatUnits,
+    http,
+    parseUnits,
+} from 'viem';
+import { InputAmount, PoolType } from '@/types';
 import { HumanAmount } from '@/data';
+import { CHAINS, VAULT, VAULT_V3 } from '@/utils';
+import { PoolState, PoolStateWithBalances } from '../types';
+import { getSortedTokens } from './getSortedTokens';
+import { vaultExtensionV3Abi, vaultV2Abi } from '@/abi';
+
+type MulticallContract = {
+    address: Address;
+    abi: any;
+    functionName: string;
+    args?: any;
+};
 
 /**
  * For a given pool and reference token amount, calculate all token amounts proportional to their balances within the pool.
@@ -72,3 +90,150 @@ export function calculateProportionalAmounts(
         bptAmount,
     };
 }
+
+export const getPoolStateWithBalancesV2 = async (
+    poolState: PoolState,
+    chainId: number,
+    rpcUrl: string,
+): Promise<PoolStateWithBalances> => {
+    const totalSupplyContract = getTotalSupplyContractV2(poolState);
+    const getBalanceContracts = {
+        address: VAULT[chainId],
+        abi: vaultV2Abi,
+        functionName: 'getPoolTokens',
+        args: [poolState.id],
+    };
+
+    const publicClient = createPublicClient({
+        transport: http(rpcUrl),
+        chain: CHAINS[chainId],
+    });
+    const outputs = await publicClient.multicall({
+        contracts: [
+            totalSupplyContract,
+            getBalanceContracts,
+        ] as MulticallContract[],
+    });
+
+    if (outputs.some((output) => output.status === 'failure')) {
+        throw new Error(
+            'Error: Unable to get pool state with balances for CowAmm pool.',
+        );
+    }
+
+    const totalShares = outputs[0].result as bigint;
+    const [_, balances] = outputs[1].result as [Address[], bigint[], bigint];
+
+    const sortedTokens = getSortedTokens(poolState.tokens, chainId);
+
+    const poolStateWithBalances: PoolStateWithBalances = {
+        ...poolState,
+        tokens: sortedTokens.map((token, i) => ({
+            address: token.address,
+            decimals: token.decimals,
+            index: i,
+            balance: formatUnits(balances[i], token.decimals) as HumanAmount,
+        })),
+        totalShares: formatEther(totalShares) as HumanAmount,
+    };
+    return poolStateWithBalances;
+};
+
+export const getPoolStateWithBalancesV3 = async (
+    poolState: PoolState,
+    chainId: number,
+    rpcUrl: string,
+): Promise<PoolStateWithBalances> => {
+    const totalSupplyContract = {
+        address: VAULT_V3[chainId],
+        abi: vaultExtensionV3Abi,
+        functionName: 'totalSupply',
+        args: [poolState.address],
+    };
+    const getBalanceContracts = {
+        address: VAULT_V3[chainId],
+        abi: vaultExtensionV3Abi,
+        functionName: 'getCurrentLiveBalances',
+        args: [poolState.address],
+    };
+
+    const publicClient = createPublicClient({
+        transport: http(rpcUrl),
+        chain: CHAINS[chainId],
+    });
+    const outputs = await publicClient.multicall({
+        contracts: [
+            totalSupplyContract,
+            getBalanceContracts,
+        ] as MulticallContract[],
+    });
+
+    if (outputs.some((output) => output.status === 'failure')) {
+        throw new Error(
+            'Error: Unable to get pool state with balances for CowAmm pool.',
+        );
+    }
+
+    const totalShares = outputs[0].result as bigint;
+    const balances = outputs[1].result as bigint[];
+
+    const sortedTokens = getSortedTokens(poolState.tokens, chainId);
+
+    const poolStateWithBalances: PoolStateWithBalances = {
+        ...poolState,
+        tokens: sortedTokens.map((token, i) => ({
+            address: token.address,
+            decimals: token.decimals,
+            index: i,
+            balance: formatUnits(balances[i], token.decimals) as HumanAmount,
+        })),
+        totalShares: formatEther(totalShares) as HumanAmount,
+    };
+    return poolStateWithBalances;
+};
+
+// Private
+
+const getTotalSupplyContractV2 = (poolState: PoolState) => {
+    if (poolState.type === PoolType.ComposableStable) {
+        return {
+            address: poolState.address,
+            abi: [
+                {
+                    inputs: [],
+                    name: 'getActualSupply',
+                    outputs: [
+                        {
+                            internalType: 'uint256',
+                            name: '',
+                            type: 'uint256',
+                        },
+                    ],
+                    stateMutability: 'view',
+                    type: 'function',
+                },
+            ],
+            functionName: 'getActualSupply',
+        };
+    }
+
+    return {
+        address: poolState.address,
+        abi: [
+            {
+                inputs: [],
+                name: 'totalSupply',
+                outputs: [
+                    {
+                        internalType: 'uint256',
+                        name: '',
+                        type: 'uint256',
+                    },
+                ],
+                stateMutability: 'view',
+                type: 'function',
+            },
+        ],
+        functionName: 'totalSupply',
+    };
+};

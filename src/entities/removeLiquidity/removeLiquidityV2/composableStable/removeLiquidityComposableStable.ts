@@ -1,13 +1,7 @@
-import {
-    createPublicClient,
-    encodeFunctionData,
-    formatEther,
-    formatUnits,
-    http,
-} from 'viem';
+import { encodeFunctionData } from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
-import { CHAINS, VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
+import { VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
@@ -18,14 +12,16 @@ import {
     RemoveLiquidityRecoveryInput,
 } from '../../types';
 import { RemoveLiquidityV2ComposableStableBuildCallInput } from './types';
-import { PoolState, PoolStateWithBalances } from '../../../types';
+import { PoolState } from '../../../types';
 import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { ComposableStableEncoder } from '../../../encoders/composableStable';
-import { calculateProportionalAmounts, getSortedTokens } from '../../../utils';
+import {
+    calculateProportionalAmounts,
+    getPoolStateWithBalancesV2,
+    getSortedTokens,
+} from '../../../utils';
 import { getAmountsCall, getAmountsQuery } from '../../helper';
 import { insertIndex } from '@/utils';
-import { getActualSupply, getPoolTokensV2 } from '@/utils/tokens';
-import { HumanAmount } from '@/data';
 
 export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
@@ -87,33 +83,18 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         input: RemoveLiquidityRecoveryInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
-        const client = createPublicClient({
-            transport: http(input.rpcUrl),
-            chain: CHAINS[input.chainId],
-        });
+        const poolStateWithBalances = await getPoolStateWithBalancesV2(
+            poolState,
+            input.chainId,
+            input.rpcUrl,
+        );
 
-        const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const [_, tokenBalances] = await getPoolTokensV2(poolState.id, client);
-        const totalShares = await getActualSupply(poolState.address, client);
-
-        const poolStateWithBalances: PoolStateWithBalances = {
-            ...poolState,
-            tokens: sortedTokens.map((token, i) => ({
-                address: token.address,
-                decimals: token.decimals,
-                index: i,
-                balance: formatUnits(
-                    tokenBalances[i],
-                    token.decimals,
-                ) as HumanAmount,
-            })),
-            totalShares: formatEther(totalShares) as HumanAmount,
-        };
-
+        // TODO: round down to replicate SC math
         const { tokenAmounts } = calculateProportionalAmounts(
             poolStateWithBalances,
             input.bptIn,
         );
+
         const bptToken = new Token(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(
             bptToken,
