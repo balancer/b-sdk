@@ -11,9 +11,7 @@ import {
     AddLiquidityKind,
     AddLiquidity,
     BalancerApi,
-    calculateProportionalAmountsCowAmm,
     ChainId,
-    getPoolStateWithBalancesCowAmm,
     Slippage,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
@@ -79,25 +77,10 @@ const addLiquidityProportional = async ({
     // API + on-chain calls are used to fetch relevant pool data
     const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
     const poolState = await balancerApi.pools.fetchPoolState(poolId);
-    const poolStateWithBalances = await getPoolStateWithBalancesCowAmm(
-        poolState,
-        chainId,
-        rpcUrl,
-    );
-    console.log('Pool State with Balances:');
-    console.log(poolStateWithBalances);
-
-    const { tokenAmounts, bptAmount } = calculateProportionalAmountsCowAmm(
-        poolStateWithBalances,
-        referenceAmount,
-    );
-
-    console.log('Token Amounts:');
-    tokenAmounts.map((a) => console.log(a.address, a.rawAmount.toString()));
 
     // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced
     const addLiquidityInput: AddLiquidityInput = {
-        referenceAmount: bptAmount,
+        referenceAmount,
         chainId,
         rpcUrl,
         kind: AddLiquidityKind.Proportional,
@@ -105,10 +88,7 @@ const addLiquidityProportional = async ({
 
     // Simulate addLiquidity to get the amount of BPT out
     const addLiquidity = new AddLiquidity();
-    const queryOutput = await addLiquidity.query(
-        addLiquidityInput,
-        poolStateWithBalances,
-    );
+    const queryOutput = await addLiquidity.query(addLiquidityInput, poolState);
 
     console.log('\nAdd Liquidity Query Output:');
     console.log('Tokens In:');

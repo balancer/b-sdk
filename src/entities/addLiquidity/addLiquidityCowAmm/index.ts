@@ -3,10 +3,6 @@ import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import {
-    calculateProportionalAmountsCowAmm,
-    getPoolStateWithBalancesCowAmm,
-} from '@/entities/utils';
 import { buildCallWithPermit2ProtocolVersionError } from '@/utils';
 
 import { getAmountsCall } from '../helpers';
@@ -18,22 +14,36 @@ import {
     AddLiquidityKind,
     AddLiquidityProportionalInput,
 } from '../types';
+import {
+    calculateProportionalAmountsCowAmm,
+    getPoolStateWithBalancesCowAmm,
+} from '@/entities/utils';
 
 export class AddLiquidityCowAmm implements AddLiquidityBase {
     async query(
         input: AddLiquidityProportionalInput,
         poolState: PoolState,
     ): Promise<AddLiquidityBaseQueryOutput> {
+        // get a single poolState on-chain that will be used to get bptAmount from referenceAmount and then to simulate an add liquidity proportional query
         const poolStateWithBalances = await getPoolStateWithBalancesCowAmm(
             poolState,
             input.chainId,
             input.rpcUrl,
         );
 
-        const { tokenAmounts, bptAmount } = calculateProportionalAmountsCowAmm(
+        // get bptAmount from referenceAmount
+        // Note: rounds down in favor of leaving some dust behind instead of taking more amountIn than the user expects
+        const { bptAmount: _bptAmount } = calculateProportionalAmountsCowAmm(
             poolStateWithBalances,
             input.referenceAmount,
         );
+
+        // simulate an add liquidity proportional query by exactly replicating smart contract math
+        const { tokenAmounts, bptAmount } = calculateProportionalAmountsCowAmm(
+            poolStateWithBalances,
+            _bptAmount,
+        );
+
         const bptOut = TokenAmount.fromRawAmount(
             new Token(input.chainId, bptAmount.address, bptAmount.decimals),
             bptAmount.rawAmount,
@@ -47,8 +57,8 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
         const tokenInIndex = undefined;
 
         const output: AddLiquidityBaseQueryOutput = {
-            poolType: poolStateWithBalances.type,
-            poolId: poolStateWithBalances.id,
+            poolType: poolState.type,
+            poolId: poolState.id,
             addLiquidityKind: input.kind,
             bptOut,
             amountsIn,
