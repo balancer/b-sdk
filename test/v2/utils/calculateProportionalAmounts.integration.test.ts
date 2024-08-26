@@ -8,6 +8,7 @@ import {
     AddLiquidityUnbalancedInput,
     AddLiquidityProportionalInput,
     PoolStateWithBalances,
+    calculateProportionalAmounts,
 } from '@/entities';
 import { CHAINS, ChainId, getPoolAddress } from '@/utils';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
@@ -27,7 +28,6 @@ import { InputAmount, PoolType } from '@/types';
 import { doAddLiquidity } from 'test/lib/utils/addLiquidityHelper';
 import { HumanAmount } from '@/data';
 import { TOKENS } from 'test/lib/utils/addresses';
-import { calculateProportionalAmounts } from '@/entities/utils/calculateProportionalAmounts';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -36,14 +36,14 @@ const poolId =
 
 describe('add liquidity composable stable test', () => {
     let txInput: AddLiquidityTxInput;
-    let poolState: PoolStateWithBalances;
+    let poolStateWithBalances: PoolStateWithBalances;
     let functionOutput: { tokenAmounts: InputAmount[]; bptAmount: InputAmount };
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolState = await api.fetchPoolStateWithBalances(poolId);
+        poolStateWithBalances = await api.fetchPoolStateWithBalances(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -57,7 +57,7 @@ describe('add liquidity composable stable test', () => {
             client,
             addLiquidity: new AddLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolState: poolState,
+            poolState: poolStateWithBalances,
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             addLiquidityInput: {} as AddLiquidityInput,
         };
@@ -66,7 +66,11 @@ describe('add liquidity composable stable test', () => {
             decimals: TOKENS[chainId].vETH.decimals,
             rawAmount: BigInt(1e18),
         };
-        functionOutput = calculateProportionalAmounts(poolState, vETHAmount);
+
+        functionOutput = calculateProportionalAmounts(
+            poolStateWithBalances,
+            vETHAmount,
+        );
     });
 
     beforeEach(async () => {
@@ -101,13 +105,10 @@ describe('add liquidity composable stable test', () => {
                 ...txInput,
                 addLiquidityInput,
             });
-            let delta =
+            const delta =
                 addLiquidityOutput.addLiquidityQueryOutput.bptOut.amount -
                 functionOutput.bptAmount.rawAmount;
-            if (delta < 0) {
-                delta = -delta;
-            }
-            expect(delta < 10n).to.be.true; // 10n of tolerance
+            expect(Number(delta)).to.be.closeTo(0, 10); // 10n of tolerance
         });
     });
     describe('add liquidity proportional', () => {
@@ -129,10 +130,9 @@ describe('add liquidity composable stable test', () => {
             addLiquidityOutput.addLiquidityQueryOutput.amountsIn
                 .slice(1)
                 .forEach(({ amount }, index) => {
-                    const signedDelta =
+                    const delta =
                         amount - functionOutput.tokenAmounts[index].rawAmount;
-                    const delta = signedDelta < 0 ? -signedDelta : signedDelta;
-                    expect(delta < 10n).to.be.true; // 10n of tolerance
+                    expect(Number(delta)).to.be.closeTo(0, 10); // 10n of tolerance
                 });
         });
     });
@@ -161,7 +161,7 @@ class MockApi {
                     '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f' as Address, // VETH
                 decimals: 18,
                 index: 1,
-                balance: '1.045187143371175654' as HumanAmount,
+                balance: '0.656833976755210273' as HumanAmount,
             },
             {
                 name: 'Wrapped Ether',
@@ -170,7 +170,7 @@ class MockApi {
                     '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address, // WETH
                 decimals: 18,
                 index: 2,
-                balance: '0.813652579142753934' as HumanAmount,
+                balance: '0.49124187623781629' as HumanAmount,
             },
         ];
 
@@ -179,7 +179,7 @@ class MockApi {
             address: getPoolAddress(id) as Address,
             type: PoolType.ComposableStable,
             tokens,
-            totalShares: '1.879969119336134102' as HumanAmount,
+            totalShares: '1.160614615757644766' as HumanAmount,
             protocolVersion: 2,
         };
     }
