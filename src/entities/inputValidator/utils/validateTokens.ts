@@ -4,7 +4,7 @@ import {
     RemoveLiquidityKind,
     RemoveLiquidityRecoveryInput,
 } from '../../removeLiquidity/types';
-import { PoolState, PoolStateWithBalances } from '../../types';
+import { PoolState } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
 
 export const validateTokensAddLiquidity = (
@@ -69,11 +69,11 @@ export const validateTokensRemoveLiquidity = (
 
 export const validateTokensRemoveLiquidityRecovery = (
     removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
-    poolStateWithBalances: PoolStateWithBalances,
+    poolState: PoolState,
 ) => {
     areTokensInArray(
         [removeLiquidityRecoveryInput.bptIn.address],
-        [poolStateWithBalances.address],
+        [poolState.address],
     );
 };
 
