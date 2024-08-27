@@ -126,10 +126,10 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
             input.rpcUrl,
         );
 
-        // TODO: round down to replicate smart contract math
         const { tokenAmounts } = calculateProportionalAmounts(
             poolStateWithBalances,
             input.bptIn,
+            -1,
         );
 
         const bptIn = TokenAmount.fromRawAmount(
