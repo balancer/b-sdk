@@ -30,13 +30,14 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
             input.rpcUrl,
         );
 
-        const { tokenAmounts, bptAmount } = calculateProportionalAmountsCowAmm(
+        const { tokenAmounts } = calculateProportionalAmountsCowAmm(
             poolStateWithBalances,
             input.bptIn,
         );
+
         const bptIn = TokenAmount.fromRawAmount(
-            new Token(input.chainId, bptAmount.address, bptAmount.decimals),
-            bptAmount.rawAmount,
+            new Token(input.chainId, input.bptIn.address, input.bptIn.decimals),
+            input.bptIn.rawAmount,
         );
         const amountsOut = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
