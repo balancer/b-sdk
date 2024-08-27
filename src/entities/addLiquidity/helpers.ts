@@ -1,12 +1,15 @@
 import { MAX_UINT256, removeIndex } from '@/utils';
 import { AddLiquidityAmounts, PoolState } from '../types';
-import { getAmounts, getSortedTokens } from '../utils';
+import {
+    getAmounts,
+    getBptAmountFromReferenceAmount,
+    getSortedTokens,
+} from '../utils';
 import {
     AddLiquidityBaseBuildCallInput,
     AddLiquidityInput,
     AddLiquidityKind,
 } from './types';
-import { getBptAmountFromReferenceAmount } from '../utils/addLiquidityProportionalHelpers';
 
 export const getAmountsQuery = async (
     input: AddLiquidityInput,

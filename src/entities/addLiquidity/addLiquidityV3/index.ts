@@ -3,7 +3,11 @@ import { balancerRouterAbi } from '@/abi';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import { getAmounts, getSortedTokens } from '@/entities/utils';
+import {
+    getAmounts,
+    getBptAmountFromReferenceAmount,
+    getSortedTokens,
+} from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
@@ -24,7 +28,6 @@ import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
 import { getValue } from '@/entities/utils/getValue';
 import { Permit2 } from '@/entities/permit2Helper';
-import { getBptAmountFromReferenceAmount } from '@/entities/utils/addLiquidityProportionalHelpers';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(

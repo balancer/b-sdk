@@ -1,13 +1,11 @@
 import { createPublicClient, formatEther, formatUnits, http } from 'viem';
 
 import { HumanAmount } from '@/data';
-import { Address, InputAmount } from '@/types';
+import { Address } from '@/types';
 import { CHAINS, VAULT_V3 } from '@/utils';
 
 import { getSortedTokens } from './getSortedTokens';
 import { PoolState, PoolStateWithBalances } from '../types';
-import { AddLiquidityProportionalInput } from '../addLiquidity/types';
-import { calculateProportionalAmounts } from './calculateProportionalAmounts';
 import { vaultExtensionV3Abi } from '@/abi';
 
 type MulticallContract = {
@@ -15,40 +13,6 @@ type MulticallContract = {
     abi: any;
     functionName: string;
     args?: any;
-};
-
-export const getBptAmountFromReferenceAmount = async (
-    input: AddLiquidityProportionalInput,
-    poolState: PoolState,
-): Promise<InputAmount> => {
-    let bptAmount: InputAmount;
-    if (input.referenceAmount.address === poolState.address) {
-        bptAmount = input.referenceAmount;
-    } else {
-        switch (poolState.protocolVersion) {
-            case 1:
-                // TODO
-                bptAmount = input.referenceAmount;
-                break;
-            case 2:
-                // TODO
-                bptAmount = input.referenceAmount;
-                break;
-            case 3: {
-                const poolStateWithBalances = await getPoolStateWithBalancesV3(
-                    poolState,
-                    input.chainId,
-                    input.rpcUrl,
-                );
-                ({ bptAmount } = calculateProportionalAmounts(
-                    poolStateWithBalances,
-                    input.referenceAmount,
-                ));
-                break;
-            }
-        }
-    }
-    return bptAmount;
 };
 
 export const getPoolStateWithBalancesV3 = async (
