@@ -275,7 +275,7 @@ describe('add liquidity test', () => {
                     );
                 });
             });
-            describe.only('with amountIn as referenceAmount', () => {
+            describe('with amountIn as referenceAmount', () => {
                 beforeAll(() => {
                     const token = txInput.poolState.tokens[0];
                     const referenceAmount: InputAmount = {
