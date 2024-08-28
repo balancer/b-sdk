@@ -1,5 +1,6 @@
 import {
     PublicClient,
+    Address,
     createPublicClient,
     encodeFunctionData,
     getContract,
@@ -89,6 +90,7 @@ export class SwapV3 implements SwapBase {
     public async query(
         rpcUrl?: string,
         block?: bigint,
+        account?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const client = createPublicClient({
             chain: CHAINS[this.chainId],
@@ -97,12 +99,13 @@ export class SwapV3 implements SwapBase {
 
         return this.isBatchSwap
             ? this.queryBatchSwap(client, block)
-            : this.querySingleSwap(client, block);
+            : this.querySingleSwap(client, block, account);
     }
 
     private async querySingleSwap(
         client: PublicClient,
         block?: bigint,
+        account?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
             address: BALANCER_ROUTER[this.chainId],
@@ -110,6 +113,7 @@ export class SwapV3 implements SwapBase {
             client,
         });
         if ('exactAmountIn' in this.swaps) {
+            console.log('account', account);
             const { result } =
                 await routerContract.simulate.querySwapSingleTokenExactIn(
                     [
@@ -119,7 +123,10 @@ export class SwapV3 implements SwapBase {
                         this.swaps.exactAmountIn,
                         DEFAULT_USERDATA,
                     ],
-                    { blockNumber: block },
+                    {
+                        blockNumber: block,
+                        account, // error happens if account is defined
+                    },
                 );
             return {
                 swapKind: SwapKind.GivenIn,
@@ -140,7 +147,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.exactAmountOut,
                         DEFAULT_USERDATA,
                     ],
-                    { blockNumber: block },
+                    { blockNumber: block, account },
                 );
             return {
                 swapKind: SwapKind.GivenOut,

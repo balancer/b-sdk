@@ -2,7 +2,7 @@
  * Example showing how to find swap information for a token pair.
  *
  * Run with:
- * pnpm example ./examples/swaps/swap.ts
+ * pnpm example ./examples/swaps/smartSwap.ts
  */
 import { config } from 'dotenv';
 config();
@@ -20,7 +20,7 @@ import {
     SwapBuildOutputExactOut,
 } from '../../src';
 
-const swap = async () => {
+const smartSwap = async () => {
     // User defined
     const rpcUrl = process.env.POLYGON_RPC_URL;
     const chainId = ChainId.POLYGON;
@@ -107,4 +107,4 @@ const swap = async () => {
     }
 };
 
-export default swap;
+export default smartSwap;
