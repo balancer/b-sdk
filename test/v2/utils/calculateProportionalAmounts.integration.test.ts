@@ -71,6 +71,11 @@ describe('add liquidity composable stable test', () => {
             poolStateWithBalances,
             vETHAmount,
         );
+
+        functionOutput = calculateProportionalAmounts(
+            poolStateWithBalances,
+            functionOutput.bptAmount,
+        );
     });
 
     beforeEach(async () => {
@@ -108,7 +113,7 @@ describe('add liquidity composable stable test', () => {
             const delta =
                 addLiquidityOutput.addLiquidityQueryOutput.bptOut.amount -
                 functionOutput.bptAmount.rawAmount;
-            expect(Number(delta)).to.be.closeTo(0, 10); // 10n of tolerance
+            expect(Number(delta)).to.be.closeTo(0, 5); // 5 wei of tolerance
         });
     });
     describe('add liquidity proportional', () => {
@@ -132,7 +137,7 @@ describe('add liquidity composable stable test', () => {
                 .forEach(({ amount }, index) => {
                     const delta =
                         amount - functionOutput.tokenAmounts[index].rawAmount;
-                    expect(Number(delta)).to.be.closeTo(0, 10); // 10n of tolerance
+                    expect(Number(delta)).to.be.closeTo(0, 5); // 5 wei of tolerance
                 });
         });
     });

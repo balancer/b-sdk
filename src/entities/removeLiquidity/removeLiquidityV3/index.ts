@@ -129,7 +129,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         const { tokenAmounts } = calculateProportionalAmounts(
             poolStateWithBalances,
             input.bptIn,
-            -1,
         );
 
         const bptIn = TokenAmount.fromRawAmount(

@@ -92,7 +92,6 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         const { tokenAmounts } = calculateProportionalAmounts(
             poolStateWithBalances,
             input.bptIn,
-            -1,
         );
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
