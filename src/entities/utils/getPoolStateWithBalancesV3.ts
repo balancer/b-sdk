@@ -46,7 +46,7 @@ export const getPoolStateWithBalancesV3 = async (
 
     if (outputs.some((output) => output.status === 'failure')) {
         throw new Error(
-            'Error: Unable to get pool state with balances for CowAmm pool.',
+            'Error: Unable to get pool state with balances for v3 pool.',
         );
     }
 
