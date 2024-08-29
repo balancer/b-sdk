@@ -12,13 +12,6 @@ import { PoolState, PoolStateWithBalances } from '../types';
 import { getSortedTokens } from './getSortedTokens';
 import { vaultV2Abi } from '@/abi';
 
-type MulticallContract = {
-    address: Address;
-    abi: any;
-    functionName: string;
-    args?: any;
-};
-
 export const getPoolStateWithBalancesV2 = async (
     poolState: PoolState,
     chainId: number,
@@ -28,8 +21,8 @@ export const getPoolStateWithBalancesV2 = async (
     const getBalanceContracts = {
         address: VAULT[chainId],
         abi: vaultV2Abi,
-        functionName: 'getPoolTokens',
-        args: [poolState.id],
+        functionName: 'getPoolTokens' as const,
+        args: [poolState.id] as const,
     };
 
     const publicClient = createPublicClient({
@@ -37,10 +30,7 @@ export const getPoolStateWithBalancesV2 = async (
         chain: CHAINS[chainId],
     });
     const outputs = await publicClient.multicall({
-        contracts: [
-            totalSupplyContract,
-            getBalanceContracts,
-        ] as MulticallContract[],
+        contracts: [totalSupplyContract, getBalanceContracts],
     });
 
     if (outputs.some((output) => output.status === 'failure')) {

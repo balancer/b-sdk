@@ -1,19 +1,11 @@
 import { createPublicClient, formatEther, formatUnits, http } from 'viem';
 
 import { HumanAmount } from '@/data';
-import { Address } from '@/types';
 import { CHAINS, VAULT_V3 } from '@/utils';
 
 import { getSortedTokens } from './getSortedTokens';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { vaultExtensionV3Abi } from '@/abi';
-
-type MulticallContract = {
-    address: Address;
-    abi: any;
-    functionName: string;
-    args?: any;
-};
 
 export const getPoolStateWithBalancesV3 = async (
     poolState: PoolState,
@@ -23,14 +15,14 @@ export const getPoolStateWithBalancesV3 = async (
     const totalSupplyContract = {
         address: VAULT_V3[chainId],
         abi: vaultExtensionV3Abi,
-        functionName: 'totalSupply',
-        args: [poolState.address],
+        functionName: 'totalSupply' as const,
+        args: [poolState.address] as const,
     };
     const getBalanceContracts = {
         address: VAULT_V3[chainId],
         abi: vaultExtensionV3Abi,
-        functionName: 'getCurrentLiveBalances',
-        args: [poolState.address],
+        functionName: 'getCurrentLiveBalances' as const,
+        args: [poolState.address] as const,
     };
 
     const publicClient = createPublicClient({
@@ -38,10 +30,7 @@ export const getPoolStateWithBalancesV3 = async (
         chain: CHAINS[chainId],
     });
     const outputs = await publicClient.multicall({
-        contracts: [
-            totalSupplyContract,
-            getBalanceContracts,
-        ] as MulticallContract[],
+        contracts: [totalSupplyContract, getBalanceContracts],
     });
 
     if (outputs.some((output) => output.status === 'failure')) {
