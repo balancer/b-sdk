@@ -32,7 +32,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         poolState: PoolState,
     ): Promise<AddLiquidityV2BaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const amounts = getAmountsQuery(sortedTokens, input);
+        const amounts = await getAmountsQuery(input, poolState);
 
         const userData = WeightedEncoder.encodeAddLiquidityUserData(
             input.kind,

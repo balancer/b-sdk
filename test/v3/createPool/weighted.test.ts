@@ -38,6 +38,8 @@ describe('Create Weighted Pool tests', () => {
             swapFeeManager: zeroAddress,
             chainId,
             protocolVersion: 3,
+            enableDonation: false,
+            disableUnbalancedLiquidity: false,
         };
     });
 

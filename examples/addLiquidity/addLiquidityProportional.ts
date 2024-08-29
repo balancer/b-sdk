@@ -3,17 +3,15 @@
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/addLiquidity/addLiquidity.ts
+ * pnpm example ./examples/addLiquidity/addLiquidityProportional.ts
  */
-import { Address, parseEther } from 'viem';
+import { Address } from 'viem';
 import {
     AddLiquidityInput,
     AddLiquidityKind,
     AddLiquidity,
     BalancerApi,
-    API_ENDPOINT,
     ChainId,
-    PriceImpact,
     Slippage,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
@@ -22,32 +20,31 @@ import { getSlot } from 'examples/lib/getSlot';
 
 async function runAgainstFork() {
     // User defined inputs
-    const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
-    const chainId = ChainId.SEPOLIA;
+    const { rpcUrl } = await startFork(
+        ANVIL_NETWORKS.MAINNET,
+        undefined,
+        20520774n,
+    );
+    const chainId = ChainId.MAINNET;
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-    // 80BAL-20WETH
+    // USDC-WETH CowAmm pool
     const pool = {
-        id: '0x03Bf996C7BD45B3386cb41875761d45e27EaB284',
-        address: '0x03Bf996C7BD45B3386cb41875761d45e27EaB284' as Address,
+        id: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91',
+        address: '0xf08d4dea369c456d26a3168ff0024b904f2d8b91' as Address,
     };
-    const amountsIn = [
-        {
-            rawAmount: parseEther('0.001'),
-            decimals: 18,
-            address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' as Address,
-        },
-        {
-            rawAmount: parseEther('0.001'),
-            decimals: 18,
-            address: '0xb19382073c7a0addbb56ac6af1808fa49e377b75' as Address,
-        },
-    ];
-    const slippage = Slippage.fromPercentage('1'); // 1%
 
-    const call = await addLiquidity({
+    const referenceAmount = {
+        rawAmount: 158708n,
+        decimals: 6,
+        address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as Address, // USDC
+    };
+
+    const slippage = Slippage.fromPercentage('0'); // 1%
+
+    const call = await addLiquidityProportional({
         rpcUrl,
         chainId,
-        amountsIn,
+        referenceAmount,
         poolId: pool.id,
         slippage,
     });
@@ -59,42 +56,35 @@ async function runAgainstFork() {
             rpcUrl,
             chainId,
             impersonateAccount: userAccount,
-            forkTokens: amountsIn.map((a) => ({
-                address: a.address,
-                slot: getSlot(chainId, a.address),
-                rawBalance: a.rawAmount,
+            forkTokens: call.maxAmountsIn.map((a) => ({
+                address: a.token.address,
+                slot: getSlot(chainId, a.token.address),
+                rawBalance: a.amount,
             })),
         },
-        [...amountsIn.map((a) => a.address), pool.address],
+        [...call.maxAmountsIn.map((a) => a.token.address), pool.address],
         call.protocolVersion,
     );
 }
 
-const addLiquidity = async ({
+const addLiquidityProportional = async ({
     rpcUrl,
     chainId,
     poolId,
-    amountsIn,
+    referenceAmount,
     slippage,
 }) => {
-    // API is used to fetch relevant pool data
-    const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
+    // API + on-chain calls are used to fetch relevant pool data
+    const balancerApi = new BalancerApi('https://api-v3.balancer.fi/', chainId);
     const poolState = await balancerApi.pools.fetchPoolState(poolId);
 
     // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced
     const addLiquidityInput: AddLiquidityInput = {
-        amountsIn,
+        referenceAmount,
         chainId,
         rpcUrl,
-        kind: AddLiquidityKind.Unbalanced,
+        kind: AddLiquidityKind.Proportional,
     };
-
-    // Calculate price impact to ensure it's acceptable
-    const priceImpact = await PriceImpact.addLiquidityUnbalanced(
-        addLiquidityInput,
-        poolState,
-    );
-    console.log(`\nPrice Impact: ${priceImpact.percentage.toFixed(2)}%`);
 
     // Simulate addLiquidity to get the amount of BPT out
     const addLiquidity = new AddLiquidity();

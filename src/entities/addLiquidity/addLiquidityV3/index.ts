@@ -3,7 +3,11 @@ import { balancerRouterAbi } from '@/abi';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import { getAmounts, getSortedTokens } from '@/entities/utils';
+import {
+    getAmounts,
+    getBptAmountFromReferenceAmount,
+    getSortedTokens,
+} from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
@@ -39,11 +43,16 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
         switch (input.kind) {
             case AddLiquidityKind.Proportional: {
+                const bptAmount = await getBptAmountFromReferenceAmount(
+                    input,
+                    poolState,
+                );
+
                 // proportional join query returns exactAmountsIn for exactBptOut
                 const amountsInNumbers = await doAddLiquidityProportionalQuery(
                     input,
                     poolState.address,
-                    input.bptOut.rawAmount,
+                    bptAmount.rawAmount,
                 );
 
                 amountsIn = sortedTokens.map((t, i) =>
@@ -52,7 +61,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
                 bptOut = TokenAmount.fromRawAmount(
                     bptToken,
-                    input.bptOut.rawAmount,
+                    bptAmount.rawAmount,
                 );
 
                 tokenInIndex = undefined;

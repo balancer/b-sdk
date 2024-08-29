@@ -17,6 +17,7 @@ import {
     TokenAmount,
     VAULT,
     Permit2Helper,
+    AddLiquidityKind,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
@@ -106,28 +107,27 @@ function isAddLiquidityComposableStableQueryOutput(
     return false;
 }
 
-function getCheck(output: AddLiquidityQueryOutput, isExactIn: boolean) {
+function getCheck(output: AddLiquidityQueryOutput) {
+    let _check = output;
+    // biome-ignore lint/correctness/noUnusedVariables: <bptIndex may not exist depending on the pool type>
+    let bptIndex: number | undefined;
+    // remove bptIndex from check
     if (isAddLiquidityComposableStableQueryOutput(output)) {
-        if (isExactIn) {
-            // Using this destructuring to return only the fields of interest
-            // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-            const { bptOut, bptIndex, ...check } =
-                output as AddLiquidityV2ComposableStableQueryOutput;
-            return check;
-        }
-        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-        const { amountsIn, bptIndex, ...check } =
-            output as AddLiquidityV2ComposableStableQueryOutput;
-        return check;
+        ({ bptIndex, ..._check } =
+            output as AddLiquidityV2ComposableStableQueryOutput);
     }
-    if (isExactIn) {
-        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-        const { bptOut, ...check } = output;
-        return check;
+    // remove bptOut and amountsIn from check
+    const { bptOut, amountsIn, ...check } = _check;
+
+    const kind = output.addLiquidityKind;
+    switch (kind) {
+        case AddLiquidityKind.Proportional:
+            return { ...check, bptOut, amountsIn };
+        case AddLiquidityKind.SingleToken:
+            return { ...check, bptOut };
+        case AddLiquidityKind.Unbalanced:
+            return { ...check, amountsIn };
     }
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    const { amountsIn, ...check } = output;
-    return check;
 }
 
 /**
@@ -224,7 +224,7 @@ export function assertAddLiquidityUnbalanced(
         chainId: addLiquidityInput.chainId,
     };
 
-    const queryCheck = getCheck(addLiquidityQueryOutput, true);
+    const queryCheck = getCheck(addLiquidityQueryOutput);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
 
@@ -295,7 +295,7 @@ export function assertAddLiquiditySingleToken(
         chainId: addLiquidityInput.chainId,
     };
 
-    const queryCheck = getCheck(addLiquidityQueryOutput, false);
+    const queryCheck = getCheck(addLiquidityQueryOutput);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
 
@@ -340,21 +340,30 @@ export function assertAddLiquidityProportional(
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
-    const bptToken = new Token(
-        addLiquidityInput.chainId,
-        poolState.address,
-        18,
+    // replace referenceAmount into amountsIn or bptOut for comparison
+    const bptOut = addLiquidityQueryOutput.bptOut.token.isSameAddress(
+        addLiquidityInput.referenceAmount.address,
+    )
+        ? TokenAmount.fromRawAmount(
+              addLiquidityQueryOutput.bptOut.token,
+              addLiquidityInput.referenceAmount.rawAmount,
+          )
+        : addLiquidityQueryOutput.bptOut;
+    const amountsIn = addLiquidityOutput.addLiquidityQueryOutput.amountsIn.map(
+        (a) =>
+            a.token.isSameAddress(addLiquidityInput.referenceAmount.address) &&
+            !a.token.isSameAddress(poolState.address) // skip CSP BPT as token
+                ? TokenAmount.fromRawAmount(
+                      a.token,
+                      addLiquidityInput.referenceAmount.rawAmount,
+                  )
+                : a,
     );
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'amountsIn' | 'bptIndex'
-    > = {
-        // Query should use same bpt out as user sets
-        bptOut: TokenAmount.fromRawAmount(
-            bptToken,
-            addLiquidityInput.bptOut.rawAmount,
-        ),
+    const expectedQueryOutput: Omit<AddLiquidityQueryOutput, 'bptIndex'> = {
+        // Query should use same referenceAmount as user sets
+        bptOut,
+        amountsIn,
         // Only expect tokenInIndex for AddLiquiditySingleToken
         tokenInIndex: undefined,
         // Should match inputs
@@ -365,7 +374,7 @@ export function assertAddLiquidityProportional(
         chainId: addLiquidityInput.chainId,
     };
 
-    const queryCheck = getCheck(addLiquidityQueryOutput, false);
+    const queryCheck = getCheck(addLiquidityQueryOutput);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
 

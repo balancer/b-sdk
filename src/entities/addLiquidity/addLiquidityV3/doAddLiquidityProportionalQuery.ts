@@ -21,5 +21,5 @@ export const doAddLiquidityProportionalQuery = async (
         args: [poolAddress, bptOut, '0x'],
     });
 
-    return amountsIn;
+    return [...amountsIn];
 };
