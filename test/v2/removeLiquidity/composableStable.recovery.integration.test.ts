@@ -101,7 +101,7 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                poolState.protocolVersion,
+                2,
             );
         });
         test('with native', async () => {
@@ -117,7 +117,7 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
-                poolState.protocolVersion,
+                2,
                 wethIsEth,
             );
         });

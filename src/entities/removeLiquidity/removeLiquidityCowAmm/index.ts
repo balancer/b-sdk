@@ -1,7 +1,10 @@
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import { calculateProportionalAmounts } from '@/entities/utils';
+import {
+    calculateProportionalAmountsCowAmm,
+    getPoolStateWithBalancesCowAmm,
+} from '@/entities/utils';
 
 import { getAmountsCall } from '../helper';
 import {
@@ -13,8 +16,8 @@ import {
     RemoveLiquidityProportionalInput,
 } from '../types';
 import { encodeFunctionData } from 'viem';
-import { getPoolStateWithBalancesCowAmm } from '@/entities/utils/cowAmmHelpers';
 import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
+import { buildCallWithPermit2ProtocolVersionError } from '@/utils';
 
 export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
     public async query(
@@ -27,13 +30,14 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
             input.rpcUrl,
         );
 
-        const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
+        const { tokenAmounts } = calculateProportionalAmountsCowAmm(
             poolStateWithBalances,
             input.bptIn,
         );
+
         const bptIn = TokenAmount.fromRawAmount(
-            new Token(input.chainId, bptAmount.address, bptAmount.decimals),
-            bptAmount.rawAmount,
+            new Token(input.chainId, input.bptIn.address, input.bptIn.decimals),
+            input.bptIn.rawAmount,
         );
         const amountsOut = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
@@ -91,5 +95,9 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
                 TokenAmount.fromRawAmount(a.token, amounts.minAmountsOut[i]),
             ),
         };
+    }
+
+    buildCallWithPermit(): RemoveLiquidityBuildCallOutput {
+        throw buildCallWithPermit2ProtocolVersionError;
     }
 }

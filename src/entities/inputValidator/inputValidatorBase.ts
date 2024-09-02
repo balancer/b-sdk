@@ -8,7 +8,7 @@ import {
     CreatePoolV3WeightedInput,
 } from '../createPool/types';
 import { InitPoolInput, InitPoolInputV3 } from '../initPool/types';
-import { PoolState, PoolStateWithBalances } from '../types';
+import { PoolState } from '../types';
 import {
     validateCreatePoolTokens,
     validateTokensAddLiquidity,
@@ -69,9 +69,9 @@ export class InputValidatorBase {
 
     validateRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
-        poolStateWithBalances: PoolStateWithBalances,
+        poolState: PoolState,
     ): void {
-        validateTokensRemoveLiquidityRecovery(input, poolStateWithBalances);
+        validateTokensRemoveLiquidityRecovery(input, poolState);
     }
 
     validateWethIsEth(initPoolInput: InitPoolInputV3) {

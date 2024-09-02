@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.25.0
+
+### Minor Changes
+
+- 3da1e5b: Update Add Liquidity Proportional to expect any referenceAmount as input
+
 ## 0.24.0
 
 ### Minor Changes

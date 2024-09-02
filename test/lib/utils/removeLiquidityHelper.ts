@@ -509,17 +509,8 @@ export function assertTokenDeltas(
             expectedDeltas[nativeAssetIndex];
         expectedDeltas[nativeAssetIndex] = 0n;
     }
-    const balanceVsExpectedDeltas = txOutput.balanceDeltas.map(
-        (balanceDelta, index) => {
-            const delta = balanceDelta - expectedDeltas[index];
-            return Math.abs(parseInt(delta.toString()));
-        },
-    );
-    // Expected Delta for Recovery Exits has rounding errors because it relies
-    // on calculating proportional amounts off-chain instead of on-chain queries
-    balanceVsExpectedDeltas.forEach((diff) => {
-        expect(diff).to.be.lessThanOrEqual(5);
-    });
+
+    expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
 }
 
 export function assertRemoveLiquidityBuildCallOutput(

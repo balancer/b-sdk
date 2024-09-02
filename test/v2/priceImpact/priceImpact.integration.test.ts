@@ -11,6 +11,7 @@ import {
     AddLiquiditySingleTokenInput,
     AddLiquidityUnbalancedInput,
     Address,
+    calculateProportionalAmounts,
     ChainId,
     getPoolAddress,
     Hex,
@@ -28,8 +29,6 @@ import {
     SwapKind,
     RemoveLiquidityNestedSingleTokenInput,
 } from 'src';
-
-import { calculateProportionalAmounts } from '@/entities/utils/calculateProportionalAmounts';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS } from 'test/lib/utils/addresses';

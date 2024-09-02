@@ -1,18 +1,22 @@
 import { MAX_UINT256, removeIndex } from '@/utils';
-import { Token } from '../token';
-import { AddLiquidityAmounts } from '../types';
-import { getAmounts } from '../utils';
+import { AddLiquidityAmounts, PoolState } from '../types';
+import {
+    getAmounts,
+    getBptAmountFromReferenceAmount,
+    getSortedTokens,
+} from '../utils';
 import {
     AddLiquidityBaseBuildCallInput,
     AddLiquidityInput,
     AddLiquidityKind,
 } from './types';
 
-export const getAmountsQuery = (
-    poolTokens: Token[],
+export const getAmountsQuery = async (
     input: AddLiquidityInput,
+    poolState: PoolState,
     bptIndex = -1,
-): AddLiquidityAmounts => {
+): Promise<AddLiquidityAmounts> => {
+    const poolTokens = getSortedTokens(poolState.tokens, input.chainId);
     switch (input.kind) {
         case AddLiquidityKind.Unbalanced: {
             const maxAmountsIn = getAmounts(poolTokens, input.amountsIn);
@@ -40,8 +44,12 @@ export const getAmountsQuery = (
         }
         case AddLiquidityKind.Proportional: {
             const maxAmountsIn = Array(poolTokens.length).fill(MAX_UINT256);
+            const bptAmount = await getBptAmountFromReferenceAmount(
+                input,
+                poolState,
+            );
             return {
-                minimumBpt: input.bptOut.rawAmount,
+                minimumBpt: bptAmount.rawAmount,
                 maxAmountsIn,
                 tokenInIndex: undefined,
                 maxAmountsInWithoutBpt: removeIndex(maxAmountsIn, bptIndex),
