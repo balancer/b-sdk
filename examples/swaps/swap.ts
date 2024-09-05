@@ -18,7 +18,20 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
+    Permit2Helper,
+    CHAINS,
 } from '../../src';
+
+import {
+    // createWalletClient,
+    // createPublicClient,
+    http,
+    createTestClient,
+    publicActions,
+    walletActions,
+} from 'viem';
+// import { privateKeyToAccount } from 'viem/accounts';
+// import { polygon } from 'viem/chains';
 
 const swap = async () => {
     // User defined
@@ -77,30 +90,50 @@ const swap = async () => {
     // Get up to date swap result by querying onchain
     const queryOutput = await swap.query(rpcUrl);
 
+    // const client = createPublicClient({
+    //     chain: polygon,
+    //     transport: http(),
+    // });
+
+    const buildCallInput = {
+        slippage,
+        deadline,
+        queryOutput,
+        sender,
+        recipient,
+        wethIsEth,
+    };
+
+    const client = createTestClient({
+        mode: 'anvil',
+        chain: CHAINS[chainId],
+        transport: http(rpcUrl),
+    })
+        .extend(publicActions)
+        .extend(walletActions);
+
+    const permit2 = await Permit2Helper.signSwapApproval({
+        ...buildCallInput,
+        client,
+        owner: sender,
+    });
+
     // Construct transaction to make swap
     if (queryOutput.swapKind === SwapKind.GivenIn) {
         console.log(`Updated amount: ${queryOutput.expectedAmountOut.amount}`);
-        const callData = swap.buildCall({
-            slippage,
-            deadline,
-            queryOutput,
-            sender,
-            recipient,
-            wethIsEth,
-        }) as SwapBuildOutputExactIn;
+        const callData = swap.buildCallWithPermit2(
+            buildCallInput,
+            permit2,
+        ) as SwapBuildOutputExactIn;
         console.log(
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
     } else {
         console.log(`Updated amount: ${queryOutput.expectedAmountIn.amount}`);
-        const callData = swap.buildCall({
-            slippage,
-            deadline,
-            queryOutput,
-            sender,
-            recipient,
-            wethIsEth,
-        }) as SwapBuildOutputExactOut;
+        const callData = swap.buildCallWithPermit2(
+            buildCallInput,
+            permit2,
+        ) as SwapBuildOutputExactOut;
         console.log(
             `Max Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
