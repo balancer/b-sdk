@@ -1,6 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { RemoveLiquidityBaseBuildCallInput } from '../types';
-import { balancerRouterAbi } from '@/abi';
+import { balancerRouterAbi, vaultExtensionV3Abi, vaultV3Abi } from '@/abi';
 
 export const encodeRemoveLiquiditySingleTokenExactIn = (
     input: RemoveLiquidityBaseBuildCallInput,
@@ -13,7 +13,7 @@ export const encodeRemoveLiquiditySingleTokenExactIn = (
         );
     }
     return encodeFunctionData({
-        abi: balancerRouterAbi,
+        abi: [...balancerRouterAbi, ...vaultV3Abi, ...vaultExtensionV3Abi],
         functionName: 'removeLiquiditySingleTokenExactIn',
         args: [
             input.poolId,

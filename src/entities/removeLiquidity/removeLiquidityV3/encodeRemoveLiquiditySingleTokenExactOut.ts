@@ -1,7 +1,7 @@
 import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
 import { RemoveLiquidityBaseBuildCallInput } from '../types';
 import { encodeFunctionData } from 'viem';
-import { balancerRouterAbi } from '@/abi';
+import { balancerRouterAbi, vaultExtensionV3Abi, vaultV3Abi } from '@/abi';
 import { Hex } from '@/types';
 
 export const encodeRemoveLiquiditySingleTokenExactOut = (
@@ -13,7 +13,7 @@ export const encodeRemoveLiquiditySingleTokenExactOut = (
         throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
     }
     return encodeFunctionData({
-        abi: balancerRouterAbi,
+        abi: [...balancerRouterAbi, ...vaultV3Abi, ...vaultExtensionV3Abi],
         functionName: 'removeLiquiditySingleTokenExactOut',
         args: [
             input.poolId,

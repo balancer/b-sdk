@@ -6,7 +6,7 @@ import {
 } from 'viem';
 import { Hex } from '../../types';
 import { BALANCER_RELAYER, CHAINS, ChainId } from '../../utils';
-import { balancerRelayerAbi } from '../../abi';
+import { balancerRelayerAbi, vaultExtensionV3Abi, vaultV3Abi } from '../../abi';
 
 export const doAddLiquidityNestedQuery = async (
     chainId: ChainId,
@@ -24,7 +24,7 @@ export const doAddLiquidityNestedQuery = async (
     });
 
     const result = decodeFunctionResult({
-        abi: balancerRelayerAbi,
+        abi: [...balancerRelayerAbi, ...vaultV3Abi, ...vaultExtensionV3Abi],
         functionName: 'vaultActionsQueryMulticall',
         data: data as Hex,
     });

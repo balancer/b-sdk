@@ -1,4 +1,4 @@
-import { balancerRouterAbi } from '@/abi';
+import { balancerRouterAbi, vaultExtensionV3Abi, vaultV3Abi } from '@/abi';
 import { PoolState } from '../types';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInputV3 } from './types';
 import { BALANCER_ROUTER } from '@/utils';
@@ -23,7 +23,7 @@ export class InitPoolV3 implements InitPoolBase {
         });
 
         const callData = encodeFunctionData({
-            abi: balancerRouterAbi,
+            abi: [...balancerRouterAbi, ...vaultV3Abi, ...vaultExtensionV3Abi],
             functionName: 'initialize',
             args,
         });
