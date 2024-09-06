@@ -1,4 +1,9 @@
-import { balancerRouterAbi, vaultExtensionV3Abi, vaultV3Abi } from '@/abi';
+import {
+    balancerRouterAbi,
+    permit2Abi,
+    vaultExtensionV3Abi,
+    vaultV3Abi,
+} from '@/abi';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
 import { createPublicClient, http } from 'viem';
 import { RemoveLiquiditySingleTokenExactOutInput } from '../types';
@@ -14,7 +19,12 @@ export const doRemoveLiquiditySingleTokenExactOutQuery = async (
     });
     const { result: bptIn } = await client.simulateContract({
         address: BALANCER_ROUTER[chainId],
-        abi: [...balancerRouterAbi, ...vaultV3Abi, ...vaultExtensionV3Abi],
+        abi: [
+            ...balancerRouterAbi,
+            ...vaultV3Abi,
+            ...vaultExtensionV3Abi,
+            ...permit2Abi,
+        ],
         functionName: 'queryRemoveLiquiditySingleTokenExactOut',
         args: [poolAddress, amountOut.address, amountOut.rawAmount, '0x'],
     });
