@@ -31,12 +31,7 @@ import { encodeRemoveLiquiditySingleTokenExactIn } from './encodeRemoveLiquidity
 import { encodeRemoveLiquidityProportional } from './encodeRemoveLiquidityProportional';
 import { encodeRemoveLiquidityRecovery } from './encodeRemoveLiquidityRecovery';
 import { encodeFunctionData, zeroAddress } from 'viem';
-import {
-    balancerRouterAbi,
-    permit2Abi,
-    vaultExtensionV3Abi,
-    vaultV3Abi,
-} from '@/abi';
+import { balancerRouterAbi } from '@/abi';
 import { Permit } from '@/entities/permitHelper';
 
 export class RemoveLiquidityV3 implements RemoveLiquidityBase {
@@ -227,12 +222,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: [
-                ...balancerRouterAbi,
-                ...vaultV3Abi,
-                ...vaultExtensionV3Abi,
-                ...permit2Abi,
-            ],
+            abi: balancerRouterAbi,
             functionName: 'permitBatchAndCall',
             args,
         });

@@ -13,7 +13,7 @@ export const encodeRemoveLiquiditySingleTokenExactIn = (
         );
     }
     return encodeFunctionData({
-        abi: [...balancerRouterAbi],
+        abi: balancerRouterAbi,
         functionName: 'removeLiquiditySingleTokenExactIn',
         args: [
             input.poolId,

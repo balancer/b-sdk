@@ -6,7 +6,7 @@ export const encodeRemoveLiquidityRecovery = (
     input: RemoveLiquidityBaseBuildCallInput,
 ) => {
     return encodeFunctionData({
-        abi: [...balancerRouterAbi],
+        abi: balancerRouterAbi,
         functionName: 'removeLiquidityRecovery',
         args: [input.poolId, input.bptIn.amount],
     });

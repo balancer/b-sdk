@@ -7,7 +7,7 @@ export const encodeRemoveLiquidityProportional = (
     minAmountsOut: bigint[],
 ) => {
     return encodeFunctionData({
-        abi: [...balancerRouterAbi],
+        abi: balancerRouterAbi,
         functionName: 'removeLiquidityProportional',
         args: [
             input.poolId,
