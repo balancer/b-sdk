@@ -121,8 +121,8 @@ export class SwapV3 implements SwapBase {
                           this.swaps.tokenOut,
                           this.swaps.exactAmountIn,
                           0n, // minAmountOut
-                          999999999999999999n,
-                          false,
+                          999999999999999999n, // deadline
+                          false, // wethIsEth
                           DEFAULT_USERDATA,
                       ],
                       { blockNumber: block, account },
