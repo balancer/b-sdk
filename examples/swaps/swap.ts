@@ -1,5 +1,5 @@
 /**
- * Example showing how to find swap information for a token pair.
+ * Example showing how to find swap information for a token pair
  *
  * Run with:
  * pnpm example ./examples/swaps/swap.ts
@@ -18,37 +18,43 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
-    Permit2Helper,
-    CHAINS,
+    Permit2Batch,
+    MaxAllowanceExpiration,
+    BALANCER_ROUTER,
+    PERMIT2,
+    permit2Abi,
+    PermitDetails,
+    MaxSigDeadline,
+    AllowanceTransfer,
 } from '../../src';
 
-import {
-    // createWalletClient,
-    // createPublicClient,
-    http,
-    createTestClient,
-    publicActions,
-    walletActions,
-} from 'viem';
-// import { privateKeyToAccount } from 'viem/accounts';
-// import { polygon } from 'viem/chains';
+import { createPublicClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { sepolia } from 'viem/chains';
 
 const swap = async () => {
     // User defined
-    const rpcUrl = process.env.POLYGON_RPC_URL;
-    const chainId = ChainId.POLYGON;
+    const publicClient = createPublicClient({
+        chain: sepolia,
+        transport: http(),
+    });
+    const account = privateKeyToAccount(
+        process.env.PRIVATE_KEY as `0x${string}`,
+    );
+    const rpcUrl = process.env.SEPOLIA_RPC_URL;
+    const chainId = ChainId.SEPOLIA;
     const swapKind = SwapKind.GivenIn;
     const tokenIn = new Token(
         chainId,
-        '0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6',
+        '0xE8d4E9Fc8257B77Acb9eb80B5e8176F4f0cBCeBC',
         18,
-        'MaticX',
+        'MockToken1',
     );
     const tokenOut = new Token(
         chainId,
-        '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+        '0xF0Bab79D87F51a249AFe316a580C1cDFC111bE10',
         18,
-        'WMATIC',
+        'MockToken2',
     );
     const wethIsEth = false;
     const slippage = Slippage.fromPercentage('0.1');
@@ -90,11 +96,6 @@ const swap = async () => {
     // Get up to date swap result by querying onchain
     const queryOutput = await swap.query(rpcUrl);
 
-    // const client = createPublicClient({
-    //     chain: polygon,
-    //     transport: http(),
-    // });
-
     const buildCallInput = {
         slippage,
         deadline,
@@ -104,36 +105,57 @@ const swap = async () => {
         wethIsEth,
     };
 
-    const client = createTestClient({
-        mode: 'anvil',
-        chain: CHAINS[chainId],
-        transport: http(rpcUrl),
-    })
-        .extend(publicActions)
-        .extend(walletActions);
+    const [, , nonce] = await publicClient.readContract({
+        address: PERMIT2[chainId],
+        abi: permit2Abi,
+        functionName: 'allowance',
+        args: [account.address, tokenIn.address, BALANCER_ROUTER[chainId]],
+    });
 
-    const permit2 = await Permit2Helper.signSwapApproval({
-        ...buildCallInput,
-        client,
-        owner: sender,
+    const details: PermitDetails[] = [
+        {
+            token: tokenIn.address,
+            amount: swapAmount.amount,
+            expiration: Number(MaxAllowanceExpiration),
+            nonce,
+        },
+    ];
+
+    const batch: Permit2Batch = {
+        details,
+        spender: BALANCER_ROUTER[chainId],
+        sigDeadline: MaxSigDeadline,
+    };
+
+    const { domain, types, values } = AllowanceTransfer.getPermitData(
+        batch,
+        PERMIT2[chainId],
+        chainId,
+    );
+
+    const signature = await account.signTypedData({
+        message: { ...values },
+        domain,
+        primaryType: 'PermitBatch',
+        types,
     });
 
     // Construct transaction to make swap
     if (queryOutput.swapKind === SwapKind.GivenIn) {
         console.log(`Updated amount: ${queryOutput.expectedAmountOut.amount}`);
-        const callData = swap.buildCallWithPermit2(
-            buildCallInput,
-            permit2,
-        ) as SwapBuildOutputExactIn;
+        const callData = swap.buildCallWithPermit2(buildCallInput, {
+            signature,
+            batch,
+        }) as SwapBuildOutputExactIn;
         console.log(
             `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
     } else {
         console.log(`Updated amount: ${queryOutput.expectedAmountIn.amount}`);
-        const callData = swap.buildCallWithPermit2(
-            buildCallInput,
-            permit2,
-        ) as SwapBuildOutputExactOut;
+        const callData = swap.buildCallWithPermit2(buildCallInput, {
+            signature,
+            batch,
+        }) as SwapBuildOutputExactOut;
         console.log(
             `Max Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
