@@ -1,5 +1,5 @@
 /**
- * Example showing how to find swap information for a token pair.
+ * Example showing how to find swap information for a token pair using the SOR to find the best path
  *
  * Run with:
  * pnpm example ./examples/swaps/smartSwap.ts
