@@ -14,7 +14,7 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
 } from '@balancer/sdk';
-import { Address, parseUnits, formatUnits } from 'viem';
+import { Address, parseUnits } from 'viem';
 
 const customSwap = async () => {
     // User defined
@@ -33,8 +33,10 @@ const customSwap = async () => {
     const swapKind = SwapKind.GivenIn;
     const tokens = [tokenIn, tokenOut];
     const protocolVersion = 3 as const;
-    const inputAmountRaw = parseUnits('1', 18);
+    const inputAmountRaw = parseUnits('7', 18);
     const outputAmountRaw = parseUnits('1', 18);
+    const slippage = Slippage.fromPercentage('0.1'); // 0.1%,
+    const deadline = 999999999999999999n; // Deadline for the swap, in this case infinite
 
     const paths = [
         { pools, tokens, protocolVersion, inputAmountRaw, outputAmountRaw },
@@ -44,51 +46,38 @@ const customSwap = async () => {
     // Swap object provides useful helpers for re-querying, building call, etc
     const swap = new Swap(swapInput);
 
-    console.log(
-        `Input token: ${swap.inputAmount.token.address}, Amount: ${swap.inputAmount.amount}`,
-    );
-    console.log(
-        `Output token: ${swap.outputAmount.token.address}, Amount: ${swap.outputAmount.amount}`,
-    );
-
     // Get up to date swap result by querying onchain
     const queryOutput = (await swap.query(
         rpcUrl,
-        undefined, // block number
+        6645259n, // block number
         account, // required for accurate query if pool uses hook that depends on reading user's on chain state
     )) as ExactInQueryOutput | ExactOutQueryOutput;
 
     if (queryOutput.swapKind === SwapKind.GivenIn) {
         console.log(
-            `Expected Amount Out: ${formatUnits(
-                queryOutput.expectedAmountOut.amount,
-                tokenOut.decimals,
-            )}`,
+            `User Input Amount: ${swap.inputAmount.amount} (token: ${swap.inputAmount.token.address})\nExpected Amount Out: ${queryOutput.expectedAmountOut.amount} (token: ${swap.outputAmount.token.address})`,
         );
     } else {
         console.log(
-            `Expected Amount In: ${formatUnits(
-                queryOutput.expectedAmountIn.amount,
-                tokenIn.decimals,
-            )}`,
+            `User Output Amount: ${swap.outputAmount.amount} ( token: ${swap.outputAmount.token.address} )\nExpected Amount In: ${queryOutput.expectedAmountIn.amount}`,
         );
     }
 
     // Build call data using user defined slippage
     const callData = swap.buildCall({
-        slippage: Slippage.fromPercentage('0.1'), // 0.1%,
-        deadline: 999999999999999999n, // Deadline for the swap, in this case infinite
+        slippage,
+        deadline,
         queryOutput,
         wethIsEth: false,
     }) as SwapBuildOutputExactIn | SwapBuildOutputExactOut;
 
     if ('minAmountOut' in callData) {
         console.log(
-            `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
+            `Minimum Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
     } else {
         console.log(
-            `Min Amount Out: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
+            `Maximum Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
         );
     }
 };
