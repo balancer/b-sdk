@@ -16,7 +16,12 @@ import {
     MAX_UINT256,
     CHAINS,
 } from '../../../../utils';
-import { balancerRouterAbi } from '../../../../abi';
+import {
+    balancerRouterAbi,
+    permit2Abi,
+    vaultExtensionV3Abi,
+    vaultV3Abi,
+} from '../../../../abi';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
@@ -109,7 +114,12 @@ export class SwapV3 implements SwapBase {
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
             address: BALANCER_ROUTER[this.chainId],
-            abi: balancerRouterAbi,
+            abi: [
+                ...balancerRouterAbi,
+                ...vaultV3Abi,
+                ...vaultExtensionV3Abi,
+                ...permit2Abi,
+            ],
             client,
         });
         if ('exactAmountIn' in this.swaps) {
@@ -226,7 +236,12 @@ export class SwapV3 implements SwapBase {
         // Note - batchSwaps are made via the Batch Router
         const batchRouterContract = getContract({
             address: BALANCER_BATCH_ROUTER[this.chainId],
-            abi: balancerBatchRouterAbi,
+            abi: [
+                ...balancerBatchRouterAbi,
+                ...vaultV3Abi,
+                ...vaultExtensionV3Abi,
+                ...permit2Abi,
+            ],
             client,
         });
         /*
