@@ -21,7 +21,8 @@ const customSwap = async () => {
     const rpcUrl = process.env.SEPOLIA_RPC_URL;
     const chainId = ChainId.SEPOLIA;
     const account = '0x5036388C540994Ed7b74b82F71175a441F85BdA1'; // User sending the swap (optional)
-    const pools = ['0x6D9656174205876897A9f526CCDcD3aE725ffEFF' as Address];
+    const constantProductPool = '0x6D9656174205876897A9f526CCDcD3aE725ffEFF';
+    // const constantSumPool = '0x1F1CC000b04925847E3E44A9039c5B16160D2ff4';
     const tokenIn = {
         address: '0xE8d4E9Fc8257B77Acb9eb80B5e8176F4f0cBCeBC' as Address,
         decimals: 18,
@@ -33,13 +34,27 @@ const customSwap = async () => {
     const swapKind = SwapKind.GivenIn;
     const tokens = [tokenIn, tokenOut];
     const protocolVersion = 3 as const;
-    const inputAmountRaw = parseUnits('7', 18);
+    const inputAmountRaw = parseUnits('1', 18);
     const outputAmountRaw = parseUnits('1', 18);
     const slippage = Slippage.fromPercentage('0.1'); // 0.1%,
     const deadline = 999999999999999999n; // Deadline for the swap, in this case infinite
 
+    // Add a second path to trigger `queryBatchSwap`
     const paths = [
-        { pools, tokens, protocolVersion, inputAmountRaw, outputAmountRaw },
+        {
+            pools: [constantProductPool as Address],
+            tokens,
+            protocolVersion,
+            inputAmountRaw,
+            outputAmountRaw,
+        },
+        // {
+        //     pools: [constantSumPool as Address],
+        //     tokens,
+        //     protocolVersion,
+        //     inputAmountRaw,
+        //     outputAmountRaw,
+        // },
     ];
     const swapInput = { chainId, swapKind, paths };
 
