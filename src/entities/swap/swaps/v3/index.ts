@@ -121,7 +121,7 @@ export class SwapV3 implements SwapBase {
                           this.swaps.tokenOut,
                           this.swaps.exactAmountIn,
                           0n, // minAmountOut
-                          999999999999999999n, // deadline
+                          MAX_UINT256, // deadline
                           false, // wethIsEth
                           DEFAULT_USERDATA,
                       ],
@@ -154,8 +154,8 @@ export class SwapV3 implements SwapBase {
                           this.swaps.tokenIn,
                           this.swaps.tokenOut,
                           this.swaps.exactAmountOut,
-                          999999999999999999n, // maxAmountIn
-                          999999999999999999n, // deadline
+                          MAX_UINT256, // maxAmountIn
+                          MAX_UINT256, // deadline
                           false, // wethIsEth
                           DEFAULT_USERDATA,
                       ],
