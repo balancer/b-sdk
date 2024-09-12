@@ -27,6 +27,14 @@ export const balancerRouterAbi = [
     { inputs: [], name: 'InsufficientEth', type: 'error' },
     { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
     {
+        inputs: [
+            { internalType: 'uint8', name: 'bits', type: 'uint8' },
+            { internalType: 'uint256', name: 'value', type: 'uint256' },
+        ],
+        name: 'SafeCastOverflowedUintDowncast',
+        type: 'error',
+    },
+    {
         inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
         name: 'SafeERC20FailedOperation',
         type: 'error',
@@ -168,7 +176,6 @@ export const balancerRouterAbi = [
                 name: 'amountWrappedRaw',
                 type: 'uint256',
             },
-            { internalType: 'address', name: 'sharesOwner', type: 'address' },
         ],
         name: 'addLiquidityToBuffer',
         outputs: [
@@ -195,6 +202,7 @@ export const balancerRouterAbi = [
                 type: 'uint256',
             },
             { internalType: 'address', name: 'sharesOwner', type: 'address' },
+            { internalType: 'bool', name: 'isBufferInitialized', type: 'bool' },
         ],
         name: 'addLiquidityToBufferHook',
         outputs: [
@@ -271,6 +279,31 @@ export const balancerRouterAbi = [
             { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
         ],
         stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountUnderlyingRaw',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountWrappedRaw',
+                type: 'uint256',
+            },
+        ],
+        name: 'initializeBuffer',
+        outputs: [
+            { internalType: 'uint256', name: 'issuedShares', type: 'uint256' },
+        ],
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -843,57 +876,6 @@ export const balancerRouterAbi = [
                 type: 'uint256[]',
             },
             { internalType: 'bytes', name: 'returnData', type: 'bytes' },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'sharesToRemove',
-                type: 'uint256',
-            },
-        ],
-        name: 'removeLiquidityFromBuffer',
-        outputs: [
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'sharesToRemove',
-                type: 'uint256',
-            },
-            { internalType: 'address', name: 'sharesOwner', type: 'address' },
-        ],
-        name: 'removeLiquidityFromBufferHook',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: 'removedUnderlyingBalanceRaw',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'removedWrappedBalanceRaw',
-                type: 'uint256',
-            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
