@@ -65,7 +65,6 @@ const protocolVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.address;
-console.log('poolId', poolId);
 
 const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
