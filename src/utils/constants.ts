@@ -319,7 +319,7 @@ export const NATIVE_ASSETS = {
 export const ACTION_IDS_AND_ADMIN = {
     grantRole: {
         actionId:
-            '0x89ac05fcc5f8d988ec0e8d12117301c9b69403c1cc7666180222f23eb0886f45',
+            '0xdf708f061cc70791921a11c689684b5eda79aaa254960c564686a977d2ca8392',
         admin: '0x171C0fF5943CE5f133130436A29bF61E26516003',
     },
 };
