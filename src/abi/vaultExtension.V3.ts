@@ -1,4 +1,4 @@
-export const vaultExtensionV3Abi = [
+export const vaultExtensionAbi_V3 = [
     {
         inputs: [
             {

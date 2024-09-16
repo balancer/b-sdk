@@ -43,7 +43,7 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityRecoveryInput,
     removeLiquidityUnbalancedNotSupportedOnV3,
-    vaultAdminAbi,
+    vaultAdminAbi_V3,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -477,7 +477,7 @@ async function putPoolIntoRecoveryMode(
     // get the actionId for the enableRecoveryMode function
     const actionId = await client.readContract({
         address: VAULT_ADMIN[chainId],
-        abi: vaultAdminAbi,
+        abi: vaultAdminAbi_V3,
         functionName: 'getActionId',
         args: [toFunctionSelector('function enableRecoveryMode(address)')],
     });
@@ -503,7 +503,7 @@ async function putPoolIntoRecoveryMode(
     const { request: enableRecoveryModeRequest } =
         await client.simulateContract({
             address: VAULT_V3[chainId],
-            abi: [...authorizerAbi, ...vaultAdminAbi],
+            abi: [...authorizerAbi, ...vaultAdminAbi_V3],
             functionName: 'enableRecoveryMode',
             args: [poolState.address],
             account: authorizedAddress,

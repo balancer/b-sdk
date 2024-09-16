@@ -1,7 +1,7 @@
 import {
     balancerRouterAbi,
     permit2Abi,
-    vaultExtensionV3Abi,
+    vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
@@ -27,7 +27,7 @@ export const doRemoveLiquiditySingleTokenExactInQuery = async (
         abi: [
             ...balancerRouterAbi,
             ...vaultV3Abi,
-            ...vaultExtensionV3Abi,
+            ...vaultExtensionAbi_V3,
             ...permit2Abi,
         ],
         functionName: 'queryRemoveLiquiditySingleTokenExactIn',
