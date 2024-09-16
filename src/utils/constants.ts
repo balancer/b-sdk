@@ -144,7 +144,7 @@ export const VAULT: Record<number, Address> = {
 };
 
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x7966FE92C59295EcE7FB5D9EfDB271967BFe2fbA',
+    [ChainId.SEPOLIA]: '0x3958583A272Fc26dFb87B62917a3cC2C13b010f5', //Updated for Tide
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
@@ -175,7 +175,7 @@ export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
 };
 export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x765ce16dbb3D7e89a9beBc834C5D6894e7fAA93c',
+    [ChainId.SEPOLIA]: '0x944E71BfD43c863784c075893203EF84c37C218C', //Updated for Tide
 };
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
@@ -188,18 +188,19 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.OPTIMISM]: '0x043a2dad730d585c44fb79d2614f295d2d625412',
     [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
     [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
+    [ChainId.SEPOLIA]: '0x3406594FBE49BBF5B37c096CcEc44b3bE4CF3370',//Was not in OG Balancer Repo. Added for Sepolia for Tide //TODO Need to check if this works
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xDd10aDF05379D7C0Ee4bC9c72ecc5C01c40E25b8',
+    [ChainId.SEPOLIA]: '0xf41baB917790eB98097Ac8Cc822Fa0519e41e149',  //Updated for Tide
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x48341a762AD5470f96F4B553681696d1e5eeac0A',
+    [ChainId.SEPOLIA]: '0x090Bda0031DA28985B5622cf1d2bf7AA5Ae1C759', //Updated for Tide
 };
 
 export const PERMIT2: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.SEPOLIA]: '0x99FE8348aDA1f369e9d8295e8335BED2C8c9e916', //Updated for Tide
 };
 
 export const AUTHORIZER: Record<number, Address> = {
