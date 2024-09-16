@@ -43,9 +43,8 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityRecoveryInput,
     removeLiquidityUnbalancedNotSupportedOnV3,
-    vaultExtensionV3Abi,
+    vaultAdminAbi,
 } from 'src';
-import { vaultAdminAbi } from 'src/abi/vaultV3Admin'; // why can't I import from 'src' ??? :(
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
@@ -423,13 +422,12 @@ describe('remove liquidity test', () => {
                 txInput.testAddress,
             );
         });
-        test.only('with tokens', async () => {
+        test('with tokens', async () => {
             const removeLiquidityOutput = await doRemoveLiquidity({
                 ...txInput,
                 removeLiquidityInput: input,
             });
 
-            console.log('removeLiquidityOutput', removeLiquidityOutput);
             assertRemoveLiquidityRecovery(
                 txInput.poolState,
                 input,
@@ -493,34 +491,13 @@ async function putPoolIntoRecoveryMode(
         account: ADMIN_OF_AUTHORIZER,
     });
 
-    // the grantRole transaction must be sent by the "grantRole" admin
-    await client.impersonateAccount({
-        address: ADMIN_OF_AUTHORIZER,
-    });
+    // the grantRole transaction must be sent by the "grantRole" admin, whose PK we do not have
+    await client.impersonateAccount({ address: ADMIN_OF_AUTHORIZER });
 
     // Do transaction to grand the testAccount the right to put pools into recovery mode
     await client.writeContract(grantRoleRequest);
 
-    await client.stopImpersonatingAccount({
-        address: ADMIN_OF_AUTHORIZER,
-    });
-
-    // Check to see if authorizedAddress can perform the action
-    const canPerform = await client.readContract({
-        address: AUTHORIZER[chainId],
-        abi: authorizerAbi,
-        functionName: 'canPerform',
-        args: [
-            actionId,
-            authorizedAddress, // the original test address
-            '0x0000000000000000000000000000000000000000', // unused filler
-        ],
-    });
-    console.log('canPerform', canPerform);
-
-    await client.impersonateAccount({
-        address: ADMIN_OF_AUTHORIZER,
-    });
+    await client.stopImpersonatingAccount({ address: ADMIN_OF_AUTHORIZER });
 
     // Test accounts enabled recovery mode. account is the testAddress
     const { request: enableRecoveryModeRequest } =
@@ -534,15 +511,5 @@ async function putPoolIntoRecoveryMode(
 
     // put pool into recovery mode
     await client.writeContract(enableRecoveryModeRequest);
-
-    // verify that the pool is in recovery mode
-    const isPoolInRecoveryMode = await client.readContract({
-        address: VAULT_V3[chainId],
-        abi: vaultExtensionV3Abi,
-        functionName: 'isPoolInRecoveryMode',
-        args: [poolState.address],
-    });
-
-    console.log('isPoolInRecoveryMode', isPoolInRecoveryMode);
 }
 /******************************************************************************/
