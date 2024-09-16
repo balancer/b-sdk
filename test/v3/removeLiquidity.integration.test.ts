@@ -14,6 +14,7 @@ import {
     PublicActions,
     TestActions,
     WalletActions,
+    toFunctionSelector,
 } from 'viem';
 
 import {
@@ -23,7 +24,8 @@ import {
     BALANCER_ROUTER,
     CHAINS,
     VAULT_V3,
-    ACTION_IDS_AND_ADMIN,
+    VAULT_ADMIN,
+    ADMIN_OF_AUTHORIZER,
     AUTHORIZER,
     authorizerAbi,
     ChainId,
@@ -474,28 +476,33 @@ async function putPoolIntoRecoveryMode(
     poolState: PoolState,
     authorizedAddress: Address,
 ) {
+    // get the actionId for the enableRecoveryMode function
+    const actionId = await client.readContract({
+        address: VAULT_ADMIN[chainId],
+        abi: vaultAdminAbi,
+        functionName: 'getActionId',
+        args: [toFunctionSelector('function enableRecoveryMode(address)')],
+    });
+
     // grant the testAddress the right to enable Recovery mode for pools
     const { request: grantRoleRequest } = await client.simulateContract({
         address: AUTHORIZER[chainId],
         abi: authorizerAbi,
         functionName: 'grantRole',
-        args: [
-            ACTION_IDS_AND_ADMIN.grantRole.actionId,
-            authorizedAddress, // the original test address
-        ],
-        account: ACTION_IDS_AND_ADMIN.grantRole.admin,
+        args: [actionId, authorizedAddress],
+        account: ADMIN_OF_AUTHORIZER,
     });
 
     // the grantRole transaction must be sent by the "grantRole" admin
     await client.impersonateAccount({
-        address: ACTION_IDS_AND_ADMIN.grantRole.admin,
+        address: ADMIN_OF_AUTHORIZER,
     });
 
     // Do transaction to grand the testAccount the right to put pools into recovery mode
     await client.writeContract(grantRoleRequest);
 
     await client.stopImpersonatingAccount({
-        address: ACTION_IDS_AND_ADMIN.grantRole.admin,
+        address: ADMIN_OF_AUTHORIZER,
     });
 
     // Check to see if authorizedAddress can perform the action
@@ -504,16 +511,15 @@ async function putPoolIntoRecoveryMode(
         abi: authorizerAbi,
         functionName: 'canPerform',
         args: [
-            ACTION_IDS_AND_ADMIN.grantRole.actionId,
+            actionId,
             authorizedAddress, // the original test address
             '0x0000000000000000000000000000000000000000', // unused filler
         ],
     });
-
     console.log('canPerform', canPerform);
 
     await client.impersonateAccount({
-        address: ACTION_IDS_AND_ADMIN.grantRole.admin,
+        address: ADMIN_OF_AUTHORIZER,
     });
 
     // Test accounts enabled recovery mode. account is the testAddress

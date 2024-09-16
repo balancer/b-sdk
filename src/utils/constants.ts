@@ -147,6 +147,10 @@ export const VAULT_V3: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0x0EF1c156a7986F394d90eD1bEeA6483Cc435F542',
 };
 
+export const VAULT_ADMIN: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x65c4af66f112706c7890ca3a2e32bda8df6d9cb2',
+};
+
 export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.AVALANCHE]: '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD',
@@ -205,6 +209,9 @@ export const PERMIT2: Record<number, Address> = {
 export const AUTHORIZER: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0xa331d84ec860bf466b4cdccfb4ac09a1b43f3ae6',
 };
+
+export const ADMIN_OF_AUTHORIZER = '0x171C0fF5943CE5f133130436A29bF61E26516003'; // is this EoA chain agnostic?
+
 /**
  * Native Assets
  */
@@ -314,14 +321,6 @@ export const NATIVE_ASSETS = {
         'Matic',
         '0xa2036f0538221a77a3937f1379699f44945018d0',
     ),
-};
-
-export const ACTION_IDS_AND_ADMIN = {
-    grantRole: {
-        actionId:
-            '0xdf708f061cc70791921a11c689684b5eda79aaa254960c564686a977d2ca8392',
-        admin: '0x171C0fF5943CE5f133130436A29bF61E26516003',
-    },
 };
 
 export const ETH = NATIVE_ASSETS[ChainId.MAINNET];
