@@ -7,7 +7,7 @@ import {
 } from 'viem';
 import { PoolState } from '@/entities';
 import { CHAINS, VAULT_V3 } from '@/utils';
-import { vaultExtensionV3Abi } from '@/abi';
+import { vaultExtensionAbi_V3 } from '@/abi';
 
 export class Pools {
     client: PublicClient;
@@ -25,7 +25,7 @@ export class Pools {
         // First call fetches pool tokens from vault
         const poolTokens = await this.client.readContract({
             address: VAULT_V3[this.chainId],
-            abi: vaultExtensionV3Abi,
+            abi: vaultExtensionAbi_V3,
             functionName: 'getPoolTokens',
             args: [id],
         });

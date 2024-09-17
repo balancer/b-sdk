@@ -9,7 +9,7 @@ import { BALANCER_RELAYER, CHAINS, ChainId } from '../../utils';
 import {
     balancerRelayerAbi,
     permit2Abi,
-    vaultExtensionV3Abi,
+    vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '../../abi';
 
@@ -32,7 +32,7 @@ export const doAddLiquidityNestedQuery = async (
         abi: [
             ...balancerRelayerAbi,
             ...vaultV3Abi,
-            ...vaultExtensionV3Abi,
+            ...vaultExtensionAbi_V3,
             ...permit2Abi,
         ],
         functionName: 'vaultActionsQueryMulticall',

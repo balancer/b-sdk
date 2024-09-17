@@ -18,7 +18,7 @@ import {
 import {
     balancerRouterAbi,
     permit2Abi,
-    vaultExtensionV3Abi,
+    vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '../../../../abi';
 import {
@@ -114,7 +114,7 @@ export class SwapV3 implements SwapBase {
             abi: [
                 ...balancerRouterAbi,
                 ...vaultV3Abi,
-                ...vaultExtensionV3Abi,
+                ...vaultExtensionAbi_V3,
                 ...permit2Abi,
             ],
             client,
@@ -207,7 +207,7 @@ export class SwapV3 implements SwapBase {
             abi: [
                 ...balancerBatchRouterAbi,
                 ...vaultV3Abi,
-                ...vaultExtensionV3Abi,
+                ...vaultExtensionAbi_V3,
                 ...permit2Abi,
             ],
             client,

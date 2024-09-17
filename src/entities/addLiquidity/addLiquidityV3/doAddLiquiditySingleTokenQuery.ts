@@ -4,7 +4,7 @@ import { BALANCER_ROUTER, CHAINS } from '@/utils';
 import {
     balancerRouterAbi,
     permit2Abi,
-    vaultExtensionV3Abi,
+    vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
 import { Address } from '@/types';
@@ -24,7 +24,7 @@ export const doAddLiquiditySingleTokenQuery = async (
         abi: [
             ...balancerRouterAbi,
             ...vaultV3Abi,
-            ...vaultExtensionV3Abi,
+            ...vaultExtensionAbi_V3,
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquiditySingleTokenExactOut',
