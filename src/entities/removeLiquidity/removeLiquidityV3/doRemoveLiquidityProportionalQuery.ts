@@ -1,4 +1,9 @@
-import { balancerRouterAbi } from '@/abi';
+import {
+    balancerRouterAbi,
+    permit2Abi,
+    vaultExtensionAbi_V3,
+    vaultV3Abi,
+} from '@/abi';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
 import { createPublicClient, http } from 'viem';
 import { RemoveLiquidityProportionalInput } from '../types';
@@ -14,7 +19,12 @@ export const doRemoveLiquidityProportionalQuery = async (
     });
     const { result: amountsOut } = await client.simulateContract({
         address: BALANCER_ROUTER[chainId],
-        abi: balancerRouterAbi,
+        abi: [
+            ...balancerRouterAbi,
+            ...vaultV3Abi,
+            ...vaultExtensionAbi_V3,
+            ...permit2Abi,
+        ],
         functionName: 'queryRemoveLiquidityProportional',
         args: [poolAddress, bptIn.rawAmount, '0x'],
     });

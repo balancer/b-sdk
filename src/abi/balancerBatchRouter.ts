@@ -27,6 +27,14 @@ export const balancerBatchRouterAbi = [
     { inputs: [], name: 'InsufficientEth', type: 'error' },
     { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
     {
+        inputs: [
+            { internalType: 'uint8', name: 'bits', type: 'uint8' },
+            { internalType: 'uint256', name: 'value', type: 'uint256' },
+        ],
+        name: 'SafeCastOverflowedUintDowncast',
+        type: 'error',
+    },
+    {
         inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
         name: 'SafeERC20FailedOperation',
         type: 'error',
@@ -73,7 +81,11 @@ export const balancerBatchRouterAbi = [
         ],
         name: 'addLiquidityERC4626PoolProportionalHook',
         outputs: [
-            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'underlyingAmountsIn',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -659,7 +671,7 @@ export const balancerBatchRouterAbi = [
         outputs: [
             {
                 internalType: 'uint256[]',
-                name: 'amountsOut',
+                name: 'underlyingAmountsOut',
                 type: 'uint256[]',
             },
         ],

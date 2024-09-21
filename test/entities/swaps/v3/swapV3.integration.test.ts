@@ -43,7 +43,7 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
-const blockNo = 6497703n;
+const blockNo = 6675575n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
@@ -237,7 +237,7 @@ describe('SwapV3', () => {
                 const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
                 expect(expected.expectedAmountIn.amount).to.eq(
-                    101002020040406n,
+                    101012121252531n,
                 );
             });
         });
@@ -283,12 +283,12 @@ describe('SwapV3', () => {
                         WETH.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([593566581018333n]);
+                    expect(expected.pathAmounts).to.deep.eq([593759337607784n]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         wethToken,
                     );
                     expect(expected.expectedAmountIn.amount).to.eq(
-                        593566581018333n,
+                        593759337607784n,
                     );
                 });
             });
@@ -334,14 +334,14 @@ describe('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                     expect(expected.pathAmounts).to.deep.eq([
-                        593566581018333n,
-                        998115374792638n,
+                        593759337607784n,
+                        998215196313547n,
                     ]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         wethToken,
                     );
                     expect(expected.expectedAmountIn.amount).to.eq(
-                        1591681955810971n,
+                        1591974533921331n,
                     );
                 });
             });
@@ -954,13 +954,13 @@ describe('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
                     expect(expected.pathAmounts).to.deep.eq([
-                        98985260225752491151n,
+                        98983539917018246361n,
                     ]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         daiToken,
                     );
                     expect(expected.expectedAmountOut.amount).to.eq(
-                        98985260225752491151n,
+                        98983539917018246361n,
                     );
                 });
                 test('GivenOut', async () => {
@@ -986,11 +986,11 @@ describe('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([101015043n]);
+                    expect(expected.pathAmounts).to.deep.eq([101026903n]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountIn.amount).to.eq(101015043n);
+                    expect(expected.expectedAmountIn.amount).to.eq(101026903n);
                 });
             });
             describe('swap should be executed correctly', () => {

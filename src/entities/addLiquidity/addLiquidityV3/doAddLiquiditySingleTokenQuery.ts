@@ -1,7 +1,12 @@
 import { createPublicClient, http } from 'viem';
 import { AddLiquiditySingleTokenInput } from '../types';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
-import { balancerRouterAbi } from '@/abi';
+import {
+    balancerRouterAbi,
+    permit2Abi,
+    vaultExtensionAbi_V3,
+    vaultV3Abi,
+} from '@/abi';
 import { Address } from '@/types';
 
 export const doAddLiquiditySingleTokenQuery = async (
@@ -16,7 +21,12 @@ export const doAddLiquiditySingleTokenQuery = async (
 
     const { result: amountIn } = await client.simulateContract({
         address: BALANCER_ROUTER[chainId],
-        abi: balancerRouterAbi,
+        abi: [
+            ...balancerRouterAbi,
+            ...vaultV3Abi,
+            ...vaultExtensionAbi_V3,
+            ...permit2Abi,
+        ],
         functionName: 'queryAddLiquiditySingleTokenExactOut',
         args: [poolAddress, tokenIn, bptOut, '0x'],
     });

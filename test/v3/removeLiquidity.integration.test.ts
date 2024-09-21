@@ -9,12 +9,12 @@ import {
     parseUnits,
     publicActions,
     walletActions,
-    parseAbi,
     Address,
     Client,
     PublicActions,
     TestActions,
     WalletActions,
+    toFunctionSelector,
 } from 'viem';
 
 import {
@@ -24,7 +24,8 @@ import {
     BALANCER_ROUTER,
     CHAINS,
     VAULT_V3,
-    ACTION_IDS_AND_ADMIN,
+    VAULT_ADMIN,
+    ADMIN_OF_AUTHORIZER,
     AUTHORIZER,
     authorizerAbi,
     ChainId,
@@ -42,6 +43,7 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityRecoveryInput,
     removeLiquidityUnbalancedNotSupportedOnV3,
+    vaultAdminAbi_V3,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -425,6 +427,7 @@ describe('remove liquidity test', () => {
                 ...txInput,
                 removeLiquidityInput: input,
             });
+
             assertRemoveLiquidityRecovery(
                 txInput.poolState,
                 input,
@@ -471,39 +474,41 @@ async function putPoolIntoRecoveryMode(
     poolState: PoolState,
     authorizedAddress: Address,
 ) {
+    // get the actionId for the enableRecoveryMode function
+    const actionId = await client.readContract({
+        address: VAULT_ADMIN[chainId],
+        abi: vaultAdminAbi_V3,
+        functionName: 'getActionId',
+        args: [toFunctionSelector('function enableRecoveryMode(address)')],
+    });
+
     // grant the testAddress the right to enable Recovery mode for pools
     const { request: grantRoleRequest } = await client.simulateContract({
         address: AUTHORIZER[chainId],
         abi: authorizerAbi,
         functionName: 'grantRole',
-        args: [
-            ACTION_IDS_AND_ADMIN.grantRole.actionId,
-            authorizedAddress, // the original test address
-        ],
-        account: ACTION_IDS_AND_ADMIN.grantRole.admin,
+        args: [actionId, authorizedAddress],
+        account: ADMIN_OF_AUTHORIZER,
     });
 
-    // the grantRole transaction must be sent by the "grantRole" admin
-    await client.impersonateAccount({
-        address: ACTION_IDS_AND_ADMIN.grantRole.admin,
-    });
+    // the grantRole transaction must be sent by the "grantRole" admin, whose PK we do not have
+    await client.impersonateAccount({ address: ADMIN_OF_AUTHORIZER });
 
     // Do transaction to grand the testAccount the right to put pools into recovery mode
     await client.writeContract(grantRoleRequest);
 
-    await client.stopImpersonatingAccount({
-        address: ACTION_IDS_AND_ADMIN.grantRole.admin,
-    });
+    await client.stopImpersonatingAccount({ address: ADMIN_OF_AUTHORIZER });
 
     // Test accounts enabled recovery mode. account is the testAddress
     const { request: enableRecoveryModeRequest } =
         await client.simulateContract({
             address: VAULT_V3[chainId],
-            abi: parseAbi(['function enableRecoveryMode(address pool)']),
+            abi: [...authorizerAbi, ...vaultAdminAbi_V3],
             functionName: 'enableRecoveryMode',
             args: [poolState.address],
             account: authorizedAddress,
         });
+
     // put pool into recovery mode
     await client.writeContract(enableRecoveryModeRequest);
 }

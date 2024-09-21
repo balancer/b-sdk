@@ -38,18 +38,26 @@ export const vaultV3Abi = [
     { inputs: [], name: 'AmountGivenZero', type: 'error' },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenIn',
+                type: 'address',
+            },
+            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
+            { internalType: 'uint256', name: 'maxAmountIn', type: 'uint256' },
         ],
         name: 'AmountInAboveMax',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenOut',
+                type: 'address',
+            },
+            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
+            { internalType: 'uint256', name: 'minAmountOut', type: 'uint256' },
         ],
         name: 'AmountOutBelowMin',
         type: 'error',
@@ -62,18 +70,49 @@ export const vaultV3Abi = [
     { inputs: [], name: 'BeforeSwapHookFailed', type: 'error' },
     {
         inputs: [
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
+            { internalType: 'uint256', name: 'maxAmountIn', type: 'uint256' },
         ],
         name: 'BptAmountInAboveMax',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
+            { internalType: 'uint256', name: 'minAmountOut', type: 'uint256' },
         ],
         name: 'BptAmountOutBelowMin',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'BufferAlreadyInitialized',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'BufferNotInitialized',
+        type: 'error',
+    },
+    { inputs: [], name: 'BufferSharesInvalidOwner', type: 'error' },
+    { inputs: [], name: 'BufferSharesInvalidReceiver', type: 'error' },
+    {
+        inputs: [
+            { internalType: 'uint256', name: 'totalSupply', type: 'uint256' },
+        ],
+        name: 'BufferTotalSupplyTooLow',
         type: 'error',
     },
     { inputs: [], name: 'CannotReceiveEth', type: 'error' },
@@ -129,18 +168,26 @@ export const vaultV3Abi = [
     { inputs: [], name: 'FeePrecisionTooHigh', type: 'error' },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenIn',
+                type: 'address',
+            },
+            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
+            { internalType: 'uint256', name: 'maxAmountIn', type: 'uint256' },
         ],
         name: 'HookAdjustedAmountInAboveMax',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenOut',
+                type: 'address',
+            },
+            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
+            { internalType: 'uint256', name: 'minAmountOut', type: 'uint256' },
         ],
         name: 'HookAdjustedAmountOutBelowMin',
         type: 'error',
@@ -172,6 +219,17 @@ export const vaultV3Abi = [
     { inputs: [], name: 'InvalidToken', type: 'error' },
     { inputs: [], name: 'InvalidTokenConfiguration', type: 'error' },
     { inputs: [], name: 'InvalidTokenType', type: 'error' },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'InvalidUnderlyingToken',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -208,10 +266,52 @@ export const vaultV3Abi = [
     { inputs: [], name: 'MinTokens', type: 'error' },
     { inputs: [], name: 'MultipleNonZeroInputs', type: 'error' },
     { inputs: [], name: 'NotEnoughBufferShares', type: 'error' },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'expectedUnderlyingAmount',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'actualUnderlyingAmount',
+                type: 'uint256',
+            },
+        ],
+        name: 'NotEnoughUnderlying',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'expectedWrappedAmount',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'actualWrappedAmount',
+                type: 'uint256',
+            },
+        ],
+        name: 'NotEnoughWrapped',
+        type: 'error',
+    },
     { inputs: [], name: 'NotStaticCall', type: 'error' },
     { inputs: [], name: 'NotVaultDelegateCall', type: 'error' },
-    { inputs: [], name: 'OperationNotSupported', type: 'error' },
     { inputs: [], name: 'PauseBufferPeriodDurationTooLarge', type: 'error' },
+    { inputs: [], name: 'PercentageAboveMax', type: 'error' },
     {
         inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
         name: 'PoolAlreadyInitialized',
@@ -255,6 +355,13 @@ export const vaultV3Abi = [
     {
         inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
         name: 'PoolPaused',
+        type: 'error',
+    },
+    {
+        inputs: [
+            { internalType: 'uint256', name: 'totalSupply', type: 'uint256' },
+        ],
+        name: 'PoolTotalSupplyTooLow',
         type: 'error',
     },
     { inputs: [], name: 'ProtocolFeesExceedTotalCollected', type: 'error' },
@@ -310,16 +417,7 @@ export const vaultV3Abi = [
         name: 'TokensMismatch',
         type: 'error',
     },
-    {
-        inputs: [
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
-        ],
-        name: 'TotalSupplyTooLow',
-        type: 'error',
-    },
     { inputs: [], name: 'TradeAmountTooSmall', type: 'error' },
-    { inputs: [], name: 'UserDataNotSupported', type: 'error' },
     { inputs: [], name: 'VaultBuffersArePaused', type: 'error' },
     { inputs: [], name: 'VaultIsNotUnlocked', type: 'error' },
     { inputs: [], name: 'VaultNotPaused', type: 'error' },
@@ -328,7 +426,11 @@ export const vaultV3Abi = [
     { inputs: [], name: 'VaultPaused', type: 'error' },
     {
         inputs: [
-            { internalType: 'address', name: 'wrappedToken', type: 'address' },
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
         ],
         name: 'WrapAmountTooSmall',
         type: 'error',
@@ -336,25 +438,22 @@ export const vaultV3Abi = [
     { inputs: [], name: 'WrongProtocolFeeControllerDeployment', type: 'error' },
     {
         inputs: [
-            { internalType: 'address', name: 'wrappedToken', type: 'address' },
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'underlyingToken',
+                type: 'address',
+            },
         ],
-        name: 'WrongUnderlyingAmount',
+        name: 'WrongUnderlyingToken',
         type: 'error',
     },
     { inputs: [], name: 'WrongVaultAdminDeployment', type: 'error' },
     { inputs: [], name: 'WrongVaultExtensionDeployment', type: 'error' },
-    {
-        inputs: [
-            { internalType: 'address', name: 'wrappedToken', type: 'address' },
-        ],
-        name: 'WrongWrappedAmount',
-        type: 'error',
-    },
-    {
-        inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
-        name: 'WrongWrappedTokenAsset',
-        type: 'error',
-    },
     { inputs: [], name: 'ZeroDivision', type: 'error' },
     {
         anonymous: false,
@@ -412,14 +511,52 @@ export const vaultV3Abi = [
             {
                 indexed: true,
                 internalType: 'address',
-                name: 'sharesOwner',
+                name: 'from',
                 type: 'address',
             },
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'amountWrapped',
+                name: 'burnedShares',
                 type: 'uint256',
+            },
+        ],
+        name: 'BufferSharesBurned',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'to',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
+        ],
+        name: 'BufferSharesMinted',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
             },
             {
                 indexed: false,
@@ -430,7 +567,7 @@ export const vaultV3Abi = [
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'issuedShares',
+                name: 'amountWrapped',
                 type: 'uint256',
             },
         ],
@@ -447,18 +584,6 @@ export const vaultV3Abi = [
                 type: 'address',
             },
             {
-                indexed: true,
-                internalType: 'address',
-                name: 'sharesOwner',
-                type: 'address',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'amountWrapped',
-                type: 'uint256',
-            },
-            {
                 indexed: false,
                 internalType: 'uint256',
                 name: 'amountUnderlying',
@@ -467,7 +592,7 @@ export const vaultV3Abi = [
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'removedShares',
+                name: 'amountWrapped',
                 type: 'uint256',
             },
         ],
@@ -882,7 +1007,26 @@ export const vaultV3Abi = [
                 type: 'bool',
             },
         ],
+        name: 'VaultBuffersPausedStateChanged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'bool',
+                name: 'paused',
+                type: 'bool',
+            },
+        ],
         name: 'VaultPausedStateChanged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [],
+        name: 'VaultQueriesDisabled',
         type: 'event',
     },
     {
@@ -1133,8 +1277,8 @@ export const vaultV3Abi = [
                     },
                     { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
-                internalType: 'struct SwapParams',
-                name: 'params',
+                internalType: 'struct VaultSwapParams',
+                name: 'vaultSwapParams',
                 type: 'tuple',
             },
         ],
