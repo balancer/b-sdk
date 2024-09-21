@@ -31,7 +31,7 @@ const queryCustomPath = async () => {
         address: '0x9d57eDCe10b7BdDA98997613c33ff7f3e34F4eAd' as Address,
         decimals: 18,
     };
-    const swapKind = SwapKind.GivenIn;
+    const swapKind = SwapKind.GivenIn as SwapKind;
     const tokens = [tokenIn, tokenOut];
     const protocolVersion = 3 as const;
     const inputAmountRaw = parseUnits('1', 18);
@@ -51,6 +51,18 @@ const queryCustomPath = async () => {
     // Swap object provides useful helpers for re-querying, building call, etc
     const swap = new Swap(swapInput);
 
+    if (swapKind === SwapKind.GivenIn) {
+        console.log('Given tokenIn:', {
+            address: tokenIn.address,
+            amount: inputAmountRaw,
+        });
+    } else {
+        console.log('Given tokenOut:', {
+            address: tokenOut.address,
+            amount: outputAmountRaw,
+        });
+    }
+
     // Get up to date swap result by querying onchain
     const queryOutput = (await swap.query(rpcUrl)) as
         | ExactInQueryOutput
@@ -58,12 +70,18 @@ const queryCustomPath = async () => {
 
     // Construct transaction to make swap
     if (queryOutput.swapKind === SwapKind.GivenIn) {
-        console.log(`Updated amount: ${queryOutput.expectedAmountOut.amount}`);
+        console.log('tokenOut:', {
+            address: tokenOut.address,
+            expectedAmount: queryOutput.expectedAmountOut.amount,
+        });
     } else {
-        console.log(`Updated amount: ${queryOutput.expectedAmountIn.amount}`);
+        console.log('tokenIn:', {
+            address: tokenIn.address,
+            expectedAmount: queryOutput.expectedAmountIn.amount,
+        });
     }
 
-    return { swap, queryOutput };
+    return { swap, chainId, queryOutput };
 };
 
 export default queryCustomPath;

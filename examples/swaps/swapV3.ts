@@ -8,7 +8,6 @@ import { config } from 'dotenv';
 config();
 
 import {
-    ChainId,
     Slippage,
     SwapKind,
     SwapBuildOutputExactIn,
@@ -19,33 +18,80 @@ import {
     permit2Abi,
     PermitDetails,
     TokenAmount,
+    CHAINS,
 } from '../../src';
 
 import queryCustomPath from './queryCustomPath';
-import { signPermit2 } from '../approvals';
+import { approveSpenderOnToken, signPermit2 } from '../approvals';
 
-import { createPublicClient, http } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import { sepolia } from 'viem/chains';
+import { createTestClient, http, publicActions, walletActions } from 'viem';
+import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 
-const swap = async () => {
-    // User defined
-    const publicClient = createPublicClient({
-        chain: sepolia,
-        transport: http(),
-    });
-    const account = privateKeyToAccount(
-        process.env.PRIVATE_KEY as `0x${string}`,
-    );
-    const chainId = ChainId.SEPOLIA;
-    // Get up to date swap result by querying onchain
-    const { swap, queryOutput } = await queryCustomPath();
-
-    const sender = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-    const recipient = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+const swapV3 = async () => {
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
+    // User defined;
+    const sender = '0x5036388C540994Ed7b74b82F71175a441F85BdA1';
+    const recipient = '0x5036388C540994Ed7b74b82F71175a441F85BdA1';
     const slippage = Slippage.fromPercentage('0.1');
     const deadline = 999999999999999999n; // Infinity
     const wethIsEth = false;
+
+    // Get up to date swap result by querying onchain
+    const { chainId, swap, queryOutput } = await queryCustomPath();
+
+    let tokenIn: TokenAmount;
+
+    if (queryOutput.swapKind === SwapKind.GivenIn) {
+        tokenIn = queryOutput.amountIn;
+    } else {
+        tokenIn = queryOutput.expectedAmountIn;
+    }
+
+    const client = createTestClient({
+        // account: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
+        chain: CHAINS[chainId],
+        mode: 'anvil',
+        transport: http(rpcUrl),
+    })
+        .extend(publicActions)
+        .extend(walletActions);
+
+    // Impersonate sender so we don't need private key
+    await client.impersonateAccount({ address: sender });
+
+    // Approve Permit2 contract as spender of tokenIn
+    await approveSpenderOnToken(
+        client,
+        sender,
+        tokenIn.token.address,
+        PERMIT2[chainId],
+    );
+
+    // Get Permit2 nonce for PermitDetails
+    const [, , nonce] = await client.readContract({
+        address: PERMIT2[chainId],
+        abi: permit2Abi,
+        functionName: 'allowance',
+        args: [sender, tokenIn.token.address, BALANCER_ROUTER[chainId]],
+    });
+
+    // Set up details for Permit2 signature
+    const details: PermitDetails[] = [
+        {
+            token: tokenIn.token.address,
+            amount: tokenIn.amount,
+            expiration: Number(MaxAllowanceExpiration),
+            nonce,
+        },
+    ];
+
+    // Sign Permit2 batch
+    const signedPermit2Batch = await signPermit2(
+        client,
+        sender,
+        chainId,
+        details,
+    );
 
     const buildCallInput = {
         sender,
@@ -56,42 +102,12 @@ const swap = async () => {
         queryOutput,
     };
 
-    let tokenIn: TokenAmount;
-
-    if (queryOutput.swapKind === SwapKind.GivenIn) {
-        tokenIn = queryOutput.amountIn;
-    } else {
-        tokenIn = queryOutput.expectedAmountIn;
-    }
-
-    const [, , nonce] = await publicClient.readContract({
-        address: PERMIT2[chainId],
-        abi: permit2Abi,
-        functionName: 'allowance',
-        args: [
-            account.address,
-            tokenIn.token.address,
-            BALANCER_ROUTER[chainId],
-        ],
-    });
-
-    const details: PermitDetails[] = [
-        {
-            token: tokenIn.token.address,
-            amount: tokenIn.amount,
-            expiration: Number(MaxAllowanceExpiration),
-            nonce,
-        },
-    ];
-
-    const signedPermit2Batch = await signPermit2(account, details);
-
+    // Build call data with Permit2 signature
     const callData = swap.buildCallWithPermit2(
         buildCallInput,
         signedPermit2Batch,
     ) as SwapBuildOutputExactOut | SwapBuildOutputExactIn;
 
-    // Construct transaction to make swap
     if ('minAmountOut' in callData && 'expectedAmountOut' in queryOutput) {
         console.log(`Updated amount: ${queryOutput.expectedAmountOut.amount}`);
         console.log(
@@ -105,4 +121,4 @@ const swap = async () => {
     }
 };
 
-export default swap;
+export default swapV3;

@@ -8,12 +8,19 @@ import {
     ChainId,
 } from '../../src';
 
-export const signPermit2 = async (client, details: PermitDetails[]) => {
-    const chainId = ChainId.SEPOLIA;
+import { Address } from 'viem';
+
+export const signPermit2 = async (
+    client: any,
+    account: Address,
+    chainId: ChainId,
+    details: PermitDetails[],
+) => {
+    const spender = BALANCER_ROUTER[chainId];
 
     const batch: Permit2Batch = {
         details,
-        spender: BALANCER_ROUTER[chainId],
+        spender,
         sigDeadline: MaxSigDeadline,
     };
 
@@ -23,7 +30,10 @@ export const signPermit2 = async (client, details: PermitDetails[]) => {
         chainId,
     );
 
+    await client.impersonateAccount({ address: account });
+
     const signature = await client.signTypedData({
+        account: account,
         message: { ...values },
         domain,
         primaryType: 'PermitBatch',

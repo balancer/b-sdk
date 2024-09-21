@@ -19,25 +19,25 @@ import {
 
 const querySmartPath = async () => {
     // User defined
-    const rpcUrl = process.env.SEPOLIA_RPC_URL;
-    const chainId = ChainId.SEPOLIA;
-    const swapKind = SwapKind.GivenOut;
+    const rpcUrl = process.env.MAINNET_RPC_URL;
+    const chainId = ChainId.MAINNET;
+    const swapKind = SwapKind.GivenIn as SwapKind;
     const tokenIn = new Token(
         chainId,
-        '0xE8d4E9Fc8257B77Acb9eb80B5e8176F4f0cBCeBC',
-        18,
-        'MockToken1',
+        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        6,
+        'USDC',
     );
     const tokenOut = new Token(
         chainId,
-        '0xF0Bab79D87F51a249AFe316a580C1cDFC111bE10',
+        '0xba100000625a3754423978a60c9317c58a424e3D',
         18,
-        'MockToken2',
+        'BAL',
     );
     const swapAmount =
         swapKind === SwapKind.GivenIn
-            ? TokenAmount.fromHumanAmount(tokenIn, '1.2345678910')
-            : TokenAmount.fromHumanAmount(tokenOut, '1.2345678910');
+            ? TokenAmount.fromHumanAmount(tokenIn, '100')
+            : TokenAmount.fromHumanAmount(tokenOut, '100');
 
     // API is used to fetch best path from available liquidity
     const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
@@ -59,24 +59,31 @@ const querySmartPath = async () => {
     // Swap object provides useful helpers for re-querying, building call, etc
     const swap = new Swap(swapInput);
 
-    console.log(
-        `Input token: ${swap.inputAmount.token.address}, Amount: ${swap.inputAmount.amount}`,
-    );
-    console.log(
-        `Output token: ${swap.outputAmount.token.address}, Amount: ${swap.outputAmount.amount}`,
-    );
+    console.table({
+        Address: {
+            tokenIn: swap.inputAmount.token.address,
+            tokenOut: swap.outputAmount.token.address,
+        },
+        Amount: {
+            tokenIn: swap.inputAmount.amount,
+            tokenOut: swap.outputAmount.amount,
+        },
+    });
 
     // Get up to date swap result by querying onchain
     const queryOutput = await swap.query(rpcUrl);
 
     // Construct transaction to make swap
     if (queryOutput.swapKind === SwapKind.GivenIn) {
-        console.log(`Updated amount: ${queryOutput.expectedAmountOut.amount}`);
+        console.log(
+            'Expected Amount Out:',
+            queryOutput.expectedAmountOut.amount,
+        );
     } else {
-        console.log(`Updated amount: ${queryOutput.expectedAmountIn.amount}`);
+        console.log('Expected Amount In:', queryOutput.expectedAmountIn.amount);
     }
 
-    return queryOutput;
+    return { swap, chainId, queryOutput };
 };
 
 export default querySmartPath;
