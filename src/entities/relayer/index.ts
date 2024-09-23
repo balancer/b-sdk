@@ -1,19 +1,17 @@
 import {
-    Client,
     concat,
     encodeFunctionData,
     hexToBigInt,
     pad,
-    PublicActions,
     slice,
     toHex,
-    WalletActions,
 } from 'viem';
 import { Address, Hex } from '../../types';
 import { batchRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
 import { RelayerAuthorization } from './authorization';
 import { vaultV2Abi } from '../../abi';
 import { MAX_UINT256 } from '../../utils';
+import { ViemClient } from 'test/lib/utils';
 
 export class Relayer {
     static CHAINED_REFERENCE_TEMP_PREFIX = '0xba10' as Hex; // Temporary reference: it is deleted after a read.
@@ -57,7 +55,7 @@ export class Relayer {
     static signRelayerApproval = async (
         relayerAddress: Address,
         signerAddress: Address,
-        client: Client & WalletActions & PublicActions,
+        client: ViemClient,
     ): Promise<Hex> => {
         const approval = encodeFunctionData({
             abi: vaultV2Abi,

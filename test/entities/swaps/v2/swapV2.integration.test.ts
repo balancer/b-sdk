@@ -8,10 +8,7 @@ import {
     parseEther,
     publicActions,
     walletActions,
-    Client,
-    PublicActions,
     TestActions,
-    WalletActions,
 } from 'viem';
 import {
     CHAINS,
@@ -23,6 +20,7 @@ import {
     ExactOutQueryOutput,
     VAULT,
     Path,
+    ViemClient,
 } from '@/index';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -44,7 +42,7 @@ const WETH = TOKENS[chainId].WETH;
 const vault = VAULT[chainId];
 
 describe('SwapV2', () => {
-    let client: Client & PublicActions & TestActions & WalletActions;
+    let client: ViemClient & TestActions;
     let testAddress: Address;
     const pathBalWeth: Path = {
         protocolVersion: 2,

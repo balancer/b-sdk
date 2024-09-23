@@ -1,8 +1,6 @@
-import { Client, PublicActions, WalletActions } from 'viem';
-
 import { weightedPoolAbi_V3 } from '@/abi';
 import { Hex } from '@/types';
-import { BALANCER_ROUTER, MAX_UINT256 } from '@/utils';
+import { BALANCER_ROUTER, MAX_UINT256, ViemClient } from '@/utils';
 import { getNonce } from './helper';
 import { RemoveLiquidityBaseBuildCallInput } from '../removeLiquidity/types';
 import { getAmountsCall } from '../removeLiquidity/helper';
@@ -30,7 +28,7 @@ export type Permit = {
 export class PermitHelper {
     static signRemoveLiquidityApproval = async (
         input: RemoveLiquidityBaseBuildCallInput & {
-            client: Client & WalletActions & PublicActions;
+            client: ViemClient;
             owner: Hex;
             nonce?: bigint;
             deadline?: bigint;
@@ -63,7 +61,7 @@ export class PermitHelper {
  * @param { Client & WalletActions & PublicActions } client - Wallet client to invoke for signing the permit message
  */
 const signPermit = async (
-    client: Client & WalletActions & PublicActions,
+    client: ViemClient,
     token: Hex,
     owner: Hex,
     spender: Hex,
@@ -111,10 +109,7 @@ const signPermit = async (
     return { permitApproval, permitSignature };
 };
 
-const getDomain = async (
-    client: Client & WalletActions & PublicActions,
-    token: Hex,
-) => {
+const getDomain = async (client: ViemClient, token: Hex) => {
     const [, name, version, chainId, verifyingContract, , ,] =
         await client.readContract({
             abi: weightedPoolAbi_V3,

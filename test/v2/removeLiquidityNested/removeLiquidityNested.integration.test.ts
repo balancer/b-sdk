@@ -3,15 +3,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
     publicActions,
-    PublicActions,
     TestActions,
     TransactionReceipt,
-    WalletActions,
     walletActions,
 } from 'viem';
 
@@ -30,6 +27,7 @@ import {
     replaceWrapped,
     Slippage,
     TokenAmount,
+    ViemClient,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -41,7 +39,7 @@ type TxInput = {
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
-    client: Client & PublicActions & TestActions & WalletActions;
+    client: ViemClient & TestActions;
     tokenOut?: Address;
     wethIsEth?: boolean;
 };
@@ -49,7 +47,7 @@ type TxInput = {
 describe('remove liquidity nested test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
-    let client: Client & PublicActions & TestActions & WalletActions;
+    let client: ViemClient & TestActions;
     let poolId: Hex;
     let testAddress: Address;
 
