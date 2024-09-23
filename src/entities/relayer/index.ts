@@ -10,8 +10,7 @@ import { Address, Hex } from '../../types';
 import { batchRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
 import { RelayerAuthorization } from './authorization';
 import { vaultV2Abi } from '../../abi';
-import { MAX_UINT256 } from '../../utils';
-import { ViemClient } from 'test/lib/utils';
+import { MAX_UINT256, ViemClient } from '../../utils';
 
 export class Relayer {
     static CHAINED_REFERENCE_TEMP_PREFIX = '0xba10' as Hex; // Temporary reference: it is deleted after a read.
