@@ -41,7 +41,7 @@ import {
     RemoveLiquidityRecoveryInput,
     removeLiquidityUnbalancedNotSupportedOnV3,
     vaultAdminAbi_V3,
-    ViemClient,
+    PublicWalletClient,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -70,7 +70,7 @@ const WETH = TOKENS[chainId].WETH;
 const BAL = TOKENS[chainId].BAL;
 
 describe('remove liquidity test', () => {
-    let client: ViemClient & TestActions;
+    let client: PublicWalletClient & TestActions;
     let prepTxInput: AddLiquidityTxInput;
     let txInput: RemoveLiquidityTxInput;
     let poolState: PoolState;

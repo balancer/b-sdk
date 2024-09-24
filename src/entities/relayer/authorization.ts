@@ -1,5 +1,5 @@
 import { concat, pad, parseSignature, toHex } from 'viem';
-import { MAX_UINT256, VAULT, ViemClient } from '../../utils';
+import { MAX_UINT256, VAULT, PublicWalletClient } from '../../utils';
 import { Address, Hex } from '../../types';
 import { vaultV2Abi } from '../../abi';
 
@@ -39,7 +39,7 @@ export class RelayerAuthorization {
     };
 
     static signJoinAuthorization = (
-        client: ViemClient,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -57,7 +57,7 @@ export class RelayerAuthorization {
         );
 
     static signExitAuthorization = (
-        client: ViemClient,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -75,7 +75,7 @@ export class RelayerAuthorization {
         );
 
     static signSwapAuthorization = (
-        client: ViemClient,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -93,7 +93,7 @@ export class RelayerAuthorization {
         );
 
     static signBatchSwapAuthorization = (
-        client: ViemClient,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -111,7 +111,7 @@ export class RelayerAuthorization {
         );
 
     static signSetRelayerApprovalAuthorization = (
-        client: ViemClient,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -130,7 +130,7 @@ export class RelayerAuthorization {
 
     static signAuthorizationFor = async (
         type: RelayerAction,
-        client: ViemClient,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,

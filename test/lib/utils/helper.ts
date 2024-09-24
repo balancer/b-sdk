@@ -25,7 +25,7 @@ import {
     PERMIT2,
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
-    ViemClient,
+    PublicWalletClient,
 } from '@/utils';
 
 export type TxOutput = {
@@ -35,7 +35,7 @@ export type TxOutput = {
 };
 
 export const hasApprovedToken = async (
-    client: ViemClient,
+    client: PublicWalletClient,
     account: Address,
     token: Address,
     spender: Address,
@@ -53,7 +53,7 @@ export const hasApprovedToken = async (
 };
 
 export const hasApprovedTokenOnPermit2 = async (
-    client: ViemClient,
+    client: PublicWalletClient,
     account: Address,
     token: Address,
     spender: Address,
@@ -72,7 +72,7 @@ export const hasApprovedTokenOnPermit2 = async (
 };
 
 export const approveToken = async (
-    client: ViemClient,
+    client: PublicWalletClient,
     accountAddress: Address,
     tokenAddress: Address,
     protocolVersion: 2 | 3,
@@ -127,7 +127,7 @@ export const approveToken = async (
 };
 
 export const approveTokens = async (
-    client: ViemClient,
+    client: PublicWalletClient,
     accountAddress: Address,
     tokens: Address[],
     protocolVersion: 2 | 3,
@@ -146,7 +146,7 @@ export const approveTokens = async (
 };
 
 export const approveSpenderOnTokens = async (
-    client: ViemClient,
+    client: PublicWalletClient,
     accountAddress: Address,
     tokens: Address[],
     spender: Address,
@@ -167,7 +167,7 @@ export const approveSpenderOnTokens = async (
 };
 
 export const approveSpenderOnToken = async (
-    client: ViemClient,
+    client: PublicWalletClient,
     account: Address,
     token: Address,
     spender: Address,
@@ -205,7 +205,7 @@ export const approveSpenderOnToken = async (
 };
 
 export const approveSpenderOnPermit2 = async (
-    client: ViemClient,
+    client: PublicWalletClient,
     account: Address,
     token: Address,
     spender: Address,
@@ -287,7 +287,7 @@ export const getBalances = async (
  */
 export async function sendTransactionGetBalances(
     tokensForBalanceCheck: Address[],
-    client: ViemClient & TestActions,
+    client: PublicWalletClient & TestActions,
     clientAddress: Address,
     to: Address,
     data: Address,
@@ -488,7 +488,7 @@ export async function findTokenBalanceSlot(
  * @param protocolVersion Balancer vault version
  */
 export const forkSetup = async (
-    client: ViemClient & TestActions,
+    client: PublicWalletClient & TestActions,
     accountAddress: Address,
     tokens: Address[],
     slots: number[] | undefined,
@@ -530,7 +530,7 @@ export const forkSetup = async (
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
  */
 export const forkSetupCowAmm = async (
-    client: ViemClient & TestActions,
+    client: PublicWalletClient & TestActions,
     accountAddress: Address,
     tokens: Address[],
     slots: number[] | undefined,
@@ -564,7 +564,7 @@ export const forkSetupCowAmm = async (
 export const getSlots = async (
     slots: number[] | undefined,
     tokens: Address[],
-    client: ViemClient & TestActions,
+    client: PublicWalletClient & TestActions,
     accountAddress: Address,
     isVyperMapping: boolean[],
 ): Promise<number[]> => {

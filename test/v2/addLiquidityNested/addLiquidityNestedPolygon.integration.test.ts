@@ -19,7 +19,7 @@ import {
     Hex,
     PoolType,
     NestedPoolState,
-    ViemClient,
+    PublicWalletClient,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -39,7 +39,7 @@ const DAO_st_WMATIC = POOLS[chainId].DAO_st_WMATIC;
 
 describe('add liquidity nested test', () => {
     let rpcUrl: string;
-    let client: ViemClient & TestActions;
+    let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let mainTokens: TestToken[];
     let initialBalances: bigint[];

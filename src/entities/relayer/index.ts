@@ -10,7 +10,7 @@ import { Address, Hex } from '../../types';
 import { batchRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
 import { RelayerAuthorization } from './authorization';
 import { vaultV2Abi } from '../../abi';
-import { MAX_UINT256, ViemClient } from '../../utils';
+import { MAX_UINT256, PublicWalletClient } from '../../utils';
 
 export class Relayer {
     static CHAINED_REFERENCE_TEMP_PREFIX = '0xba10' as Hex; // Temporary reference: it is deleted after a read.
@@ -54,7 +54,7 @@ export class Relayer {
     static signRelayerApproval = async (
         relayerAddress: Address,
         signerAddress: Address,
-        client: ViemClient,
+        client: PublicWalletClient,
     ): Promise<Hex> => {
         const approval = encodeFunctionData({
             abi: vaultV2Abi,

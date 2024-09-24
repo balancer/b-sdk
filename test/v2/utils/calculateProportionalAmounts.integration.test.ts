@@ -11,7 +11,7 @@ import {
     PoolState,
     getPoolStateWithBalancesV2,
 } from '@/entities';
-import { CHAINS, ChainId, getPoolAddress } from '@/utils';
+import { CHAINS, ChainId, PublicWalletClient, getPoolAddress } from '@/utils';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { AddLiquidityTxInput } from 'test/lib/utils/types';
 import {
@@ -36,7 +36,7 @@ const poolId =
     '0x156c02f3f7fef64a3a9d80ccf7085f23cce91d76000000000000000000000570'; // Balancer vETH/WETH StablePool
 
 describe('add liquidity composable stable test', () => {
-    let client: ViemClient & TestActions;
+    let client: PublicWalletClient & TestActions;
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
     let functionOutput: { tokenAmounts: InputAmount[]; bptAmount: InputAmount };

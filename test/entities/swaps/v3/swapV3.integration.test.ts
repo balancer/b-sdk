@@ -22,7 +22,7 @@ import {
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
     PERMIT2,
-    ViemClient,
+    PublicWalletClient,
 } from '@/index';
 import { Path } from '@/entities/swap/paths/types';
 
@@ -52,7 +52,7 @@ const stataUSDC = TOKENS[chainId].stataUSDC;
 const stataDAI = TOKENS[chainId].stataDAI;
 
 describe('SwapV3', () => {
-    let client: ViemClient & TestActions;
+    let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let rpcUrl: string;
     let snapshot: Hex;

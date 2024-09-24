@@ -27,7 +27,7 @@ import {
     replaceWrapped,
     Slippage,
     TokenAmount,
-    ViemClient,
+    PublicWalletClient,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -39,7 +39,7 @@ type TxInput = {
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
-    client: ViemClient & TestActions;
+    client: PublicWalletClient & TestActions;
     tokenOut?: Address;
     wethIsEth?: boolean;
 };
@@ -47,7 +47,7 @@ type TxInput = {
 describe('remove liquidity nested test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
-    let client: ViemClient & TestActions;
+    let client: PublicWalletClient & TestActions;
     let poolId: Hex;
     let testAddress: Address;
 

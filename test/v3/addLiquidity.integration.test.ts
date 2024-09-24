@@ -28,7 +28,7 @@ import {
     InputAmount,
     PoolType,
     PERMIT2,
-    ViemClient,
+    PublicWalletClient,
 } from '../../src';
 import {
     AddLiquidityTxInput,
@@ -53,7 +53,7 @@ const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 
 describe('add liquidity test', () => {
-    let client: ViemClient & TestActions;
+    let client: PublicWalletClient & TestActions;
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
     let tokens: Address[];

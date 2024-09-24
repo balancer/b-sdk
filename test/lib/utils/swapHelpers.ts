@@ -10,7 +10,7 @@ import {
     SwapBuildCallInput,
     SwapKind,
     Permit2Helper,
-    ViemClient,
+    PublicWalletClient,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
@@ -43,7 +43,7 @@ export async function assertSwapExactIn({
     },
 }: {
     contractToCall: Address;
-    client: ViemClient & TestActions;
+    client: PublicWalletClient & TestActions;
     rpcUrl: string;
     chainId: ChainId;
     swap: Swap;
@@ -169,7 +169,7 @@ export async function assertSwapExactOut({
     },
 }: {
     contractToCall: Address;
-    client: ViemClient & TestActions;
+    client: PublicWalletClient & TestActions;
     rpcUrl: string;
     chainId: ChainId;
     swap: Swap;

@@ -20,7 +20,7 @@ import {
     ExactOutQueryOutput,
     VAULT,
     Path,
-    ViemClient,
+    PublicWalletClient,
 } from '@/index';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -42,7 +42,7 @@ const WETH = TOKENS[chainId].WETH;
 const vault = VAULT[chainId];
 
 describe('SwapV2', () => {
-    let client: ViemClient & TestActions;
+    let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     const pathBalWeth: Path = {
         protocolVersion: 2,

@@ -17,7 +17,7 @@ import {
     ChainId,
     Hex,
     NestedPoolState,
-    ViemClient,
+    PublicWalletClient,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -41,7 +41,7 @@ const BPT_WETH_3POOL = POOLS[chainId].BPT_WETH_3POOL;
 
 describe('add liquidity nested test', () => {
     let rpcUrl: string;
-    let client: ViemClient & TestActions;
+    let client: PublicWalletClient & TestActions;
     let poolId: Hex;
     let testAddress: Address;
     let mainTokens: TestToken[];

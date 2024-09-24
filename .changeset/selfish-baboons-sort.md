@@ -2,4 +2,4 @@
 "@balancer/sdk": patch
 ---
 
-Exposes ViemClient type
+Exposes PublicWalletClient type

@@ -9,7 +9,7 @@ import {
     BALANCER_BATCH_ROUTER,
     BALANCER_ROUTER,
     PERMIT2,
-    ViemClient,
+    PublicWalletClient,
 } from '@/utils';
 import {
     MaxAllowanceExpiration,
@@ -38,7 +38,7 @@ export type Permit2 = {
 export class Permit2Helper {
     static async signAddLiquidityApproval(
         input: AddLiquidityBaseBuildCallInput & {
-            client: ViemClient;
+            client: PublicWalletClient;
             owner: Address;
             nonces?: number[];
             expirations?: number[];
@@ -76,7 +76,7 @@ export class Permit2Helper {
 
     static async signSwapApproval(
         input: SwapBuildCallInputBase & {
-            client: ViemClient;
+            client: PublicWalletClient;
             owner: Address;
             nonce?: number;
             expiration?: number;
