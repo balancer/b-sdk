@@ -5,7 +5,12 @@ import {
     Permit2Batch,
     PermitDetails,
 } from './allowanceTransfer';
-import { BALANCER_BATCH_ROUTER, BALANCER_ROUTER, PERMIT2 } from '@/utils';
+import {
+    BALANCER_BATCH_ROUTER,
+    BALANCER_ROUTER,
+    PERMIT2,
+    PublicWalletClient,
+} from '@/utils';
 import {
     MaxAllowanceExpiration,
     MaxAllowanceTransferAmount,
@@ -33,7 +38,7 @@ export type Permit2 = {
 export class Permit2Helper {
     static async signAddLiquidityApproval(
         input: AddLiquidityBaseBuildCallInput & {
-            client: Client & WalletActions & PublicActions;
+            client: PublicWalletClient;
             owner: Address;
             nonces?: number[];
             expirations?: number[];
@@ -71,7 +76,7 @@ export class Permit2Helper {
 
     static async signSwapApproval(
         input: SwapBuildCallInputBase & {
-            client: Client & WalletActions & PublicActions;
+            client: PublicWalletClient;
             owner: Address;
             nonce?: number;
             expiration?: number;

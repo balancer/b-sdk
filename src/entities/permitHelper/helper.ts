@@ -1,9 +1,8 @@
-import { Client, PublicActions, WalletActions } from 'viem';
-
 import { Address } from '@/types';
+import { PublicWalletClient } from '@/utils';
 
 export const getNonce = async (
-    client: Client & WalletActions & PublicActions,
+    client: PublicWalletClient,
     token: Address,
     owner: Address,
 ) => {

@@ -8,10 +8,7 @@ import {
     parseEther,
     publicActions,
     walletActions,
-    Client,
-    PublicActions,
     TestActions,
-    WalletActions,
     Hex,
 } from 'viem';
 import {
@@ -25,6 +22,7 @@ import {
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
     PERMIT2,
+    PublicWalletClient,
 } from '@/index';
 import { Path } from '@/entities/swap/paths/types';
 
@@ -54,7 +52,7 @@ const stataUSDC = TOKENS[chainId].stataUSDC;
 const stataDAI = TOKENS[chainId].stataDAI;
 
 describe('SwapV3', () => {
-    let client: Client & PublicActions & TestActions & WalletActions;
+    let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let rpcUrl: string;
     let snapshot: Hex;

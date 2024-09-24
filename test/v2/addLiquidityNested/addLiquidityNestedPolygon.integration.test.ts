@@ -4,18 +4,23 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
     publicActions,
-    PublicActions,
     TestActions,
-    WalletActions,
     walletActions,
 } from 'viem';
 
-import { Address, CHAINS, ChainId, Hex, PoolType, NestedPoolState } from 'src';
+import {
+    Address,
+    CHAINS,
+    ChainId,
+    Hex,
+    PoolType,
+    NestedPoolState,
+    PublicWalletClient,
+} from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
@@ -34,7 +39,7 @@ const DAO_st_WMATIC = POOLS[chainId].DAO_st_WMATIC;
 
 describe('add liquidity nested test', () => {
     let rpcUrl: string;
-    let client: Client & PublicActions & TestActions & WalletActions;
+    let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let mainTokens: TestToken[];
     let initialBalances: bigint[];

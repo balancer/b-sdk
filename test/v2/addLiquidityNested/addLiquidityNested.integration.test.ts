@@ -3,18 +3,22 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
     publicActions,
-    PublicActions,
     TestActions,
-    WalletActions,
     walletActions,
 } from 'viem';
 
-import { Address, CHAINS, ChainId, Hex, NestedPoolState } from 'src';
+import {
+    Address,
+    CHAINS,
+    ChainId,
+    Hex,
+    NestedPoolState,
+    PublicWalletClient,
+} from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
@@ -37,7 +41,7 @@ const BPT_WETH_3POOL = POOLS[chainId].BPT_WETH_3POOL;
 
 describe('add liquidity nested test', () => {
     let rpcUrl: string;
-    let client: Client & PublicActions & TestActions & WalletActions;
+    let client: PublicWalletClient & TestActions;
     let poolId: Hex;
     let testAddress: Address;
     let mainTokens: TestToken[];
