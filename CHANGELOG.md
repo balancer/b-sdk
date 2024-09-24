@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 0.26.1
+
+### Patch Changes
+
+- 2be2b58: Add OPTIMISM_RPC_URL to test envs
+- 503f72a: Exposes PublicWalletClient type
+
 ## 0.26.0
 
 ### Minor Changes
