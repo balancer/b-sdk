@@ -1,3 +1,3 @@
-import { Client, WalletActions, PublicActions } from 'viem';
+import { PublicActions, WalletClient } from 'viem';
 
-export type PublicWalletClient = Client & WalletActions & PublicActions;
+export type PublicWalletClient = WalletClient & PublicActions;
