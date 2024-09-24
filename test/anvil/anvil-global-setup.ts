@@ -111,7 +111,7 @@ function getAnvilOptions(
     blockNumber?: bigint,
 ): CreateAnvilOptions {
     let forkUrl: string;
-    if (process.env[network.rpcEnv] !== undefined) {
+    if (process.env[network.rpcEnv] !== 'undefined') {
         forkUrl = process.env[network.rpcEnv] as string;
     } else {
         if (!network.fallBackRpc)
