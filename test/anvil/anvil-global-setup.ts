@@ -70,7 +70,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     },
     OPTIMISM: {
         rpcEnv: 'OPTIMISM_RPC_URL',
-        fallBackRpc: 'https://optimism.gateway.tenderly.co',
+        fallBackRpc: 'https://optimism.llamarpc.com',
         port: ANVIL_PORTS.OPTIMISM,
         forkBlockNumber: 117374265n,
     },
