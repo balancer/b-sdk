@@ -15,6 +15,9 @@ export default defineConfig(({ mode }) => {
                 env.ARBITRUM_RPC_URL,
             ),
             'process.env.FANTOM_RPC_URL': JSON.stringify(env.FANTOM_RPC_URL),
+            'process.env.OPTIMISM_RPC_URL': JSON.stringify(
+                env.OPTIMISM_RPC_URL,
+            ),
             'process.env.SKIP_GLOBAL_SETUP': JSON.stringify(
                 env.SKIP_GLOBAL_SETUP,
             ),
