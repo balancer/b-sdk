@@ -7,7 +7,7 @@ import {
     Hex,
 } from 'viem';
 import { TokenAmount } from '../../../../tokenAmount';
-import { BALANCER_RELAYER, ChainId } from '@/utils';
+import { BALANCER_RELAYER, ChainId, EMPTY_SENDER } from '@/utils';
 import { balancerRelayerAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
@@ -56,6 +56,7 @@ export async function querySwapExit(
     });
 
     const { data } = await client.call({
+        ...EMPTY_SENDER,
         to: BALANCER_RELAYER[ChainId.MAINNET],
         data: encodedMulticall,
     });

@@ -21,6 +21,12 @@ import {
 
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
+/*
+    Using empty account (undefined by default) in some multicall requests causes failures in some nodes
+    More info: https://github.com/wevm/viem/issues/2792
+*/
+export const EMPTY_SENDER = { account: ZERO_ADDRESS };
+
 const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
