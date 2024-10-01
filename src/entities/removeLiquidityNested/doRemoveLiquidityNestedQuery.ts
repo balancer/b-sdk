@@ -5,7 +5,7 @@ import {
     http,
 } from 'viem';
 import { Hex } from '../../types';
-import { BALANCER_RELAYER, CHAINS, ChainId } from '../../utils';
+import { BALANCER_RELAYER, CHAINS, ChainId, EMPTY_SENDER } from '../../utils';
 import { balancerRelayerAbi } from '../../abi';
 
 export const doRemoveLiquidityNestedQuery = async (
@@ -20,6 +20,7 @@ export const doRemoveLiquidityNestedQuery = async (
     });
 
     const { data } = await client.call({
+        ...EMPTY_SENDER,
         to: BALANCER_RELAYER[chainId],
         data: encodedMulticall,
     });
