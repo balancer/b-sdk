@@ -5,6 +5,7 @@ import {
     weightedPoolFactoryV4Abi_V2,
     composableStableFactoryV5Abi_V2,
     weightedPoolFactoryAbi_V3,
+    stablePoolFactoryAbi_V3,
 } from 'src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
 
@@ -22,6 +23,7 @@ export async function doCreatePool(
         },
         3: {
             [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
+            [PoolType.Stable]: stablePoolFactoryAbi_V3,
         },
     };
 

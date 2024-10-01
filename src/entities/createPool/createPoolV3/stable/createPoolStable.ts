@@ -7,7 +7,7 @@ import {
     PoolRoleAccounts,
 } from '../../types';
 import { stablePoolFactoryAbi_V3 } from '@/abi';
-import { STABLE_POOL_FACTORY_BALANCER_V3 } from '@/utils';
+import { STABLE_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 
 export class CreatePoolStableV3 implements CreatePoolBase {
@@ -20,9 +20,7 @@ export class CreatePoolStableV3 implements CreatePoolBase {
     }
 
     private encodeCall(input: CreatePoolV3StableInput): Hex {
-        const sortedTokenConfigs = [...input.tokenConfigs].sort((a, b) =>
-            a.token.toLowerCase().localeCompare(b.token.toLowerCase()),
-        );
+        const sortedTokenConfigs = sortByAddress(input.tokens);
 
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
@@ -33,7 +31,14 @@ export class CreatePoolStableV3 implements CreatePoolBase {
         const args = [
             input.name || input.symbol,
             input.symbol,
-            sortedTokenConfigs,
+            sortedTokenConfigs.map(
+                ({ address, rateProvider, tokenType, paysYieldFees }) => ({
+                    token: address,
+                    tokenType,
+                    rateProvider,
+                    paysYieldFees,
+                }),
+            ),
             input.amplificationParameter,
             roleAccounts,
             input.swapFeePercentage,

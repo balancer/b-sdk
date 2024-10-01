@@ -52,8 +52,8 @@ export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
 export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Stable;
     amplificationParameter: bigint; // value between 1e3 and 5000e3
-    tokenConfigs: {
-        token: Address;
+    tokens: {
+        address: Address;
         rateProvider: Address;
         tokenType: TokenType;
         paysYieldFees: boolean;

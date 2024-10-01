@@ -2,11 +2,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '@/entities/removeLiquidity/types';
-import {
-    CreatePoolV2ComposableStableInput,
-    CreatePoolV2WeightedInput,
-    CreatePoolV3WeightedInput,
-} from '../createPool/types';
+import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput, InitPoolInputV3 } from '../initPool/types';
 import { PoolState } from '../types';
 import {
@@ -32,12 +28,7 @@ export class InputValidatorBase {
         }
     }
 
-    validateCreatePool(
-        input:
-            | CreatePoolV2WeightedInput
-            | CreatePoolV3WeightedInput
-            | CreatePoolV2ComposableStableInput,
-    ) {
+    validateCreatePool(input: CreatePoolInput) {
         validateCreatePoolTokens(input.tokens);
         if (input.protocolVersion === 3) {
             input.tokens.forEach(({ tokenType, rateProvider }) => {
