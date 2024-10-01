@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.27.0
+
+### Minor Changes
+
+- cc78c64: Add zero address sender to multicall calls to avoid issues with Nethermind/Geth nodes
+
 ## 0.26.1
 
 ### Patch Changes
