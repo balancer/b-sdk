@@ -47,7 +47,7 @@ describe('Create Weighted Pool tests', () => {
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl, { timeout: 120_000 }),
+            transport: http(rpcUrl, { timeout: 120_000 }), // // FIXME: createPool step takes a long time, so we increase the timeout as a temporary solution
         })
             .extend(publicActions)
             .extend(walletActions);
@@ -146,5 +146,5 @@ describe('Create Weighted Pool tests', () => {
         });
 
         assertInitPool(initPoolInput, addLiquidityOutput);
-    });
+    }, 120_000);
 });

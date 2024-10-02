@@ -35,7 +35,8 @@ describe('Create Stable Pool tests', () => {
     const poolType = PoolType.Stable;
     const protocolVersion = 3;
     const DAI = TOKENS[chainId].DAI;
-    const USDC = TOKENS[chainId].USDC;
+    const BAL = TOKENS[chainId].BAL;
+    const INIT_AMOUNT = '100';
 
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
@@ -56,6 +57,8 @@ describe('Create Stable Pool tests', () => {
 
         createPoolInput = {
             poolType,
+            chainId,
+            protocolVersion,
             name: 'DAI USDC Stable Pool',
             symbol: 'DAI-USDC',
             amplificationParameter: 420n,
@@ -67,7 +70,7 @@ describe('Create Stable Pool tests', () => {
                     paysYieldFees: false,
                 },
                 {
-                    address: USDC.address,
+                    address: BAL.address,
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                     paysYieldFees: false,
@@ -78,8 +81,6 @@ describe('Create Stable Pool tests', () => {
             pauseManager: testAddress,
             swapFeeManager: testAddress,
             disableUnbalancedLiquidity: false,
-            chainId,
-            protocolVersion,
             enableDonation: false,
         };
 
@@ -110,12 +111,13 @@ describe('Create Stable Pool tests', () => {
             poolType,
             protocolVersion,
         );
+
         await forkSetup(
             client,
             testAddress,
-            [...poolState.tokens.map((t) => t.address)],
-            [3, 1],
-            [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
+            poolState.tokens.map((t) => t.address),
+            [BAL.slot!, DAI.slot!],
+            poolState.tokens.map((t) => parseUnits(INIT_AMOUNT, t.decimals)),
             undefined,
             protocolVersion,
         );
@@ -123,14 +125,14 @@ describe('Create Stable Pool tests', () => {
         const initPoolInput = {
             amountsIn: [
                 {
-                    address: createPoolInput.tokens[0].address,
-                    rawAmount: parseEther('10'),
-                    decimals: DAI.decimals,
+                    address: createPoolInput.tokens[1].address,
+                    rawAmount: parseUnits(INIT_AMOUNT, BAL.decimals),
+                    decimals: BAL.decimals,
                 },
                 {
-                    address: createPoolInput.tokens[1].address,
-                    rawAmount: parseEther('10'),
-                    decimals: USDC.decimals,
+                    address: createPoolInput.tokens[0].address,
+                    rawAmount: parseUnits(INIT_AMOUNT, DAI.decimals),
+                    decimals: DAI.decimals,
                 },
             ],
             minBptAmountOut: parseEther('1'),
@@ -143,7 +145,7 @@ describe('Create Stable Pool tests', () => {
             initPoolInput,
             poolState,
             initPool: new InitPool(),
-            slippage: Slippage.fromPercentage('0.1'),
+            slippage: Slippage.fromPercentage('0.01'),
         });
 
         assertInitPool(initPoolInput, addLiquidityOutput);
