@@ -1,4 +1,4 @@
-// pnpm test -- createPool/stable.test.ts
+// pnpm test -- createPool/stable/stable.validation.test.ts
 
 import { parseEther, zeroAddress } from 'viem';
 import {
@@ -15,7 +15,7 @@ import {
     MAX_TOKENS,
 } from 'src/entities/inputValidator/stable/inputValidatorStable';
 
-describe('Create Stable Pool tests', () => {
+describe('Create stable pool input validation tests', () => {
     const chainId = ChainId.SEPOLIA;
     const createPool = new CreatePool();
     let createStablePoolInput: CreatePoolV3StableInput;
