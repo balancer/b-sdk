@@ -16,7 +16,6 @@ import {
     PoolState,
     PoolType,
     Slippage,
-    CreatePool,
     CreatePoolV2WeightedInput,
     InitPoolDataProvider,
     InitPool,
@@ -72,7 +71,6 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
 
         createTxInput = {
             client,
-            createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: createPoolWeightedInput,
         };

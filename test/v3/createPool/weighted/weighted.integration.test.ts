@@ -16,7 +16,6 @@ import {
     ChainId,
     PoolType,
     TokenType,
-    CreatePool,
     CreatePoolV3WeightedInput,
     InitPoolDataProvider,
     InitPool,
@@ -33,12 +32,14 @@ import { vaultExtensionAbi_V3 } from 'src/abi/';
 
 describe('Create Weighted Pool tests', () => {
     const chainId = ChainId.SEPOLIA;
+    const poolType = PoolType.Weighted;
+    const protocolVersion = 3;
 
-    let client: PublicWalletClient & TestActions;
-    let poolAddress: Address;
-    let createWeightedPoolInput: CreatePoolV3WeightedInput;
-    let signerAddress: Address;
     let rpcUrl: string;
+    let client: PublicWalletClient & TestActions;
+    let testAddress: Address;
+    let createPoolInput: CreatePoolV3WeightedInput;
+    let poolAddress: Address;
 
     // Deploy (and register) a pool before the tests run
     beforeAll(async () => {
@@ -50,10 +51,10 @@ describe('Create Weighted Pool tests', () => {
         })
             .extend(publicActions)
             .extend(walletActions);
-        signerAddress = (await client.getAddresses())[0];
+        testAddress = (await client.getAddresses())[0];
 
-        createWeightedPoolInput = {
-            poolType: PoolType.Weighted,
+        createPoolInput = {
+            poolType,
             symbol: '50BAL-50WETH',
             tokens: [
                 {
@@ -71,19 +72,18 @@ describe('Create Weighted Pool tests', () => {
             ],
             swapFeePercentage: parseEther('0.01'),
             poolHooksContract: zeroAddress,
-            pauseManager: signerAddress,
-            swapFeeManager: signerAddress,
+            pauseManager: testAddress,
+            swapFeeManager: testAddress,
             disableUnbalancedLiquidity: false,
             chainId,
-            protocolVersion: 3,
+            protocolVersion,
             enableDonation: false,
         };
 
         poolAddress = await doCreatePool({
             client,
-            testAddress: signerAddress,
-            createPool: new CreatePool(),
-            createPoolInput: createWeightedPoolInput,
+            testAddress,
+            createPoolInput,
         });
     });
 
@@ -105,29 +105,29 @@ describe('Create Weighted Pool tests', () => {
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
         const poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
-            PoolType.Weighted,
-            3,
+            poolType,
+            protocolVersion,
         );
 
         await forkSetup(
             client,
-            signerAddress,
+            testAddress,
             [...poolState.tokens.map((t) => t.address)],
             [3, 1],
             [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
             undefined,
-            3,
+            protocolVersion,
         );
 
         const initPoolInput = {
             amountsIn: [
                 {
-                    address: createWeightedPoolInput.tokens[0].address,
+                    address: createPoolInput.tokens[0].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                 },
                 {
-                    address: createWeightedPoolInput.tokens[1].address,
+                    address: createPoolInput.tokens[1].address,
                     rawAmount: parseEther('100'),
                     decimals: 18,
                 },
@@ -138,11 +138,11 @@ describe('Create Weighted Pool tests', () => {
 
         const addLiquidityOutput = await doInitPool({
             client,
-            initPool: new InitPool(),
-            testAddress: signerAddress,
-            slippage: Slippage.fromPercentage('0.01'),
+            testAddress,
             initPoolInput,
-            poolState: poolState,
+            poolState,
+            initPool: new InitPool(),
+            slippage: Slippage.fromPercentage('0.01'),
         });
 
         assertInitPool(initPoolInput, addLiquidityOutput);

@@ -16,7 +16,6 @@ import {
     PoolState,
     PoolType,
     Slippage,
-    CreatePool,
     CreatePoolV2ComposableStableInput,
     InitPoolDataProvider,
     InitPool,
@@ -75,7 +74,6 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
 
         createTxInput = {
             client,
-            createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: createPoolComposableStableInput,
         };

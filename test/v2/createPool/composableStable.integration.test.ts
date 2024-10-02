@@ -11,7 +11,6 @@ import {
     CHAINS,
     ChainId,
     PoolType,
-    CreatePool,
     CreatePoolV2ComposableStableInput,
     CreatePoolInput,
 } from 'src';
@@ -38,7 +37,6 @@ describe('Create Composable Stable Pool tests', () => {
 
         txInput = {
             client,
-            createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: {} as CreatePoolInput,
         };

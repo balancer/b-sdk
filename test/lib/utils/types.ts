@@ -5,7 +5,6 @@ import {
     AddLiquidityInput,
     Address,
     ChainId,
-    CreatePool,
     CreatePoolInput,
     InitPool,
     InitPoolInput,
@@ -58,7 +57,6 @@ export type RemoveLiquidityRecoveryTxInput = RemoveLiquidityTxInputBase & {
 
 export type CreatePoolTxInput = {
     client: PublicWalletClient & TestActions;
-    createPool: CreatePool;
     createPoolInput: CreatePoolInput;
     testAddress: Address;
 };
