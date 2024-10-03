@@ -29,7 +29,7 @@ describe('Create Composable Stable Pool tests', () => {
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl),
+            transport: http(rpcUrl, { timeout: 120_000 }), // FIXME: createPool step takes a long time, so we increase the timeout as a temporary solution
         })
             .extend(publicActions)
             .extend(walletActions);
