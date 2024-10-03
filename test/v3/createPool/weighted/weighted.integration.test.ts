@@ -18,7 +18,6 @@ import {
     TokenType,
     CreatePoolV3WeightedInput,
     InitPoolDataProvider,
-    InitPool,
     Slippage,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
@@ -30,10 +29,12 @@ import { PublicWalletClient } from '@/utils';
 import { VAULT_V3 } from 'src/utils/constants';
 import { vaultExtensionAbi_V3 } from 'src/abi/';
 
-describe('Create Weighted Pool tests', () => {
+describe('create weighted pool test', () => {
+    const protocolVersion = 3;
     const chainId = ChainId.SEPOLIA;
     const poolType = PoolType.Weighted;
-    const protocolVersion = 3;
+    const BAL = TOKENS[chainId].BAL;
+    const WETH = TOKENS[chainId].WETH;
 
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
@@ -58,13 +59,13 @@ describe('Create Weighted Pool tests', () => {
             symbol: '50BAL-50WETH',
             tokens: [
                 {
-                    address: TOKENS[chainId].BAL.address, // BAL
+                    address: BAL.address,
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                 },
                 {
-                    address: TOKENS[chainId].WETH.address, // WETH
+                    address: WETH.address,
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
@@ -113,7 +114,7 @@ describe('Create Weighted Pool tests', () => {
             client,
             testAddress,
             [...poolState.tokens.map((t) => t.address)],
-            [3, 1],
+            [WETH.slot!, BAL.slot!],
             [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
             undefined,
             protocolVersion,
@@ -124,12 +125,12 @@ describe('Create Weighted Pool tests', () => {
                 {
                     address: createPoolInput.tokens[0].address,
                     rawAmount: parseEther('100'),
-                    decimals: 18,
+                    decimals: BAL.decimals,
                 },
                 {
                     address: createPoolInput.tokens[1].address,
                     rawAmount: parseEther('100'),
-                    decimals: 18,
+                    decimals: WETH.decimals,
                 },
             ],
             minBptAmountOut: parseEther('90'),
@@ -141,7 +142,6 @@ describe('Create Weighted Pool tests', () => {
             testAddress,
             initPoolInput,
             poolState,
-            initPool: new InitPool(),
             slippage: Slippage.fromPercentage('0.01'),
         });
 

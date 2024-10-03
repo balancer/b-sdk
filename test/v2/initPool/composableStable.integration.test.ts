@@ -18,7 +18,6 @@ import {
     Slippage,
     CreatePoolV2ComposableStableInput,
     InitPoolDataProvider,
-    InitPool,
     InitPoolInput,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
@@ -99,7 +98,6 @@ describe('Composable Stable Pool - Init Pool tests', async () => {
 
         initPoolTxInput = {
             client,
-            initPool: new InitPool(),
             testAddress: signerAddress,
             initPoolInput: {} as InitPoolInput,
             slippage: Slippage.fromPercentage('0.01'),

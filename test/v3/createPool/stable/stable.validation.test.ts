@@ -15,7 +15,7 @@ import {
     MAX_TOKENS,
 } from 'src/entities/inputValidator/stable/inputValidatorStable';
 
-describe('Create stable pool input validation tests', () => {
+describe('create stable pool input validations', () => {
     const chainId = ChainId.SEPOLIA;
     const createPool = new CreatePool();
     let createStablePoolInput: CreatePoolV3StableInput;
@@ -48,8 +48,6 @@ describe('Create stable pool input validation tests', () => {
             enableDonation: false,
             disableUnbalancedLiquidity: false,
         };
-
-        console.log('createStablePoolInput', createStablePoolInput);
     });
 
     test('Should throw error if duplicate token addresses', async () => {

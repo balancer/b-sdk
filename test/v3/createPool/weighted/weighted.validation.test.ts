@@ -10,7 +10,7 @@ import {
 } from 'src';
 import { TOKENS } from 'test/lib/utils/addresses';
 
-describe('Create weighted pool input validation tests', () => {
+describe('create weighted pool input validations', () => {
     const chainId = ChainId.SEPOLIA;
     const createPool = new CreatePool();
     let createWeightedPoolInput: CreatePoolV3WeightedInput;

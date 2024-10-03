@@ -6,7 +6,6 @@ import {
     Address,
     ChainId,
     CreatePoolInput,
-    InitPool,
     InitPoolInput,
     NestedPoolState,
     PoolState,
@@ -33,7 +32,6 @@ export type InitPoolTxInput = Omit<
     'addLiquidity' | 'addLiquidityInput'
 > & {
     initPoolInput: InitPoolInput;
-    initPool: InitPool;
 };
 
 export type RemoveLiquidityTxInputBase = {

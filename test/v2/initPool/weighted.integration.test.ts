@@ -18,7 +18,6 @@ import {
     Slippage,
     CreatePoolV2WeightedInput,
     InitPoolDataProvider,
-    InitPool,
     InitPoolInput,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
@@ -96,7 +95,6 @@ describe('Add Liquidity Init - Weighted Pool', async () => {
 
         initPoolTxInput = {
             client,
-            initPool: new InitPool(),
             testAddress: signerAddress,
             initPoolInput: {} as InitPoolInput,
             slippage: Slippage.fromPercentage('0.01'),

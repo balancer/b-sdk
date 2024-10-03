@@ -18,7 +18,6 @@ import {
     TokenType,
     CreatePoolV3StableInput,
     InitPoolDataProvider,
-    InitPool,
     Slippage,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
@@ -30,13 +29,12 @@ import { vaultExtensionAbi_V3 } from 'src/abi/';
 import { doInitPool, assertInitPool } from 'test/lib/utils/initPoolHelper';
 import { forkSetup } from 'test/lib/utils/helper';
 
-describe('Create Stable Pool tests', () => {
+describe('create stable pool test', () => {
+    const protocolVersion = 3;
     const chainId = ChainId.SEPOLIA;
     const poolType = PoolType.Stable;
-    const protocolVersion = 3;
-    const DAI = TOKENS[chainId].DAI;
-    const BAL = TOKENS[chainId].BAL;
-    const INIT_AMOUNT = '100';
+    const scUSD = TOKENS[chainId].scUSD;
+    const scDAI = TOKENS[chainId].scDAI;
 
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
@@ -59,18 +57,18 @@ describe('Create Stable Pool tests', () => {
             poolType,
             chainId,
             protocolVersion,
-            name: 'DAI USDC Stable Pool',
-            symbol: 'DAI-USDC',
+            name: 'scUSD scDAI Stable Pool',
+            symbol: 'scUSD-scDAI',
             amplificationParameter: 420n,
             tokens: [
                 {
-                    address: DAI.address,
+                    address: scUSD.address,
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                     paysYieldFees: false,
                 },
                 {
-                    address: BAL.address,
+                    address: scDAI.address,
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                     paysYieldFees: false,
@@ -116,8 +114,8 @@ describe('Create Stable Pool tests', () => {
             client,
             testAddress,
             poolState.tokens.map((t) => t.address),
-            [BAL.slot!, DAI.slot!],
-            poolState.tokens.map((t) => parseUnits(INIT_AMOUNT, t.decimals)),
+            [scDAI.slot!, scUSD.slot!],
+            poolState.tokens.map((t) => parseUnits('100', t.decimals)),
             undefined,
             protocolVersion,
         );
@@ -125,17 +123,17 @@ describe('Create Stable Pool tests', () => {
         const initPoolInput = {
             amountsIn: [
                 {
-                    address: createPoolInput.tokens[1].address,
-                    rawAmount: parseUnits(INIT_AMOUNT, BAL.decimals),
-                    decimals: BAL.decimals,
+                    address: createPoolInput.tokens[0].address,
+                    rawAmount: parseUnits('100', scUSD.decimals),
+                    decimals: scUSD.decimals,
                 },
                 {
-                    address: createPoolInput.tokens[0].address,
-                    rawAmount: parseUnits(INIT_AMOUNT, DAI.decimals),
-                    decimals: DAI.decimals,
+                    address: createPoolInput.tokens[1].address,
+                    rawAmount: parseUnits('100', scDAI.decimals),
+                    decimals: scDAI.decimals,
                 },
             ],
-            minBptAmountOut: parseEther('1'),
+            minBptAmountOut: parseEther('10'),
             chainId,
         };
 
@@ -144,7 +142,6 @@ describe('Create Stable Pool tests', () => {
             testAddress,
             initPoolInput,
             poolState,
-            initPool: new InitPool(),
             slippage: Slippage.fromPercentage('0.01'),
         });
 
