@@ -16,7 +16,11 @@ import {
     MAX_UINT256,
     CHAINS,
 } from '../../../../utils';
-import { balancerRouterAbi } from '../../../../abi';
+import {
+    balancerRouterAbi,
+    vaultExtensionV3Abi,
+    vaultV3Abi,
+} from '../../../../abi';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
@@ -109,42 +113,43 @@ export class SwapV3 implements SwapBase {
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
             address: BALANCER_ROUTER[this.chainId],
-            abi: balancerRouterAbi,
+            abi: [...balancerRouterAbi, ...vaultV3Abi, ...vaultExtensionV3Abi],
             client,
         });
         if ('exactAmountIn' in this.swaps) {
-            const { result } = account
-                ? await routerContract.simulate.swapSingleTokenExactIn(
-                      [
-                          this.swaps.pool,
-                          this.swaps.tokenIn,
-                          this.swaps.tokenOut,
-                          this.swaps.exactAmountIn,
-                          0n, // minAmountOut
-                          999999999999999999n, // deadline
-                          false, // wethIsEth
-                          DEFAULT_USERDATA,
-                      ],
-                      { blockNumber: block, account },
-                  )
-                : await routerContract.simulate.querySwapSingleTokenExactIn(
-                      [
-                          this.swaps.pool,
-                          this.swaps.tokenIn,
-                          this.swaps.tokenOut,
-                          this.swaps.exactAmountIn,
-                          DEFAULT_USERDATA,
-                      ],
-                      { blockNumber: block },
-                  );
-            return {
-                swapKind: SwapKind.GivenIn,
-                expectedAmountOut: TokenAmount.fromRawAmount(
-                    this.outputAmount.token,
-                    result,
-                ),
-                amountIn: this.inputAmount,
-            };
+            try {
+                const { result } = account
+                    ? await routerContract.simulate.querySwapSingleTokenExactIn(
+                          [
+                              this.swaps.pool,
+                              this.swaps.tokenIn,
+                              this.swaps.tokenOut,
+                              this.swaps.exactAmountIn,
+                              DEFAULT_USERDATA,
+                          ],
+                          { blockNumber: block, account },
+                      )
+                    : await routerContract.simulate.querySwapSingleTokenExactIn(
+                          [
+                              this.swaps.pool,
+                              this.swaps.tokenIn,
+                              this.swaps.tokenOut,
+                              this.swaps.exactAmountIn,
+                              DEFAULT_USERDATA,
+                          ],
+                          { blockNumber: block },
+                      );
+                return {
+                    swapKind: SwapKind.GivenIn,
+                    expectedAmountOut: TokenAmount.fromRawAmount(
+                        this.outputAmount.token,
+                        result,
+                    ),
+                    amountIn: this.inputAmount,
+                };
+            } catch (err) {
+                console.log(err);
+            }
         }
         if ('exactAmountOut' in this.swaps) {
             const { result } = account

@@ -14,13 +14,14 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
 } from '@balancer/sdk';
-import { Address, parseUnits } from 'viem';
+import { Address, parseUnits, zeroAddress } from 'viem';
 
 const customSwap = async () => {
     // User defined
     const rpcUrl = process.env.SEPOLIA_RPC_URL;
     const chainId = ChainId.SEPOLIA;
-    const account = '0x5036388C540994Ed7b74b82F71175a441F85BdA1'; // User sending the swap (optional)
+    const account = '0x5036388C540994Ed7b74b82F71175a441F85BdA1'; // User sending the swap - DOES NOT WORK
+    // const account = zeroAddress; // WORKS
     const pools = ['0x6D9656174205876897A9f526CCDcD3aE725ffEFF' as Address];
     const tokenIn = {
         address: '0xE8d4E9Fc8257B77Acb9eb80B5e8176F4f0cBCeBC' as Address,
