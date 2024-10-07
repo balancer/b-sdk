@@ -4,20 +4,16 @@ import { TxOutput, sendTransactionGetBalances } from './helper';
 import { InitPoolTxInput } from './types';
 
 function sdkInitPool({
-    initPool,
-    initPoolInput: addLiquidityInput,
+    initPoolInput,
     poolState,
 }: {
-    initPool: InitPool;
     initPoolInput: InitPoolInput;
     poolState: PoolState;
 }): {
     initPoolBuildOutput: InitPoolBuildOutput;
 } {
-    const initPoolBuildOutput = initPool.buildCall(
-        addLiquidityInput,
-        poolState,
-    );
+    const initPool = new InitPool();
+    const initPoolBuildOutput = initPool.buildCall(initPoolInput, poolState);
 
     return {
         initPoolBuildOutput,
@@ -25,10 +21,9 @@ function sdkInitPool({
 }
 
 export async function doInitPool(txInput: InitPoolTxInput) {
-    const { initPool, poolState, initPoolInput, testAddress, client } = txInput;
+    const { poolState, initPoolInput, testAddress, client } = txInput;
 
     const { initPoolBuildOutput } = sdkInitPool({
-        initPool,
         initPoolInput,
         poolState,
     });

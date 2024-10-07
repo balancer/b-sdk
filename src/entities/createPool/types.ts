@@ -49,6 +49,16 @@ export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
     disableUnbalancedLiquidity: boolean;
 };
 
+export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
+    poolType: PoolType.Stable;
+    amplificationParameter: bigint; // value between 1e3 and 5000e3
+    tokens: {
+        address: Address;
+        rateProvider: Address;
+        tokenType: TokenType;
+        paysYieldFees: boolean;
+    }[];
+};
 export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Weighted;
     tokens: {
@@ -63,7 +73,8 @@ export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
 export type CreatePoolInput =
     | CreatePoolV2WeightedInput
     | CreatePoolV2ComposableStableInput
-    | CreatePoolV3WeightedInput;
+    | CreatePoolV3WeightedInput
+    | CreatePoolV3StableInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;

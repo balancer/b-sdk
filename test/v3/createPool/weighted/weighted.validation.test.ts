@@ -1,4 +1,4 @@
-// pnpm test -- createPool/weighted.test.ts
+// pnpm test -- createPool/weighted/weighted.validation.test.ts
 
 import { parseEther, zeroAddress } from 'viem';
 import {
@@ -10,7 +10,7 @@ import {
 } from 'src';
 import { TOKENS } from 'test/lib/utils/addresses';
 
-describe('Create Weighted Pool tests', () => {
+describe('create weighted pool input validations', () => {
     const chainId = ChainId.SEPOLIA;
     const createPool = new CreatePool();
     let createWeightedPoolInput: CreatePoolV3WeightedInput;
