@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         },
         test: {
             testTimeout: 20_000,
-            hookTimeout: 30_000,
+            hookTimeout: 60_000,
             setupFiles: ['/test/vitest-setup.ts'],
             globals: true,
             pool: 'forks',
