@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 0.28.0
+
+### Minor Changes
+
+- b00b8d0: Update to deploy 9
+- 128313b: Support for v3 stable pool creation
+
 ## 0.27.0
 
 ### Minor Changes
