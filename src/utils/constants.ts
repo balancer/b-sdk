@@ -150,11 +150,11 @@ export const VAULT: Record<number, Address> = {
 };
 
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x0EF1c156a7986F394d90eD1bEeA6483Cc435F542',
+    [ChainId.SEPOLIA]: '0x30AF3689547354f82C70256894B07C9D0f067BB6',
 };
 
 export const VAULT_ADMIN: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x65c4af66f112706c7890ca3a2e32bda8df6d9cb2',
+    [ChainId.SEPOLIA]: '0xa91b39DAeF308666a1e8E34BCacE2C3a899AaE78',
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
@@ -199,19 +199,23 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
 };
 
 export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x7c5E586ed4EC1793a6076FC0Dcad03Ca2442f7F8',
+    [ChainId.SEPOLIA]: '0x209e6cE55A89A39329C9666a5B8b371e84572aE8',
 };
 
 export const STABLE_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x2a55364B7948a460f9DEfFFc4440cB838A10dc26',
+    [ChainId.SEPOLIA]: '0x088F634B55C19A3138fd919098fB1320c4aBa6D0',
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xB12FcB422aAe6720f882E22C340964a7723f2387',
+    [ChainId.SEPOLIA]: '0x77eDc69766409C599F06Ef0B551a0990CBfe13A7',
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x0418001D0d68C71d0E391fE46dC7aFCe045f34A0',
+    [ChainId.SEPOLIA]: '0x16Cf31c5c4f92ad6185D583080C84FEeb6074c78',
+};
+
+export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x89cA59Bc46c00D90C496Fc99f16668b00Dd6B5CC',
 };
 
 export const PERMIT2: Record<number, Address> = {
@@ -222,7 +226,7 @@ export const AUTHORIZER: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0xa331d84ec860bf466b4cdccfb4ac09a1b43f3ae6',
 };
 
-export const ADMIN_OF_AUTHORIZER = '0x171C0fF5943CE5f133130436A29bF61E26516003'; // is this EoA chain agnostic?
+export const ADMIN_OF_AUTHORIZER = '0x171C0fF5943CE5f133130436A29bF61E26516003'; // do we plan to use same EoA for all chains?
 
 /**
  * Native Assets

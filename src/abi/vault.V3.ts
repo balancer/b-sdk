@@ -370,6 +370,11 @@ export const vaultV3Abi = [
     { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
     { inputs: [], name: 'RouterNotTrusted', type: 'error' },
     {
+        inputs: [{ internalType: 'int256', name: 'value', type: 'int256' }],
+        name: 'SafeCastOverflowedIntToUint',
+        type: 'error',
+    },
+    {
         inputs: [{ internalType: 'uint256', name: 'value', type: 'uint256' }],
         name: 'SafeCastOverflowedUintToInt',
         type: 'error',
@@ -455,6 +460,44 @@ export const vaultV3Abi = [
     { inputs: [], name: 'WrongVaultAdminDeployment', type: 'error' },
     { inputs: [], name: 'WrongVaultExtensionDeployment', type: 'error' },
     { inputs: [], name: 'ZeroDivision', type: 'error' },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'aggregateSwapFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'AggregateSwapFeePercentageChanged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'aggregateYieldFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'AggregateYieldFeePercentageChanged',
+        type: 'event',
+    },
     {
         anonymous: false,
         inputs: [
@@ -616,9 +659,21 @@ export const vaultV3Abi = [
             },
             {
                 indexed: false,
+                internalType: 'uint256',
+                name: 'totalSupply',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
                 internalType: 'int256[]',
                 name: 'deltas',
                 type: 'int256[]',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256[]',
+                name: 'swapFeeAmountsRaw',
+                type: 'uint256[]',
             },
         ],
         name: 'PoolBalanceChanged',
@@ -906,12 +961,6 @@ export const vaultV3Abi = [
                 name: 'swapFeeAmount',
                 type: 'uint256',
             },
-            {
-                indexed: false,
-                internalType: 'contract IERC20',
-                name: 'swapFeeToken',
-                type: 'address',
-            },
         ],
         name: 'Swap',
         type: 'event',
@@ -1127,7 +1176,6 @@ export const vaultV3Abi = [
                         name: 'limitRaw',
                         type: 'uint256',
                     },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct BufferWrapOrUnwrapParams',
                 name: 'params',

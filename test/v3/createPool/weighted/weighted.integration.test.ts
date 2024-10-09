@@ -29,14 +29,14 @@ import { PublicWalletClient } from '@/utils';
 import { VAULT_V3 } from 'src/utils/constants';
 import { vaultExtensionAbi_V3 } from 'src/abi/';
 
-describe('create weighted pool test', () => {
-    const protocolVersion = 3;
-    const chainId = ChainId.SEPOLIA;
-    const poolType = PoolType.Weighted;
-    const BAL = TOKENS[chainId].BAL;
-    const WETH = TOKENS[chainId].WETH;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
+const protocolVersion = 3;
+const chainId = ChainId.SEPOLIA;
+const poolType = PoolType.Weighted;
+const BAL = TOKENS[chainId].BAL;
+const WETH = TOKENS[chainId].WETH;
 
-    let rpcUrl: string;
+describe('create weighted pool test', () => {
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let createPoolInput: CreatePoolV3WeightedInput;
@@ -44,7 +44,6 @@ describe('create weighted pool test', () => {
 
     // Deploy (and register) a pool before the tests run
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
