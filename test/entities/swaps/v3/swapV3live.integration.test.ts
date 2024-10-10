@@ -20,14 +20,11 @@ import {
     SwapKind,
     Token,
     Swap,
-    ExactInQueryOutput,
-    ExactOutQueryOutput,
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
     PERMIT2,
     PublicWalletClient,
 } from '@/index';
-import { Path } from '@/entities/swap/paths/types';
 
 import {
     approveSpenderOnTokens,
@@ -35,7 +32,7 @@ import {
     setTokenBalances,
 } from 'test/lib/utils/helper';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
-import { POOLS, TOKENS } from 'test/lib/utils/addresses';
+import { TOKENS } from 'test/lib/utils/addresses';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
@@ -63,25 +60,13 @@ const WETH_USD_BPT = {
     slot: 0,
 };
 
-const WSTETH = {
-    address: '0xcdee63eba9149219bb3ed23b08c4f14cc239f512',
-    decimals: 18,
-    slot: 0,
-};
-
-const DAI = TOKENS[chainId].DAI;
-const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
-const stataUSDC = TOKENS[chainId].stataUSDC;
-const stataDAI = TOKENS[chainId].stataDAI;
+const WSTETH = TOKENS[chainId].wstETH;
 
 describe('SwapV3', () => {
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let rpcUrl: string;
     let snapshot: Hex;
-    let pathBalWeth: Path;
-    let pathUsdcWethMulti: Path;
-    let pathUsdcWethJoin: Path;
     let tokens: Address[];
     let api: BalancerApi;
 
@@ -104,19 +89,14 @@ describe('SwapV3', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        tokens = [WETH.address, BAL.address, USDC.address, WSTETH.address];
+        tokens = [WETH.address, BAL.address, USDC.address];
 
         await setTokenBalances(
             client,
             testAddress,
             tokens,
-            [WETH.slot, BAL.slot, USDC.slot, WSTETH.slot] as number[],
-            [
-                parseEther('100'),
-                parseEther('100'),
-                100000000000n,
-                parseEther('100'),
-            ],
+            [WETH.slot, BAL.slot, USDC.slot] as number[],
+            [parseEther('100'), parseEther('100'), 100000000000n],
         );
 
         await approveSpenderOnTokens(
