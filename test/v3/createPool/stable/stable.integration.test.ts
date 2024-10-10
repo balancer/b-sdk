@@ -29,21 +29,20 @@ import { vaultExtensionAbi_V3 } from 'src/abi/';
 import { doInitPool, assertInitPool } from 'test/lib/utils/initPoolHelper';
 import { forkSetup } from 'test/lib/utils/helper';
 
-describe('create stable pool test', () => {
-    const protocolVersion = 3;
-    const chainId = ChainId.SEPOLIA;
-    const poolType = PoolType.Stable;
-    const scUSD = TOKENS[chainId].scUSD;
-    const scDAI = TOKENS[chainId].scDAI;
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
+const protocolVersion = 3;
+const chainId = ChainId.SEPOLIA;
+const poolType = PoolType.Stable;
+const scUSD = TOKENS[chainId].scUSD;
+const scDAI = TOKENS[chainId].scDAI;
 
-    let rpcUrl: string;
+describe('create stable pool test', () => {
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let createPoolInput: CreatePoolV3StableInput;
     let poolAddress: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
