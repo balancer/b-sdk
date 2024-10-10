@@ -60,8 +60,6 @@ const WETH_USD_BPT = {
     slot: 0,
 };
 
-const WSTETH = TOKENS[chainId].wstETH;
-
 describe('SwapV3', () => {
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
