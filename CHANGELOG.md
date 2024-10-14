@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.28.1
+
+### Patch Changes
+
+- d64eb0f: Update vault extension ABI to deploy9 version.
+
 ## 0.28.0
 
 ### Minor Changes
