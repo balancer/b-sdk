@@ -429,6 +429,44 @@ export const vaultExtensionAbi_V3 = [
                 type: 'address',
             },
             {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'aggregateSwapFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'AggregateSwapFeePercentageChanged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'aggregateYieldFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'AggregateYieldFeePercentageChanged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
                 indexed: true,
                 internalType: 'address',
                 name: 'owner',
@@ -580,9 +618,21 @@ export const vaultExtensionAbi_V3 = [
             },
             {
                 indexed: false,
+                internalType: 'uint256',
+                name: 'totalSupply',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
                 internalType: 'int256[]',
                 name: 'deltas',
                 type: 'int256[]',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256[]',
+                name: 'swapFeeAmountsRaw',
+                type: 'uint256[]',
             },
         ],
         name: 'PoolBalanceChanged',
@@ -869,12 +919,6 @@ export const vaultExtensionAbi_V3 = [
                 internalType: 'uint256',
                 name: 'swapFeeAmount',
                 type: 'uint256',
-            },
-            {
-                indexed: false,
-                internalType: 'contract IERC20',
-                name: 'swapFeeToken',
-                type: 'address',
             },
         ],
         name: 'Swap',
@@ -1570,6 +1614,19 @@ export const vaultExtensionAbi_V3 = [
             { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
         ],
         stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'isERC4626BufferInitialized',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
         type: 'function',
     },
     {
