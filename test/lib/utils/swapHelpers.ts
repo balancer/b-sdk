@@ -283,3 +283,46 @@ export async function assertSwapExactOut({
         ).toBe(true);
     }
 }
+
+export function assertPathsAreVersionTagged(
+    version: number,
+    sorPaths: Array<{ protocolVersion: number }>,
+) {
+    for (const path of sorPaths) {
+        if (path.protocolVersion !== version) {
+            throw new Error(
+                `Expected protocolVersion to be 3, but found ${path.protocolVersion}`,
+            );
+        }
+    }
+}
+
+export function assertPathHasMultiHop(
+    sorPaths: Array<{ pools: any[] }>,
+    shouldBeMultiHop: boolean,
+) {
+    if (shouldBeMultiHop) {
+        expect(sorPaths[0].pools.length).to.be.gt(1);
+    } else {
+        expect(sorPaths[0].pools.length).toBe(1);
+    }
+}
+
+export function assertPathHasEitherExitOrJoin(sorPaths: any[]) {
+    for (const path of sorPaths) {
+        const pools = path.pools;
+        const tokenAddresses = path.tokens.map(
+            (token: { address: string }) => token.address,
+        );
+
+        // Check if any pool address is found in the token addresses
+        const hasMatchingPool = pools.some((pool: string) =>
+            tokenAddresses.includes(pool),
+        );
+
+        if (!hasMatchingPool) {
+            throw new Error('No matching pool address found in tokens array');
+        }
+        expect(hasMatchingPool).to.be.true;
+    }
+}
