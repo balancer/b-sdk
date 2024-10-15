@@ -23,22 +23,21 @@ async function runAgainstFork() {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
     const chainId = ChainId.SEPOLIA;
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-    // Pool from a custom factory that is not currently supported in Balancer API
+    // Weighted pool from deploy 9
     const pool = {
-        // TODO: update with pool from testnet deployment 4
-        id: '0xd851b2b78c41c40a4fa134f6fc4282b71f0f1491',
-        address: '0xd851b2b78c41c40a4fa134f6fc4282b71f0f1491' as Address,
+        id: '0xd71958aeD5E2e835A648Ff832a181F7BdaBbaF13',
+        address: '0xd71958aeD5E2e835A648Ff832a181F7BdaBbaF13' as Address,
     };
     const amountsIn = [
         {
-            rawAmount: parseEther('0.01'),
+            rawAmount: parseEther('0.02'),
             decimals: 18,
-            address: '0x990c8eab51d9ecb365bf9b3de09d121af007db68' as Address,
+            address: '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9' as Address, // wETH
         },
         {
-            rawAmount: parseEther('0.01'),
+            rawAmount: parseEther('0.04'),
             decimals: 18,
-            address: '0xcd20075dc190c411287132e891ec42f009babc73' as Address,
+            address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75' as Address, // BAL
         },
     ];
     const slippage = Slippage.fromPercentage('1'); // 1%
@@ -80,7 +79,7 @@ const addLiquidity = async ({
     const onchainProvider = new OnChainProvider(rpcUrl, chainId);
     const poolState = await onchainProvider.pools.fetchPoolState(
         poolId,
-        'CustomPool',
+        'Weighted',
     );
 
     // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced

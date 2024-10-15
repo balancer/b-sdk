@@ -27,17 +27,17 @@ async function runAgainstFork() {
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     // 80BAL-20WETH
     const pool = {
-        id: '0x03Bf996C7BD45B3386cb41875761d45e27EaB284',
-        address: '0x03Bf996C7BD45B3386cb41875761d45e27EaB284' as Address,
+        id: '0xd71958aeD5E2e835A648Ff832a181F7BdaBbaF13',
+        address: '0xd71958aeD5E2e835A648Ff832a181F7BdaBbaF13' as Address,
     };
     const amountsIn = [
         {
-            rawAmount: parseEther('0.0001'),
+            rawAmount: parseEther('0.00033'),
             decimals: 18,
-            address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' as Address,
+            address: '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9' as Address,
         },
         {
-            rawAmount: parseEther('0.0001'),
+            rawAmount: parseEther('0.00069'),
             decimals: 18,
             address: '0xb19382073c7a0addbb56ac6af1808fa49e377b75' as Address,
         },
