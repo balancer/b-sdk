@@ -1,5 +1,6 @@
 import {
     PublicClient,
+    Address,
     createPublicClient,
     encodeFunctionData,
     getContract,
@@ -94,6 +95,7 @@ export class SwapV3 implements SwapBase {
     public async query(
         rpcUrl?: string,
         block?: bigint,
+        account?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const client = createPublicClient({
             chain: CHAINS[this.chainId],
@@ -101,13 +103,14 @@ export class SwapV3 implements SwapBase {
         });
 
         return this.isBatchSwap
-            ? this.queryBatchSwap(client, block)
-            : this.querySingleSwap(client, block);
+            ? this.queryBatchSwap(client, block, account)
+            : this.querySingleSwap(client, block, account);
     }
 
     private async querySingleSwap(
         client: PublicClient,
         block?: bigint,
+        account?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
             address: BALANCER_ROUTER[this.chainId],
@@ -120,17 +123,31 @@ export class SwapV3 implements SwapBase {
             client,
         });
         if ('exactAmountIn' in this.swaps) {
-            const { result } =
-                await routerContract.simulate.querySwapSingleTokenExactIn(
-                    [
-                        this.swaps.pool,
-                        this.swaps.tokenIn,
-                        this.swaps.tokenOut,
-                        this.swaps.exactAmountIn,
-                        DEFAULT_USERDATA,
-                    ],
-                    { blockNumber: block },
-                );
+            const { result } = account
+                ? // pseudo query fails if account has insufficient allowance or balance
+                  await routerContract.simulate.swapSingleTokenExactIn(
+                      [
+                          this.swaps.pool,
+                          this.swaps.tokenIn,
+                          this.swaps.tokenOut,
+                          this.swaps.exactAmountIn,
+                          0n, // minAmountOut
+                          MAX_UINT256, // deadline
+                          false, // wethIsEth
+                          DEFAULT_USERDATA,
+                      ],
+                      { blockNumber: block, account },
+                  )
+                : await routerContract.simulate.querySwapSingleTokenExactIn(
+                      [
+                          this.swaps.pool,
+                          this.swaps.tokenIn,
+                          this.swaps.tokenOut,
+                          this.swaps.exactAmountIn,
+                          DEFAULT_USERDATA,
+                      ],
+                      { blockNumber: block },
+                  );
             return {
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
@@ -141,17 +158,31 @@ export class SwapV3 implements SwapBase {
             };
         }
         if ('exactAmountOut' in this.swaps) {
-            const { result } =
-                await routerContract.simulate.querySwapSingleTokenExactOut(
-                    [
-                        this.swaps.pool,
-                        this.swaps.tokenIn,
-                        this.swaps.tokenOut,
-                        this.swaps.exactAmountOut,
-                        DEFAULT_USERDATA,
-                    ],
-                    { blockNumber: block },
-                );
+            const { result } = account
+                ? // pseudo query fails if account has insufficient allowance or balance
+                  await routerContract.simulate.swapSingleTokenExactOut(
+                      [
+                          this.swaps.pool,
+                          this.swaps.tokenIn,
+                          this.swaps.tokenOut,
+                          this.swaps.exactAmountOut,
+                          MAX_UINT256, // maxAmountIn
+                          MAX_UINT256, // deadline
+                          false, // wethIsEth
+                          DEFAULT_USERDATA,
+                      ],
+                      { blockNumber: block, account },
+                  )
+                : await routerContract.simulate.querySwapSingleTokenExactOut(
+                      [
+                          this.swaps.pool,
+                          this.swaps.tokenIn,
+                          this.swaps.tokenOut,
+                          this.swaps.exactAmountOut,
+                          DEFAULT_USERDATA,
+                      ],
+                      { blockNumber: block },
+                  );
             return {
                 swapKind: SwapKind.GivenOut,
                 expectedAmountIn: TokenAmount.fromRawAmount(
@@ -200,6 +231,7 @@ export class SwapV3 implements SwapBase {
     private async queryBatchSwap(
         client: PublicClient,
         block?: bigint,
+        account?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         // Note - batchSwaps are made via the Batch Router
         const batchRouterContract = getContract({
@@ -219,14 +251,24 @@ export class SwapV3 implements SwapBase {
         const swapsWithLimits = this.getSwapsWithLimits();
 
         if (this.swapKind === SwapKind.GivenIn) {
-            const { result } =
-                await batchRouterContract.simulate.querySwapExactIn(
-                    [
-                        swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
-                        DEFAULT_USERDATA,
-                    ],
-                    { blockNumber: block },
-                );
+            const { result } = account
+                ? // pseudo query fails if account has insufficient allowance or balance
+                  await batchRouterContract.simulate.swapExactIn(
+                      [
+                          swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                          MAX_UINT256, // deadline
+                          false, // wethIsEth
+                          DEFAULT_USERDATA,
+                      ],
+                      { blockNumber: block, account },
+                  )
+                : await batchRouterContract.simulate.querySwapExactIn(
+                      [
+                          swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                          DEFAULT_USERDATA,
+                      ],
+                      { blockNumber: block },
+                  );
 
             if (result[1].length !== 1)
                 throw Error(
@@ -244,13 +286,24 @@ export class SwapV3 implements SwapBase {
             };
         }
 
-        const { result } = await batchRouterContract.simulate.querySwapExactOut(
-            [
-                swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
-                DEFAULT_USERDATA,
-            ],
-            { blockNumber: block },
-        );
+        const { result } = account
+            ? // pseudo query fails if account has insufficient allowance or balance
+              await batchRouterContract.simulate.swapExactOut(
+                  [
+                      swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                      MAX_UINT256, // deadline
+                      false, // wethIsEth
+                      DEFAULT_USERDATA,
+                  ],
+                  { blockNumber: block, account },
+              )
+            : await batchRouterContract.simulate.querySwapExactOut(
+                  [
+                      swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                      DEFAULT_USERDATA,
+                  ],
+                  { blockNumber: block },
+              );
 
         if (result[1].length !== 1)
             throw Error(

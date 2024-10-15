@@ -15,6 +15,7 @@ import {
     SwapPathExactAmountIn,
     SwapPathExactAmountOut,
 } from '../swaps/v3';
+import { Address } from 'viem';
 
 export interface SwapBase {
     chainId: number;
@@ -34,6 +35,7 @@ export interface SwapBase {
     query(
         rpcUrl?: string,
         block?: bigint,
+        account?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput>;
     queryCallData(): string;
     buildCall(
