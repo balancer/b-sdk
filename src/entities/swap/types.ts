@@ -9,6 +9,7 @@ export type SwapInput = {
     chainId: number;
     paths: Path[];
     swapKind: SwapKind;
+    userData?: Hex;
 };
 
 export type SwapBuildCallInputBase = {

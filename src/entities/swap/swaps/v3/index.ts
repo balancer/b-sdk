@@ -48,7 +48,12 @@ export * from './types';
 
 // A Swap can be a single or multiple paths
 export class SwapV3 implements SwapBase {
-    public constructor({ chainId, paths, swapKind }: SwapInput) {
+    public constructor({
+        chainId,
+        paths,
+        swapKind,
+        userData = DEFAULT_USERDATA,
+    }: SwapInput) {
         if (paths.length === 0)
             throw new Error('Invalid swap: must contain at least 1 path.');
 
@@ -70,12 +75,14 @@ export class SwapV3 implements SwapBase {
         this.outputAmount = getOutputAmount(this.paths);
         this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
         this.swaps = this.getSwaps(this.paths);
+        this.userData = userData;
     }
 
     public readonly chainId: number;
     public readonly isBatchSwap: boolean;
     public readonly paths: PathWithAmount[];
     public readonly swapKind: SwapKind;
+    public readonly userData: Hex;
     public swaps:
         | SingleTokenExactIn
         | SingleTokenExactOut
@@ -127,7 +134,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountIn,
-                        DEFAULT_USERDATA,
+                        this.userData,
                     ],
                     { blockNumber: block },
                 );
@@ -148,7 +155,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountOut,
-                        DEFAULT_USERDATA,
+                        this.userData,
                     ],
                     { blockNumber: block },
                 );
@@ -223,7 +230,7 @@ export class SwapV3 implements SwapBase {
                 await batchRouterContract.simulate.querySwapExactIn(
                     [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
-                        DEFAULT_USERDATA,
+                        this.userData,
                     ],
                     { blockNumber: block },
                 );
@@ -247,7 +254,7 @@ export class SwapV3 implements SwapBase {
         const { result } = await batchRouterContract.simulate.querySwapExactOut(
             [
                 swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
-                DEFAULT_USERDATA,
+                this.userData,
             ],
             { blockNumber: block },
         );
@@ -279,7 +286,7 @@ export class SwapV3 implements SwapBase {
                     functionName: 'querySwapExactIn',
                     args: [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
-                        DEFAULT_USERDATA,
+                        this.userData,
                     ],
                 });
             } else {
@@ -288,7 +295,7 @@ export class SwapV3 implements SwapBase {
                     functionName: 'querySwapExactOut',
                     args: [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
-                        DEFAULT_USERDATA,
+                        this.userData,
                     ],
                 });
             }
@@ -302,7 +309,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountIn,
-                        DEFAULT_USERDATA,
+                        this.userData,
                     ],
                 });
             } else if ('exactAmountOut' in this.swaps) {
@@ -314,7 +321,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountOut,
-                        DEFAULT_USERDATA,
+                        this.userData,
                     ],
                 });
             } else throw new Error('Incorrect V3 Swap');
@@ -442,7 +449,7 @@ export class SwapV3 implements SwapBase {
                     limit.amount, // minAmountOut
                     deadline,
                     wethIsEth,
-                    DEFAULT_USERDATA,
+                    this.userData,
                 ],
             });
         } else if ('exactAmountOut' in this.swaps) {
@@ -457,7 +464,7 @@ export class SwapV3 implements SwapBase {
                     limit.amount, // maxAmountIn
                     deadline,
                     wethIsEth,
-                    DEFAULT_USERDATA,
+                    this.userData,
                 ],
             });
         } else throw new Error('Incorrect V3 Swap');
@@ -501,7 +508,7 @@ export class SwapV3 implements SwapBase {
                     swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
                     deadline,
                     wethIsEth,
-                    DEFAULT_USERDATA,
+                    this.userData,
                 ],
             });
         } else {
@@ -522,7 +529,7 @@ export class SwapV3 implements SwapBase {
                     swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
                     deadline,
                     wethIsEth,
-                    DEFAULT_USERDATA,
+                    this.userData,
                 ],
             });
         }
