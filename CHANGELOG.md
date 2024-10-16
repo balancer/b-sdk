@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.28.2
+
+### Patch Changes
+
+- 5442afb: Add support for userData to v3 swaps
+
 ## 0.28.1
 
 ### Patch Changes
