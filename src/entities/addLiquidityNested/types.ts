@@ -1,9 +1,10 @@
-import { Address, Hex, InputAmount, PoolType } from '../../../types';
-import { ChainId } from '../../../utils';
-import { Slippage } from '../../slippage';
-import { Token } from '../../token';
-import { TokenAmount } from '../../tokenAmount';
-import { PoolKind } from '../../types';
+import { Address, Hex } from 'viem';
+import { InputAmount, PoolType } from '../../types';
+import { ChainId } from '../../utils';
+import { Slippage } from '../slippage';
+import { Token } from '../token';
+import { TokenAmount } from '../tokenAmount';
+import { PoolKind } from '../types';
 
 export type AddLiquidityNestedInput = {
     amountsIn: InputAmount[];
@@ -43,4 +44,11 @@ export type AddLiquidityNestedCallInput = AddLiquidityNestedQueryOutput & {
     accountAddress: Address;
     relayerApprovalSignature?: Hex;
     wethIsEth?: boolean;
+};
+
+export type AddLiquidityNestedBuildCallOutput = {
+    callData: Hex;
+    to: Address;
+    value: bigint;
+    minBptOut: bigint;
 };

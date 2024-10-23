@@ -4,7 +4,7 @@ import { encodeFunctionData, Hex } from 'viem';
 import { TokenAmount } from '../../tokenAmount';
 import { getValue } from '../../utils/getValue';
 import { replaceWrapped } from '@/entities/utils';
-import { AddLiquidityNestedCallAttributes } from './types';
+import { AddLiquidityNestedCallAttributes } from '../types';
 import { WeightedEncoder } from '@/entities/encoders';
 import { PoolType } from '@/types';
 

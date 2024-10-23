@@ -9,7 +9,7 @@ import {
 import {
     AddLiquidityNestedCallAttributes,
     AddLiquidityNestedInput,
-} from './types';
+} from '../types';
 import { NestedPool, PoolKind } from '@/entities/types';
 import { Relayer } from '@/entities/relayer';
 

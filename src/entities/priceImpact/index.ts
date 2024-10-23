@@ -22,7 +22,7 @@ import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { NestedPoolState, PoolState } from '../types';
 import { getSortedTokens } from '../utils';
-import { AddLiquidityNestedInput } from '../addLiquidityNested/addLiquidityNestedV2/types';
+import { AddLiquidityNestedInput } from '../addLiquidityNested/types';
 import { AddLiquidityNested } from '../addLiquidityNested';
 
 export class PriceImpact {

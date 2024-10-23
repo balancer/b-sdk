@@ -1,21 +1,20 @@
 import { encodeFunctionData } from 'viem';
-import { Address, Hex } from '../../../types';
 import { Token } from '../../token';
 import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../../utils';
 import { Relayer } from '../../relayer';
 import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../../tokenAmount';
 import { balancerRelayerAbi } from '../../../abi';
-import {
-    AddLiquidityNestedInput,
-    AddLiquidityNestedQueryOutput,
-    AddLiquidityNestedCallInput,
-} from './types';
 import { doAddLiquidityNestedQuery } from './doAddLiquidityNestedQuery';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { validateBuildCallInput, validateQueryInput } from './validateInputs';
 import { NestedPoolState } from '../../types';
-import { validateNestedPoolState } from '../../utils';
+import {
+    AddLiquidityNestedBuildCallOutput,
+    AddLiquidityNestedInput,
+    AddLiquidityNestedQueryOutput,
+    AddLiquidityNestedCallInput,
+} from '../types';
 
 export class AddLiquidityNestedV2 {
     async query(
@@ -23,7 +22,6 @@ export class AddLiquidityNestedV2 {
         nestedPoolState: NestedPoolState,
     ): Promise<AddLiquidityNestedQueryOutput> {
         const amountsIn = validateQueryInput(input, nestedPoolState);
-        validateNestedPoolState(nestedPoolState);
 
         const callsAttributes = getQueryCallsAttributes(
             input,
@@ -60,12 +58,9 @@ export class AddLiquidityNestedV2 {
         return { callsAttributes, amountsIn, bptOut, protocolVersion: 2 };
     }
 
-    buildCall(input: AddLiquidityNestedCallInput): {
-        callData: Hex;
-        to: Address;
-        value: bigint | undefined;
-        minBptOut: bigint;
-    } {
+    buildCall(
+        input: AddLiquidityNestedCallInput,
+    ): AddLiquidityNestedBuildCallOutput {
         validateBuildCallInput(input);
         // apply slippage to bptOut
         const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
