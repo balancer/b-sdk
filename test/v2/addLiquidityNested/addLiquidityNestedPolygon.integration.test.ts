@@ -134,6 +134,7 @@ export class MockApi {
     public async getNestedPool(poolId: Hex): Promise<NestedPoolState> {
         if (poolId !== DAO_st_WMATIC.id) throw Error();
         return {
+            protocolVersion: 2,
             pools: [
                 {
                     id: DAO_st_WMATIC.id,

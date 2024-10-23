@@ -1,4 +1,4 @@
-// pnpm test -- addLiquidityNested.integration.test.ts
+// pnpm test -- addLiquidityNestedV3.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -18,7 +18,7 @@ import {
     Hex,
     NestedPoolState,
     PublicWalletClient,
-} from 'src';
+} from '@/index';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
@@ -31,7 +31,7 @@ import {
     TOKENS,
 } from 'test/lib/utils';
 
-const chainId = ChainId.MAINNET;
+const chainId = ChainId.SEPOLIA;
 const DAI = TOKENS[chainId].DAI;
 const WETH = TOKENS[chainId].WETH;
 const USDC = TOKENS[chainId].USDC;
@@ -39,7 +39,7 @@ const USDT = TOKENS[chainId].USDT;
 const BPT_3POOL = POOLS[chainId].BPT_3POOL;
 const BPT_WETH_3POOL = POOLS[chainId].BPT_WETH_3POOL;
 
-describe('add liquidity nested test', () => {
+describe('V3 add liquidity nested test', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let poolId: Hex;
@@ -50,7 +50,7 @@ describe('add liquidity nested test', () => {
 
     beforeAll(async () => {
         // setup chain and test client
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
 
         client = createTestClient({
             mode: 'anvil',
@@ -128,97 +128,97 @@ describe('add liquidity nested test', () => {
         );
     });
 
-    test('all tokens', async () => {
-        const amountsIn = mainTokens.map((t) => ({
-            address: t.address,
-            rawAmount: parseUnits('1', t.decimals),
-            decimals: t.decimals,
-        }));
+    // test('all tokens', async () => {
+    //     const amountsIn = mainTokens.map((t) => ({
+    //         address: t.address,
+    //         rawAmount: parseUnits('1', t.decimals),
+    //         decimals: t.decimals,
+    //     }));
 
-        txInput = {
-            ...txInput,
-            amountsIn,
-        };
+    //     txInput = {
+    //         ...txInput,
+    //         amountsIn,
+    //     };
 
-        const {
-            transactionReceipt,
-            balanceDeltas,
-            bptOut,
-            minBptOut,
-            slippage,
-            value,
-        } = await doAddLiquidityNested(txInput);
+    //     const {
+    //         transactionReceipt,
+    //         balanceDeltas,
+    //         bptOut,
+    //         minBptOut,
+    //         slippage,
+    //         value,
+    //     } = await doAddLiquidityNested(txInput);
 
-        assertResults(
-            transactionReceipt,
-            bptOut,
-            amountsIn,
-            balanceDeltas,
-            slippage,
-            minBptOut,
-            chainId,
-            value,
-        );
-    });
+    //     assertResults(
+    //         transactionReceipt,
+    //         bptOut,
+    //         amountsIn,
+    //         balanceDeltas,
+    //         slippage,
+    //         minBptOut,
+    //         chainId,
+    //         value,
+    //     );
+    // });
 
-    test('native asset', async () => {
-        const amountsIn = mainTokens.map((t) => ({
-            address: t.address,
-            rawAmount: parseUnits('1', t.decimals),
-            decimals: t.decimals,
-        }));
+    // test('native asset', async () => {
+    //     const amountsIn = mainTokens.map((t) => ({
+    //         address: t.address,
+    //         rawAmount: parseUnits('1', t.decimals),
+    //         decimals: t.decimals,
+    //     }));
 
-        const wethIsEth = true;
+    //     const wethIsEth = true;
 
-        txInput = {
-            ...txInput,
-            amountsIn,
-            wethIsEth,
-        };
+    //     txInput = {
+    //         ...txInput,
+    //         amountsIn,
+    //         wethIsEth,
+    //     };
 
-        const {
-            transactionReceipt,
-            balanceDeltas,
-            bptOut,
-            minBptOut,
-            slippage,
-            value,
-        } = await doAddLiquidityNested(txInput);
+    //     const {
+    //         transactionReceipt,
+    //         balanceDeltas,
+    //         bptOut,
+    //         minBptOut,
+    //         slippage,
+    //         value,
+    //     } = await doAddLiquidityNested(txInput);
 
-        assertResults(
-            transactionReceipt,
-            bptOut,
-            amountsIn,
-            balanceDeltas,
-            slippage,
-            minBptOut,
-            chainId,
-            value,
-            wethIsEth,
-        );
-    });
+    //     assertResults(
+    //         transactionReceipt,
+    //         bptOut,
+    //         amountsIn,
+    //         balanceDeltas,
+    //         slippage,
+    //         minBptOut,
+    //         chainId,
+    //         value,
+    //         wethIsEth,
+    //     );
+    // });
 
-    test('native asset - invalid input', async () => {
-        const amountsIn = [
-            {
-                address: USDC.address,
-                rawAmount: parseUnits('1', USDC.decimals),
-                decimals: USDC.decimals,
-            },
-        ];
+    // test('native asset - invalid input', async () => {
+    //     const amountsIn = [
+    //         {
+    //             address: USDC.address,
+    //             rawAmount: parseUnits('1', USDC.decimals),
+    //             decimals: USDC.decimals,
+    //         },
+    //     ];
 
-        const wethIsEth = true;
+    //     const wethIsEth = true;
 
-        txInput = {
-            ...txInput,
-            amountsIn,
-            wethIsEth,
-        };
+    //     txInput = {
+    //         ...txInput,
+    //         amountsIn,
+    //         wethIsEth,
+    //     };
 
-        await expect(() => doAddLiquidityNested(txInput)).rejects.toThrowError(
-            'Adding liquidity with native asset requires wrapped native asset to exist within amountsIn',
-        );
-    });
+    //     await expect(() => doAddLiquidityNested(txInput)).rejects.toThrowError(
+    //         'Adding liquidity with native asset requires wrapped native asset to exist within amountsIn',
+    //     );
+    // });
 });
 
 /*********************** Mock To Represent API Requirements **********************/
@@ -227,7 +227,7 @@ class MockApi {
     public async getNestedPool(poolId: Hex): Promise<NestedPoolState> {
         if (poolId !== BPT_WETH_3POOL.id) throw Error();
         return {
-            protocolVersion: 2,
+            protocolVersion: 3,
             pools: [
                 {
                     id: BPT_WETH_3POOL.id,

@@ -1,9 +1,9 @@
-import { Address, Hex, InputAmount, PoolType } from '../../types';
-import { ChainId } from '../../utils';
-import { Slippage } from '../slippage';
-import { Token } from '../token';
-import { TokenAmount } from '../tokenAmount';
-import { PoolKind } from '../types';
+import { Address, Hex, InputAmount, PoolType } from '../../../types';
+import { ChainId } from '../../../utils';
+import { Slippage } from '../../slippage';
+import { Token } from '../../token';
+import { TokenAmount } from '../../tokenAmount';
+import { PoolKind } from '../../types';
 
 export type AddLiquidityNestedInput = {
     amountsIn: InputAmount[];
@@ -35,6 +35,7 @@ export type AddLiquidityNestedQueryOutput = {
     callsAttributes: AddLiquidityNestedCallAttributes[];
     amountsIn: TokenAmount[];
     bptOut: TokenAmount;
+    protocolVersion: 1 | 2 | 3;
 };
 
 export type AddLiquidityNestedCallInput = AddLiquidityNestedQueryOutput & {

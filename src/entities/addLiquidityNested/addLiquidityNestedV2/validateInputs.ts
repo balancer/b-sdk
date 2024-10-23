@@ -1,7 +1,7 @@
-import { NATIVE_ASSETS } from '../../utils';
-import { Token } from '../token';
-import { TokenAmount } from '../tokenAmount';
-import { NestedPoolState } from '../types';
+import { NATIVE_ASSETS } from '../../../utils';
+import { Token } from '../../token';
+import { TokenAmount } from '../../tokenAmount';
+import { NestedPoolState } from '../../types';
 import { AddLiquidityNestedCallInput, AddLiquidityNestedInput } from './types';
 
 export const validateQueryInput = (

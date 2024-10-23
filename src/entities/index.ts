@@ -1,7 +1,5 @@
 export * from './addLiquidity';
 export * from './addLiquidity/types';
-export * from './addLiquidityNested';
-export * from './addLiquidityNested/types';
 export * from './createPool';
 export * from './encoders';
 export * from './initPool';

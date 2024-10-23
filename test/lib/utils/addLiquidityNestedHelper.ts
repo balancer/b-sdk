@@ -1,6 +1,5 @@
 import { Address, TransactionReceipt } from 'viem';
 import {
-    AddLiquidityNested,
     AddLiquidityNestedInput,
     Relayer,
     Slippage,
@@ -10,6 +9,7 @@ import {
 import { BALANCER_RELAYER, NATIVE_ASSETS } from '@/utils';
 import { AddLiquidityNestedTxInput } from './types';
 import { sendTransactionGetBalances } from './helper';
+import { AddLiquidityNested } from '@/entities/addLiquidityNested';
 
 export const assertResults = (
     transactionReceipt: TransactionReceipt,
