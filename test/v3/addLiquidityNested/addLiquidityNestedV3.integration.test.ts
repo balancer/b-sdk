@@ -10,43 +10,54 @@ import {
     TestActions,
     walletActions,
 } from 'viem';
-
 import {
     Address,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     CHAINS,
     ChainId,
-    Hex,
     NestedPoolState,
+    PERMIT2,
     PublicWalletClient,
+    Slippage,
+    Token,
+    TokenAmount,
+    AddLiquidityNested,
+    AddLiquidityNestedInput,
+    AddLiquidityNestedQueryOutputV3,
 } from '@/index';
-
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
-    AddLiquidityNestedTxInput,
-    assertResults,
-    doAddLiquidityNested,
-    forkSetup,
+    approveSpenderOnPermit2,
+    approveSpenderOnToken,
     POOLS,
-    TestToken,
+    sendTransactionGetBalances,
+    setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
 
 const chainId = ChainId.SEPOLIA;
-const DAI = TOKENS[chainId].DAI;
+const NESTED_WITH_BOOSTED_POOL = POOLS[chainId].NESTED_WITH_BOOSTED_POOL;
+const BOOSTED_POOL = POOLS[chainId].MOCK_BOOSTED_POOL;
+const DAI = TOKENS[chainId].DAI_AAVE;
+const USDC = TOKENS[chainId].USDC_AAVE;
 const WETH = TOKENS[chainId].WETH;
-const USDC = TOKENS[chainId].USDC;
-const USDT = TOKENS[chainId].USDT;
-const BPT_3POOL = POOLS[chainId].BPT_3POOL;
-const BPT_WETH_3POOL = POOLS[chainId].BPT_WETH_3POOL;
+
+const parentBptToken = new Token(
+    chainId,
+    NESTED_WITH_BOOSTED_POOL.address,
+    NESTED_WITH_BOOSTED_POOL.decimals,
+);
+// These are the underlying tokens
+const daiToken = new Token(chainId, DAI.address, DAI.decimals);
+const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
+const wethToken = new Token(chainId, WETH.address, WETH.decimals);
+const mainTokens = [wethToken, daiToken, usdcToken];
 
 describe('V3 add liquidity nested test', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
-    let poolId: Hex;
     let testAddress: Address;
-    let mainTokens: TestToken[];
-    let initialBalances: bigint[];
-    let txInput: AddLiquidityNestedTxInput;
+    const addLiquidityNested = new AddLiquidityNested();
 
     beforeAll(async () => {
         // setup chain and test client
@@ -62,238 +73,176 @@ describe('V3 add liquidity nested test', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        poolId = BPT_WETH_3POOL.id;
-
-        // setup mock api
-        const api = new MockApi();
-        // get pool state from api
-        const nestedPoolState = await api.getNestedPool(poolId);
-
-        mainTokens = [WETH, DAI, USDC, USDT];
-        initialBalances = mainTokens.map((t) => parseUnits('1000', t.decimals));
-
-        txInput = {
-            nestedPoolState,
-            chainId,
-            rpcUrl,
-            testAddress,
-            client,
-            amountsIn: [],
-        };
-    });
-
-    beforeEach(async () => {
-        // User approve vault to spend their tokens and update user balance
-        await forkSetup(
+        await setTokenBalances(
             client,
             testAddress,
             mainTokens.map((t) => t.address),
-            mainTokens.map((t) => t.slot) as number[],
-            initialBalances,
+            [WETH.slot, DAI.slot, USDC.slot] as number[],
+            mainTokens.map((t) => parseUnits('1000', t.decimals)),
         );
     });
 
-    test('single token', async () => {
-        const amountsIn = [
-            {
-                address: WETH.address,
-                rawAmount: parseUnits('1', WETH.decimals),
-                decimals: WETH.decimals,
-            },
-        ];
-
-        txInput = {
-            ...txInput,
-            amountsIn,
-        };
-
-        const {
-            transactionReceipt,
-            balanceDeltas,
-            bptOut,
-            minBptOut,
-            slippage,
-            value,
-        } = await doAddLiquidityNested(txInput);
-
-        assertResults(
-            transactionReceipt,
-            bptOut,
-            amountsIn,
-            balanceDeltas,
-            slippage,
-            minBptOut,
-            chainId,
-            value,
-        );
-    });
-
-    // test('all tokens', async () => {
-    //     const amountsIn = mainTokens.map((t) => ({
-    //         address: t.address,
-    //         rawAmount: parseUnits('1', t.decimals),
-    //         decimals: t.decimals,
-    //     }));
-
-    //     txInput = {
-    //         ...txInput,
-    //         amountsIn,
-    //     };
-
-    //     const {
-    //         transactionReceipt,
-    //         balanceDeltas,
-    //         bptOut,
-    //         minBptOut,
-    //         slippage,
-    //         value,
-    //     } = await doAddLiquidityNested(txInput);
-
-    //     assertResults(
-    //         transactionReceipt,
-    //         bptOut,
-    //         amountsIn,
-    //         balanceDeltas,
-    //         slippage,
-    //         minBptOut,
-    //         chainId,
-    //         value,
-    //     );
-    // });
-
-    // test('native asset', async () => {
-    //     const amountsIn = mainTokens.map((t) => ({
-    //         address: t.address,
-    //         rawAmount: parseUnits('1', t.decimals),
-    //         decimals: t.decimals,
-    //     }));
-
-    //     const wethIsEth = true;
-
-    //     txInput = {
-    //         ...txInput,
-    //         amountsIn,
-    //         wethIsEth,
-    //     };
-
-    //     const {
-    //         transactionReceipt,
-    //         balanceDeltas,
-    //         bptOut,
-    //         minBptOut,
-    //         slippage,
-    //         value,
-    //     } = await doAddLiquidityNested(txInput);
-
-    //     assertResults(
-    //         transactionReceipt,
-    //         bptOut,
-    //         amountsIn,
-    //         balanceDeltas,
-    //         slippage,
-    //         minBptOut,
-    //         chainId,
-    //         value,
-    //         wethIsEth,
-    //     );
-    // });
-
-    // test('native asset - invalid input', async () => {
-    //     const amountsIn = [
-    //         {
-    //             address: USDC.address,
-    //             rawAmount: parseUnits('1', USDC.decimals),
-    //             decimals: USDC.decimals,
-    //         },
-    //     ];
-
-    //     const wethIsEth = true;
-
-    //     txInput = {
-    //         ...txInput,
-    //         amountsIn,
-    //         wethIsEth,
-    //     };
-
-    //     await expect(() => doAddLiquidityNested(txInput)).rejects.toThrowError(
-    //         'Adding liquidity with native asset requires wrapped native asset to exist within amountsIn',
-    //     );
-    // });
-});
-
-/*********************** Mock To Represent API Requirements **********************/
-
-class MockApi {
-    public async getNestedPool(poolId: Hex): Promise<NestedPoolState> {
-        if (poolId !== BPT_WETH_3POOL.id) throw Error();
-        return {
-            protocolVersion: 3,
-            pools: [
+    test('query with underlying', async () => {
+        const addLiquidityInput: AddLiquidityNestedInput = {
+            amountsIn: [
                 {
-                    id: BPT_WETH_3POOL.id,
-                    address: BPT_WETH_3POOL.address,
-                    type: BPT_WETH_3POOL.type,
-                    level: 1,
-                    tokens: [
-                        {
-                            address: BPT_3POOL.address,
-                            decimals: BPT_3POOL.decimals,
-                            index: 0,
-                        },
-                        {
-                            address: WETH.address,
-                            decimals: WETH.decimals,
-                            index: 1,
-                        },
-                    ],
+                    address: WETH.address,
+                    rawAmount: parseUnits('0.1', WETH.decimals),
+                    decimals: WETH.decimals,
                 },
                 {
-                    id: BPT_3POOL.id,
-                    address: BPT_3POOL.address,
-                    type: BPT_3POOL.type,
-                    level: 0,
-                    tokens: [
-                        {
-                            address: DAI.address,
-                            decimals: DAI.decimals,
-                            index: 0,
-                        },
-                        {
-                            address: BPT_3POOL.address,
-                            decimals: BPT_3POOL.decimals,
-                            index: 1,
-                        },
-                        {
-                            address: USDC.address,
-                            decimals: USDC.decimals,
-                            index: 2,
-                        },
-                        {
-                            address: USDT.address,
-                            decimals: USDT.decimals,
-                            index: 3,
-                        },
-                    ],
+                    address: USDC.address,
+                    rawAmount: parseUnits('20', USDC.decimals),
+                    decimals: USDC.decimals,
                 },
             ],
-            mainTokens: [
+            chainId,
+            rpcUrl,
+        };
+        const queryOutput = await addLiquidityNested.query(
+            addLiquidityInput,
+            nestedPoolState,
+        );
+        const expectedAmountsIn = [
+            TokenAmount.fromHumanAmount(wethToken, '0.1'),
+            TokenAmount.fromHumanAmount(daiToken, '0'),
+            TokenAmount.fromHumanAmount(usdcToken, '20'),
+        ];
+        expect(queryOutput.protocolVersion).toEqual(3);
+        expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
+        expect(queryOutput.bptOut.amount > 0n).to.be.true;
+        expect(queryOutput.amountsIn).to.deep.eq(expectedAmountsIn);
+    });
+
+    test('add liquidity transaction', async () => {
+        const addLiquidityInput: AddLiquidityNestedInput = {
+            amountsIn: [
+                {
+                    address: WETH.address,
+                    rawAmount: parseUnits('0.1', WETH.decimals),
+                    decimals: WETH.decimals,
+                },
+                {
+                    address: USDC.address,
+                    rawAmount: parseUnits('20', USDC.decimals),
+                    decimals: USDC.decimals,
+                },
+            ],
+            chainId,
+            rpcUrl,
+        };
+
+        for (const amount of addLiquidityInput.amountsIn) {
+            // Approve Permit2 to spend account tokens
+            await approveSpenderOnToken(
+                client,
+                testAddress,
+                amount.address,
+                PERMIT2[chainId],
+            );
+            // Approve Router to spend account tokens using Permit2
+            await approveSpenderOnPermit2(
+                client,
+                testAddress,
+                amount.address,
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            );
+        }
+
+        const queryOutput = (await addLiquidityNested.query(
+            addLiquidityInput,
+            nestedPoolState,
+        )) as AddLiquidityNestedQueryOutputV3;
+
+        const addLiquidityBuildInput = {
+            ...queryOutput,
+            slippage: Slippage.fromPercentage('1'), // 1%,
+        };
+
+        const addLiquidityBuildCallOutput = addLiquidityNested.buildCall(
+            addLiquidityBuildInput,
+        );
+
+        // send add liquidity transaction and check balance changes
+        const { transactionReceipt, balanceDeltas } =
+            await sendTransactionGetBalances(
+                [
+                    ...mainTokens.map((t) => t.address),
+                    queryOutput.bptOut.token.address,
+                ],
+                client,
+                testAddress,
+                addLiquidityBuildCallOutput.to,
+                addLiquidityBuildCallOutput.callData,
+                addLiquidityBuildCallOutput.value,
+            );
+        // think about using assertResults helper here
+        expect(transactionReceipt.status).to.eq('success');
+        const expectedAmountsIn = [
+            TokenAmount.fromHumanAmount(wethToken, '0.1'),
+            TokenAmount.fromHumanAmount(daiToken, '0'),
+            TokenAmount.fromHumanAmount(usdcToken, '20'),
+        ];
+        const expectedDeltas = [
+            ...expectedAmountsIn.map((a) => a.amount),
+            queryOutput.bptOut.amount,
+        ];
+        expect(expectedDeltas).to.deep.eq(balanceDeltas);
+    });
+});
+
+const nestedPoolState: NestedPoolState = {
+    protocolVersion: 3,
+    pools: [
+        {
+            id: NESTED_WITH_BOOSTED_POOL.id,
+            address: NESTED_WITH_BOOSTED_POOL.address,
+            type: NESTED_WITH_BOOSTED_POOL.type,
+            level: 1,
+            tokens: [
+                {
+                    address: BOOSTED_POOL.address,
+                    decimals: BOOSTED_POOL.decimals,
+                    index: 0,
+                },
                 {
                     address: WETH.address,
                     decimals: WETH.decimals,
+                    index: 1,
+                },
+            ],
+        },
+        {
+            id: BOOSTED_POOL.id,
+            address: BOOSTED_POOL.address,
+            type: BOOSTED_POOL.type,
+            level: 0,
+            tokens: [
+                {
+                    address: USDC.address,
+                    decimals: USDC.decimals,
+                    index: 0,
                 },
                 {
                     address: DAI.address,
                     decimals: DAI.decimals,
-                },
-                {
-                    address: USDC.address,
-                    decimals: USDC.decimals,
-                },
-                {
-                    address: USDT.address,
-                    decimals: USDT.decimals,
+                    index: 1,
                 },
             ],
-        };
-    }
-}
+        },
+    ],
+    mainTokens: [
+        {
+            address: WETH.address,
+            decimals: WETH.decimals,
+        },
+        {
+            address: DAI.address,
+            decimals: DAI.decimals,
+        },
+        {
+            address: USDC.address,
+            decimals: USDC.decimals,
+        },
+    ],
+};

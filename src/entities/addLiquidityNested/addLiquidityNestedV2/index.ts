@@ -12,15 +12,17 @@ import { NestedPoolState } from '../../types';
 import {
     AddLiquidityNestedBuildCallOutput,
     AddLiquidityNestedInput,
-    AddLiquidityNestedQueryOutput,
-    AddLiquidityNestedCallInput,
 } from '../types';
+import {
+    AddLiquidityNestedCallInputV2,
+    AddLiquidityNestedQueryOutputV2,
+} from './types';
 
 export class AddLiquidityNestedV2 {
     async query(
         input: AddLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
-    ): Promise<AddLiquidityNestedQueryOutput> {
+    ): Promise<AddLiquidityNestedQueryOutputV2> {
         const amountsIn = validateQueryInput(input, nestedPoolState);
 
         const callsAttributes = getQueryCallsAttributes(
@@ -59,7 +61,7 @@ export class AddLiquidityNestedV2 {
     }
 
     buildCall(
-        input: AddLiquidityNestedCallInput,
+        input: AddLiquidityNestedCallInputV2,
     ): AddLiquidityNestedBuildCallOutput {
         validateBuildCallInput(input);
         // apply slippage to bptOut

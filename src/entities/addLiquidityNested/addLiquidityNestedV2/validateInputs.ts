@@ -2,7 +2,8 @@ import { NATIVE_ASSETS } from '../../../utils';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
 import { NestedPoolState } from '../../types';
-import { AddLiquidityNestedCallInput, AddLiquidityNestedInput } from './types';
+import { AddLiquidityNestedInput } from '../types';
+import { AddLiquidityNestedCallInputV2 } from './types';
 
 export const validateQueryInput = (
     input: AddLiquidityNestedInput,
@@ -26,7 +27,7 @@ export const validateQueryInput = (
 };
 
 export const validateBuildCallInput = (
-    input: AddLiquidityNestedCallInput,
+    input: AddLiquidityNestedCallInputV2,
 ): void => {
     const chainId = input.callsAttributes[0].chainId;
     if (input.wethIsEth) {

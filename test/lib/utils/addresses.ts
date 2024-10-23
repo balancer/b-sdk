@@ -308,5 +308,12 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
+        NESTED_WITH_BOOSTED_POOL: {
+            address: '0xee76b8f75e20d4bb9eb483cdec176dfc8d02bb3a',
+            id: '0xee76b8f75e20d4bb9eb483cdec176dfc8d02bb3a',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
     },
 };

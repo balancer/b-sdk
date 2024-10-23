@@ -1,12 +1,13 @@
-import {
-    AddLiquidityNestedInput,
-    AddLiquidityNestedQueryOutput,
-    AddLiquidityNestedCallInput,
-} from './addLiquidityNestedV2/types';
 import { NestedPoolState } from '../types';
 import { validateNestedPoolState } from '../utils';
 import { AddLiquidityNestedV2 } from './addLiquidityNestedV2';
-import { AddLiquidityNestedBuildCallOutput } from './types';
+import {
+    AddLiquidityNestedBuildCallOutput,
+    AddLiquidityNestedCallInput,
+    AddLiquidityNestedInput,
+    AddLiquidityNestedQueryOutput,
+} from './types';
+import { AddLiquidityNestedV3 } from './addLiquidityNestedV3';
 
 export class AddLiquidityNested {
     async query(
@@ -25,9 +26,8 @@ export class AddLiquidityNested {
                 return addLiquidity.query(input, nestedPoolState);
             }
             case 3: {
-                throw new Error(
-                    'AddLiquidityNested not supported for ProtocolVersion 3.',
-                );
+                const addLiquidity = new AddLiquidityNestedV3();
+                return addLiquidity.query(input, nestedPoolState);
             }
         }
     }
@@ -36,19 +36,13 @@ export class AddLiquidityNested {
         input: AddLiquidityNestedCallInput,
     ): AddLiquidityNestedBuildCallOutput {
         switch (input.protocolVersion) {
-            case 1: {
-                throw new Error(
-                    'AddLiquidityNested not supported for ProtocolVersion 1.',
-                );
-            }
             case 2: {
                 const addLiquidity = new AddLiquidityNestedV2();
                 return addLiquidity.buildCall(input);
             }
             case 3: {
-                throw new Error(
-                    'AddLiquidityNested not supported for ProtocolVersion 3.',
-                );
+                const addLiquidity = new AddLiquidityNestedV3();
+                return addLiquidity.buildCall(input);
             }
         }
     }
