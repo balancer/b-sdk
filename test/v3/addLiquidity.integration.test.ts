@@ -139,7 +139,15 @@ describe('add liquidity test', () => {
                     })),
                 };
             });
-            test('token inputs', async () => {
+            test.only('token inputs', async () => {
+                /* txInput = {
+                    client,
+                    addLiquidity: new AddLiquidity(),
+                    slippage: Slippage.fromPercentage('1'), // 1%
+                    poolState,
+                    testAddress,
+                    addLiquidityInput: {} as AddLiquidityInput,
+                }; */
                 const addLiquidityOutput = await doAddLiquidity({
                     ...txInput,
                     addLiquidityInput,

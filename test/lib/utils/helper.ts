@@ -17,7 +17,7 @@ import {
     trim,
 } from 'viem';
 
-import { erc20Abi, permit2Abi } from '@/abi';
+import { erc20Abi, permit2Abi, erc4626Abi } from '@/abi';
 import {
     VAULT,
     MAX_UINT256,
@@ -26,6 +26,7 @@ import {
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
     PublicWalletClient,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
 } from '@/utils';
 
 export type TxOutput = {
@@ -118,10 +119,21 @@ export const approveToken = async (
             amount,
             deadline,
         );
+        // Approve CompositeLiquidityRouter to spend account tokens using Permit2
+        const compositeLiquidityApprovedOnPermit2 =
+            await approveSpenderOnPermit2(
+                client,
+                accountAddress,
+                tokenAddress,
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                amount,
+                deadline,
+            );
         approved =
             permit2ApprovedOnToken &&
             routerApprovedOnPermit2 &&
-            batchRouterApprovedOnPermit2;
+            batchRouterApprovedOnPermit2 &&
+            compositeLiquidityApprovedOnPermit2;
     }
     return approved;
 };
@@ -292,7 +304,26 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
+    joinWithUnderlying?: boolean,
 ): Promise<TxOutput> {
+    // Joining a boosted pool via the composite liquidity router is a join where
+    // none of the pool tokens are used but rather the `asset` of the pool tokens
+    // the last entry in the array is eth and before that the bpt token, so all
+    // balances for the tokens before that are needed.
+    if (joinWithUnderlying) {
+        const tokensWithUnderlyings = tokensForBalanceCheck.slice(0, -2);
+        const underlyingPromises = tokensWithUnderlyings.map(async (token) => {
+            const underlying = await client.readContract({
+                address: token,
+                abi: erc4626Abi,
+                functionName: 'asset',
+            });
+            return underlying;
+        });
+        const underlyings = await Promise.all(underlyingPromises);
+        tokensForBalanceCheck.push(...underlyings);
+    }
+
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
         client,

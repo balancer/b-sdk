@@ -215,7 +215,7 @@ export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
 };
 
 export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x89cA59Bc46c00D90C496Fc99f16668b00Dd6B5CC',
+    [ChainId.SEPOLIA]: '0xB262C9994d642F5b63987CD5401D2beBD4AC0384',
 };
 
 export const PERMIT2: Record<number, Address> = {
