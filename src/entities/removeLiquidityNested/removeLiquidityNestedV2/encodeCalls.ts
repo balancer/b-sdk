@@ -1,11 +1,10 @@
-import { Hex, PoolType } from '../../types';
-import { WeightedEncoder } from '../encoders';
-import { ComposableStableEncoder } from '../encoders/composableStable';
-import { RemoveLiquidityNestedCallAttributes } from './types';
-import { replaceWrapped } from '../utils/replaceWrapped';
-import { batchRelayerLibraryAbi } from '../../abi';
-import { encodeFunctionData } from 'viem';
+import { encodeFunctionData, Hex } from 'viem';
 import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
+import { RemoveLiquidityNestedCallAttributes } from './types';
+import { replaceWrapped } from '@/entities/utils';
+import { batchRelayerLibraryAbi } from '@/abi';
+import { PoolType } from '@/types';
+import { ComposableStableEncoder, WeightedEncoder } from '@/entities/encoders';
 
 export const encodeCalls = (
     callsAttributes: RemoveLiquidityNestedCallAttributes[],

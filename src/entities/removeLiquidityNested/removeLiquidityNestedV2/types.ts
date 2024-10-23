@@ -1,9 +1,10 @@
-import { Address, Hex, PoolType } from '../../types';
-import { ChainId } from '../../utils';
-import { Slippage } from '../slippage';
-import { Token } from '../token';
-import { TokenAmount } from '../tokenAmount';
-import { PoolKind } from '../types';
+import { Address, Hex } from 'viem';
+import { Slippage } from '@/entities/slippage';
+import { Token } from '@/entities/token';
+import { TokenAmount } from '@/entities/tokenAmount';
+import { PoolKind } from '@/entities/types';
+import { PoolType } from '@/types';
+import { ChainId } from '@/utils';
 
 export type RemoveLiquidityNestedProportionalInput = {
     bptAmountIn: bigint;
@@ -45,6 +46,7 @@ export type RemoveLiquidityNestedCallAttributes = {
 };
 
 export type RemoveLiquidityNestedQueryOutput = {
+    protocolVersion: 1 | 2 | 3;
     callsAttributes: RemoveLiquidityNestedCallAttributes[];
     bptAmountIn: TokenAmount;
     amountsOut: TokenAmount[];

@@ -1,7 +1,7 @@
 import { Hex } from 'viem';
-import { Token } from '../token';
 import { RemoveLiquidityNestedCallAttributes } from './types';
-import { Relayer } from '../relayer';
+import { Token } from '@/entities/token';
+import { Relayer } from '@/entities/relayer';
 
 export const getPeekCalls = (
     calls: RemoveLiquidityNestedCallAttributes[],

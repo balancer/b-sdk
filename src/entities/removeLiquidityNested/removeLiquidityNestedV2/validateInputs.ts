@@ -1,11 +1,11 @@
-import { NATIVE_ASSETS } from '@/utils';
-import { Token } from '../token';
-import { NestedPoolState } from '../types';
+import { NATIVE_ASSETS } from '../../../utils';
+import { Token } from '../../token';
+import { NestedPoolState } from '../../types';
 import {
     RemoveLiquidityNestedCallInput,
     RemoveLiquidityNestedProportionalInput,
     RemoveLiquidityNestedSingleTokenInput,
-} from './removeLiquidityNestedV2/types';
+} from './types';
 
 export const validateQueryInput = (
     input:

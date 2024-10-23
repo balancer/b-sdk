@@ -1,14 +1,16 @@
-import { Token } from '../token';
+import { Address } from 'viem';
+import { TokenAmount } from '@/entities/tokenAmount';
+
+import { BALANCER_RELAYER, ChainId, ZERO_ADDRESS } from '@/utils';
+import { Token } from '@/entities/token';
+import { NestedPool, PoolKind } from '@/entities/types';
 import {
+    RemoveLiquidityNestedCallAttributes,
     RemoveLiquidityNestedProportionalInput,
     RemoveLiquidityNestedSingleTokenInput,
-    RemoveLiquidityNestedCallAttributes,
 } from './types';
-import { NestedPool, PoolKind } from '../types';
-import { TokenAmount } from '../tokenAmount';
-import { Address, PoolType } from '../../types';
-import { BALANCER_RELAYER, ChainId, ZERO_ADDRESS } from '../../utils';
-import { Relayer } from '../relayer';
+import { PoolType } from '@/types';
+import { Relayer } from '@/entities/relayer';
 
 export const getQueryCallsAttributes = (
     input:

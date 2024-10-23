@@ -10,8 +10,6 @@ import { validateNestedPoolState } from '../utils';
 import { AddLiquidityNestedV2 } from './addLiquidityNestedV2';
 
 export class AddLiquidityNested {
-    constructor(public config?: AddLiquidityConfig) {}
-
     async query(
         input: AddLiquidityNestedInput,
         nestedPoolState: NestedPoolState,

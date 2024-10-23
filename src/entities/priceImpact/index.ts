@@ -16,7 +16,7 @@ import {
     RemoveLiquidityUnbalancedInput,
 } from '../removeLiquidity/types';
 import { RemoveLiquidityNested } from '../removeLiquidityNested';
-import { RemoveLiquidityNestedSingleTokenInput } from '../removeLiquidityNested/types';
+import { RemoveLiquidityNestedSingleTokenInput } from '../removeLiquidityNested/removeLiquidityNestedV2/types';
 import { Swap, SwapInput } from '../swap';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';

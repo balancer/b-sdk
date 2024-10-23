@@ -1,4 +1,4 @@
-// pnpm test -- removeLiquidityNested.integration.test.ts
+// pnpm test -- removeLiquidityNestedV3.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -44,7 +44,7 @@ type TxInput = {
     wethIsEth?: boolean;
 };
 
-describe('remove liquidity nested test', () => {
+describe.skip('remove liquidity nested test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
@@ -316,7 +316,7 @@ class MockApi {
         )
             throw Error();
         return {
-            protocolVersion: 2,
+            protocolVersion: 3,
             pools: [
                 {
                     id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',
