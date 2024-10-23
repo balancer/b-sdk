@@ -6,23 +6,19 @@ import { PoolKind } from '@/entities/types';
 import { PoolType } from '@/types';
 import { ChainId } from '@/utils';
 
-export type RemoveLiquidityNestedProportionalInput = {
+export type RemoveLiquidityNestedProportionalInputV2 = {
     bptAmountIn: bigint;
     chainId: ChainId;
     rpcUrl: string;
     toInternalBalance?: boolean;
 };
 
-export type RemoveLiquidityNestedSingleTokenInput =
-    RemoveLiquidityNestedProportionalInput & {
+export type RemoveLiquidityNestedSingleTokenInputV2 =
+    RemoveLiquidityNestedProportionalInputV2 & {
         tokenOut: Address;
     };
 
-export type RemoveLiquidityNestedInput =
-    | RemoveLiquidityNestedProportionalInput
-    | RemoveLiquidityNestedSingleTokenInput;
-
-export type RemoveLiquidityNestedCallAttributes = {
+export type RemoveLiquidityNestedCallAttributesV2 = {
     chainId: ChainId;
     sortedTokens: Token[];
     poolId: Address;
@@ -45,17 +41,17 @@ export type RemoveLiquidityNestedCallAttributes = {
     wethIsEth?: boolean;
 };
 
-export type RemoveLiquidityNestedQueryOutput = {
-    protocolVersion: 1 | 2 | 3;
-    callsAttributes: RemoveLiquidityNestedCallAttributes[];
+export type RemoveLiquidityNestedQueryOutputV2 = {
+    protocolVersion: 2;
+    callsAttributes: RemoveLiquidityNestedCallAttributesV2[];
     bptAmountIn: TokenAmount;
     amountsOut: TokenAmount[];
     isProportional: boolean;
     chainId: ChainId;
 };
 
-export type RemoveLiquidityNestedCallInput =
-    RemoveLiquidityNestedQueryOutput & {
+export type RemoveLiquidityNestedCallInputV2 =
+    RemoveLiquidityNestedQueryOutputV2 & {
         slippage: Slippage;
         accountAddress: Address;
         relayerApprovalSignature?: Hex;

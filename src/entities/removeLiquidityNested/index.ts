@@ -1,13 +1,14 @@
-import { Address, Hex } from 'viem';
-import { TokenAmount, NestedPoolState } from '@/entities';
+import { NestedPoolState } from '@/entities';
 import { validateNestedPoolState } from '@/entities/utils';
+import { RemoveLiquidityNestedV2 } from './removeLiquidityNestedV2';
 import {
+    RemoveLiquidityNestedInput,
     RemoveLiquidityNestedQueryOutput,
     RemoveLiquidityNestedCallInput,
-    RemoveLiquidityNestedInput,
-} from './removeLiquidityNestedV2/types';
-import { validateBuildCallInput } from './validateInputs';
-import { RemoveLiquidityNestedV2 } from './removeLiquidityNestedV2';
+    RemoveLiquidityNestedBuildCallOutput,
+} from './types';
+import { RemoveLiquidityNestedV3 } from './removeLiquidityNestedV3';
+import { validateBuildCallInput } from './removeLiquidityNestedV2/validateInputs';
 
 export class RemoveLiquidityNested {
     async query(
@@ -22,38 +23,28 @@ export class RemoveLiquidityNested {
                 );
             }
             case 2: {
-                const addLiquidity = new RemoveLiquidityNestedV2();
-                return addLiquidity.query(input, nestedPoolState);
+                const removeLiquidity = new RemoveLiquidityNestedV2();
+                return removeLiquidity.query(input, nestedPoolState);
             }
             case 3: {
-                throw new Error(
-                    'RemoveLiquidityNested not supported for ProtocolVersion 3.',
-                );
+                const removeLiquidity = new RemoveLiquidityNestedV3();
+                return removeLiquidity.query(input, nestedPoolState);
             }
         }
     }
 
-    buildCall(input: RemoveLiquidityNestedCallInput): {
-        callData: Hex;
-        to: Address;
-        minAmountsOut: TokenAmount[];
-    } {
-        validateBuildCallInput(input);
-
+    buildCall(
+        input: RemoveLiquidityNestedCallInput,
+    ): RemoveLiquidityNestedBuildCallOutput {
         switch (input.protocolVersion) {
-            case 1: {
-                throw new Error(
-                    'AddLiquidityNested not supported for ProtocolVersion 1.',
-                );
-            }
             case 2: {
+                validateBuildCallInput(input);
                 const removeLiquidity = new RemoveLiquidityNestedV2();
                 return removeLiquidity.buildCall(input);
             }
             case 3: {
-                throw new Error(
-                    'AddLiquidityNested not supported for ProtocolVersion 3.',
-                );
+                const removeLiquidity = new RemoveLiquidityNestedV3();
+                return removeLiquidity.buildCall(input);
             }
         }
     }
