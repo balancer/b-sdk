@@ -27,6 +27,7 @@ import {
     AddLiquidityNestedQueryOutputV3,
 } from './types';
 import { validateQueryInput } from '../addLiquidityNestedV2/validateInputs';
+import { Permit2 } from '@/entities/permit2Helper';
 
 export class AddLiquidityNestedV3 {
     async query(
@@ -94,6 +95,32 @@ export class AddLiquidityNestedV3 {
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             value: 0n, // TODO defaulting to 0 until router has payable
             minBptOut,
+        };
+    }
+
+    public buildCallWithPermit2(
+        input: AddLiquidityNestedCallInputV3,
+        permit2: Permit2,
+    ): AddLiquidityNestedBuildCallOutput {
+        const buildCallOutput = this.buildCall(input);
+
+        const args = [
+            [],
+            [],
+            permit2.batch,
+            permit2.signature,
+            [buildCallOutput.callData],
+        ] as const;
+
+        const callData = encodeFunctionData({
+            abi: balancerCompositeLiquidityRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
+        });
+
+        return {
+            ...buildCallOutput,
+            callData,
         };
     }
 

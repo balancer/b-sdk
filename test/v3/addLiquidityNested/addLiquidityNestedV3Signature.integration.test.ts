@@ -1,4 +1,4 @@
-// pnpm test -- addLiquidityNestedV3.integration.test.ts
+// pnpm test -- addLiquidityNestedV3Signature.integration.test.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -12,7 +12,6 @@ import {
 } from 'viem';
 import {
     Address,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     CHAINS,
     ChainId,
     NestedPoolState,
@@ -24,10 +23,10 @@ import {
     AddLiquidityNested,
     AddLiquidityNestedInput,
     AddLiquidityNestedQueryOutputV3,
+    Permit2Helper,
 } from '@/index';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
-    approveSpenderOnPermit2,
     approveSpenderOnToken,
     POOLS,
     sendTransactionGetBalances,
@@ -42,18 +41,13 @@ const DAI = TOKENS[chainId].DAI_AAVE;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const WETH = TOKENS[chainId].WETH;
 
-const parentBptToken = new Token(
-    chainId,
-    NESTED_WITH_BOOSTED_POOL.address,
-    NESTED_WITH_BOOSTED_POOL.decimals,
-);
 // These are the underlying tokens
 const daiToken = new Token(chainId, DAI.address, DAI.decimals);
 const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
 const wethToken = new Token(chainId, WETH.address, WETH.decimals);
 const mainTokens = [wethToken, daiToken, usdcToken];
 
-describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
+describe('V3 add liquidity nested test, with Permit2 signature', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
@@ -82,38 +76,6 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
         );
     });
 
-    test('query with underlying', async () => {
-        const addLiquidityInput: AddLiquidityNestedInput = {
-            amountsIn: [
-                {
-                    address: WETH.address,
-                    rawAmount: parseUnits('0.1', WETH.decimals),
-                    decimals: WETH.decimals,
-                },
-                {
-                    address: USDC.address,
-                    rawAmount: parseUnits('20', USDC.decimals),
-                    decimals: USDC.decimals,
-                },
-            ],
-            chainId,
-            rpcUrl,
-        };
-        const queryOutput = await addLiquidityNested.query(
-            addLiquidityInput,
-            nestedPoolState,
-        );
-        const expectedAmountsIn = [
-            TokenAmount.fromHumanAmount(wethToken, '0.1'),
-            TokenAmount.fromHumanAmount(daiToken, '0'),
-            TokenAmount.fromHumanAmount(usdcToken, '20'),
-        ];
-        expect(queryOutput.protocolVersion).toEqual(3);
-        expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
-        expect(queryOutput.bptOut.amount > 0n).to.be.true;
-        expect(queryOutput.amountsIn).to.deep.eq(expectedAmountsIn);
-    });
-
     test('add liquidity transaction', async () => {
         const addLiquidityInput: AddLiquidityNestedInput = {
             amountsIn: [
@@ -132,23 +94,6 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
             rpcUrl,
         };
 
-        for (const amount of addLiquidityInput.amountsIn) {
-            // Approve Permit2 to spend account tokens
-            await approveSpenderOnToken(
-                client,
-                testAddress,
-                amount.address,
-                PERMIT2[chainId],
-            );
-            // Approve Router to spend account tokens using Permit2
-            await approveSpenderOnPermit2(
-                client,
-                testAddress,
-                amount.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            );
-        }
-
         const queryOutput = (await addLiquidityNested.query(
             addLiquidityInput,
             nestedPoolState,
@@ -159,9 +104,29 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
             slippage: Slippage.fromPercentage('1'), // 1%,
         };
 
-        const addLiquidityBuildCallOutput = addLiquidityNested.buildCall(
-            addLiquidityBuildInput,
-        );
+        // Even when using signatures there must be an initial approve by the user to allow Permit2 to spend their tokens
+        for (const amount of addLiquidityInput.amountsIn) {
+            // Approve Permit2 to spend account tokens
+            await approveSpenderOnToken(
+                client,
+                testAddress,
+                amount.address,
+                PERMIT2[chainId],
+            );
+        }
+
+        // Create signature for each token being used to add
+        const permit2 = await Permit2Helper.signAddLiquidityNestedApproval({
+            ...addLiquidityBuildInput,
+            client,
+            owner: testAddress,
+        });
+
+        const addLiquidityBuildCallOutput =
+            addLiquidityNested.buildCallWithPermit2(
+                addLiquidityBuildInput,
+                permit2,
+            );
 
         // send add liquidity transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =

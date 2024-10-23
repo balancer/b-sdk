@@ -8,6 +8,8 @@ import {
     AddLiquidityNestedQueryOutput,
 } from './types';
 import { AddLiquidityNestedV3 } from './addLiquidityNestedV3';
+import { Permit2 } from '../permit2Helper';
+import { AddLiquidityNestedCallInputV3 } from './addLiquidityNestedV3/types';
 
 export class AddLiquidityNested {
     async query(
@@ -45,5 +47,13 @@ export class AddLiquidityNested {
                 return addLiquidity.buildCall(input);
             }
         }
+    }
+
+    public buildCallWithPermit2(
+        input: AddLiquidityNestedCallInputV3,
+        permit2: Permit2,
+    ): AddLiquidityNestedBuildCallOutput {
+        const addLiquidity = new AddLiquidityNestedV3();
+        return addLiquidity.buildCallWithPermit2(input, permit2);
     }
 }
