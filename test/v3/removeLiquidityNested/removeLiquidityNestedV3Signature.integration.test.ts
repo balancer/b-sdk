@@ -24,11 +24,12 @@ import {
     TokenAmount,
     Slippage,
     PermitHelper,
-    balancerCompositeLiquidityRouterAbi,
-    vaultAdminAbi_V3,
-    vaultV3Abi,
-    vaultExtensionAbi_V3,
-    permit2Abi,
+    // TODO remove once debug finished
+    // balancerCompositeLiquidityRouterAbi,
+    // vaultAdminAbi_V3,
+    // vaultV3Abi,
+    // vaultExtensionAbi_V3,
+    // permit2Abi,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -208,7 +209,7 @@ describe('V3 remove liquidity nested test, with Permit signature', () => {
     });
 });
 
-const nestedPoolState: NestedPoolState = {
+const _nestedPoolState: NestedPoolState = {
     protocolVersion: 3,
     pools: [
         {
