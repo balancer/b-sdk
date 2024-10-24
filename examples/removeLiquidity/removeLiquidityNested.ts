@@ -24,7 +24,7 @@ import {
     replaceWrapped,
     Slippage,
     RemoveLiquidityNested,
-    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedSingleTokenInputV2,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import { makeForkTx } from 'examples/lib/makeForkTx';
@@ -103,7 +103,7 @@ const removeLiquidityNested = async ({
     // setup remove liquidity helper
     const removeLiquidityNested = new RemoveLiquidityNested();
 
-    const removeLiquidityInput: RemoveLiquidityNestedSingleTokenInput = {
+    const removeLiquidityInput: RemoveLiquidityNestedSingleTokenInputV2 = {
         bptAmountIn,
         chainId,
         rpcUrl,

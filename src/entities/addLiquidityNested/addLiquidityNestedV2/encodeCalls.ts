@@ -1,12 +1,12 @@
-import { Hex, PoolType } from '../../types';
-import { WeightedEncoder } from '../encoders';
-import { ComposableStableEncoder } from '../encoders/composableStable';
+import { ComposableStableEncoder } from '../../encoders/composableStable';
+import { batchRelayerLibraryAbi } from '../../../abi';
+import { encodeFunctionData, Hex } from 'viem';
+import { TokenAmount } from '../../tokenAmount';
+import { getValue } from '../../utils/getValue';
+import { replaceWrapped } from '@/entities/utils';
 import { AddLiquidityNestedCallAttributes } from './types';
-import { replaceWrapped } from '../utils/replaceWrapped';
-import { batchRelayerLibraryAbi } from '../../abi';
-import { encodeFunctionData } from 'viem';
-import { TokenAmount } from '../tokenAmount';
-import { getValue } from '../utils/getValue';
+import { WeightedEncoder } from '@/entities/encoders';
+import { PoolType } from '@/types';
 
 export const encodeCalls = (
     callsAttributes: AddLiquidityNestedCallAttributes[],

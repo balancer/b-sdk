@@ -14,8 +14,6 @@ import {
 } from 'viem';
 import {
     Address,
-    AddLiquidityNested,
-    AddLiquidityNestedInput,
     BALANCER_RELAYER,
     BalancerApi,
     API_ENDPOINT,
@@ -29,6 +27,8 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import { makeForkTx } from 'examples/lib/makeForkTx';
 import { getSlot } from 'examples/lib/getSlot';
+import { AddLiquidityNestedInput } from '@/entities/addLiquidityNested/addLiquidityNestedV2/types';
+import { AddLiquidityNested } from '@/entities/addLiquidityNested';
 
 async function runAgainstFork() {
     // User defined inputs

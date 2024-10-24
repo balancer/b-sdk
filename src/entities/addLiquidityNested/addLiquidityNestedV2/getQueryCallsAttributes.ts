@@ -1,20 +1,20 @@
-import { Token } from '../token';
+import { Address, PoolType } from '@/types';
+import { Token } from '@/entities/token';
 import {
-    BALANCER_RELAYER,
-    ChainId,
     ZERO_ADDRESS,
+    BALANCER_RELAYER,
     getPoolAddress,
-} from '../../utils';
+    ChainId,
+} from '@/utils';
 import {
-    AddLiquidityNestedInput,
     AddLiquidityNestedCallAttributes,
+    AddLiquidityNestedInputV2,
 } from './types';
-import { NestedPool, PoolKind } from '../types';
-import { Address, PoolType } from '../../types';
-import { Relayer } from '../relayer';
+import { NestedPool, PoolKind } from '@/entities/types';
+import { Relayer } from '@/entities/relayer';
 
 export const getQueryCallsAttributes = (
-    { amountsIn, chainId, fromInternalBalance }: AddLiquidityNestedInput,
+    { amountsIn, chainId, fromInternalBalance }: AddLiquidityNestedInputV2,
     pools: NestedPool[],
 ): AddLiquidityNestedCallAttributes[] => {
     /**

@@ -1,16 +1,16 @@
-import { NATIVE_ASSETS } from '../../utils';
-import { Token } from '../token';
-import { NestedPoolState } from '../types';
+import { NATIVE_ASSETS } from '../../../utils';
+import { Token } from '../../token';
+import { NestedPoolState } from '../../types';
 import {
-    RemoveLiquidityNestedCallInput,
-    RemoveLiquidityNestedProportionalInput,
-    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedCallInputV2,
+    RemoveLiquidityNestedProportionalInputV2,
+    RemoveLiquidityNestedSingleTokenInputV2,
 } from './types';
 
 export const validateQueryInput = (
     input:
-        | RemoveLiquidityNestedProportionalInput
-        | RemoveLiquidityNestedSingleTokenInput,
+        | RemoveLiquidityNestedProportionalInputV2
+        | RemoveLiquidityNestedSingleTokenInputV2,
     nestedPoolState: NestedPoolState,
 ) => {
     const tokenOut = 'tokenOut' in input ? input.tokenOut : undefined;
@@ -20,7 +20,7 @@ export const validateQueryInput = (
     );
     if (!isProportional) {
         validateInputsSingleToken(
-            input as RemoveLiquidityNestedSingleTokenInput,
+            input as RemoveLiquidityNestedSingleTokenInputV2,
             mainTokens,
         );
     }
@@ -29,7 +29,7 @@ export const validateQueryInput = (
 };
 
 const validateInputsSingleToken = (
-    input: RemoveLiquidityNestedSingleTokenInput,
+    input: RemoveLiquidityNestedSingleTokenInputV2,
     mainTokens: Token[],
 ) => {
     const tokenOut = mainTokens.find((t) => t.isSameAddress(input.tokenOut));
@@ -42,7 +42,7 @@ const validateInputsSingleToken = (
 };
 
 export const validateBuildCallInput = (
-    input: RemoveLiquidityNestedCallInput,
+    input: RemoveLiquidityNestedCallInputV2,
 ) => {
     if (
         input.wethIsEth &&

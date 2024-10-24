@@ -1,45 +1,30 @@
-import { Address, Hex, InputAmount, PoolType } from '../../types';
-import { ChainId } from '../../utils';
-import { Slippage } from '../slippage';
-import { Token } from '../token';
-import { TokenAmount } from '../tokenAmount';
-import { PoolKind } from '../types';
+import { Address, Hex } from 'viem';
+import {
+    AddLiquidityNestedCallInputV2,
+    AddLiquidityNestedQueryOutputV2,
+    AddLiquidityNestedInputV2,
+} from './addLiquidityNestedV2/types';
+import {
+    AddLiquidityNestedCallInputV3,
+    AddLiquidityNestedInputV3,
+    AddLiquidityNestedQueryOutputV3,
+} from './addLiquidityNestedV3/types';
 
-export type AddLiquidityNestedInput = {
-    amountsIn: InputAmount[];
-    chainId: ChainId;
-    rpcUrl: string;
-    fromInternalBalance?: boolean;
-};
+export type AddLiquidityNestedInput =
+    | AddLiquidityNestedInputV2
+    | AddLiquidityNestedInputV3;
 
-export type AddLiquidityNestedCallAttributes = {
-    chainId: ChainId;
-    wethIsEth?: boolean;
-    sortedTokens: Token[];
-    poolId: Hex;
-    poolAddress: Address;
-    poolType: PoolType;
-    kind: PoolKind;
-    sender: Address;
-    recipient: Address;
-    maxAmountsIn: {
-        amount: bigint;
-        isRef: boolean;
-    }[];
+export type AddLiquidityNestedQueryOutput =
+    | AddLiquidityNestedQueryOutputV2
+    | AddLiquidityNestedQueryOutputV3;
+
+export type AddLiquidityNestedCallInput =
+    | AddLiquidityNestedCallInputV2
+    | AddLiquidityNestedCallInputV3;
+
+export type AddLiquidityNestedBuildCallOutput = {
+    callData: Hex;
+    to: Address;
+    value: bigint;
     minBptOut: bigint;
-    fromInternalBalance: boolean;
-    outputReference: bigint;
-};
-
-export type AddLiquidityNestedQueryOutput = {
-    callsAttributes: AddLiquidityNestedCallAttributes[];
-    amountsIn: TokenAmount[];
-    bptOut: TokenAmount;
-};
-
-export type AddLiquidityNestedCallInput = AddLiquidityNestedQueryOutput & {
-    slippage: Slippage;
-    accountAddress: Address;
-    relayerApprovalSignature?: Hex;
-    wethIsEth?: boolean;
 };

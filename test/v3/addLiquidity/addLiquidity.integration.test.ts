@@ -29,7 +29,7 @@ import {
     PoolType,
     PERMIT2,
     PublicWalletClient,
-} from '../../src';
+} from '@/index';
 import {
     AddLiquidityTxInput,
     assertAddLiquidityUnbalanced,
@@ -41,8 +41,8 @@ import {
     setTokenBalances,
     approveSpenderOnTokens,
     approveTokens,
-} from '../lib/utils';
-import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
+} from '../../lib/utils';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
 const protocolVersion = 3;
 

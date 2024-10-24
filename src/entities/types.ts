@@ -41,6 +41,7 @@ export type NestedPool = {
 };
 
 export type NestedPoolState = {
+    protocolVersion: 1 | 2 | 3;
     pools: NestedPool[];
     mainTokens: {
         address: Address;
