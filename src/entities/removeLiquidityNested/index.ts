@@ -1,4 +1,4 @@
-import { NestedPoolState } from '@/entities';
+import { NestedPoolState, Permit } from '@/entities';
 import { validateNestedPoolState } from '@/entities/utils';
 import { RemoveLiquidityNestedV2 } from './removeLiquidityNestedV2';
 import {
@@ -9,6 +9,8 @@ import {
 } from './types';
 import { RemoveLiquidityNestedV3 } from './removeLiquidityNestedV3';
 import { validateBuildCallInput } from './removeLiquidityNestedV2/validateInputs';
+import { encodeFunctionData, zeroAddress } from 'viem';
+import { balancerCompositeLiquidityRouterAbi } from '@/abi';
 
 export class RemoveLiquidityNested {
     async query(
@@ -47,5 +49,30 @@ export class RemoveLiquidityNested {
                 return removeLiquidity.buildCall(input);
             }
         }
+    }
+
+    public buildCallWithPermit(
+        input: RemoveLiquidityNestedCallInput,
+        permit: Permit,
+    ): RemoveLiquidityNestedBuildCallOutput {
+        const buildCallOutput = this.buildCall(input);
+
+        const args = [
+            permit.batch,
+            permit.signatures,
+            { details: [], spender: zeroAddress, sigDeadline: 0n },
+            '0x',
+            [buildCallOutput.callData],
+        ] as const;
+        const callData = encodeFunctionData({
+            abi: balancerCompositeLiquidityRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
+        });
+
+        return {
+            ...buildCallOutput,
+            callData,
+        };
     }
 }
