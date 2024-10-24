@@ -7,6 +7,8 @@ export type RemoveLiquidityNestedProportionalInputV3 = {
     bptAmountIn: bigint;
     chainId: ChainId;
     rpcUrl: string;
+    sender?: Address;
+    userData?: Hex;
 };
 
 export type RemoveLiquidityNestedQueryOutputV3 = {

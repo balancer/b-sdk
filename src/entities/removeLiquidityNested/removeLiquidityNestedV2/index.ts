@@ -7,7 +7,6 @@ import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../../utils';
 import { Relayer } from '../../relayer';
 import { TokenAmount } from '../../tokenAmount';
 import { NestedPoolState } from '../../types';
-import { validateNestedPoolState } from '../../utils';
 
 import { encodeCalls } from './encodeCalls';
 import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
@@ -29,8 +28,6 @@ export class RemoveLiquidityNestedV2 {
         nestedPoolState: NestedPoolState,
     ): Promise<RemoveLiquidityNestedQueryOutputV2> {
         const isProportional = validateQueryInput(input, nestedPoolState);
-        validateNestedPoolState(nestedPoolState);
-
         const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
             input,
             nestedPoolState.pools,
