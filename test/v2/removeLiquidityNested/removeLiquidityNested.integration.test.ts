@@ -21,8 +21,8 @@ import {
     NestedPoolState,
     PoolType,
     Relayer,
-    RemoveLiquidityNestedProportionalInput,
-    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedProportionalInputV2,
+    RemoveLiquidityNestedSingleTokenInputV2,
     replaceWrapped,
     Slippage,
     TokenAmount,
@@ -244,8 +244,8 @@ export const doTransaction = async ({
     // setup remove liquidity helper
     const removeLiquidityNested = new RemoveLiquidityNested();
     const removeLiquidityInput:
-        | RemoveLiquidityNestedProportionalInput
-        | RemoveLiquidityNestedSingleTokenInput = {
+        | RemoveLiquidityNestedProportionalInputV2
+        | RemoveLiquidityNestedSingleTokenInputV2 = {
         bptAmountIn: amountIn,
         chainId,
         rpcUrl,

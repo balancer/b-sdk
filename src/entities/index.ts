@@ -13,6 +13,8 @@ export * from './priceImpactAmount';
 export * from './relayer';
 export * from './removeLiquidity';
 export * from './removeLiquidity/types';
+export * from './removeLiquidityNested/index';
+export * from './removeLiquidityNested/types';
 export * from './removeLiquidityNested/removeLiquidityNestedV2';
 export * from './removeLiquidityNested/removeLiquidityNestedV2/types';
 export * from './slippage';

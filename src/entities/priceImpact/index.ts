@@ -16,7 +16,7 @@ import {
     RemoveLiquidityUnbalancedInput,
 } from '../removeLiquidity/types';
 import { RemoveLiquidityNested } from '../removeLiquidityNested';
-import { RemoveLiquidityNestedSingleTokenInput } from '../removeLiquidityNested/removeLiquidityNestedV2/types';
+import { RemoveLiquidityNestedSingleTokenInputV2 } from '../removeLiquidityNested/removeLiquidityNestedV2/types';
 import { Swap, SwapInput } from '../swap';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
@@ -370,7 +370,7 @@ export class PriceImpact {
      * @returns price impact amount
      */
     static removeLiquidityNested = async (
-        input: RemoveLiquidityNestedSingleTokenInput,
+        input: RemoveLiquidityNestedSingleTokenInputV2,
         nestedPoolState: NestedPoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within RemoveLiquidity

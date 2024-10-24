@@ -27,7 +27,7 @@ import {
     RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityUnbalancedInput,
     SwapKind,
-    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedSingleTokenInputV2,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -424,7 +424,7 @@ describe('price impact', () => {
      * ABA approach as price impact for other actions (addLiquidity, swap, etc.)
      */
     describe('remove liquidity nested - single token', () => {
-        let input: RemoveLiquidityNestedSingleTokenInput;
+        let input: RemoveLiquidityNestedSingleTokenInputV2;
         beforeAll(() => {
             input = {
                 chainId,

@@ -1,13 +1,13 @@
 import { encodeFunctionData, Hex } from 'viem';
 import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
-import { RemoveLiquidityNestedCallAttributes } from './types';
+import { RemoveLiquidityNestedCallAttributesV2 } from './types';
 import { replaceWrapped } from '@/entities/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { PoolType } from '@/types';
 import { ComposableStableEncoder, WeightedEncoder } from '@/entities/encoders';
 
 export const encodeCalls = (
-    callsAttributes: RemoveLiquidityNestedCallAttributes[],
+    callsAttributes: RemoveLiquidityNestedCallAttributesV2[],
     isProportional: boolean,
 ) => {
     const encodedCalls: Hex[] = [];

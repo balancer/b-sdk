@@ -7,27 +7,27 @@ import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../../utils';
 import { Relayer } from '../../relayer';
 import { TokenAmount } from '../../tokenAmount';
 import { NestedPoolState } from '../../types';
-import { validateNestedPoolState } from '../../utils';
 
 import { encodeCalls } from './encodeCalls';
 import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
 import { getPeekCalls } from './getPeekCalls';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
-import {
-    RemoveLiquidityNestedQueryOutput,
-    RemoveLiquidityNestedCallInput,
-    RemoveLiquidityNestedInput,
-} from './types';
 import { validateQueryInput, validateBuildCallInput } from './validateInputs';
+import {
+    RemoveLiquidityNestedCallInputV2,
+    RemoveLiquidityNestedProportionalInputV2,
+    RemoveLiquidityNestedQueryOutputV2,
+    RemoveLiquidityNestedSingleTokenInputV2,
+} from './types';
 
 export class RemoveLiquidityNestedV2 {
     async query(
-        input: RemoveLiquidityNestedInput,
+        input:
+            | RemoveLiquidityNestedProportionalInputV2
+            | RemoveLiquidityNestedSingleTokenInputV2,
         nestedPoolState: NestedPoolState,
-    ): Promise<RemoveLiquidityNestedQueryOutput> {
+    ): Promise<RemoveLiquidityNestedQueryOutputV2> {
         const isProportional = validateQueryInput(input, nestedPoolState);
-        validateNestedPoolState(nestedPoolState);
-
         const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
             input,
             nestedPoolState.pools,
@@ -85,7 +85,7 @@ export class RemoveLiquidityNestedV2 {
         };
     }
 
-    buildCall(input: RemoveLiquidityNestedCallInput): {
+    buildCall(input: RemoveLiquidityNestedCallInputV2): {
         callData: Hex;
         to: Address;
         minAmountsOut: TokenAmount[];

@@ -5,25 +5,25 @@ import { BALANCER_RELAYER, ChainId, ZERO_ADDRESS } from '@/utils';
 import { Token } from '@/entities/token';
 import { NestedPool, PoolKind } from '@/entities/types';
 import {
-    RemoveLiquidityNestedCallAttributes,
-    RemoveLiquidityNestedProportionalInput,
-    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedCallAttributesV2,
+    RemoveLiquidityNestedProportionalInputV2,
+    RemoveLiquidityNestedSingleTokenInputV2,
 } from './types';
 import { PoolType } from '@/types';
 import { Relayer } from '@/entities/relayer';
 
 export const getQueryCallsAttributes = (
     input:
-        | RemoveLiquidityNestedProportionalInput
-        | RemoveLiquidityNestedSingleTokenInput,
+        | RemoveLiquidityNestedProportionalInputV2
+        | RemoveLiquidityNestedSingleTokenInputV2,
     pools: NestedPool[],
     isProportional: boolean,
 ): {
     bptAmountIn: TokenAmount;
-    callsAttributes: RemoveLiquidityNestedCallAttributes[];
+    callsAttributes: RemoveLiquidityNestedCallAttributesV2[];
 } => {
     const { bptAmountIn, chainId, toInternalBalance = false } = input;
-    let callsAttributes: RemoveLiquidityNestedCallAttributes[];
+    let callsAttributes: RemoveLiquidityNestedCallAttributesV2[];
 
     // sort pools by descending level
     const poolsTopDown = pools.sort((a, b) => b.level - a.level);
@@ -39,7 +39,7 @@ export const getQueryCallsAttributes = (
             toInternalBalance,
         );
     } else {
-        const { tokenOut } = input as RemoveLiquidityNestedSingleTokenInput;
+        const { tokenOut } = input as RemoveLiquidityNestedSingleTokenInputV2;
 
         callsAttributes = getSingleTokenCallsAttributes(
             poolsTopDown,
@@ -70,7 +70,7 @@ const getProportionalCallsAttributes = (
      * 3. Output at bottom level is the amountsOut
      */
 
-    const calls: RemoveLiquidityNestedCallAttributes[] = [];
+    const calls: RemoveLiquidityNestedCallAttributesV2[] = [];
     for (const pool of poolsSortedByLevel) {
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
@@ -133,7 +133,7 @@ const getSingleTokenCallsAttributes = (
         tokenOut,
         poolsTopDown,
     );
-    const calls: RemoveLiquidityNestedCallAttributes[] = [];
+    const calls: RemoveLiquidityNestedCallAttributesV2[] = [];
 
     for (let i = 0; i < removeLiquidityPath.length; i++) {
         const pool = removeLiquidityPath[i];
@@ -209,7 +209,7 @@ const getRemoveLiquidityPath = (
 const getBptAmountIn = (
     pool: NestedPool,
     bptAmountIn: bigint,
-    calls: RemoveLiquidityNestedCallAttributes[],
+    calls: RemoveLiquidityNestedCallAttributesV2[],
     isProportional: boolean,
 ) => {
     // first call has bptAmountIn provided as it's input
@@ -221,14 +221,14 @@ const getBptAmountIn = (
     }
 
     // following calls have their input as the outputReference of a previous call
-    let previousCall: RemoveLiquidityNestedCallAttributes;
+    let previousCall: RemoveLiquidityNestedCallAttributesV2;
     let outputReferenceIndex: number;
     if (isProportional) {
         previousCall = calls.find((call) =>
             call.sortedTokens
                 .map((token) => token.address)
                 .includes(pool.address),
-        ) as RemoveLiquidityNestedCallAttributes;
+        ) as RemoveLiquidityNestedCallAttributesV2;
         outputReferenceIndex = previousCall.sortedTokens
             .map((token) => token.address)
             .indexOf(pool.address);
@@ -248,7 +248,7 @@ const getBptAmountIn = (
 // Sender's logic: if there is a previous call, then the sender is the
 // recipient of that call, otherwise it's the user.
 const getSenderProportional = (
-    calls: RemoveLiquidityNestedCallAttributes[],
+    calls: RemoveLiquidityNestedCallAttributesV2[],
     poolAddress: Address,
     accountAddress: Address,
 ): Address => {
