@@ -1,8 +1,16 @@
 export const balancerCompositeLiquidityRouterAbi = [
     {
         inputs: [
-            { internalType: 'contract IVault', name: 'vault', type: 'address' },
-            { internalType: 'contract IWETH', name: 'weth', type: 'address' },
+            {
+                internalType: 'contract IVault',
+                name: 'vault',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IWETH',
+                name: 'weth',
+                type: 'address',
+            },
             {
                 internalType: 'contract IPermit2',
                 name: 'permit2',
@@ -13,12 +21,24 @@ export const balancerCompositeLiquidityRouterAbi = [
         type: 'constructor',
     },
     {
-        inputs: [{ internalType: 'address', name: 'target', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'target',
+                type: 'address',
+            },
+        ],
         name: 'AddressEmptyCode',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'account',
+                type: 'address',
+            },
+        ],
         name: 'AddressInsufficientBalance',
         type: 'error',
     },
@@ -29,38 +49,103 @@ export const balancerCompositeLiquidityRouterAbi = [
                 name: 'tokenOut',
                 type: 'address',
             },
-            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-            { internalType: 'uint256', name: 'minAmountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minAmountOut',
+                type: 'uint256',
+            },
         ],
         name: 'AmountOutBelowMin',
         type: 'error',
     },
-    { inputs: [], name: 'ElementNotFound', type: 'error' },
-    { inputs: [], name: 'EthTransfer', type: 'error' },
-    { inputs: [], name: 'FailedInnerCall', type: 'error' },
-    { inputs: [], name: 'InputLengthMismatch', type: 'error' },
-    { inputs: [], name: 'InsufficientEth', type: 'error' },
-    { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
+    {
+        inputs: [],
+        name: 'ElementNotFound',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ErrorSelectorNotFound',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'EthTransfer',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'FailedInnerCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InputLengthMismatch',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InsufficientEth',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ReentrancyGuardReentrantCall',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'uint8', name: 'bits', type: 'uint8' },
-            { internalType: 'uint256', name: 'value', type: 'uint256' },
+            {
+                internalType: 'uint8',
+                name: 'bits',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
         ],
         name: 'SafeCastOverflowedUintDowncast',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+        ],
         name: 'SafeERC20FailedOperation',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+        ],
         name: 'SenderIsNotVault',
         type: 'error',
     },
-    { inputs: [], name: 'SwapDeadline', type: 'error' },
-    { inputs: [], name: 'TransientIndexOutOfBounds', type: 'error' },
+    {
+        inputs: [],
+        name: 'SwapDeadline',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'TransientIndexOutOfBounds',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -68,7 +153,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                 name: 'expectedTokensOut',
                 type: 'address[]',
             },
-            { internalType: 'address[]', name: 'tokensOut', type: 'address[]' },
+            {
+                internalType: 'address[]',
+                name: 'tokensOut',
+                type: 'address[]',
+            },
         ],
         name: 'WrongTokensOut',
         type: 'error',
@@ -82,7 +171,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'maxAmountsIn',
@@ -98,8 +191,16 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct IRouterCommon.AddLiquidityHookParams',
                 name: 'params',
@@ -126,7 +227,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'maxAmountsIn',
@@ -142,8 +247,16 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct IRouterCommon.AddLiquidityHookParams',
                 name: 'params',
@@ -152,14 +265,22 @@ export const balancerCompositeLiquidityRouterAbi = [
         ],
         name: 'addLiquidityERC4626PoolUnbalancedHook',
         outputs: [
-            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountOut',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'maxUnderlyingAmountsIn',
@@ -170,8 +291,16 @@ export const balancerCompositeLiquidityRouterAbi = [
                 name: 'exactBptAmountOut',
                 type: 'uint256',
             },
-            { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'addLiquidityProportionalToERC4626Pool',
         outputs: [
@@ -186,8 +315,16 @@ export const balancerCompositeLiquidityRouterAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'parentPool', type: 'address' },
-            { internalType: 'address[]', name: 'tokensIn', type: 'address[]' },
+            {
+                internalType: 'address',
+                name: 'parentPool',
+                type: 'address',
+            },
+            {
+                internalType: 'address[]',
+                name: 'tokensIn',
+                type: 'address[]',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'exactAmountsIn',
@@ -198,10 +335,20 @@ export const balancerCompositeLiquidityRouterAbi = [
                 name: 'minBptAmountOut',
                 type: 'uint256',
             },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'addLiquidityUnbalancedNestedPool',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -214,7 +361,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'maxAmountsIn',
@@ -230,14 +381,26 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct IRouterCommon.AddLiquidityHookParams',
                 name: 'params',
                 type: 'tuple',
             },
-            { internalType: 'address[]', name: 'tokensIn', type: 'address[]' },
+            {
+                internalType: 'address[]',
+                name: 'tokensIn',
+                type: 'address[]',
+            },
         ],
         name: 'addLiquidityUnbalancedNestedPoolHook',
         outputs: [
@@ -252,7 +415,11 @@ export const balancerCompositeLiquidityRouterAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'exactUnderlyingAmountsIn',
@@ -263,12 +430,24 @@ export const balancerCompositeLiquidityRouterAbi = [
                 name: 'minBptAmountOut',
                 type: 'uint256',
             },
-            { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'addLiquidityUnbalancedToERC4626Pool',
         outputs: [
-            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountOut',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'payable',
         type: 'function',
@@ -276,15 +455,31 @@ export const balancerCompositeLiquidityRouterAbi = [
     {
         inputs: [],
         name: 'getSender',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'bytes[]', name: 'data', type: 'bytes[]' }],
+        inputs: [
+            {
+                internalType: 'bytes[]',
+                name: 'data',
+                type: 'bytes[]',
+            },
+        ],
         name: 'multicall',
         outputs: [
-            { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
+            {
+                internalType: 'bytes[]',
+                name: 'results',
+                type: 'bytes[]',
+            },
         ],
         stateMutability: 'payable',
         type: 'function',
@@ -293,8 +488,16 @@ export const balancerCompositeLiquidityRouterAbi = [
         inputs: [
             {
                 components: [
-                    { internalType: 'address', name: 'token', type: 'address' },
-                    { internalType: 'address', name: 'owner', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'token',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'owner',
+                        type: 'address',
+                    },
                     {
                         internalType: 'address',
                         name: 'spender',
@@ -305,7 +508,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'amount',
                         type: 'uint256',
                     },
-                    { internalType: 'uint256', name: 'nonce', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'nonce',
+                        type: 'uint256',
+                    },
                     {
                         internalType: 'uint256',
                         name: 'deadline',
@@ -366,25 +573,50 @@ export const balancerCompositeLiquidityRouterAbi = [
                 name: 'permit2Batch',
                 type: 'tuple',
             },
-            { internalType: 'bytes', name: 'permit2Signature', type: 'bytes' },
-            { internalType: 'bytes[]', name: 'multicallData', type: 'bytes[]' },
+            {
+                internalType: 'bytes',
+                name: 'permit2Signature',
+                type: 'bytes',
+            },
+            {
+                internalType: 'bytes[]',
+                name: 'multicallData',
+                type: 'bytes[]',
+            },
         ],
         name: 'permitBatchAndCall',
         outputs: [
-            { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
+            {
+                internalType: 'bytes[]',
+                name: 'results',
+                type: 'bytes[]',
+            },
         ],
         stateMutability: 'payable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
             {
                 internalType: 'uint256',
                 name: 'exactBptAmountOut',
                 type: 'uint256',
             },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'queryAddLiquidityProportionalToERC4626Pool',
         outputs: [
@@ -399,46 +631,99 @@ export const balancerCompositeLiquidityRouterAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'parentPool', type: 'address' },
-            { internalType: 'address[]', name: 'tokensIn', type: 'address[]' },
+            {
+                internalType: 'address',
+                name: 'parentPool',
+                type: 'address',
+            },
+            {
+                internalType: 'address[]',
+                name: 'tokensIn',
+                type: 'address[]',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'exactAmountsIn',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'queryAddLiquidityUnbalancedNestedPool',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'exactUnderlyingAmountsIn',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'queryAddLiquidityUnbalancedToERC4626Pool',
         outputs: [
-            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountOut',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
             {
                 internalType: 'uint256',
                 name: 'exactBptAmountIn',
                 type: 'uint256',
             },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'queryRemoveLiquidityProportionalFromERC4626Pool',
         outputs: [
@@ -453,14 +738,31 @@ export const balancerCompositeLiquidityRouterAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'parentPool', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'parentPool',
+                type: 'address',
+            },
             {
                 internalType: 'uint256',
                 name: 'exactBptAmountIn',
                 type: 'uint256',
             },
-            { internalType: 'address[]', name: 'tokensOut', type: 'address[]' },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'address[]',
+                name: 'tokensOut',
+                type: 'address[]',
+            },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'queryRemoveLiquidityProportionalNestedPool',
         outputs: [
@@ -482,7 +784,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'minAmountsOut',
@@ -498,8 +804,16 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct IRouterCommon.RemoveLiquidityHookParams',
                 name: 'params',
@@ -519,7 +833,11 @@ export const balancerCompositeLiquidityRouterAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
             {
                 internalType: 'uint256',
                 name: 'exactBptAmountIn',
@@ -530,8 +848,16 @@ export const balancerCompositeLiquidityRouterAbi = [
                 name: 'minUnderlyingAmountsOut',
                 type: 'uint256[]',
             },
-            { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'removeLiquidityProportionalFromERC4626Pool',
         outputs: [
@@ -546,19 +872,31 @@ export const balancerCompositeLiquidityRouterAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'parentPool', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'parentPool',
+                type: 'address',
+            },
             {
                 internalType: 'uint256',
                 name: 'exactBptAmountIn',
                 type: 'uint256',
             },
-            { internalType: 'address[]', name: 'tokensOut', type: 'address[]' },
+            {
+                internalType: 'address[]',
+                name: 'tokensOut',
+                type: 'address[]',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'minAmountsOut',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: 'userData', type: 'bytes' },
+            {
+                internalType: 'bytes',
+                name: 'userData',
+                type: 'bytes',
+            },
         ],
         name: 'removeLiquidityProportionalNestedPool',
         outputs: [
@@ -580,7 +918,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'minAmountsOut',
@@ -596,14 +938,26 @@ export const balancerCompositeLiquidityRouterAbi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct IRouterCommon.RemoveLiquidityHookParams',
                 name: 'params',
                 type: 'tuple',
             },
-            { internalType: 'address[]', name: 'tokensOut', type: 'address[]' },
+            {
+                internalType: 'address[]',
+                name: 'tokensOut',
+                type: 'address[]',
+            },
         ],
         name: 'removeLiquidityProportionalNestedPoolHook',
         outputs: [
@@ -616,5 +970,8 @@ export const balancerCompositeLiquidityRouterAbi = [
         stateMutability: 'nonpayable',
         type: 'function',
     },
-    { stateMutability: 'payable', type: 'receive' },
+    {
+        stateMutability: 'payable',
+        type: 'receive',
+    },
 ] as const;

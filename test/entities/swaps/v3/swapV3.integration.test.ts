@@ -41,7 +41,7 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
-const blockNo = 6839728n;
+const blockNo = 6940150n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;

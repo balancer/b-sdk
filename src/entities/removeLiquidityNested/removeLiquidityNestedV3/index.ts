@@ -98,7 +98,7 @@ export class RemoveLiquidityNestedV3 {
         parentPool: Address,
         exactBptAmountIn: bigint,
         tokensOut: Address[],
-        _sender: Address,
+        sender: Address,
         userData: Hex,
     ) => {
         const client = createPublicClient({
@@ -115,12 +115,7 @@ export class RemoveLiquidityNestedV3 {
                 ...permit2Abi,
             ],
             functionName: 'queryRemoveLiquidityProportionalNestedPool',
-            args: [
-                parentPool,
-                exactBptAmountIn,
-                tokensOut,
-                /*sender,*/ userData,
-            ],
+            args: [parentPool, exactBptAmountIn, tokensOut, sender, userData],
         });
         return amountsOut;
     };

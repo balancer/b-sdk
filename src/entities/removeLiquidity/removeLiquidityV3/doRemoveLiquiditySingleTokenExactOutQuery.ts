@@ -5,7 +5,7 @@ import {
     vaultV3Abi,
 } from '@/abi';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, zeroAddress } from 'viem';
 import { RemoveLiquiditySingleTokenExactOutInput } from '../types';
 import { Address } from '@/types';
 
@@ -26,7 +26,13 @@ export const doRemoveLiquiditySingleTokenExactOutQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryRemoveLiquiditySingleTokenExactOut',
-        args: [poolAddress, amountOut.address, amountOut.rawAmount, '0x'],
+        args: [
+            poolAddress,
+            amountOut.address,
+            amountOut.rawAmount,
+            zeroAddress,
+            '0x',
+        ],
     });
     return bptIn;
 };

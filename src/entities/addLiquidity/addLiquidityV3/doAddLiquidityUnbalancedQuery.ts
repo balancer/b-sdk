@@ -1,4 +1,4 @@
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, zeroAddress } from 'viem';
 import { AddLiquidityUnbalancedInput } from '../types';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
 import {
@@ -28,7 +28,7 @@ export const doAddLiquidityUnbalancedQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquidityUnbalanced',
-        args: [poolAddress, maxAmountsIn, '0x'],
+        args: [poolAddress, maxAmountsIn, zeroAddress, '0x'],
     });
     return bptAmountOut;
 };

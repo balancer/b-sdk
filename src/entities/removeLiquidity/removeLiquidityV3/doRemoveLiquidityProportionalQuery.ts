@@ -5,7 +5,7 @@ import {
     vaultV3Abi,
 } from '@/abi';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, zeroAddress } from 'viem';
 import { RemoveLiquidityProportionalInput } from '../types';
 import { Address } from '@/types';
 
@@ -26,7 +26,7 @@ export const doRemoveLiquidityProportionalQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryRemoveLiquidityProportional',
-        args: [poolAddress, bptIn.rawAmount, '0x'],
+        args: [poolAddress, bptIn.rawAmount, zeroAddress, '0x'],
     });
     return amountsOut;
 };
