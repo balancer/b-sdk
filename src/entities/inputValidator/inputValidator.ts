@@ -13,7 +13,11 @@ import { InputValidatorGyro } from './gyro/inputValidatorGyro';
 import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
-import { ChainId, buildCallWithPermit2ProtocolVersionError } from '@/utils';
+import {
+    CHAINS,
+    ChainId,
+    buildCallWithPermit2ProtocolVersionError,
+} from '@/utils';
 
 export class InputValidator {
     validators: Record<string, InputValidatorBase> = {};
@@ -88,7 +92,7 @@ export class InputValidator {
     }
 
     private validateChain(chainId: number): void {
-        if (chainId in ChainId) return;
+        if (chainId in CHAINS) return;
         throw new Error(`Unsupported ChainId: ${chainId}`);
     }
 

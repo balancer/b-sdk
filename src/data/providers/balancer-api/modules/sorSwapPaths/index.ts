@@ -1,5 +1,5 @@
 import { BalancerApiClient } from '../../client';
-import { ChainId } from '@/utils';
+import { API_CHAIN_NAMES, ChainId } from '@/utils';
 import { Address } from 'viem';
 import { SwapKind } from '@/types';
 import { TokenAmount } from '@/entities';
@@ -108,29 +108,8 @@ export class SorSwapPaths {
     }
 
     private mapGqlChain(chainId: ChainId): string {
-        switch (chainId) {
-            case ChainId.ARBITRUM_ONE:
-                return 'ARBITRUM';
-            case ChainId.AVALANCHE:
-                return 'AVALANCHE';
-            case ChainId.FANTOM:
-                return 'FANTOM';
-            case ChainId.GNOSIS_CHAIN:
-                return 'GNOSIS';
-            case ChainId.MAINNET:
-                return 'MAINNET';
-            case ChainId.OPTIMISM:
-                return 'OPTIMISM';
-            case ChainId.POLYGON:
-                return 'POLYGON';
-            case ChainId.ZKEVM:
-                return 'ZKEVM';
-            case ChainId.SEPOLIA:
-                return 'SEPOLIA';
-            case ChainId.BASE:
-                return 'BASE';
-            default:
-                throw Error(`Unsupported API chain: ${chainId}`);
-        }
+        if (chainId in API_CHAIN_NAMES) {
+            return API_CHAIN_NAMES[chainId];
+        } else throw Error(`Unsupported API chain: ${chainId}`);
     }
 }
