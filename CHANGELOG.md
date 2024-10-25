@@ -1,5 +1,16 @@
 # @balancer/sdk
 
+## 0.29.0
+
+### Minor Changes
+
+- 8d4d0ee: Add add/remove support for V3 nested pools.
+- ae2c177: Update to Deploy 10.
+
+### Patch Changes
+
+- 1a85f89: Re-deploy force.
+
 ## 0.28.2
 
 ### Patch Changes
