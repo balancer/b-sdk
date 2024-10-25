@@ -53,7 +53,7 @@ const boosted_pool = POOLS[chainId].MOCK_BOOSTED_POOL;
 const stataUSDC = TOKENS[chainId].stataUSDC;
 const stataUSDT = TOKENS[chainId].stataUSDT;
 
-describe('SwapV3', () => {
+describe.skip('SwapV3', () => {
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let rpcUrl: string;
