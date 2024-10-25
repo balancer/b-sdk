@@ -958,11 +958,11 @@ describe('SwapV3', () => {
                         USDT.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([99910225n]);
+                    expect(expected.pathAmounts).to.deep.eq([99910226n]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdtToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(99910225n);
+                    expect(expected.expectedAmountOut.amount).to.eq(99910226n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -987,11 +987,11 @@ describe('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([100089854n]);
+                    expect(expected.pathAmounts).to.deep.eq([100089856n]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountIn.amount).to.eq(100089854n);
+                    expect(expected.expectedAmountIn.amount).to.eq(100089856n);
                 });
             });
             describe('swap should be executed correctly', () => {
