@@ -27,7 +27,7 @@ import {
     RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityUnbalancedInput,
     SwapKind,
-    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedSingleTokenInputV2,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -424,7 +424,7 @@ describe('price impact', () => {
      * ABA approach as price impact for other actions (addLiquidity, swap, etc.)
      */
     describe('remove liquidity nested - single token', () => {
-        let input: RemoveLiquidityNestedSingleTokenInput;
+        let input: RemoveLiquidityNestedSingleTokenInputV2;
         beforeAll(() => {
             input = {
                 chainId,
@@ -518,6 +518,7 @@ class MockApi {
     public async getNestedPool(poolId: Hex): Promise<NestedPoolState> {
         if (poolId !== BPT_WETH_3POOL.id) throw Error();
         return {
+            protocolVersion: 2,
             pools: [
                 {
                     id: BPT_WETH_3POOL.id,

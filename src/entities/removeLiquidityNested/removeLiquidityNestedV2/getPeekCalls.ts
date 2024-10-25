@@ -1,10 +1,10 @@
 import { Hex } from 'viem';
-import { Token } from '../token';
-import { RemoveLiquidityNestedCallAttributes } from './types';
-import { Relayer } from '../relayer';
+import { RemoveLiquidityNestedCallAttributesV2 } from './types';
+import { Token } from '@/entities/token';
+import { Relayer } from '@/entities/relayer';
 
 export const getPeekCalls = (
-    calls: RemoveLiquidityNestedCallAttributes[],
+    calls: RemoveLiquidityNestedCallAttributesV2[],
     isProportional: boolean,
 ) => {
     const tokensOut: Token[] = [];

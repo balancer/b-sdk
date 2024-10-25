@@ -21,9 +21,8 @@ import {
     NestedPoolState,
     PoolType,
     Relayer,
-    RemoveLiquidityNested,
-    RemoveLiquidityNestedProportionalInput,
-    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedProportionalInputV2,
+    RemoveLiquidityNestedSingleTokenInputV2,
     replaceWrapped,
     Slippage,
     TokenAmount,
@@ -32,6 +31,7 @@ import {
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
+import { RemoveLiquidityNested } from '@/entities/removeLiquidityNested';
 
 type TxInput = {
     poolId: Hex;
@@ -244,8 +244,8 @@ export const doTransaction = async ({
     // setup remove liquidity helper
     const removeLiquidityNested = new RemoveLiquidityNested();
     const removeLiquidityInput:
-        | RemoveLiquidityNestedProportionalInput
-        | RemoveLiquidityNestedSingleTokenInput = {
+        | RemoveLiquidityNestedProportionalInputV2
+        | RemoveLiquidityNestedSingleTokenInputV2 = {
         bptAmountIn: amountIn,
         chainId,
         rpcUrl,
@@ -316,6 +316,7 @@ class MockApi {
         )
             throw Error();
         return {
+            protocolVersion: 2,
             pools: [
                 {
                     id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',
