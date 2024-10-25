@@ -150,11 +150,11 @@ export const VAULT: Record<number, Address> = {
 };
 
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x30AF3689547354f82C70256894B07C9D0f067BB6',
+    [ChainId.SEPOLIA]: '0x68aD967ae8393B722EC69dB1018Ec28AF9A34493',
 };
 
 export const VAULT_ADMIN: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xa91b39DAeF308666a1e8E34BCacE2C3a899AaE78',
+    [ChainId.SEPOLIA]: '0x1fe31af18AB9D33A4a2f9c2d501a570d6052826f',
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
@@ -199,23 +199,23 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
 };
 
 export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x209e6cE55A89A39329C9666a5B8b371e84572aE8',
+    [ChainId.SEPOLIA]: '0x4F12F60148F98aD920b99e844807F0e245f2AE58',
 };
 
 export const STABLE_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x088F634B55C19A3138fd919098fB1320c4aBa6D0',
+    [ChainId.SEPOLIA]: '0xD895059a81711e4955823ED2C0755F204A86E5DA',
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x77eDc69766409C599F06Ef0B551a0990CBfe13A7',
+    [ChainId.SEPOLIA]: '0x657841f7059Db5B6Ae935c6DF064e999C4f516D5',
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x16Cf31c5c4f92ad6185D583080C84FEeb6074c78',
+    [ChainId.SEPOLIA]: '0x58b9e59a33AE8eF9b6B039118972a2C76F4c75D8',
 };
 
 export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x89cA59Bc46c00D90C496Fc99f16668b00Dd6B5CC',
+    [ChainId.SEPOLIA]: '0x45c27274296DE024755CF8c0017D136Ee0FA55f6',
 };
 
 export const PERMIT2: Record<number, Address> = {

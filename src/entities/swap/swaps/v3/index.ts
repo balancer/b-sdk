@@ -4,6 +4,7 @@ import {
     encodeFunctionData,
     getContract,
     http,
+    zeroAddress,
 } from 'viem';
 import { TokenAmount } from '../../../tokenAmount';
 import { SwapKind, Hex } from '../../../../types';
@@ -134,6 +135,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountIn,
+                        zeroAddress,
                         this.userData,
                     ],
                     { blockNumber: block },
@@ -155,6 +157,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountOut,
+                        zeroAddress,
                         this.userData,
                     ],
                     { blockNumber: block },
@@ -230,6 +233,7 @@ export class SwapV3 implements SwapBase {
                 await batchRouterContract.simulate.querySwapExactIn(
                     [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                        zeroAddress,
                         this.userData,
                     ],
                     { blockNumber: block },
@@ -254,6 +258,7 @@ export class SwapV3 implements SwapBase {
         const { result } = await batchRouterContract.simulate.querySwapExactOut(
             [
                 swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                zeroAddress,
                 this.userData,
             ],
             { blockNumber: block },
@@ -286,6 +291,7 @@ export class SwapV3 implements SwapBase {
                     functionName: 'querySwapExactIn',
                     args: [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
+                        zeroAddress,
                         this.userData,
                     ],
                 });
@@ -295,6 +301,7 @@ export class SwapV3 implements SwapBase {
                     functionName: 'querySwapExactOut',
                     args: [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
+                        zeroAddress,
                         this.userData,
                     ],
                 });
@@ -309,6 +316,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountIn,
+                        zeroAddress,
                         this.userData,
                     ],
                 });
@@ -321,6 +329,7 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountOut,
+                        zeroAddress,
                         this.userData,
                     ],
                 });

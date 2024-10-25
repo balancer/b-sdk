@@ -129,7 +129,7 @@ export class AddLiquidityNestedV3 {
         parentPool: Address,
         tokensIn: Address[],
         maxAmountsIn: bigint[],
-        _sender: Address,
+        sender: Address,
         userData: Hex,
     ) => {
         const client = createPublicClient({
@@ -146,7 +146,7 @@ export class AddLiquidityNestedV3 {
                 ...permit2Abi,
             ],
             functionName: 'queryAddLiquidityUnbalancedNestedPool',
-            args: [parentPool, tokensIn, maxAmountsIn, /*sender,*/ userData],
+            args: [parentPool, tokensIn, maxAmountsIn, sender, userData],
         });
         return bptAmountOut;
     };

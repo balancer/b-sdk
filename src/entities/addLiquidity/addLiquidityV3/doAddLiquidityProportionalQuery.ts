@@ -1,4 +1,4 @@
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, zeroAddress } from 'viem';
 import { AddLiquidityProportionalInput } from '../types';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
 import {
@@ -28,7 +28,7 @@ export const doAddLiquidityProportionalQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquidityProportional',
-        args: [poolAddress, bptOut, '0x'],
+        args: [poolAddress, bptOut, zeroAddress, '0x'],
     });
 
     return [...amountsIn];
