@@ -26,9 +26,11 @@ import {
     ChainId,
     AddLiquidityBoostedV3,
     AddLiquidityInput,
+    Permit2Helper,
     PERMIT2,
     Token,
     PublicWalletClient,
+    AddLiquidityBuildCallInput,
 } from '../../src';
 import {
     AddLiquidityTxInput,
@@ -39,24 +41,26 @@ import {
     approveSpenderOnTokens,
     approveTokens,
 } from '../lib/utils';
+
+import { sendTransactionGetBalances } from 'test/lib/utils';
+
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
 
 const protocolVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
-// https://sepolia.etherscan.io/address/0x797c69b235cb047c9331d39c96f30f76dce6444d#readContract
-// deploy 9
-const poolid = '0x797c69b235cb047c9331d39c96f30f76dce6444d';
-const stataUSDC = 0x8a88124522dbbf1e56352ba3de1d9f78c143751e;
+// deploy 10
+const poolid = '0x6dbdd7a36d900083a5b86a55583d90021e9f33e8';
+// const stataUSDC = 0x8a88124522dbbf1e56352ba3de1d9f78c143751e;
 const USDC = {
     address: '0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8',
     decimals: 6,
     slot: 0,
 };
-const stataDAI = 0xde46e43f46ff74a23a65ebb0580cbe3dfe684a17;
-const DAI = {
-    address: '0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357',
-    decimals: 18,
+//const statAUSDT = 0x978206fae13faf5a8d293fb614326b237684b750;
+const USDT = {
+    address: '0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0',
+    decimals: 6,
     slot: 0,
 };
 
@@ -65,13 +69,11 @@ describe('add liquidity test', () => {
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
     let poolStateWithUnderlyings: PoolStateWithUnderlyings;
-    let tokens: Address[];
     let rpcUrl: string;
     let snapshot: Hex;
     let testAddress: Address;
 
     beforeAll(async () => {
-        // get the PoolState from the Api
         const balancerApi = new BalancerApi(
             'https://test-api-v3.balancer.fi/',
             chainId,
@@ -95,9 +97,12 @@ describe('add liquidity test', () => {
         await setTokenBalances(
             client,
             testAddress,
-            [DAI.address, USDC.address] as Address[],
-            [DAI.slot, USDC.slot] as number[],
-            [parseUnits('100', DAI.decimals), parseUnits('100', USDC.decimals)],
+            [USDT.address, USDC.address] as Address[],
+            [USDT.slot, USDC.slot] as number[],
+            [
+                parseUnits('100', USDT.decimals),
+                parseUnits('100', USDC.decimals),
+            ],
         );
 
         // approve Permit2 to spend users DAI/USDC
@@ -105,7 +110,7 @@ describe('add liquidity test', () => {
         await approveSpenderOnTokens(
             client,
             testAddress,
-            [DAI.address, USDC.address] as Address[],
+            [USDT.address, USDC.address] as Address[],
             PERMIT2[chainId],
         );
 
@@ -120,21 +125,17 @@ describe('add liquidity test', () => {
     });
 
     describe('permit 2 direct approval', () => {
-        // Permit2 is approved to spend users DAI/USDC
-        // Adding liquidity with the composite Router allows to join boosted pools via underlying tokens
         beforeEach(async () => {
-            // Permit2 is approved to spend users DAI/USDC
             // Here We approve the Vault to spend Tokens on the users behalf via Permit2
             await approveTokens(
                 client,
                 testAddress as Address,
-                [DAI.address, USDC.address] as Address[],
+                [USDT.address, USDC.address] as Address[],
                 protocolVersion,
             );
         });
         describe('add liquidity unbalanced', () => {
             test('with tokens', async () => {
-                // AddLiquidityInput type is required which can be AddLiquidityUnbalancedInput
                 const input: AddLiquidityUnbalancedInput = {
                     chainId,
                     rpcUrl,
@@ -145,9 +146,9 @@ describe('add liquidity test', () => {
                             address: USDC.address as Address,
                         },
                         {
-                            rawAmount: 1000000000000000000n,
-                            decimals: 18,
-                            address: DAI.address as Address,
+                            rawAmount: 1000000n,
+                            decimals: 6,
+                            address: USDT.address as Address,
                         },
                     ],
                     kind: AddLiquidityKind.Unbalanced,
@@ -178,7 +179,7 @@ describe('add liquidity test', () => {
                 //establish underlying Tokens
                 const underlyingTokens: Token[] = [
                     new Token(11155111, USDC.address as Address, USDC.decimals), //051e
-                    new Token(11155111, DAI.address as Address, DAI.decimals), //a17
+                    new Token(11155111, USDT.address as Address, USDT.decimals), //a17
                 ];
 
                 assertAddLiquidityUnbalanced(
@@ -196,7 +197,7 @@ describe('add liquidity test', () => {
             });
         });
         describe('add liquidity proportional', () => {
-            test.only('with tokens', async () => {
+            test('with tokens', async () => {
                 const slippage: Slippage = Slippage.fromPercentage('1');
                 const wethIsEth = false;
 
@@ -214,14 +215,12 @@ describe('add liquidity test', () => {
                     rpcUrl: rpcUrl,
                     referenceAmount: {
                         rawAmount: 1000000000000000000n,
-                        decimals: 6,
-                        address: USDC.address as Address,
+                        decimals: 18,
+                        address: poolid as Address,
                     },
                     kind: AddLiquidityKind.Proportional,
                 };
 
-                // join with underlying (via composite liquidity router)
-                // indicated by true
                 const addLiquidityOutput = await doAddLiquidity(
                     {
                         ...txInput,
@@ -230,6 +229,12 @@ describe('add liquidity test', () => {
                     true,
                 );
 
+                //establish underlying Tokens
+                const underlyingTokens: Token[] = [
+                    new Token(11155111, USDC.address as Address, USDC.decimals), //051e
+                    new Token(11155111, USDT.address as Address, USDT.decimals), //a17
+                ];
+
                 assertAddLiquidityProportional(
                     poolState,
                     input,
@@ -237,11 +242,231 @@ describe('add liquidity test', () => {
                     slippage,
                     protocolVersion,
                     wethIsEth,
+                    underlyingTokens,
+                );
+
+                // make sure to pass Tokens in correct order. Same as poolTokens but as underlyings instead
+                assertTokenMatch(
+                    [
+                        new Token(
+                            111555111,
+                            USDC.address as Address,
+                            USDC.decimals,
+                        ),
+                        new Token(
+                            111555111,
+                            USDT.address as Address,
+                            USDT.decimals,
+                        ),
+                    ],
+                    addLiquidityOutput.addLiquidityBuildCallOutput.maxAmountsIn.map(
+                        (a) => a.token,
+                    ),
                 );
             });
-            test('with native', async () => {});
+            test('with native', async () => {
+                // TODO
+            });
         });
     });
 
-    describe('permit 2 signatures', () => {});
+    describe('permit 2 signatures', () => {
+        const addLiquidityBoosted = new AddLiquidityBoostedV3();
+        beforeEach(async () => {});
+        describe('add liquidity unbalanced', () => {
+            test('token inputs', async () => {
+                const input: AddLiquidityUnbalancedInput = {
+                    chainId,
+                    rpcUrl,
+                    amountsIn: [
+                        {
+                            rawAmount: 1000000n,
+                            decimals: 6,
+                            address: USDC.address as Address,
+                        },
+                        {
+                            rawAmount: 1000000n,
+                            decimals: 6,
+                            address: USDT.address as Address,
+                        },
+                    ],
+                    kind: AddLiquidityKind.Unbalanced,
+                };
+
+                const addLiquidityQueryOutput = await addLiquidityBoosted.query(
+                    input,
+                    poolState,
+                );
+
+                const addLiquidityBuildInput = {
+                    ...addLiquidityQueryOutput,
+                    slippage: Slippage.fromPercentage('1'),
+                } as AddLiquidityBuildCallInput;
+
+                const permit2 =
+                    await Permit2Helper.signAddLiquidityBoostedApproval({
+                        ...addLiquidityBuildInput,
+                        client,
+                        owner: testAddress,
+                    });
+
+                const addLiquidityBuildCallOutput =
+                    await addLiquidityBoosted.buildCallWithPermit2(
+                        addLiquidityBuildInput,
+                        permit2,
+                    );
+
+                const { transactionReceipt, balanceDeltas } =
+                    await sendTransactionGetBalances(
+                        [
+                            addLiquidityQueryOutput.bptOut.token.address,
+                            USDC.address as `0x${string}`,
+                            USDT.address as `0x${string}`,
+                        ],
+                        client,
+                        testAddress,
+                        addLiquidityBuildCallOutput.to, // f6
+                        addLiquidityBuildCallOutput.callData,
+                    );
+
+                expect(transactionReceipt.status).to.eq('success');
+
+                expect(addLiquidityQueryOutput.bptOut.amount > 0n).to.be.true;
+
+                const expectedDeltas = [
+                    addLiquidityQueryOutput.bptOut.amount,
+                    ...input.amountsIn.map((a) => a.rawAmount),
+                ];
+
+                expect(balanceDeltas).to.deep.eq(expectedDeltas);
+
+                const slippageAdjustedQueryOutput = Slippage.fromPercentage(
+                    '1',
+                ).applyTo(addLiquidityQueryOutput.bptOut.amount, -1);
+
+                expect(
+                    slippageAdjustedQueryOutput ===
+                        addLiquidityBuildCallOutput.minBptOut.amount,
+                ).to.be.true;
+            });
+            test('with native', async () => {
+                // TODO
+            });
+        });
+        describe('add liquidity proportional', () => {
+            test('token inputs', async () => {
+                const addLiquidityProportionalInput: AddLiquidityProportionalInput =
+                    {
+                        chainId,
+                        rpcUrl,
+                        referenceAmount: {
+                            rawAmount: 1000000000000000000n,
+                            decimals: 18,
+                            address: poolid as Address,
+                        },
+                        kind: AddLiquidityKind.Proportional,
+                    };
+
+                const addLiquidityQueryOutput = await addLiquidityBoosted.query(
+                    addLiquidityProportionalInput,
+                    poolStateWithUnderlyings,
+                );
+                const addLiquidityBuildInput: AddLiquidityBuildCallInput = {
+                    ...addLiquidityQueryOutput,
+                    slippage: Slippage.fromPercentage('1'),
+                };
+
+                const permit2 =
+                    await Permit2Helper.signAddLiquidityBoostedApproval({
+                        ...addLiquidityBuildInput,
+                        client,
+                        owner: testAddress,
+                    });
+
+                const addLiquidityBuildCallOutput =
+                    await addLiquidityBoosted.buildCallWithPermit2(
+                        addLiquidityBuildInput,
+                        permit2,
+                    );
+
+                const { transactionReceipt, balanceDeltas } =
+                    await sendTransactionGetBalances(
+                        [
+                            addLiquidityQueryOutput.bptOut.token.address,
+                            USDC.address as `0x${string}`,
+                            USDT.address as `0x${string}`,
+                        ],
+                        client,
+                        testAddress,
+                        addLiquidityBuildCallOutput.to, //
+                        addLiquidityBuildCallOutput.callData,
+                    );
+
+                expect(transactionReceipt.status).to.eq('success');
+
+                addLiquidityQueryOutput.amountsIn.map((a) => {
+                    expect(a.amount > 0n).to.be.true;
+                });
+
+                const expectedDeltas = [
+                    addLiquidityProportionalInput.referenceAmount.rawAmount,
+                    ...addLiquidityQueryOutput.amountsIn.map(
+                        (tokenAmount) => tokenAmount.amount,
+                    ),
+                ];
+                expect(balanceDeltas).to.deep.eq(expectedDeltas);
+
+                const slippageAdjustedQueryInput =
+                    addLiquidityQueryOutput.amountsIn.map((amountsIn) => {
+                        return Slippage.fromPercentage('1').applyTo(
+                            amountsIn.amount,
+                            1,
+                        );
+                    });
+                expect(
+                    addLiquidityBuildCallOutput.maxAmountsIn.map(
+                        (a) => a.amount,
+                    ),
+                ).to.deep.eq(slippageAdjustedQueryInput);
+
+                // make sure to pass Tokens in correct order. Same as poolTokens but as underlyings instead
+                assertTokenMatch(
+                    [
+                        new Token(
+                            111555111,
+                            USDC.address as Address,
+                            USDC.decimals,
+                        ),
+                        new Token(
+                            111555111,
+                            USDT.address as Address,
+                            USDT.decimals,
+                        ),
+                    ],
+                    addLiquidityBuildCallOutput.maxAmountsIn.map(
+                        (a) => a.token,
+                    ),
+                );
+            });
+            test('with native', async () => {
+                // TODO
+            });
+        });
+    });
+
+    function assertTokenMatch(
+        tokenDefined: Token[],
+        tokenReturned: Token[],
+    ): void {
+        tokenDefined.map((tokenAmount) => {
+            expect(
+                tokenReturned.some(
+                    (token) => token.address === tokenAmount.address,
+                ),
+            );
+        });
+        tokenDefined.map((a, i) => {
+            expect(a.decimals).to.eq(tokenReturned[i].decimals);
+        });
+    }
 });

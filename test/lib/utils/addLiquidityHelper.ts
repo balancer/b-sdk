@@ -21,6 +21,7 @@ import {
     VAULT,
     Permit2Helper,
     AddLiquidityKind,
+    InputAmount,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
@@ -204,24 +205,14 @@ export function assertAddLiquidityUnbalanced(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsIn = poolState.tokens.map((t, i) => {
-        let token;
+        let token: Token;
         if (underlyingTokens) {
             token = underlyingTokens[i];
         } else {
             token = new Token(addLiquidityInput.chainId, t.address, t.decimals);
         }
-        /* const token = new Token(
-            addLiquidityInput.chainId,
-            t.address,
-            t.decimals,
-        ); */
-
-        //addLiquidityInput tokens do not match with poolTokens in case of a boosted pool join via the composite liquidty router
-
-        let input;
+        let input: InputAmount;
         if (underlyingTokens) {
-            // get the amount from the addLiquidityInput where the current pools underlying token is the same token from the addLiquidityInput
-            // if addLiquidityInput == USDC, then find USDC in the underlyingTokens array
             input = addLiquidityInput.amountsIn.find(
                 (a) => a.address.toLowerCase() === underlyingTokens[i].address,
             );
@@ -422,6 +413,7 @@ export function assertAddLiquidityProportional(
         slippage,
         protocolVersion,
         wethIsEth,
+        underlyingTokens && underlyingTokens.length > 0,
     );
 
     if (wethIsEth) {
@@ -441,6 +433,7 @@ export function assertAddLiquidityProportional(
         addLiquidityBuildCallOutput,
         txOutput,
         wethIsEth,
+        underlyingTokens && underlyingTokens.length > 0,
     );
 }
 
@@ -460,7 +453,7 @@ function assertTokenDeltas(
         (t) => t.token.address !== poolState.address,
     );
 
-    let expectedDeltas;
+    let expectedDeltas: bigint[];
     if (isBoostedJoin) {
         // Matching order of getTokens helper: [poolTokens, BPT, native, underlying]
         // Because the query output is based on the composite liquidity router, the
@@ -565,5 +558,5 @@ function assertAddLiquidityBuildCallOutput(
 
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { callData, ...buildCheck } = addLiquidityBuildCallOutput;
-    // expect(buildCheck).to.deep.eq(expectedBuildOutput);
+    expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

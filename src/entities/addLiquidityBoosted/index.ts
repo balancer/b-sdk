@@ -4,18 +4,13 @@
 // 2. Proportional - addLiquidityProportionalToERC4626Pool
 import { TokenAmount } from '@/entities/tokenAmount';
 
-import { createPublicClient, http } from 'viem';
+import { Permit2 } from '@/entities/permit2Helper';
+
+import { getAmountsCall } from '../addLiquidity/helpers';
 
 import { PoolState, PoolStateWithUnderlyings } from '@/entities/types';
 
 import {
-    AddLiquidityBaseQueryOutput,
-    AddLiquidityInput,
-    AddLiquidityKind,
-} from '../addLiquidity/types';
-
-import {
-    AddLiquidityBase,
     AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
     AddLiquidityBuildCallOutput,
@@ -30,17 +25,9 @@ import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER } from '@/utils';
 
 import { getValue } from '@/entities/utils/getValue';
 import { encodeFunctionData } from 'viem';
-import { balancerCompositeLiquidityRouterAbi } from '@/abi';
+import { balancerCompositeLiquidityRouterAbi, balancerRouterAbi } from '@/abi';
 
 import { Hex } from '@/types';
-
-// The way this class is going to be used is without a wrapper.
-// Anyone wanting to add liquidity will do two things
-// 1. Fetch the poolState from an API
-// 2. Construct his trading intend as a AddLiquidityInput type.
-// 3. Then he will call the query function to fetch amountOut
-// 4. Apply custom slippage tolerance
-// 5. Build the call. (with the queryOutput and some custom data)
 
 export class AddLiquidityBoostedV3 {
     async query(
@@ -49,29 +36,14 @@ export class AddLiquidityBoostedV3 {
     ): Promise<AddLiquidityBaseQueryOutput> {
         // Technically possible to pass singleToken adds here due to type
         // disallow it for this class
+        // TODO: Use input validator
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
         let tokenInIndex: number | undefined;
-
-        // input to a query function in other cases is defined as
-        // input: AddLiquidityBoostedInput
-        // poolState: PoolState.
-        // Action: Both input types need to be defined in helper folders
-        // Next up some validations need to be done. (why?) It should basically
-        // catch all reverts that would happen on the SC side? These are the case for
-        // nested adds - for boosted pool adds for now not required - see ticket
-        // focusing on boosted pool adds with wrapped token.
-        // potential validations could be:
-        // 1. Are all tokens a user wants to join with the `asset` of the ERC4626 Vault?
-
-        // TODO: Do tokens need to get sorted? Or are they provided in sorted order already?
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
-                // Unbalanced joins provide exact amounts in
-                // and retrieve the bpt amount out
-                // bpt amout out needs to be calculated
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
                     input,
                     poolState.address,
@@ -88,24 +60,22 @@ export class AddLiquidityBoostedV3 {
                 break;
             }
             case AddLiquidityKind.Proportional: {
-                // proportional joins provide exact bpt amount out
-                // and amountsIn need to be calculated
                 const exactAmountsInNumbers =
                     await doAddLiquidityProportionalQuery(
                         input,
                         poolState.address,
                     );
 
-                // we should have access to underlyings now.
-                // for now the query return [0n, 0n]
+                // Since the user adds tokens which are technically not pool tokens, the TokenAmount to return
+                // uses the pool's tokens underlyingTokens to indicate which tokens are being added from the user
+                // perspective
                 amountsIn = poolState.tokens.map((t, i) =>
-                    //const token = new Token(input.chainId, t.address, t.decimals);
                     TokenAmount.fromRawAmount(
                         new Token(
                             input.chainId,
-                            t.address,
-                            t.decimals,
-                            t.symbol,
+                            t.underlyingToken.address,
+                            t.underlyingToken.decimals,
+                            t.underlyingToken.symbol,
                         ),
                         exactAmountsInNumbers[i],
                     ),
@@ -116,6 +86,9 @@ export class AddLiquidityBoostedV3 {
                     input.referenceAmount.rawAmount,
                 );
                 break;
+            }
+            case AddLiquidityKind.SingleToken: {
+                throw new Error('SingleToken not supported');
             }
         }
 
@@ -136,46 +109,30 @@ export class AddLiquidityBoostedV3 {
     buildCall(
         input: AddLiquidityBaseBuildCallInput,
     ): AddLiquidityBuildCallOutput {
-        // the job of this function is to craft the callData & return it with additonal obeject properties
-        // The regular V3 addLiquidity returns a AddLiquidityBuildCallOutput
+        const amounts = getAmountsCall(input);
         let callData: Hex;
-        let amountsIn: TokenAmount[];
-        let amountsOut: TokenAmount[];
-
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Unbalanced: {
-                amountsIn = input.amountsIn;
-                amountsOut = [input.bptOut];
-
-                // amounts in are raw here
                 callData = encodeFunctionData({
                     abi: balancerCompositeLiquidityRouterAbi,
                     functionName: 'addLiquidityUnbalancedToERC4626Pool',
                     args: [
-                        input.poolId, // pool
-                        amountsIn.map((amount) => amount.amount), // amountsIn[]
-                        0n, // minBptOut
-                        !!input.wethIsEth, // wethisEth
-                        '0x', // userData
+                        input.poolId,
+                        input.amountsIn.map((amount) => amount.amount),
+                        amounts.minimumBpt,
+                        !!input.wethIsEth,
+                        '0x',
                     ],
                 });
-                // minBptOut and maxAmountsIn are TokenAmount type
                 break;
             }
             case AddLiquidityKind.Proportional: {
-                // proportional join is based on having bpt amount as part of the input
-
-                amountsIn = input.amountsIn; // from query
-                amountsOut = [input.bptOut]; // from user
-
                 callData = encodeFunctionData({
                     abi: balancerCompositeLiquidityRouterAbi,
                     functionName: 'addLiquidityProportionalToERC4626Pool',
                     args: [
                         input.poolId, // pool
-                        input.amountsIn.map(
-                            (tokenAmount) => tokenAmount.amount,
-                        ), // maxAmountsIn
+                        amounts.maxAmountsIn, // maxAmountsIn
                         input.bptOut.amount, // minBptOut
                         !!input.wethIsEth, // wethisEth
                         '0x', // userData
@@ -183,13 +140,48 @@ export class AddLiquidityBoostedV3 {
                 });
                 break;
             }
+            case AddLiquidityKind.SingleToken: {
+                throw new Error('SingleToken not supported');
+            }
         }
         return {
-            callData: callData,
+            callData,
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             value: getValue(input.amountsIn, !!input.wethIsEth),
-            minBptOut: input.bptOut,
-            maxAmountsIn: amountsIn,
+            minBptOut: TokenAmount.fromRawAmount(
+                input.bptOut.token,
+                amounts.minimumBpt,
+            ),
+            maxAmountsIn: input.amountsIn.map((a, i) =>
+                TokenAmount.fromRawAmount(a.token, amounts.maxAmountsIn[i]),
+            ),
+        };
+    }
+
+    public buildCallWithPermit2(
+        input: AddLiquidityBaseBuildCallInput,
+        permit2: Permit2,
+    ): AddLiquidityBuildCallOutput {
+        // generate same calldata as buildCall
+        const buildCallOutput = this.buildCall(input);
+
+        const args = [
+            [],
+            [],
+            permit2.batch,
+            permit2.signature,
+            [buildCallOutput.callData],
+        ] as const;
+
+        const callData = encodeFunctionData({
+            abi: balancerRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
+        });
+
+        return {
+            ...buildCallOutput,
+            callData,
         };
     }
 }
