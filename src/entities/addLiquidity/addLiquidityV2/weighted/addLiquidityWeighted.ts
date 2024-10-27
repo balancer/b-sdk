@@ -101,6 +101,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
 
         return {
             callData,
+            args,
             to: VAULT[input.chainId],
             value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(

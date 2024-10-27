@@ -7,6 +7,7 @@ import {
     AddLiquidityV2QueryOutput,
 } from './addLiquidityV2/types';
 import { Permit2 } from '../permit2Helper';
+import { parseAddLiquidityArgs } from '../utils';
 
 export enum AddLiquidityKind {
     Unbalanced = 'Unbalanced',
@@ -80,6 +81,7 @@ export interface AddLiquidityBase {
 export type AddLiquidityBuildCallOutput = {
     callData: Hex;
     to: Address;
+    args: ReturnType<typeof parseAddLiquidityArgs>['args'];
     value: bigint;
     minBptOut: TokenAmount;
     maxAmountsIn: TokenAmount[];
