@@ -42,6 +42,8 @@ import {
     approveTokens,
 } from '../lib/utils';
 
+import { assertTokenMatch } from 'test/lib/utils';
+
 import { sendTransactionGetBalances } from 'test/lib/utils';
 
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
@@ -325,7 +327,7 @@ describe('add liquidity test', () => {
                         ],
                         client,
                         testAddress,
-                        addLiquidityBuildCallOutput.to, // f6
+                        addLiquidityBuildCallOutput.to,
                         addLiquidityBuildCallOutput.callData,
                     );
 
@@ -453,20 +455,4 @@ describe('add liquidity test', () => {
             });
         });
     });
-
-    function assertTokenMatch(
-        tokenDefined: Token[],
-        tokenReturned: Token[],
-    ): void {
-        tokenDefined.map((tokenAmount) => {
-            expect(
-                tokenReturned.some(
-                    (token) => token.address === tokenAmount.address,
-                ),
-            );
-        });
-        tokenDefined.map((a, i) => {
-            expect(a.decimals).to.eq(tokenReturned[i].decimals);
-        });
-    }
 });
