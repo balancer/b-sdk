@@ -66,7 +66,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'SEPOLIA_RPC_URL',
         fallBackRpc: 'https://sepolia.gateway.tenderly.co',
         port: ANVIL_PORTS.SEPOLIA,
-        forkBlockNumber: 6940150n,
+        forkBlockNumber: 6940180n,
     },
     OPTIMISM: {
         rpcEnv: 'OPTIMISM_RPC_URL',

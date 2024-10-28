@@ -15,7 +15,7 @@ import {
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
 // Helper function to check if two BigInts are within a given percentage
-function areBigIntsWithinPercent(
+export function areBigIntsWithinPercent(
     value1: bigint,
     value2: bigint,
     percent: number,
