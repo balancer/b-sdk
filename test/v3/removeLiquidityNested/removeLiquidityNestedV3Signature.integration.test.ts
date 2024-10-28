@@ -21,50 +21,34 @@ import {
     RemoveLiquidityNestedInput,
     RemoveLiquidityNested,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
-    TokenAmount,
     Slippage,
     PermitHelper,
-    // TODO remove once debug finished
-    // balancerCompositeLiquidityRouterAbi,
-    // vaultAdminAbi_V3,
-    // vaultV3Abi,
-    // vaultExtensionAbi_V3,
-    // permit2Abi,
+    RemoveLiquidityNestedCallInputV3,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
-import {
-    approveSpenderOnToken,
-    POOLS,
-    sendTransactionGetBalances,
-    setTokenBalances,
-    TOKENS,
-} from 'test/lib/utils';
-import { RemoveLiquidityNestedCallInputV3 } from '@/entities/removeLiquidityNested/removeLiquidityNestedV3/types';
+import { POOLS, sendTransactionGetBalances, TOKENS } from 'test/lib/utils';
+import { GetNestedBpt } from 'test/lib/utils/removeNestedHelpers';
 
 const chainId = ChainId.SEPOLIA;
 const NESTED_WITH_BOOSTED_POOL = POOLS[chainId].NESTED_WITH_BOOSTED_POOL;
 const BOOSTED_POOL = POOLS[chainId].MOCK_BOOSTED_POOL;
-const DAI = TOKENS[chainId].DAI_AAVE;
+const USDT = TOKENS[chainId].USDT_AAVE;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const WETH = TOKENS[chainId].WETH;
 
-const parentBptToken = new Token(
-    chainId,
-    NESTED_WITH_BOOSTED_POOL.address,
-    NESTED_WITH_BOOSTED_POOL.decimals,
-);
 // These are the underlying tokens
-const daiToken = new Token(chainId, DAI.address, DAI.decimals);
+const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
 const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
 const wethToken = new Token(chainId, WETH.address, WETH.decimals);
-const mainTokens = [wethToken, daiToken, usdcToken];
+const mainTokens = [wethToken, usdtToken, usdcToken];
 
-describe.skip('V3 remove liquidity nested test, with Permit signature', () => {
+describe('V3 remove liquidity nested test, with Permit signature', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     const removeLiquidityNested = new RemoveLiquidityNested();
+    let bptAmount: bigint;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
@@ -79,55 +63,50 @@ describe.skip('V3 remove liquidity nested test, with Permit signature', () => {
 
         testAddress = (await client.getAddresses())[0];
 
-        // Mint BPT to testAddress
-        await setTokenBalances(
-            client,
+        /*
+        We can't use the slot method to set test address BPT balance so we add liquidity instead to get the BPT.
+        */
+        bptAmount = await GetNestedBpt(
+            chainId,
+            rpcUrl,
             testAddress,
-            [parentBptToken.address],
-            [0],
-            [parseUnits('10', 18)],
+            client,
+            nestedPoolState,
+            [
+                {
+                    address: WETH.address,
+                    rawAmount: parseUnits('0.001', WETH.decimals),
+                    decimals: WETH.decimals,
+                    slot: WETH.slot as number,
+                },
+                {
+                    address: USDC.address,
+                    rawAmount: parseUnits('2', USDC.decimals),
+                    decimals: USDC.decimals,
+                    slot: USDC.slot as number,
+                },
+            ],
         );
     });
 
-    test('remove liquidity transaction, direct approval on router', async () => {
+    test('remove liquidity transaction', async () => {
         const removeLiquidityInput: RemoveLiquidityNestedInput = {
-            bptAmountIn: parseUnits('0.7', 18),
+            bptAmountIn: bptAmount,
             chainId,
             rpcUrl,
         };
-        await approveSpenderOnToken(
-            client,
-            testAddress,
-            parentBptToken.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+
+        const queryOutput = await removeLiquidityNested.query(
+            removeLiquidityInput,
+            nestedPoolState,
         );
-
-        // TODO - Add this once on Deploy10
-        // const queryOutput = await removeLiquidityNested.query(
-        //     removeLiquidityInput,
-        //     nestedPoolState,
-        // );
-
-        // TODO remove once we have real query
-        const queryOutput = {
-            protocolVersion: 3,
-            bptAmountIn: TokenAmount.fromRawAmount(
-                parentBptToken,
-                removeLiquidityInput.bptAmountIn,
-            ),
-            amountsOut: mainTokens.map((t) =>
-                TokenAmount.fromHumanAmount(t, '0.000000001'),
-            ),
-            chainId,
-            parentPool: parentBptToken.address,
-            userData: '0x',
-        };
 
         const removeLiquidityBuildInput = {
             ...queryOutput,
             slippage: Slippage.fromPercentage('1'), // 1%,
         } as RemoveLiquidityNestedCallInputV3;
 
+        // Removals do NOT use Permit2. Here we sign a Permit approval for the CompositeRouter to spend the users BPT using ERC20 approval
         const permit = await PermitHelper.signRemoveLiquidityNestedApproval({
             ...removeLiquidityBuildInput,
             client,
@@ -140,44 +119,16 @@ describe.skip('V3 remove liquidity nested test, with Permit signature', () => {
                 permit,
             );
 
-        // TODO - used for debug atm. Remove once deploy10 hopefully fixes things
-        // const args = [
-        //     [
-        //         {
-        //             token: '0xee76b8f75e20d4bb9eb483cdec176dfc8d02bb3a',
-        //             owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-        //             spender: '0x77eDc69766409C599F06Ef0B551a0990CBfe13A7',
-        //             amount: 700000000000000000n,
-        //             nonce: 0n,
-        //             deadline:
-        //                 115792089237316195423570985008687907853269984665640564039457584007913129639935n,
-        //         },
-        //     ],
-        //     [
-        //         '0xcbe54f21bde6d544980f94a7545b1ec10b2690d1de8ede996a77126b00ce20fc5be8b982ad79d45620631e10d4715dd56673a880fc392314da46f27af4841e901b',
-        //     ],
-        //     {
-        //         details: [],
-        //         spender: '0x0000000000000000000000000000000000000000',
-        //         sigDeadline: 0n,
-        //     },
-        //     '0x',
-        //     [
-        //         '0xcb25ee65000000000000000000000000ee76b8f75e20d4bb9eb483cdec176dfc8d02bb3a00000000000000000000000000000000000000000000000009b6e64a8ec6000000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000001a000000000000000000000000000000000000000000000000000000000000000030000000000000000000000007b79995e5f793a07bc00c21412e50ecae098e7f9000000000000000000000000ff34b3d4aee8ddcd6f9afffb6fe49bd371b8a35700000000000000000000000094a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c80000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000003b023380000000000000000000000000000000000000000000000000000000003b02338000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-        //     ],
-        // ] as const;
-        // await client.simulateContract({
-        //     address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-        //     abi: [
-        //         ...balancerCompositeLiquidityRouterAbi,
-        //         ...vaultAdminAbi_V3,
-        //         ...vaultV3Abi,
-        //         ...vaultExtensionAbi_V3,
-        //         ...permit2Abi,
-        //     ],
-        //     functionName: 'permitBatchAndCall',
-        //     args,
-        // });
+        // Build call minAmountsOut should be query result with slippage applied
+        const expectedMinAmountsOut = queryOutput.amountsOut.map((amountOut) =>
+            removeLiquidityBuildInput.slippage.applyTo(amountOut.amount, -1),
+        );
+        expect(expectedMinAmountsOut).to.deep.eq(
+            addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
+        );
+        expect(addLiquidityBuildCallOutput.to).to.eq(
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+        );
 
         // send remove liquidity transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
@@ -192,24 +143,19 @@ describe.skip('V3 remove liquidity nested test, with Permit signature', () => {
                 addLiquidityBuildCallOutput.callData,
             );
         expect(transactionReceipt.status).to.eq('success');
+        // Should match user bpt amount in and query result for amounts out
         const expectedDeltas = [
-            queryOutput.bptAmountIn.amount,
+            removeLiquidityInput.bptAmountIn,
             ...queryOutput.amountsOut.map((amountOut) => amountOut.amount),
         ];
         queryOutput.amountsOut.map(
             (amountOut) => expect(amountOut.amount > 0n).to.be.true,
         );
         expect(expectedDeltas).to.deep.eq(balanceDeltas);
-        const expectedMinAmountsOut = queryOutput.amountsOut.map((amountOut) =>
-            removeLiquidityBuildInput.slippage.applyTo(amountOut.amount, -1),
-        );
-        expect(expectedMinAmountsOut).to.deep.eq(
-            addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
-        );
     });
 });
 
-const _nestedPoolState: NestedPoolState = {
+const nestedPoolState: NestedPoolState = {
     protocolVersion: 3,
     pools: [
         {
@@ -242,8 +188,8 @@ const _nestedPoolState: NestedPoolState = {
                     index: 0,
                 },
                 {
-                    address: DAI.address,
-                    decimals: DAI.decimals,
+                    address: USDT.address,
+                    decimals: USDT.decimals,
                     index: 1,
                 },
             ],
@@ -255,8 +201,8 @@ const _nestedPoolState: NestedPoolState = {
             decimals: WETH.decimals,
         },
         {
-            address: DAI.address,
-            decimals: DAI.decimals,
+            address: USDT.address,
+            decimals: USDT.decimals,
         },
         {
             address: USDC.address,

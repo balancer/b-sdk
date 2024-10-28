@@ -21,13 +21,8 @@ import {
     RemoveLiquidityNestedInput,
     RemoveLiquidityNested,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
-    TokenAmount,
     Slippage,
-    balancerCompositeLiquidityRouterAbi,
-    vaultAdminAbi_V3,
-    vaultExtensionAbi_V3,
-    vaultV3Abi,
-    permit2Abi,
+    RemoveLiquidityNestedCallInputV3,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -35,15 +30,17 @@ import {
     approveSpenderOnToken,
     POOLS,
     sendTransactionGetBalances,
-    setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
-import { RemoveLiquidityNestedCallInputV3 } from '@/entities/removeLiquidityNested/removeLiquidityNestedV3/types';
+import {
+    GetNestedBpt,
+    validateTokenAmounts,
+} from 'test/lib/utils/removeNestedHelpers';
 
 const chainId = ChainId.SEPOLIA;
 const NESTED_WITH_BOOSTED_POOL = POOLS[chainId].NESTED_WITH_BOOSTED_POOL;
 const BOOSTED_POOL = POOLS[chainId].MOCK_BOOSTED_POOL;
-const DAI = TOKENS[chainId].DAI_AAVE;
+const USDT = TOKENS[chainId].USDT_AAVE;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const WETH = TOKENS[chainId].WETH;
 
@@ -53,16 +50,17 @@ const parentBptToken = new Token(
     NESTED_WITH_BOOSTED_POOL.decimals,
 );
 // These are the underlying tokens
-const daiToken = new Token(chainId, DAI.address, DAI.decimals);
 const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
+const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
 const wethToken = new Token(chainId, WETH.address, WETH.decimals);
-const mainTokens = [wethToken, daiToken, usdcToken];
+const mainTokens = [wethToken, usdtToken, usdcToken];
 
-describe.skip('V3 remove liquidity nested test, with Permit direct approval', () => {
+describe('V3 remove liquidity nested test, with Permit direct approval', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     const removeLiquidityNested = new RemoveLiquidityNested();
+    let bptAmount: bigint;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
@@ -77,19 +75,35 @@ describe.skip('V3 remove liquidity nested test, with Permit direct approval', ()
 
         testAddress = (await client.getAddresses())[0];
 
-        // Mint BPT to testAddress
-        await setTokenBalances(
-            client,
+        /*
+        We can't use the slot method to set test address BPT balance so we add liquidity instead to get the BPT.
+        */
+        bptAmount = await GetNestedBpt(
+            chainId,
+            rpcUrl,
             testAddress,
-            [parentBptToken.address],
-            [0],
-            [parseUnits('10', 18)],
+            client,
+            nestedPoolState,
+            [
+                {
+                    address: WETH.address,
+                    rawAmount: parseUnits('0.001', WETH.decimals),
+                    decimals: WETH.decimals,
+                    slot: WETH.slot as number,
+                },
+                {
+                    address: USDC.address,
+                    rawAmount: parseUnits('2', USDC.decimals),
+                    decimals: USDC.decimals,
+                    slot: USDC.slot as number,
+                },
+            ],
         );
     });
 
     test('query with underlying', async () => {
         const removeLiquidityInput: RemoveLiquidityNestedInput = {
-            bptAmountIn: parseUnits('0.7', 18),
+            bptAmountIn: bptAmount,
             chainId,
             rpcUrl,
         };
@@ -97,16 +111,25 @@ describe.skip('V3 remove liquidity nested test, with Permit direct approval', ()
             removeLiquidityInput,
             nestedPoolState,
         );
-        console.log(queryOutput);
-        // TODO add tests
+        expect(queryOutput.protocolVersion).toEqual(3);
+        expect(queryOutput.bptAmountIn.token).to.deep.eq(parentBptToken);
+        expect(queryOutput.bptAmountIn.amount).to.eq(
+            removeLiquidityInput.bptAmountIn,
+        );
+        expect(queryOutput.amountsOut.length).to.eq(
+            nestedPoolState.mainTokens.length,
+        );
+        validateTokenAmounts(queryOutput.amountsOut, mainTokens);
     });
 
     test('remove liquidity transaction, direct approval on router', async () => {
         const removeLiquidityInput: RemoveLiquidityNestedInput = {
-            bptAmountIn: parseUnits('0.7', 18),
+            bptAmountIn: bptAmount,
             chainId,
             rpcUrl,
         };
+
+        // Removals do NOT use Permit2. Here we directly approave the Router to spend the users BPT using ERC20 approval
         await approveSpenderOnToken(
             client,
             testAddress,
@@ -114,26 +137,10 @@ describe.skip('V3 remove liquidity nested test, with Permit direct approval', ()
             BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
         );
 
-        // TODO - Add this once on Deploy10
-        // const queryOutput = await removeLiquidityNested.query(
-        //     removeLiquidityInput,
-        //     nestedPoolState,
-        // );
-
-        // TODO remove once we have real query
-        const queryOutput = {
-            protocolVersion: 3,
-            bptAmountIn: TokenAmount.fromRawAmount(
-                parentBptToken,
-                removeLiquidityInput.bptAmountIn,
-            ),
-            amountsOut: mainTokens.map((t) =>
-                TokenAmount.fromHumanAmount(t, '0.000000001'),
-            ),
-            chainId,
-            parentPool: parentBptToken.address,
-            userData: '0x',
-        };
+        const queryOutput = await removeLiquidityNested.query(
+            removeLiquidityInput,
+            nestedPoolState,
+        );
 
         const removeLiquidityBuildInput = {
             ...queryOutput,
@@ -144,33 +151,16 @@ describe.skip('V3 remove liquidity nested test, with Permit direct approval', ()
             removeLiquidityBuildInput,
         );
 
-        // TODO - this is just for debug
-        // Currently reverting with:
-        // Error: ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)
-        // 0x89ca59bc46c00d90c496fc99f16668b00dd6b5cc, 0, 700000000000000000
-        // Assuming this is a router bug fixed in deploy10 as we are set allowance earlier
-        await client.simulateContract({
-            address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            abi: [
-                ...balancerCompositeLiquidityRouterAbi,
-                ...vaultAdminAbi_V3,
-                ...vaultV3Abi,
-                ...vaultExtensionAbi_V3,
-                ...permit2Abi,
-            ],
-            functionName: 'removeLiquidityProportionalNestedPool',
-            args: [
-                '0xee76b8f75e20d4bb9eb483cdec176dfc8d02bb3a',
-                700000000000000000n,
-                [
-                    '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
-                    '0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357',
-                    '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8',
-                ],
-                [990000000n, 990000000n, 0n],
-                '0x',
-            ],
-        });
+        // Build call minAmountsOut should be query result with slippage applied
+        const expectedMinAmountsOut = queryOutput.amountsOut.map((amountOut) =>
+            removeLiquidityBuildInput.slippage.applyTo(amountOut.amount, -1),
+        );
+        expect(expectedMinAmountsOut).to.deep.eq(
+            addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
+        );
+        expect(addLiquidityBuildCallOutput.to).to.eq(
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+        );
 
         // send remove liquidity transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
@@ -185,20 +175,15 @@ describe.skip('V3 remove liquidity nested test, with Permit direct approval', ()
                 addLiquidityBuildCallOutput.callData,
             );
         expect(transactionReceipt.status).to.eq('success');
+        // Should match user bpt amount in and query result for amounts out
         const expectedDeltas = [
-            queryOutput.bptAmountIn.amount,
+            removeLiquidityInput.bptAmountIn,
             ...queryOutput.amountsOut.map((amountOut) => amountOut.amount),
         ];
         queryOutput.amountsOut.map(
             (amountOut) => expect(amountOut.amount > 0n).to.be.true,
         );
         expect(expectedDeltas).to.deep.eq(balanceDeltas);
-        const expectedMinAmountsOut = queryOutput.amountsOut.map((amountOut) =>
-            removeLiquidityBuildInput.slippage.applyTo(amountOut.amount, -1),
-        );
-        expect(expectedMinAmountsOut).to.deep.eq(
-            addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
-        );
     });
 });
 
@@ -235,8 +220,8 @@ const nestedPoolState: NestedPoolState = {
                     index: 0,
                 },
                 {
-                    address: DAI.address,
-                    decimals: DAI.decimals,
+                    address: USDT.address,
+                    decimals: USDT.decimals,
                     index: 1,
                 },
             ],
@@ -248,8 +233,8 @@ const nestedPoolState: NestedPoolState = {
             decimals: WETH.decimals,
         },
         {
-            address: DAI.address,
-            decimals: DAI.decimals,
+            address: USDT.address,
+            decimals: USDT.decimals,
         },
         {
             address: USDC.address,
