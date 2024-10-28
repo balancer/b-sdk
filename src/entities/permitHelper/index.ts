@@ -2,7 +2,7 @@ import { weightedPoolAbi_V3 } from '@/abi';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     ChainId,
     MAX_UINT256,
     PublicWalletClient,

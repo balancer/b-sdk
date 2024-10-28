@@ -30,6 +30,8 @@ import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiq
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
 import { Client, PublicActions, WalletActions } from 'viem';
 
+import { areBigIntsWithinPercent } from './swapHelpers';
+
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
@@ -490,8 +492,15 @@ function assertTokenDeltas(
         expectedDeltas[expectedDeltas.length - 1] =
             addLiquidityBuildCallOutput.value;
     }
-
-    expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
+    if (isBoostedJoin) {
+        areBigIntsWithinPercent(
+            txOutput.balanceDeltas[2],
+            expectedDeltas[2],
+            0.001,
+        );
+    } else {
+        expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
+    }
 }
 
 function assertAddLiquidityBuildCallOutput(

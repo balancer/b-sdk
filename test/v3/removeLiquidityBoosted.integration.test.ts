@@ -6,7 +6,6 @@ config();
 import {
     Address,
     createTestClient,
-    erc20Abi,
     http,
     parseUnits,
     publicActions,
@@ -15,7 +14,6 @@ import {
 } from 'viem';
 
 import {
-    AddLiquidityUnbalancedInput,
     AddLiquidityProportionalInput,
     RemoveLiquidityProportionalInput,
     AddLiquidityKind,
@@ -28,18 +26,14 @@ import {
     CHAINS,
     ChainId,
     AddLiquidityInput,
-    Permit2Helper,
     PERMIT2,
     Token,
     PublicWalletClient,
-    AddLiquidityBuildCallInput,
     AddLiquidityBoostedV3,
     RemoveLiquidityBoostedV3,
 } from '../../src';
 import {
     AddLiquidityTxInput,
-    assertAddLiquidityUnbalanced,
-    assertAddLiquidityProportional,
     doAddLiquidity,
     setTokenBalances,
     approveSpenderOnTokens,
@@ -145,7 +139,6 @@ describe('remove liquidity test', () => {
 
         // join the pool - via direct approval
         const slippage: Slippage = Slippage.fromPercentage('1');
-        const wethIsEth = false;
 
         txInput = {
             client,
@@ -167,7 +160,7 @@ describe('remove liquidity test', () => {
             kind: AddLiquidityKind.Proportional,
         };
 
-        const addLiquidityOutput = await doAddLiquidity(
+        const _addLiquidityOutput = await doAddLiquidity(
             {
                 ...txInput,
                 addLiquidityInput: input,
@@ -187,15 +180,6 @@ describe('remove liquidity test', () => {
         });
         test('remove liquidity proportional', async () => {
             const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
-
-            // check if the user actually has BPT
-            const bptBalance = await client.simulateContract({
-                address: poolState.address,
-                abi: erc20Abi,
-                functionName: 'balanceOf',
-                args: [testAddress],
-                testAddress,
-            });
 
             const removeLiquidityInput: RemoveLiquidityProportionalInput = {
                 chainId: chainId,
@@ -287,15 +271,6 @@ describe('remove liquidity test', () => {
         });
         test('remove liquidity proportional', async () => {
             const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
-
-            // check if the user actually has BPT
-            const bptBalance = await client.simulateContract({
-                address: poolState.address,
-                abi: erc20Abi,
-                functionName: 'balanceOf',
-                args: [testAddress],
-                testAddress,
-            });
 
             const removeLiquidityInput: RemoveLiquidityProportionalInput = {
                 chainId: chainId,
