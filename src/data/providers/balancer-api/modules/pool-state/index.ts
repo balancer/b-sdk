@@ -5,7 +5,7 @@ import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
 
 export class Pools {
-    readonly poolStateQuery = `
+    readonly poolStateQuery = `#graphql
     query poolGetPool($id: String!, $chain: GqlChain!) {
       poolGetPool(id: $id, chain:$chain) {
         id
@@ -16,11 +16,13 @@ export class Pools {
           index
           address
           decimals
+          symbol
+          name
         }
       }
     }`;
 
-    readonly poolStateWithRawTokensQuery = `
+    readonly poolStateWithRawTokensQuery = `#graphql
     query GetPool($id: String!, $chain: GqlChain!) {
       poolGetPool(id:$id, chain:$chain) {
         id
@@ -32,6 +34,8 @@ export class Pools {
           address
           decimals
           balance
+          symbol
+          name
         }
         dynamicData {
           totalShares

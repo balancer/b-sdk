@@ -18,6 +18,8 @@ export type PoolGetPool = {
         index: number;
         address: Address;
         decimals: number;
+        symbol: string;
+        name: string;
         nestedPool: {
             id: Hex;
             address: Address;
@@ -32,7 +34,7 @@ export type PoolGetPool = {
 };
 
 export class NestedPools {
-    readonly nestedPoolStateQuery = `
+    readonly nestedPoolStateQuery = `#graphql
     query GetPool($id: String!) {
       poolGetPool(id:$id) {
         id
@@ -98,6 +100,8 @@ export function mapPoolToNestedPoolState(pool: PoolGetPool): NestedPoolState {
                     address: t.address,
                     decimals: t.decimals,
                     index: t.index,
+                    symbol: t.symbol,
+                    name: t.name,
                 };
                 return minimalToken;
             }),

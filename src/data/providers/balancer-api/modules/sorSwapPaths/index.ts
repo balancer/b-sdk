@@ -15,7 +15,7 @@ export type SorInput = {
 };
 
 export class SorSwapPaths {
-    readonly sorSwapPathQuery = `
+    readonly sorSwapPathQuery = `#graphql
   query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!) {
     sorGetSwapPaths(
     swapAmount: $swapAmount
@@ -40,6 +40,7 @@ export class SorSwapPaths {
         tokens {
           address
           decimals
+          
         }
       }
     }
