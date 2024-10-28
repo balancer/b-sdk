@@ -1,4 +1,4 @@
-export const weightedPoolAbi_V3 = [
+export const stablePoolAbi_V3 = [
     {
         inputs: [
             {
@@ -15,13 +15,8 @@ export const weightedPoolAbi_V3 = [
                     },
                     {
                         internalType: 'uint256',
-                        name: 'numTokens',
+                        name: 'amplificationParameter',
                         type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256[]',
-                        name: 'normalizedWeights',
-                        type: 'uint256[]',
                     },
                     {
                         internalType: 'string',
@@ -29,7 +24,7 @@ export const weightedPoolAbi_V3 = [
                         type: 'string',
                     },
                 ],
-                internalType: 'struct WeightedPool.NewPoolParams',
+                internalType: 'struct StablePool.NewPoolParams',
                 name: 'params',
                 type: 'tuple',
             },
@@ -44,7 +39,32 @@ export const weightedPoolAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'BaseOutOfBounds',
+        name: 'AmpUpdateAlreadyStarted',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AmpUpdateDurationTooShort',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AmpUpdateNotStarted',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AmpUpdateRateTooFast',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AmplificationFactorTooHigh',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AmplificationFactorTooLow',
         type: 'error',
     },
     {
@@ -102,16 +122,6 @@ export const weightedPoolAbi_V3 = [
         type: 'error',
     },
     {
-        inputs: [],
-        name: 'ExponentOutOfBounds',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'InputLengthMismatch',
-        type: 'error',
-    },
-    {
         inputs: [
             {
                 internalType: 'address',
@@ -129,42 +139,23 @@ export const weightedPoolAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'InvalidExponent',
-        type: 'error',
-    },
-    {
-        inputs: [],
         name: 'InvalidShortString',
         type: 'error',
     },
     {
-        inputs: [],
-        name: 'InvalidToken',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'MaxInRatio',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'MaxOutRatio',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'MinWeight',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'NormalizedWeightInvariant',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'ProductOutOfBounds',
+        inputs: [
+            {
+                internalType: 'uint8',
+                name: 'bits',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
+        ],
+        name: 'SafeCastOverflowedUintDowncast',
         type: 'error',
     },
     {
@@ -176,6 +167,21 @@ export const weightedPoolAbi_V3 = [
             },
         ],
         name: 'SenderIsNotVault',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'SenderNotAllowed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'StableComputeBalanceDidNotConverge',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'StableInvariantDidNotConverge',
         type: 'error',
     },
     {
@@ -191,18 +197,52 @@ export const weightedPoolAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'WeightedPoolBptRateUnsupported',
-        type: 'error',
-    },
-    {
-        inputs: [],
         name: 'ZeroDivision',
         type: 'error',
     },
     {
-        inputs: [],
-        name: 'ZeroInvariant',
-        type: 'error',
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'startValue',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'endValue',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'startTime',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'endTime',
+                type: 'uint256',
+            },
+        ],
+        name: 'AmpUpdateStarted',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'currentValue',
+                type: 'uint256',
+            },
+        ],
+        name: 'AmpUpdateStopped',
+        type: 'event',
     },
     {
         anonymous: false,
@@ -509,6 +549,25 @@ export const weightedPoolAbi_V3 = [
         type: 'function',
     },
     {
+        inputs: [
+            {
+                internalType: 'bytes4',
+                name: 'selector',
+                type: 'bytes4',
+            },
+        ],
+        name: 'getActionId',
+        outputs: [
+            {
+                internalType: 'bytes32',
+                name: '',
+                type: 'bytes32',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
         inputs: [],
         name: 'getAggregateFeePercentages',
         outputs: [
@@ -520,6 +579,29 @@ export const weightedPoolAbi_V3 = [
             {
                 internalType: 'uint256',
                 name: 'aggregateYieldFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getAmplificationParameter',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bool',
+                name: 'isUpdating',
+                type: 'bool',
+            },
+            {
+                internalType: 'uint256',
+                name: 'precision',
                 type: 'uint256',
             },
         ],
@@ -593,19 +675,6 @@ export const weightedPoolAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'getNormalizedWeights',
-        outputs: [
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
         name: 'getRate',
         outputs: [
             {
@@ -614,7 +683,102 @@ export const weightedPoolAbi_V3 = [
                 type: 'uint256',
             },
         ],
-        stateMutability: 'pure',
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getStablePoolDynamicData',
+        outputs: [
+            {
+                components: [
+                    {
+                        internalType: 'uint256[]',
+                        name: 'balancesLiveScaled18',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'tokenRates',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'staticSwapFeePercentage',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'totalSupply',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'bptRate',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amplificationParameter',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'isAmpUpdating',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'isPoolInitialized',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'isPoolPaused',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'isPoolInRecoveryMode',
+                        type: 'bool',
+                    },
+                ],
+                internalType: 'struct StablePoolDynamicData',
+                name: 'data',
+                type: 'tuple',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getStablePoolImmutableData',
+        outputs: [
+            {
+                components: [
+                    {
+                        internalType: 'contract IERC20[]',
+                        name: 'tokens',
+                        type: 'address[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'decimalScalingFactors',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amplificationParameterPrecision',
+                        type: 'uint256',
+                    },
+                ],
+                internalType: 'struct StablePoolImmutableData',
+                name: 'data',
+                type: 'tuple',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
     },
     {
@@ -696,86 +860,6 @@ export const weightedPoolAbi_V3 = [
                 internalType: 'contract IVault',
                 name: '',
                 type: 'address',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getWeightedPoolDynamicData',
-        outputs: [
-            {
-                components: [
-                    {
-                        internalType: 'uint256[]',
-                        name: 'balancesLiveScaled18',
-                        type: 'uint256[]',
-                    },
-                    {
-                        internalType: 'uint256[]',
-                        name: 'tokenRates',
-                        type: 'uint256[]',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'staticSwapFeePercentage',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'totalSupply',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'isPoolInitialized',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'isPoolPaused',
-                        type: 'bool',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'isPoolInRecoveryMode',
-                        type: 'bool',
-                    },
-                ],
-                internalType: 'struct WeightedPoolDynamicData',
-                name: 'data',
-                type: 'tuple',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getWeightedPoolImmutableData',
-        outputs: [
-            {
-                components: [
-                    {
-                        internalType: 'contract IERC20[]',
-                        name: 'tokens',
-                        type: 'address[]',
-                    },
-                    {
-                        internalType: 'uint256[]',
-                        name: 'decimalScalingFactors',
-                        type: 'uint256[]',
-                    },
-                    {
-                        internalType: 'uint256[]',
-                        name: 'normalizedWeights',
-                        type: 'uint256[]',
-                    },
-                ],
-                internalType: 'struct WeightedPoolImmutableData',
-                name: 'data',
-                type: 'tuple',
             },
         ],
         stateMutability: 'view',
@@ -915,6 +999,31 @@ export const weightedPoolAbi_V3 = [
     {
         inputs: [],
         name: 'revokePermit',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'rawEndValue',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'endTime',
+                type: 'uint256',
+            },
+        ],
+        name: 'startAmplificationParameterUpdate',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'stopAmplificationParameterUpdate',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',

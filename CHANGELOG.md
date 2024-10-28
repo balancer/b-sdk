@@ -1,5 +1,35 @@
 # @balancer/sdk
 
+## 0.29.0
+
+### Minor Changes
+
+- 8d4d0ee: Add add/remove support for V3 nested pools.
+- ae2c177: Update to Deploy 10.
+
+### Patch Changes
+
+- 1a85f89: Re-deploy force.
+
+## 0.28.2
+
+### Patch Changes
+
+- 5442afb: Add support for userData to v3 swaps
+
+## 0.28.1
+
+### Patch Changes
+
+- d64eb0f: Update vault extension ABI to deploy9 version.
+
+## 0.28.0
+
+### Minor Changes
+
+- b00b8d0: Update to deploy 9
+- 128313b: Support for v3 stable pool creation
+
 ## 0.27.0
 
 ### Minor Changes

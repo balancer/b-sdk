@@ -4,14 +4,19 @@ import {
     decodeFunctionResult,
     http,
 } from 'viem';
-import { Hex } from '../../types';
-import { BALANCER_RELAYER, CHAINS, ChainId, EMPTY_SENDER } from '../../utils';
+import { Hex } from '../../../types';
+import {
+    BALANCER_RELAYER,
+    CHAINS,
+    ChainId,
+    EMPTY_SENDER,
+} from '../../../utils';
 import {
     balancerRelayerAbi,
     permit2Abi,
     vaultExtensionAbi_V3,
     vaultV3Abi,
-} from '../../abi';
+} from '../../../abi';
 
 export const doAddLiquidityNestedQuery = async (
     chainId: ChainId,

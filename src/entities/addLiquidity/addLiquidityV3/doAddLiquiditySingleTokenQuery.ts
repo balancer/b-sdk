@@ -1,4 +1,4 @@
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, zeroAddress } from 'viem';
 import { AddLiquiditySingleTokenInput } from '../types';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
 import {
@@ -28,7 +28,7 @@ export const doAddLiquiditySingleTokenQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquiditySingleTokenExactOut',
-        args: [poolAddress, tokenIn, bptOut, '0x'],
+        args: [poolAddress, tokenIn, bptOut, zeroAddress, '0x'],
     });
     return amountIn;
 };

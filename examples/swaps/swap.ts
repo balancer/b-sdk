@@ -62,6 +62,7 @@ const swap = async () => {
         chainId,
         paths: sorPaths,
         swapKind,
+        userData: '0x',
     };
 
     // Swap object provides useful helpers for re-querying, building call, etc

@@ -2,11 +2,11 @@ import {
     createPublicClient,
     decodeAbiParameters,
     decodeFunctionResult,
+    Hex,
     http,
 } from 'viem';
-import { Hex } from '../../types';
-import { BALANCER_RELAYER, CHAINS, ChainId, EMPTY_SENDER } from '../../utils';
-import { balancerRelayerAbi } from '../../abi';
+import { balancerRelayerAbi } from '@/abi';
+import { BALANCER_RELAYER, ChainId, CHAINS, EMPTY_SENDER } from '@/utils';
 
 export const doRemoveLiquidityNestedQuery = async (
     chainId: ChainId,

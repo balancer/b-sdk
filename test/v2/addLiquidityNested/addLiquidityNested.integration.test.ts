@@ -227,6 +227,7 @@ class MockApi {
     public async getNestedPool(poolId: Hex): Promise<NestedPoolState> {
         if (poolId !== BPT_WETH_3POOL.id) throw Error();
         return {
+            protocolVersion: 2,
             pools: [
                 {
                     id: BPT_WETH_3POOL.id,
