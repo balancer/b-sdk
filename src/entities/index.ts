@@ -25,4 +25,4 @@ export * from './utils';
 export * from './swap';
 export * from './swap/swaps/v2/auraBalSwaps';
 export * from './addLiquidityBoosted';
-export * from './RemoveLiquidityBoostedV3';
+export * from './removeLiquidityBoostedV3';
