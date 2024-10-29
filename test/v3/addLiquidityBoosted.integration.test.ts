@@ -137,6 +137,7 @@ describe('add liquidity test', () => {
                         },
                     ],
                     kind: AddLiquidityKind.Unbalanced,
+                    userData: '0x',
                 };
 
                 const addLiquidityQueryOutput = await addLiquidityBoosted.query(

@@ -3,6 +3,7 @@ import { encodeFunctionData, zeroAddress } from 'viem';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBaseQueryOutput,
+    RemoveLiquidityBoostedQueryOutput,
     RemoveLiquidityKind,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityBaseBuildCallInput,
@@ -36,7 +37,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityProportionalInputWithOptionalUserArgs,
         poolState: PoolStateWithUnderlyings,
-    ): Promise<RemoveLiquidityBaseQueryOutput> {
+    ): Promise<RemoveLiquidityBoostedQueryOutput> {
         // Check if userAddress and userData were provided, and assign default values if not
         if (!('userAddress' in input) || input.userAddress === undefined) {
             // TODO: I think using a random address might be better than using the 0 address.
@@ -63,7 +64,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
-        const output: RemoveLiquidityBaseQueryOutput = {
+        const output: RemoveLiquidityBoostedQueryOutput = {
             poolType: poolState.type,
             poolId: poolState.address,
             removeLiquidityKind: RemoveLiquidityKind.Proportional,
@@ -71,6 +72,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             amountsOut: amountsOut,
             protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
+            userData: input.userData ?? '0x',
         };
         return output;
     }

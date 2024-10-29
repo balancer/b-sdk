@@ -13,6 +13,7 @@ import { PoolStateWithUnderlyings } from '@/entities/types';
 import {
     AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
+    AddLiquidityBoostedQueryOutput,
     AddLiquidityBuildCallOutput,
     AddLiquidityBoostedWithOptionalInput,
     AddLiquidityUnbalancedInputWithUserArgs,
@@ -35,7 +36,7 @@ export class AddLiquidityBoostedV3 {
     async query(
         input: AddLiquidityBoostedWithOptionalInput,
         poolState: PoolStateWithUnderlyings,
-    ): Promise<AddLiquidityBaseQueryOutput> {
+    ): Promise<AddLiquidityBoostedQueryOutput> {
         // Technically possible to pass singleToken adds here due to type
         // disallow it for this class
         // TODO: Use input validator
@@ -99,7 +100,7 @@ export class AddLiquidityBoostedV3 {
             }
         }
 
-        const output: AddLiquidityBaseQueryOutput = {
+        const output: AddLiquidityBoostedQueryOutput = {
             poolType: poolState.type,
             poolId: poolState.id,
             addLiquidityKind: input.kind,
@@ -108,6 +109,7 @@ export class AddLiquidityBoostedV3 {
             tokenInIndex,
             chainId: input.chainId,
             protocolVersion: 3,
+            userData: input.userData ?? '0x',
         };
 
         return output;

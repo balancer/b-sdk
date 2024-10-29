@@ -88,6 +88,10 @@ export type AddLiquidityQueryOutput =
     | AddLiquidityBaseQueryOutput
     | AddLiquidityV2QueryOutput;
 
+export type AddLiquidityBoostedQueryOutput = AddLiquidityBaseQueryOutput & {
+    userData: Hex;
+};
+
 export type AddLiquidityBaseBuildCallInput = {
     slippage: Slippage;
     wethIsEth?: boolean;

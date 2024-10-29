@@ -82,6 +82,11 @@ export type RemoveLiquidityBaseQueryOutput = {
     chainId: number;
 };
 
+export type RemoveLiquidityBoostedQueryOutput =
+    RemoveLiquidityBaseQueryOutput & {
+        userData: Hex;
+    };
+
 export type RemoveLiquidityQueryOutput =
     | RemoveLiquidityBaseQueryOutput
     | RemoveLiquidityV2QueryOutput;
