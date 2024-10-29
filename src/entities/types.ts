@@ -29,7 +29,6 @@ export type PoolStateWithUnderlyings = {
     address: Address;
     type: string;
     tokens: PoolTokenWithUnderlying[];
-    underlyings: MinimalToken[];
     totalShares: HumanAmount;
     protocolVersion: 1 | 2 | 3;
 };

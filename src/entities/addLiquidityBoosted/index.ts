@@ -88,7 +88,6 @@ export class AddLiquidityBoostedV3 {
                             input.chainId,
                             t.underlyingToken.address,
                             t.underlyingToken.decimals,
-                            t.underlyingToken.symbol,
                         ),
                         exactAmountsInNumbers[i],
                     ),
@@ -130,7 +129,7 @@ export class AddLiquidityBoostedV3 {
                         input.poolId,
                         input.amountsIn.map((amount) => amount.amount),
                         amounts.minimumBpt,
-                        !!input.wethIsEth,
+                        false,
                         '0x',
                     ],
                 });

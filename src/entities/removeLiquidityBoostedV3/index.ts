@@ -90,7 +90,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
                 input.poolId,
                 input.bptIn.amount,
                 amounts.minAmountsOut,
-                !!input.wethIsEth,
+                false,
                 '0x',
             ],
         });
