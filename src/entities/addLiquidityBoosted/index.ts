@@ -29,13 +29,22 @@ import { getValue } from '@/entities/utils/getValue';
 import { encodeFunctionData } from 'viem';
 import { balancerCompositeLiquidityRouterAbi, balancerRouterAbi } from '@/abi';
 
+import { InputValidator } from '../inputValidator/inputValidator';
+
 import { Hex } from '@/types';
 
 export class AddLiquidityBoostedV3 {
+    private readonly inputValidator: InputValidator = new InputValidator();
+
     async query(
         input: AddLiquidityBoostedWithOptionalInput,
         poolState: PoolStateWithUnderlyings,
     ): Promise<AddLiquidityBoostedQueryOutput> {
+        this.inputValidator.validateAddLiquidityBoosted(input, {
+            ...poolState,
+            type: 'Boosted',
+        });
+
         // Technically possible to pass singleToken adds here due to type
         // disallow it for this class
         // TODO: Use input validator

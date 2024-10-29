@@ -1,18 +1,22 @@
 import { PoolType } from '../../types';
-import { AddLiquidityInput } from '../addLiquidity/types';
+import {
+    AddLiquidityInput,
+    AddLiquidityBoostedWithOptionalInput,
+} from '../addLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput } from '../initPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '../removeLiquidity/types';
-import { PoolState } from '../types';
+import { PoolState, PoolStateWithUnderlyings } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
 import { InputValidatorCowAmm } from './cowAmm/inputValidatorCowAmm';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
 import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
+import { InputValidatorBoosted } from './boosted/inputValidatorBoosted';
 import { ChainId, buildCallWithPermit2ProtocolVersionError } from '@/utils';
 
 export class InputValidator {
@@ -28,6 +32,7 @@ export class InputValidator {
             [PoolType.MetaStable]: new InputValidatorStable(),
             [PoolType.Stable]: new InputValidatorStable(),
             [PoolType.Weighted]: new InputValidatorWeighted(),
+            [PoolType.Boosted]: new InputValidatorBoosted(),
         };
     }
 
@@ -85,6 +90,17 @@ export class InputValidator {
     validateCreatePool(input: CreatePoolInput): void {
         this.validateChain(input.chainId);
         this.getValidator(input.poolType).validateCreatePool(input);
+    }
+
+    validateAddLiquidityBoosted(
+        addLiquidityInput: AddLiquidityBoostedWithOptionalInput,
+        poolState: PoolStateWithUnderlyings,
+    ): void {
+        //this.validateChain(addLiquidityInput.chainId);
+        this.getValidator(poolState.type).validateAddLiquidityBoosted(
+            addLiquidityInput,
+            poolState,
+        );
     }
 
     private validateChain(chainId: number): void {

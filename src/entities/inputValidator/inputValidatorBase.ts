@@ -4,7 +4,7 @@ import {
 } from '@/entities/removeLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput, InitPoolInputV3 } from '../initPool/types';
-import { PoolState } from '../types';
+import { PoolState, PoolStateWithUnderlyings } from '../types';
 import {
     validateCreatePoolTokens,
     validateTokensAddLiquidity,
@@ -13,7 +13,10 @@ import {
 } from './utils/validateTokens';
 import { TokenType } from '@/types';
 import { zeroAddress } from 'viem';
-import { AddLiquidityInput } from '@/entities/addLiquidity/types';
+import {
+    AddLiquidityInput,
+    AddLiquidityBoostedWithOptionalInput,
+} from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { isSameAddress, NATIVE_ASSETS } from '@/utils';
 
@@ -63,6 +66,13 @@ export class InputValidatorBase {
         poolState: PoolState,
     ): void {
         validateTokensRemoveLiquidityRecovery(input, poolState);
+    }
+
+    validateAddLiquidityBoosted(
+        addLiquidityInput: AddLiquidityBoostedWithOptionalInput,
+        poolState: PoolStateWithUnderlyings,
+    ): void {
+        this.validateAddLiquidityBoosted(addLiquidityInput, poolState);
     }
 
     validateWethIsEth(initPoolInput: InitPoolInputV3) {
