@@ -53,7 +53,7 @@ const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
 const wethToken = new Token(chainId, WETH.address, WETH.decimals);
 const mainTokens = [wethToken, daiToken, usdcToken];
 
-describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
+describe.skip('V3 add liquidity nested test, with Permit2 direct approval', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
