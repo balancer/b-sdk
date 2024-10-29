@@ -160,13 +160,10 @@ describe('remove liquidity test', () => {
             kind: AddLiquidityKind.Proportional,
         };
 
-        const _addLiquidityOutput = await doAddLiquidity(
-            {
-                ...txInput,
-                addLiquidityInput: input,
-            },
-            true,
-        );
+        const _addLiquidityOutput = await doAddLiquidity({
+            ...txInput,
+            addLiquidityInput: input,
+        });
     });
     describe('direct approval', () => {
         beforeEach(async () => {
