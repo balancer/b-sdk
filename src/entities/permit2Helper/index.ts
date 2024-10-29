@@ -137,16 +137,11 @@ export class Permit2Helper {
         const spender = BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId];
         const details: PermitDetails[] = [];
 
-        // unbalanced:
-        // 0: 4c: 1000000n
-        // 1: 3d0: 1000000n
-
         for (let i = 0; i < input.amountsIn.length; i++) {
-            // sign approval for a token (address) and amounts.
             details.push(
                 await getDetails(
                     input.client,
-                    input.amountsIn[i].token.address, // '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8' // '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0'
+                    input.amountsIn[i].token.address,
                     input.owner,
                     spender,
                     amounts.maxAmountsIn[i],
