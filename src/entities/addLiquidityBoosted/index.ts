@@ -36,7 +36,7 @@ import { Hex } from '@/types';
 export class AddLiquidityBoostedV3 {
     async query(
         input: AddLiquidityBoostedWithOptionalInput,
-        poolState: PoolState | PoolStateWithUnderlyings,
+        poolState: PoolStateWithUnderlyings,
     ): Promise<AddLiquidityBaseQueryOutput> {
         // Technically possible to pass singleToken adds here due to type
         // disallow it for this class
