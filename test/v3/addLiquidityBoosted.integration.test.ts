@@ -13,19 +13,15 @@ import {
     walletActions,
 } from 'viem';
 
-import {
-    AddLiquidityUnbalancedInput,
-    AddLiquidityProportionalInput,
+import {,
     AddLiquidityKind,
     AddLiquidityBoostedWithOptionalInput,
     Slippage,
     Hex,
     PoolStateWithUnderlyings,
-    BalancerApi,
     CHAINS,
     ChainId,
     AddLiquidityBoostedV3,
-    AddLiquidityInput,
     Permit2Helper,
     PERMIT2,
     Token,
@@ -33,10 +29,6 @@ import {
     AddLiquidityBuildCallInput,
 } from '../../src';
 import {
-    AddLiquidityTxInput,
-    assertAddLiquidityUnbalanced,
-    assertAddLiquidityProportional,
-    doAddLiquidity,
     setTokenBalances,
     approveSpenderOnTokens,
     approveTokens,

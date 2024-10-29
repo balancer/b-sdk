@@ -1,4 +1,4 @@
-import { createPublicClient, http, getAddress } from 'viem';
+import { createPublicClient, http } from 'viem';
 
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, CHAINS } from '@/utils';
 
@@ -6,10 +6,7 @@ import { Address } from '@/types';
 
 import { balancerCompositeLiquidityRouterAbi } from '@/abi';
 
-import {
-    RemoveLiquidityProportionalInput,
-    RemoveLiquidityProportionalInputWithUserArgs,
-} from 'src';
+import { RemoveLiquidityProportionalInputWithUserArgs } from 'src';
 
 export const doRemoveLiquidityProportionalQuery = async (
     {

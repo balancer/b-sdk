@@ -15,15 +15,12 @@ import {
 
 import {
     AddLiquidityProportionalInput,
-    RemoveLiquidityProportionalInput,
     RemoveLiquidityProportionalInputWithOptionalUserArgs,
     AddLiquidityKind,
     RemoveLiquidityKind,
     Slippage,
     Hex,
-    PoolState,
     PoolStateWithUnderlyings,
-    BalancerApi,
     CHAINS,
     ChainId,
     AddLiquidityInput,

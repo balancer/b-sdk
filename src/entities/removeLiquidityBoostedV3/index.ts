@@ -2,7 +2,6 @@ import { encodeFunctionData, zeroAddress } from 'viem';
 
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityProportionalInput,
     RemoveLiquidityBaseQueryOutput,
     RemoveLiquidityKind,
     RemoveLiquidityBuildCallOutput,

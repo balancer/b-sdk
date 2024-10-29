@@ -8,18 +8,16 @@ import { Permit2 } from '@/entities/permit2Helper';
 
 import { getAmountsCall } from '../addLiquidity/helpers';
 
-import { PoolState, PoolStateWithUnderlyings } from '@/entities/types';
+import { PoolStateWithUnderlyings } from '@/entities/types';
 
 import {
     AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
     AddLiquidityBuildCallOutput,
-    AddLiquidityInput,
     AddLiquidityBoostedWithOptionalInput,
     AddLiquidityUnbalancedInputWithUserArgs,
     AddLiquidityProportionalInputWithUserArgs,
     AddLiquidityKind,
-    AddLiquidityProportionalInput,
 } from '../addLiquidity/types';
 
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
