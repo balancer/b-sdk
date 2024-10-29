@@ -17,7 +17,7 @@ import {
     trim,
 } from 'viem';
 
-import { erc20Abi, permit2Abi, erc4626Abi } from '@/abi';
+import { erc20Abi, permit2Abi } from '@/abi';
 import {
     VAULT,
     MAX_UINT256,
@@ -304,26 +304,7 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
-    joinWithUnderlying?: boolean,
 ): Promise<TxOutput> {
-    // Joining a boosted pool via the composite liquidity router is a join where
-    // none of the pool tokens are used but rather the `asset` of the pool tokens
-    // the last entry in the array is eth and before that the bpt token, so all
-    // balances for the tokens before that are needed.
-    if (joinWithUnderlying) {
-        const tokensWithUnderlyings = tokensForBalanceCheck.slice(0, -2);
-        const underlyingPromises = tokensWithUnderlyings.map(async (token) => {
-            const underlying = await client.readContract({
-                address: token,
-                abi: erc4626Abi,
-                functionName: 'asset',
-            });
-            return underlying;
-        });
-        const underlyings = await Promise.all(underlyingPromises);
-        tokensForBalanceCheck.push(...underlyings);
-    }
-
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
         client,

@@ -1,6 +1,5 @@
 import {
     AddLiquidity,
-    AddLiquidityBoostedV3,
     AddLiquidityBuildCallOutput,
     AddLiquidityBuildCallInput,
     AddLiquidityInput,
@@ -11,17 +10,14 @@ import {
     AddLiquidityUnbalancedInput,
     Address,
     BALANCER_ROUTER,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     NATIVE_ASSETS,
     PoolState,
-    PoolStateWithUnderlyings,
     Slippage,
     Token,
     TokenAmount,
     VAULT,
     Permit2Helper,
     AddLiquidityKind,
-    InputAmount,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
@@ -29,8 +25,6 @@ import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
 import { Client, PublicActions, WalletActions } from 'viem';
-
-import { areBigIntsWithinPercent } from './swapHelpers';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -49,9 +43,9 @@ async function sdkAddLiquidity({
     client,
     usePermit2Signatures,
 }: {
-    addLiquidity: AddLiquidity | AddLiquidityBoostedV3;
+    addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
-    poolState: PoolState | PoolStateWithUnderlyings;
+    poolState: PoolState;
     slippage: Slippage;
     testAddress: Address;
     wethIsEth?: boolean;
@@ -146,10 +140,7 @@ function getCheck(output: AddLiquidityQueryOutput) {
  *      @param client: Client & PublicActions & WalletActions - The RPC client
  *      @param slippage: Slippage - The slippage tolerance for the transaction
  */
-export async function doAddLiquidity(
-    txInput: AddLiquidityTxInput,
-    isBoostedJoin?: boolean,
-) {
+export async function doAddLiquidity(txInput: AddLiquidityTxInput) {
     const {
         addLiquidity,
         poolState,
@@ -183,7 +174,6 @@ export async function doAddLiquidity(
         addLiquidityBuildCallOutput.to,
         addLiquidityBuildCallOutput.callData,
         addLiquidityBuildCallOutput.value,
-        isBoostedJoin, // boostedPoolJoin with underlyings
     );
 
     return {
@@ -200,30 +190,20 @@ export function assertAddLiquidityUnbalanced(
     slippage: Slippage,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
-    underlyingTokens?: Token[], //required for testing boosted joins with underlying (composite liq router)
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
-    const expectedAmountsIn = poolState.tokens.map((t, i) => {
-        let token: Token;
-        if (underlyingTokens) {
-            token = underlyingTokens[i];
-        } else {
-            token = new Token(addLiquidityInput.chainId, t.address, t.decimals);
-        }
-        let input: InputAmount;
-        if (underlyingTokens) {
-            input = addLiquidityInput.amountsIn.find(
-                (a) => a.address.toLowerCase() === underlyingTokens[i].address,
-            );
-        } else {
-            input = addLiquidityInput.amountsIn.find(
-                (a) => a.address === t.address,
-            );
-        }
-
+    const expectedAmountsIn = poolState.tokens.map((t) => {
+        const token = new Token(
+            addLiquidityInput.chainId,
+            t.address,
+            t.decimals,
+        );
+        const input = addLiquidityInput.amountsIn.find(
+            (a) => a.address === t.address,
+        );
         if (input === undefined) return TokenAmount.fromRawAmount(token, 0n);
         return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
@@ -259,7 +239,6 @@ export function assertAddLiquidityUnbalanced(
         slippage,
         protocolVersion,
         wethIsEth,
-        underlyingTokens && underlyingTokens.length > 0,
     );
 
     assertTokenDeltas(
@@ -269,7 +248,6 @@ export function assertAddLiquidityUnbalanced(
         addLiquidityBuildCallOutput,
         txOutput,
         wethIsEth,
-        underlyingTokens && underlyingTokens.length > 0,
     );
 }
 
@@ -358,7 +336,6 @@ export function assertAddLiquidityProportional(
     slippage: Slippage,
     protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
-    underlyingTokens?: Token[], //required for testing boosted joins with underlying (composite liq router)
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
@@ -415,7 +392,6 @@ export function assertAddLiquidityProportional(
         slippage,
         protocolVersion,
         wethIsEth,
-        underlyingTokens && underlyingTokens.length > 0,
     );
 
     if (wethIsEth) {
@@ -435,7 +411,6 @@ export function assertAddLiquidityProportional(
         addLiquidityBuildCallOutput,
         txOutput,
         wethIsEth,
-        underlyingTokens && underlyingTokens.length > 0,
     );
 }
 
@@ -446,7 +421,6 @@ function assertTokenDeltas(
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput,
     txOutput: TxOutput,
     wethIsEth?: boolean,
-    isBoostedJoin?: boolean,
 ) {
     expect(txOutput.transactionReceipt.status).to.eq('success');
 
@@ -455,26 +429,12 @@ function assertTokenDeltas(
         (t) => t.token.address !== poolState.address,
     );
 
-    let expectedDeltas: bigint[];
-    if (isBoostedJoin) {
-        // Matching order of getTokens helper: [poolTokens, BPT, native, underlying]
-        // Because the query output is based on the composite liquidity router, the
-        // output amounts do not include the poolTokens but rather the underlying
-        // tokens in this first set of indexes.
-        expectedDeltas = [
-            ...amountsWithoutBpt.map((_a) => 0n),
-            addLiquidityQueryOutput.bptOut.amount,
-            0n,
-            ...amountsWithoutBpt.map((a) => a.amount),
-        ];
-    } else {
-        // Matching order of getTokens helper: [poolTokens, BPT, native]
-        expectedDeltas = [
-            ...amountsWithoutBpt.map((a) => a.amount),
-            addLiquidityQueryOutput.bptOut.amount,
-            0n,
-        ];
-    }
+    // Matching order of getTokens helper: [poolTokens, BPT, native]
+    const expectedDeltas = [
+        ...amountsWithoutBpt.map((a) => a.amount),
+        addLiquidityQueryOutput.bptOut.amount,
+        0n,
+    ];
 
     /**
      * Since native asset was moved to an extra index, we need to identify its
@@ -492,15 +452,8 @@ function assertTokenDeltas(
         expectedDeltas[expectedDeltas.length - 1] =
             addLiquidityBuildCallOutput.value;
     }
-    if (isBoostedJoin) {
-        areBigIntsWithinPercent(
-            txOutput.balanceDeltas[2],
-            expectedDeltas[2],
-            0.001,
-        );
-    } else {
-        expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
-    }
+
+    expect(txOutput.balanceDeltas).to.deep.eq(expectedDeltas);
 }
 
 function assertAddLiquidityBuildCallOutput(
@@ -511,7 +464,6 @@ function assertAddLiquidityBuildCallOutput(
     slippage: Slippage,
     protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
-    isBoostedJoin?: boolean,
 ) {
     // if exactIn maxAmountsIn should use same amountsIn as input else slippage should be applied
     const maxAmountsIn = isExactIn
@@ -537,14 +489,7 @@ function assertAddLiquidityBuildCallOutput(
             to = VAULT[addLiquidityInput.chainId];
             break;
         case 3:
-            if (isBoostedJoin) {
-                to =
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[
-                        addLiquidityInput.chainId
-                    ];
-            } else {
-                to = BALANCER_ROUTER[addLiquidityInput.chainId];
-            }
+            to = BALANCER_ROUTER[addLiquidityInput.chainId];
             break;
     }
 
