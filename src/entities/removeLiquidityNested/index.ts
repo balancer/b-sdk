@@ -1,4 +1,4 @@
-import { NestedPoolState, Permit } from '@/entities';
+import { NestedPoolState, Permit, Slippage } from '@/entities';
 import { validateNestedPoolState } from '@/entities/utils';
 import { RemoveLiquidityNestedV2 } from './removeLiquidityNestedV2';
 import {
@@ -9,7 +9,7 @@ import {
 } from './types';
 import { RemoveLiquidityNestedV3 } from './removeLiquidityNestedV3';
 import { validateBuildCallInput } from './removeLiquidityNestedV2/validateInputs';
-import { encodeFunctionData, zeroAddress } from 'viem';
+import { Address, encodeFunctionData, Hex, zeroAddress } from 'viem';
 import { balancerCompositeLiquidityRouterAbi } from '@/abi';
 
 export class RemoveLiquidityNested {
@@ -73,6 +73,38 @@ export class RemoveLiquidityNested {
         return {
             ...buildCallOutput,
             callData,
+        };
+    }
+
+    /**
+     * Helper to construct RemoveLiquidityNestedCallInput with proper type resolving.
+     * @param queryOutput
+     * @param params
+     * @returns RemoveLiquidityNestedCallInput
+     */
+    buildRemoveLiquidityInput(
+        queryOutput: RemoveLiquidityNestedQueryOutput,
+        params: {
+            slippage: Slippage;
+            accountAddress?: Address;
+            relayerApprovalSignature?: Hex;
+            wethIsEth?: boolean;
+        },
+    ): RemoveLiquidityNestedCallInput {
+        if (queryOutput.protocolVersion === 2) {
+            return {
+                ...queryOutput,
+                protocolVersion: 2,
+                slippage: params.slippage,
+                accountAddress: params.accountAddress!,
+                relayerApprovalSignature: params.relayerApprovalSignature,
+                wethIsEth: params.wethIsEth,
+            };
+        }
+        return {
+            ...queryOutput,
+            protocolVersion: 3,
+            slippage: params.slippage,
         };
     }
 }
