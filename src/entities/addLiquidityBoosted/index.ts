@@ -12,7 +12,6 @@ import { PoolStateWithUnderlyings } from '@/entities/types';
 
 import {
     AddLiquidityBaseBuildCallInput,
-    AddLiquidityBaseQueryOutput,
     AddLiquidityBoostedQueryOutput,
     AddLiquidityBuildCallOutput,
     AddLiquidityBoostedWithOptionalInput,
