@@ -47,8 +47,8 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const amountsOut = amountsOutInNumbers.map((amount, i) => {
             const token = new Token(
                 input.chainId,
-                poolState.underlyings[i].address,
-                poolState.underlyings[i].decimals,
+                poolState.tokens[i].address,
+                poolState.tokens[i].decimals,
             );
             return TokenAmount.fromRawAmount(token, amount);
         });
