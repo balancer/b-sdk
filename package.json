@@ -1,10 +1,10 @@
 {
-  "name": "@bera/berancer-sdk",
+  "name": "@berachain-foundation/berancer-sdk",
   "description": "SDK for interacting with the Balancer protocol",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/balancer/b-sdk"
+    "url": "https://github.com/berachain/berancer-sdk"
   },
   "publishConfig": {
     "access": "public"
