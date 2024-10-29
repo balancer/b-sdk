@@ -1,14 +1,20 @@
-import { createPublicClient, http, getAddress } from 'viem';
+import { createPublicClient, http } from 'viem';
 
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, CHAINS } from '@/utils';
 
-import { AddLiquidityProportionalInput } from '../addLiquidity/types';
+import { AddLiquidityProportionalInputWithUserArgs } from '../addLiquidity/types';
 import { Address } from '@/types';
 
 import { balancerCompositeLiquidityRouterAbi } from '@/abi';
 
 export const doAddLiquidityProportionalQuery = async (
-    { rpcUrl, chainId, referenceAmount }: AddLiquidityProportionalInput,
+    {
+        rpcUrl,
+        chainId,
+        referenceAmount,
+        userAddress,
+        userData,
+    }: AddLiquidityProportionalInputWithUserArgs,
     poolAddress: Address,
 ): Promise<bigint[]> => {
     const client = createPublicClient({
@@ -20,12 +26,7 @@ export const doAddLiquidityProportionalQuery = async (
         address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
         abi: balancerCompositeLiquidityRouterAbi,
         functionName: 'queryAddLiquidityProportionalToERC4626Pool',
-        args: [
-            poolAddress,
-            referenceAmount.rawAmount,
-            getAddress('0xa5cc3c03994db5b0d9a5eEdD10Cabab0813678ac'),
-            '0x',
-        ],
+        args: [poolAddress, referenceAmount.rawAmount, userAddress, userData],
     });
     return [...exactAmountsIn];
 };

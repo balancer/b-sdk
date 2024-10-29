@@ -17,6 +17,7 @@ import {
     AddLiquidityUnbalancedInput,
     AddLiquidityProportionalInput,
     AddLiquidityKind,
+    AddLiquidityBoostedWithOptionalInput,
     Slippage,
     Hex,
     PoolState,
@@ -139,7 +140,7 @@ describe('add liquidity test', () => {
         });
         describe('add liquidity unbalanced', () => {
             test('with tokens', async () => {
-                const input: AddLiquidityUnbalancedInput = {
+                const input: AddLiquidityBoostedWithOptionalInput = {
                     chainId,
                     rpcUrl,
                     amountsIn: [
@@ -208,7 +209,7 @@ describe('add liquidity test', () => {
         });
         describe('add liquidity proportional', () => {
             test('with tokens', async () => {
-                const addLiquidityProportionalInput: AddLiquidityProportionalInput =
+                const addLiquidityProportionalInput: AddLiquidityBoostedWithOptionalInput =
                     {
                         chainId,
                         rpcUrl,
@@ -300,7 +301,7 @@ describe('add liquidity test', () => {
         beforeEach(async () => {});
         describe('add liquidity unbalanced', () => {
             test('token inputs', async () => {
-                const input: AddLiquidityUnbalancedInput = {
+                const input: AddLiquidityBoostedWithOptionalInput = {
                     chainId,
                     rpcUrl,
                     amountsIn: [
@@ -379,7 +380,7 @@ describe('add liquidity test', () => {
         });
         describe('add liquidity proportional', () => {
             test('token inputs', async () => {
-                const addLiquidityProportionalInput: AddLiquidityProportionalInput =
+                const addLiquidityProportionalInput: AddLiquidityBoostedWithOptionalInput =
                     {
                         chainId,
                         rpcUrl,

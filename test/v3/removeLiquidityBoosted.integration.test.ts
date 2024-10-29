@@ -16,6 +16,7 @@ import {
 import {
     AddLiquidityProportionalInput,
     RemoveLiquidityProportionalInput,
+    RemoveLiquidityProportionalInputWithOptionalUserArgs,
     AddLiquidityKind,
     RemoveLiquidityKind,
     Slippage,
@@ -178,16 +179,17 @@ describe('remove liquidity test', () => {
         test('remove liquidity proportional', async () => {
             const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
 
-            const removeLiquidityInput: RemoveLiquidityProportionalInput = {
-                chainId: chainId,
-                rpcUrl: rpcUrl,
-                bptIn: {
-                    rawAmount: 1000000000000000000n,
-                    decimals: 18,
-                    address: poolState.address,
-                },
-                kind: RemoveLiquidityKind.Proportional,
-            };
+            const removeLiquidityInput: RemoveLiquidityProportionalInputWithOptionalUserArgs =
+                {
+                    chainId: chainId,
+                    rpcUrl: rpcUrl,
+                    bptIn: {
+                        rawAmount: 1000000000000000000n,
+                        decimals: 18,
+                        address: poolState.address,
+                    },
+                    kind: RemoveLiquidityKind.Proportional,
+                };
 
             const removeLiquidityQueryOutput =
                 await removeLiquidityBoostedV3.query(
@@ -263,22 +265,22 @@ describe('remove liquidity test', () => {
         });
     });
     describe('permit approval', () => {
-        beforeEach(async () => {
-            // Generate Permit approval
-        });
         test('remove liquidity proportional', async () => {
             const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
 
-            const removeLiquidityInput: RemoveLiquidityProportionalInput = {
-                chainId: chainId,
-                rpcUrl: rpcUrl,
-                bptIn: {
-                    rawAmount: 1000000000000000000n,
-                    decimals: 18,
-                    address: poolState.address,
-                },
-                kind: RemoveLiquidityKind.Proportional,
-            };
+            const removeLiquidityInput: RemoveLiquidityProportionalInputWithOptionalUserArgs =
+                {
+                    chainId: chainId,
+                    rpcUrl: rpcUrl,
+                    bptIn: {
+                        rawAmount: 1000000000000000000n,
+                        decimals: 18,
+                        address: poolState.address,
+                    },
+                    kind: RemoveLiquidityKind.Proportional,
+                    userAddress: testAddress,
+                    userData: '0x123',
+                };
 
             const removeLiquidityQueryOutput =
                 await removeLiquidityBoostedV3.query(

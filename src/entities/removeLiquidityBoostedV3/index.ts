@@ -9,6 +9,8 @@ import {
     RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
+    RemoveLiquidityProportionalInputWithOptionalUserArgs,
+    RemoveLiquidityProportionalInputWithUserArgs,
 } from '../removeLiquidity/types';
 
 import { Permit } from '@/entities/permitHelper';
@@ -33,13 +35,20 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         throw new Error('Not implemented');
     }
     public async query(
-        input: RemoveLiquidityProportionalInput,
+        input: RemoveLiquidityProportionalInputWithOptionalUserArgs,
         poolState: PoolStateWithUnderlyings,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
-        // Implementation here
+        // Check if userAddress and userData were provided, and assign default values if not
+        if (!('userAddress' in input) || input.userAddress === undefined) {
+            // TODO: I think using a random address might be better than using the 0 address.
+            input.userAddress = '0x0000000000000000000000000000000000000000';
+        }
+        if (!('userData' in input) || input.userData === undefined) {
+            input.userData = '0x';
+        }
 
         const amountsOutInNumbers = await doRemoveLiquidityProportionalQuery(
-            input,
+            input as RemoveLiquidityProportionalInputWithUserArgs,
             poolState.address,
         );
 

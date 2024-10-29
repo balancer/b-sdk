@@ -1,14 +1,20 @@
-import { createPublicClient, http, getAddress } from 'viem';
+import { createPublicClient, http } from 'viem';
 
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, CHAINS } from '@/utils';
 
-import { AddLiquidityUnbalancedInput } from '../addLiquidity/types';
+import { AddLiquidityUnbalancedInputWithUserArgs } from '../addLiquidity/types';
 import { Address } from '@/types';
 
 import { balancerCompositeLiquidityRouterAbi } from '@/abi';
 
 export const doAddLiquidityUnbalancedQuery = async (
-    { rpcUrl, chainId, amountsIn }: AddLiquidityUnbalancedInput,
+    {
+        rpcUrl,
+        chainId,
+        amountsIn,
+        userAddress,
+        userData,
+    }: AddLiquidityUnbalancedInputWithUserArgs,
     poolAddress: Address,
 ): Promise<bigint> => {
     const client = createPublicClient({
@@ -23,8 +29,8 @@ export const doAddLiquidityUnbalancedQuery = async (
         args: [
             poolAddress,
             amountsIn.map((input) => input.rawAmount),
-            getAddress('0xa5cc3c03994db5b0d9a5eEdD10Cabab0813678ac'),
-            '0x',
+            userAddress,
+            userData,
         ],
     });
     return bptAmountOut;

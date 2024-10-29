@@ -15,7 +15,11 @@ import {
     AddLiquidityBaseQueryOutput,
     AddLiquidityBuildCallOutput,
     AddLiquidityInput,
+    AddLiquidityBoostedWithOptionalInput,
+    AddLiquidityUnbalancedInputWithUserArgs,
+    AddLiquidityProportionalInputWithUserArgs,
     AddLiquidityKind,
+    AddLiquidityProportionalInput,
 } from '../addLiquidity/types';
 
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
@@ -31,7 +35,7 @@ import { Hex } from '@/types';
 
 export class AddLiquidityBoostedV3 {
     async query(
-        input: AddLiquidityInput,
+        input: AddLiquidityBoostedWithOptionalInput,
         poolState: PoolState | PoolStateWithUnderlyings,
     ): Promise<AddLiquidityBaseQueryOutput> {
         // Technically possible to pass singleToken adds here due to type
@@ -42,10 +46,19 @@ export class AddLiquidityBoostedV3 {
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
         let tokenInIndex: number | undefined;
+
+        // Check if userAddress and userData were provided, and assign default values if not
+        if (!('userAddress' in input) || input.userAddress === undefined) {
+            // TODO: I think using a random address might be better than using the 0 address.
+            input.userAddress = '0x0000000000000000000000000000000000000000';
+        }
+        if (!('userData' in input) || input.userData === undefined) {
+            input.userData = '0x';
+        }
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
-                    input,
+                    input as AddLiquidityUnbalancedInputWithUserArgs,
                     poolState.address,
                 );
                 bptOut = TokenAmount.fromRawAmount(bptToken, bptAmountOut);
@@ -62,7 +75,7 @@ export class AddLiquidityBoostedV3 {
             case AddLiquidityKind.Proportional: {
                 const exactAmountsInNumbers =
                     await doAddLiquidityProportionalQuery(
-                        input,
+                        input as AddLiquidityProportionalInputWithUserArgs,
                         poolState.address,
                     );
 
@@ -86,9 +99,6 @@ export class AddLiquidityBoostedV3 {
                     input.referenceAmount.rawAmount,
                 );
                 break;
-            }
-            case AddLiquidityKind.SingleToken: {
-                throw new Error('SingleToken not supported');
             }
         }
 

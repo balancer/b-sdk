@@ -36,6 +36,38 @@ export type AddLiquidityProportionalInput = AddLiquidityBaseInput & {
     kind: AddLiquidityKind.Proportional;
 };
 
+export type AddLiquidityProportionalInputWithUserArgs =
+    AddLiquidityProportionalInput & {
+        userAddress: Address;
+        userData: Hex;
+    };
+
+export type AddLiquidityUnbalancedInputWithUserArgs =
+    AddLiquidityUnbalancedInput & {
+        userAddress: Address;
+        userData: Hex;
+    };
+
+export type AddLiquidityBoostedInput =
+    | AddLiquidityUnbalancedInputWithUserArgs
+    | AddLiquidityProportionalInputWithUserArgs;
+
+export type AddLiquidityProportionalInputWithOptionalUserArgs =
+    AddLiquidityProportionalInput & {
+        userAddress?: Address;
+        userData?: Hex;
+    };
+
+export type AddLiquidityUnbalancedInputWithOptionalUserArgs =
+    AddLiquidityUnbalancedInput & {
+        userAddress?: Address;
+        userData?: Hex;
+    };
+
+export type AddLiquidityBoostedWithOptionalInput =
+    | AddLiquidityUnbalancedInputWithOptionalUserArgs
+    | AddLiquidityProportionalInputWithOptionalUserArgs;
+
 export type AddLiquidityInput =
     | AddLiquidityUnbalancedInput
     | AddLiquiditySingleTokenInput

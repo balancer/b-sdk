@@ -7,6 +7,7 @@ import {
     RemoveLiquidityV2QueryOutput,
 } from './removeLiquidityV2/types';
 import { Permit } from '../permitHelper';
+import { Hex } from 'viem';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
@@ -44,6 +45,18 @@ export type RemoveLiquidityProportionalInput = RemoveLiquidityBaseInput & {
     bptIn: InputAmount;
     kind: RemoveLiquidityKind.Proportional;
 };
+
+export type RemoveLiquidityProportionalInputWithUserArgs =
+    RemoveLiquidityProportionalInput & {
+        userAddress: Address;
+        userData: Hex;
+    };
+
+export type RemoveLiquidityProportionalInputWithOptionalUserArgs =
+    RemoveLiquidityProportionalInput & {
+        userAddress?: Address;
+        userData?: Hex;
+    };
 
 export type RemoveLiquidityRecoveryInput = RemoveLiquidityBaseInput & {
     bptIn: InputAmount;
