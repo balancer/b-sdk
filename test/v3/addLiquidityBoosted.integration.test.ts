@@ -13,7 +13,7 @@ import {
     walletActions,
 } from 'viem';
 
-import {,
+import {
     AddLiquidityKind,
     AddLiquidityBoostedWithOptionalInput,
     Slippage,
