@@ -118,7 +118,6 @@ export class Pools {
             ...data.poolGetPool,
             tokens: data.poolGetPool.poolTokens,
             type: mapPoolType(data.poolGetPool.type),
-            //underlyings: data.poolGetPool.poolTokens.map((token) => {token}),
             totalShares: data.poolGetPool.dynamicData.totalShares,
         };
         return poolStateWithUnderlyings;
