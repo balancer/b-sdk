@@ -94,11 +94,14 @@ export class InputValidator {
         addLiquidityInput: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
     ): void {
+        if (poolState.type !== PoolType.Boosted)
+            throw new Error(
+                `validateAddLiquidityBoosted on non boosted pool: ${poolState.address}:${poolState.type}`,
+            );
         this.validateChain(addLiquidityInput.chainId);
-        this.getValidator(poolState.type).validateAddLiquidityBoosted(
-            addLiquidityInput,
-            poolState,
-        );
+        (
+            this.validators[PoolType.Boosted] as InputValidatorBoosted
+        ).validateAddLiquidityBoosted(addLiquidityInput, poolState);
     }
 
     private validateChain(chainId: number): void {
