@@ -16,13 +16,6 @@ export class InputValidatorBoosted extends InputValidatorBase {
         }
 
         if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {
-            if (
-                addLiquidityInput.amountsIn.length !== poolState.tokens.length
-            ) {
-                throw new Error(
-                    'AmountsIn length must be equal to tokens length',
-                );
-            }
             // check if addLiquidityInput.amountsIn.address is contained in poolState.tokens.underlyingToken.address
             const underlyingTokens = poolState.tokens.map(
                 (t) => t.underlyingToken.address,
