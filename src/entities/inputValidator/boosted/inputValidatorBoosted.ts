@@ -12,7 +12,7 @@ export class InputValidatorBoosted extends InputValidatorBase {
     ): void {
         //check if poolState.protocolVersion is 3
         if (poolState.protocolVersion !== 3) {
-            throw new Error('PoolState protocol version must be 3');
+            throw new Error('protocol version must be 3');
         }
 
         if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {

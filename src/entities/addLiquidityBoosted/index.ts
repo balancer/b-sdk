@@ -13,7 +13,7 @@ import { PoolStateWithUnderlyings } from '@/entities/types';
 import { getAmounts, getSortedTokens } from '@/entities/utils';
 
 import {
-    AddLiquidityBaseBuildCallInput,
+    AddLiquidityBoostedBuildCallInput,
     AddLiquidityBoostedQueryOutput,
     AddLiquidityBuildCallOutput,
     AddLiquidityBoostedWithOptionalInput,
@@ -47,9 +47,6 @@ export class AddLiquidityBoostedV3 {
             type: 'Boosted',
         });
 
-        // Technically possible to pass singleToken adds here due to type
-        // disallow it for this class
-        // TODO: Use input validator
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         let bptOut: TokenAmount;
@@ -58,7 +55,6 @@ export class AddLiquidityBoostedV3 {
 
         // Check if userAddress and userData were provided, and assign default values if not
         if (!('userAddress' in input) || input.userAddress === undefined) {
-            // TODO: I think using a random address might be better than using the 0 address.
             input.userAddress = '0x0000000000000000000000000000000000000000';
         }
         if (!('userData' in input) || input.userData === undefined) {
@@ -144,7 +140,7 @@ export class AddLiquidityBoostedV3 {
     }
 
     buildCall(
-        input: AddLiquidityBaseBuildCallInput,
+        input: AddLiquidityBoostedBuildCallInput,
     ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
         let callData: Hex;
@@ -158,7 +154,7 @@ export class AddLiquidityBoostedV3 {
                         input.amountsIn.map((amount) => amount.amount),
                         amounts.minimumBpt,
                         false,
-                        '0x',
+                        input.userData ? input.userData : '0x',
                     ],
                 });
                 break;
@@ -168,11 +164,11 @@ export class AddLiquidityBoostedV3 {
                     abi: balancerCompositeLiquidityRouterAbi,
                     functionName: 'addLiquidityProportionalToERC4626Pool',
                     args: [
-                        input.poolId, // pool
-                        amounts.maxAmountsIn, // maxAmountsIn
-                        input.bptOut.amount, // minBptOut
-                        !!input.wethIsEth, // wethisEth
-                        '0x', // userData
+                        input.poolId,
+                        amounts.maxAmountsIn,
+                        input.bptOut.amount,
+                        !!input.wethIsEth,
+                        input.userData ? input.userData : '0x',
                     ],
                 });
                 break;
@@ -196,7 +192,7 @@ export class AddLiquidityBoostedV3 {
     }
 
     public buildCallWithPermit2(
-        input: AddLiquidityBaseBuildCallInput,
+        input: AddLiquidityBoostedBuildCallInput,
         permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
         // generate same calldata as buildCall

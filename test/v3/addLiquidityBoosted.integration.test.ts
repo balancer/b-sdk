@@ -26,7 +26,7 @@ import {
     PERMIT2,
     Token,
     PublicWalletClient,
-    AddLiquidityBuildCallInput,
+    AddLiquidityBoostedBuildCallInput,
 } from '../../src';
 import {
     setTokenBalances,
@@ -148,7 +148,7 @@ describe('add liquidity test', () => {
                 const addLiquidityBuildInput = {
                     ...addLiquidityQueryOutput,
                     slippage: Slippage.fromPercentage('1'),
-                } as AddLiquidityBuildCallInput;
+                } as AddLiquidityBoostedBuildCallInput;
 
                 const addLiquidityBuildCallOutput =
                     await addLiquidityBoosted.buildCall(addLiquidityBuildInput);
@@ -206,10 +206,11 @@ describe('add liquidity test', () => {
                     addLiquidityProportionalInput,
                     poolStateWithUnderlyings,
                 );
-                const addLiquidityBuildInput: AddLiquidityBuildCallInput = {
-                    ...addLiquidityQueryOutput,
-                    slippage: Slippage.fromPercentage('1'),
-                };
+                const addLiquidityBuildInput: AddLiquidityBoostedBuildCallInput =
+                    {
+                        ...addLiquidityQueryOutput,
+                        slippage: Slippage.fromPercentage('1'),
+                    };
 
                 const addLiquidityBuildCallOutput =
                     await addLiquidityBoosted.buildCall(addLiquidityBuildInput);
@@ -309,7 +310,7 @@ describe('add liquidity test', () => {
                 const addLiquidityBuildInput = {
                     ...addLiquidityQueryOutput,
                     slippage: Slippage.fromPercentage('1'),
-                } as AddLiquidityBuildCallInput;
+                } as AddLiquidityBoostedBuildCallInput;
 
                 const permit2 =
                     await Permit2Helper.signAddLiquidityBoostedApproval({
@@ -378,10 +379,11 @@ describe('add liquidity test', () => {
                     addLiquidityProportionalInput,
                     poolStateWithUnderlyings,
                 );
-                const addLiquidityBuildInput: AddLiquidityBuildCallInput = {
-                    ...addLiquidityQueryOutput,
-                    slippage: Slippage.fromPercentage('1'),
-                };
+                const addLiquidityBuildInput: AddLiquidityBoostedBuildCallInput =
+                    {
+                        ...addLiquidityQueryOutput,
+                        slippage: Slippage.fromPercentage('1'),
+                    };
 
                 const permit2 =
                     await Permit2Helper.signAddLiquidityBoostedApproval({

@@ -101,6 +101,11 @@ export type AddLiquidityBuildCallInput =
     | AddLiquidityBaseBuildCallInput
     | AddLiquidityV2BuildCallInput;
 
+export type AddLiquidityBoostedBuildCallInput =
+    AddLiquidityBaseBuildCallInput & {
+        userData?: Hex;
+    };
+
 export interface AddLiquidityBase {
     query(
         input: AddLiquidityInput,
