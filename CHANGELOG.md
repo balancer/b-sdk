@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.29.1
+
+### Patch Changes
+
+- 84f3259: Full nested pool support and tests.
+
 ## 0.29.0
 
 ### Minor Changes
