@@ -1,13 +1,11 @@
 import { PoolStateWithUnderlyings } from '@/entities/types';
 import { InputValidatorBase } from '../inputValidatorBase';
-import {
-    AddLiquidityBoostedWithOptionalInput,
-    AddLiquidityKind,
-} from '@/entities/addLiquidity/types';
+import { AddLiquidityKind } from '@/entities/addLiquidity/types';
+import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
 
 export class InputValidatorBoosted extends InputValidatorBase {
     validateAddLiquidityBoosted(
-        addLiquidityInput: AddLiquidityBoostedWithOptionalInput,
+        addLiquidityInput: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
     ): void {
         //check if poolState.protocolVersion is 3

@@ -15,7 +15,6 @@ import {
 
 import {
     AddLiquidityProportionalInput,
-    RemoveLiquidityProportionalInputWithOptionalUserArgs,
     AddLiquidityKind,
     RemoveLiquidityKind,
     Slippage,
@@ -29,6 +28,8 @@ import {
     PublicWalletClient,
     AddLiquidityBoostedV3,
     RemoveLiquidityBoostedV3,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    RemoveLiquidityBoostedProportionalInput,
 } from '../../src';
 import {
     AddLiquidityTxInput,
@@ -44,8 +45,6 @@ import { sendTransactionGetBalances } from 'test/lib/utils';
 import { assertTokenMatch } from 'test/lib/utils';
 
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
-
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER } from '../../src';
 
 const protocolVersion = 3;
 
@@ -73,14 +72,6 @@ describe('remove liquidity test', () => {
     let testAddress: Address;
 
     beforeAll(async () => {
-        /* const balancerApi = new BalancerApi(
-            'https://test-api-v3.balancer.fi/',
-            chainId,
-        ); */
-        // poolState = await balancerApi.pools.fetchPoolState(poolid);
-        // poolStateWithUnderlyings =
-        //     await balancerApi.pools.fetchPoolStateWithUnderlyingTokens(poolid);
-
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         client = createTestClient({
@@ -174,7 +165,7 @@ describe('remove liquidity test', () => {
         test('remove liquidity proportional', async () => {
             const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
 
-            const removeLiquidityInput: RemoveLiquidityProportionalInputWithOptionalUserArgs =
+            const removeLiquidityInput: RemoveLiquidityBoostedProportionalInput =
                 {
                     chainId: chainId,
                     rpcUrl: rpcUrl,
@@ -263,7 +254,7 @@ describe('remove liquidity test', () => {
         test('remove liquidity proportional', async () => {
             const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
 
-            const removeLiquidityInput: RemoveLiquidityProportionalInputWithOptionalUserArgs =
+            const removeLiquidityInput: RemoveLiquidityBoostedProportionalInput =
                 {
                     chainId: chainId,
                     rpcUrl: rpcUrl,

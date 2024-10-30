@@ -2,14 +2,10 @@ import { encodeFunctionData, zeroAddress } from 'viem';
 
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBoostedQueryOutput,
-    RemoveLiquidityBoostedBuildCallInput,
     RemoveLiquidityKind,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
-    RemoveLiquidityProportionalInputWithOptionalUserArgs,
-    RemoveLiquidityProportionalInputWithUserArgs,
 } from '../removeLiquidity/types';
 
 import { Permit } from '@/entities/permitHelper';
@@ -25,34 +21,42 @@ import { getAmountsCall } from '../removeLiquidity/helper';
 
 import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportionalQuery';
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER } from '@/utils';
+import {
+    RemoveLiquidityBoostedBuildCallInput,
+    RemoveLiquidityBoostedProportionalInput,
+    RemoveLiquidityBoostedQueryOutput,
+} from './types';
+import { InputValidator } from '../inputValidator/inputValidator';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
+    private readonly inputValidator: InputValidator = new InputValidator();
+
     public async queryRemoveLiquidityRecovery(
         _input: RemoveLiquidityRecoveryInput,
         _poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
         throw new Error('Not implemented');
     }
+
     public async query(
-        input: RemoveLiquidityProportionalInputWithOptionalUserArgs,
+        input: RemoveLiquidityBoostedProportionalInput,
         poolState: PoolStateWithUnderlyings,
     ): Promise<RemoveLiquidityBoostedQueryOutput> {
-        // Check if userAddress and userData were provided, and assign default values if not
-        if (!('userAddress' in input) || input.userAddress === undefined) {
-            // TODO: I think using a random address might be better than using the 0 address.
-            input.userAddress = '0x0000000000000000000000000000000000000000';
-        }
-        if (!('userData' in input) || input.userData === undefined) {
-            input.userData = '0x';
-        }
-
-        const amountsOutInNumbers = await doRemoveLiquidityProportionalQuery(
-            input as RemoveLiquidityProportionalInputWithUserArgs,
+        this.inputValidator.validateRemoveLiquidity(input, {
+            ...poolState,
+            type: 'Boosted',
+        });
+        const underlyingAmountsOut = await doRemoveLiquidityProportionalQuery(
+            input.rpcUrl,
+            input.chainId,
+            input.bptIn.rawAmount,
+            input.userAddress ?? zeroAddress,
+            input.userData ?? '0x',
             poolState.address,
         );
 
-        // amountsOut are in underlying Tokens.
-        const amountsOut = amountsOutInNumbers.map((amount, i) => {
+        // amountsOut are in underlying Tokens sorted in token registration order of wrapped tokens in the pool
+        const amountsOut = underlyingAmountsOut.map((amount, i) => {
             const token = new Token(
                 input.chainId,
                 poolState.tokens[i].address,
@@ -69,12 +73,13 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             removeLiquidityKind: RemoveLiquidityKind.Proportional,
             bptIn: TokenAmount.fromRawAmount(bptToken, input.bptIn.rawAmount),
             amountsOut: amountsOut,
-            protocolVersion: poolState.protocolVersion,
+            protocolVersion: 3,
             chainId: input.chainId,
             userData: input.userData ?? '0x',
         };
         return output;
     }
+
     public buildCall(
         input: RemoveLiquidityBoostedBuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
@@ -91,7 +96,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
                 input.bptIn.amount,
                 amounts.minAmountsOut,
                 false,
-                input.userData ? input.userData : '0x',
+                input.userData,
             ],
         });
 
@@ -100,10 +105,10 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             value: 0n, // always has 0 value
             maxBptIn: input.bptIn, //TokenAmount
-            minAmountsOut: amounts.minAmountsOut.map((amounts, i) => {
+            minAmountsOut: amounts.minAmountsOut.map((amount, i) => {
                 return TokenAmount.fromRawAmount(
                     input.amountsOut[i].token,
-                    amounts,
+                    amount,
                 );
             }),
         };
