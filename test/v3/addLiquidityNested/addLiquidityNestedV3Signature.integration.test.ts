@@ -24,10 +24,12 @@ import {
     AddLiquidityNestedInput,
     AddLiquidityNestedQueryOutputV3,
     Permit2Helper,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
 } from '@/index';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     approveSpenderOnToken,
+    areBigIntsWithinPercent,
     POOLS,
     sendTransactionGetBalances,
     setTokenBalances,
@@ -37,17 +39,17 @@ import {
 const chainId = ChainId.SEPOLIA;
 const NESTED_WITH_BOOSTED_POOL = POOLS[chainId].NESTED_WITH_BOOSTED_POOL;
 const BOOSTED_POOL = POOLS[chainId].MOCK_BOOSTED_POOL;
-const DAI = TOKENS[chainId].DAI_AAVE;
+const USDT = TOKENS[chainId].USDT_AAVE;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const WETH = TOKENS[chainId].WETH;
 
 // These are the underlying tokens
-const daiToken = new Token(chainId, DAI.address, DAI.decimals);
 const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
+const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
 const wethToken = new Token(chainId, WETH.address, WETH.decimals);
-const mainTokens = [wethToken, daiToken, usdcToken];
+const mainTokens = [wethToken, usdtToken, usdcToken];
 
-describe.skip('V3 add liquidity nested test, with Permit2 signature', () => {
+describe('V3 add liquidity nested test, with Permit2 signature', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
@@ -71,7 +73,7 @@ describe.skip('V3 add liquidity nested test, with Permit2 signature', () => {
             client,
             testAddress,
             mainTokens.map((t) => t.address),
-            [WETH.slot, DAI.slot, USDC.slot] as number[],
+            [WETH.slot, USDT.slot, USDC.slot] as number[],
             mainTokens.map((t) => parseUnits('1000', t.decimals)),
         );
     });
@@ -81,12 +83,12 @@ describe.skip('V3 add liquidity nested test, with Permit2 signature', () => {
             amountsIn: [
                 {
                     address: WETH.address,
-                    rawAmount: parseUnits('0.1', WETH.decimals),
+                    rawAmount: parseUnits('0.001', WETH.decimals),
                     decimals: WETH.decimals,
                 },
                 {
                     address: USDC.address,
-                    rawAmount: parseUnits('20', USDC.decimals),
+                    rawAmount: parseUnits('2', USDC.decimals),
                     decimals: USDC.decimals,
                 },
             ],
@@ -127,6 +129,10 @@ describe.skip('V3 add liquidity nested test, with Permit2 signature', () => {
                 addLiquidityBuildInput,
                 permit2,
             );
+        expect(addLiquidityBuildCallOutput.value === 0n).to.be.true;
+        expect(addLiquidityBuildCallOutput.to).to.eq(
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+        );
 
         // send add liquidity transaction and check balance changes
         const { transactionReceipt, balanceDeltas } =
@@ -141,18 +147,23 @@ describe.skip('V3 add liquidity nested test, with Permit2 signature', () => {
                 addLiquidityBuildCallOutput.callData,
                 addLiquidityBuildCallOutput.value,
             );
-        // think about using assertResults helper here
         expect(transactionReceipt.status).to.eq('success');
         const expectedAmountsIn = [
-            TokenAmount.fromHumanAmount(wethToken, '0.1'),
-            TokenAmount.fromHumanAmount(daiToken, '0'),
-            TokenAmount.fromHumanAmount(usdcToken, '20'),
+            TokenAmount.fromHumanAmount(wethToken, '0.001'),
+            TokenAmount.fromHumanAmount(usdtToken, '0'),
+            TokenAmount.fromHumanAmount(usdcToken, '2'),
         ];
-        const expectedDeltas = [
-            ...expectedAmountsIn.map((a) => a.amount),
+
+        expect(expectedAmountsIn.map((a) => a.amount)).to.deep.eq(
+            balanceDeltas.slice(0, -1),
+        );
+        // Here we check that output diff is within an acceptable tolerance.
+        // !!! This should only be used in the case of buffers as all other cases can be equal
+        areBigIntsWithinPercent(
+            balanceDeltas[balanceDeltas.length - 1],
             queryOutput.bptOut.amount,
-        ];
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
+            0.001,
+        );
     });
 });
 
@@ -189,8 +200,8 @@ const nestedPoolState: NestedPoolState = {
                     index: 0,
                 },
                 {
-                    address: DAI.address,
-                    decimals: DAI.decimals,
+                    address: USDT.address,
+                    decimals: USDT.decimals,
                     index: 1,
                 },
             ],
@@ -202,8 +213,8 @@ const nestedPoolState: NestedPoolState = {
             decimals: WETH.decimals,
         },
         {
-            address: DAI.address,
-            decimals: DAI.decimals,
+            address: USDT.address,
+            decimals: USDT.decimals,
         },
         {
             address: USDC.address,

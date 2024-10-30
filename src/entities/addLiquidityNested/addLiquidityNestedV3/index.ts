@@ -30,6 +30,12 @@ import { validateQueryInput } from '../addLiquidityNestedV2/validateInputs';
 import { Permit2 } from '@/entities/permit2Helper';
 
 export class AddLiquidityNestedV3 {
+    /**
+     *
+     * @param input amountsIn can be any order and does not need all tokens. Tokens must be tokens of child pools and must not be BPT.
+     * @param nestedPoolState
+     * @returns
+     */
     async query(
         input: AddLiquidityNestedInputV3,
         nestedPoolState: NestedPoolState,

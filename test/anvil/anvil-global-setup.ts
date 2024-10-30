@@ -5,7 +5,7 @@ import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { ChainId } from '../../src/utils/constants';
 import { sleep } from '../lib/utils/promises';
 
-type NetworkSetup = {
+export type NetworkSetup = {
     rpcEnv: string;
     fallBackRpc: string | undefined;
     port: number;

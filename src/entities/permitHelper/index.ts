@@ -1,6 +1,7 @@
 import { weightedPoolAbi_V3 } from '@/abi';
 import { Hex } from '@/types';
 import {
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     BALANCER_ROUTER,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     ChainId,
@@ -80,7 +81,7 @@ export class PermitHelper {
             input.client,
             input.bptAmountIn.token.address,
             input.owner,
-            BALANCER_ROUTER[input.chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             nonce,
             input.bptAmountIn.amount, // maxBptIn
             input.deadline,
