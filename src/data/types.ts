@@ -11,3 +11,7 @@ export interface MinimalToken {
 export interface PoolTokenWithBalance extends MinimalToken {
     balance: HumanAmount;
 }
+
+export interface PoolTokenWithUnderlying extends MinimalToken {
+    underlyingToken: MinimalToken;
+}

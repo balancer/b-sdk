@@ -87,6 +87,34 @@ export class PermitHelper {
         );
         return { batch: [permitApproval], signatures: [permitSignature] };
     };
+
+    static signRemoveLiquidityBoostedApproval = async (
+        input: RemoveLiquidityBaseBuildCallInput & {
+            client: PublicWalletClient;
+            owner: Hex;
+            nonce?: bigint;
+            deadline?: bigint;
+        },
+    ): Promise<Permit> => {
+        const amounts = getAmountsCall(input);
+        const nonce =
+            input.nonce ??
+            (await getNonce(
+                input.client,
+                input.bptIn.token.address,
+                input.owner,
+            ));
+        const { permitApproval, permitSignature } = await signPermit(
+            input.client,
+            input.bptIn.token.address,
+            input.owner,
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            nonce,
+            amounts.maxBptAmountIn,
+            input.deadline,
+        );
+        return { batch: [permitApproval], signatures: [permitSignature] };
+    };
 }
 
 /**
