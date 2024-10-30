@@ -4,8 +4,6 @@ export const assertTokenMatch = (
     tokenDefined: Token[],
     tokenReturned: Token[],
 ) => {
-    tokenDefined.forEach((t) => console.log(t.address));
-    tokenReturned.forEach((t) => console.log(t.address));
     tokenDefined.map((tokenAmount) => {
         expect(
             tokenReturned.some(
