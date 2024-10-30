@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.30.0
+
+### Minor Changes
+
+- 1ce9784: added add and remove liquidity for boosted pools
+
 ## 0.29.1
 
 ### Patch Changes
