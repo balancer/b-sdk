@@ -3,9 +3,9 @@ import { encodeFunctionData, zeroAddress } from 'viem';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBoostedQueryOutput,
+    RemoveLiquidityBoostedBuildCallInput,
     RemoveLiquidityKind,
     RemoveLiquidityBuildCallOutput,
-    RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
     RemoveLiquidityProportionalInputWithOptionalUserArgs,
@@ -76,7 +76,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         return output;
     }
     public buildCall(
-        input: RemoveLiquidityBaseBuildCallInput,
+        input: RemoveLiquidityBoostedBuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
         // Apply slippage to amounts shared in put depending on the kind
         // In this case, the user is willing to accept a slightly lower
@@ -91,7 +91,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
                 input.bptIn.amount,
                 amounts.minAmountsOut,
                 false,
-                '0x',
+                input.userData ? input.userData : '0x',
             ],
         });
 
@@ -110,7 +110,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     }
 
     public buildCallWithPermit(
-        input: RemoveLiquidityBaseBuildCallInput,
+        input: RemoveLiquidityBoostedBuildCallInput,
         permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);
