@@ -9,20 +9,18 @@ import {
     InitPoolInput,
     NestedPoolState,
     PoolState,
-    PoolStateWithUnderlyings,
     RemoveLiquidityInput,
     RemoveLiquidity,
     Slippage,
     RemoveLiquidityRecoveryInput,
-    AddLiquidityBoostedV3,
 } from '@/.';
 
 export type AddLiquidityTxInput = {
     client: PublicWalletClient & TestActions;
-    addLiquidity: AddLiquidity | AddLiquidityBoostedV3;
+    addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
     slippage: Slippage;
-    poolState: PoolState | PoolStateWithUnderlyings;
+    poolState: PoolState;
     testAddress: Address;
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;

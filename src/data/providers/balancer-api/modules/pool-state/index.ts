@@ -1,9 +1,5 @@
 import { BalancerApiClient } from '../../client';
-import {
-    PoolState,
-    PoolStateWithBalances,
-    PoolStateWithUnderlyings,
-} from '../../../../../entities';
+import { PoolState, PoolStateWithBalances } from '../../../../../entities';
 import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
@@ -36,29 +32,6 @@ export class Pools {
           address
           decimals
           balance
-        }
-        dynamicData {
-          totalShares
-        }
-      }
-    }`;
-
-    readonly boostedPoolStateWithUnderlying = `
-    query GetPool($id: String!, $chain: GqlChain!) {
-      poolGetPool(id:$id, chain:$chain) {
-        id
-        address
-        type
-        protocolVersion
-        poolTokens {
-          index
-          address
-          decimals
-          balance
-          underlyingToken {
-            address
-            decimals
-          }
         }
         dynamicData {
           totalShares
@@ -102,24 +75,5 @@ export class Pools {
             totalShares: data.poolGetPool.dynamicData.totalShares,
         };
         return poolStateWithBalances;
-    }
-
-    async fetchPoolStateWithUnderlyingTokens(
-        id: string,
-    ): Promise<PoolStateWithUnderlyings> {
-        const { data } = await this.balancerApiClient.fetch({
-            query: this.boostedPoolStateWithUnderlying,
-            variables: {
-                id: id.toLowerCase(),
-                chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
-            },
-        });
-        const poolStateWithUnderlyings: PoolStateWithUnderlyings = {
-            ...data.poolGetPool,
-            tokens: data.poolGetPool.poolTokens,
-            type: mapPoolType(data.poolGetPool.type),
-            totalShares: data.poolGetPool.dynamicData.totalShares,
-        };
-        return poolStateWithUnderlyings;
     }
 }
