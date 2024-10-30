@@ -95,6 +95,11 @@ export class AddLiquidityBoostedV3 {
                 break;
             }
             case AddLiquidityKind.Proportional: {
+                if (input.referenceAmount.address !== poolState.address) {
+                    // TODO: add getBptAmountFromReferenceAmount
+                    throw new Error('Reference token must be the pool token');
+                }
+
                 const exactAmountsInNumbers =
                     await doAddLiquidityProportionalQuery(
                         input as AddLiquidityProportionalInputWithUserArgs,
