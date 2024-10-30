@@ -27,7 +27,6 @@ import {
     BALANCER_BATCH_ROUTER,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     PublicWalletClient,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
 } from '@/utils';
 
 export type TxOutput = {
