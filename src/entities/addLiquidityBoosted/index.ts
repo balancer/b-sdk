@@ -2,6 +2,7 @@
 // available:
 // 1. Unbalanced - addLiquidityUnbalancedToERC4626Pool
 // 2. Proportional - addLiquidityProportionalToERC4626Pool
+import { encodeFunctionData, zeroAddress } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 
 import { Permit2 } from '@/entities/permit2Helper';
@@ -13,12 +14,7 @@ import { PoolStateWithUnderlyings } from '@/entities/types';
 import { getAmounts, getSortedTokens } from '@/entities/utils';
 
 import {
-    AddLiquidityBoostedBuildCallInput,
-    AddLiquidityBoostedQueryOutput,
     AddLiquidityBuildCallOutput,
-    AddLiquidityBoostedWithOptionalInput,
-    AddLiquidityUnbalancedInputWithUserArgs,
-    AddLiquidityProportionalInputWithUserArgs,
     AddLiquidityKind,
 } from '../addLiquidity/types';
 
@@ -26,20 +22,22 @@ import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuery';
 import { Token } from '../token';
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER } from '@/utils';
-
-import { getValue } from '@/entities/utils/getValue';
-import { encodeFunctionData } from 'viem';
 import { balancerCompositeLiquidityRouterAbi, balancerRouterAbi } from '@/abi';
 
 import { InputValidator } from '../inputValidator/inputValidator';
 
 import { Hex } from '@/types';
+import {
+    AddLiquidityBoostedBuildCallInput,
+    AddLiquidityBoostedInput,
+    AddLiquidityBoostedQueryOutput,
+} from './types';
 
 export class AddLiquidityBoostedV3 {
     private readonly inputValidator: InputValidator = new InputValidator();
 
     async query(
-        input: AddLiquidityBoostedWithOptionalInput,
+        input: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
     ): Promise<AddLiquidityBoostedQueryOutput> {
         this.inputValidator.validateAddLiquidityBoosted(input, {
@@ -51,15 +49,7 @@ export class AddLiquidityBoostedV3 {
 
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
-        let tokenInIndex: number | undefined;
 
-        // Check if userAddress and userData were provided, and assign default values if not
-        if (!('userAddress' in input) || input.userAddress === undefined) {
-            input.userAddress = '0x0000000000000000000000000000000000000000';
-        }
-        if (!('userData' in input) || input.userData === undefined) {
-            input.userData = '0x';
-        }
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
                 // It is allowed not not provide the same amount of TokenAmounts as inputs
@@ -75,7 +65,10 @@ export class AddLiquidityBoostedV3 {
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
 
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
-                    input as AddLiquidityUnbalancedInputWithUserArgs,
+                    input.rpcUrl,
+                    input.chainId,
+                    input.userAddress ?? zeroAddress,
+                    input.userData ?? '0x',
                     poolState.address,
                     maxAmountsIn,
                 );
@@ -98,8 +91,12 @@ export class AddLiquidityBoostedV3 {
 
                 const exactAmountsInNumbers =
                     await doAddLiquidityProportionalQuery(
-                        input as AddLiquidityProportionalInputWithUserArgs,
+                        input.rpcUrl,
+                        input.chainId,
+                        input.userAddress ?? zeroAddress,
+                        input.userData ?? '0x',
                         poolState.address,
+                        input.referenceAmount.rawAmount,
                     );
 
                 // Since the user adds tokens which are technically not pool tokens, the TokenAmount to return
@@ -125,12 +122,11 @@ export class AddLiquidityBoostedV3 {
         }
 
         const output: AddLiquidityBoostedQueryOutput = {
-            poolType: poolState.type,
             poolId: poolState.id,
+            poolType: poolState.type,
             addLiquidityKind: input.kind,
             bptOut,
             amountsIn,
-            tokenInIndex,
             chainId: input.chainId,
             protocolVersion: 3,
             userData: input.userData ?? '0x',
@@ -143,19 +139,20 @@ export class AddLiquidityBoostedV3 {
         input: AddLiquidityBoostedBuildCallInput,
     ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
+        const args = [
+            input.poolId,
+            amounts.maxAmountsIn,
+            amounts.minimumBpt,
+            false,
+            input.userData,
+        ] as const;
         let callData: Hex;
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Unbalanced: {
                 callData = encodeFunctionData({
                     abi: balancerCompositeLiquidityRouterAbi,
                     functionName: 'addLiquidityUnbalancedToERC4626Pool',
-                    args: [
-                        input.poolId,
-                        input.amountsIn.map((amount) => amount.amount),
-                        amounts.minimumBpt,
-                        false,
-                        input.userData ? input.userData : '0x',
-                    ],
+                    args,
                 });
                 break;
             }
@@ -163,13 +160,7 @@ export class AddLiquidityBoostedV3 {
                 callData = encodeFunctionData({
                     abi: balancerCompositeLiquidityRouterAbi,
                     functionName: 'addLiquidityProportionalToERC4626Pool',
-                    args: [
-                        input.poolId,
-                        amounts.maxAmountsIn,
-                        input.bptOut.amount,
-                        !!input.wethIsEth,
-                        input.userData ? input.userData : '0x',
-                    ],
+                    args,
                 });
                 break;
             }
@@ -180,7 +171,7 @@ export class AddLiquidityBoostedV3 {
         return {
             callData,
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
-            value: getValue(input.amountsIn, !!input.wethIsEth),
+            value: 0n, // Default to 0 as native not supported
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,

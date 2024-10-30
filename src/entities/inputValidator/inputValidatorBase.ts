@@ -13,12 +13,10 @@ import {
 } from './utils/validateTokens';
 import { TokenType } from '@/types';
 import { zeroAddress } from 'viem';
-import {
-    AddLiquidityInput,
-    AddLiquidityBoostedWithOptionalInput,
-} from '@/entities/addLiquidity/types';
+import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { isSameAddress, NATIVE_ASSETS } from '@/utils';
+import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
 
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
@@ -69,7 +67,7 @@ export class InputValidatorBase {
     }
 
     validateAddLiquidityBoosted(
-        addLiquidityInput: AddLiquidityBoostedWithOptionalInput,
+        addLiquidityInput: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
     ): void {
         this.validateAddLiquidityBoosted(addLiquidityInput, poolState);

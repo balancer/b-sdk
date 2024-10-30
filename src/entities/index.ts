@@ -1,5 +1,7 @@
 export * from './addLiquidity';
 export * from './addLiquidity/types';
+export * from './addLiquidityBoosted';
+export * from './addLiquidityBoosted/types';
 export * from './addLiquidityNested';
 export * from './addLiquidityNested/types';
 export * from './addLiquidityNested/addLiquidityNestedV2/types';
@@ -27,5 +29,4 @@ export * from './types';
 export * from './utils';
 export * from './swap';
 export * from './swap/swaps/v2/auraBalSwaps';
-export * from './addLiquidityBoosted';
 export * from './removeLiquidityBoosted';

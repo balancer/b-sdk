@@ -15,7 +15,6 @@ import {
 
 import {
     AddLiquidityKind,
-    AddLiquidityBoostedWithOptionalInput,
     Slippage,
     Hex,
     PoolStateWithUnderlyings,
@@ -27,6 +26,7 @@ import {
     Token,
     PublicWalletClient,
     AddLiquidityBoostedBuildCallInput,
+    AddLiquidityBoostedInput,
 } from '../../src';
 import {
     setTokenBalances,
@@ -59,7 +59,7 @@ const USDT = {
     slot: 0,
 };
 
-describe('add liquidity test', () => {
+describe('Boosted AddLiquidity', () => {
     let client: PublicWalletClient & TestActions;
     let rpcUrl: string;
     let snapshot: Hex;
@@ -121,7 +121,7 @@ describe('add liquidity test', () => {
         });
         describe('add liquidity unbalanced', () => {
             test('with tokens', async () => {
-                const input: AddLiquidityBoostedWithOptionalInput = {
+                const input: AddLiquidityBoostedInput = {
                     chainId,
                     rpcUrl,
                     amountsIn: [
@@ -145,10 +145,11 @@ describe('add liquidity test', () => {
                     poolStateWithUnderlyings,
                 );
 
-                const addLiquidityBuildInput = {
-                    ...addLiquidityQueryOutput,
-                    slippage: Slippage.fromPercentage('1'),
-                } as AddLiquidityBoostedBuildCallInput;
+                const addLiquidityBuildInput: AddLiquidityBoostedBuildCallInput =
+                    {
+                        ...addLiquidityQueryOutput,
+                        slippage: Slippage.fromPercentage('1'),
+                    };
 
                 const addLiquidityBuildCallOutput =
                     await addLiquidityBoosted.buildCall(addLiquidityBuildInput);
@@ -191,7 +192,7 @@ describe('add liquidity test', () => {
         });
         describe('add liquidity proportional', () => {
             test('with tokens', async () => {
-                const addLiquidityProportionalInput: AddLiquidityBoostedWithOptionalInput =
+                const addLiquidityProportionalInput: AddLiquidityBoostedInput =
                     {
                         chainId,
                         rpcUrl,
@@ -281,10 +282,9 @@ describe('add liquidity test', () => {
     });
 
     describe('permit 2 signatures', () => {
-        beforeEach(async () => {});
         describe('add liquidity unbalanced', () => {
             test('token inputs', async () => {
-                const input: AddLiquidityBoostedWithOptionalInput = {
+                const input: AddLiquidityBoostedInput = {
                     chainId,
                     rpcUrl,
                     amountsIn: [
@@ -363,7 +363,7 @@ describe('add liquidity test', () => {
         });
         describe('add liquidity proportional', () => {
             test('token inputs', async () => {
-                const addLiquidityProportionalInput: AddLiquidityBoostedWithOptionalInput =
+                const addLiquidityProportionalInput: AddLiquidityBoostedInput =
                     {
                         chainId,
                         rpcUrl,

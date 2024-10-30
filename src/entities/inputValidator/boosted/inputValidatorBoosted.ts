@@ -17,8 +17,8 @@ export class InputValidatorBoosted extends InputValidatorBase {
 
         if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {
             // check if addLiquidityInput.amountsIn.address is contained in poolState.tokens.underlyingToken.address
-            const underlyingTokens = poolState.tokens.map(
-                (t) => t.underlyingToken.address,
+            const underlyingTokens = poolState.tokens.map((t) =>
+                t.underlyingToken.address.toLowerCase(),
             );
             addLiquidityInput.amountsIn.forEach((a) => {
                 if (

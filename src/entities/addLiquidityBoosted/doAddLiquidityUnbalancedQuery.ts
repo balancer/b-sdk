@@ -1,21 +1,18 @@
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, Hex, http } from 'viem';
 
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, CHAINS } from '@/utils';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, ChainId, CHAINS } from '@/utils';
 
-import { AddLiquidityUnbalancedInputWithUserArgs } from '../addLiquidity/types';
 import { Address } from '@/types';
 
 import { balancerCompositeLiquidityRouterAbi } from '@/abi';
 
 export const doAddLiquidityUnbalancedQuery = async (
-    {
-        rpcUrl,
-        chainId,
-        userAddress,
-        userData,
-    }: AddLiquidityUnbalancedInputWithUserArgs,
+    rpcUrl: string,
+    chainId: ChainId,
+    sender: Address,
+    userData: Hex,
     poolAddress: Address,
-    maxAmountsIn: bigint[],
+    exactUnderlyingAmountsIn: bigint[],
 ): Promise<bigint> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -26,7 +23,7 @@ export const doAddLiquidityUnbalancedQuery = async (
         address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
         abi: balancerCompositeLiquidityRouterAbi,
         functionName: 'queryAddLiquidityUnbalancedToERC4626Pool',
-        args: [poolAddress, maxAmountsIn, userAddress, userData],
+        args: [poolAddress, exactUnderlyingAmountsIn, sender, userData],
     });
     return bptAmountOut;
 };
