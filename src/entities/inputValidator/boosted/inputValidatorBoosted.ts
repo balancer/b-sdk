@@ -1,13 +1,11 @@
 import { PoolStateWithUnderlyings } from '@/entities/types';
 import { InputValidatorBase } from '../inputValidatorBase';
-import {
-    AddLiquidityBoostedWithOptionalInput,
-    AddLiquidityKind,
-} from '@/entities/addLiquidity/types';
+import { AddLiquidityKind } from '@/entities/addLiquidity/types';
+import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
 
 export class InputValidatorBoosted extends InputValidatorBase {
     validateAddLiquidityBoosted(
-        addLiquidityInput: AddLiquidityBoostedWithOptionalInput,
+        addLiquidityInput: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
     ): void {
         //check if poolState.protocolVersion is 3
@@ -17,8 +15,8 @@ export class InputValidatorBoosted extends InputValidatorBase {
 
         if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {
             // check if addLiquidityInput.amountsIn.address is contained in poolState.tokens.underlyingToken.address
-            const underlyingTokens = poolState.tokens.map(
-                (t) => t.underlyingToken.address,
+            const underlyingTokens = poolState.tokens.map((t) =>
+                t.underlyingToken.address.toLowerCase(),
             );
             addLiquidityInput.amountsIn.forEach((a) => {
                 if (

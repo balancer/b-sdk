@@ -1,8 +1,5 @@
 import { PoolType } from '../../types';
-import {
-    AddLiquidityInput,
-    AddLiquidityBoostedWithOptionalInput,
-} from '../addLiquidity/types';
+import { AddLiquidityInput } from '../addLiquidity/types';
 import { CreatePoolInput } from '../createPool/types';
 import { InitPoolInput } from '../initPool/types';
 import {
@@ -18,6 +15,7 @@ import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
 import { InputValidatorBoosted } from './boosted/inputValidatorBoosted';
 import { ChainId, buildCallWithPermit2ProtocolVersionError } from '@/utils';
+import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
 
 export class InputValidator {
     validators: Record<string, InputValidatorBase> = {};
@@ -93,14 +91,17 @@ export class InputValidator {
     }
 
     validateAddLiquidityBoosted(
-        addLiquidityInput: AddLiquidityBoostedWithOptionalInput,
+        addLiquidityInput: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
     ): void {
-        //this.validateChain(addLiquidityInput.chainId);
-        this.getValidator(poolState.type).validateAddLiquidityBoosted(
-            addLiquidityInput,
-            poolState,
-        );
+        if (poolState.type !== PoolType.Boosted)
+            throw new Error(
+                `validateAddLiquidityBoosted on non boosted pool: ${poolState.address}:${poolState.type}`,
+            );
+        this.validateChain(addLiquidityInput.chainId);
+        (
+            this.validators[PoolType.Boosted] as InputValidatorBoosted
+        ).validateAddLiquidityBoosted(addLiquidityInput, poolState);
     }
 
     private validateChain(chainId: number): void {

@@ -9,7 +9,7 @@ export const assertTokenMatch = (
             tokenReturned.some(
                 (token) => token.address === tokenAmount.address,
             ),
-        );
+        ).to.be.true;
     });
     tokenDefined.map((a, i) => {
         expect(a.decimals).to.eq(tokenReturned[i].decimals);
