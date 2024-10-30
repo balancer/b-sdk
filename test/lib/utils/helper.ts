@@ -25,6 +25,7 @@ import {
     PERMIT2,
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     PublicWalletClient,
 } from '@/utils';
 
@@ -118,10 +119,20 @@ export const approveToken = async (
             amount,
             deadline,
         );
+        // Approve CompositeRouter to spend account tokens using Permit2
+        const compositeRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
+            client,
+            accountAddress,
+            tokenAddress,
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            amount,
+            deadline,
+        );
         approved =
             permit2ApprovedOnToken &&
             routerApprovedOnPermit2 &&
-            batchRouterApprovedOnPermit2;
+            batchRouterApprovedOnPermit2 &&
+            compositeRouterApprovedOnPermit2;
     }
     return approved;
 };
@@ -298,6 +309,30 @@ export async function sendTransactionGetBalances(
         client,
         clientAddress,
     );
+
+    // TODO - Leave this in as useful as basis for manual debug
+    // await client.simulateContract({
+    //     address:
+    //         BALANCER_COMPOSITE_LIQUIDITY_ROUTER[client.chain?.id as number],
+    //     abi: [
+    //         ...balancerCompositeLiquidityRouterAbi,
+    //         ...vaultV3Abi,
+    //         ...vaultExtensionAbi_V3,
+    //         ...permit2Abi,
+    //     ],
+    //     functionName: 'addLiquidityUnbalancedNestedPool',
+    //     args: [
+    //         '0x0270daf4ee12ccb1abc8aa365054eecb1b7f4f6b',
+    //         [
+    //             '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8',
+    //             '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
+    //             '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+    //         ],
+    //         [0n, 19000000n, 1000000000000000n],
+    //         0n, // 209352153002437020n,
+    //         '0x',
+    //     ],
+    // });
 
     // Send transaction to local fork
     const hash = await client.sendTransaction({
