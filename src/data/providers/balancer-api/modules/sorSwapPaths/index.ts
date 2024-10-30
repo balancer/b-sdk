@@ -15,15 +15,29 @@ export type SorInput = {
   useProtocolVersion?: 2 | 3; // If not specified API will return best
 };
 
+export type SorSwapResult = {
+  paths: Path[];
+  priceImpact: {
+    error: string | null;
+    priceImpact: string;
+  };
+};
+
+// NOTE: there exists a priceImpact query and typings for this but these are tightly coupled to addLiquidity operations
+export type SorPriceImpact = {
+  error: string | null;
+  priceImpact: string;
+};
+
 export class SorSwapPaths {
   readonly sorSwapPathQuery = `#graphql
   query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!) {
     sorGetSwapPaths(
-    swapAmount: $swapAmount
-    chain: $chain
-    swapType: $swapType
-    tokenIn: $tokenIn
-    tokenOut: $tokenOut
+      swapAmount: $swapAmount
+      chain: $chain
+      swapType: $swapType
+      tokenIn: $tokenIn
+      tokenOut: $tokenOut
     ) {
       tokenInAmount
       tokenOutAmount
@@ -49,12 +63,12 @@ export class SorSwapPaths {
   readonly sorSwapPathQueryWithVersion = `#graphql
   query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $useProtocolVersion: Int!) {
     sorGetSwapPaths(
-    swapAmount: $swapAmount
-    chain: $chain
-    swapType: $swapType
-    tokenIn: $tokenIn
-    tokenOut: $tokenOut
-    useProtocolVersion: $useProtocolVersion
+      swapAmount: $swapAmount
+      chain: $chain
+      swapType: $swapType
+      tokenIn: $tokenIn
+      tokenOut: $tokenOut
+      useProtocolVersion: $useProtocolVersion
     ) {
       tokenInAmount
       tokenOutAmount
@@ -80,7 +94,7 @@ export class SorSwapPaths {
 
   constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
-  async fetchSorSwapPaths(sorInput: SorInput): Promise<Path[]> {
+  async fetchSorSwapPaths(sorInput: SorInput): Promise<SorSwapResult> {
     const variables = {
       chain: this.mapGqlChain(sorInput.chainId),
       swapAmount: sorInput.swapAmount.toSignificant(
@@ -102,8 +116,10 @@ export class SorSwapPaths {
           }
         : variables,
     });
-    const poolGetPool: Path[] = data.sorGetSwapPaths.paths;
-    return poolGetPool;
+    const paths: Path[] = data.sorGetSwapPaths.paths;
+    const priceImpact: SorPriceImpact = data.sorGetSwapPaths.priceImpact;
+
+    return { paths, priceImpact };
   }
 
   private mapGqlChain(chainId: ChainId): string {
