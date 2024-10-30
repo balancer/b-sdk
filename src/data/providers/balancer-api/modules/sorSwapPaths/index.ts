@@ -17,16 +17,37 @@ export type SorInput = {
 
 export type SorSwapResult = {
   paths: Path[];
+  routes: SorRoute[];
   priceImpact: {
     error: string | null;
     priceImpact: string;
   };
 };
 
+// FIXME: these types should exist within the GQL schema
 // NOTE: there exists a priceImpact query and typings for this but these are tightly coupled to addLiquidity operations
 export type SorPriceImpact = {
   error: string | null;
   priceImpact: string;
+};
+
+export type SorHop = {
+  poolId: string;
+  tokenIn: string;
+  tokenInAmount: string;
+  tokenOut: string;
+  tokenOutAmount: string;
+  pool: {
+    symbol: string;
+  };
+};
+
+export type SorRoute = {
+  share: string;
+  tokenInAmount: string;
+  tokenOut: string;
+  tokenOutAmount: string;
+  hops: SorHop[];
 };
 
 export class SorSwapPaths {
@@ -55,6 +76,22 @@ export class SorSwapPaths {
         tokens {
           address
           decimals
+        }
+      }
+      routes {
+        share
+        tokenInAmount
+        tokenOut
+        tokenOutAmount
+        hops {
+          poolId
+          tokenIn
+          tokenInAmount
+          tokenOut
+          tokenOutAmount
+          pool {
+            symbol
+          }
         }
       }
     }
@@ -88,6 +125,22 @@ export class SorSwapPaths {
           decimals
         }
       }
+      routes {
+        share
+        tokenInAmount
+        tokenOut
+        tokenOutAmount
+        hops {
+          poolId
+          tokenIn
+          tokenInAmount
+          tokenOut
+          tokenOutAmount
+          pool {
+            symbol
+          }
+        }
+      }
     }
   }
 `;
@@ -118,8 +171,9 @@ export class SorSwapPaths {
     });
     const paths: Path[] = data.sorGetSwapPaths.paths;
     const priceImpact: SorPriceImpact = data.sorGetSwapPaths.priceImpact;
+    const routes: SorRoute[] = data.sorGetSwapPaths.routes;
 
-    return { paths, priceImpact };
+    return { paths, priceImpact, routes };
   }
 
   private mapGqlChain(chainId: ChainId): string {
