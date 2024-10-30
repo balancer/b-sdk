@@ -8,6 +8,7 @@ export {
   SorInput as GetQuoteInput,
   SorHop,
   SorRoute,
+  SorSwapResult,
 } from "./modules/sorSwapPaths";
 export {
   mapPoolToNestedPoolState,
