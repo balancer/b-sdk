@@ -10,6 +10,8 @@ import { getAmountsCall } from '../addLiquidity/helpers';
 
 import { PoolStateWithUnderlyings } from '@/entities/types';
 
+import { getAmounts, getSortedTokens } from '@/entities/utils';
+
 import {
     AddLiquidityBaseBuildCallInput,
     AddLiquidityBoostedQueryOutput,
@@ -64,9 +66,22 @@ export class AddLiquidityBoostedV3 {
         }
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
+                // It is allowed not not provide the same amount of TokenAmounts as inputs
+                // as the pool has tokens, in this case, the input tokens are filled with
+                // a default value ( 0 in this case ) to assure correct amounts in as the pool has tokens.
+                const underlyingTokens = poolState.tokens.map((t) => {
+                    return t.underlyingToken;
+                });
+                const sortedTokens = getSortedTokens(
+                    underlyingTokens,
+                    input.chainId,
+                );
+                const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
+
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
                     input as AddLiquidityUnbalancedInputWithUserArgs,
                     poolState.address,
+                    maxAmountsIn,
                 );
                 bptOut = TokenAmount.fromRawAmount(bptToken, bptAmountOut);
 

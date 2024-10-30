@@ -11,11 +11,11 @@ export const doAddLiquidityUnbalancedQuery = async (
     {
         rpcUrl,
         chainId,
-        amountsIn,
         userAddress,
         userData,
     }: AddLiquidityUnbalancedInputWithUserArgs,
     poolAddress: Address,
+    maxAmountsIn: bigint[],
 ): Promise<bigint> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -26,12 +26,7 @@ export const doAddLiquidityUnbalancedQuery = async (
         address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
         abi: balancerCompositeLiquidityRouterAbi,
         functionName: 'queryAddLiquidityUnbalancedToERC4626Pool',
-        args: [
-            poolAddress,
-            amountsIn.map((input) => input.rawAmount),
-            userAddress,
-            userData,
-        ],
+        args: [poolAddress, maxAmountsIn, userAddress, userData],
     });
     return bptAmountOut;
 };
