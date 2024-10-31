@@ -1,9 +1,20 @@
+import { insertIndex } from '@/utils';
 import { encodeFunctionData } from 'viem';
+
+import { vaultV2Abi } from '../../../../abi';
+import { VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
+import { ComposableStableEncoder } from '../../../encoders/composableStable';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
-import { VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
-import { vaultV2Abi } from '../../../../abi';
+import { PoolState } from '../../../types';
+import {
+    calculateProportionalAmounts,
+    getPoolStateWithBalancesV2,
+    getSortedTokens,
+} from '../../../utils';
+import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
+import { getAmountsCall, getAmountsQuery } from '../../helper';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildCallOutput,
@@ -12,16 +23,6 @@ import {
     RemoveLiquidityRecoveryInput,
 } from '../../types';
 import { RemoveLiquidityV2ComposableStableBuildCallInput } from './types';
-import { PoolState } from '../../../types';
-import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
-import { ComposableStableEncoder } from '../../../encoders/composableStable';
-import {
-    calculateProportionalAmounts,
-    getPoolStateWithBalancesV2,
-    getSortedTokens,
-} from '../../../utils';
-import { getAmountsCall, getAmountsQuery } from '../../helper';
-import { insertIndex } from '@/utils';
 
 export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
     public async query(
@@ -159,6 +160,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         });
 
         return {
+            args,
             callData,
             to: VAULT[input.chainId],
             value: 0n,

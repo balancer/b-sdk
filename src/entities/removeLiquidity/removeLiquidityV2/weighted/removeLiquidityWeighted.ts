@@ -1,10 +1,19 @@
 import { encodeFunctionData } from 'viem';
+
+import { vaultV2Abi } from '../../../../abi';
+import { VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
+import { WeightedEncoder } from '../../../encoders/weighted';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
-import { WeightedEncoder } from '../../../encoders/weighted';
-import { VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
-import { vaultV2Abi } from '../../../../abi';
+import { PoolState } from '../../../types';
+import {
+    calculateProportionalAmounts,
+    getPoolStateWithBalancesV2,
+    getSortedTokens,
+} from '../../../utils';
+import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
+import { getAmountsCall, getAmountsQuery } from '../../helper';
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildCallOutput,
@@ -12,14 +21,6 @@ import {
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
 } from '../../types';
-import { PoolState } from '../../../types';
-import { doRemoveLiquidityQuery } from '../../../utils/doRemoveLiquidityQuery';
-import {
-    calculateProportionalAmounts,
-    getPoolStateWithBalancesV2,
-    getSortedTokens,
-} from '../../../utils';
-import { getAmountsCall, getAmountsQuery } from '../../helper';
 import { RemoveLiquidityV2BaseBuildCallInput } from '../types';
 
 export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
@@ -137,6 +138,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         });
 
         return {
+            args,
             callData,
             to: VAULT[input.chainId],
             value: 0n,

@@ -1,12 +1,13 @@
-import { TokenAmount } from '../tokenAmount';
-import { Slippage } from '../slippage';
 import { Address, InputAmount } from '../../types';
+import { Permit } from '../permitHelper';
+import { Slippage } from '../slippage';
+import { TokenAmount } from '../tokenAmount';
 import { PoolState } from '../types';
+import { parseRemoveLiquidityArgs } from '../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityV2BuildCallInput,
     RemoveLiquidityV2QueryOutput,
 } from './removeLiquidityV2/types';
-import { Permit } from '../permitHelper';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
@@ -88,6 +89,7 @@ export type RemoveLiquidityBuildCallOutput = {
     value: bigint;
     maxBptIn: TokenAmount;
     minAmountsOut: TokenAmount[];
+    args?: ReturnType<typeof parseRemoveLiquidityArgs>['args'];
 };
 
 export interface RemoveLiquidityBase {
