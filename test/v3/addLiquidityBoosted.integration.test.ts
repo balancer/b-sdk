@@ -17,7 +17,6 @@ import {
     AddLiquidityKind,
     Slippage,
     Hex,
-    PoolStateWithUnderlyings,
     CHAINS,
     ChainId,
     AddLiquidityBoostedV3,
@@ -33,31 +32,18 @@ import {
     approveSpenderOnTokens,
     approveTokens,
     areBigIntsWithinPercent,
+    TOKENS,
+    assertTokenMatch,
+    sendTransactionGetBalances,
 } from '../lib/utils';
-
-import { assertTokenMatch } from 'test/lib/utils';
-
-import { sendTransactionGetBalances } from 'test/lib/utils';
-
 import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
+import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 
 const protocolVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
-// deploy 10
-const poolid = '0x6dbdd7a36d900083a5b86a55583d90021e9f33e8';
-// const stataUSDC = 0x8a88124522dbbf1e56352ba3de1d9f78c143751e;
-const USDC = {
-    address: '0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8',
-    decimals: 6,
-    slot: 0,
-};
-//const statAUSDT = 0x978206fae13faf5a8d293fb614326b237684b750;
-const USDT = {
-    address: '0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0',
-    decimals: 6,
-    slot: 0,
-};
+const USDC = TOKENS[chainId].USDC_AAVE;
+const USDT = TOKENS[chainId].USDT_AAVE;
 
 describe('Boosted AddLiquidity', () => {
     let client: PublicWalletClient & TestActions;
@@ -142,7 +128,7 @@ describe('Boosted AddLiquidity', () => {
 
                 const addLiquidityQueryOutput = await addLiquidityBoosted.query(
                     input,
-                    poolStateWithUnderlyings,
+                    boostedPool_USDC_USDT,
                 );
 
                 const addLiquidityBuildInput: AddLiquidityBoostedBuildCallInput =
@@ -199,13 +185,13 @@ describe('Boosted AddLiquidity', () => {
                         referenceAmount: {
                             rawAmount: 1000000000000000000n,
                             decimals: 18,
-                            address: poolid as Address,
+                            address: boostedPool_USDC_USDT.address,
                         },
                         kind: AddLiquidityKind.Proportional,
                     };
                 const addLiquidityQueryOutput = await addLiquidityBoosted.query(
                     addLiquidityProportionalInput,
-                    poolStateWithUnderlyings,
+                    boostedPool_USDC_USDT,
                 );
                 const addLiquidityBuildInput: AddLiquidityBoostedBuildCallInput =
                     {
@@ -304,7 +290,7 @@ describe('Boosted AddLiquidity', () => {
 
                 const addLiquidityQueryOutput = await addLiquidityBoosted.query(
                     input,
-                    poolStateWithUnderlyings,
+                    boostedPool_USDC_USDT,
                 );
 
                 const addLiquidityBuildInput = {
@@ -370,14 +356,14 @@ describe('Boosted AddLiquidity', () => {
                         referenceAmount: {
                             rawAmount: 1000000000000000000n,
                             decimals: 18,
-                            address: poolid as Address,
+                            address: boostedPool_USDC_USDT.address,
                         },
                         kind: AddLiquidityKind.Proportional,
                     };
 
                 const addLiquidityQueryOutput = await addLiquidityBoosted.query(
                     addLiquidityProportionalInput,
-                    poolStateWithUnderlyings,
+                    boostedPool_USDC_USDT,
                 );
                 const addLiquidityBuildInput: AddLiquidityBoostedBuildCallInput =
                     {
@@ -462,34 +448,4 @@ describe('Boosted AddLiquidity', () => {
             });
         });
     });
-
-    const poolStateWithUnderlyings: PoolStateWithUnderlyings = {
-        id: '0x6dbdd7a36d900083a5b86a55583d90021e9f33e8',
-        address: '0x6dbdd7a36d900083a5b86a55583d90021e9f33e8',
-        type: 'Stable',
-        protocolVersion: 3,
-        tokens: [
-            {
-                index: 0,
-                address: '0x8a88124522dbbf1e56352ba3de1d9f78c143751e',
-                decimals: 6,
-                underlyingToken: {
-                    address: '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8',
-                    decimals: 6,
-                    index: 0,
-                },
-            },
-            {
-                index: 1,
-                address: '0x978206fae13faf5a8d293fb614326b237684b750',
-                decimals: 6,
-                underlyingToken: {
-                    address: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
-                    decimals: 6,
-                    index: 1,
-                },
-            },
-        ],
-        totalShares: '119755.048508537457614083',
-    };
 });
