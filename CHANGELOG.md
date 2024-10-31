@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.30.1
+
+### Patch Changes
+
+- a080968: chore: remove unused totalShares field from PoolStateWithUnderlyings type
+
 ## 0.30.0
 
 ### Minor Changes
