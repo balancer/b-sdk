@@ -490,6 +490,5 @@ describe('Boosted AddLiquidity', () => {
                 },
             },
         ],
-        totalShares: '119755.048508537457614083',
     };
 });
