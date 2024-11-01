@@ -7,6 +7,7 @@ import {
     RemoveLiquidityV2QueryOutput,
 } from './removeLiquidityV2/types';
 import { Permit } from '../permitHelper';
+import { RemoveLiquidityBoostedBuildCallInput } from '../removeLiquidityBoosted/types';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
@@ -67,6 +68,7 @@ export type RemoveLiquidityBaseQueryOutput = {
     tokenOutIndex?: number;
     protocolVersion: 1 | 2 | 3;
     chainId: number;
+    to: Address;
 };
 
 export type RemoveLiquidityQueryOutput =
@@ -80,7 +82,8 @@ export type RemoveLiquidityBaseBuildCallInput = {
 
 export type RemoveLiquidityBuildCallInput =
     | RemoveLiquidityBaseBuildCallInput
-    | RemoveLiquidityV2BuildCallInput;
+    | RemoveLiquidityV2BuildCallInput
+    | RemoveLiquidityBoostedBuildCallInput;
 
 export type RemoveLiquidityBuildCallOutput = {
     callData: Address;
