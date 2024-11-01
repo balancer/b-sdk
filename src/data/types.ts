@@ -13,5 +13,5 @@ export interface PoolTokenWithBalance extends MinimalToken {
 }
 
 export interface PoolTokenWithUnderlying extends MinimalToken {
-    underlyingToken: MinimalToken;
+    underlyingToken: MinimalToken | null;
 }

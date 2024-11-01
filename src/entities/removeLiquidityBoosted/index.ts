@@ -27,6 +27,7 @@ import {
     RemoveLiquidityBoostedQueryOutput,
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
+import { getSortedTokens } from '../utils';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -55,12 +56,26 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             poolState.address,
         );
 
-        // amountsOut are in underlying Tokens sorted in token registration order of wrapped tokens in the pool
+        // Child tokens are the lowest most tokens. This will be underlying if it exists.
+        const childTokens = poolState.tokens.map((t) => {
+            if (t.underlyingToken) {
+                return t.underlyingToken;
+            }
+            return {
+                address: t.address,
+                decimals: t.decimals,
+                index: t.index,
+            };
+        });
+
+        const sortedChildTokens = getSortedTokens(childTokens, input.chainId);
+
+        // amountsOut are in child tokens sorted in token registration order of wrapped tokens in the pool
         const amountsOut = underlyingAmountsOut.map((amount, i) => {
             const token = new Token(
                 input.chainId,
-                poolState.tokens[i].underlyingToken.address,
-                poolState.tokens[i].underlyingToken.decimals,
+                sortedChildTokens[i].address,
+                sortedChildTokens[i].decimals,
             );
             return TokenAmount.fromRawAmount(token, amount);
         });
@@ -72,7 +87,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             poolId: poolState.address,
             removeLiquidityKind: RemoveLiquidityKind.Proportional,
             bptIn: TokenAmount.fromRawAmount(bptToken, input.bptIn.rawAmount),
-            amountsOut: amountsOut,
+            amountsOut,
             protocolVersion: 3,
             chainId: input.chainId,
             userData: input.userData ?? '0x',

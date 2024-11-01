@@ -4,7 +4,12 @@ import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, ChainId, CHAINS } from '@/utils';
 
 import { Address } from '@/types';
 
-import { balancerCompositeLiquidityRouterAbi } from '@/abi';
+import {
+    balancerCompositeLiquidityRouterAbi,
+    permit2Abi,
+    vaultExtensionAbi_V3,
+    vaultV3Abi,
+} from '@/abi';
 
 export const doAddLiquidityUnbalancedQuery = async (
     rpcUrl: string,
@@ -21,7 +26,12 @@ export const doAddLiquidityUnbalancedQuery = async (
 
     const { result: bptAmountOut } = await client.simulateContract({
         address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-        abi: balancerCompositeLiquidityRouterAbi,
+        abi: [
+            ...balancerCompositeLiquidityRouterAbi,
+            ...vaultV3Abi,
+            ...vaultExtensionAbi_V3,
+            ...permit2Abi,
+        ],
         functionName: 'queryAddLiquidityUnbalancedToERC4626Pool',
         args: [poolAddress, exactUnderlyingAmountsIn, sender, userData],
     });

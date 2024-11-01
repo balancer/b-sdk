@@ -19,10 +19,12 @@ import { RemoveLiquidityNested } from '../removeLiquidityNested';
 import { RemoveLiquidityNestedSingleTokenInputV2 } from '../removeLiquidityNested/removeLiquidityNestedV2/types';
 import { Swap, SwapInput } from '../swap';
 import { TokenAmount } from '../tokenAmount';
-import { NestedPoolState, PoolState } from '../types';
+import { NestedPoolState, PoolState, PoolStateWithUnderlyings } from '../types';
 import { getSortedTokens } from '../utils';
 import { AddLiquidityNestedInput } from '../addLiquidityNested/types';
 import { AddLiquidityNested } from '../addLiquidityNested';
+import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types';
+import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
 
 export class PriceImpact {
     /**
@@ -240,6 +242,13 @@ export class PriceImpact {
             return deltaBPT.amount * signal;
         }
     };
+
+    static async addLiquidityUnbalancedBoosted(
+        input: AddLiquidityBoostedUnbalancedInput,
+        poolState: PoolStateWithUnderlyings,
+    ): Promise<PriceImpactAmount> {
+        return addLiquidityUnbalancedBoosted(input, poolState);
+    }
 
     /**
      * Calculate price impact on adding liquidity for nested pools.
