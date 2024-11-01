@@ -57,7 +57,13 @@ export class AddLiquidityNestedV2 {
         );
         const bptOut = TokenAmount.fromRawAmount(tokenOut, peekedValue);
 
-        return { callsAttributes, amountsIn, bptOut, protocolVersion: 2 };
+        return {
+            to: BALANCER_RELAYER[input.chainId],
+            callsAttributes,
+            amountsIn,
+            bptOut,
+            protocolVersion: 2,
+        };
     }
 
     buildCall(

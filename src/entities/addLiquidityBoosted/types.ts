@@ -35,6 +35,7 @@ export type AddLiquidityBoostedQueryOutput = {
     chainId: number;
     protocolVersion: 3;
     userData: Hex;
+    to: Address;
 };
 
 export type AddLiquidityBoostedBuildCallInput = {
