@@ -56,6 +56,10 @@ export class Swap {
         return this.swap.outputAmount;
     }
 
+    public get isBatchSwap(): boolean {
+        return this.swap.isBatchSwap;
+    }
+
     // rpcUrl is optional, but recommended to prevent rate limiting
     public async query(
         rpcUrl?: string,
