@@ -26,7 +26,7 @@ import {
     PublicWalletClient,
     AddLiquidityBoostedBuildCallInput,
     AddLiquidityBoostedInput,
-} from '../../src';
+} from '../../../src';
 import {
     setTokenBalances,
     approveSpenderOnTokens,
@@ -35,8 +35,8 @@ import {
     TOKENS,
     assertTokenMatch,
     sendTransactionGetBalances,
-} from '../lib/utils';
-import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
+} from '../../lib/utils';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 
 const protocolVersion = 3;

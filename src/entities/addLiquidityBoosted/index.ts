@@ -50,16 +50,25 @@ export class AddLiquidityBoostedV3 {
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
 
+        // Child tokens are the lowest most tokens. This will be underlying if it exists.
+        const childTokens = poolState.tokens.map((t) => {
+            if (t.underlyingToken) {
+                return t.underlyingToken;
+            }
+            return {
+                address: t.address,
+                decimals: t.decimals,
+                index: t.index,
+            };
+        });
+
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
                 // It is allowed not not provide the same amount of TokenAmounts as inputs
                 // as the pool has tokens, in this case, the input tokens are filled with
                 // a default value ( 0 in this case ) to assure correct amounts in as the pool has tokens.
-                const underlyingTokens = poolState.tokens.map((t) => {
-                    return t.underlyingToken;
-                });
                 const sortedTokens = getSortedTokens(
-                    underlyingTokens,
+                    childTokens,
                     input.chainId,
                 );
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
@@ -99,16 +108,10 @@ export class AddLiquidityBoostedV3 {
                         input.referenceAmount.rawAmount,
                     );
 
-                // Since the user adds tokens which are technically not pool tokens, the TokenAmount to return
-                // uses the pool's tokens underlyingTokens to indicate which tokens are being added from the user
-                // perspective
-                amountsIn = poolState.tokens.map((t, i) =>
+                // Amounts are mapped to child tokens of the pool
+                amountsIn = childTokens.map((t, i) =>
                     TokenAmount.fromRawAmount(
-                        new Token(
-                            input.chainId,
-                            t.underlyingToken.address,
-                            t.underlyingToken.decimals,
-                        ),
+                        new Token(input.chainId, t.address, t.decimals),
                         exactAmountsInNumbers[i],
                     ),
                 );

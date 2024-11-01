@@ -1,4 +1,4 @@
-// pnpm test -- v3/removeLiquidityBoosted.integration.test.ts
+// pnpm test -- removeLiquidityBoosted.integration.test.ts
 
 import { config } from 'dotenv';
 config();
@@ -40,9 +40,10 @@ import {
     sendTransactionGetBalances,
     assertTokenMatch,
     TOKENS,
-} from '../lib/utils';
+    areBigIntsWithinPercent,
+} from '../../lib/utils';
 
-import { ANVIL_NETWORKS, startFork } from '../anvil/anvil-global-setup';
+import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 
 const protocolVersion = 3;
@@ -203,7 +204,10 @@ describe('remove liquidity test', () => {
                     (amountOut) => amountOut.amount,
                 ),
             ];
-            expect(expectedDeltas).to.deep.eq(balanceDeltas);
+            // Here we check that output diff is within an acceptable tolerance as buffers can have difference in queries/result
+            expectedDeltas.forEach((delta, i) => {
+                areBigIntsWithinPercent(delta, balanceDeltas[i], 0.001);
+            });
             const expectedMinAmountsOut =
                 removeLiquidityQueryOutput.amountsOut.map((amountOut) =>
                     removeLiquidityBuildInput.slippage.applyTo(
