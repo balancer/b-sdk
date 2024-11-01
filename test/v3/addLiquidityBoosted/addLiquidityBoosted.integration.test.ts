@@ -1,4 +1,4 @@
-// pnpm test -- v3/addLiquidityBoosted.integration.test.ts
+// pnpm test -- v3/addLiquidityBoosted/addLiquidityBoosted.integration.test.ts
 
 import { config } from 'dotenv';
 config();
