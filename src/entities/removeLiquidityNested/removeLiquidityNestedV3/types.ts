@@ -18,6 +18,7 @@ export type RemoveLiquidityNestedQueryOutputV3 = {
     chainId: ChainId;
     parentPool: Address;
     userData: Hex;
+    to: Address;
 };
 
 export type RemoveLiquidityNestedCallInputV3 =

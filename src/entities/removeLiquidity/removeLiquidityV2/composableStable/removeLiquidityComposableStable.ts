@@ -67,6 +67,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         );
 
         return {
+            to: VAULT[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -114,6 +115,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             TokenAmount.fromRawAmount(bptToken, 0n),
         );
         return {
+            to: VAULT[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,

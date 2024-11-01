@@ -121,6 +121,7 @@ describe('add liquidity composable stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
 
@@ -140,6 +141,7 @@ describe('add liquidity composable stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );
@@ -174,6 +176,7 @@ describe('add liquidity composable stable test', () => {
                 input,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
 
@@ -193,6 +196,7 @@ describe('add liquidity composable stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );
@@ -225,6 +229,7 @@ describe('add liquidity composable stable test', () => {
                 input,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
         test('with native', async () => {
@@ -242,6 +247,7 @@ describe('add liquidity composable stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );

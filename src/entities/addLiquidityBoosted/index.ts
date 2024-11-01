@@ -133,6 +133,7 @@ export class AddLiquidityBoostedV3 {
             chainId: input.chainId,
             protocolVersion: 3,
             userData: input.userData ?? '0x',
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
         };
 
         return output;

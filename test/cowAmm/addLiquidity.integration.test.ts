@@ -122,6 +122,7 @@ describe('add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 protocolVersion,
             );
         });

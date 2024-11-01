@@ -1,12 +1,12 @@
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildCallOutput,
-    RemoveLiquidityBuildCallInput,
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
     RemoveLiquidityProportionalInput,
+    RemoveLiquidityBaseBuildCallInput,
 } from './types';
 import { PoolState } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
@@ -14,6 +14,7 @@ import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
 import { RemoveLiquidityCowAmm } from './removeLiquidityCowAmm';
 import { Permit } from '../permitHelper';
+import { RemoveLiquidityV2BuildCallInput } from './removeLiquidityV2/types';
 
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -78,7 +79,9 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityBuildCallInput,
+        input:
+            | RemoveLiquidityBaseBuildCallInput
+            | RemoveLiquidityV2BuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
         const isV2Input = 'sender' in input;
         switch (input.protocolVersion) {
@@ -106,7 +109,9 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     }
 
     public buildCallWithPermit(
-        input: RemoveLiquidityBuildCallInput,
+        input:
+            | RemoveLiquidityBaseBuildCallInput
+            | RemoveLiquidityV2BuildCallInput,
         permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
         if (input.protocolVersion === 3) {

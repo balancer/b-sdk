@@ -18,6 +18,7 @@ import {
     VAULT,
     Permit2Helper,
     AddLiquidityKind,
+    ChainId,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
@@ -188,6 +189,7 @@ export function assertAddLiquidityUnbalanced(
     addLiquidityInput: AddLiquidityUnbalancedInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -214,6 +216,7 @@ export function assertAddLiquidityUnbalanced(
     > = {
         // | Omit<AddLiquidityV2BaseQueryOutput, 'amountsIn' | 'bptIndex'> = {
         // Query should use same amountsIn as input
+        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
         amountsIn: expectedAmountsIn,
         tokenInIndex: undefined,
         // Should match inputs
@@ -256,6 +259,7 @@ export function assertAddLiquiditySingleToken(
     addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -280,6 +284,7 @@ export function assertAddLiquiditySingleToken(
         'amountsIn' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
+        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
         bptOut: TokenAmount.fromRawAmount(
             bptToken,
             addLiquidityInput.bptOut.rawAmount,
@@ -334,6 +339,7 @@ export function assertAddLiquidityProportional(
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -360,7 +366,24 @@ export function assertAddLiquidityProportional(
                 : a,
     );
 
+    let to: Address;
+
+    switch (protocolVersion) {
+        case 1:
+            to = poolState.address;
+            break;
+        case 2:
+            to = VAULT[chainId];
+            break;
+        case 3:
+            to = BALANCER_ROUTER[chainId];
+            break;
+        default:
+            throw new Error(`Unsupported protocolVersion: ${protocolVersion}`);
+    }
+
     const expectedQueryOutput: Omit<AddLiquidityQueryOutput, 'bptIndex'> = {
+        to,
         // Query should use same referenceAmount as user sets
         bptOut,
         amountsIn,

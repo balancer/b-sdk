@@ -106,6 +106,7 @@ describe('weighted remove liquidity recovery test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
         test('with native', async () => {
@@ -121,6 +122,7 @@ describe('weighted remove liquidity recovery test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );

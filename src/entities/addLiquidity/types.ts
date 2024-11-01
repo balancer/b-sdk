@@ -50,6 +50,7 @@ export type AddLiquidityBaseQueryOutput = {
     chainId: number;
     tokenInIndex?: number;
     protocolVersion: 1 | 2 | 3;
+    to: Address;
 };
 
 export type AddLiquidityQueryOutput =
