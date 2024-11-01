@@ -114,6 +114,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
         test('with native', async () => {
@@ -132,6 +133,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 wethIsEth,
             );
         });
@@ -166,6 +168,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
         test('with native', async () => {
@@ -184,6 +187,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );
@@ -218,6 +222,7 @@ describe('weighted remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
 
@@ -237,6 +242,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );
@@ -269,6 +275,7 @@ describe('weighted remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
         test('with native', async () => {
@@ -286,6 +293,7 @@ describe('weighted remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );

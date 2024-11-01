@@ -19,6 +19,7 @@ import {
     TokenAmount,
     VAULT,
     PermitHelper,
+    ChainId,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
@@ -184,6 +185,7 @@ export function assertRemoveLiquidityUnbalanced(
     removeLiquidityInput: RemoveLiquidityUnbalancedInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     wethIsEth?: boolean,
 ) {
     const {
@@ -211,6 +213,7 @@ export function assertRemoveLiquidityUnbalanced(
         'bptIn' | 'bptIndex'
     > = {
         // Query should use same amountsOut as input
+        to: VAULT[chainId],
         amountsOut: expectedAmountsOut,
         tokenOutIndex: undefined,
         // Should match inputs
@@ -249,6 +252,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
     removeLiquidityInput: RemoveLiquiditySingleTokenExactOutInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -281,6 +285,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         'bptIn' | 'bptIndex'
     > = {
         // Query should use same amountsOut as input
+        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
         amountsOut: expectedAmountsOut,
         tokenOutIndex: tokensWithoutBpt.findIndex(
             (t) => t.address === removeLiquidityInput.amountOut.address,
@@ -322,6 +327,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     removeLiquidityInput: RemoveLiquiditySingleTokenExactInInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -349,6 +355,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         'amountsOut' | 'bptIndex'
     > = {
         // Query should use same bpt out as user sets
+        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
         bptIn: TokenAmount.fromRawAmount(
             bptToken,
             removeLiquidityInput.bptIn.rawAmount,
@@ -406,6 +413,7 @@ export function assertRemoveLiquidityProportional(
     removeLiquidityInput: RemoveLiquidityProportionalInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -420,6 +428,22 @@ export function assertRemoveLiquidityProportional(
         poolState.address,
         18,
     );
+
+    let to: Address;
+
+    switch (protocolVersion) {
+        case 1:
+            to = poolState.address;
+            break;
+        case 2:
+            to = VAULT[chainId];
+            break;
+        case 3:
+            to = BALANCER_ROUTER[chainId];
+            break;
+        default:
+            throw new Error(`Unsupported protocolVersion: ${protocolVersion}`);
+    }
 
     const expectedQueryOutput: Omit<
         RemoveLiquidityQueryOutput,
@@ -438,6 +462,7 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityKind: removeLiquidityInput.kind,
         protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityInput.chainId,
+        to,
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);
