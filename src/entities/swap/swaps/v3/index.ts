@@ -74,7 +74,12 @@ export class SwapV3 implements SwapBase {
         this.swapKind = swapKind;
         this.inputAmount = getInputAmount(this.paths);
         this.outputAmount = getOutputAmount(this.paths);
-        this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
+        this.isBatchSwap =
+            paths.length > 1 ||
+            paths[0].pools.length > 1 ||
+            paths[0].pools[0].toLowerCase() ===
+                this.inputAmount.token.address ||
+            paths[0].pools[0].toLowerCase() === this.outputAmount.token.address;
         this.swaps = this.getSwaps(this.paths);
         this.userData = userData;
     }
