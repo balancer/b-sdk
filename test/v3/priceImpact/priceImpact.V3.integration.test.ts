@@ -58,7 +58,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000545');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000555');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -87,12 +87,11 @@ describe('PriceImpact V3', () => {
                     boostedPool_USDC_USDT,
                 );
             const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.000571008');
+                PriceImpactAmount.fromDecimal('0.0005708172');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
-        // TODO - should be able to add this in once Composite Router is fixed
-        test.skip('Single token input', async () => {
+        test('Single token input', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
                 chainId,
                 rpcUrl,
@@ -111,14 +110,12 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.000571008');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0004755');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
 
-    // TODO - try this again once Composite Router is fixed
-    describe.skip('Partial Boosted Pool Boosted Pool AddLiquidity', () => {
+    describe('Partial Boosted Pool Boosted Pool AddLiquidity', () => {
         test('Close to proportional', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
                 chainId,
@@ -143,11 +140,10 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000545');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000065');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
-        // Reverting with Error: TradeAmountTooSmall(). With fixed router try removing default of 1001 and changing to 0
         test('Unbalanced', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
                 chainId,
@@ -172,7 +168,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000545');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0056435');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
