@@ -81,15 +81,11 @@ export class AddLiquidityBoostedV3 {
                     poolState.address,
                     maxAmountsIn,
                 );
+
                 bptOut = TokenAmount.fromRawAmount(bptToken, bptAmountOut);
-
-                amountsIn = input.amountsIn.map((t) => {
-                    return TokenAmount.fromRawAmount(
-                        new Token(input.chainId, t.address, t.decimals),
-                        t.rawAmount,
-                    );
-                });
-
+                amountsIn = sortedTokens.map((t, i) =>
+                    TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
+                );
                 break;
             }
             case AddLiquidityKind.Proportional: {
