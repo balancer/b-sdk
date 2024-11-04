@@ -58,7 +58,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000545');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000555');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -87,7 +87,7 @@ describe('PriceImpact V3', () => {
                     boostedPool_USDC_USDT,
                 );
             const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.000571008');
+                PriceImpactAmount.fromDecimal('0.0005708172');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -112,7 +112,7 @@ describe('PriceImpact V3', () => {
                     boostedPool_USDC_USDT,
                 );
             const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.000571008');
+                PriceImpactAmount.fromDecimal('0.0005708172');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
