@@ -1,5 +1,18 @@
 # @balancer/sdk
 
+## 0.31.0
+
+### Minor Changes
+
+- a1b87c6: Add to field to query outputs. Useful for correct approval spender before build.
+- e234fc1: Remove Swap Price Impact function and tests.
+- 4e32362: Add optional sender and userData inputs for add/remove/swap queries. Sender can be used to query accurate result when pool may have hook thats behaviour is affected by sender, e.g. loyalty fee hook.
+
+### Patch Changes
+
+- 2a664ce: Make boosted add/remove support partial boosted.
+- a33d0fc: Expose isBatchSwap on swap class
+
 ## 0.30.1
 
 ### Patch Changes
