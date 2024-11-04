@@ -142,22 +142,14 @@ async function queryAddLiquidityForTokenDelta(
         poolTokens[tokenIndex],
         abs(delta),
     );
-    // TODO - temp fix while router is fixed. Change to only have value for tokenIndex
-    // const amountsIn = Array(poolTokens.length).fill(2000);
-    const amountsIn = poolTokens.map((t) =>
-        TokenAmount.fromRawAmount(t, 1001).toInputAmount(),
-    );
-    // This gets around the WrapAmountTooSmall error thrown by vault
-    if (absDelta.amount > 1000n)
-        amountsIn[tokenIndex] = absDelta.toInputAmount();
 
-    if (amountsIn.every((a) => a.rawAmount <= 1001n))
-        return delta < 0n ? -1001n : 1001n;
+    const amountsIn = [absDelta.toInputAmount()];
+    // Work-around Vault _MINIMUM_WRAP_AMOUNT limit
+    if (absDelta.amount <= 1000n) amountsIn[0].rawAmount = 1001n;
 
     const { bptOut: deltaBPT } = await addLiquidity.query(
         {
             ...input,
-            // amountsIn: [absDelta.toInputAmount()],
             amountsIn,
         },
         poolState,
