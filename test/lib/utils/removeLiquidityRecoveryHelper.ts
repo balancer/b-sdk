@@ -22,6 +22,7 @@ import {
     assertTokenDeltas,
     getCheck,
 } from './removeLiquidityHelper';
+import { Hex } from 'viem';
 
 export const sdkRemoveLiquidityRecovery = async ({
     removeLiquidity,
@@ -139,10 +140,11 @@ export function assertRemoveLiquidityRecovery(
         18,
     );
 
-    const expectedQueryOutput: Omit<
-        RemoveLiquidityQueryOutput,
-        'amountsOut' | 'bptIndex'
-    > = {
+    let expectedQueryOutput:
+        | Omit<RemoveLiquidityQueryOutput, 'amountsOut' | 'bptIndex'>
+        | (Omit<RemoveLiquidityQueryOutput, 'amountsOut' | 'bptIndex'> & {
+              userData: Hex;
+          }) = {
         // Query should use same bpt out as user sets
         bptIn: TokenAmount.fromRawAmount(
             bptToken,
@@ -158,6 +160,9 @@ export function assertRemoveLiquidityRecovery(
         chainId: removeLiquidityRecoveryInput.chainId,
         to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
     };
+
+    if (protocolVersion === 3)
+        expectedQueryOutput = { ...expectedQueryOutput, userData: '0x' };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);
 
