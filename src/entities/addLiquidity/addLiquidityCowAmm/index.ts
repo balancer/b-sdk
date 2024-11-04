@@ -57,6 +57,7 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
         const tokenInIndex = undefined;
 
         const output: AddLiquidityBaseQueryOutput = {
+            to: poolState.id,
             poolType: poolState.type,
             poolId: poolState.id,
             addLiquidityKind: input.kind,

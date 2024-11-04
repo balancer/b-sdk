@@ -68,6 +68,7 @@ export class AddLiquidityNestedV3 {
         const bptToken = new Token(input.chainId, parentPool.address, 18);
 
         return {
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             parentPool: parentPool.address,
             chainId: input.chainId,
             amountsIn: mainTokens.map((t, i) =>

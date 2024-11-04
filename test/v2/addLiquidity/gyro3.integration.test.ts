@@ -116,6 +116,7 @@ describe('Gyro3 add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
         //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network

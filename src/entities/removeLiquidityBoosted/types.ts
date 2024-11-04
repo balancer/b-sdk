@@ -22,6 +22,7 @@ export type RemoveLiquidityBoostedQueryOutput = {
     protocolVersion: 3;
     chainId: number;
     userData: Hex;
+    to: Address;
 };
 
 export type RemoveLiquidityBoostedBuildCallInput = {

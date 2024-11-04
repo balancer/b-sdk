@@ -105,6 +105,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         }
 
         const output: AddLiquidityBaseQueryOutput = {
+            to: BALANCER_ROUTER[input.chainId],
             poolType: poolState.type,
             poolId: poolState.id,
             addLiquidityKind: input.kind,

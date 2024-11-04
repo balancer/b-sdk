@@ -116,6 +116,7 @@ describe('GyroE V2 add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
         test('with native', async () => {
@@ -130,6 +131,7 @@ describe('GyroE V2 add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );

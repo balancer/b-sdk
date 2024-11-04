@@ -116,6 +116,7 @@ describe('add liquidity stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
 
@@ -135,6 +136,7 @@ describe('add liquidity stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 poolState.protocolVersion,
                 wethIsEth,
             );
@@ -170,6 +172,7 @@ describe('add liquidity stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
 
@@ -186,6 +189,7 @@ describe('add liquidity stable test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 poolState.protocolVersion,
                 wethIsEth,
             );

@@ -83,6 +83,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBoostedQueryOutput = {
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             poolType: poolState.type,
             poolId: poolState.address,
             removeLiquidityKind: RemoveLiquidityKind.Proportional,

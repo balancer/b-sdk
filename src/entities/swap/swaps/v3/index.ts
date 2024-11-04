@@ -146,6 +146,7 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
             return {
+                to: BALANCER_ROUTER[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -168,6 +169,7 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
             return {
+                to: BALANCER_ROUTER[this.chainId],
                 swapKind: SwapKind.GivenOut,
                 expectedAmountIn: TokenAmount.fromRawAmount(
                     this.inputAmount.token,
@@ -250,6 +252,7 @@ export class SwapV3 implements SwapBase {
                 );
 
             return {
+                to: BALANCER_BATCH_ROUTER[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -275,6 +278,7 @@ export class SwapV3 implements SwapBase {
             );
 
         return {
+            to: BALANCER_BATCH_ROUTER[this.chainId],
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,

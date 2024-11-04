@@ -1,4 +1,6 @@
 import {
+    BALANCER_ROUTER,
+    ChainId,
     NATIVE_ASSETS,
     PoolState,
     RemoveLiquidityBuildCallInput,
@@ -8,6 +10,7 @@ import {
     Slippage,
     Token,
     TokenAmount,
+    VAULT,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances } from './helper';
@@ -120,6 +123,7 @@ export function assertRemoveLiquidityRecovery(
     removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -152,6 +156,7 @@ export function assertRemoveLiquidityRecovery(
         removeLiquidityKind: removeLiquidityRecoveryInput.kind,
         protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityRecoveryInput.chainId,
+        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
     };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);
