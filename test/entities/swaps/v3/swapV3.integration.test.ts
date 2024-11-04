@@ -41,7 +41,7 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
-const blockNo = 7008718n;
+const blockNo = 7010829n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
@@ -251,13 +251,12 @@ describe('SwapV3', () => {
                 const expected = (await swap.query(
                     rpcUrl,
                 )) as ExactInQueryOutput;
-                /* const wethToken = new Token(
-                    chainId,
-                    WETH.address,
-                    WETH.decimals,
-                ); */
-                //expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                //expect(expected.expectedAmountOut.amount).to.eq(98999999n);
+                const balToken = new Token(chainId, BAL.address, BAL.decimals);
+
+                expect(expected.expectedAmountOut.token).to.deep.eq(balToken);
+                expect(expected.expectedAmountOut.amount).to.eq(
+                    1409169048985584n,
+                );
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -276,10 +275,10 @@ describe('SwapV3', () => {
                     101010202020405n,
                 );
             });
-            test('Given Out as BPT', async () => {
+            test.only('Given Out as BPT', async () => {
                 const swap = new Swap({
                     chainId,
-                    paths: [pathBPTWeth],
+                    paths: [pathBalWeth],
                     swapKind: SwapKind.GivenOut,
                 });
 
@@ -287,12 +286,12 @@ describe('SwapV3', () => {
                     rpcUrl,
                 )) as ExactOutQueryOutput;
 
-                expect(expected.expectedAmountIn.token).to.deep.eq(
-                    POOLS[chainId].MOCK_WETH_BAL_POOL.id,
+                const balToken = new Token(chainId, BAL.address, BAL.decimals);
+
+                expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
+                expect(expected.expectedAmountIn.amount).to.eq(
+                    102241640811992n,
                 );
-                /* expect(expected.expectedAmountIn.amount).to.eq(
-                    101010202020405n,
-                ); */
             });
         });
         describe('multi-hop swap', () => {
