@@ -9,7 +9,7 @@ export type AddLiquidityBoostedProportionalInput = {
     rpcUrl: string;
     referenceAmount: InputAmount;
     kind: AddLiquidityKind.Proportional;
-    userAddress?: Address;
+    sender?: Address;
     userData?: Hex;
 };
 
@@ -18,7 +18,7 @@ export type AddLiquidityBoostedUnbalancedInput = {
     rpcUrl: string;
     amountsIn: InputAmount[];
     kind: AddLiquidityKind.Unbalanced;
-    userAddress?: Address;
+    sender?: Address;
     userData?: Hex;
 };
 

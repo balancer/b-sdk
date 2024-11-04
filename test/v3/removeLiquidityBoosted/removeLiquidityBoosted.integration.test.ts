@@ -255,7 +255,7 @@ describe('remove liquidity test', () => {
                         address: boostedPool_USDC_USDT.address,
                     },
                     kind: RemoveLiquidityKind.Proportional,
-                    userAddress: testAddress,
+                    sender: testAddress,
                     userData: '0x123',
                 };
 

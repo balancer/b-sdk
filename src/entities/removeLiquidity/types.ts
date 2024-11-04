@@ -8,6 +8,7 @@ import {
 } from './removeLiquidityV2/types';
 import { Permit } from '../permitHelper';
 import { RemoveLiquidityBoostedBuildCallInput } from '../removeLiquidityBoosted/types';
+import { Hex } from 'viem';
 
 export enum RemoveLiquidityKind {
     Unbalanced = 'Unbalanced', // exact out
@@ -21,6 +22,8 @@ export enum RemoveLiquidityKind {
 export type RemoveLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
+    sender?: Address;
+    userData?: Hex;
 };
 
 export type RemoveLiquidityUnbalancedInput = RemoveLiquidityBaseInput & {

@@ -51,7 +51,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             input.rpcUrl,
             input.chainId,
             input.bptIn.rawAmount,
-            input.userAddress ?? zeroAddress,
+            input.sender ?? zeroAddress,
             input.userData ?? '0x',
             poolState.address,
         );

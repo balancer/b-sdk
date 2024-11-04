@@ -14,6 +14,7 @@ import {
     SwapInput,
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
+import { Address } from 'viem';
 
 export * from './types';
 export * from './paths';
@@ -64,8 +65,9 @@ export class Swap {
     public async query(
         rpcUrl?: string,
         block?: bigint,
+        sender?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
-        return this.swap.query(rpcUrl, block);
+        return this.swap.query(rpcUrl, block, sender);
     }
 
     public queryCallData(): string {

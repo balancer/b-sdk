@@ -25,7 +25,7 @@ import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
-import { Client, PublicActions, WalletActions } from 'viem';
+import { Client, Hex, PublicActions, WalletActions } from 'viem';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -210,10 +210,11 @@ export function assertAddLiquidityUnbalanced(
         return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'bptOut' | 'bptIndex'
-    > = {
+    let expectedQueryOutput:
+        | Omit<AddLiquidityQueryOutput, 'bptOut' | 'bptIndex'>
+        | (Omit<AddLiquidityQueryOutput, 'bptOut' | 'bptIndex'> & {
+              userData: Hex;
+          }) = {
         // | Omit<AddLiquidityV2BaseQueryOutput, 'amountsIn' | 'bptIndex'> = {
         // Query should use same amountsIn as input
         to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
@@ -226,6 +227,9 @@ export function assertAddLiquidityUnbalanced(
         protocolVersion: poolState.protocolVersion,
         chainId: addLiquidityInput.chainId,
     };
+
+    if (protocolVersion === 3)
+        expectedQueryOutput = { ...expectedQueryOutput, userData: '0x' };
 
     const queryCheck = getCheck(addLiquidityQueryOutput);
 
@@ -279,10 +283,11 @@ export function assertAddLiquiditySingleToken(
         (t) => t.address !== poolState.address,
     );
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'amountsIn' | 'bptIndex'
-    > = {
+    let expectedQueryOutput:
+        | Omit<AddLiquidityQueryOutput, 'amountsIn' | 'bptIndex'>
+        | (Omit<AddLiquidityQueryOutput, 'bptOut' | 'bptIndex'> & {
+              userData: Hex;
+          }) = {
         // Query should use same bpt out as user sets
         to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
         bptOut: TokenAmount.fromRawAmount(
@@ -299,6 +304,9 @@ export function assertAddLiquiditySingleToken(
         protocolVersion: poolState.protocolVersion,
         chainId: addLiquidityInput.chainId,
     };
+
+    if (protocolVersion === 3)
+        expectedQueryOutput = { ...expectedQueryOutput, userData: '0x' };
 
     const queryCheck = getCheck(addLiquidityQueryOutput);
 
@@ -382,7 +390,11 @@ export function assertAddLiquidityProportional(
             throw new Error(`Unsupported protocolVersion: ${protocolVersion}`);
     }
 
-    const expectedQueryOutput: Omit<AddLiquidityQueryOutput, 'bptIndex'> = {
+    let expectedQueryOutput:
+        | Omit<AddLiquidityQueryOutput, 'bptIndex'>
+        | (Omit<AddLiquidityQueryOutput, 'bptOut' | 'bptIndex'> & {
+              userData: Hex;
+          }) = {
         to,
         // Query should use same referenceAmount as user sets
         bptOut,
@@ -396,6 +408,9 @@ export function assertAddLiquidityProportional(
         protocolVersion: poolState.protocolVersion,
         chainId: addLiquidityInput.chainId,
     };
+
+    if (protocolVersion === 3)
+        expectedQueryOutput = { ...expectedQueryOutput, userData: '0x' };
 
     const queryCheck = getCheck(addLiquidityQueryOutput);
 

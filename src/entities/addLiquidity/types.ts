@@ -18,6 +18,8 @@ export enum AddLiquidityKind {
 export type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
+    sender?: Address;
+    userData?: Hex;
 };
 
 export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {
