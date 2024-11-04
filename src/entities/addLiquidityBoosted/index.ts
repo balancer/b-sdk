@@ -76,7 +76,7 @@ export class AddLiquidityBoostedV3 {
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
                     input.rpcUrl,
                     input.chainId,
-                    input.userAddress ?? zeroAddress,
+                    input.sender ?? zeroAddress,
                     input.userData ?? '0x',
                     poolState.address,
                     maxAmountsIn,
@@ -102,7 +102,7 @@ export class AddLiquidityBoostedV3 {
                     await doAddLiquidityProportionalQuery(
                         input.rpcUrl,
                         input.chainId,
-                        input.userAddress ?? zeroAddress,
+                        input.sender ?? zeroAddress,
                         input.userData ?? '0x',
                         poolState.address,
                         input.referenceAmount.rawAmount,
