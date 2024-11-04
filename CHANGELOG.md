@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 0.31.1
+
+### Patch Changes
+
+- 46bcb86: Update CompositeRouter address (deploy10 version with bug fix).
+  Remove CompositeRouter workarounds for Boosted Price Impact.
+
 ## 0.31.0
 
 ### Minor Changes
