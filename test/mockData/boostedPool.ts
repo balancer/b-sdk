@@ -27,5 +27,4 @@ export const boostedPool_USDC_USDT: PoolStateWithUnderlyings = {
             },
         },
     ],
-    totalShares: '119755.048508537457614083',
 };
