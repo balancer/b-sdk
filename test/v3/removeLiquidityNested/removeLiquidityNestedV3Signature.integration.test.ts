@@ -15,7 +15,6 @@ import {
     Address,
     ChainId,
     CHAINS,
-    NestedPoolState,
     PublicWalletClient,
     Token,
     RemoveLiquidityNestedInput,
@@ -29,18 +28,17 @@ import {
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     areBigIntsWithinPercent,
-    POOLS,
     sendTransactionGetBalances,
-    TOKENS,
 } from 'test/lib/utils';
 import { GetNestedBpt } from 'test/lib/utils/removeNestedHelpers';
+import {
+    nestedWithBoostedPool,
+    USDC,
+    USDT,
+    WETH,
+} from 'test/mockData/nestedPool';
 
 const chainId = ChainId.SEPOLIA;
-const NESTED_WITH_BOOSTED_POOL = POOLS[chainId].NESTED_WITH_BOOSTED_POOL;
-const BOOSTED_POOL = POOLS[chainId].MOCK_BOOSTED_POOL;
-const USDT = TOKENS[chainId].USDT_AAVE;
-const USDC = TOKENS[chainId].USDC_AAVE;
-const WETH = TOKENS[chainId].WETH;
 
 // These are the underlying tokens
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
@@ -76,7 +74,7 @@ describe('V3 remove liquidity nested test, with Permit signature', () => {
             rpcUrl,
             testAddress,
             client,
-            nestedPoolState,
+            nestedWithBoostedPool,
             [
                 {
                     address: WETH.address,
@@ -103,7 +101,7 @@ describe('V3 remove liquidity nested test, with Permit signature', () => {
 
         const queryOutput = await removeLiquidityNested.query(
             removeLiquidityInput,
-            nestedPoolState,
+            nestedWithBoostedPool,
         );
 
         const removeLiquidityBuildInput = {
@@ -162,59 +160,3 @@ describe('V3 remove liquidity nested test, with Permit signature', () => {
         });
     });
 });
-
-const nestedPoolState: NestedPoolState = {
-    protocolVersion: 3,
-    pools: [
-        {
-            id: NESTED_WITH_BOOSTED_POOL.id,
-            address: NESTED_WITH_BOOSTED_POOL.address,
-            type: NESTED_WITH_BOOSTED_POOL.type,
-            level: 1,
-            tokens: [
-                {
-                    address: BOOSTED_POOL.address,
-                    decimals: BOOSTED_POOL.decimals,
-                    index: 0,
-                },
-                {
-                    address: WETH.address,
-                    decimals: WETH.decimals,
-                    index: 1,
-                },
-            ],
-        },
-        {
-            id: BOOSTED_POOL.id,
-            address: BOOSTED_POOL.address,
-            type: BOOSTED_POOL.type,
-            level: 0,
-            tokens: [
-                {
-                    address: USDC.address,
-                    decimals: USDC.decimals,
-                    index: 0,
-                },
-                {
-                    address: USDT.address,
-                    decimals: USDT.decimals,
-                    index: 1,
-                },
-            ],
-        },
-    ],
-    mainTokens: [
-        {
-            address: WETH.address,
-            decimals: WETH.decimals,
-        },
-        {
-            address: USDT.address,
-            decimals: USDT.decimals,
-        },
-        {
-            address: USDC.address,
-            decimals: USDC.decimals,
-        },
-    ],
-};
