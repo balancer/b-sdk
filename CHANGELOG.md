@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.31.2
+
+### Patch Changes
+
+- 72a96fb: fix: validateBuffer check for V2 buffer array.
+
 ## 0.31.1
 
 ### Patch Changes
