@@ -21,6 +21,10 @@ export type PoolStateWithBalances = {
 export type PoolStateWithBalancesAndDynamicData = PoolStateWithBalances & {
     volume24h: HumanAmount;
     fees24h: HumanAmount;
+    aprItems: {
+        id: Hex;
+        apr: number;
+    }[];
 };
 export type AddLiquidityAmounts = {
     maxAmountsIn: bigint[];

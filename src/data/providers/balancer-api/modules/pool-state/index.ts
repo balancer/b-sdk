@@ -43,6 +43,10 @@ export class Pools {
           totalShares
           volume24h
           fees24h
+          aprItems {
+            apr
+            id
+          }
         }
       }
     }`;
@@ -83,6 +87,7 @@ export class Pools {
             totalShares: data.poolGetPool.dynamicData.totalShares,
             volume24h: data.poolGetPool.dynamicData.volume24h,
             fees24h: data.poolGetPool.dynamicData.fees24h,
+            aprItems: data.poolGetPool.dynamicData.aprItems,
         };
         return poolStateWithBalances;
     }
