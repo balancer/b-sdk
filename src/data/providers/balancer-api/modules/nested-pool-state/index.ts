@@ -1,6 +1,10 @@
 import { BalancerApiClient } from '../../client';
-import { NestedPool, NestedPoolState } from '../../../../../entities';
-import { MinimalToken } from '../../../../types';
+import {
+    NestedPoolState,
+    NestedPoolV2,
+    NestedPoolV3,
+    PoolTokenWithUnderlying,
+} from '../../../../../entities';
 import { Address, Hex } from '../../../../../types';
 import { mapPoolType } from '@/utils/poolTypeMapper';
 import { API_CHAIN_NAMES, isSameAddress } from '@/utils';
@@ -19,17 +23,14 @@ export type PoolGetPool = {
 };
 
 export type UnderlyingToken = {
-    symbol: string;
     address: Address;
     decimals: number;
 };
 
 export type Token = {
-    symbol: string;
     index: number;
     address: Address;
     decimals: number;
-    isErc4626: boolean;
     underlyingToken: UnderlyingToken | null;
     nestedPool: {
         id: Hex;
@@ -54,10 +55,8 @@ export class NestedPools {
       }
       poolTokens {
         index
-        symbol
         address
         decimals
-        isErc4626
         nestedPool {
           id
           address
@@ -65,11 +64,8 @@ export class NestedPools {
           tokens {
             index
             address
-            symbol
             decimals
-            isErc4626
             underlyingToken {
-              symbol
               address
               decimals
             }
@@ -113,17 +109,21 @@ export class NestedPools {
 }
 
 export function mapPoolToNestedPoolStateV3(pool: PoolGetPool): NestedPoolState {
-    const pools: NestedPool[] = [
+    const pools: NestedPoolV3[] = [
         {
             id: pool.id,
             address: pool.address,
             type: mapPoolType(pool.type),
             level: 1,
             tokens: pool.poolTokens.map((t) => {
-                const minimalToken: MinimalToken = {
+                const minimalToken: PoolTokenWithUnderlying = {
                     address: t.address,
                     decimals: t.decimals,
                     index: t.index,
+                    underlyingToken:
+                        t.underlyingToken === null
+                            ? null
+                            : { ...t.underlyingToken, index: t.index },
                 };
                 return minimalToken;
             }),
@@ -145,7 +145,18 @@ export function mapPoolToNestedPoolStateV3(pool: PoolGetPool): NestedPoolState {
             address: token.nestedPool.address,
             level: 0,
             type: mapPoolType(token.nestedPool.type),
-            tokens: token.nestedPool.tokens.map(getMainToken),
+            tokens: token.nestedPool.tokens.map((t) => {
+                const minimalToken: PoolTokenWithUnderlying = {
+                    address: t.address,
+                    decimals: t.decimals,
+                    index: t.index,
+                    underlyingToken:
+                        t.underlyingToken === null
+                            ? null
+                            : { ...t.underlyingToken, index: t.index },
+                };
+                return minimalToken;
+            }),
         });
     });
 
@@ -173,7 +184,7 @@ function getMainToken(token: Token): {
     index: number;
 } {
     // If token has an underlying token, use that
-    if (token.isErc4626 && token.underlyingToken) {
+    if (token.underlyingToken) {
         return {
             index: token.index,
             address: token.underlyingToken.address,
@@ -196,17 +207,21 @@ function getMainToken(token: Token): {
 }
 
 export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
-    const pools: NestedPool[] = [
+    const pools: NestedPoolV2[] = [
         {
             id: pool.id,
             address: pool.address,
             type: mapPoolType(pool.type),
             level: 1,
             tokens: pool.poolTokens.map((t) => {
-                const minimalToken: MinimalToken = {
+                const minimalToken: PoolTokenWithUnderlying = {
                     address: t.address,
                     decimals: t.decimals,
                     index: t.index,
+                    underlyingToken:
+                        t.underlyingToken === null
+                            ? null
+                            : { ...t.underlyingToken, index: t.index },
                 };
                 return minimalToken;
             }),
@@ -229,10 +244,14 @@ export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
             level: 0,
             type: mapPoolType(token.nestedPool.type),
             tokens: token.nestedPool.tokens.map((t) => {
-                const minimalToken: MinimalToken = {
+                const minimalToken: PoolTokenWithUnderlying = {
                     address: t.address,
                     decimals: t.decimals,
                     index: t.index,
+                    underlyingToken:
+                        t.underlyingToken === null
+                            ? null
+                            : { ...t.underlyingToken, index: t.index },
                 };
                 return minimalToken;
             }),
@@ -249,7 +268,7 @@ export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
         });
 
     return {
-        protocolVersion: pool.protocolVersion,
+        protocolVersion: 2,
         pools,
         mainTokens,
     };
