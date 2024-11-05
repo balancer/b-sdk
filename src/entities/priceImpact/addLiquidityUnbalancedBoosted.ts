@@ -1,10 +1,10 @@
-import { abs, ChainId, max, min } from '../../utils';
+import { abs, ChainId, isSameAddress, max, min } from '../../utils';
 import { InputToken, SwapKind } from '../../types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import { Swap, SwapInput, TokenApi } from '../swap';
 import { TokenAmount } from '../tokenAmount';
-import { PoolStateWithUnderlyings } from '../types';
+import { PoolStateWithUnderlyings, PoolTokenWithUnderlying } from '../types';
 import { priceImpactABA } from '.';
 import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types';
 import { AddLiquidityBoostedV3 } from '../addLiquidityBoosted';
@@ -12,7 +12,6 @@ import { RemoveLiquidityBoostedV3 } from '../removeLiquidityBoosted';
 import { RemoveLiquidityBoostedProportionalInput } from '../removeLiquidityBoosted/types';
 import { Address, BaseError, ContractFunctionRevertedError } from 'viem';
 import { Token } from '../token';
-import { PoolTokenWithUnderlying } from '@/data';
 
 /**
  * Calculate price impact on add liquidity unbalanced operations
@@ -247,7 +246,9 @@ function getTokenWrapInfo(
     tokens: PoolTokenWithUnderlying[],
     token: InputToken,
 ): TokenWrapInfo {
-    const poolToken = tokens.find((t) => t.address === token.address);
+    const poolToken = tokens.find((t) =>
+        isSameAddress(t.address, token.address),
+    );
     if (poolToken)
         return {
             token: poolToken,
@@ -257,7 +258,7 @@ function getTokenWrapInfo(
 
     const wrapped = tokens
         .filter((t) => t.underlyingToken !== null)
-        .find((t) => t.underlyingToken!.address === token.address);
+        .find((t) => isSameAddress(t.underlyingToken!.address, token.address));
 
     if (!wrapped) throw Error(`Cannot map token to wrapped: ${token.address}`);
     return {
