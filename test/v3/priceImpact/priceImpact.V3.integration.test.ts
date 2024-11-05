@@ -3,10 +3,11 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { Address } from 'viem';
+import { Address, parseUnits } from 'viem';
 import {
     AddLiquidityBoostedUnbalancedInput,
     AddLiquidityKind,
+    AddLiquidityNestedInput,
     ChainId,
     PriceImpact,
     PriceImpactAmount,
@@ -16,11 +17,13 @@ import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 import { partialBoostedPool_USDT_stataDAI } from 'test/mockData/partialBoostedPool';
+import { nestedWithBoostedPool } from 'test/mockData/nestedPool';
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const USDT = TOKENS[chainId].USDT_AAVE;
 const DAI = TOKENS[chainId].DAI_AAVE;
+const WETH = TOKENS[chainId].WETH;
 
 describe('PriceImpact V3', () => {
     let rpcUrl: string;
@@ -169,6 +172,34 @@ describe('PriceImpact V3', () => {
                     partialBoostedPool_USDT_stataDAI,
                 );
             const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0056435');
+            expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
+        });
+    });
+
+    describe('Nested pool', () => {
+        test('Close to proportional', async () => {
+            const addLiquidityInput: AddLiquidityNestedInput = {
+                amountsIn: [
+                    {
+                        address: WETH.address,
+                        rawAmount: parseUnits('0.001', WETH.decimals),
+                        decimals: WETH.decimals,
+                    },
+                    {
+                        address: USDC.address,
+                        rawAmount: parseUnits('2', USDC.decimals),
+                        decimals: USDC.decimals,
+                    },
+                ],
+                chainId,
+                rpcUrl,
+            };
+            const priceImpactABA = await PriceImpact.addLiquidityNested(
+                addLiquidityInput,
+                nestedWithBoostedPool,
+            );
+            const priceImpactSpot =
+                PriceImpactAmount.fromDecimal('0.0018658560496355');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
