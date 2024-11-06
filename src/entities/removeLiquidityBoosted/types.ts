@@ -9,7 +9,7 @@ export type RemoveLiquidityBoostedProportionalInput = {
     rpcUrl: string;
     bptIn: InputAmount;
     kind: RemoveLiquidityKind.Proportional;
-    userAddress?: Address;
+    sender?: Address;
     userData?: Hex;
 };
 

@@ -65,7 +65,9 @@ export function validatePaths(paths: Path[]) {
 function validateBufferVersion(paths: Path[]) {
     if (
         !paths.every((p) => {
-            return p.isBuffer ? p.protocolVersion === 3 : true;
+            return p.isBuffer?.some((b) => b === true)
+                ? p.protocolVersion === 3
+                : true;
         })
     ) {
         throw new Error('Unsupported swap: buffers not supported in V2.');

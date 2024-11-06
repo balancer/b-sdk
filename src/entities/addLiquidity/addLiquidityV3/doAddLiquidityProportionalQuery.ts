@@ -1,6 +1,5 @@
-import { createPublicClient, http, zeroAddress } from 'viem';
-import { AddLiquidityProportionalInput } from '../types';
-import { BALANCER_ROUTER, CHAINS } from '@/utils';
+import { createPublicClient, Hex, http } from 'viem';
+import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
 import {
     balancerRouterAbi,
     permit2Abi,
@@ -10,7 +9,10 @@ import {
 import { Address } from '@/types';
 
 export const doAddLiquidityProportionalQuery = async (
-    { rpcUrl, chainId }: AddLiquidityProportionalInput,
+    rpcUrl: string,
+    chainId: ChainId,
+    sender: Address,
+    userData: Hex,
     poolAddress: Address,
     bptOut: bigint,
 ): Promise<bigint[]> => {
@@ -28,7 +30,7 @@ export const doAddLiquidityProportionalQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquidityProportional',
-        args: [poolAddress, bptOut, zeroAddress, '0x'],
+        args: [poolAddress, bptOut, sender, userData],
     });
 
     return [...amountsIn];

@@ -76,20 +76,16 @@ export class AddLiquidityBoostedV3 {
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
                     input.rpcUrl,
                     input.chainId,
-                    input.userAddress ?? zeroAddress,
+                    input.sender ?? zeroAddress,
                     input.userData ?? '0x',
                     poolState.address,
                     maxAmountsIn,
                 );
+
                 bptOut = TokenAmount.fromRawAmount(bptToken, bptAmountOut);
-
-                amountsIn = input.amountsIn.map((t) => {
-                    return TokenAmount.fromRawAmount(
-                        new Token(input.chainId, t.address, t.decimals),
-                        t.rawAmount,
-                    );
-                });
-
+                amountsIn = sortedTokens.map((t, i) =>
+                    TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
+                );
                 break;
             }
             case AddLiquidityKind.Proportional: {
@@ -102,7 +98,7 @@ export class AddLiquidityBoostedV3 {
                     await doAddLiquidityProportionalQuery(
                         input.rpcUrl,
                         input.chainId,
-                        input.userAddress ?? zeroAddress,
+                        input.sender ?? zeroAddress,
                         input.userData ?? '0x',
                         poolState.address,
                         input.referenceAmount.rawAmount,

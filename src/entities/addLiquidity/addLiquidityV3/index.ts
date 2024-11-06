@@ -1,4 +1,4 @@
-import { encodeFunctionData } from 'viem';
+import { encodeFunctionData, zeroAddress } from 'viem';
 import { balancerRouterAbi } from '@/abi';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
@@ -50,7 +50,10 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
                 // proportional join query returns exactAmountsIn for exactBptOut
                 const amountsInNumbers = await doAddLiquidityProportionalQuery(
-                    input,
+                    input.rpcUrl,
+                    input.chainId,
+                    input.sender ?? zeroAddress,
+                    input.userData ?? '0x',
                     poolState.address,
                     bptAmount.rawAmount,
                 );
@@ -70,7 +73,10 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             case AddLiquidityKind.Unbalanced: {
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
-                    input,
+                    input.rpcUrl,
+                    input.chainId,
+                    input.sender ?? zeroAddress,
+                    input.userData ?? '0x',
                     poolState.address,
                     maxAmountsIn,
                 );
@@ -87,7 +93,11 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     input.bptOut.rawAmount,
                 );
                 const amountIn = await doAddLiquiditySingleTokenQuery(
-                    input,
+                    input.rpcUrl,
+                    input.chainId,
+                    input.sender ?? zeroAddress,
+                    input.userData ?? '0x',
+                    input.tokenIn,
                     poolState.address,
                     input.bptOut.rawAmount,
                 );
@@ -104,7 +114,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             }
         }
 
-        const output: AddLiquidityBaseQueryOutput = {
+        const output: AddLiquidityBaseQueryOutput & { userData: Hex } = {
             to: BALANCER_ROUTER[input.chainId],
             poolType: poolState.type,
             poolId: poolState.id,
@@ -114,13 +124,14 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             tokenInIndex,
             chainId: input.chainId,
             protocolVersion: 3,
+            userData: input.userData ?? '0x',
         };
 
         return output;
     }
 
     buildCall(
-        input: AddLiquidityBaseBuildCallInput,
+        input: AddLiquidityBaseBuildCallInput & { userData: Hex },
     ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
         let callData: Hex;
@@ -135,7 +146,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                             amounts.maxAmountsIn,
                             amounts.minimumBpt,
                             !!input.wethIsEth,
-                            '0x',
+                            input.userData,
                         ],
                     });
                 }
@@ -150,7 +161,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                             input.amountsIn.map((a) => a.amount),
                             amounts.minimumBpt,
                             !!input.wethIsEth,
-                            '0x',
+                            input.userData,
                         ],
                     });
                 }
@@ -170,7 +181,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                             input.amountsIn[input.tokenInIndex].amount,
                             input.bptOut.amount,
                             !!input.wethIsEth,
-                            '0x',
+                            input.userData,
                         ],
                     });
                 }
@@ -192,7 +203,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
     }
 
     public buildCallWithPermit2(
-        input: AddLiquidityBaseBuildCallInput,
+        input: AddLiquidityBaseBuildCallInput & { userData: Hex },
         permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);
