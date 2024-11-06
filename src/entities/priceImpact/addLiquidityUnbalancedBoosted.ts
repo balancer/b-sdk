@@ -47,7 +47,17 @@ export async function addLiquidityUnbalancedBoosted(
 
     // simulate adding liquidity to get amounts in
     const addLiquidity = new AddLiquidityBoostedV3();
-    const { amountsIn, bptOut } = await addLiquidity.query(input, poolState);
+    let amountsIn: TokenAmount[];
+    let bptOut: TokenAmount;
+    try {
+        const queryResult = await addLiquidity.query(input, poolState);
+        amountsIn = queryResult.amountsIn;
+        bptOut = queryResult.bptOut;
+    } catch (err) {
+        throw new Error(
+            `addLiquidity operation will fail at SC level with user defined input.\n${err}`,
+        );
+    }
     const poolTokens = amountsIn.map((a) => a.token);
 
     // simulate removing liquidity to get amounts out

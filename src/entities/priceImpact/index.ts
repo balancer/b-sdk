@@ -26,6 +26,7 @@ import { AddLiquidityNested } from '../addLiquidityNested';
 import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types';
 import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
 import { addLiquidityNested } from './addLiquidityNested';
+import { Token } from '../token';
 
 export class PriceImpact {
     /**
@@ -42,7 +43,15 @@ export class PriceImpact {
 
         // simulate adding liquidity to get amounts in
         const addLiquidity = new AddLiquidity();
-        const { amountsIn } = await addLiquidity.query(input, poolState);
+        let amountsIn: TokenAmount[];
+        try {
+            const queryResult = await addLiquidity.query(input, poolState);
+            amountsIn = queryResult.amountsIn;
+        } catch (err) {
+            throw new Error(
+                `addLiquiditySingleToken operation will fail at SC level with user defined input.\n${err}`,
+            );
+        }
 
         // simulate removing liquidity to get amounts out
         const removeLiquidity = new RemoveLiquidity();
@@ -101,11 +110,19 @@ export class PriceImpact {
 
         // simulate adding liquidity to get amounts in
         const addLiquidity = new AddLiquidity();
-        const { amountsIn, bptOut } = await addLiquidity.query(
-            input,
-            poolState,
-        );
-        const poolTokens = amountsIn.map((a) => a.token);
+        let amountsIn: TokenAmount[];
+        let bptOut: TokenAmount;
+        let poolTokens: Token[];
+        try {
+            const queryResult = await addLiquidity.query(input, poolState);
+            amountsIn = queryResult.amountsIn;
+            bptOut = queryResult.bptOut;
+            poolTokens = amountsIn.map((a) => a.token);
+        } catch (err) {
+            throw new Error(
+                `addLiquidityUnbalanced operation will fail at SC level with user defined input.\n${err}`,
+            );
+        }
 
         // simulate removing liquidity to get amounts out
         const removeLiquidity = new RemoveLiquidity();
