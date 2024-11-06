@@ -302,10 +302,17 @@ export class PriceImpact {
 
         // simulate removing liquidity to get amounts out
         const removeLiquidity = new RemoveLiquidity();
-        const { bptIn, amountsOut } = await removeLiquidity.query(
-            input,
-            poolState,
-        );
+        let amountsOut: TokenAmount[];
+        let bptIn: TokenAmount;
+        try {
+            const queryResult = await removeLiquidity.query(input, poolState);
+            amountsOut = queryResult.amountsOut;
+            bptIn = queryResult.bptIn;
+        } catch (err) {
+            throw new Error(
+                `removeLiquidity operation will fail at SC level with user defined input.\n${err}`,
+            );
+        }
 
         // simulate adding liquidity to get amounts in
         const addLiquidity = new AddLiquidity();
@@ -342,10 +349,20 @@ export class PriceImpact {
 
         // simulate removing liquidity to get amounts out
         const removeLiquidityNested = new RemoveLiquidityNested();
-        const { bptAmountIn, amountsOut } = await removeLiquidityNested.query(
-            input,
-            nestedPoolState,
-        );
+        let amountsOut: TokenAmount[];
+        let bptAmountIn: TokenAmount;
+        try {
+            const queryResult = await removeLiquidityNested.query(
+                input,
+                nestedPoolState,
+            );
+            amountsOut = queryResult.amountsOut;
+            bptAmountIn = queryResult.bptAmountIn;
+        } catch (err) {
+            throw new Error(
+                `removeLiquidity operation will fail at SC level with user defined input.\n${err}`,
+            );
+        }
 
         // simulate adding liquidity to get amounts in
         const addLiquidityNested = new AddLiquidityNested();

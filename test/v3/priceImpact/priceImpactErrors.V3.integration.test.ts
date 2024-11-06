@@ -9,11 +9,14 @@ import {
     AddLiquidityKind,
     ChainId,
     PriceImpact,
+    RemoveLiquidityKind,
+    RemoveLiquiditySingleTokenExactInInput,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
+import { weightedWethBal, WETH } from 'test/mockData/weightedWethBalPool';
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
@@ -45,7 +48,27 @@ describe('PriceImpact Errors V3', () => {
                 boostedPool_USDC_USDT,
             ),
         ).rejects.toThrowError(
-            'AddLiquidity operation will fail at SC level with user defined input.',
+            'operation will fail at SC level with user defined input.',
+        );
+    });
+
+    test('Expect Error for failing remove input', async () => {
+        const removeLiquidityInput: RemoveLiquiditySingleTokenExactInInput = {
+            chainId,
+            rpcUrl,
+            bptIn: {
+                rawAmount: 1000000000000000000000n,
+                decimals: 18,
+                address: weightedWethBal.address,
+            },
+            tokenOut: WETH.address,
+            kind: RemoveLiquidityKind.SingleTokenExactIn,
+        };
+
+        await expect(() =>
+            PriceImpact.removeLiquidity(removeLiquidityInput, weightedWethBal),
+        ).rejects.toThrowError(
+            'removeLiquidity operation will fail at SC level with user defined input',
         );
     });
 });
