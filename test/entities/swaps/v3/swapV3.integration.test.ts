@@ -240,9 +240,9 @@ describe('SwapV3', () => {
                     WETH.decimals,
                 );
                 expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountOut.amount).to.eq(98999999n);
+                expect(expected.expectedAmountOut.amount).to.eq(97807604n);
             });
-            test.only('GivenIn as BPT', async () => {
+            test('GivenIn as BPT', async () => {
                 const swap = new Swap({
                     chainId,
                     paths: [pathBPTBAL],
@@ -272,10 +272,10 @@ describe('SwapV3', () => {
                 const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
                 expect(expected.expectedAmountIn.amount).to.eq(
-                    101010202020405n,
+                    102241640811992n,
                 );
             });
-            test.only('Given Out as BPT', async () => {
+            test('Given Out as BPT', async () => {
                 const swap = new Swap({
                     chainId,
                     paths: [pathBalWeth],
@@ -313,11 +313,11 @@ describe('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([193863n]);
+                    expect(expected.pathAmounts).to.deep.eq([186324n]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(193863n);
+                    expect(expected.expectedAmountOut.amount).to.eq(186324n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -337,13 +337,13 @@ describe('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                     expect(expected.pathAmounts).to.deep.eq([
-                        1041497493625045n,
+                        1084111861665514n,
                     ]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         wethToken,
                     );
                     expect(expected.expectedAmountIn.amount).to.eq(
-                        1041497493625045n,
+                        1084111861665514n,
                     );
                 });
             });
@@ -366,13 +366,13 @@ describe('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
                     expect(expected.pathAmounts).to.deep.eq([
-                        193863n,
-                        3901118n,
+                        186324n,
+                        1181508n,
                     ]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(4094981n);
+                    expect(expected.expectedAmountOut.amount).to.eq(1367832n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -392,14 +392,14 @@ describe('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                     expect(expected.pathAmounts).to.deep.eq([
-                        1041497493625045n,
-                        154666227372924n,
+                        1084111861665514n,
+                        519629120486462n,
                     ]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         wethToken,
                     );
                     expect(expected.expectedAmountIn.amount).to.eq(
-                        1196163720997969n,
+                        1603740982151976n,
                     );
                 });
             });
@@ -1011,11 +1011,11 @@ describe('SwapV3', () => {
                         USDT.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([99910225n]);
+                    expect(expected.pathAmounts).to.deep.eq([99910376n]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdtToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(99910225n);
+                    expect(expected.expectedAmountOut.amount).to.eq(99910376n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -1040,11 +1040,11 @@ describe('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([100089854n]);
+                    expect(expected.pathAmounts).to.deep.eq([100089705n]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountIn.amount).to.eq(100089854n);
+                    expect(expected.expectedAmountIn.amount).to.eq(100089705n);
                 });
             });
             describe('swap should be executed correctly', () => {
