@@ -1,6 +1,8 @@
 import { PathWithAmount } from './pathWithAmount';
 import { TokenAmount } from '../../tokenAmount';
+import { isSameAddress } from '@/utils';
 import { Path } from './types';
+import { Address } from 'viem';
 
 export function getInputAmount(paths: PathWithAmount[]): TokenAmount {
     if (
@@ -80,4 +82,26 @@ function validateBufferLength(paths: Path[]) {
             'Unsupported swap: buffers and pools must have same length.',
         );
     }
+}
+
+/**
+ * Determines if the given paths represent a batch swap.
+ *
+ * A batch swap is identified by one of the following conditions:
+ * - There is more than one path.
+ * - The first path contains more than one pool.
+ * - The input token is the same as the first pool in the first path. (a BPT swap)
+ * - The output token is the same as the first pool in the first path. (a BPT swap)
+ */
+export function isBatchSwap(
+    paths: Path[],
+    inputToken: Address,
+    outputToken: Address,
+): boolean {
+    return (
+        paths.length > 1 ||
+        paths[0].pools.length > 1 ||
+        isSameAddress(paths[0].pools[0], inputToken) ||
+        isSameAddress(paths[0].pools[0], outputToken)
+    );
 }

@@ -31,7 +31,11 @@ import {
     SwapInput,
 } from '../../types';
 import { PathWithAmount } from '../../paths/pathWithAmount';
-import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
+import {
+    getInputAmount,
+    getOutputAmount,
+    isBatchSwap,
+} from '../../paths/pathHelpers';
 import {
     SingleTokenExactIn,
     SingleTokenExactOut,
@@ -74,12 +78,11 @@ export class SwapV3 implements SwapBase {
         this.swapKind = swapKind;
         this.inputAmount = getInputAmount(this.paths);
         this.outputAmount = getOutputAmount(this.paths);
-        this.isBatchSwap =
-            paths.length > 1 ||
-            paths[0].pools.length > 1 ||
-            paths[0].pools[0].toLowerCase() ===
-                this.inputAmount.token.address ||
-            paths[0].pools[0].toLowerCase() === this.outputAmount.token.address;
+        this.isBatchSwap = isBatchSwap(
+            paths,
+            this.inputAmount.token.address,
+            this.outputAmount.token.address,
+        );
         this.swaps = this.getSwaps(this.paths);
         this.userData = userData;
     }
