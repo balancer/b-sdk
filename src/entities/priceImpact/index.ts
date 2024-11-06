@@ -146,7 +146,13 @@ export class PriceImpact {
             if (deltas[i] === 0n) {
                 deltaBPTs.push(0n);
             } else {
-                deltaBPTs.push(await queryAddLiquidityForTokenDelta(i));
+                try {
+                    deltaBPTs.push(await queryAddLiquidityForTokenDelta(i));
+                } catch (err) {
+                    throw new Error(
+                        `Unexpected error while calculating addLiquidityUnbalanced PI at Delta add step:\n${err}`,
+                    );
+                }
             }
         }
 
@@ -205,39 +211,45 @@ export class PriceImpact {
                     resultTokenIndex = minPositiveDeltaIndex;
                     outputAmountRaw = abs(deltas[givenTokenIndex]);
                 }
-                const swapInput: SwapInput = {
-                    chainId: input.chainId,
-                    paths: [
-                        {
-                            tokens: [
-                                poolTokens[
-                                    minPositiveDeltaIndex
-                                ].toInputToken(),
-                                poolTokens[
-                                    minNegativeDeltaIndex
-                                ].toInputToken(),
-                            ],
-                            pools: [poolState.id],
-                            inputAmountRaw,
-                            outputAmountRaw,
-                            protocolVersion: poolState.protocolVersion,
-                        },
-                    ],
-                    swapKind,
-                };
-                const swap = new Swap(swapInput);
-                const result = await swap.query(input.rpcUrl);
-                const resultAmount =
-                    result.swapKind === SwapKind.GivenIn
-                        ? result.expectedAmountOut
-                        : result.expectedAmountIn;
+                try {
+                    const swapInput: SwapInput = {
+                        chainId: input.chainId,
+                        paths: [
+                            {
+                                tokens: [
+                                    poolTokens[
+                                        minPositiveDeltaIndex
+                                    ].toInputToken(),
+                                    poolTokens[
+                                        minNegativeDeltaIndex
+                                    ].toInputToken(),
+                                ],
+                                pools: [poolState.id],
+                                inputAmountRaw,
+                                outputAmountRaw,
+                                protocolVersion: poolState.protocolVersion,
+                            },
+                        ],
+                        swapKind,
+                    };
+                    const swap = new Swap(swapInput);
+                    const result = await swap.query(input.rpcUrl);
+                    const resultAmount =
+                        result.swapKind === SwapKind.GivenIn
+                            ? result.expectedAmountOut
+                            : result.expectedAmountIn;
 
-                deltas[givenTokenIndex] = 0n;
-                deltaBPTs[givenTokenIndex] = 0n;
-                deltas[resultTokenIndex] =
-                    deltas[resultTokenIndex] + resultAmount.amount;
-                deltaBPTs[resultTokenIndex] =
-                    await queryAddLiquidityForTokenDelta(resultTokenIndex);
+                    deltas[givenTokenIndex] = 0n;
+                    deltaBPTs[givenTokenIndex] = 0n;
+                    deltas[resultTokenIndex] =
+                        deltas[resultTokenIndex] + resultAmount.amount;
+                    deltaBPTs[resultTokenIndex] =
+                        await queryAddLiquidityForTokenDelta(resultTokenIndex);
+                } catch (err) {
+                    throw new Error(
+                        `Unexpected error while calculating addLiquidityUnbalanced PI at Swap step:\n${err}`,
+                    );
+                }
             }
             return minNegativeDeltaIndex;
         }

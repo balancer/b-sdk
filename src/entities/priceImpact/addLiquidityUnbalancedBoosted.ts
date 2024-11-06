@@ -153,17 +153,23 @@ async function queryAddLiquidityForTokenDelta(
     );
 
     const amountsIn = [absDelta.toInputAmount()];
-    // Work-around Vault _MINIMUM_WRAP_AMOUNT limit
-    if (absDelta.amount <= 1000n) amountsIn[0].rawAmount = 1001n;
-
-    const { bptOut: deltaBPT } = await addLiquidity.query(
-        {
-            ...input,
-            amountsIn,
-        },
-        poolState,
-    );
-    return delta < 0n ? -deltaBPT.amount : deltaBPT.amount;
+    if (absDelta.amount <= 1000n)
+        // Work-around Vault _MINIMUM_WRAP_AMOUNT limit
+        amountsIn[0].rawAmount = 1001n;
+    try {
+        const { bptOut: deltaBPT } = await addLiquidity.query(
+            {
+                ...input,
+                amountsIn,
+            },
+            poolState,
+        );
+        return delta < 0n ? -deltaBPT.amount : deltaBPT.amount;
+    } catch (err) {
+        throw new Error(
+            `Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Delta add step:\n${err}`,
+        );
+    }
 }
 
 async function zeroOutDeltas(
@@ -223,25 +229,31 @@ async function zeroOutDeltas(
             inputAmountRaw,
             outputAmountRaw,
         );
-        const swap = new Swap(swapInput);
-        const result = await swap.query(input.rpcUrl);
-        const resultAmount =
-            result.swapKind === SwapKind.GivenIn
-                ? result.expectedAmountOut
-                : result.expectedAmountIn;
+        try {
+            const swap = new Swap(swapInput);
+            const result = await swap.query(input.rpcUrl);
+            const resultAmount =
+                result.swapKind === SwapKind.GivenIn
+                    ? result.expectedAmountOut
+                    : result.expectedAmountIn;
 
-        deltas[givenTokenIndex] = 0n;
-        deltaBPTs[givenTokenIndex] = 0n;
-        deltas[resultTokenIndex] =
-            deltas[resultTokenIndex] + resultAmount.amount;
-        deltaBPTs[resultTokenIndex] = await queryAddLiquidityForTokenDelta(
-            addLiquidity,
-            input,
-            poolState,
-            poolTokens,
-            resultTokenIndex,
-            deltas[resultTokenIndex],
-        );
+            deltas[givenTokenIndex] = 0n;
+            deltaBPTs[givenTokenIndex] = 0n;
+            deltas[resultTokenIndex] =
+                deltas[resultTokenIndex] + resultAmount.amount;
+            deltaBPTs[resultTokenIndex] = await queryAddLiquidityForTokenDelta(
+                addLiquidity,
+                input,
+                poolState,
+                poolTokens,
+                resultTokenIndex,
+                deltas[resultTokenIndex],
+            );
+        } catch (err) {
+            throw new Error(
+                `Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Swap step:\n${err}`,
+            );
+        }
     }
     return minNegativeDeltaIndex;
 }
