@@ -28,9 +28,6 @@ export async function addLiquidityNested(
     input: AddLiquidityNestedInput,
     nestedPoolState: NestedPoolState,
 ): Promise<PriceImpactAmount> {
-    if (nestedPoolState.protocolVersion === 1)
-        throw Error('Nested Price Impact not supported for protocolVersion 1');
-
     const addLiquidity = new AddLiquidity();
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
     // sort pools from child to parent
@@ -102,7 +99,7 @@ async function getAddUnbalancedResult(
     rpcUrl: string,
     pool: NestedPoolV2,
     amountsIn: InputAmount[],
-    protocolVersion: 2 | 3,
+    protocolVersion: 1 | 2 | 3,
 ): Promise<AddResult> {
     const addLiquidityInput: AddLiquidityUnbalancedInput = {
         chainId,
