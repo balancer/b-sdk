@@ -1,5 +1,5 @@
 import { MathSol, abs, max, min } from '../../utils';
-import { InputAmount, SwapKind } from '../../types';
+import { SwapKind } from '../../types';
 
 import { AddLiquidity } from '../addLiquidity';
 import {
@@ -25,6 +25,7 @@ import { AddLiquidityNestedInput } from '../addLiquidityNested/types';
 import { AddLiquidityNested } from '../addLiquidityNested';
 import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types';
 import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
+import { addLiquidityNested } from './addLiquidityNested';
 
 export class PriceImpact {
     /**
@@ -265,68 +266,7 @@ export class PriceImpact {
         nestedPoolState: NestedPoolState,
     ): Promise<PriceImpactAmount> => {
         // inputs are being validated within AddLiquidityNested
-
-        let amountsIn: InputAmount[] = [];
-        const addLiquidity = new AddLiquidity();
-        const sortedPools = nestedPoolState.pools.sort(
-            (a, b) => a.level - b.level,
-        );
-        const priceImpactAmounts: PriceImpactAmount[] = [];
-        const bptOuts: InputAmount[] = [];
-        for (const pool of sortedPools) {
-            if (pool.level === 0) {
-                amountsIn = input.amountsIn.filter((a) =>
-                    pool.tokens.some(
-                        (t) =>
-                            t.address.toLowerCase() === a.address.toLowerCase(),
-                    ),
-                );
-                // skip pool if no relevant amountsIn
-                if (amountsIn.length === 0) {
-                    continue;
-                }
-            } else {
-                amountsIn = [...bptOuts, ...input.amountsIn].filter((a) =>
-                    pool.tokens.some(
-                        (t) =>
-                            t.address.toLowerCase() === a.address.toLowerCase(),
-                    ),
-                );
-            }
-
-            // build addLiquidityInput
-            const addLiquidityInput: AddLiquidityUnbalancedInput = {
-                chainId: input.chainId,
-                rpcUrl: input.rpcUrl,
-                amountsIn,
-                kind: AddLiquidityKind.Unbalanced,
-            };
-            const poolState: PoolState = {
-                ...pool,
-                protocolVersion: 2, // TODO: refactor to allow v3 on a separate PR
-            };
-
-            // calculate individual price impact
-            const poolPriceImpact = await PriceImpact.addLiquidityUnbalanced(
-                addLiquidityInput,
-                poolState,
-            );
-            priceImpactAmounts.push(poolPriceImpact);
-
-            // get bptOut so it can be used as amountsIn for the next pool
-            const { bptOut } = await addLiquidity.query(
-                addLiquidityInput,
-                poolState,
-            );
-            bptOuts.push(bptOut.toInputAmount());
-        }
-
-        const priceImpactSum = priceImpactAmounts.reduce(
-            (acc, cur) => acc + cur.amount,
-            0n,
-        );
-
-        return PriceImpactAmount.fromRawAmount(priceImpactSum);
+        return await addLiquidityNested(input, nestedPoolState);
     };
 
     /**

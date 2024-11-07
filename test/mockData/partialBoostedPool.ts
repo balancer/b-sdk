@@ -23,5 +23,4 @@ export const partialBoostedPool_USDT_stataDAI: PoolStateWithUnderlyings = {
             },
         },
     ],
-    totalShares: '0',
 };

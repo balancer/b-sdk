@@ -15,7 +15,6 @@ import {
     Address,
     ChainId,
     CHAINS,
-    NestedPoolState,
     PublicWalletClient,
     Token,
     RemoveLiquidityNestedInput,
@@ -28,21 +27,21 @@ import {
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     approveSpenderOnToken,
-    POOLS,
     sendTransactionGetBalances,
-    TOKENS,
 } from 'test/lib/utils';
 import {
     GetNestedBpt,
     validateTokenAmounts,
 } from 'test/lib/utils/removeNestedHelpers';
+import {
+    nestedWithBoostedPool,
+    NESTED_WITH_BOOSTED_POOL,
+    USDC,
+    USDT,
+    WETH,
+} from 'test/mockData/nestedPool';
 
 const chainId = ChainId.SEPOLIA;
-const NESTED_WITH_BOOSTED_POOL = POOLS[chainId].NESTED_WITH_BOOSTED_POOL;
-const BOOSTED_POOL = POOLS[chainId].MOCK_BOOSTED_POOL;
-const USDT = TOKENS[chainId].USDT_AAVE;
-const USDC = TOKENS[chainId].USDC_AAVE;
-const WETH = TOKENS[chainId].WETH;
 
 const parentBptToken = new Token(
     chainId,
@@ -83,7 +82,7 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
             rpcUrl,
             testAddress,
             client,
-            nestedPoolState,
+            nestedWithBoostedPool,
             [
                 {
                     address: WETH.address,
@@ -109,7 +108,7 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
         };
         const queryOutput = await removeLiquidityNested.query(
             removeLiquidityInput,
-            nestedPoolState,
+            nestedWithBoostedPool,
         );
         expect(queryOutput.protocolVersion).toEqual(3);
         expect(queryOutput.bptAmountIn.token).to.deep.eq(parentBptToken);
@@ -117,7 +116,7 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
             removeLiquidityInput.bptAmountIn,
         );
         expect(queryOutput.amountsOut.length).to.eq(
-            nestedPoolState.mainTokens.length,
+            nestedWithBoostedPool.mainTokens.length,
         );
         validateTokenAmounts(queryOutput.amountsOut, mainTokens);
     });
@@ -139,7 +138,7 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
 
         const queryOutput = await removeLiquidityNested.query(
             removeLiquidityInput,
-            nestedPoolState,
+            nestedWithBoostedPool,
         );
 
         const removeLiquidityBuildInput = {
@@ -186,59 +185,3 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
         expect(expectedDeltas).to.deep.eq(balanceDeltas);
     });
 });
-
-const nestedPoolState: NestedPoolState = {
-    protocolVersion: 3,
-    pools: [
-        {
-            id: NESTED_WITH_BOOSTED_POOL.id,
-            address: NESTED_WITH_BOOSTED_POOL.address,
-            type: NESTED_WITH_BOOSTED_POOL.type,
-            level: 1,
-            tokens: [
-                {
-                    address: BOOSTED_POOL.address,
-                    decimals: BOOSTED_POOL.decimals,
-                    index: 0,
-                },
-                {
-                    address: WETH.address,
-                    decimals: WETH.decimals,
-                    index: 1,
-                },
-            ],
-        },
-        {
-            id: BOOSTED_POOL.id,
-            address: BOOSTED_POOL.address,
-            type: BOOSTED_POOL.type,
-            level: 0,
-            tokens: [
-                {
-                    address: USDC.address,
-                    decimals: USDC.decimals,
-                    index: 0,
-                },
-                {
-                    address: USDT.address,
-                    decimals: USDT.decimals,
-                    index: 1,
-                },
-            ],
-        },
-    ],
-    mainTokens: [
-        {
-            address: WETH.address,
-            decimals: WETH.decimals,
-        },
-        {
-            address: USDT.address,
-            decimals: USDT.decimals,
-        },
-        {
-            address: USDC.address,
-            decimals: USDC.decimals,
-        },
-    ],
-};
