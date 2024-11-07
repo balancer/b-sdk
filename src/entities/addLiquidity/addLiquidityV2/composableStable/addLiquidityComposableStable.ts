@@ -1,30 +1,31 @@
-import { encodeFunctionData } from 'viem';
-import { Token } from '@/entities/token';
-import { TokenAmount } from '@/entities/tokenAmount';
-import {
-    buildCallWithPermit2ProtocolVersionError,
-    VAULT,
-    ZERO_ADDRESS,
-} from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
     AddLiquidityBuildCallOutput,
     AddLiquidityInput,
 } from '@/entities/addLiquidity/types';
+import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
+import { Token } from '@/entities/token';
+import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import {
     doAddLiquidityQuery,
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '@/entities/utils';
-import { ComposableStableEncoder } from '@/entities/encoders/composableStable';
+import {
+    VAULT,
+    ZERO_ADDRESS,
+    buildCallWithPermit2ProtocolVersionError,
+} from '@/utils';
+import { encodeFunctionData } from 'viem';
+
 import { getValue } from '../../../utils/getValue';
+import { getAmountsCall, getAmountsQuery } from '../../helpers';
 import {
     AddLiquidityV2ComposableStableBuildCallInput,
     AddLiquidityV2ComposableStableQueryOutput,
 } from './types';
-import { getAmountsCall, getAmountsQuery } from '../../helpers';
 
 export class AddLiquidityComposableStable implements AddLiquidityBase {
     public async query(
@@ -107,6 +108,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
 
         return {
             callData,
+            args,
             to: VAULT[input.chainId],
             value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
