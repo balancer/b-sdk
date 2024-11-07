@@ -26,6 +26,7 @@ import { AddLiquidityNested } from '../addLiquidityNested';
 import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types';
 import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
 import { addLiquidityNested } from './addLiquidityNested';
+import { Token } from '../token';
 
 export class PriceImpact {
     /**
@@ -42,7 +43,15 @@ export class PriceImpact {
 
         // simulate adding liquidity to get amounts in
         const addLiquidity = new AddLiquidity();
-        const { amountsIn } = await addLiquidity.query(input, poolState);
+        let amountsIn: TokenAmount[];
+        try {
+            const queryResult = await addLiquidity.query(input, poolState);
+            amountsIn = queryResult.amountsIn;
+        } catch (err) {
+            throw new Error(
+                `addLiquiditySingleToken operation will fail at SC level with user defined input.\n${err}`,
+            );
+        }
 
         // simulate removing liquidity to get amounts out
         const removeLiquidity = new RemoveLiquidity();
@@ -101,11 +110,19 @@ export class PriceImpact {
 
         // simulate adding liquidity to get amounts in
         const addLiquidity = new AddLiquidity();
-        const { amountsIn, bptOut } = await addLiquidity.query(
-            input,
-            poolState,
-        );
-        const poolTokens = amountsIn.map((a) => a.token);
+        let amountsIn: TokenAmount[];
+        let bptOut: TokenAmount;
+        let poolTokens: Token[];
+        try {
+            const queryResult = await addLiquidity.query(input, poolState);
+            amountsIn = queryResult.amountsIn;
+            bptOut = queryResult.bptOut;
+            poolTokens = amountsIn.map((a) => a.token);
+        } catch (err) {
+            throw new Error(
+                `addLiquidityUnbalanced operation will fail at SC level with user defined input.\n${err}`,
+            );
+        }
 
         // simulate removing liquidity to get amounts out
         const removeLiquidity = new RemoveLiquidity();
@@ -129,7 +146,13 @@ export class PriceImpact {
             if (deltas[i] === 0n) {
                 deltaBPTs.push(0n);
             } else {
-                deltaBPTs.push(await queryAddLiquidityForTokenDelta(i));
+                try {
+                    deltaBPTs.push(await queryAddLiquidityForTokenDelta(i));
+                } catch (err) {
+                    throw new Error(
+                        `Unexpected error while calculating addLiquidityUnbalanced PI at Delta add step:\n${err}`,
+                    );
+                }
             }
         }
 
@@ -188,39 +211,45 @@ export class PriceImpact {
                     resultTokenIndex = minPositiveDeltaIndex;
                     outputAmountRaw = abs(deltas[givenTokenIndex]);
                 }
-                const swapInput: SwapInput = {
-                    chainId: input.chainId,
-                    paths: [
-                        {
-                            tokens: [
-                                poolTokens[
-                                    minPositiveDeltaIndex
-                                ].toInputToken(),
-                                poolTokens[
-                                    minNegativeDeltaIndex
-                                ].toInputToken(),
-                            ],
-                            pools: [poolState.id],
-                            inputAmountRaw,
-                            outputAmountRaw,
-                            protocolVersion: poolState.protocolVersion,
-                        },
-                    ],
-                    swapKind,
-                };
-                const swap = new Swap(swapInput);
-                const result = await swap.query(input.rpcUrl);
-                const resultAmount =
-                    result.swapKind === SwapKind.GivenIn
-                        ? result.expectedAmountOut
-                        : result.expectedAmountIn;
+                try {
+                    const swapInput: SwapInput = {
+                        chainId: input.chainId,
+                        paths: [
+                            {
+                                tokens: [
+                                    poolTokens[
+                                        minPositiveDeltaIndex
+                                    ].toInputToken(),
+                                    poolTokens[
+                                        minNegativeDeltaIndex
+                                    ].toInputToken(),
+                                ],
+                                pools: [poolState.id],
+                                inputAmountRaw,
+                                outputAmountRaw,
+                                protocolVersion: poolState.protocolVersion,
+                            },
+                        ],
+                        swapKind,
+                    };
+                    const swap = new Swap(swapInput);
+                    const result = await swap.query(input.rpcUrl);
+                    const resultAmount =
+                        result.swapKind === SwapKind.GivenIn
+                            ? result.expectedAmountOut
+                            : result.expectedAmountIn;
 
-                deltas[givenTokenIndex] = 0n;
-                deltaBPTs[givenTokenIndex] = 0n;
-                deltas[resultTokenIndex] =
-                    deltas[resultTokenIndex] + resultAmount.amount;
-                deltaBPTs[resultTokenIndex] =
-                    await queryAddLiquidityForTokenDelta(resultTokenIndex);
+                    deltas[givenTokenIndex] = 0n;
+                    deltaBPTs[givenTokenIndex] = 0n;
+                    deltas[resultTokenIndex] =
+                        deltas[resultTokenIndex] + resultAmount.amount;
+                    deltaBPTs[resultTokenIndex] =
+                        await queryAddLiquidityForTokenDelta(resultTokenIndex);
+                } catch (err) {
+                    throw new Error(
+                        `Unexpected error while calculating addLiquidityUnbalanced PI at Swap step:\n${err}`,
+                    );
+                }
             }
             return minNegativeDeltaIndex;
         }
@@ -285,10 +314,17 @@ export class PriceImpact {
 
         // simulate removing liquidity to get amounts out
         const removeLiquidity = new RemoveLiquidity();
-        const { bptIn, amountsOut } = await removeLiquidity.query(
-            input,
-            poolState,
-        );
+        let amountsOut: TokenAmount[];
+        let bptIn: TokenAmount;
+        try {
+            const queryResult = await removeLiquidity.query(input, poolState);
+            amountsOut = queryResult.amountsOut;
+            bptIn = queryResult.bptIn;
+        } catch (err) {
+            throw new Error(
+                `removeLiquidity operation will fail at SC level with user defined input.\n${err}`,
+            );
+        }
 
         // simulate adding liquidity to get amounts in
         const addLiquidity = new AddLiquidity();
@@ -325,10 +361,20 @@ export class PriceImpact {
 
         // simulate removing liquidity to get amounts out
         const removeLiquidityNested = new RemoveLiquidityNested();
-        const { bptAmountIn, amountsOut } = await removeLiquidityNested.query(
-            input,
-            nestedPoolState,
-        );
+        let amountsOut: TokenAmount[];
+        let bptAmountIn: TokenAmount;
+        try {
+            const queryResult = await removeLiquidityNested.query(
+                input,
+                nestedPoolState,
+            );
+            amountsOut = queryResult.amountsOut;
+            bptAmountIn = queryResult.bptAmountIn;
+        } catch (err) {
+            throw new Error(
+                `removeLiquidity operation will fail at SC level with user defined input.\n${err}`,
+            );
+        }
 
         // simulate adding liquidity to get amounts in
         const addLiquidityNested = new AddLiquidityNested();
