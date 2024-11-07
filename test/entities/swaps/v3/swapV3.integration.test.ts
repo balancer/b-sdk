@@ -41,7 +41,7 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
-const blockNo = 6940180n;
+const blockNo = 7010829n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
@@ -53,12 +53,13 @@ const boosted_pool = POOLS[chainId].MOCK_BOOSTED_POOL;
 const stataUSDC = TOKENS[chainId].stataUSDC;
 const stataUSDT = TOKENS[chainId].stataUSDT;
 
-describe.skip('SwapV3', () => {
+describe('SwapV3', () => {
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let rpcUrl: string;
     let snapshot: Hex;
     let pathBalWeth: Path;
+    let pathBPTBAL: Path;
     let pathMultiSwap: Path;
     let pathUsdcWethMulti: Path;
     let pathWithExit: Path;
@@ -82,6 +83,24 @@ describe.skip('SwapV3', () => {
             pools: [POOLS[chainId].MOCK_WETH_BAL_POOL.id],
             inputAmountRaw: 100000000000n,
             outputAmountRaw: 100000000000n,
+        };
+
+        // bpt [swap] weth
+        pathBPTBAL = {
+            protocolVersion: 3,
+            tokens: [
+                {
+                    address: '0xce701deAC1B660dA4ee05F6F3F7cbafDDb6a79Fe', //BPT
+                    decimals: 18,
+                },
+                {
+                    address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',
+                    decimals: 18,
+                },
+            ],
+            pools: ['0xce701deAC1B660dA4ee05F6F3F7cbafDDb6a79Fe'],
+            inputAmountRaw: 1000000000000000n,
+            outputAmountRaw: 1n,
         };
 
         // weth [swap] bal [swap] dai [swap] usdc
@@ -221,7 +240,23 @@ describe.skip('SwapV3', () => {
                     WETH.decimals,
                 );
                 expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountOut.amount).to.eq(98999999n);
+                expect(expected.expectedAmountOut.amount).to.eq(97807604n);
+            });
+            test('GivenIn as BPT', async () => {
+                const swap = new Swap({
+                    chainId,
+                    paths: [pathBPTBAL],
+                    swapKind: SwapKind.GivenIn,
+                });
+                const expected = (await swap.query(
+                    rpcUrl,
+                )) as ExactInQueryOutput;
+                const balToken = new Token(chainId, BAL.address, BAL.decimals);
+
+                expect(expected.expectedAmountOut.token).to.deep.eq(balToken);
+                expect(expected.expectedAmountOut.amount).to.eq(
+                    1409169048985584n,
+                );
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -237,7 +272,25 @@ describe.skip('SwapV3', () => {
                 const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
                 expect(expected.expectedAmountIn.amount).to.eq(
-                    101010202020405n,
+                    102241640811992n,
+                );
+            });
+            test('Given Out as BPT', async () => {
+                const swap = new Swap({
+                    chainId,
+                    paths: [pathBalWeth],
+                    swapKind: SwapKind.GivenOut,
+                });
+
+                const expected = (await swap.query(
+                    rpcUrl,
+                )) as ExactOutQueryOutput;
+
+                const balToken = new Token(chainId, BAL.address, BAL.decimals);
+
+                expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
+                expect(expected.expectedAmountIn.amount).to.eq(
+                    102241640811992n,
                 );
             });
         });
@@ -260,11 +313,11 @@ describe.skip('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([193863n]);
+                    expect(expected.pathAmounts).to.deep.eq([186324n]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(193863n);
+                    expect(expected.expectedAmountOut.amount).to.eq(186324n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -284,13 +337,13 @@ describe.skip('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                     expect(expected.pathAmounts).to.deep.eq([
-                        1041497493625045n,
+                        1084111861665514n,
                     ]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         wethToken,
                     );
                     expect(expected.expectedAmountIn.amount).to.eq(
-                        1041497493625045n,
+                        1084111861665514n,
                     );
                 });
             });
@@ -313,13 +366,13 @@ describe.skip('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
                     expect(expected.pathAmounts).to.deep.eq([
-                        193863n,
-                        3901118n,
+                        186324n,
+                        1181508n,
                     ]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(4094981n);
+                    expect(expected.expectedAmountOut.amount).to.eq(1367832n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -339,14 +392,14 @@ describe.skip('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                     expect(expected.pathAmounts).to.deep.eq([
-                        1041497493625045n,
-                        154666227372924n,
+                        1084111861665514n,
+                        519629120486462n,
                     ]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         wethToken,
                     );
                     expect(expected.expectedAmountIn.amount).to.eq(
-                        1196163720997969n,
+                        1603740982151976n,
                     );
                 });
             });
@@ -958,11 +1011,11 @@ describe.skip('SwapV3', () => {
                         USDT.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([99910225n]);
+                    expect(expected.pathAmounts).to.deep.eq([99910376n]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdtToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(99910225n);
+                    expect(expected.expectedAmountOut.amount).to.eq(99910376n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -987,11 +1040,11 @@ describe.skip('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([100089854n]);
+                    expect(expected.pathAmounts).to.deep.eq([100089705n]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountIn.amount).to.eq(100089854n);
+                    expect(expected.expectedAmountIn.amount).to.eq(100089705n);
                 });
             });
             describe('swap should be executed correctly', () => {
