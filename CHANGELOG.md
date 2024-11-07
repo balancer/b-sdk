@@ -1,5 +1,20 @@
 # @balancer/sdk
 
+## 0.32.0
+
+### Minor Changes
+
+- b927594: Tidy nested types. Share common with boosted.
+  Support for V3 addLiquidityNested PI (including nested boosted).
+- f2f1e42: BPT swaps as first step & change of batch router address
+
+### Patch Changes
+
+- dcd1f0d: PriceImpact error handling and messaging improvements.
+  - Catch any errors with initial add/remove steps - these are thrown because the user input is valid, e.g. would cause INVARIANT_GROWTH errors
+  - Catch any errors in query during unbalanced calc steps and throw message that will help with debug - e.g. caused by delta amounts
+- 52fed3d: Fix PI test.
+
 ## 0.31.2
 
 ### Patch Changes
