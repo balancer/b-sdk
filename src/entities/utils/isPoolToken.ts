@@ -26,7 +26,7 @@ export function isPoolToken(
         const isToken = isSameAddress(t.address, token);
         const isUnderlying =
             isPoolTokenWithUnderlying(t) &&
-            t.underlyingToken &&
+            t.underlyingToken?.address &&
             isSameAddress(t.underlyingToken.address, token);
 
         if (isToken || isUnderlying) {
