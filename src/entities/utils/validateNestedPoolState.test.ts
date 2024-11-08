@@ -1,10 +1,6 @@
 // pnpm test -- nestedPoolStateValidation.test.ts
 import { describe, expect, test } from 'vitest';
-import {
-    NestedPoolState,
-    NestedPoolV2,
-    validateNestedPoolState,
-} from '../src/entities';
+import { NestedPoolState, NestedPoolV2, validateNestedPoolState } from '..';
 import { PoolType } from '@/types';
 
 describe('nested pool state validations', () => {
@@ -45,7 +41,7 @@ describe('nested pool state validations', () => {
                         TOP
                 3POOL_BPT/auraBal_BPT/WETH
 
-        3POOL_BPT           auraBal_BPT         
+        3POOL_BPT           auraBal_BPT
         DAI/USDC/USDT       auraBal/8020_BPT
 
                                 8020_BPT
