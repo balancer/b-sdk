@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.32.1
+
+### Patch Changes
+
+- 603fbd5: fix: nested single token remove v2 validation
+
 ## 0.32.0
 
 ### Minor Changes
