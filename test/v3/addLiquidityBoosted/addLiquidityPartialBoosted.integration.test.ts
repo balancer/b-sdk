@@ -23,6 +23,7 @@ import {
     AddLiquidityBoostedV3,
     AddLiquidityKind,
     AddLiquidityBoostedUnbalancedInput,
+    AddLiquidityBoostedProportionalInput,
 } from '@/index';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
@@ -53,7 +54,6 @@ describe('V3 add liquidity partial boosted', () => {
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
-    let addLiquidityInput: AddLiquidityBoostedUnbalancedInput;
     const amountsIn = [
         TokenAmount.fromHumanAmount(usdtToken, '1'),
         TokenAmount.fromHumanAmount(daiToken, '2'),
@@ -80,91 +80,195 @@ describe('V3 add liquidity partial boosted', () => {
             [USDT.slot, DAI.slot] as number[],
             amountsIn.map((t) => parseUnits('1000', t.token.decimals)),
         );
-
-        addLiquidityInput = {
-            amountsIn: amountsIn.map((a) => ({
-                address: a.token.address,
-                rawAmount: a.amount,
-                decimals: a.token.decimals,
-            })),
-            chainId,
-            rpcUrl,
-            kind: AddLiquidityKind.Unbalanced,
-        };
     });
 
-    test('query with underlying', async () => {
-        const queryOutput = await addLiquidityBoosted.query(
-            addLiquidityInput,
-            partialBoostedPool_USDT_stataDAI,
-        );
-        expect(queryOutput.protocolVersion).toEqual(3);
-        expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
-        expect(queryOutput.bptOut.amount > 0n).to.be.true;
-        expect(queryOutput.amountsIn).to.deep.eq(amountsIn);
-    });
+    describe('unbalanced', async () => {
+        let addLiquidityInput: AddLiquidityBoostedUnbalancedInput;
 
-    test('add liquidity transaction', async () => {
-        for (const amount of addLiquidityInput.amountsIn) {
-            // Approve Permit2 to spend account tokens
-            await approveSpenderOnToken(
-                client,
-                testAddress,
-                amount.address,
-                PERMIT2[chainId],
+        beforeAll(async () => {
+            addLiquidityInput = {
+                amountsIn: amountsIn.map((a) => ({
+                    address: a.token.address,
+                    rawAmount: a.amount,
+                    decimals: a.token.decimals,
+                })),
+                chainId,
+                rpcUrl,
+                kind: AddLiquidityKind.Unbalanced,
+            };
+        });
+
+        test('query with underlying', async () => {
+            const queryOutput = await addLiquidityBoosted.query(
+                addLiquidityInput,
+                partialBoostedPool_USDT_stataDAI,
             );
-            // Approve Router to spend account tokens using Permit2
-            await approveSpenderOnPermit2(
-                client,
-                testAddress,
-                amount.address,
+            expect(queryOutput.protocolVersion).toEqual(3);
+            expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
+            expect(queryOutput.bptOut.amount > 0n).to.be.true;
+            expect(queryOutput.amountsIn).to.deep.eq(amountsIn);
+        });
+
+        test('add liquidity transaction', async () => {
+            for (const amount of addLiquidityInput.amountsIn) {
+                // Approve Permit2 to spend account tokens
+                await approveSpenderOnToken(
+                    client,
+                    testAddress,
+                    amount.address,
+                    PERMIT2[chainId],
+                );
+                // Approve Router to spend account tokens using Permit2
+                await approveSpenderOnPermit2(
+                    client,
+                    testAddress,
+                    amount.address,
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                );
+            }
+
+            const queryOutput = await addLiquidityBoosted.query(
+                addLiquidityInput,
+                partialBoostedPool_USDT_stataDAI,
+            );
+
+            const addLiquidityBuildInput = {
+                ...queryOutput,
+                slippage: Slippage.fromPercentage('1'), // 1%,
+            };
+
+            const addLiquidityBuildCallOutput = addLiquidityBoosted.buildCall(
+                addLiquidityBuildInput,
+            );
+            expect(addLiquidityBuildCallOutput.value === 0n).to.be.true;
+            expect(addLiquidityBuildCallOutput.to).to.eq(
                 BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
             );
-        }
 
-        const queryOutput = await addLiquidityBoosted.query(
-            addLiquidityInput,
-            partialBoostedPool_USDT_stataDAI,
-        );
+            // send add liquidity transaction and check balance changes
+            const { transactionReceipt, balanceDeltas } =
+                await sendTransactionGetBalances(
+                    [
+                        ...amountsIn.map((t) => t.token.address),
+                        queryOutput.bptOut.token.address,
+                    ],
+                    client,
+                    testAddress,
+                    addLiquidityBuildCallOutput.to,
+                    addLiquidityBuildCallOutput.callData,
+                    addLiquidityBuildCallOutput.value,
+                );
 
-        const addLiquidityBuildInput = {
-            ...queryOutput,
-            slippage: Slippage.fromPercentage('1'), // 1%,
-        };
+            expect(transactionReceipt.status).to.eq('success');
 
-        const addLiquidityBuildCallOutput = addLiquidityBoosted.buildCall(
-            addLiquidityBuildInput,
-        );
-        expect(addLiquidityBuildCallOutput.value === 0n).to.be.true;
-        expect(addLiquidityBuildCallOutput.to).to.eq(
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-        );
+            expect(amountsIn.map((a) => a.amount)).to.deep.eq(
+                balanceDeltas.slice(0, -1),
+            );
+            // Here we check that output diff is within an acceptable tolerance.
+            // !!! This should only be used in the case of buffers as all other cases can be equal
+            areBigIntsWithinPercent(
+                balanceDeltas[balanceDeltas.length - 1],
+                queryOutput.bptOut.amount,
+                0.001,
+            );
+        });
+    });
 
-        // send add liquidity transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [
-                    ...amountsIn.map((t) => t.token.address),
-                    queryOutput.bptOut.token.address,
-                ],
-                client,
-                testAddress,
-                addLiquidityBuildCallOutput.to,
-                addLiquidityBuildCallOutput.callData,
-                addLiquidityBuildCallOutput.value,
+    describe('proportional', async () => {
+        let addLiquidityInput: AddLiquidityBoostedProportionalInput;
+        let referenceTokenAmount: TokenAmount;
+        beforeAll(async () => {
+            referenceTokenAmount = amountsIn[0];
+            addLiquidityInput = {
+                referenceAmount: {
+                    address: referenceTokenAmount.token.address,
+                    rawAmount: referenceTokenAmount.amount,
+                    decimals: referenceTokenAmount.token.decimals,
+                },
+                chainId,
+                rpcUrl,
+                kind: AddLiquidityKind.Proportional,
+            };
+        });
+
+        test('query with underlying', async () => {
+            const queryOutput = await addLiquidityBoosted.query(
+                addLiquidityInput,
+                partialBoostedPool_USDT_stataDAI,
+            );
+            expect(queryOutput.protocolVersion).toEqual(3);
+            expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
+            expect(queryOutput.bptOut.amount > 0n).to.be.true;
+            expect(queryOutput.amountsIn[0]).to.deep.eq(referenceTokenAmount);
+        });
+
+        test('add liquidity transaction', async () => {
+            for (const token of partialBoostedPool_USDT_stataDAI.tokens) {
+                // Approve Permit2 to spend account tokens
+                await approveSpenderOnToken(
+                    client,
+                    testAddress,
+                    token.underlyingToken?.address ?? token.address,
+                    PERMIT2[chainId],
+                );
+                // Approve Router to spend account tokens using Permit2
+                await approveSpenderOnPermit2(
+                    client,
+                    testAddress,
+                    token.underlyingToken?.address ?? token.address,
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                );
+            }
+
+            const queryOutput = await addLiquidityBoosted.query(
+                addLiquidityInput,
+                partialBoostedPool_USDT_stataDAI,
             );
 
-        expect(transactionReceipt.status).to.eq('success');
+            const addLiquidityBuildInput = {
+                ...queryOutput,
+                slippage: Slippage.fromPercentage('1'), // 1%,
+            };
 
-        expect(amountsIn.map((a) => a.amount)).to.deep.eq(
-            balanceDeltas.slice(0, -1),
-        );
-        // Here we check that output diff is within an acceptable tolerance.
-        // !!! This should only be used in the case of buffers as all other cases can be equal
-        areBigIntsWithinPercent(
-            balanceDeltas[balanceDeltas.length - 1],
-            queryOutput.bptOut.amount,
-            0.001,
-        );
+            const addLiquidityBuildCallOutput = addLiquidityBoosted.buildCall(
+                addLiquidityBuildInput,
+            );
+            expect(addLiquidityBuildCallOutput.value === 0n).to.be.true;
+            expect(addLiquidityBuildCallOutput.to).to.eq(
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            );
+
+            // send add liquidity transaction and check balance changes
+
+            const tokensForBalanceCheck = [
+                ...queryOutput.amountsIn,
+                queryOutput.bptOut,
+            ];
+
+            const { transactionReceipt, balanceDeltas } =
+                await sendTransactionGetBalances(
+                    tokensForBalanceCheck.map((t) => t.token.address),
+                    client,
+                    testAddress,
+                    addLiquidityBuildCallOutput.to,
+                    addLiquidityBuildCallOutput.callData,
+                    addLiquidityBuildCallOutput.value,
+                );
+
+            expect(transactionReceipt.status).to.eq('success');
+
+            // Here we check that output diff is within an acceptable tolerance.
+            // !!! This should only be used in the case of buffers as all other cases can be equal
+            tokensForBalanceCheck.forEach(
+                (token, i) =>
+                    expect(
+                        areBigIntsWithinPercent(
+                            balanceDeltas[i],
+                            token.amount,
+                            0.001,
+                        ),
+                    ).to.be.true,
+            );
+        });
     });
 });

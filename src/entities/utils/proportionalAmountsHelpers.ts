@@ -3,9 +3,11 @@ import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
 import { MathSol } from '@/utils';
 import { AddLiquidityProportionalInput } from '../addLiquidity/types';
-import { PoolState } from '../types';
+import { PoolState, PoolStateWithUnderlyings } from '../types';
 import { getPoolStateWithBalancesV2 } from './getPoolStateWithBalancesV2';
 import { getPoolStateWithBalancesV3 } from './getPoolStateWithBalancesV3';
+import { getBoostedPoolStateWithBalancesV3 } from './getBoostedPoolStateWithBalancesV3';
+import { AddLiquidityBoostedProportionalInput } from '../addLiquidityBoosted/types';
 
 /**
  * For a given pool and reference token amount, calculate all token amounts proportional to their balances within the pool.
@@ -124,6 +126,44 @@ export const getBptAmountFromReferenceAmount = async (
                 break;
             }
         }
+    }
+    return bptAmount;
+};
+
+/**
+ * Calculate the BPT amount for a given reference amount in a boosted pool (rounded down).
+ *
+ * @param input
+ * @param poolState
+ * @returns
+ */
+export const getBptAmountFromReferenceAmountBoosted = async (
+    input: AddLiquidityBoostedProportionalInput,
+    poolStateWithUnderlyings: PoolStateWithUnderlyings,
+): Promise<InputAmount> => {
+    let bptAmount: InputAmount;
+    if (input.referenceAmount.address === poolStateWithUnderlyings.address) {
+        bptAmount = input.referenceAmount;
+    } else {
+        const poolStateWithUnderlyingBalances =
+            await getBoostedPoolStateWithBalancesV3(
+                poolStateWithUnderlyings,
+                input.chainId,
+                input.rpcUrl,
+            );
+
+        // use underlying tokens as tokens if they exist (in case of a partial boosted pool)
+        const poolStateWithBalances = {
+            ...poolStateWithUnderlyingBalances,
+            tokens: poolStateWithUnderlyingBalances.tokens.map(
+                (t) => t.underlyingToken ?? t,
+            ),
+        };
+
+        ({ bptAmount } = calculateProportionalAmounts(
+            poolStateWithBalances,
+            input.referenceAmount,
+        ));
     }
     return bptAmount;
 };
