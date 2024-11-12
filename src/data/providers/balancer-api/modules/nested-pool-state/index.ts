@@ -249,24 +249,9 @@ export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
     });
 
     // mainTokens are pool tokens filtering out nested pools and phantomBPTs
-    const mainTokens = pool.poolTokens.flatMap((t) => {
-        if (t.nestedPool) {
-            const nestedPool = t.nestedPool;
-            return nestedPool.tokens
-                .filter((t) => t.address !== nestedPool.address) // remove phantomBPT
-                .map((t) => {
-                    return {
-                        address: t.address,
-                        decimals: t.decimals,
-                    };
-                });
-        }
-
-        return {
-            address: t.address,
-            decimals: t.decimals,
-        };
-    });
+    const mainTokens = pools
+        .flatMap((p) => p.tokens)
+        .filter((t) => !pools.find((p) => p.address === t.address));
 
     return {
         protocolVersion: 2,
