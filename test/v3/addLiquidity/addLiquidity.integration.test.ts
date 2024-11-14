@@ -438,7 +438,7 @@ describe('add liquidity test', () => {
                 );
             });
         });
-        // FIXME: test proportional case on pool with >18 decimal tokens - it will fail
+
         describe('add liquidity proportional', () => {
             let addLiquidityInput: AddLiquidityProportionalInput;
             beforeAll(() => {

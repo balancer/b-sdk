@@ -4,6 +4,7 @@ import {
     formatEther,
     formatUnits,
     http,
+    PublicClient,
 } from 'viem';
 
 import { HumanAmount } from '@/data';
@@ -22,67 +23,25 @@ export const getBoostedPoolStateWithBalancesV3 = async (
     chainId: number,
     rpcUrl: string,
 ): Promise<PoolStateWithUnderlyingBalances> => {
-    const totalSupplyContract = {
-        address: VAULT_V3[chainId],
-        abi: vaultExtensionAbi_V3,
-        functionName: 'totalSupply' as const,
-        args: [poolState.address] as const,
-    };
-    const getBalanceContracts = {
-        address: VAULT_V3[chainId],
-        abi: vaultExtensionAbi_V3,
-        functionName: 'getCurrentLiveBalances' as const,
-        args: [poolState.address] as const,
-    };
-
     const publicClient = createPublicClient({
         transport: http(rpcUrl),
         chain: CHAINS[chainId],
     });
-    const outputs = await publicClient.multicall({
-        contracts: [totalSupplyContract, getBalanceContracts],
-    });
 
-    if (outputs.some((output) => output.status === 'failure')) {
-        throw new Error(
-            'Error: Unable to get pool state with balances for v3 pool.',
-        );
-    }
-
-    const totalShares = outputs[0].result as bigint;
-    const balancesScale18 = outputs[1].result as bigint[];
-
-    const poolTokens = getSortedTokens(poolState.tokens, chainId);
-    const tokenBalances = poolTokens.map((token, i) =>
-        TokenAmount.fromScale18Amount(token, balancesScale18[i]),
-    );
-
-    const getUnderlyingBalancesContracts = poolState.tokens // TODO: not sorted
-        .filter((token) => token.underlyingToken !== null)
-        .map((token, i) => ({
-            address: token.address,
-            abi: erc4626Abi,
-            functionName: 'previewRedeem' as const,
-            args: [tokenBalances[i].amount] as const,
-        }));
-
-    const underlyingBalanceOutputs = await publicClient.multicall({
-        contracts: [...getUnderlyingBalancesContracts],
-    });
-    if (
-        underlyingBalanceOutputs.some((output) => output.status === 'failure')
-    ) {
-        throw new Error(
-            'Error: Unable to get underlying balances for v3 pool.',
-        );
-    }
-
-    const underlyingBalances = underlyingBalanceOutputs.map(
-        (output) => output.result as bigint,
+    const { tokenBalances, totalShares } = await getTokenBalancesAndTotalShares(
+        chainId,
+        poolState,
+        publicClient,
     );
 
     const sortedTokens = [...poolState.tokens].sort(
         (a, b) => a.index - b.index,
+    );
+
+    const underlyingBalances = await getUnderlyingBalances(
+        sortedTokens,
+        tokenBalances,
+        publicClient,
     );
 
     const poolStateWithUnderlyingBalances: PoolStateWithUnderlyingBalances = {
@@ -107,4 +66,74 @@ export const getBoostedPoolStateWithBalancesV3 = async (
         totalShares: formatEther(totalShares) as HumanAmount,
     };
     return poolStateWithUnderlyingBalances;
+};
+
+const getUnderlyingBalances = async (
+    sortedTokens: import('/Users/bruninho/Development/Balancer/b-sdk/src/entities/types').PoolTokenWithUnderlying[],
+    tokenBalances: TokenAmount[],
+    publicClient: PublicClient,
+) => {
+    const getUnderlyingBalancesContracts = sortedTokens
+        .filter((token) => token.underlyingToken !== null)
+        .map((token, i) => ({
+            address: token.address,
+            abi: erc4626Abi,
+            functionName: 'previewRedeem' as const,
+            args: [tokenBalances[i].amount] as const,
+        }));
+
+    const underlyingBalanceOutputs = await publicClient.multicall({
+        contracts: [...getUnderlyingBalancesContracts],
+    });
+    if (
+        underlyingBalanceOutputs.some((output) => output.status === 'failure')
+    ) {
+        throw new Error(
+            'Error: Unable to get underlying balances for v3 pool.',
+        );
+    }
+
+    const underlyingBalances = underlyingBalanceOutputs.map(
+        (output) => output.result as bigint,
+    );
+    return underlyingBalances;
+};
+
+const getTokenBalancesAndTotalShares = async (
+    chainId: number,
+    poolState: PoolStateWithUnderlyings,
+    publicClient: PublicClient,
+) => {
+    const totalSupplyContract = {
+        address: VAULT_V3[chainId],
+        abi: vaultExtensionAbi_V3,
+        functionName: 'totalSupply' as const,
+        args: [poolState.address] as const,
+    };
+    const getBalanceContracts = {
+        address: VAULT_V3[chainId],
+        abi: vaultExtensionAbi_V3,
+        functionName: 'getCurrentLiveBalances' as const,
+        args: [poolState.address] as const,
+    };
+
+    const outputs = await publicClient.multicall({
+        contracts: [totalSupplyContract, getBalanceContracts],
+    });
+
+    if (outputs.some((output) => output.status === 'failure')) {
+        throw new Error(
+            'Error: Unable to get pool state with balances for v3 pool.',
+        );
+    }
+
+    const totalShares = outputs[0].result as bigint;
+    const balancesScale18 = outputs[1].result as bigint[];
+
+    const poolTokens = getSortedTokens(poolState.tokens, chainId);
+    const tokenBalances = poolTokens.map((token, i) =>
+        TokenAmount.fromScale18Amount(token, balancesScale18[i]),
+    );
+
+    return { tokenBalances, totalShares };
 };
