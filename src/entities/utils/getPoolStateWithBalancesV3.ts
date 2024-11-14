@@ -50,7 +50,7 @@ export const getPoolStateWithBalancesV3 = async (
             address: token.address,
             decimals: token.decimals,
             index: i,
-            balance: formatUnits(balances[i], token.decimals) as HumanAmount, // FIXME: getCurrentLiveBalances returns scale18, so this will break for tokens with less decimals
+            balance: formatUnits(balances[i], token.decimals) as HumanAmount,
         })),
         totalShares: formatEther(totalShares) as HumanAmount,
     };
