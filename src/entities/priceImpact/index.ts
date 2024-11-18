@@ -1,6 +1,3 @@
-import { abs, max, min } from '../../utils';
-import { SwapKind } from '../../types';
-
 import { AddLiquidity } from '../addLiquidity';
 import {
     AddLiquidityKind,
@@ -17,7 +14,6 @@ import {
 } from '../removeLiquidity/types';
 import { RemoveLiquidityNested } from '../removeLiquidityNested';
 import { RemoveLiquidityNestedSingleTokenInputV2 } from '../removeLiquidityNested/removeLiquidityNestedV2/types';
-import { Swap, SwapInput } from '../swap';
 import { TokenAmount } from '../tokenAmount';
 import { NestedPoolState, PoolState, PoolStateWithUnderlyings } from '../types';
 import { getSortedTokens } from '../utils';
@@ -26,8 +22,8 @@ import { AddLiquidityNested } from '../addLiquidityNested';
 import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types';
 import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
 import { addLiquidityNested } from './addLiquidityNested';
-import { Token } from '../token';
 import { priceImpactABA } from './helper';
+import { addLiquidityUnbalanced } from './addLiquidityUnbalanced';
 
 export class PriceImpact {
     /**
@@ -107,171 +103,7 @@ export class PriceImpact {
         input: AddLiquidityUnbalancedInput,
         poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
-        // inputs are being validated within AddLiquidity
-
-        // simulate adding liquidity to get amounts in
-        const addLiquidity = new AddLiquidity();
-        let amountsIn: TokenAmount[];
-        let bptOut: TokenAmount;
-        let poolTokens: Token[];
-        try {
-            const queryResult = await addLiquidity.query(input, poolState);
-            amountsIn = queryResult.amountsIn;
-            bptOut = queryResult.bptOut;
-            poolTokens = amountsIn.map((a) => a.token);
-        } catch (err) {
-            throw new Error(
-                `addLiquidityUnbalanced operation will fail at SC level with user defined input.\n${err}`,
-            );
-        }
-
-        // simulate removing liquidity to get amounts out
-        const removeLiquidity = new RemoveLiquidity();
-        const removeLiquidityInput: RemoveLiquidityInput = {
-            chainId: input.chainId,
-            rpcUrl: input.rpcUrl,
-            bptIn: bptOut.toInputAmount(),
-            kind: RemoveLiquidityKind.Proportional,
-        };
-        const { amountsOut } = await removeLiquidity.query(
-            removeLiquidityInput,
-            poolState,
-        );
-
-        // deltas between unbalanced and proportional amounts
-        const deltas = amountsOut.map((a, i) => a.amount - amountsIn[i].amount);
-
-        // get how much BPT each delta would mint
-        const deltaBPTs: bigint[] = [];
-        for (let i = 0; i < deltas.length; i++) {
-            if (deltas[i] === 0n) {
-                deltaBPTs.push(0n);
-            } else {
-                try {
-                    deltaBPTs.push(await queryAddLiquidityForTokenDelta(i));
-                } catch (err) {
-                    throw new Error(
-                        `Unexpected error while calculating addLiquidityUnbalanced PI at Delta add step:\n${err}`,
-                    );
-                }
-            }
-        }
-
-        // zero out deltas by swapping between tokens from proportionalAmounts
-        // to exactAmountsIn, leaving the remaining delta within a single token
-        let remainingDeltaIndex = 0;
-        if (deltaBPTs.some((deltaBPT) => deltaBPT !== 0n)) {
-            remainingDeltaIndex = await zeroOutDeltas(deltas, deltaBPTs);
-        }
-
-        // get relevant amount for price impact calculation
-        const deltaAmount = TokenAmount.fromRawAmount(
-            amountsIn[remainingDeltaIndex].token,
-            abs(deltas[remainingDeltaIndex]),
-        );
-
-        // calculate price impact using ABA method
-        return priceImpactABA(
-            amountsIn[remainingDeltaIndex],
-            amountsIn[remainingDeltaIndex].sub(deltaAmount),
-        );
-
-        // helper functions
-
-        async function zeroOutDeltas(deltas: bigint[], deltaBPTs: bigint[]) {
-            let minNegativeDeltaIndex = deltaBPTs.findIndex(
-                (deltaBPT) => deltaBPT === max(deltaBPTs.filter((a) => a < 0n)),
-            );
-            const nonZeroDeltasBPTs = deltaBPTs.filter((d) => d !== 0n);
-            for (let i = 0; i < nonZeroDeltasBPTs.length - 1; i++) {
-                const minPositiveDeltaIndex = deltaBPTs.findIndex(
-                    (deltaBPT) =>
-                        deltaBPT === min(deltaBPTs.filter((a) => a > 0n)),
-                );
-                minNegativeDeltaIndex = deltaBPTs.findIndex(
-                    (deltaBPT) =>
-                        deltaBPT === max(deltaBPTs.filter((a) => a < 0n)),
-                );
-
-                let swapKind: SwapKind;
-                let givenTokenIndex: number;
-                let resultTokenIndex: number;
-                let inputAmountRaw = 0n;
-                let outputAmountRaw = 0n;
-                if (
-                    deltaBPTs[minPositiveDeltaIndex] <
-                    abs(deltaBPTs[minNegativeDeltaIndex])
-                ) {
-                    swapKind = SwapKind.GivenIn;
-                    givenTokenIndex = minPositiveDeltaIndex;
-                    resultTokenIndex = minNegativeDeltaIndex;
-                    inputAmountRaw = abs(deltas[givenTokenIndex]);
-                } else {
-                    swapKind = SwapKind.GivenOut;
-                    givenTokenIndex = minNegativeDeltaIndex;
-                    resultTokenIndex = minPositiveDeltaIndex;
-                    outputAmountRaw = abs(deltas[givenTokenIndex]);
-                }
-                try {
-                    const swapInput: SwapInput = {
-                        chainId: input.chainId,
-                        paths: [
-                            {
-                                tokens: [
-                                    poolTokens[
-                                        minPositiveDeltaIndex
-                                    ].toInputToken(),
-                                    poolTokens[
-                                        minNegativeDeltaIndex
-                                    ].toInputToken(),
-                                ],
-                                pools: [poolState.id],
-                                inputAmountRaw,
-                                outputAmountRaw,
-                                protocolVersion: poolState.protocolVersion,
-                            },
-                        ],
-                        swapKind,
-                    };
-                    const swap = new Swap(swapInput);
-                    const result = await swap.query(input.rpcUrl);
-                    const resultAmount =
-                        result.swapKind === SwapKind.GivenIn
-                            ? result.expectedAmountOut
-                            : result.expectedAmountIn;
-
-                    deltas[givenTokenIndex] = 0n;
-                    deltaBPTs[givenTokenIndex] = 0n;
-                    deltas[resultTokenIndex] =
-                        deltas[resultTokenIndex] + resultAmount.amount;
-                    deltaBPTs[resultTokenIndex] =
-                        await queryAddLiquidityForTokenDelta(resultTokenIndex);
-                } catch (err) {
-                    throw new Error(
-                        `Unexpected error while calculating addLiquidityUnbalanced PI at Swap step:\n${err}`,
-                    );
-                }
-            }
-            return minNegativeDeltaIndex;
-        }
-
-        async function queryAddLiquidityForTokenDelta(
-            tokenIndex: number,
-        ): Promise<bigint> {
-            const absDelta = TokenAmount.fromRawAmount(
-                poolTokens[tokenIndex],
-                abs(deltas[tokenIndex]),
-            );
-            const { bptOut: deltaBPT } = await addLiquidity.query(
-                {
-                    ...input,
-                    amountsIn: [absDelta.toInputAmount()],
-                },
-                poolState,
-            );
-            const signal = deltas[tokenIndex] >= 0n ? 1n : -1n;
-            return deltaBPT.amount * signal;
-        }
+        return addLiquidityUnbalanced(input, poolState);
     };
 
     static async addLiquidityUnbalancedBoosted(
