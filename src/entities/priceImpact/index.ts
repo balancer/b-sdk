@@ -25,6 +25,8 @@ import { addLiquidityNested } from './addLiquidityNested';
 import { priceImpactABA } from './helper';
 import { addLiquidityUnbalanced } from './addLiquidityUnbalanced';
 
+export * from './helper';
+
 export class PriceImpact {
     /**
      * Calculate price impact on add liquidity single token operations
