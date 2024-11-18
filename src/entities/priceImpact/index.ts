@@ -1,4 +1,4 @@
-import { MathSol, abs, max, min } from '../../utils';
+import { abs, max, min } from '../../utils';
 import { SwapKind } from '../../types';
 
 import { AddLiquidity } from '../addLiquidity';
@@ -27,6 +27,7 @@ import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types
 import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
 import { addLiquidityNested } from './addLiquidityNested';
 import { Token } from '../token';
+import { priceImpactABA } from './helper';
 
 export class PriceImpact {
     /**
@@ -393,17 +394,3 @@ export class PriceImpact {
         return priceImpactABA(bptAmountIn, bptOut);
     };
 }
-
-/**
- * Applies the ABA method to calculate the price impact of an operation.
- * @param initialA amount of token A at the begginig of the ABA process, i.e. A -> B amountIn
- * @param finalA amount of token A at the end of the ABA process, i.e. B -> A amountOut
- * @returns
- */
-export const priceImpactABA = (initialA: TokenAmount, finalA: TokenAmount) => {
-    const priceImpact = MathSol.divDownFixed(
-        initialA.scale18 - finalA.scale18,
-        initialA.scale18 * 2n,
-    );
-    return PriceImpactAmount.fromRawAmount(priceImpact);
-};
