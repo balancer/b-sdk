@@ -5,8 +5,10 @@ import { MathSol } from '@/utils';
 import { AddLiquidityProportionalInput } from '../addLiquidity/types';
 import { PoolState, PoolStateWithUnderlyings } from '../types';
 import { getPoolStateWithBalancesV2 } from './getPoolStateWithBalancesV2';
-import { getPoolStateWithBalancesV3 } from './getPoolStateWithBalancesV3';
-import { getBoostedPoolStateWithBalancesV3 } from './getBoostedPoolStateWithBalancesV3';
+import {
+    getBoostedPoolStateWithBalancesV3,
+    getPoolStateWithBalancesV3,
+} from './getPoolStateWithBalancesV3';
 import { AddLiquidityBoostedProportionalInput } from '../addLiquidityBoosted/types';
 
 /**
