@@ -61,7 +61,11 @@ describe('V3 add liquidity partial boosted', () => {
 
     beforeAll(async () => {
         // setup chain and test client
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS.SEPOLIA,
+            undefined,
+            7010800n,
+        ));
 
         client = createTestClient({
             mode: 'anvil',
@@ -199,7 +203,10 @@ describe('V3 add liquidity partial boosted', () => {
             expect(queryOutput.protocolVersion).toEqual(3);
             expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
             expect(queryOutput.bptOut.amount > 0n).to.be.true;
-            expect(queryOutput.amountsIn[0]).to.deep.eq(referenceTokenAmount);
+            expect(queryOutput.amountsIn.map((a) => a.amount)).to.deep.eq([
+                1000000n,
+                1256754429559706426n,
+            ]);
         });
 
         test('add liquidity transaction', async () => {
