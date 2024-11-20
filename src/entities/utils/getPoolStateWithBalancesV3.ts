@@ -31,12 +31,14 @@ export const getPoolStateWithBalancesV3 = async (
         chain: CHAINS[chainId],
     });
 
+    // get on-chain pool token balances and total shares
     const { tokenAmounts, totalShares } = await getTokenAmountsAndTotalShares(
         chainId,
         poolState,
         publicClient,
     );
 
+    // build PoolStateWithBalances object with queried on-chain balances
     const poolStateWithBalances: PoolStateWithBalances = {
         ...poolState,
         tokens: tokenAmounts.map((tokenAmount, i) => ({
@@ -63,6 +65,7 @@ export const getBoostedPoolStateWithBalancesV3 = async (
         chain: CHAINS[chainId],
     });
 
+    // get on-chain pool token balances and total shares
     const { tokenAmounts, totalShares } = await getTokenAmountsAndTotalShares(
         chainId,
         poolState,
@@ -73,12 +76,14 @@ export const getBoostedPoolStateWithBalancesV3 = async (
         (a, b) => a.index - b.index,
     );
 
+    // get on-chain balances for each respective underlying pool token (by querying erc4626 previewRedeem function)
     const underlyingBalances = await getUnderlyingBalances(
         sortedTokens,
         tokenAmounts,
         publicClient,
     );
 
+    // build PoolStateWithUnderlyingBalances object with queried on-chain balances
     const poolStateWithUnderlyingBalances: PoolStateWithUnderlyingBalances = {
         ...poolState,
         tokens: sortedTokens.map((token, i) => ({
@@ -108,6 +113,7 @@ const getUnderlyingBalances = async (
     tokenAmounts: TokenAmount[],
     publicClient: PublicClient,
 ) => {
+    // create one contract call for each underlying token
     const getUnderlyingBalancesContracts = sortedTokens
         .filter((token) => token.underlyingToken !== null)
         .map((token, i) => ({
@@ -117,9 +123,12 @@ const getUnderlyingBalances = async (
             args: [tokenAmounts[i].amount] as const,
         }));
 
+    // execute multicall to get on-chain balances for each underlying token
     const underlyingBalanceOutputs = await publicClient.multicall({
         contracts: [...getUnderlyingBalancesContracts],
     });
+
+    // throw error if any of the underlying balance calls failed
     if (
         underlyingBalanceOutputs.some((output) => output.status === 'failure')
     ) {
@@ -128,9 +137,11 @@ const getUnderlyingBalances = async (
         );
     }
 
+    // extract underlying balances from multicall outputs
     const underlyingBalances = underlyingBalanceOutputs.map(
         (output) => output.result as bigint,
     );
+
     return underlyingBalances;
 };
 
@@ -139,6 +150,7 @@ const getTokenAmountsAndTotalShares = async (
     poolState: PoolState,
     publicClient: PublicClient,
 ) => {
+    // create contract calls to get total supply and balances for each pool token
     const totalSupplyContract = {
         address: VAULT_V3[chainId],
         abi: vaultExtensionAbi_V3,
@@ -152,19 +164,21 @@ const getTokenAmountsAndTotalShares = async (
         args: [poolState.address] as const,
     };
 
+    // execute multicall to get total supply and balances for each pool token
     const outputs = await publicClient.multicall({
         contracts: [totalSupplyContract, getBalanceContracts],
     });
 
+    // throw error if any of the calls failed
     if (outputs.some((output) => output.status === 'failure')) {
         throw new Error(
             'Error: Unable to get pool state with balances for v3 pool.',
         );
     }
 
+    // extract total supply and balances from multicall outputs
     const totalShares = outputs[0].result as bigint;
     const balancesScale18 = outputs[1].result as bigint[];
-
     const poolTokens = getSortedTokens(poolState.tokens, chainId);
     const tokenAmounts = poolTokens.map((token, i) =>
         TokenAmount.fromScale18Amount(token, balancesScale18[i]),
