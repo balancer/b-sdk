@@ -5,7 +5,7 @@ import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import { Swap, SwapInput, TokenApi } from '../swap';
 import { TokenAmount } from '../tokenAmount';
 import { PoolStateWithUnderlyings, PoolTokenWithUnderlying } from '../types';
-import { priceImpactABA } from '.';
+import { priceImpactABA } from './helper';
 import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types';
 import { AddLiquidityBoostedV3 } from '../addLiquidityBoosted';
 import { RemoveLiquidityBoostedV3 } from '../removeLiquidityBoosted';

@@ -14,11 +14,6 @@ export type PoolGetPool = {
     protocolVersion: 1 | 2 | 3;
     address: Address;
     type: string;
-    allTokens: {
-        address: Address;
-        decimals: number;
-        isMainToken: boolean;
-    }[];
     poolTokens: Token[];
 };
 
@@ -48,11 +43,6 @@ export class NestedPools {
       protocolVersion
       address
       type
-      allTokens {
-        address
-        decimals
-        isMainToken
-      }
       poolTokens {
         index
         address
@@ -258,14 +248,10 @@ export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
         });
     });
 
-    const mainTokens = pool.allTokens
-        .filter((t) => t.isMainToken)
-        .map((t) => {
-            return {
-                address: t.address,
-                decimals: t.decimals,
-            };
-        });
+    // mainTokens are pool tokens filtering out nested pools and phantomBPTs
+    const mainTokens = pools
+        .flatMap((p) => p.tokens)
+        .filter((t) => !pools.find((p) => p.address === t.address));
 
     return {
         protocolVersion: 2,

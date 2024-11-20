@@ -13,11 +13,12 @@ import {
     AddLiquidityKind,
     AddLiquidityUnbalancedInput,
 } from '../addLiquidity/types';
-import { PriceImpact } from '.';
 import { ChainId } from '@/utils';
 import { TokenAmount } from '../tokenAmount';
 import { AddLiquidityBoostedUnbalancedInput } from '../addLiquidityBoosted/types';
 import { AddLiquidityBoostedV3 } from '../addLiquidityBoosted';
+import { addLiquidityUnbalanced } from './addLiquidityUnbalanced';
+import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
 
 type AddResult = {
     priceImpactAmount: PriceImpactAmount;
@@ -111,7 +112,7 @@ async function getAddUnbalancedResult(
         ...pool,
         protocolVersion,
     };
-    const priceImpactAmount = await PriceImpact.addLiquidityUnbalanced(
+    const priceImpactAmount = await addLiquidityUnbalanced(
         addLiquidityInput,
         poolState,
     );
@@ -135,7 +136,7 @@ async function getAddBoostedUnbalancedResult(
         kind: AddLiquidityKind.Unbalanced,
     };
 
-    const priceImpactAmount = await PriceImpact.addLiquidityUnbalancedBoosted(
+    const priceImpactAmount = await addLiquidityUnbalancedBoosted(
         addLiquidityInput,
         { ...pool, protocolVersion: 3 },
     );
