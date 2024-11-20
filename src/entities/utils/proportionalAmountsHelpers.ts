@@ -1,7 +1,7 @@
 import { Address, parseUnits } from 'viem';
 import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
-import { MathSol } from '@/utils';
+import { isSameAddress, MathSol } from '@/utils';
 import { AddLiquidityProportionalInput } from '../addLiquidity/types';
 import { PoolState, PoolStateWithUnderlyings } from '../types';
 import { getPoolStateWithBalancesV2 } from './getPoolStateWithBalancesV2';
@@ -144,7 +144,12 @@ export const getBptAmountFromReferenceAmountBoosted = async (
     poolStateWithUnderlyings: PoolStateWithUnderlyings,
 ): Promise<InputAmount> => {
     let bptAmount: InputAmount;
-    if (input.referenceAmount.address === poolStateWithUnderlyings.address) {
+    if (
+        isSameAddress(
+            input.referenceAmount.address,
+            poolStateWithUnderlyings.address,
+        )
+    ) {
         bptAmount = input.referenceAmount;
     } else {
         const poolStateWithUnderlyingBalances =
