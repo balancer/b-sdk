@@ -46,7 +46,7 @@ export const getPoolStateWithBalancesV3 = async (
             decimals: tokenAmount.token.decimals,
             index: i,
             balance: formatUnits(
-                tokenAmount.amount[i],
+                tokenAmount.amount,
                 tokenAmount.token.decimals,
             ) as HumanAmount,
         })),
