@@ -25,10 +25,10 @@ async function runAgainstFork() {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
     const chainId = ChainId.SEPOLIA;
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-    // 80BAL-20WETH
+    // 50BAL-50WETH
     const pool = {
-        id: '0x03Bf996C7BD45B3386cb41875761d45e27EaB284',
-        address: '0x03Bf996C7BD45B3386cb41875761d45e27EaB284' as Address,
+        id: '0x5e54dad6c2504d63473f95d8025b763fd5b893c6',
+        address: '0x5e54dad6c2504d63473f95d8025b763fd5b893c6' as Address,
     };
     const amountsIn = [
         {
