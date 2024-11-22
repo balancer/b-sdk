@@ -44,7 +44,7 @@ async function runAgainstFork() {
     ];
     const slippage = Slippage.fromPercentage('1'); // 1%
 
-    const call = await addLiquidity({
+    const call = await addLiquidityExample({
         rpcUrl,
         chainId,
         amountsIn,
@@ -70,7 +70,7 @@ async function runAgainstFork() {
     );
 }
 
-const addLiquidity = async ({
+export const addLiquidityExample = async ({
     rpcUrl,
     chainId,
     poolId,

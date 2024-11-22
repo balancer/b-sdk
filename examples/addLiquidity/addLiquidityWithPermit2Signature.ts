@@ -1,5 +1,5 @@
 /**
- * Example showing how to add liquidity to a pool while approving amounts through Permit2 signature.
+ * Example showing how to add liquidity to a pool while approving tokens through Permit2 signature.
  * (Runs against a local Anvil fork)
  *
  * Run with:
@@ -88,6 +88,7 @@ async function runAgainstFork() {
                 slot: getSlot(chainId, a.address),
                 rawBalance: a.rawAmount,
             })),
+            client,
         },
         [...amountsIn.map((a) => a.address), pool.address],
         call.protocolVersion,
