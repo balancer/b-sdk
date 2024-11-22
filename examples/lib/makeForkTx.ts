@@ -39,6 +39,7 @@ export async function makeForkTx(
     },
     tokensForBalanceCheck: Address[],
     protocolVersion: 1 | 2 | 3,
+    approveOnPermit2 = true,
 ) {
     const client = createTestClient({
         mode: 'anvil',
@@ -66,6 +67,7 @@ export async function makeForkTx(
             forkConfig.forkTokens.map((t) => t.rawBalance),
             undefined,
             protocolVersion,
+            approveOnPermit2,
         );
     }
 
