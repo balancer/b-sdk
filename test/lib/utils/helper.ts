@@ -77,6 +77,7 @@ export const approveToken = async (
     accountAddress: Address,
     tokenAddress: Address,
     protocolVersion: 2 | 3,
+    approveOnPermit2 = true,
     amount?: bigint,
     deadline?: bigint,
 ): Promise<boolean> => {
@@ -101,38 +102,42 @@ export const approveToken = async (
             PERMIT2[chainId],
             amount,
         );
-        // Approve Router to spend account tokens using Permit2
-        const routerApprovedOnPermit2 = await approveSpenderOnPermit2(
-            client,
-            accountAddress,
-            tokenAddress,
-            BALANCER_ROUTER[chainId],
-            amount,
-            deadline,
-        );
-        // Approve BatchRouter to spend account tokens using Permit2
-        const batchRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
-            client,
-            accountAddress,
-            tokenAddress,
-            BALANCER_BATCH_ROUTER[chainId],
-            amount,
-            deadline,
-        );
-        // Approve CompositeRouter to spend account tokens using Permit2
-        const compositeRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
-            client,
-            accountAddress,
-            tokenAddress,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            amount,
-            deadline,
-        );
-        approved =
-            permit2ApprovedOnToken &&
-            routerApprovedOnPermit2 &&
-            batchRouterApprovedOnPermit2 &&
-            compositeRouterApprovedOnPermit2;
+        approved = permit2ApprovedOnToken;
+        if (approveOnPermit2) {
+            // Approve Router to spend account tokens using Permit2
+            const routerApprovedOnPermit2 = await approveSpenderOnPermit2(
+                client,
+                accountAddress,
+                tokenAddress,
+                BALANCER_ROUTER[chainId],
+                amount,
+                deadline,
+            );
+            // Approve BatchRouter to spend account tokens using Permit2
+            const batchRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
+                client,
+                accountAddress,
+                tokenAddress,
+                BALANCER_BATCH_ROUTER[chainId],
+                amount,
+                deadline,
+            );
+            // Approve CompositeRouter to spend account tokens using Permit2
+            const compositeRouterApprovedOnPermit2 =
+                await approveSpenderOnPermit2(
+                    client,
+                    accountAddress,
+                    tokenAddress,
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                    amount,
+                    deadline,
+                );
+            approved =
+                approved &&
+                routerApprovedOnPermit2 &&
+                batchRouterApprovedOnPermit2 &&
+                compositeRouterApprovedOnPermit2;
+        }
     }
     return approved;
 };
@@ -142,6 +147,7 @@ export const approveTokens = async (
     accountAddress: Address,
     tokens: Address[],
     protocolVersion: 2 | 3,
+    approveOnPermit2 = true,
 ): Promise<boolean> => {
     const approvals: boolean[] = [];
     for (let i = 0; i < tokens.length; i++) {
@@ -150,6 +156,7 @@ export const approveTokens = async (
             accountAddress,
             tokens[i],
             protocolVersion,
+            approveOnPermit2,
         );
         approvals.push(approved);
     }
@@ -521,6 +528,7 @@ export async function findTokenBalanceSlot(
  * @param balances Balances in EVM amounts
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
  * @param protocolVersion Balancer vault version
+ * @param approveOnPermit2 Whether to approve spender on Permit2
  */
 export const forkSetup = async (
     client: PublicWalletClient & TestActions,
@@ -530,6 +538,7 @@ export const forkSetup = async (
     balances: bigint[],
     isVyperMapping: boolean[] = Array(tokens.length).fill(false),
     protocolVersion: 2 | 3 = 2,
+    approveOnPermit2 = true,
 ): Promise<void> => {
     await client.impersonateAccount({ address: accountAddress });
 
@@ -550,7 +559,13 @@ export const forkSetup = async (
         isVyperMapping,
     );
 
-    await approveTokens(client, accountAddress, tokens, protocolVersion);
+    await approveTokens(
+        client,
+        accountAddress,
+        tokens,
+        protocolVersion,
+        approveOnPermit2,
+    );
 };
 
 /**
