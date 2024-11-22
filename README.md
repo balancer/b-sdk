@@ -100,7 +100,7 @@ Builds the addLiquidity transaction using user defined slippage.
 
 ```typescript
 buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput
-````
+```
 
 **Parameters**
 
@@ -116,6 +116,32 @@ AddLiquidityBuildCallOutput
 
 [AddLiquidityBuildCallOutput](./src/entities/addLiquidity/types.ts#L75) - Encoded call data for addLiquidity that user can submit.
 ___
+
+### buildCallWithPermit2
+
+Builds the addLiquidity transaction and approves amounts through a Permit2 signature.
+  
+```typescript
+buildCallWithPermit2(input: AddLiquidityBuildCallInput, permit2: Permit2): AddLiquidityBuildCallOutput
+```
+
+**Parameters**
+
+| Name               | Type          | Description   |
+| -------------      | ------------- | ------------  |
+| input | [AddLiquidityBuildCallInput](./src/entities/addLiquidity/types.ts#L63) | Parameters required to build the call including user defined slippage |
+| permit2 | [Permit2](./src/entities/permit2Helper/index.ts#L35) | Permit2 signature |
+*Note: refer to [Permit2Helper](#calculateproportionalamounts) for a Permit2 helper function*
+
+**Returns**
+
+```typescript
+AddLiquidityBuildCallOutput
+```
+
+[AddLiquidityBuildCallOutput](./src/entities/addLiquidity/types.ts#L75) - Encoded call data for addLiquidity that user can submit.
+___
+
 
 ## RemoveLiquidity
 
@@ -661,9 +687,11 @@ Helper functions.
 
 Given pool balances (including BPT) and a reference token amount, it calculates all other amounts proportional to the reference amount.
 
-### Example
+**Example**
 
-See the [price impact example](/examples/priceImpact/addLiquidity.ts).
+See [calculateProportionalAmounts example](/examples/utils/calculateProportionalAmounts.ts).
+
+**Function**
 
 ```typescript
 calculateProportionalAmounts(
@@ -700,4 +728,47 @@ calculateProportionalAmounts(
 ```
 
 Amounts proportional to the reference amount.
+___
+
+### Permit2 Helper
+
+Facilitate Permit2 signature generation. Each operation (e.g. addLiquidity, removeLiquidity, swap, ...) has its own helper that leverages the same input type of the operation itself in order to simplify signature generation.
+
+**Example**
+
+See [addLiquidityWithPermit2Signature example](/examples/addLiquidity/addLiquidityWithPermit2Signature.ts).
+
+**Function**
+
+Helper function to create a Permit2 signature for an addLiquidity operation:
+
+```typescript
+static async signAddLiquidityApproval(
+        input: AddLiquidityBaseBuildCallInput & {
+            client: PublicWalletClient;
+            owner: Address;
+            nonces?: number[];
+            expirations?: number[];
+        },
+    ): Promise<Permit2>
+```
+
+**Parameters**
+
+| Name               | Type          | Description   |
+| -------------      | ------------- | ------------  |
+| input | [AddLiquidityBaseBuildCallInput](./src/entities/addLiquidity/types.ts#L62) | Add Liquidity Input |
+| client | [PublicWalletClient](./src/utils/types.ts#L3) | Viem's wallet client with public actions |
+| owner | Address | User address |
+| nonces (optional) | number[] | Nonces for each token |
+| expirations (optional) | number[] | Expirations for each token |
+
+**Returns**
+
+```typescript
+Promise<Permit2>;
+```
+
+[Permit2](./src/entities/permit2Helper/index.ts#L35) - Permit2 object with metadata and encoded signature
+
 ___
