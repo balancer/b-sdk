@@ -4,6 +4,7 @@ dotenv.config();
 
 import {
     createTestClient,
+    Hex,
     http,
     parseUnits,
     publicActions,
@@ -53,6 +54,7 @@ describe('V3 add liquidity partial boosted', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
+    let snapshot: Hex;
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
     const amountsIn = [
         TokenAmount.fromHumanAmount(usdtToken, '1'),
@@ -84,6 +86,16 @@ describe('V3 add liquidity partial boosted', () => {
             [USDT.slot, DAI.slot] as number[],
             amountsIn.map((t) => parseUnits('1000', t.token.decimals)),
         );
+        // Uses Special RPC methods to revert state back to same snapshot for each test
+        // https://github.com/trufflesuite/ganache-cli-archive/blob/master/README.md
+        snapshot = await client.snapshot();
+    });
+
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
     });
 
     describe('unbalanced', async () => {
@@ -205,7 +217,7 @@ describe('V3 add liquidity partial boosted', () => {
             expect(queryOutput.bptOut.amount > 0n).to.be.true;
             expect(queryOutput.amountsIn.map((a) => a.amount)).to.deep.eq([
                 1000000n,
-                1256754429559706426n,
+                1009005794941698996n,
             ]);
         });
 
