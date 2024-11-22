@@ -5,9 +5,10 @@ import {
     walletActions,
     Address,
     Hex,
+    TestActions,
 } from 'viem';
 
-import { CHAINS } from '../../src';
+import { CHAINS, PublicWalletClient } from '../../src';
 import {
     forkSetup,
     forkSetupCowAmm,
@@ -36,18 +37,22 @@ export async function makeForkTx(
         chainId: number;
         impersonateAccount: Address;
         forkTokens: ForkToken[];
+        client?: PublicWalletClient & TestActions;
     },
     tokensForBalanceCheck: Address[],
     protocolVersion: 1 | 2 | 3,
     approveOnPermit2 = true,
 ) {
-    const client = createTestClient({
-        mode: 'anvil',
-        chain: CHAINS[forkConfig.chainId],
-        transport: http(forkConfig.rpcUrl),
-    })
-        .extend(publicActions)
-        .extend(walletActions);
+    const client =
+        forkConfig.client ??
+        createTestClient({
+            mode: 'anvil',
+            chain: CHAINS[forkConfig.chainId],
+            transport: http(forkConfig.rpcUrl),
+            account: forkConfig.impersonateAccount,
+        })
+            .extend(publicActions)
+            .extend(walletActions);
 
     if (protocolVersion === 1) {
         await forkSetupCowAmm(
