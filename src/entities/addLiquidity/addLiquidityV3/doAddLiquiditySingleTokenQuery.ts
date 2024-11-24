@@ -1,6 +1,5 @@
-import { createPublicClient, http } from 'viem';
-import { AddLiquiditySingleTokenInput } from '../types';
-import { BALANCER_ROUTER, CHAINS } from '@/utils';
+import { createPublicClient, Hex, http } from 'viem';
+import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
 import {
     balancerRouterAbi,
     permit2Abi,
@@ -10,7 +9,11 @@ import {
 import { Address } from '@/types';
 
 export const doAddLiquiditySingleTokenQuery = async (
-    { rpcUrl, chainId, tokenIn }: AddLiquiditySingleTokenInput,
+    rpcUrl: string,
+    chainId: ChainId,
+    sender: Address,
+    userData: Hex,
+    tokenIn: Address,
     poolAddress: Address,
     bptOut: bigint,
 ): Promise<bigint> => {
@@ -28,7 +31,7 @@ export const doAddLiquiditySingleTokenQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquiditySingleTokenExactOut',
-        args: [poolAddress, tokenIn, bptOut, '0x'],
+        args: [poolAddress, tokenIn, bptOut, sender, userData],
     });
     return amountIn;
 };

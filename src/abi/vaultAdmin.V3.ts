@@ -434,6 +434,11 @@ export const vaultAdminAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'InvalidTokenDecimals',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'InvalidTokenType',
         type: 'error',
     },
@@ -663,6 +668,22 @@ export const vaultAdminAbi_V3 = [
     {
         inputs: [
             {
+                internalType: 'uint8',
+                name: 'bits',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
+        ],
+        name: 'SafeCastOverflowedUintDowncast',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
                 internalType: 'uint256',
                 name: 'value',
                 type: 'uint256',
@@ -834,6 +855,49 @@ export const vaultAdminAbi_V3 = [
         type: 'error',
     },
     {
+        inputs: [],
+        name: 'ZeroDivision',
+        type: 'error',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'aggregateSwapFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'AggregateSwapFeePercentageChanged',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'aggregateYieldFeePercentage',
+                type: 'uint256',
+            },
+        ],
+        name: 'AggregateYieldFeePercentageChanged',
+        type: 'event',
+    },
+    {
         anonymous: false,
         inputs: [
             {
@@ -994,9 +1058,21 @@ export const vaultAdminAbi_V3 = [
             },
             {
                 indexed: false,
+                internalType: 'uint256',
+                name: 'totalSupply',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
                 internalType: 'int256[]',
                 name: 'deltas',
                 type: 'int256[]',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256[]',
+                name: 'swapFeeAmountsRaw',
+                type: 'uint256[]',
             },
         ],
         name: 'PoolBalanceChanged',
@@ -1284,12 +1360,6 @@ export const vaultAdminAbi_V3 = [
                 name: 'swapFeeAmount',
                 type: 'uint256',
             },
-            {
-                indexed: false,
-                internalType: 'contract IERC20',
-                name: 'swapFeeToken',
-                type: 'address',
-            },
         ],
         name: 'Swap',
         type: 'event',
@@ -1451,12 +1521,7 @@ export const vaultAdminAbi_V3 = [
             },
             {
                 internalType: 'uint256',
-                name: 'amountUnderlyingRaw',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amountWrappedRaw',
+                name: 'exactSharesToIssue',
                 type: 'uint256',
             },
             {
@@ -1469,7 +1534,12 @@ export const vaultAdminAbi_V3 = [
         outputs: [
             {
                 internalType: 'uint256',
-                name: 'issuedShares',
+                name: 'amountUnderlyingRaw',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountWrappedRaw',
                 type: 'uint256',
             },
         ],

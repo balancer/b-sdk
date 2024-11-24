@@ -21,6 +21,12 @@ import {
 
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
+/*
+    Using empty account (undefined by default) in some multicall requests causes failures in some nodes
+    More info: https://github.com/wevm/viem/issues/2792
+*/
+export const EMPTY_SENDER = { account: ZERO_ADDRESS };
+
 const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
@@ -144,11 +150,11 @@ export const VAULT: Record<number, Address> = {
 };
 
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x0EF1c156a7986F394d90eD1bEeA6483Cc435F542',
+    [ChainId.SEPOLIA]: '0x68aD967ae8393B722EC69dB1018Ec28AF9A34493',
 };
 
 export const VAULT_ADMIN: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x65c4af66f112706c7890ca3a2e32bda8df6d9cb2',
+    [ChainId.SEPOLIA]: '0x1fe31af18AB9D33A4a2f9c2d501a570d6052826f',
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
@@ -178,9 +184,7 @@ export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
     [ChainId.POLYGON]: '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
 };
-export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x7c5E586ed4EC1793a6076FC0Dcad03Ca2442f7F8',
-};
+
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
     [ChainId.AVALANCHE]: '0xe42ffa682a26ef8f25891db4882932711d42e467',
@@ -194,12 +198,24 @@ export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
     [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
 };
 
+export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x4F12F60148F98aD920b99e844807F0e245f2AE58',
+};
+
+export const STABLE_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0xD895059a81711e4955823ED2C0755F204A86E5DA',
+};
+
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xB12FcB422aAe6720f882E22C340964a7723f2387',
+    [ChainId.SEPOLIA]: '0x657841f7059Db5B6Ae935c6DF064e999C4f516D5',
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x0418001D0d68C71d0E391fE46dC7aFCe045f34A0',
+    [ChainId.SEPOLIA]: '0xB3AA271349c78FAe6180898dA1689C920573c937',
+};
+
+export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0xF83E3216458C695a5dAa81094AeF8Ef109290e51',
 };
 
 export const PERMIT2: Record<number, Address> = {
@@ -210,7 +226,7 @@ export const AUTHORIZER: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0xa331d84ec860bf466b4cdccfb4ac09a1b43f3ae6',
 };
 
-export const ADMIN_OF_AUTHORIZER = '0x171C0fF5943CE5f133130436A29bF61E26516003'; // is this EoA chain agnostic?
+export const ADMIN_OF_AUTHORIZER = '0x171C0fF5943CE5f133130436A29bF61E26516003'; // do we plan to use same EoA for all chains?
 
 /**
  * Native Assets

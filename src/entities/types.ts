@@ -19,6 +19,18 @@ export type PoolStateWithBalances = {
     protocolVersion: 1 | 2 | 3;
 };
 
+export type PoolTokenWithUnderlying = MinimalToken & {
+    underlyingToken: MinimalToken | null;
+};
+
+export type PoolStateWithUnderlyings = {
+    id: Hex;
+    address: Address;
+    type: string;
+    tokens: PoolTokenWithUnderlying[];
+    protocolVersion: 1 | 2 | 3;
+};
+
 export type AddLiquidityAmounts = {
     maxAmountsIn: bigint[];
     maxAmountsInWithoutBpt: bigint[];
@@ -32,21 +44,40 @@ export type RemoveLiquidityAmounts = {
     maxBptAmountIn: bigint;
 };
 
-export type NestedPool = {
+type NestedPoolBase = {
     id: Hex;
     address: Address;
     type: PoolType;
     level: number; // 0 is the bottom and the highest level is the top
+};
+
+export type NestedPoolV2 = NestedPoolBase & {
     tokens: MinimalToken[]; // each token should have at least one
 };
 
-export type NestedPoolState = {
-    pools: NestedPool[];
+export type NestedPoolV3 = NestedPoolBase & {
+    tokens: PoolTokenWithUnderlying[]; // each token should have at least one
+};
+
+type NestedPoolStateBase = {
+    protocolVersion: 1 | 2 | 3;
     mainTokens: {
         address: Address;
         decimals: number;
     }[];
 };
+
+export type NestedPoolStateV2 = NestedPoolStateBase & {
+    protocolVersion: 1 | 2;
+    pools: NestedPoolV2[];
+};
+
+export type NestedPoolStateV3 = NestedPoolStateBase & {
+    protocolVersion: 3;
+    pools: NestedPoolV3[];
+};
+
+export type NestedPoolState = NestedPoolStateV2 | NestedPoolStateV3;
 
 export enum PoolKind {
     WEIGHTED = 0,

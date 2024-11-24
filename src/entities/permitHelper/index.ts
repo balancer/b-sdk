@@ -1,11 +1,16 @@
-import { Client, PublicActions, WalletActions } from 'viem';
-
 import { weightedPoolAbi_V3 } from '@/abi';
 import { Hex } from '@/types';
-import { BALANCER_ROUTER, MAX_UINT256 } from '@/utils';
+import {
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_ROUTER,
+    ChainId,
+    MAX_UINT256,
+    PublicWalletClient,
+} from '@/utils';
 import { getNonce } from './helper';
 import { RemoveLiquidityBaseBuildCallInput } from '../removeLiquidity/types';
 import { getAmountsCall } from '../removeLiquidity/helper';
+import { TokenAmount } from '../tokenAmount';
 
 type PermitApproval = {
     /** Address of the token to approve */
@@ -30,7 +35,7 @@ export type Permit = {
 export class PermitHelper {
     static signRemoveLiquidityApproval = async (
         input: RemoveLiquidityBaseBuildCallInput & {
-            client: Client & WalletActions & PublicActions;
+            client: PublicWalletClient;
             owner: Hex;
             nonce?: bigint;
             deadline?: bigint;
@@ -55,6 +60,61 @@ export class PermitHelper {
         );
         return { batch: [permitApproval], signatures: [permitSignature] };
     };
+
+    static signRemoveLiquidityNestedApproval = async (input: {
+        bptAmountIn: TokenAmount;
+        chainId: ChainId;
+        client: PublicWalletClient;
+        owner: Hex;
+        nonce?: bigint;
+        deadline?: bigint;
+    }): Promise<Permit> => {
+        const nonce =
+            input.nonce ??
+            (await getNonce(
+                input.client,
+                input.bptAmountIn.token.address,
+                input.owner,
+            ));
+        const { permitApproval, permitSignature } = await signPermit(
+            input.client,
+            input.bptAmountIn.token.address,
+            input.owner,
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            nonce,
+            input.bptAmountIn.amount, // maxBptIn
+            input.deadline,
+        );
+        return { batch: [permitApproval], signatures: [permitSignature] };
+    };
+
+    static signRemoveLiquidityBoostedApproval = async (
+        input: RemoveLiquidityBaseBuildCallInput & {
+            client: PublicWalletClient;
+            owner: Hex;
+            nonce?: bigint;
+            deadline?: bigint;
+        },
+    ): Promise<Permit> => {
+        const amounts = getAmountsCall(input);
+        const nonce =
+            input.nonce ??
+            (await getNonce(
+                input.client,
+                input.bptIn.token.address,
+                input.owner,
+            ));
+        const { permitApproval, permitSignature } = await signPermit(
+            input.client,
+            input.bptIn.token.address,
+            input.owner,
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            nonce,
+            amounts.maxBptAmountIn,
+            input.deadline,
+        );
+        return { batch: [permitApproval], signatures: [permitSignature] };
+    };
 }
 
 /**
@@ -63,7 +123,7 @@ export class PermitHelper {
  * @param { Client & WalletActions & PublicActions } client - Wallet client to invoke for signing the permit message
  */
 const signPermit = async (
-    client: Client & WalletActions & PublicActions,
+    client: PublicWalletClient,
     token: Hex,
     owner: Hex,
     spender: Hex,
@@ -111,10 +171,7 @@ const signPermit = async (
     return { permitApproval, permitSignature };
 };
 
-const getDomain = async (
-    client: Client & WalletActions & PublicActions,
-    token: Hex,
-) => {
+const getDomain = async (client: PublicWalletClient, token: Hex) => {
     const [, name, version, chainId, verifyingContract, , ,] =
         await client.readContract({
             abi: weightedPoolAbi_V3,

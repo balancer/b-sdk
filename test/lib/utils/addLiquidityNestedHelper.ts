@@ -1,15 +1,10 @@
 import { Address, TransactionReceipt } from 'viem';
-import {
-    AddLiquidityNested,
-    AddLiquidityNestedInput,
-    Relayer,
-    Slippage,
-    TokenAmount,
-    replaceWrapped,
-} from '@/entities';
+import { Relayer, Slippage, TokenAmount, replaceWrapped } from '@/entities';
 import { BALANCER_RELAYER, NATIVE_ASSETS } from '@/utils';
 import { AddLiquidityNestedTxInput } from './types';
 import { sendTransactionGetBalances } from './helper';
+import { AddLiquidityNested } from '@/entities/addLiquidityNested';
+import { AddLiquidityNestedInputV2 } from '@/entities/addLiquidityNested/addLiquidityNestedV2/types';
 
 export const assertResults = (
     transactionReceipt: TransactionReceipt,
@@ -41,7 +36,7 @@ export const assertResults = (
     if (wrappedNativeAsset && wethIsEth) {
         expect(value).to.eq(wrappedNativeAsset.rawAmount);
     } else {
-        expect(value).to.eq(undefined || 0n);
+        expect(value).to.eq(0n);
     }
 };
 
@@ -57,7 +52,7 @@ export const doAddLiquidityNested = async ({
     // setup add liquidity helper
     const addLiquidityNested = new AddLiquidityNested();
 
-    const addLiquidityInput: AddLiquidityNestedInput = {
+    const addLiquidityInput: AddLiquidityNestedInputV2 = {
         amountsIn,
         chainId,
         rpcUrl,
@@ -76,13 +71,16 @@ export const doAddLiquidityNested = async ({
         client,
     );
 
-    const { callData, to, value, minBptOut } = addLiquidityNested.buildCall({
+    const buildCallInput = {
         ...queryOutput,
         slippage,
         accountAddress: testAddress,
         relayerApprovalSignature: signature,
         wethIsEth,
-    });
+    };
+
+    const { callData, to, value, minBptOut } =
+        addLiquidityNested.buildCall(buildCallInput);
 
     let tokensIn = queryOutput.amountsIn.map((a) => a.token);
     if (wethIsEth) {

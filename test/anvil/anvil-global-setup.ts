@@ -5,7 +5,7 @@ import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { ChainId } from '../../src/utils/constants';
 import { sleep } from '../lib/utils/promises';
 
-type NetworkSetup = {
+export type NetworkSetup = {
     rpcEnv: string;
     fallBackRpc: string | undefined;
     port: number;
@@ -66,11 +66,11 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'SEPOLIA_RPC_URL',
         fallBackRpc: 'https://sepolia.gateway.tenderly.co',
         port: ANVIL_PORTS.SEPOLIA,
-        forkBlockNumber: 6679621n,
+        forkBlockNumber: 7010800n,
     },
     OPTIMISM: {
         rpcEnv: 'OPTIMISM_RPC_URL',
-        fallBackRpc: 'https://optimism.gateway.tenderly.co',
+        fallBackRpc: 'https://optimism.llamarpc.com',
         port: ANVIL_PORTS.OPTIMISM,
         forkBlockNumber: 117374265n,
     },
@@ -111,7 +111,7 @@ function getAnvilOptions(
     blockNumber?: bigint,
 ): CreateAnvilOptions {
     let forkUrl: string;
-    if (process.env[network.rpcEnv] !== undefined) {
+    if (process.env[network.rpcEnv] !== 'undefined') {
         forkUrl = process.env[network.rpcEnv] as string;
     } else {
         if (!network.fallBackRpc)

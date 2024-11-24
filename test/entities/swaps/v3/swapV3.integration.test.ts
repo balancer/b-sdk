@@ -8,10 +8,7 @@ import {
     parseEther,
     publicActions,
     walletActions,
-    Client,
-    PublicActions,
     TestActions,
-    WalletActions,
     Hex,
 } from 'viem';
 import {
@@ -25,6 +22,7 @@ import {
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
     PERMIT2,
+    PublicWalletClient,
 } from '@/index';
 import { Path } from '@/entities/swap/paths/types';
 
@@ -43,22 +41,25 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 // blockNo shouldn't change as checks depend on token balances
-const blockNo = 6675575n;
+const blockNo = 7010829n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const DAI = TOKENS[chainId].DAI_AAVE;
+const USDT = TOKENS[chainId].USDT_AAVE;
 const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
+const boosted_pool = POOLS[chainId].MOCK_BOOSTED_POOL;
 const stataUSDC = TOKENS[chainId].stataUSDC;
-const stataDAI = TOKENS[chainId].stataDAI;
+const stataUSDT = TOKENS[chainId].stataUSDT;
 
 describe('SwapV3', () => {
-    let client: Client & PublicActions & TestActions & WalletActions;
+    let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let rpcUrl: string;
     let snapshot: Hex;
     let pathBalWeth: Path;
+    let pathBPTBAL: Path;
     let pathMultiSwap: Path;
     let pathUsdcWethMulti: Path;
     let pathWithExit: Path;
@@ -82,6 +83,24 @@ describe('SwapV3', () => {
             pools: [POOLS[chainId].MOCK_WETH_BAL_POOL.id],
             inputAmountRaw: 100000000000n,
             outputAmountRaw: 100000000000n,
+        };
+
+        // bpt [swap] weth
+        pathBPTBAL = {
+            protocolVersion: 3,
+            tokens: [
+                {
+                    address: '0xce701deAC1B660dA4ee05F6F3F7cbafDDb6a79Fe', //BPT
+                    decimals: 18,
+                },
+                {
+                    address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',
+                    decimals: 18,
+                },
+            ],
+            pools: ['0xce701deAC1B660dA4ee05F6F3F7cbafDDb6a79Fe'],
+            inputAmountRaw: 1000000000000000n,
+            outputAmountRaw: 1n,
         };
 
         // weth [swap] bal [swap] dai [swap] usdc
@@ -221,7 +240,23 @@ describe('SwapV3', () => {
                     WETH.decimals,
                 );
                 expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountOut.amount).to.eq(98999998n);
+                expect(expected.expectedAmountOut.amount).to.eq(97807604n);
+            });
+            test('GivenIn as BPT', async () => {
+                const swap = new Swap({
+                    chainId,
+                    paths: [pathBPTBAL],
+                    swapKind: SwapKind.GivenIn,
+                });
+                const expected = (await swap.query(
+                    rpcUrl,
+                )) as ExactInQueryOutput;
+                const balToken = new Token(chainId, BAL.address, BAL.decimals);
+
+                expect(expected.expectedAmountOut.token).to.deep.eq(balToken);
+                expect(expected.expectedAmountOut.amount).to.eq(
+                    1409169048985584n,
+                );
             });
             test('GivenOut', async () => {
                 const swap = new Swap({
@@ -237,7 +272,25 @@ describe('SwapV3', () => {
                 const balToken = new Token(chainId, BAL.address, BAL.decimals);
                 expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
                 expect(expected.expectedAmountIn.amount).to.eq(
-                    101012121252531n,
+                    102241640811992n,
+                );
+            });
+            test('Given Out as BPT', async () => {
+                const swap = new Swap({
+                    chainId,
+                    paths: [pathBalWeth],
+                    swapKind: SwapKind.GivenOut,
+                });
+
+                const expected = (await swap.query(
+                    rpcUrl,
+                )) as ExactOutQueryOutput;
+
+                const balToken = new Token(chainId, BAL.address, BAL.decimals);
+
+                expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
+                expect(expected.expectedAmountIn.amount).to.eq(
+                    102241640811992n,
                 );
             });
         });
@@ -260,11 +313,11 @@ describe('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([378320n]);
+                    expect(expected.pathAmounts).to.deep.eq([186324n]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(378320n);
+                    expect(expected.expectedAmountOut.amount).to.eq(186324n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -283,12 +336,14 @@ describe('SwapV3', () => {
                         WETH.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([593759337607784n]);
+                    expect(expected.pathAmounts).to.deep.eq([
+                        1084111861665514n,
+                    ]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         wethToken,
                     );
                     expect(expected.expectedAmountIn.amount).to.eq(
-                        593759337607784n,
+                        1084111861665514n,
                     );
                 });
             });
@@ -310,11 +365,14 @@ describe('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([378320n, 637976n]);
+                    expect(expected.pathAmounts).to.deep.eq([
+                        186324n,
+                        1181508n,
+                    ]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(1016296n);
+                    expect(expected.expectedAmountOut.amount).to.eq(1367832n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -334,14 +392,14 @@ describe('SwapV3', () => {
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
                     expect(expected.pathAmounts).to.deep.eq([
-                        593759337607784n,
-                        998215196313547n,
+                        1084111861665514n,
+                        519629120486462n,
                     ]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         wethToken,
                     );
                     expect(expected.expectedAmountIn.amount).to.eq(
-                        1591974533921331n,
+                        1603740982151976n,
                     );
                 });
             });
@@ -900,7 +958,7 @@ describe('SwapV3', () => {
 
     describe('boosted', () => {
         describe('multi-hop swap', () => {
-            // USDC[wrap]aUSDC[swap]aDAI[unwrap]DAI
+            // USDC[wrap]aUSDC[swap]aUSDT[unwrap]USDT
             const pathWithBuffers = {
                 protocolVersion: 3,
                 tokens: [
@@ -913,18 +971,18 @@ describe('SwapV3', () => {
                         decimals: stataUSDC.decimals,
                     },
                     {
-                        address: stataDAI.address,
-                        decimals: stataDAI.decimals,
+                        address: stataUSDT.address,
+                        decimals: stataUSDT.decimals,
                     },
                     {
-                        address: DAI.address,
-                        decimals: DAI.decimals,
+                        address: USDT.address,
+                        decimals: USDT.decimals,
                     },
                 ],
                 pools: [
                     stataUSDC.address,
-                    POOLS[chainId].MOCK_BOOSTED_POOL.id,
-                    stataDAI.address,
+                    boosted_pool.address,
+                    stataUSDT.address,
                 ],
                 isBuffer: [true, false, true],
             };
@@ -947,21 +1005,17 @@ describe('SwapV3', () => {
                         rpcUrl,
                     )) as ExactInQueryOutput;
 
-                    const daiToken = new Token(
+                    const usdtToken = new Token(
                         chainId,
-                        DAI.address,
-                        DAI.decimals,
+                        USDT.address,
+                        USDT.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([
-                        98983539917018246361n,
-                    ]);
+                    expect(expected.pathAmounts).to.deep.eq([99910376n]);
                     expect(expected.expectedAmountOut.token).to.deep.eq(
-                        daiToken,
+                        usdtToken,
                     );
-                    expect(expected.expectedAmountOut.amount).to.eq(
-                        98983539917018246361n,
-                    );
+                    expect(expected.expectedAmountOut.amount).to.eq(99910376n);
                 });
                 test('GivenOut', async () => {
                     const swap = new Swap({
@@ -970,7 +1024,7 @@ describe('SwapV3', () => {
                             {
                                 ...pathWithBuffers,
                                 inputAmountRaw: 0n,
-                                outputAmountRaw: 100000000000000000000n,
+                                outputAmountRaw: 100000000n,
                             } as Path,
                         ],
                         swapKind: SwapKind.GivenOut,
@@ -986,11 +1040,11 @@ describe('SwapV3', () => {
                         USDC.decimals,
                     );
                     expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([101026903n]);
+                    expect(expected.pathAmounts).to.deep.eq([100089705n]);
                     expect(expected.expectedAmountIn.token).to.deep.eq(
                         usdcToken,
                     );
-                    expect(expected.expectedAmountIn.amount).to.eq(101026903n);
+                    expect(expected.expectedAmountIn.amount).to.eq(100089705n);
                 });
             });
             describe('swap should be executed correctly', () => {
@@ -1035,7 +1089,7 @@ describe('SwapV3', () => {
                             {
                                 ...pathWithBuffers,
                                 inputAmountRaw: 0n,
-                                outputAmountRaw: 100000000000000000000n,
+                                outputAmountRaw: 10000000n,
                             } as Path,
                         ],
                         swapKind: SwapKind.GivenOut,

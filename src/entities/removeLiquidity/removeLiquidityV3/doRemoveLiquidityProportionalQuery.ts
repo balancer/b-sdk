@@ -4,14 +4,17 @@ import {
     vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
-import { BALANCER_ROUTER, CHAINS } from '@/utils';
-import { createPublicClient, http } from 'viem';
-import { RemoveLiquidityProportionalInput } from '../types';
+import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
+import { createPublicClient, Hex, http } from 'viem';
 import { Address } from '@/types';
 
 export const doRemoveLiquidityProportionalQuery = async (
-    { chainId, rpcUrl, bptIn }: RemoveLiquidityProportionalInput,
+    rpcUrl: string,
+    chainId: ChainId,
+    sender: Address,
+    userData: Hex,
     poolAddress: Address,
+    exactBptAmountIn: bigint,
 ): Promise<readonly bigint[]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -26,7 +29,7 @@ export const doRemoveLiquidityProportionalQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryRemoveLiquidityProportional',
-        args: [poolAddress, bptIn.rawAmount, '0x'],
+        args: [poolAddress, exactBptAmountIn, sender, userData],
     });
     return amountsOut;
 };

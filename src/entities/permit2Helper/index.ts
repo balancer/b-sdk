@@ -5,7 +5,14 @@ import {
     Permit2Batch,
     PermitDetails,
 } from './allowanceTransfer';
-import { BALANCER_BATCH_ROUTER, BALANCER_ROUTER, PERMIT2 } from '@/utils';
+import {
+    BALANCER_BATCH_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_ROUTER,
+    ChainId,
+    PERMIT2,
+    PublicWalletClient,
+} from '@/utils';
 import {
     MaxAllowanceExpiration,
     MaxAllowanceTransferAmount,
@@ -33,7 +40,7 @@ export type Permit2 = {
 export class Permit2Helper {
     static async signAddLiquidityApproval(
         input: AddLiquidityBaseBuildCallInput & {
-            client: Client & WalletActions & PublicActions;
+            client: PublicWalletClient;
             owner: Address;
             nonces?: number[];
             expirations?: number[];
@@ -69,9 +76,86 @@ export class Permit2Helper {
         return signPermit2(input.client, input.owner, spender, details);
     }
 
+    static async signAddLiquidityNestedApproval(input: {
+        amountsIn: TokenAmount[];
+        chainId: ChainId;
+        client: PublicWalletClient;
+        owner: Address;
+        nonces?: number[];
+        expirations?: number[];
+    }): Promise<Permit2> {
+        if (input.nonces && input.nonces.length !== input.amountsIn.length) {
+            throw new Error("Nonces length doesn't match amountsIn length");
+        }
+        if (
+            input.expirations &&
+            input.expirations.length !== input.amountsIn.length
+        ) {
+            throw new Error(
+                "Expirations length doesn't match amountsIn length",
+            );
+        }
+        const maxAmountsIn = input.amountsIn.map((a) => a.amount);
+        const spender = BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId];
+        const details: PermitDetails[] = [];
+        for (let i = 0; i < input.amountsIn.length; i++) {
+            details.push(
+                await getDetails(
+                    input.client,
+                    input.amountsIn[i].token.address,
+                    input.owner,
+                    spender,
+                    maxAmountsIn[i],
+                    input.expirations ? input.expirations[i] : undefined,
+                    input.nonces ? input.nonces[i] : undefined,
+                ),
+            );
+        }
+        return signPermit2(input.client, input.owner, spender, details);
+    }
+
+    static async signAddLiquidityBoostedApproval(
+        input: AddLiquidityBaseBuildCallInput & {
+            client: PublicWalletClient;
+            owner: Address;
+            nonces?: number[];
+            expirations?: number[];
+        },
+    ): Promise<Permit2> {
+        if (input.nonces && input.nonces.length !== input.amountsIn.length) {
+            throw new Error("Nonces length doesn't match amountsIn length");
+        }
+        if (
+            input.expirations &&
+            input.expirations.length !== input.amountsIn.length
+        ) {
+            throw new Error(
+                "Expirations length doesn't match amountsIn length",
+            );
+        }
+        const amounts = getAmountsCall(input);
+        const spender = BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId];
+        const details: PermitDetails[] = [];
+
+        for (let i = 0; i < input.amountsIn.length; i++) {
+            details.push(
+                await getDetails(
+                    input.client,
+                    input.amountsIn[i].token.address,
+                    input.owner,
+                    spender,
+                    amounts.maxAmountsIn[i],
+                    input.expirations ? input.expirations[i] : undefined,
+                    input.nonces ? input.nonces[i] : undefined,
+                ),
+            );
+        }
+        return signPermit2(input.client, input.owner, spender, details);
+    }
+
     static async signSwapApproval(
         input: SwapBuildCallInputBase & {
-            client: Client & WalletActions & PublicActions;
+            client: PublicWalletClient;
             owner: Address;
             nonce?: number;
             expiration?: number;

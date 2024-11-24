@@ -12,6 +12,7 @@ export enum PoolType {
     MetaStable = 'MetaStable',
     Stable = 'Stable',
     Weighted = 'Weighted',
+    Boosted = 'Boosted',
 }
 
 export enum SwapKind {

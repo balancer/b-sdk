@@ -1,126 +1,93 @@
-import { encodeFunctionData } from 'viem';
-import { Address, Hex } from '../../types';
-import { Token } from '../token';
-import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../utils';
-import { Relayer } from '../relayer';
-import { encodeCalls } from './encodeCalls';
-import { TokenAmount } from '../tokenAmount';
-import { balancerRelayerAbi } from '../../abi';
-import {
-    AddLiquidityNestedInput,
-    AddLiquidityNestedQueryOutput,
-    AddLiquidityNestedCallInput,
-} from './types';
-import { doAddLiquidityNestedQuery } from './doAddLiquidityNestedQuery';
-import { getQueryCallsAttributes } from './getQueryCallsAttributes';
-import { validateBuildCallInput, validateQueryInput } from './validateInputs';
 import { NestedPoolState } from '../types';
 import { validateNestedPoolState } from '../utils';
+import { AddLiquidityNestedV2 } from './addLiquidityNestedV2';
+import {
+    AddLiquidityNestedBuildCallOutput,
+    AddLiquidityNestedCallInput,
+    AddLiquidityNestedInput,
+    AddLiquidityNestedQueryOutput,
+} from './types';
+import { AddLiquidityNestedV3 } from './addLiquidityNestedV3';
+import { Permit2 } from '../permit2Helper';
+import { AddLiquidityNestedCallInputV3 } from './addLiquidityNestedV3/types';
+import { Slippage } from '../slippage';
+import { Address, Hex } from 'viem';
 
 export class AddLiquidityNested {
     async query(
         input: AddLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
     ): Promise<AddLiquidityNestedQueryOutput> {
-        const amountsIn = validateQueryInput(input, nestedPoolState);
         validateNestedPoolState(nestedPoolState);
-
-        const callsAttributes = getQueryCallsAttributes(
-            input,
-            nestedPoolState.pools,
-        );
-
-        const { encodedCalls } = encodeCalls(callsAttributes);
-
-        // append peek call to get bptOut
-        const peekCall = Relayer.encodePeekChainedReferenceValue(
-            callsAttributes[callsAttributes.length - 1].outputReference,
-        );
-        encodedCalls.push(peekCall);
-
-        const encodedMulticall = encodeFunctionData({
-            abi: balancerRelayerAbi,
-            functionName: 'vaultActionsQueryMulticall',
-            args: [encodedCalls],
-        });
-
-        const peekedValue = await doAddLiquidityNestedQuery(
-            input.chainId,
-            input.rpcUrl,
-            encodedMulticall,
-        );
-
-        const tokenOut = new Token(
-            input.chainId,
-            callsAttributes[callsAttributes.length - 1].poolAddress,
-            18,
-        );
-        const bptOut = TokenAmount.fromRawAmount(tokenOut, peekedValue);
-
-        return { callsAttributes, amountsIn, bptOut };
+        switch (nestedPoolState.protocolVersion) {
+            case 1: {
+                throw new Error(
+                    'AddLiquidityNested not supported for ProtocolVersion 1.',
+                );
+            }
+            case 2: {
+                const addLiquidity = new AddLiquidityNestedV2();
+                return addLiquidity.query(input, nestedPoolState);
+            }
+            case 3: {
+                const addLiquidity = new AddLiquidityNestedV3();
+                return addLiquidity.query(input, nestedPoolState);
+            }
+        }
     }
 
-    buildCall(input: AddLiquidityNestedCallInput): {
-        callData: Hex;
-        to: Address;
-        value: bigint | undefined;
-        minBptOut: bigint;
-    } {
-        validateBuildCallInput(input);
-        // apply slippage to bptOut
-        const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
-
-        // update last call with minBptOut limit in place
-        input.callsAttributes[input.callsAttributes.length - 1] = {
-            ...input.callsAttributes[input.callsAttributes.length - 1],
-            minBptOut,
-        };
-
-        // update wethIsEth flag + sender and recipient placeholders
-        input.callsAttributes = input.callsAttributes.map((call) => {
-            return {
-                ...call,
-                sender:
-                    call.sender === ZERO_ADDRESS
-                        ? input.accountAddress
-                        : call.sender,
-                recipient:
-                    call.recipient === ZERO_ADDRESS
-                        ? input.accountAddress
-                        : call.recipient,
-                wethIsEth: input.wethIsEth,
-            };
-        });
-
-        const { encodedCalls, values } = encodeCalls(input.callsAttributes);
-
-        // prepend relayer approval if provided
-        if (input.relayerApprovalSignature !== undefined) {
-            encodedCalls.unshift(
-                Relayer.encodeSetRelayerApproval(
-                    BALANCER_RELAYER[input.callsAttributes[0].chainId],
-                    true,
-                    input.relayerApprovalSignature,
-                ),
-            );
+    buildCall(
+        input: AddLiquidityNestedCallInput,
+    ): AddLiquidityNestedBuildCallOutput {
+        switch (input.protocolVersion) {
+            case 2: {
+                const addLiquidity = new AddLiquidityNestedV2();
+                return addLiquidity.buildCall(input);
+            }
+            case 3: {
+                const addLiquidity = new AddLiquidityNestedV3();
+                return addLiquidity.buildCall(input);
+            }
         }
+    }
 
-        const callData = encodeFunctionData({
-            abi: balancerRelayerAbi,
-            functionName: 'multicall',
-            args: [encodedCalls],
-        });
+    public buildCallWithPermit2(
+        input: AddLiquidityNestedCallInputV3,
+        permit2: Permit2,
+    ): AddLiquidityNestedBuildCallOutput {
+        const addLiquidity = new AddLiquidityNestedV3();
+        return addLiquidity.buildCallWithPermit2(input, permit2);
+    }
 
-        // aggregate values from all calls
-        const accumulatedValue = values.reduce((acc, value) => {
-            return acc + value;
-        }, 0n);
-
+    /**
+     * Helper to construct AddLiquidityNestedCallInput with proper type resolving.
+     * @param queryOutput
+     * @param params
+     * @returns AddLiquidityNestedCallInput
+     */
+    buildAddLiquidityInput(
+        queryOutput: AddLiquidityNestedQueryOutput,
+        params: {
+            slippage: Slippage;
+            accountAddress?: Address;
+            relayerApprovalSignature?: Hex;
+            wethIsEth?: boolean;
+        },
+    ): AddLiquidityNestedCallInput {
+        if (queryOutput.protocolVersion === 2) {
+            return {
+                ...queryOutput,
+                protocolVersion: 2,
+                slippage: params.slippage,
+                accountAddress: params.accountAddress!,
+                relayerApprovalSignature: params.relayerApprovalSignature,
+                wethIsEth: params.wethIsEth,
+            };
+        }
         return {
-            callData,
-            to: BALANCER_RELAYER[input.callsAttributes[0].chainId],
-            value: accumulatedValue,
-            minBptOut,
+            ...queryOutput,
+            protocolVersion: 3,
+            slippage: params.slippage,
         };
     }
 }

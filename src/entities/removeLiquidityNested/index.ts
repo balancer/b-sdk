@@ -1,154 +1,110 @@
-import { encodeFunctionData } from 'viem';
-
-import { balancerRelayerAbi } from '../../abi';
-import { Address, Hex } from '../../types';
-import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../utils';
-
-import { Relayer } from '../relayer';
-import { TokenAmount } from '../tokenAmount';
-import { NestedPoolState } from '../types';
-import { validateNestedPoolState } from '../utils';
-
-import { encodeCalls } from './encodeCalls';
-import { doRemoveLiquidityNestedQuery } from './doRemoveLiquidityNestedQuery';
-import { getPeekCalls } from './getPeekCalls';
-import { getQueryCallsAttributes } from './getQueryCallsAttributes';
+import { NestedPoolState, Permit, Slippage } from '@/entities';
+import { validateNestedPoolState } from '@/entities/utils';
+import { RemoveLiquidityNestedV2 } from './removeLiquidityNestedV2';
 import {
+    RemoveLiquidityNestedInput,
     RemoveLiquidityNestedQueryOutput,
     RemoveLiquidityNestedCallInput,
-    RemoveLiquidityNestedInput,
+    RemoveLiquidityNestedBuildCallOutput,
 } from './types';
-import { validateQueryInput, validateBuildCallInput } from './validateInputs';
+import { RemoveLiquidityNestedV3 } from './removeLiquidityNestedV3';
+import { validateBuildCallInput } from './removeLiquidityNestedV2/validateInputs';
+import { Address, encodeFunctionData, Hex, zeroAddress } from 'viem';
+import { balancerCompositeLiquidityRouterAbi } from '@/abi';
 
 export class RemoveLiquidityNested {
     async query(
         input: RemoveLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
     ): Promise<RemoveLiquidityNestedQueryOutput> {
-        const isProportional = validateQueryInput(input, nestedPoolState);
         validateNestedPoolState(nestedPoolState);
+        switch (nestedPoolState.protocolVersion) {
+            case 1: {
+                throw new Error(
+                    'RemoveLiquidityNested not supported for ProtocolVersion 1.',
+                );
+            }
+            case 2: {
+                const removeLiquidity = new RemoveLiquidityNestedV2();
+                return removeLiquidity.query(input, nestedPoolState);
+            }
+            case 3: {
+                const removeLiquidity = new RemoveLiquidityNestedV3();
+                return removeLiquidity.query(input, nestedPoolState);
+            }
+        }
+    }
 
-        const { callsAttributes, bptAmountIn } = getQueryCallsAttributes(
-            input,
-            nestedPoolState.pools,
-            isProportional,
-        );
+    buildCall(
+        input: RemoveLiquidityNestedCallInput,
+    ): RemoveLiquidityNestedBuildCallOutput {
+        switch (input.protocolVersion) {
+            case 2: {
+                validateBuildCallInput(input);
+                const removeLiquidity = new RemoveLiquidityNestedV2();
+                return removeLiquidity.buildCall(input);
+            }
+            case 3: {
+                const removeLiquidity = new RemoveLiquidityNestedV3();
+                return removeLiquidity.buildCall(input);
+            }
+        }
+    }
 
-        const encodedCalls = encodeCalls(callsAttributes, isProportional);
+    public buildCallWithPermit(
+        input: RemoveLiquidityNestedCallInput,
+        permit: Permit,
+    ): RemoveLiquidityNestedBuildCallOutput {
+        const buildCallOutput = this.buildCall(input);
 
-        const { peekCalls, tokensOut } = getPeekCalls(
-            callsAttributes,
-            isProportional,
-        );
-
-        // insert peek calls to get amountsOut
-        let tokensOutCount = 0;
-        const tokensOutIndexes: number[] = [];
-        callsAttributes.forEach((call, i) => {
-            tokensOut.forEach((tokenOut, j) => {
-                if (
-                    call.sortedTokens.some((t) =>
-                        t.isSameAddress(tokenOut.address),
-                    )
-                ) {
-                    tokensOutCount++;
-                    encodedCalls.splice(i + tokensOutCount, 0, peekCalls[j]);
-                    tokensOutIndexes.push(i + tokensOutCount);
-                }
-            });
+        const args = [
+            permit.batch,
+            permit.signatures,
+            { details: [], spender: zeroAddress, sigDeadline: 0n },
+            '0x',
+            [buildCallOutput.callData],
+        ] as const;
+        const callData = encodeFunctionData({
+            abi: balancerCompositeLiquidityRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
         });
-
-        const encodedMulticall = encodeFunctionData({
-            abi: balancerRelayerAbi,
-            functionName: 'vaultActionsQueryMulticall',
-            args: [encodedCalls],
-        });
-
-        const peekedValues = await doRemoveLiquidityNestedQuery(
-            input.chainId,
-            input.rpcUrl,
-            encodedMulticall,
-            tokensOutIndexes,
-        );
-
-        const amountsOut = tokensOut.map((tokenOut, i) =>
-            TokenAmount.fromRawAmount(tokenOut, peekedValues[i]),
-        );
 
         return {
-            callsAttributes,
-            bptAmountIn,
-            amountsOut,
-            isProportional,
-            chainId: input.chainId,
+            ...buildCallOutput,
+            callData,
         };
     }
 
-    buildCall(input: RemoveLiquidityNestedCallInput): {
-        callData: Hex;
-        to: Address;
-        minAmountsOut: TokenAmount[];
-    } {
-        validateBuildCallInput(input);
-
-        // apply slippage to amountsOut
-        const minAmountsOut = input.amountsOut.map((amountOut) =>
-            TokenAmount.fromRawAmount(
-                amountOut.token,
-                input.slippage.applyTo(amountOut.amount, -1),
-            ),
-        );
-
-        input.callsAttributes.forEach((call) => {
-            // update relevant calls with minAmountOut limits in place
-            minAmountsOut.forEach((minAmountOut, j) => {
-                const minAmountOutIndex = call.sortedTokens.findIndex((t) =>
-                    t.isSameAddress(minAmountOut.token.address),
-                );
-                if (minAmountOutIndex !== -1) {
-                    call.minAmountsOut[minAmountOutIndex] =
-                        minAmountsOut[j].amount;
-                }
-            });
-            // update wethIsEth flag
-            call.wethIsEth = !!input.wethIsEth;
-            // update sender and recipient placeholders
-            call.sender =
-                call.sender === ZERO_ADDRESS
-                    ? input.accountAddress
-                    : call.sender;
-            call.recipient =
-                call.recipient === ZERO_ADDRESS
-                    ? input.accountAddress
-                    : call.recipient;
-        });
-
-        const encodedCalls = encodeCalls(
-            input.callsAttributes,
-            input.isProportional,
-        );
-
-        // prepend relayer approval if provided
-        if (input.relayerApprovalSignature !== undefined) {
-            encodedCalls.unshift(
-                Relayer.encodeSetRelayerApproval(
-                    BALANCER_RELAYER[input.callsAttributes[0].chainId],
-                    true,
-                    input.relayerApprovalSignature,
-                ),
-            );
+    /**
+     * Helper to construct RemoveLiquidityNestedCallInput with proper type resolving.
+     * @param queryOutput
+     * @param params
+     * @returns RemoveLiquidityNestedCallInput
+     */
+    buildRemoveLiquidityInput(
+        queryOutput: RemoveLiquidityNestedQueryOutput,
+        params: {
+            slippage: Slippage;
+            accountAddress?: Address;
+            relayerApprovalSignature?: Hex;
+            wethIsEth?: boolean;
+        },
+    ): RemoveLiquidityNestedCallInput {
+        if (queryOutput.protocolVersion === 2) {
+            return {
+                ...queryOutput,
+                protocolVersion: 2,
+                slippage: params.slippage,
+                accountAddress: params.accountAddress!,
+                relayerApprovalSignature: params.relayerApprovalSignature,
+                wethIsEth: params.wethIsEth,
+            };
         }
-
-        const callData = encodeFunctionData({
-            abi: balancerRelayerAbi,
-            functionName: 'multicall',
-            args: [encodedCalls],
-        });
-
         return {
-            callData,
-            to: BALANCER_RELAYER[input.callsAttributes[0].chainId],
-            minAmountsOut,
+            ...queryOutput,
+            protocolVersion: 3,
+            slippage: params.slippage,
         };
     }
 }

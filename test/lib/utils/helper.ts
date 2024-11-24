@@ -5,7 +5,6 @@ import {
     PublicActions,
     TestActions,
     TransactionReceipt,
-    WalletActions,
     concat,
     encodeAbiParameters,
     hexToBigInt,
@@ -26,6 +25,8 @@ import {
     PERMIT2,
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    PublicWalletClient,
 } from '@/utils';
 
 export type TxOutput = {
@@ -35,7 +36,7 @@ export type TxOutput = {
 };
 
 export const hasApprovedToken = async (
-    client: Client & PublicActions & WalletActions,
+    client: PublicWalletClient,
     account: Address,
     token: Address,
     spender: Address,
@@ -53,7 +54,7 @@ export const hasApprovedToken = async (
 };
 
 export const hasApprovedTokenOnPermit2 = async (
-    client: Client & PublicActions & WalletActions,
+    client: PublicWalletClient,
     account: Address,
     token: Address,
     spender: Address,
@@ -72,7 +73,7 @@ export const hasApprovedTokenOnPermit2 = async (
 };
 
 export const approveToken = async (
-    client: Client & PublicActions & WalletActions,
+    client: PublicWalletClient,
     accountAddress: Address,
     tokenAddress: Address,
     protocolVersion: 2 | 3,
@@ -118,16 +119,26 @@ export const approveToken = async (
             amount,
             deadline,
         );
+        // Approve CompositeRouter to spend account tokens using Permit2
+        const compositeRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
+            client,
+            accountAddress,
+            tokenAddress,
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            amount,
+            deadline,
+        );
         approved =
             permit2ApprovedOnToken &&
             routerApprovedOnPermit2 &&
-            batchRouterApprovedOnPermit2;
+            batchRouterApprovedOnPermit2 &&
+            compositeRouterApprovedOnPermit2;
     }
     return approved;
 };
 
 export const approveTokens = async (
-    client: Client & PublicActions & WalletActions,
+    client: PublicWalletClient,
     accountAddress: Address,
     tokens: Address[],
     protocolVersion: 2 | 3,
@@ -146,7 +157,7 @@ export const approveTokens = async (
 };
 
 export const approveSpenderOnTokens = async (
-    client: Client & PublicActions & WalletActions,
+    client: PublicWalletClient,
     accountAddress: Address,
     tokens: Address[],
     spender: Address,
@@ -167,7 +178,7 @@ export const approveSpenderOnTokens = async (
 };
 
 export const approveSpenderOnToken = async (
-    client: Client & PublicActions & WalletActions,
+    client: PublicWalletClient,
     account: Address,
     token: Address,
     spender: Address,
@@ -205,7 +216,7 @@ export const approveSpenderOnToken = async (
 };
 
 export const approveSpenderOnPermit2 = async (
-    client: Client & PublicActions & WalletActions,
+    client: PublicWalletClient,
     account: Address,
     token: Address,
     spender: Address,
@@ -287,7 +298,7 @@ export const getBalances = async (
  */
 export async function sendTransactionGetBalances(
     tokensForBalanceCheck: Address[],
-    client: Client & PublicActions & TestActions & WalletActions,
+    client: PublicWalletClient & TestActions,
     clientAddress: Address,
     to: Address,
     data: Address,
@@ -298,6 +309,30 @@ export async function sendTransactionGetBalances(
         client,
         clientAddress,
     );
+
+    // TODO - Leave this in as useful as basis for manual debug
+    // await client.simulateContract({
+    //     address:
+    //         BALANCER_COMPOSITE_LIQUIDITY_ROUTER[client.chain?.id as number],
+    //     abi: [
+    //         ...balancerCompositeLiquidityRouterAbi,
+    //         ...vaultV3Abi,
+    //         ...vaultExtensionAbi_V3,
+    //         ...permit2Abi,
+    //     ],
+    //     functionName: 'addLiquidityUnbalancedNestedPool',
+    //     args: [
+    //         '0x0270daf4ee12ccb1abc8aa365054eecb1b7f4f6b',
+    //         [
+    //             '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8',
+    //             '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
+    //             '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+    //         ],
+    //         [0n, 19000000n, 1000000000000000n],
+    //         0n, // 209352153002437020n,
+    //         '0x',
+    //     ],
+    // });
 
     // Send transaction to local fork
     const hash = await client.sendTransaction({
@@ -488,7 +523,7 @@ export async function findTokenBalanceSlot(
  * @param protocolVersion Balancer vault version
  */
 export const forkSetup = async (
-    client: Client & PublicActions & TestActions & WalletActions,
+    client: PublicWalletClient & TestActions,
     accountAddress: Address,
     tokens: Address[],
     slots: number[] | undefined,
@@ -530,7 +565,7 @@ export const forkSetup = async (
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
  */
 export const forkSetupCowAmm = async (
-    client: Client & PublicActions & TestActions & WalletActions,
+    client: PublicWalletClient & TestActions,
     accountAddress: Address,
     tokens: Address[],
     slots: number[] | undefined,
@@ -564,7 +599,7 @@ export const forkSetupCowAmm = async (
 export const getSlots = async (
     slots: number[] | undefined,
     tokens: Address[],
-    client: Client & PublicActions & TestActions & WalletActions,
+    client: PublicWalletClient & TestActions,
     accountAddress: Address,
     isVyperMapping: boolean[],
 ): Promise<number[]> => {

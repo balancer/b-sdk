@@ -13,7 +13,6 @@ import {
     CHAINS,
     ChainId,
     PoolType,
-    CreatePool,
     CreatePoolInput,
     CreatePoolV2WeightedInput,
 } from 'src';
@@ -40,7 +39,6 @@ describe('Create Weighted Pool tests', () => {
 
         txInput = {
             client,
-            createPool: new CreatePool(),
             testAddress: signerAddress,
             createPoolInput: {} as CreatePoolInput,
         };

@@ -6,6 +6,7 @@ import { CHAINS, VAULT_V3 } from '@/utils';
 import { getSortedTokens } from './getSortedTokens';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { vaultExtensionAbi_V3 } from '@/abi';
+import { TokenAmount } from '../tokenAmount';
 
 export const getPoolStateWithBalancesV3 = async (
     poolState: PoolState,
@@ -40,9 +41,12 @@ export const getPoolStateWithBalancesV3 = async (
     }
 
     const totalShares = outputs[0].result as bigint;
-    const balances = outputs[1].result as bigint[];
+    const balancesScale18 = outputs[1].result as bigint[];
 
     const sortedTokens = getSortedTokens(poolState.tokens, chainId);
+    const balances = sortedTokens.map((token, i) =>
+        TokenAmount.fromScale18Amount(token, balancesScale18[i]),
+    );
 
     const poolStateWithBalances: PoolStateWithBalances = {
         ...poolState,
@@ -50,7 +54,10 @@ export const getPoolStateWithBalancesV3 = async (
             address: token.address,
             decimals: token.decimals,
             index: i,
-            balance: formatUnits(balances[i], token.decimals) as HumanAmount,
+            balance: formatUnits(
+                balances[i].amount,
+                token.decimals,
+            ) as HumanAmount,
         })),
         totalShares: formatEther(totalShares) as HumanAmount,
     };

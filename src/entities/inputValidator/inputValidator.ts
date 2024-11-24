@@ -6,14 +6,16 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '../removeLiquidity/types';
-import { PoolState } from '../types';
+import { PoolState, PoolStateWithUnderlyings } from '../types';
 import { InputValidatorComposableStable } from './composableStable/inputValidatorComposableStable';
 import { InputValidatorCowAmm } from './cowAmm/inputValidatorCowAmm';
 import { InputValidatorGyro } from './gyro/inputValidatorGyro';
 import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
+import { InputValidatorBoosted } from './boosted/inputValidatorBoosted';
 import { ChainId, buildCallWithPermit2ProtocolVersionError } from '@/utils';
+import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
 
 export class InputValidator {
     validators: Record<string, InputValidatorBase> = {};
@@ -28,6 +30,7 @@ export class InputValidator {
             [PoolType.MetaStable]: new InputValidatorStable(),
             [PoolType.Stable]: new InputValidatorStable(),
             [PoolType.Weighted]: new InputValidatorWeighted(),
+            [PoolType.Boosted]: new InputValidatorBoosted(),
         };
     }
 
@@ -85,6 +88,20 @@ export class InputValidator {
     validateCreatePool(input: CreatePoolInput): void {
         this.validateChain(input.chainId);
         this.getValidator(input.poolType).validateCreatePool(input);
+    }
+
+    validateAddLiquidityBoosted(
+        addLiquidityInput: AddLiquidityBoostedInput,
+        poolState: PoolStateWithUnderlyings,
+    ): void {
+        if (poolState.type !== PoolType.Boosted)
+            throw new Error(
+                `validateAddLiquidityBoosted on non boosted pool: ${poolState.address}:${poolState.type}`,
+            );
+        this.validateChain(addLiquidityInput.chainId);
+        (
+            this.validators[PoolType.Boosted] as InputValidatorBoosted
+        ).validateAddLiquidityBoosted(addLiquidityInput, poolState);
     }
 
     private validateChain(chainId: number): void {

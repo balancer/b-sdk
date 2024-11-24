@@ -1,13 +1,5 @@
-import {
-    Client,
-    concat,
-    pad,
-    parseSignature,
-    PublicActions,
-    toHex,
-    WalletActions,
-} from 'viem';
-import { MAX_UINT256, VAULT } from '../../utils';
+import { concat, pad, parseSignature, toHex } from 'viem';
+import { MAX_UINT256, VAULT, PublicWalletClient } from '../../utils';
 import { Address, Hex } from '../../types';
 import { vaultV2Abi } from '../../abi';
 
@@ -47,7 +39,7 @@ export class RelayerAuthorization {
     };
 
     static signJoinAuthorization = (
-        client: Client & WalletActions & PublicActions,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -65,7 +57,7 @@ export class RelayerAuthorization {
         );
 
     static signExitAuthorization = (
-        client: Client & WalletActions & PublicActions,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -83,7 +75,7 @@ export class RelayerAuthorization {
         );
 
     static signSwapAuthorization = (
-        client: Client & WalletActions & PublicActions,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -101,7 +93,7 @@ export class RelayerAuthorization {
         );
 
     static signBatchSwapAuthorization = (
-        client: Client & WalletActions & PublicActions,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -119,7 +111,7 @@ export class RelayerAuthorization {
         );
 
     static signSetRelayerApprovalAuthorization = (
-        client: Client & WalletActions & PublicActions,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,
@@ -138,7 +130,7 @@ export class RelayerAuthorization {
 
     static signAuthorizationFor = async (
         type: RelayerAction,
-        client: Client & WalletActions & PublicActions,
+        client: PublicWalletClient,
         signerAddress: Address,
         allowedSender: Address,
         allowedCalldata: Hex,

@@ -116,6 +116,7 @@ describe('remove liquidity stable test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
     });
@@ -149,6 +150,7 @@ describe('remove liquidity stable test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
     });
@@ -181,6 +183,7 @@ describe('remove liquidity stable test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
     });
@@ -211,6 +214,7 @@ describe('remove liquidity stable test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
     });

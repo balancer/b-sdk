@@ -1,6 +1,5 @@
-import { createPublicClient, http } from 'viem';
-import { AddLiquidityUnbalancedInput } from '../types';
-import { BALANCER_ROUTER, CHAINS } from '@/utils';
+import { createPublicClient, Hex, http } from 'viem';
+import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
 import {
     balancerRouterAbi,
     permit2Abi,
@@ -10,7 +9,10 @@ import {
 import { Address } from '@/types';
 
 export const doAddLiquidityUnbalancedQuery = async (
-    { rpcUrl, chainId }: AddLiquidityUnbalancedInput,
+    rpcUrl: string,
+    chainId: ChainId,
+    sender: Address,
+    userData: Hex,
     poolAddress: Address,
     maxAmountsIn: bigint[],
 ) => {
@@ -28,7 +30,7 @@ export const doAddLiquidityUnbalancedQuery = async (
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquidityUnbalanced',
-        args: [poolAddress, maxAmountsIn, '0x'],
+        args: [poolAddress, maxAmountsIn, sender, userData],
     });
     return bptAmountOut;
 };

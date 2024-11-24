@@ -1,12 +1,11 @@
-import { Client, PublicActions, TestActions, WalletActions } from 'viem';
+import { PublicWalletClient } from '@/utils/types';
+import { TestActions } from 'viem';
 import {
     AddLiquidity,
     AddLiquidityInput,
     Address,
     ChainId,
-    CreatePool,
     CreatePoolInput,
-    InitPool,
     InitPoolInput,
     NestedPoolState,
     PoolState,
@@ -17,7 +16,7 @@ import {
 } from '@/.';
 
 export type AddLiquidityTxInput = {
-    client: Client & PublicActions & TestActions & WalletActions;
+    client: PublicWalletClient & TestActions;
     addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
     slippage: Slippage;
@@ -33,11 +32,10 @@ export type InitPoolTxInput = Omit<
     'addLiquidity' | 'addLiquidityInput'
 > & {
     initPoolInput: InitPoolInput;
-    initPool: InitPool;
 };
 
 export type RemoveLiquidityTxInputBase = {
-    client: Client & PublicActions & TestActions & WalletActions;
+    client: PublicWalletClient & TestActions;
     removeLiquidity: RemoveLiquidity;
     poolState: PoolState;
     slippage: Slippage;
@@ -56,8 +54,7 @@ export type RemoveLiquidityRecoveryTxInput = RemoveLiquidityTxInputBase & {
 };
 
 export type CreatePoolTxInput = {
-    client: Client & PublicActions & TestActions & WalletActions;
-    createPool: CreatePool;
+    client: PublicWalletClient & TestActions;
     createPoolInput: CreatePoolInput;
     testAddress: Address;
 };
@@ -72,6 +69,6 @@ export type AddLiquidityNestedTxInput = {
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
-    client: Client & PublicActions & TestActions & WalletActions;
+    client: PublicWalletClient & TestActions;
     wethIsEth?: boolean;
 };
