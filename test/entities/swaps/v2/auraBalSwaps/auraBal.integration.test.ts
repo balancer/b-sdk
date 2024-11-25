@@ -1,11 +1,14 @@
 // pnpm test -- auraBal.integration.test.ts
 import {
     createTestClient,
+    Hex,
     http,
     publicActions,
+    TestActions,
     walletActions,
     zeroAddress,
 } from 'viem';
+
 import {
     Relayer,
     Slippage,
@@ -17,6 +20,7 @@ import {
     NATIVE_ASSETS,
     SwapKind,
     ChainId,
+    PublicWalletClient,
 } from '@/index';
 
 import {
@@ -32,54 +36,67 @@ const weth = new Token(chainId, NATIVE_ASSETS[chainId].wrapped, 18);
 
 describe('auraBalSwaps:Integration tests', () => {
     let rpcUrl: string;
+    let snapshot: Hex;
+    let client: PublicWalletClient & TestActions;
+
     beforeAll(async () => {
         // setup chain and test client
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET));
+
+        client = createTestClient({
+            mode: 'anvil',
+            chain: CHAINS[chainId],
+            transport: http(rpcUrl),
+        })
+            .extend(publicActions)
+            .extend(walletActions);
+
+        snapshot = await client.snapshot();
+    });
+
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
     });
 
     describe('to auraBal', () => {
         test('from bal', async () => {
-            await testAuraBalSwap(bal, auraBalToken, 1, rpcUrl);
+            await testAuraBalSwap(client, bal, auraBalToken, 1, rpcUrl);
         });
 
         test('from weth', async () => {
-            await testAuraBalSwap(weth, auraBalToken, 3, rpcUrl);
+            await testAuraBalSwap(client, weth, auraBalToken, 3, rpcUrl);
         });
         test('from weth, wethIsEth=true', async () => {
-            await testAuraBalSwap(weth, auraBalToken, 3, rpcUrl, true);
+            await testAuraBalSwap(client, weth, auraBalToken, 3, rpcUrl, true);
         });
     });
 
     describe('from auraBal', () => {
         test('to bal', async () => {
-            await testAuraBalSwap(auraBalToken, bal, 0, rpcUrl);
+            await testAuraBalSwap(client, auraBalToken, bal, 0, rpcUrl);
         });
 
         test('to weth', async () => {
-            await testAuraBalSwap(auraBalToken, weth, 0, rpcUrl);
+            await testAuraBalSwap(client, auraBalToken, weth, 0, rpcUrl);
         });
 
         test('to weth, wethIsEth=true', async () => {
-            await testAuraBalSwap(auraBalToken, weth, 0, rpcUrl, true);
+            await testAuraBalSwap(client, auraBalToken, weth, 0, rpcUrl, true);
         });
     });
 });
 
 async function testAuraBalSwap(
+    client: PublicWalletClient & TestActions,
     tokenIn: Token,
     tokenOut: Token,
     tokenInSlot: number,
     rpcUrl: string,
     wethIsEth = false,
 ) {
-    const client = createTestClient({
-        mode: 'anvil',
-        chain: CHAINS[chainId],
-        transport: http(rpcUrl),
-    })
-        .extend(publicActions)
-        .extend(walletActions);
-
     const testAddress = (await client.getAddresses())[0];
     const auraBalSwap = new AuraBalSwap(rpcUrl);
     const swapAmount = TokenAmount.fromHumanAmount(tokenIn, '1');

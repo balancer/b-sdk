@@ -438,6 +438,7 @@ describe('add liquidity test', () => {
                 );
             });
         });
+
         describe('add liquidity proportional', () => {
             let addLiquidityInput: AddLiquidityProportionalInput;
             beforeAll(() => {

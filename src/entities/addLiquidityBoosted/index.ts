@@ -11,7 +11,11 @@ import { getAmountsCall } from '../addLiquidity/helpers';
 
 import { PoolStateWithUnderlyings } from '@/entities/types';
 
-import { getAmounts, getSortedTokens } from '@/entities/utils';
+import {
+    getAmounts,
+    getBptAmountFromReferenceAmountBoosted,
+    getSortedTokens,
+} from '@/entities/utils';
 
 import {
     AddLiquidityBuildCallOutput,
@@ -89,10 +93,10 @@ export class AddLiquidityBoostedV3 {
                 break;
             }
             case AddLiquidityKind.Proportional: {
-                if (input.referenceAmount.address !== poolState.address) {
-                    // TODO: add getBptAmountFromReferenceAmount
-                    throw new Error('Reference token must be the pool token');
-                }
+                const bptAmount = await getBptAmountFromReferenceAmountBoosted(
+                    input,
+                    poolState,
+                );
 
                 const exactAmountsInNumbers =
                     await doAddLiquidityProportionalQuery(
@@ -101,7 +105,7 @@ export class AddLiquidityBoostedV3 {
                         input.sender ?? zeroAddress,
                         input.userData ?? '0x',
                         poolState.address,
-                        input.referenceAmount.rawAmount,
+                        bptAmount.rawAmount,
                     );
 
                 // Amounts are mapped to child tokens of the pool
@@ -114,7 +118,7 @@ export class AddLiquidityBoostedV3 {
 
                 bptOut = TokenAmount.fromRawAmount(
                     bptToken,
-                    input.referenceAmount.rawAmount,
+                    bptAmount.rawAmount,
                 );
                 break;
             }

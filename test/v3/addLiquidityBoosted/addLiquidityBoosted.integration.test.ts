@@ -177,7 +177,7 @@ describe('Boosted AddLiquidity', () => {
             });
         });
         describe('add liquidity proportional', () => {
-            test('with tokens', async () => {
+            test('with bpt', async () => {
                 const addLiquidityProportionalInput: AddLiquidityBoostedInput =
                     {
                         chainId,
@@ -200,7 +200,7 @@ describe('Boosted AddLiquidity', () => {
                     };
 
                 const addLiquidityBuildCallOutput =
-                    await addLiquidityBoosted.buildCall(addLiquidityBuildInput);
+                    addLiquidityBoosted.buildCall(addLiquidityBuildInput);
 
                 const { transactionReceipt, balanceDeltas } =
                     await sendTransactionGetBalances(
@@ -223,6 +223,90 @@ describe('Boosted AddLiquidity', () => {
 
                 const expectedDeltas = [
                     addLiquidityProportionalInput.referenceAmount.rawAmount,
+                    ...addLiquidityQueryOutput.amountsIn.map(
+                        (tokenAmount) => tokenAmount.amount,
+                    ),
+                ];
+                expect(balanceDeltas).to.deep.eq(expectedDeltas);
+
+                const slippageAdjustedQueryInput =
+                    addLiquidityQueryOutput.amountsIn.map((amountsIn) => {
+                        return Slippage.fromPercentage('1').applyTo(
+                            amountsIn.amount,
+                            1,
+                        );
+                    });
+                expect(
+                    addLiquidityBuildCallOutput.maxAmountsIn.map(
+                        (a) => a.amount,
+                    ),
+                ).to.deep.eq(slippageAdjustedQueryInput);
+
+                // make sure to pass Tokens in correct order. Same as poolTokens but as underlyings instead
+                assertTokenMatch(
+                    [
+                        new Token(
+                            111555111,
+                            USDC.address as Address,
+                            USDC.decimals,
+                        ),
+                        new Token(
+                            111555111,
+                            USDT.address as Address,
+                            USDT.decimals,
+                        ),
+                    ],
+                    addLiquidityBuildCallOutput.maxAmountsIn.map(
+                        (a) => a.token,
+                    ),
+                );
+            });
+            test('with reference token (non bpt)', async () => {
+                const addLiquidityProportionalInput: AddLiquidityBoostedInput =
+                    {
+                        chainId,
+                        rpcUrl,
+                        referenceAmount: {
+                            rawAmount: 481201n,
+                            decimals: 6,
+                            address: USDC.address,
+                        },
+                        kind: AddLiquidityKind.Proportional,
+                    };
+                const addLiquidityQueryOutput = await addLiquidityBoosted.query(
+                    addLiquidityProportionalInput,
+                    boostedPool_USDC_USDT,
+                );
+                const addLiquidityBuildInput: AddLiquidityBoostedBuildCallInput =
+                    {
+                        ...addLiquidityQueryOutput,
+                        slippage: Slippage.fromPercentage('1'),
+                    };
+
+                const addLiquidityBuildCallOutput =
+                    addLiquidityBoosted.buildCall(addLiquidityBuildInput);
+
+                const { transactionReceipt, balanceDeltas } =
+                    await sendTransactionGetBalances(
+                        [
+                            addLiquidityQueryOutput.bptOut.token.address,
+                            USDC.address as `0x${string}`,
+                            USDT.address as `0x${string}`,
+                        ],
+                        client,
+                        testAddress,
+                        addLiquidityBuildCallOutput.to, //
+                        addLiquidityBuildCallOutput.callData,
+                    );
+
+                expect(transactionReceipt.status).to.eq('success');
+
+                addLiquidityQueryOutput.amountsIn.map((a) => {
+                    expect(a.amount > 0n).to.be.true;
+                });
+
+                const expectedDeltas = [
+                    addLiquidityQueryOutput.bptOut.amount,
                     ...addLiquidityQueryOutput.amountsIn.map(
                         (tokenAmount) => tokenAmount.amount,
                     ),
