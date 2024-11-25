@@ -63,11 +63,7 @@ describe('V3 add liquidity partial boosted', () => {
 
     beforeAll(async () => {
         // setup chain and test client
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            7010800n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
 
         client = createTestClient({
             mode: 'anvil',
