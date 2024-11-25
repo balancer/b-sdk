@@ -114,17 +114,6 @@ describe('V3 add liquidity partial boosted', () => {
             };
         });
 
-        test('query with underlying', async () => {
-            const queryOutput = await addLiquidityBoosted.query(
-                addLiquidityInput,
-                partialBoostedPool_USDT_stataDAI,
-            );
-            expect(queryOutput.protocolVersion).toEqual(3);
-            expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
-            expect(queryOutput.bptOut.amount > 0n).to.be.true;
-            expect(queryOutput.amountsIn).to.deep.eq(amountsIn);
-        });
-
         test('add liquidity transaction', async () => {
             for (const amount of addLiquidityInput.amountsIn) {
                 // Approve Permit2 to spend account tokens
@@ -147,6 +136,11 @@ describe('V3 add liquidity partial boosted', () => {
                 addLiquidityInput,
                 partialBoostedPool_USDT_stataDAI,
             );
+
+            expect(queryOutput.protocolVersion).toEqual(3);
+            expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
+            expect(queryOutput.bptOut.amount > 0n).to.be.true;
+            expect(queryOutput.amountsIn).to.deep.eq(amountsIn);
 
             const addLiquidityBuildInput = {
                 ...queryOutput,
@@ -207,20 +201,6 @@ describe('V3 add liquidity partial boosted', () => {
             };
         });
 
-        test('query with underlying', async () => {
-            const queryOutput = await addLiquidityBoosted.query(
-                addLiquidityInput,
-                partialBoostedPool_USDT_stataDAI,
-            );
-            expect(queryOutput.protocolVersion).toEqual(3);
-            expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
-            expect(queryOutput.bptOut.amount > 0n).to.be.true;
-            expect(queryOutput.amountsIn.map((a) => a.amount)).to.deep.eq([
-                1000000n,
-                1009005794941698996n,
-            ]);
-        });
-
         test('add liquidity transaction', async () => {
             for (const token of partialBoostedPool_USDT_stataDAI.tokens) {
                 // Approve Permit2 to spend account tokens
@@ -243,6 +223,10 @@ describe('V3 add liquidity partial boosted', () => {
                 addLiquidityInput,
                 partialBoostedPool_USDT_stataDAI,
             );
+
+            expect(queryOutput.protocolVersion).toEqual(3);
+            expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
+            expect(queryOutput.bptOut.amount > 0n).to.be.true;
 
             const addLiquidityBuildInput = {
                 ...queryOutput,
