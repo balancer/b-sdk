@@ -18,7 +18,7 @@ import {
 } from '@/entities/utils';
 
 import {
-    AddLiquidityBuildCallOutput,
+    AddLiquidityBoostedV3BuildCallOutput,
     AddLiquidityKind,
 } from '../addLiquidity/types';
 
@@ -141,7 +141,7 @@ export class AddLiquidityBoostedV3 {
 
     buildCall(
         input: AddLiquidityBoostedBuildCallInput,
-    ): AddLiquidityBuildCallOutput {
+    ): AddLiquidityBoostedV3BuildCallOutput {
         const amounts = getAmountsCall(input);
         const args = [
             input.poolId,
@@ -174,6 +174,7 @@ export class AddLiquidityBoostedV3 {
         }
         return {
             callData,
+            args,
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             value: 0n, // Default to 0 as native not supported
             minBptOut: TokenAmount.fromRawAmount(
@@ -189,7 +190,7 @@ export class AddLiquidityBoostedV3 {
     public buildCallWithPermit2(
         input: AddLiquidityBoostedBuildCallInput,
         permit2: Permit2,
-    ): AddLiquidityBuildCallOutput {
+    ): AddLiquidityBoostedV3BuildCallOutput {
         // generate same calldata as buildCall
         const buildCallOutput = this.buildCall(input);
 
