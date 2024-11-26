@@ -1,4 +1,5 @@
 import {
+    Address,
     PublicClient,
     createPublicClient,
     encodeFunctionData,
@@ -31,7 +32,11 @@ import {
     SwapInput,
 } from '../../types';
 import { PathWithAmount } from '../../paths/pathWithAmount';
-import { getInputAmount, getOutputAmount } from '../../paths/pathHelpers';
+import {
+    getInputAmount,
+    getOutputAmount,
+    isBatchSwap,
+} from '../../paths/pathHelpers';
 import {
     SingleTokenExactIn,
     SingleTokenExactOut,
@@ -74,7 +79,11 @@ export class SwapV3 implements SwapBase {
         this.swapKind = swapKind;
         this.inputAmount = getInputAmount(this.paths);
         this.outputAmount = getOutputAmount(this.paths);
-        this.isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
+        this.isBatchSwap = isBatchSwap(
+            paths,
+            this.inputAmount.token.address,
+            this.outputAmount.token.address,
+        );
         this.swaps = this.getSwaps(this.paths);
         this.userData = userData;
     }
@@ -102,6 +111,7 @@ export class SwapV3 implements SwapBase {
     public async query(
         rpcUrl?: string,
         block?: bigint,
+        sender?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const client = createPublicClient({
             chain: CHAINS[this.chainId],
@@ -109,13 +119,14 @@ export class SwapV3 implements SwapBase {
         });
 
         return this.isBatchSwap
-            ? this.queryBatchSwap(client, block)
-            : this.querySingleSwap(client, block);
+            ? this.queryBatchSwap(client, block, sender)
+            : this.querySingleSwap(client, block, sender);
     }
 
     private async querySingleSwap(
         client: PublicClient,
         block?: bigint,
+        sender?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
             address: BALANCER_ROUTER[this.chainId],
@@ -135,12 +146,13 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountIn,
-                        zeroAddress,
+                        sender ?? zeroAddress,
                         this.userData,
                     ],
                     { blockNumber: block },
                 );
             return {
+                to: BALANCER_ROUTER[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -157,12 +169,13 @@ export class SwapV3 implements SwapBase {
                         this.swaps.tokenIn,
                         this.swaps.tokenOut,
                         this.swaps.exactAmountOut,
-                        zeroAddress,
+                        sender ?? zeroAddress,
                         this.userData,
                     ],
                     { blockNumber: block },
                 );
             return {
+                to: BALANCER_ROUTER[this.chainId],
                 swapKind: SwapKind.GivenOut,
                 expectedAmountIn: TokenAmount.fromRawAmount(
                     this.inputAmount.token,
@@ -210,6 +223,7 @@ export class SwapV3 implements SwapBase {
     private async queryBatchSwap(
         client: PublicClient,
         block?: bigint,
+        sender?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         // Note - batchSwaps are made via the Batch Router
         const batchRouterContract = getContract({
@@ -233,7 +247,7 @@ export class SwapV3 implements SwapBase {
                 await batchRouterContract.simulate.querySwapExactIn(
                     [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
-                        zeroAddress,
+                        sender ?? zeroAddress,
                         this.userData,
                     ],
                     { blockNumber: block },
@@ -245,6 +259,7 @@ export class SwapV3 implements SwapBase {
                 );
 
             return {
+                to: BALANCER_BATCH_ROUTER[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -258,7 +273,7 @@ export class SwapV3 implements SwapBase {
         const { result } = await batchRouterContract.simulate.querySwapExactOut(
             [
                 swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
-                zeroAddress,
+                sender ?? zeroAddress,
                 this.userData,
             ],
             { blockNumber: block },
@@ -270,6 +285,7 @@ export class SwapV3 implements SwapBase {
             );
 
         return {
+            to: BALANCER_BATCH_ROUTER[this.chainId],
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,

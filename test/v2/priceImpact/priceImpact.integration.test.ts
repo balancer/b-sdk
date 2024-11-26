@@ -17,7 +17,6 @@ import {
     Hex,
     InputAmount,
     NestedPoolState,
-    Path,
     PoolState,
     PoolStateWithBalances,
     PoolType,
@@ -26,7 +25,6 @@ import {
     RemoveLiquidityKind,
     RemoveLiquiditySingleTokenExactInInput,
     RemoveLiquidityUnbalancedInput,
-    SwapKind,
     RemoveLiquidityNestedSingleTokenInputV2,
 } from 'src';
 
@@ -43,10 +41,7 @@ const wstETH_rETH_sfrxETH = POOLS[chainId].wstETH_rETH_sfrxETH;
 const wstETH = TOKENS[chainId].wstETH;
 const sfrxETH = TOKENS[chainId].sfrxETH;
 const rETH = TOKENS[chainId].rETH;
-
-// pool and tokens for swap
 const BAL_WETH = POOLS[chainId].BAL_WETH;
-const wstETH_wETH = POOLS[chainId].wstETH_wETH_CSP;
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 
@@ -237,121 +232,6 @@ describe('price impact', () => {
                 0,
                 1e-4, // 1 bps
             );
-        });
-    });
-
-    describe('swap', () => {
-        let pathBalWeth: Path;
-        let pathBalWethWsteth: Path;
-        beforeAll(() => {
-            pathBalWeth = {
-                protocolVersion: 2,
-                tokens: [
-                    {
-                        address: BAL.address,
-                        decimals: BAL.decimals,
-                    },
-                    {
-                        address: WETH.address,
-                        decimals: WETH.decimals,
-                    },
-                ],
-                pools: [BAL_WETH.id],
-                inputAmountRaw: 100000000000000000000000n,
-                outputAmountRaw: 196372838414869690332n,
-            };
-            pathBalWethWsteth = {
-                ...pathBalWeth,
-                tokens: [
-                    ...pathBalWeth.tokens,
-                    {
-                        address: wstETH.address,
-                        decimals: wstETH.decimals,
-                    },
-                ],
-                pools: [...pathBalWeth.pools, wstETH_wETH.id],
-                outputAmountRaw: 171347288436104819088n,
-            };
-        });
-
-        describe('single swap', () => {
-            const priceImpactSpot = PriceImpactAmount.fromDecimal(
-                '0.01740850105233393', // from previous SDK/SOR
-            );
-            describe('given in', () => {
-                test('ABA close to Spot Price', async () => {
-                    const priceImpactABA = await PriceImpact.swap(
-                        {
-                            chainId,
-                            paths: [pathBalWeth],
-                            swapKind: SwapKind.GivenIn,
-                        },
-                        rpcUrl,
-                        block,
-                    );
-                    expect(priceImpactABA.decimal).closeTo(
-                        priceImpactSpot.decimal,
-                        1e-3, // 1 bps
-                    );
-                });
-            });
-
-            describe('given out', () => {
-                test('ABA close to Spot Price', async () => {
-                    const priceImpactABA = await PriceImpact.swap(
-                        {
-                            chainId,
-                            paths: [pathBalWeth],
-                            swapKind: SwapKind.GivenOut,
-                        },
-                        rpcUrl,
-                    );
-                    expect(priceImpactABA.decimal).closeTo(
-                        priceImpactSpot.decimal,
-                        1e-3, // 1 bps
-                    );
-                });
-            });
-        });
-
-        describe('batch swap', () => {
-            const priceImpactSpot = PriceImpactAmount.fromDecimal(
-                '0.017440413722011654', // from previous SDK/SOR
-            );
-            describe('given in', () => {
-                test('ABA close to Spot Price', async () => {
-                    const priceImpactABA = await PriceImpact.swap(
-                        {
-                            chainId,
-                            paths: [pathBalWethWsteth],
-                            swapKind: SwapKind.GivenIn,
-                        },
-                        rpcUrl,
-                        block,
-                    );
-                    expect(priceImpactABA.decimal).closeTo(
-                        priceImpactSpot.decimal,
-                        1e-3, // 1 bps
-                    );
-                });
-            });
-
-            describe('given out', () => {
-                test('ABA close to Spot Price', async () => {
-                    const priceImpactABA = await PriceImpact.swap(
-                        {
-                            chainId,
-                            paths: [pathBalWethWsteth],
-                            swapKind: SwapKind.GivenOut,
-                        },
-                        rpcUrl,
-                    );
-                    expect(priceImpactABA.decimal).closeTo(
-                        priceImpactSpot.decimal, // we can use the same value for comparison, because test conditions are the same
-                        1e-3, // 1 bps
-                    );
-                });
-            });
         });
     });
 

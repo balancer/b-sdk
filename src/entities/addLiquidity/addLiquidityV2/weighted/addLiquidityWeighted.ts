@@ -63,6 +63,7 @@ export class AddLiquidityWeighted implements AddLiquidityBase {
         );
 
         return {
+            to: VAULT[input.chainId],
             poolType: poolState.type,
             addLiquidityKind: input.kind,
             poolId: poolState.id,

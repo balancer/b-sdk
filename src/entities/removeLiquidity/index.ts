@@ -1,12 +1,12 @@
 import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildCallOutput,
-    RemoveLiquidityBuildCallInput,
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
     RemoveLiquidityProportionalInput,
+    RemoveLiquidityBaseBuildCallInput,
 } from './types';
 import { PoolState } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
@@ -14,6 +14,8 @@ import { RemoveLiquidityV2 } from './removeLiquidityV2';
 import { RemoveLiquidityV3 } from './removeLiquidityV3';
 import { RemoveLiquidityCowAmm } from './removeLiquidityCowAmm';
 import { Permit } from '../permitHelper';
+import { RemoveLiquidityV2BuildCallInput } from './removeLiquidityV2/types';
+import { Hex } from 'viem';
 
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -78,7 +80,10 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityBuildCallInput,
+        input:
+            | RemoveLiquidityBaseBuildCallInput
+            | RemoveLiquidityV2BuildCallInput
+            | (RemoveLiquidityBaseBuildCallInput & { userData: Hex }),
     ): RemoveLiquidityBuildCallOutput {
         const isV2Input = 'sender' in input;
         switch (input.protocolVersion) {
@@ -95,6 +100,10 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
             }
             case 3: {
                 if (!isV2Input) {
+                    if (!('userData' in input))
+                        throw new Error(
+                            'UserData must be provided in buildCall input',
+                        );
                     const removeLiquidity = new RemoveLiquidityV3();
                     return removeLiquidity.buildCall(input);
                 }
@@ -106,10 +115,15 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     }
 
     public buildCallWithPermit(
-        input: RemoveLiquidityBuildCallInput,
+        input:
+            | RemoveLiquidityBaseBuildCallInput
+            | RemoveLiquidityV2BuildCallInput
+            | (RemoveLiquidityBaseBuildCallInput & { userData: Hex }),
         permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
         if (input.protocolVersion === 3) {
+            if (!('userData' in input))
+                throw new Error('UserData must be provided in buildCall input');
             const removeLiquidity = new RemoveLiquidityV3();
             return removeLiquidity.buildCallWithPermit(input, permit);
         }

@@ -48,6 +48,7 @@ export type RemoveLiquidityNestedQueryOutputV2 = {
     amountsOut: TokenAmount[];
     isProportional: boolean;
     chainId: ChainId;
+    to: Address;
 };
 
 export type RemoveLiquidityNestedCallInputV2 =

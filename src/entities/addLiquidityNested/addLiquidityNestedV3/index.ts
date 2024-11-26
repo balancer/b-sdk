@@ -30,6 +30,12 @@ import { validateQueryInput } from '../addLiquidityNestedV2/validateInputs';
 import { Permit2 } from '@/entities/permit2Helper';
 
 export class AddLiquidityNestedV3 {
+    /**
+     *
+     * @param input amountsIn can be any order and does not need all tokens. Tokens must be tokens of child pools and must not be BPT.
+     * @param nestedPoolState
+     * @returns
+     */
     async query(
         input: AddLiquidityNestedInputV3,
         nestedPoolState: NestedPoolState,
@@ -62,6 +68,7 @@ export class AddLiquidityNestedV3 {
         const bptToken = new Token(input.chainId, parentPool.address, 18);
 
         return {
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             parentPool: parentPool.address,
             chainId: input.chainId,
             amountsIn: mainTokens.map((t, i) =>

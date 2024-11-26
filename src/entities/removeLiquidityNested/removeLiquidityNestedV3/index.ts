@@ -51,6 +51,7 @@ export class RemoveLiquidityNestedV3 {
             );
 
         return {
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             protocolVersion: 3,
             bptAmountIn: TokenAmount.fromRawAmount(bptToken, input.bptAmountIn),
             chainId: input.chainId,

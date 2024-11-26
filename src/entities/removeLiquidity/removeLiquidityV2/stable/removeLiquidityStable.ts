@@ -60,6 +60,7 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
         );
 
         return {
+            to: VAULT[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -98,6 +99,7 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
             ),
         );
         return {
+            to: VAULT[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,

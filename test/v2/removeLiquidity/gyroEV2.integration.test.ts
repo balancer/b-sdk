@@ -109,6 +109,7 @@ describe('GyroE V2 remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
         test('with native', async () => {
@@ -126,6 +127,7 @@ describe('GyroE V2 remove liquidity test', () => {
                 removeLiquidityInput,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );

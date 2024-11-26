@@ -211,11 +211,11 @@ export const BALANCER_ROUTER: Record<number, Address> = {
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x58b9e59a33AE8eF9b6B039118972a2C76F4c75D8',
+    [ChainId.SEPOLIA]: '0xB3AA271349c78FAe6180898dA1689C920573c937',
 };
 
 export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x45c27274296DE024755CF8c0017D136Ee0FA55f6',
+    [ChainId.SEPOLIA]: '0xF83E3216458C695a5dAa81094AeF8Ef109290e51',
 };
 
 export const PERMIT2: Record<number, Address> = {

@@ -1,4 +1,6 @@
 import {
+    BALANCER_ROUTER,
+    ChainId,
     NATIVE_ASSETS,
     PoolState,
     RemoveLiquidityBuildCallInput,
@@ -8,6 +10,7 @@ import {
     Slippage,
     Token,
     TokenAmount,
+    VAULT,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances } from './helper';
@@ -19,6 +22,7 @@ import {
     assertTokenDeltas,
     getCheck,
 } from './removeLiquidityHelper';
+import { Hex } from 'viem';
 
 export const sdkRemoveLiquidityRecovery = async ({
     removeLiquidity,
@@ -120,6 +124,7 @@ export function assertRemoveLiquidityRecovery(
     removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
     removeLiquidityOutput: RemoveLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -135,10 +140,11 @@ export function assertRemoveLiquidityRecovery(
         18,
     );
 
-    const expectedQueryOutput: Omit<
-        RemoveLiquidityQueryOutput,
-        'amountsOut' | 'bptIndex'
-    > = {
+    let expectedQueryOutput:
+        | Omit<RemoveLiquidityQueryOutput, 'amountsOut' | 'bptIndex'>
+        | (Omit<RemoveLiquidityQueryOutput, 'amountsOut' | 'bptIndex'> & {
+              userData: Hex;
+          }) = {
         // Query should use same bpt out as user sets
         bptIn: TokenAmount.fromRawAmount(
             bptToken,
@@ -152,7 +158,11 @@ export function assertRemoveLiquidityRecovery(
         removeLiquidityKind: removeLiquidityRecoveryInput.kind,
         protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityRecoveryInput.chainId,
+        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
     };
+
+    if (protocolVersion === 3)
+        expectedQueryOutput = { ...expectedQueryOutput, userData: '0x' };
 
     const queryCheck = getCheck(removeLiquidityQueryOutput, true);
 

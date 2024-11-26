@@ -1,9 +1,9 @@
-import { encodeFunctionData } from 'viem';
+import { encodeFunctionData, Hex } from 'viem';
 import { RemoveLiquidityBaseBuildCallInput } from '../types';
 import { balancerRouterAbi } from '@/abi';
 
 export const encodeRemoveLiquidityProportional = (
-    input: RemoveLiquidityBaseBuildCallInput,
+    input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
     minAmountsOut: bigint[],
 ) => {
     return encodeFunctionData({
@@ -14,7 +14,7 @@ export const encodeRemoveLiquidityProportional = (
             input.bptIn.amount,
             minAmountsOut,
             !!input.wethIsEth,
-            '0x',
+            input.userData,
         ],
     });
 };

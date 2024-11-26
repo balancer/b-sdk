@@ -47,6 +47,7 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         );
 
         const output: RemoveLiquidityBaseQueryOutput = {
+            to: poolState.id,
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
