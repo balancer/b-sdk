@@ -154,6 +154,7 @@ describe('remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 protocolVersion,
             );
         });

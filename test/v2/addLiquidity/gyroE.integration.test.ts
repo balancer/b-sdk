@@ -116,6 +116,7 @@ describe('gyroE V2 add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
         });
     });

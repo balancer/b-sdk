@@ -27,11 +27,12 @@ import {
     Slippage,
     TokenAmount,
     PublicWalletClient,
+    RemoveLiquidityNestedCallInputV2,
+    RemoveLiquidityNested,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
-import { RemoveLiquidityNested } from '@/entities/removeLiquidityNested';
 
 type TxInput = {
     poolId: Hex;
@@ -265,13 +266,16 @@ export const doTransaction = async ({
         client,
     );
 
-    const { callData, to, minAmountsOut } = removeLiquidityNested.buildCall({
+    const buildCallInput = {
         ...queryOutput,
         slippage,
         accountAddress: testAddress,
         relayerApprovalSignature: signature,
         wethIsEth,
-    });
+    } as RemoveLiquidityNestedCallInputV2;
+
+    const { callData, to, minAmountsOut } =
+        removeLiquidityNested.buildCall(buildCallInput);
 
     let tokensOut = minAmountsOut.map((a) => a.token);
     if (wethIsEth) {

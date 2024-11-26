@@ -1,5 +1,79 @@
 # @balancer/sdk
 
+## 0.32.2
+
+### Patch Changes
+
+- c5e3ffd: Refactor nestedPoolState logic to fetch mainTokens from api
+- ac0c5a5: Add proportional helper to calculate BPT from a reference amount for boosted pools
+- 2712ee0: Fix getPoolStateWithBalancesV3 with less 18 decimals tokens
+- 1455fde: Fix circular dependency on price impact implementation
+
+## 0.32.1
+
+### Patch Changes
+
+- 603fbd5: fix: nested single token remove v2 validation
+
+## 0.32.0
+
+### Minor Changes
+
+- b927594: Tidy nested types. Share common with boosted.
+  Support for V3 addLiquidityNested PI (including nested boosted).
+- f2f1e42: BPT swaps as first step & change of batch router address
+
+### Patch Changes
+
+- dcd1f0d: PriceImpact error handling and messaging improvements.
+  - Catch any errors with initial add/remove steps - these are thrown because the user input is valid, e.g. would cause INVARIANT_GROWTH errors
+  - Catch any errors in query during unbalanced calc steps and throw message that will help with debug - e.g. caused by delta amounts
+- 52fed3d: Fix PI test.
+
+## 0.31.2
+
+### Patch Changes
+
+- 72a96fb: fix: validateBuffer check for V2 buffer array.
+
+## 0.31.1
+
+### Patch Changes
+
+- 46bcb86: Update CompositeRouter address (deploy10 version with bug fix).
+  Remove CompositeRouter workarounds for Boosted Price Impact.
+
+## 0.31.0
+
+### Minor Changes
+
+- a1b87c6: Add to field to query outputs. Useful for correct approval spender before build.
+- e234fc1: Remove Swap Price Impact function and tests.
+- 4e32362: Add optional sender and userData inputs for add/remove/swap queries. Sender can be used to query accurate result when pool may have hook thats behaviour is affected by sender, e.g. loyalty fee hook.
+
+### Patch Changes
+
+- 2a664ce: Make boosted add/remove support partial boosted.
+- a33d0fc: Expose isBatchSwap on swap class
+
+## 0.30.1
+
+### Patch Changes
+
+- a080968: chore: remove unused totalShares field from PoolStateWithUnderlyings type
+
+## 0.30.0
+
+### Minor Changes
+
+- 1ce9784: added add and remove liquidity for boosted pools
+
+## 0.29.1
+
+### Patch Changes
+
+- 84f3259: Full nested pool support and tests.
+
 ## 0.29.0
 
 ### Minor Changes

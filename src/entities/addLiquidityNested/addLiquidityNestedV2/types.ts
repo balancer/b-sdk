@@ -33,6 +33,7 @@ export type AddLiquidityNestedCallAttributes = {
 };
 
 export type AddLiquidityNestedQueryOutputV2 = {
+    to: Address;
     callsAttributes: AddLiquidityNestedCallAttributes[];
     amountsIn: TokenAmount[];
     bptOut: TokenAmount;

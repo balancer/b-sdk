@@ -13,6 +13,7 @@ import { AddLiquidityV3 } from './addLiquidityV3';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { AddLiquidityCowAmm } from './addLiquidityCowAmm';
 import { Permit2 } from '../permit2Helper';
+import { Hex } from 'viem';
 
 export class AddLiquidity implements AddLiquidityBase {
     constructor(public config?: AddLiquidityConfig) {}
@@ -42,7 +43,11 @@ export class AddLiquidity implements AddLiquidityBase {
         }
     }
 
-    buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput {
+    buildCall(
+        input:
+            | AddLiquidityBuildCallInput
+            | (AddLiquidityBuildCallInput & { userData: Hex }),
+    ): AddLiquidityBuildCallOutput {
         switch (input.protocolVersion) {
             case 1: {
                 const addLiquidity = new AddLiquidityCowAmm();
@@ -57,6 +62,10 @@ export class AddLiquidity implements AddLiquidityBase {
             }
             case 3: {
                 if (!('sender' in input)) {
+                    if (!('userData' in input))
+                        throw new Error(
+                            'UserData must be provided in buildCall input',
+                        );
                     const addLiquidity = new AddLiquidityV3();
                     return addLiquidity.buildCall(input);
                 }
@@ -68,10 +77,14 @@ export class AddLiquidity implements AddLiquidityBase {
     }
 
     buildCallWithPermit2(
-        input: AddLiquidityBuildCallInput,
+        input:
+            | AddLiquidityBuildCallInput
+            | (AddLiquidityBuildCallInput & { userData: Hex }),
         permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
         InputValidator.validateBuildCallWithPermit2(input);
+        if (!('userData' in input))
+            throw new Error('UserData must be provided in buildCall input');
 
         const addLiquidity = new AddLiquidityV3();
         return addLiquidity.buildCallWithPermit2(input, permit2);

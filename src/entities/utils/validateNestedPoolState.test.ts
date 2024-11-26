@@ -1,10 +1,6 @@
-// pnpm test -- constraintValidation.test.ts
+// pnpm test -- nestedPoolStateValidation.test.ts
 import { describe, expect, test } from 'vitest';
-import {
-    NestedPoolState,
-    NestedPool,
-    validateNestedPoolState,
-} from '../src/entities';
+import { NestedPoolState, NestedPoolV2, validateNestedPoolState } from '..';
 import { PoolType } from '@/types';
 
 describe('nested pool state validations', () => {
@@ -45,14 +41,14 @@ describe('nested pool state validations', () => {
                         TOP
                 3POOL_BPT/auraBal_BPT/WETH
 
-        3POOL_BPT           auraBal_BPT         
+        3POOL_BPT           auraBal_BPT
         DAI/USDC/USDT       auraBal/8020_BPT
 
                                 8020_BPT
                                 BAL/WETH
  */
 // Does not return 8020_BPT pool
-const happyPools: NestedPool[] = [
+const happyPools: NestedPoolV2[] = [
     {
         id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',
         address: '0x08775ccb6674d6bdceb0797c364c2653ed84f384',
@@ -130,7 +126,7 @@ const happyPools: NestedPool[] = [
 ];
 
 // Includes 8020_BPT pool
-const deepPools: NestedPool[] = [
+const deepPools: NestedPoolV2[] = [
     { ...happyPools[0], level: 2 },
     { ...happyPools[1], level: 1 },
     { ...happyPools[2], level: 1 },
@@ -157,6 +153,7 @@ const deepPools: NestedPool[] = [
 // Returning main tokens as 1 level
 const happyPoolState: NestedPoolState = {
     pools: [...happyPools],
+    protocolVersion: 2,
     mainTokens: [
         {
             address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
@@ -198,6 +195,7 @@ const missingMain: NestedPoolState = {
 
 // WETH is token in two pools
 const multiTokenPoolState: NestedPoolState = {
+    protocolVersion: 2,
     pools: [...deepPools],
     mainTokens: [
         {
@@ -225,6 +223,7 @@ const multiTokenPoolState: NestedPoolState = {
 
 // BAL is 2 level of nesting
 const deepPoolState: NestedPoolState = {
+    protocolVersion: 2,
     pools: [...deepPools],
     mainTokens: [
         {

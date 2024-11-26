@@ -1,6 +1,7 @@
 import { weightedPoolAbi_V3 } from '@/abi';
 import { Hex } from '@/types';
 import {
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     BALANCER_ROUTER,
     ChainId,
     MAX_UINT256,
@@ -79,9 +80,37 @@ export class PermitHelper {
             input.client,
             input.bptAmountIn.token.address,
             input.owner,
-            BALANCER_ROUTER[input.chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             nonce,
             input.bptAmountIn.amount, // maxBptIn
+            input.deadline,
+        );
+        return { batch: [permitApproval], signatures: [permitSignature] };
+    };
+
+    static signRemoveLiquidityBoostedApproval = async (
+        input: RemoveLiquidityBaseBuildCallInput & {
+            client: PublicWalletClient;
+            owner: Hex;
+            nonce?: bigint;
+            deadline?: bigint;
+        },
+    ): Promise<Permit> => {
+        const amounts = getAmountsCall(input);
+        const nonce =
+            input.nonce ??
+            (await getNonce(
+                input.client,
+                input.bptIn.token.address,
+                input.owner,
+            ));
+        const { permitApproval, permitSignature } = await signPermit(
+            input.client,
+            input.bptIn.token.address,
+            input.owner,
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            nonce,
+            amounts.maxBptAmountIn,
             input.deadline,
         );
         return { batch: [permitApproval], signatures: [permitSignature] };

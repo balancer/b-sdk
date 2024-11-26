@@ -13,6 +13,7 @@ export type AddLiquidityNestedInputV3 = {
 };
 
 export type AddLiquidityNestedQueryOutputV3 = {
+    to: Address;
     amountsIn: TokenAmount[];
     bptOut: TokenAmount;
     protocolVersion: 3;

@@ -76,6 +76,7 @@ export class RemoveLiquidityNestedV2 {
         );
 
         return {
+            to: BALANCER_RELAYER[input.chainId],
             protocolVersion: 2,
             callsAttributes,
             bptAmountIn,

@@ -11,7 +11,8 @@ export {
     SorSwapResult,
 } from './modules/sorSwapPaths';
 export {
-    mapPoolToNestedPoolState,
+    mapPoolToNestedPoolStateV2,
+    mapPoolToNestedPoolStateV3,
     PoolGetPool,
 } from './modules/nested-pool-state';
 

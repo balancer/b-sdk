@@ -6,7 +6,7 @@ import {
     AddLiquidityV2BuildCallInput,
     AddLiquidityV2QueryOutput,
 } from './addLiquidityV2/types';
-import { Permit2 } from '../permit2Helper';
+import { Permit2} from '../permit2Helper';
 import { parseAddLiquidityArgs } from '../utils';
 
 export enum AddLiquidityKind {
@@ -19,6 +19,8 @@ export enum AddLiquidityKind {
 export type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
+    sender?: Address;
+    userData?: Hex;
 };
 
 export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {
@@ -51,6 +53,7 @@ export type AddLiquidityBaseQueryOutput = {
     chainId: number;
     tokenInIndex?: number;
     protocolVersion: 1 | 2 | 3;
+    to: Address;
 };
 
 export type AddLiquidityQueryOutput =
@@ -82,6 +85,16 @@ export type AddLiquidityBuildCallOutput = {
     callData: Hex;
     to: Address;
     args: ReturnType<typeof parseAddLiquidityArgs>['args'];
+    value: bigint;
+    minBptOut: TokenAmount;
+    maxAmountsIn: TokenAmount[];
+};
+
+// NOTE: this is to prevent an issue where we want to return args for liquidity build output, but args differ for V3 Boosted
+export type AddLiquidityBoostedV3BuildCallOutput = {
+    callData: Hex;
+    to: Address;
+    args: readonly [`0x${string}`, bigint[], bigint, false, `0x${string}`]
     value: bigint;
     minBptOut: TokenAmount;
     maxAmountsIn: TokenAmount[];

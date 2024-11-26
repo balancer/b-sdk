@@ -101,6 +101,7 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
             );
         });
@@ -117,6 +118,7 @@ describe('composable stable remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
                 2,
                 wethIsEth,
             );
