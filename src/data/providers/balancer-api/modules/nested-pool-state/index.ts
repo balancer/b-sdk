@@ -33,49 +33,46 @@ export type Token = {
         id: Hex;
         address: Address;
         type: string;
-        tokens: {
-            index: number;
-            address: Address;
-            decimals: number;
-        }[];
+        tokens: Token[];
     } | null;
 };
 
 export class NestedPools {
     readonly nestedPoolStateQuery = `#graphql
-    query GetPool($id: String!, $chain: GqlChain!) {
-        poolGetPool(id: $id, chain: $chain) {
-            id
-            protocolVersion
+  query GetPool($id: String!, $chain: GqlChain!) {
+    poolGetPool(id: $id, chain: $chain) {
+      id
+      protocolVersion
+      address
+      type
+      poolTokens {
+        index
+        address
+        decimals
+        symbol
+        name
+        nestedPool {
+          id
+          address
+          type
+          tokens {
+            index
             address
-            type
-            poolTokens {
-                index
-                address
-                decimals
-                symbol
-                name
-                nestedPool {
-                    id
-                    address
-                    type
-                    tokens {
-                        index
-                        address
-                        decimals
-                        underlyingToken {
-                            address
-                            decimals
-                        }
-                    }
-                }
-                underlyingToken {
-                    address
-                    decimals
-                }
+            decimals
+            underlyingToken {
+              address
+              decimals
             }
+          }
         }
-    }`;
+        underlyingToken {
+          address
+          decimals
+        }
+      }
+    }
+  }
+`;
 
     constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
