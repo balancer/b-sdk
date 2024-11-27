@@ -326,6 +326,30 @@ export const weightedPoolFactoryAbi_V3 = [
         type: 'function',
     },
     {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'start',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'count',
+                type: 'uint256',
+            },
+        ],
+        name: 'getPools',
+        outputs: [
+            {
+                internalType: 'address[]',
+                name: 'result',
+                type: 'address[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
         inputs: [],
         name: 'getVault',
         outputs: [

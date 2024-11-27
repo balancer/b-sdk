@@ -16,6 +16,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                 name: 'permit2',
                 type: 'address',
             },
+            {
+                internalType: 'string',
+                name: 'version',
+                type: 'string',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -40,6 +45,27 @@ export const balancerCompositeLiquidityRouterAbi = [
             },
         ],
         name: 'AddressInsufficientBalance',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC20',
+                name: 'tokenIn',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxAmountIn',
+                type: 'uint256',
+            },
+        ],
+        name: 'AmountInAboveMax',
         type: 'error',
     },
     {
@@ -336,6 +362,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                 type: 'uint256',
             },
             {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
+            {
                 internalType: 'bytes',
                 name: 'userData',
                 type: 'bytes',
@@ -349,7 +380,7 @@ export const balancerCompositeLiquidityRouterAbi = [
                 type: 'uint256',
             },
         ],
-        stateMutability: 'nonpayable',
+        stateMutability: 'payable',
         type: 'function',
     },
     {
@@ -893,6 +924,11 @@ export const balancerCompositeLiquidityRouterAbi = [
                 type: 'uint256[]',
             },
             {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
+            {
                 internalType: 'bytes',
                 name: 'userData',
                 type: 'bytes',
@@ -906,7 +942,7 @@ export const balancerCompositeLiquidityRouterAbi = [
                 type: 'uint256[]',
             },
         ],
-        stateMutability: 'nonpayable',
+        stateMutability: 'payable',
         type: 'function',
     },
     {
@@ -968,6 +1004,19 @@ export const balancerCompositeLiquidityRouterAbi = [
             },
         ],
         stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'version',
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
     },
     {

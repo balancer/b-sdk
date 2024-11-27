@@ -454,6 +454,22 @@ export const vaultAdminAbi_V3 = [
         type: 'error',
     },
     {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minIssuedShares',
+                type: 'uint256',
+            },
+        ],
+        name: 'IssuedSharesBelowMin',
+        type: 'error',
+    },
+    {
         inputs: [],
         name: 'MaxTokens',
         type: 'error',
@@ -508,6 +524,11 @@ export const vaultAdminAbi_V3 = [
             },
         ],
         name: 'NotEnoughWrapped',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'NotStaticCall',
         type: 'error',
     },
     {
@@ -648,6 +669,11 @@ export const vaultAdminAbi_V3 = [
     {
         inputs: [],
         name: 'QueriesDisabled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'QueriesDisabledPermanently',
         type: 'error',
     },
     {
@@ -996,24 +1022,42 @@ export const vaultAdminAbi_V3 = [
         inputs: [
             {
                 indexed: true,
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
+                internalType: 'address',
+                name: 'pool',
                 type: 'address',
             },
             {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'amountUnderlying',
-                type: 'uint256',
+                indexed: true,
+                internalType: 'address',
+                name: 'liquidityProvider',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'enum AddLiquidityKind',
+                name: 'kind',
+                type: 'uint8',
             },
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'amountWrapped',
+                name: 'totalSupply',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'uint256[]',
+                name: 'amountsAddedRaw',
+                type: 'uint256[]',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256[]',
+                name: 'swapFeeAmountsRaw',
+                type: 'uint256[]',
+            },
         ],
-        name: 'LiquidityAddedToBuffer',
+        name: 'LiquidityAdded',
         type: 'event',
     },
     {
@@ -1037,8 +1081,14 @@ export const vaultAdminAbi_V3 = [
                 name: 'amountWrapped',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'bufferBalances',
+                type: 'bytes32',
+            },
         ],
-        name: 'LiquidityRemovedFromBuffer',
+        name: 'LiquidityAddedToBuffer',
         type: 'event',
     },
     {
@@ -1057,6 +1107,12 @@ export const vaultAdminAbi_V3 = [
                 type: 'address',
             },
             {
+                indexed: true,
+                internalType: 'enum RemoveLiquidityKind',
+                name: 'kind',
+                type: 'uint8',
+            },
+            {
                 indexed: false,
                 internalType: 'uint256',
                 name: 'totalSupply',
@@ -1064,9 +1120,9 @@ export const vaultAdminAbi_V3 = [
             },
             {
                 indexed: false,
-                internalType: 'int256[]',
-                name: 'deltas',
-                type: 'int256[]',
+                internalType: 'uint256[]',
+                name: 'amountsRemovedRaw',
+                type: 'uint256[]',
             },
             {
                 indexed: false,
@@ -1075,7 +1131,38 @@ export const vaultAdminAbi_V3 = [
                 type: 'uint256[]',
             },
         ],
-        name: 'PoolBalanceChanged',
+        name: 'LiquidityRemoved',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountUnderlying',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountWrapped',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'bufferBalances',
+                type: 'bytes32',
+            },
+        ],
+        name: 'LiquidityRemovedFromBuffer',
         type: 'event',
     },
     {
@@ -1424,12 +1511,6 @@ export const vaultAdminAbi_V3 = [
                 type: 'address',
             },
             {
-                indexed: true,
-                internalType: 'contract IERC20',
-                name: 'underlyingToken',
-                type: 'address',
-            },
-            {
                 indexed: false,
                 internalType: 'uint256',
                 name: 'burnedShares',
@@ -1441,8 +1522,39 @@ export const vaultAdminAbi_V3 = [
                 name: 'withdrawnUnderlying',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'bufferBalances',
+                type: 'bytes32',
+            },
         ],
         name: 'Unwrap',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'string',
+                name: 'eventKey',
+                type: 'string',
+            },
+            {
+                indexed: false,
+                internalType: 'bytes',
+                name: 'eventData',
+                type: 'bytes',
+            },
+        ],
+        name: 'VaultAuxiliary',
         type: 'event',
     },
     {
@@ -1479,13 +1591,13 @@ export const vaultAdminAbi_V3 = [
     },
     {
         anonymous: false,
+        inputs: [],
+        name: 'VaultQueriesEnabled',
+        type: 'event',
+    },
+    {
+        anonymous: false,
         inputs: [
-            {
-                indexed: true,
-                internalType: 'contract IERC20',
-                name: 'underlyingToken',
-                type: 'address',
-            },
             {
                 indexed: true,
                 internalType: 'contract IERC4626',
@@ -1504,6 +1616,12 @@ export const vaultAdminAbi_V3 = [
                 name: 'mintedShares',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'bufferBalances',
+                type: 'bytes32',
+            },
         ],
         name: 'Wrap',
         type: 'event',
@@ -1518,6 +1636,16 @@ export const vaultAdminAbi_V3 = [
                 internalType: 'contract IERC4626',
                 name: 'wrappedToken',
                 type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxAmountUnderlyingInRaw',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxAmountWrappedInRaw',
+                type: 'uint256',
             },
             {
                 internalType: 'uint256',
@@ -1591,6 +1719,13 @@ export const vaultAdminAbi_V3 = [
         type: 'function',
     },
     {
+        inputs: [],
+        name: 'disableQueryPermanently',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
         inputs: [
             {
                 internalType: 'address',
@@ -1599,6 +1734,13 @@ export const vaultAdminAbi_V3 = [
             },
         ],
         name: 'disableRecoveryMode',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'enableQuery',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -1879,6 +2021,11 @@ export const vaultAdminAbi_V3 = [
                 type: 'uint256',
             },
             {
+                internalType: 'uint256',
+                name: 'minIssuedShares',
+                type: 'uint256',
+            },
+            {
                 internalType: 'address',
                 name: 'sharesOwner',
                 type: 'address',
@@ -1960,6 +2107,16 @@ export const vaultAdminAbi_V3 = [
                 name: 'sharesToRemove',
                 type: 'uint256',
             },
+            {
+                internalType: 'uint256',
+                name: 'minAmountUnderlyingOutRaw',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minAmountWrappedOutRaw',
+                type: 'uint256',
+            },
         ],
         name: 'removeLiquidityFromBuffer',
         outputs: [
@@ -1987,6 +2144,16 @@ export const vaultAdminAbi_V3 = [
             {
                 internalType: 'uint256',
                 name: 'sharesToRemove',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minAmountUnderlyingOutRaw',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minAmountWrappedOutRaw',
                 type: 'uint256',
             },
             {
