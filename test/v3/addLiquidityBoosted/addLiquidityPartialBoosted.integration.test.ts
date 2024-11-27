@@ -50,7 +50,8 @@ const parentBptToken = new Token(
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
 const daiToken = new Token(chainId, DAI.address, DAI.decimals);
 
-describe('V3 add liquidity partial boosted', () => {
+// TODO: pending test pool to be created/initialized
+describe.skip('V3 add liquidity partial boosted', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;

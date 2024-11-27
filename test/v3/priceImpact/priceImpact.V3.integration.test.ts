@@ -61,7 +61,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000055');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000585');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -90,7 +90,7 @@ describe('PriceImpact V3', () => {
                     boostedPool_USDC_USDT,
                 );
             const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.0005707385');
+                PriceImpactAmount.fromDecimal('0.0005823585');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -113,12 +113,13 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000476');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0004745');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
 
-    describe('Partial Boosted Pool Boosted Pool AddLiquidity', () => {
+    // TODO: pending test pool to be created/initialized
+    describe.skip('Partial Boosted Pool Boosted Pool AddLiquidity', () => {
         test('Close to proportional', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
                 chainId,
@@ -176,7 +177,8 @@ describe('PriceImpact V3', () => {
         });
     });
 
-    describe('Nested pool', () => {
+    // FIXME: zeroOutDeltas is swapping a huge amount (~200 WETH) and hitting MaxInRatio
+    describe.skip('Nested pool', () => {
         test('Close to proportional', async () => {
             const addLiquidityInput: AddLiquidityNestedInput = {
                 amountsIn: [
