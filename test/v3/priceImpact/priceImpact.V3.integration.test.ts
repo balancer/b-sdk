@@ -61,7 +61,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000585');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000595');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -90,7 +90,7 @@ describe('PriceImpact V3', () => {
                     boostedPool_USDC_USDT,
                 );
             const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.0005823585');
+                PriceImpactAmount.fromDecimal('0.0005823798');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -118,8 +118,7 @@ describe('PriceImpact V3', () => {
         });
     });
 
-    // TODO: pending test pool to be created/initialized
-    describe.skip('Partial Boosted Pool Boosted Pool AddLiquidity', () => {
+    describe('Partial Boosted Pool Boosted Pool AddLiquidity', () => {
         test('Close to proportional', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
                 chainId,
@@ -144,7 +143,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000016');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000345');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -172,7 +171,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.00566425');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0020675');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
