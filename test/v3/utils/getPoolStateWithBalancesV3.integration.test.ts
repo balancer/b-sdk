@@ -36,7 +36,7 @@ describe('add liquidity test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS[ChainId[chainId]],
             undefined,
-            7057106n,
+            7164489n,
         ));
     });
 
@@ -55,16 +55,16 @@ describe('add liquidity test', () => {
                         address: USDC.address,
                         decimals: USDC.decimals,
                         index: 0,
-                        balance: '9585.21526',
+                        balance: '5000',
                     },
                     {
                         address: DAI.address,
                         decimals: DAI.decimals,
                         index: 1,
-                        balance: '10256.288668913000293429',
+                        balance: '5000',
                     },
                 ],
-                totalShares: '9912.817276660069114899',
+                totalShares: '4999.999999999899996138',
             };
 
             expect(poolStateWithBalances).to.deep.eq(mockData);

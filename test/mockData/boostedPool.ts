@@ -1,8 +1,8 @@
 import { PoolStateWithUnderlyings } from '@/entities';
 
 export const boostedPool_USDC_USDT: PoolStateWithUnderlyings = {
-    id: '0x6dbdd7a36d900083a5b86a55583d90021e9f33e8',
-    address: '0x6dbdd7a36d900083a5b86a55583d90021e9f33e8',
+    id: '0xd63db0b88dca565633fb8d70a70b9b8093d34a7e',
+    address: '0xd63db0b88dca565633fb8d70a70b9b8093d34a7e',
     type: 'Stable',
     protocolVersion: 3,
     tokens: [

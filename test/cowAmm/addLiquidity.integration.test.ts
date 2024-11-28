@@ -57,11 +57,7 @@ describe('add liquidity test', () => {
         // get pool state from api
         poolState = await api.getPool(poolId);
 
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS[ChainId[chainId]],
-            undefined,
-            6051270n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         const client = createTestClient({
             mode: 'anvil',

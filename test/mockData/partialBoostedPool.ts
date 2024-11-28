@@ -1,8 +1,8 @@
 import { PoolStateWithUnderlyings } from '@/entities';
 
 export const partialBoostedPool_USDT_stataDAI: PoolStateWithUnderlyings = {
-    id: '0x31e7f3a9b9c834a752887723b017397e928d9ede',
-    address: '0x31e7f3a9b9c834a752887723b017397e928d9ede',
+    id: '0xCE7601b157e0871332D2295F274a0f4314a1585D',
+    address: '0xCE7601b157e0871332D2295F274a0f4314a1585D',
     type: 'Stable',
     protocolVersion: 3,
     tokens: [

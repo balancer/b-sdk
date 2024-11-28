@@ -476,6 +476,22 @@ export const vaultExtensionAbi_V3 = [
         type: 'error',
     },
     {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minIssuedShares',
+                type: 'uint256',
+            },
+        ],
+        name: 'IssuedSharesBelowMin',
+        type: 'error',
+    },
+    {
         inputs: [],
         name: 'MaxTokens',
         type: 'error',
@@ -675,6 +691,11 @@ export const vaultExtensionAbi_V3 = [
     {
         inputs: [],
         name: 'QueriesDisabled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'QueriesDisabledPermanently',
         type: 'error',
     },
     {
@@ -1013,24 +1034,42 @@ export const vaultExtensionAbi_V3 = [
         inputs: [
             {
                 indexed: true,
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
+                internalType: 'address',
+                name: 'pool',
                 type: 'address',
             },
             {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'amountUnderlying',
-                type: 'uint256',
+                indexed: true,
+                internalType: 'address',
+                name: 'liquidityProvider',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'enum AddLiquidityKind',
+                name: 'kind',
+                type: 'uint8',
             },
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'amountWrapped',
+                name: 'totalSupply',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'uint256[]',
+                name: 'amountsAddedRaw',
+                type: 'uint256[]',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256[]',
+                name: 'swapFeeAmountsRaw',
+                type: 'uint256[]',
+            },
         ],
-        name: 'LiquidityAddedToBuffer',
+        name: 'LiquidityAdded',
         type: 'event',
     },
     {
@@ -1054,8 +1093,14 @@ export const vaultExtensionAbi_V3 = [
                 name: 'amountWrapped',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'bufferBalances',
+                type: 'bytes32',
+            },
         ],
-        name: 'LiquidityRemovedFromBuffer',
+        name: 'LiquidityAddedToBuffer',
         type: 'event',
     },
     {
@@ -1074,6 +1119,12 @@ export const vaultExtensionAbi_V3 = [
                 type: 'address',
             },
             {
+                indexed: true,
+                internalType: 'enum RemoveLiquidityKind',
+                name: 'kind',
+                type: 'uint8',
+            },
+            {
                 indexed: false,
                 internalType: 'uint256',
                 name: 'totalSupply',
@@ -1081,9 +1132,9 @@ export const vaultExtensionAbi_V3 = [
             },
             {
                 indexed: false,
-                internalType: 'int256[]',
-                name: 'deltas',
-                type: 'int256[]',
+                internalType: 'uint256[]',
+                name: 'amountsRemovedRaw',
+                type: 'uint256[]',
             },
             {
                 indexed: false,
@@ -1092,7 +1143,38 @@ export const vaultExtensionAbi_V3 = [
                 type: 'uint256[]',
             },
         ],
-        name: 'PoolBalanceChanged',
+        name: 'LiquidityRemoved',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountUnderlying',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'amountWrapped',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'bufferBalances',
+                type: 'bytes32',
+            },
+        ],
+        name: 'LiquidityRemovedFromBuffer',
         type: 'event',
     },
     {
@@ -1441,12 +1523,6 @@ export const vaultExtensionAbi_V3 = [
                 type: 'address',
             },
             {
-                indexed: true,
-                internalType: 'contract IERC20',
-                name: 'underlyingToken',
-                type: 'address',
-            },
-            {
                 indexed: false,
                 internalType: 'uint256',
                 name: 'burnedShares',
@@ -1458,8 +1534,39 @@ export const vaultExtensionAbi_V3 = [
                 name: 'withdrawnUnderlying',
                 type: 'uint256',
             },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'bufferBalances',
+                type: 'bytes32',
+            },
         ],
         name: 'Unwrap',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'string',
+                name: 'eventKey',
+                type: 'string',
+            },
+            {
+                indexed: false,
+                internalType: 'bytes',
+                name: 'eventData',
+                type: 'bytes',
+            },
+        ],
+        name: 'VaultAuxiliary',
         type: 'event',
     },
     {
@@ -1496,13 +1603,13 @@ export const vaultExtensionAbi_V3 = [
     },
     {
         anonymous: false,
+        inputs: [],
+        name: 'VaultQueriesEnabled',
+        type: 'event',
+    },
+    {
+        anonymous: false,
         inputs: [
-            {
-                indexed: true,
-                internalType: 'contract IERC20',
-                name: 'underlyingToken',
-                type: 'address',
-            },
             {
                 indexed: true,
                 internalType: 'contract IERC4626',
@@ -1520,6 +1627,12 @@ export const vaultExtensionAbi_V3 = [
                 internalType: 'uint256',
                 name: 'mintedShares',
                 type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'bufferBalances',
+                type: 'bytes32',
             },
         ],
         name: 'Wrap',
@@ -1675,6 +1788,24 @@ export const vaultExtensionAbi_V3 = [
     {
         inputs: [
             {
+                internalType: 'string',
+                name: 'eventKey',
+                type: 'string',
+            },
+            {
+                internalType: 'bytes',
+                name: 'eventData',
+                type: 'bytes',
+            },
+        ],
+        name: 'emitAuxiliaryEvent',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
                 internalType: 'address',
                 name: 'pool',
                 type: 'address',
@@ -1772,6 +1903,25 @@ export const vaultExtensionAbi_V3 = [
                 internalType: 'uint256[]',
                 name: 'balancesLiveScaled18',
                 type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC4626',
+                name: 'wrappedToken',
+                type: 'address',
+            },
+        ],
+        name: 'getERC4626BufferAsset',
+        outputs: [
+            {
+                internalType: 'address',
+                name: 'asset',
+                type: 'address',
             },
         ],
         stateMutability: 'view',
@@ -2433,6 +2583,19 @@ export const vaultExtensionAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'isQueryDisabledPermanently',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
         name: 'isUnlocked',
         outputs: [
             {
@@ -2615,6 +2778,11 @@ export const vaultExtensionAbi_V3 = [
                 name: 'exactBptAmountIn',
                 type: 'uint256',
             },
+            {
+                internalType: 'uint256[]',
+                name: 'minAmountsOut',
+                type: 'uint256[]',
+            },
         ],
         name: 'removeLiquidityRecovery',
         outputs: [
@@ -2644,69 +2812,6 @@ export const vaultExtensionAbi_V3 = [
             },
         ],
         stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
-        ],
-        name: 'transfer',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'spender',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'from',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
-        ],
-        name: 'transferFrom',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
-        stateMutability: 'nonpayable',
         type: 'function',
     },
     {

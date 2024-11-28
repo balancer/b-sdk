@@ -24,4 +24,5 @@ export type AddLiquidityNestedQueryOutputV3 = {
 
 export type AddLiquidityNestedCallInputV3 = AddLiquidityNestedQueryOutputV3 & {
     slippage: Slippage;
+    wethIsEth?: boolean;
 };
