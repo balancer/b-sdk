@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.33.0
+
+### Minor Changes
+
+- 2d192ff: Update to testnet deployment 11
+
 ## 0.32.2
 
 ### Patch Changes
