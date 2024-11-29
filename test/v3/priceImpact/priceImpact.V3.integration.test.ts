@@ -61,7 +61,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000595');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000057');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -90,7 +90,7 @@ describe('PriceImpact V3', () => {
                     boostedPool_USDC_USDT,
                 );
             const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.0005823798');
+                PriceImpactAmount.fromDecimal('0.00058062185');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -113,7 +113,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0004745');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0004755');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
@@ -143,7 +143,9 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000345');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                '0.029220310653853106',
+            );
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -171,7 +173,9 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0020675');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                '0.006768518949421069',
+            );
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });

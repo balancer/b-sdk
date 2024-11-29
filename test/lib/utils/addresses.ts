@@ -328,5 +328,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
+        // usdc, dai
+        MOCK_STABLE_POOL: {
+            address: '0x676f89b5e1563eef4d1344dc629812b1e9c1b0d7',
+            id: '0x676f89b5e1563eef4d1344dc629812b1e9c1b0d7',
+            type: PoolType.Stable,
+            decimals: 18,
+            slot: 0,
+        },
     },
 };
