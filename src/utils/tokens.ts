@@ -68,12 +68,14 @@ export async function getPoolTokensV3(
 ): Promise<Address[]> {
     try {
         const chainId = await client.getChainId();
-        const vaultV3 = getContract({
+        const vaultExplorer = getContract({
             abi: vaultExplorerAbi_V3,
             address: VAULT_EXPLORER_V3[chainId],
             client: client,
         });
-        return (await vaultV3.read.getPoolTokens([poolAddress])) as Address[];
+        return (await vaultExplorer.read.getPoolTokens([
+            poolAddress,
+        ])) as Address[];
     } catch (e) {
         console.warn(e);
         throw new Error(
