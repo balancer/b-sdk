@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.33.1
+
+### Patch Changes
+
+- b2b9411: Enable add liquidity proportional for stable pools on v3
+
 ## 0.33.0
 
 ### Minor Changes
