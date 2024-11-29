@@ -37,7 +37,10 @@ export class InputValidatorStable extends InputValidatorBase {
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
-        if (addLiquidityInput.kind === AddLiquidityKind.Proportional) {
+        if (
+            poolState.protocolVersion === 2 &&
+            addLiquidityInput.kind === AddLiquidityKind.Proportional
+        ) {
             throw addLiquidityProportionalNotSupportedOnPoolTypeError(
                 poolState.type,
             );
