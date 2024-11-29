@@ -157,6 +157,10 @@ export const VAULT_ADMIN: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0x2AD9162D9b388b75eB40cBF996AbE8E968670c5C',
 };
 
+export const VAULT_EXPLORER_V3: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0xa9F171e84A95c103aD4aFAC3Ec83810f9cA193a8',
+};
+
 export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.AVALANCHE]: '0xC128468b7Ce63eA702C1f104D55A2566b13D3ABD',

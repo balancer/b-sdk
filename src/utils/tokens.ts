@@ -1,6 +1,6 @@
 import { Address, Client, Hex, PublicClient, getContract } from 'viem';
-import { vaultV2Abi, vaultExtensionAbi_V3 } from '../abi';
-import { VAULT, VAULT_V3 } from './constants';
+import { vaultV2Abi, vaultExplorerAbi_V3 } from '../abi';
+import { VAULT, VAULT_EXPLORER_V3 } from './constants';
 
 export async function getTokenDecimals(
     tokenAddress: Address,
@@ -69,8 +69,8 @@ export async function getPoolTokensV3(
     try {
         const chainId = await client.getChainId();
         const vaultV3 = getContract({
-            abi: vaultExtensionAbi_V3,
-            address: VAULT_V3[chainId],
+            abi: vaultExplorerAbi_V3,
+            address: VAULT_EXPLORER_V3[chainId],
             client: client,
         });
         return (await vaultV3.read.getPoolTokens([poolAddress])) as Address[];

@@ -18,3 +18,4 @@ export * from './weightedPool.V3';
 export * from './vaultAdmin.V3';
 export * from './stablePoolFactory.V3';
 export * from './balancerCompositeLiquidityRouter';
+export * from './vaultExplorer.V3';
