@@ -34,7 +34,7 @@ export async function getTokenDecimals(
     } catch (e) {
         console.warn(e);
         throw new Error(
-            `Error: Unable to get Token Decimals from token: ${tokenAddress}`,
+            `Unable to get Token Decimals from token: ${tokenAddress}`,
         );
     }
 }
@@ -57,7 +57,7 @@ export async function getPoolTokensV2(
     } catch (e) {
         console.warn(e);
         throw new Error(
-            `Error: Unable to get pool tokens using this pool id: ${poolId}`,
+            `Unable to get pool tokens using this pool id: ${poolId}`,
         );
     }
 }
@@ -77,7 +77,7 @@ export async function getPoolTokensV3(
     } catch (e) {
         console.warn(e);
         throw new Error(
-            `Error: Unable to get pool tokens using this pool address: ${poolAddress}`,
+            `Unable to get pool tokens using this pool address: ${poolAddress}`,
         );
     }
 }
