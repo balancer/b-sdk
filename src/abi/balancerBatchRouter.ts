@@ -16,6 +16,11 @@ export const balancerBatchRouterAbi = [
                 name: 'permit2',
                 type: 'address',
             },
+            {
+                internalType: 'string',
+                name: 'version',
+                type: 'string',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -55,6 +60,11 @@ export const balancerBatchRouterAbi = [
     {
         inputs: [],
         name: 'FailedInnerCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InputLengthMismatch',
         type: 'error',
     },
     {
@@ -966,6 +976,19 @@ export const balancerBatchRouterAbi = [
             },
         ],
         stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'version',
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
     },
     {

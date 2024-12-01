@@ -24,4 +24,5 @@ export type RemoveLiquidityNestedQueryOutputV3 = {
 export type RemoveLiquidityNestedCallInputV3 =
     RemoveLiquidityNestedQueryOutputV3 & {
         slippage: Slippage;
+        wethIsEth?: boolean;
     };

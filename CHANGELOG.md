@@ -1,5 +1,26 @@
 # @balancer/sdk
 
+## 0.33.1
+
+### Patch Changes
+
+- b2b9411: Enable add liquidity proportional for stable pools on v3
+
+## 0.33.0
+
+### Minor Changes
+
+- 2d192ff: Update to testnet deployment 11
+
+## 0.32.2
+
+### Patch Changes
+
+- c5e3ffd: Refactor nestedPoolState logic to fetch mainTokens from api
+- ac0c5a5: Add proportional helper to calculate BPT from a reference amount for boosted pools
+- 2712ee0: Fix getPoolStateWithBalancesV3 with less 18 decimals tokens
+- 1455fde: Fix circular dependency on price impact implementation
+
 ## 0.32.1
 
 ### Patch Changes

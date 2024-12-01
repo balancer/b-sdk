@@ -12,7 +12,7 @@ import {
     AddLiquidityNestedInput,
 } from '../types';
 import { Token } from '@/entities/token';
-import { getAmounts } from '@/entities/utils';
+import { getAmounts, getValue } from '@/entities/utils';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, CHAINS } from '@/utils';
 import {
@@ -86,6 +86,7 @@ export class AddLiquidityNestedV3 {
         // validateBuildCallInput(input); TODO - Add this like V2 once weth/native is allowed
         // apply slippage to bptOut
         const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
+        const wethIsEth = input.wethIsEth ?? false;
         const callData = encodeFunctionData({
             abi: balancerCompositeLiquidityRouterAbi,
             functionName: 'addLiquidityUnbalancedNestedPool',
@@ -94,13 +95,14 @@ export class AddLiquidityNestedV3 {
                 input.amountsIn.map((a) => a.token.address),
                 input.amountsIn.map((a) => a.amount),
                 minBptOut,
+                wethIsEth,
                 input.userData,
             ],
         });
         return {
             callData,
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
-            value: 0n, // TODO defaulting to 0 until router has payable
+            value: getValue(input.amountsIn, wethIsEth),
             minBptOut,
         };
     }

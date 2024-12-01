@@ -23,11 +23,24 @@ export type PoolTokenWithUnderlying = MinimalToken & {
     underlyingToken: MinimalToken | null;
 };
 
+export interface PoolTokenWithUnderlyingBalance extends PoolTokenWithBalance {
+    underlyingToken: PoolTokenWithBalance | null;
+}
+
 export type PoolStateWithUnderlyings = {
     id: Hex;
     address: Address;
     type: string;
     tokens: PoolTokenWithUnderlying[];
+    protocolVersion: 1 | 2 | 3;
+};
+
+export type PoolStateWithUnderlyingBalances = {
+    id: Hex;
+    address: Address;
+    type: string;
+    tokens: PoolTokenWithUnderlyingBalance[];
+    totalShares: HumanAmount;
     protocolVersion: 1 | 2 | 3;
 };
 

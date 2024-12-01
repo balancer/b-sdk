@@ -610,6 +610,46 @@ export const stablePoolAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'getAmplificationState',
+        outputs: [
+            {
+                components: [
+                    {
+                        internalType: 'uint64',
+                        name: 'startValue',
+                        type: 'uint64',
+                    },
+                    {
+                        internalType: 'uint64',
+                        name: 'endValue',
+                        type: 'uint64',
+                    },
+                    {
+                        internalType: 'uint32',
+                        name: 'startTime',
+                        type: 'uint32',
+                    },
+                    {
+                        internalType: 'uint32',
+                        name: 'endTime',
+                        type: 'uint32',
+                    },
+                ],
+                internalType: 'struct AmplificationState',
+                name: 'amplificationState',
+                type: 'tuple',
+            },
+            {
+                internalType: 'uint256',
+                name: 'precision',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
         name: 'getCurrentLiveBalances',
         outputs: [
             {
@@ -721,6 +761,26 @@ export const stablePoolAbi_V3 = [
                         internalType: 'uint256',
                         name: 'amplificationParameter',
                         type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'startValue',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'endValue',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint32',
+                        name: 'startTime',
+                        type: 'uint32',
+                    },
+                    {
+                        internalType: 'uint32',
+                        name: 'endTime',
+                        type: 'uint32',
                     },
                     {
                         internalType: 'bool',

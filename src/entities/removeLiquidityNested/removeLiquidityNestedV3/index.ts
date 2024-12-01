@@ -84,6 +84,7 @@ export class RemoveLiquidityNestedV3 {
                 input.bptAmountIn.amount,
                 minAmountsOut.map((a) => a.token.address),
                 minAmountsOut.map((a) => a.amount),
+                input.wethIsEth ?? false,
                 input.userData,
             ],
         });

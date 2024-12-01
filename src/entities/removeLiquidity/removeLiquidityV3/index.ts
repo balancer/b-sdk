@@ -205,7 +205,10 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 break;
             case RemoveLiquidityKind.Recovery:
                 {
-                    callData = encodeRemoveLiquidityRecovery(input);
+                    callData = encodeRemoveLiquidityRecovery(
+                        input,
+                        amounts.minAmountsOut,
+                    );
                 }
                 break;
         }
