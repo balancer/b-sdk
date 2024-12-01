@@ -19,9 +19,8 @@ import { setupExampleFork } from '../lib/setupExampleFork';
 import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
 
 const swapV2 = async () => {
+    // Choose chain id to start fork
     const chainId = ChainId.MAINNET;
-
-    // Start fork with desired chainId
     const { client, rpcUrl, userAccount } = await setupExampleFork({ chainId });
 
     // User defines these params for querying swap with SOR
@@ -68,7 +67,7 @@ const swapV2 = async () => {
         queryOutput,
     };
 
-    // TODO: Figure out why this approval is not working? (related to txReceipt TODO)
+    // Approve V2 Vault contract as spender of tokenIn
     await approveSpenderOnToken(
         client,
         sender,
