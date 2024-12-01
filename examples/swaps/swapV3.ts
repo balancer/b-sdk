@@ -1,99 +1,74 @@
 /**
- * Example showing how to find swap information for a token pair
+ * Example showing how to query and execute a v3 swap using a custom path
+ * Note that all v3 swaps require permit2 approvals
  *
  * Run with:
  * pnpm example ./examples/swaps/swapV3.ts
  */
-import { config } from 'dotenv';
-config();
 
 import {
     Slippage,
     SwapKind,
-    SwapBuildOutputExactIn,
-    SwapBuildOutputExactOut,
-    MaxAllowanceExpiration,
-    BALANCER_ROUTER,
     PERMIT2,
-    permit2Abi,
-    PermitDetails,
     TokenAmount,
-    CHAINS,
+    ChainId,
+    Permit2Helper,
+    SwapBuildCallInput,
 } from '../../src';
-
-import queryCustomPath from './queryCustomPath';
-import { approveSpenderOnToken, signPermit2 } from '../approvals';
-
-import { createTestClient, http, publicActions, walletActions } from 'viem';
-import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
+import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
+import { setupExampleFork } from '../lib/setupExampleFork';
+import { queryCustomPath } from './queryCustomPath';
+import { parseUnits, Address } from 'viem';
 
 const swapV3 = async () => {
-    const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
-    // User defined;
-    const sender = '0x5036388C540994Ed7b74b82F71175a441F85BdA1';
-    const recipient = '0x5036388C540994Ed7b74b82F71175a441F85BdA1';
-    const slippage = Slippage.fromPercentage('0.1');
-    const deadline = 999999999999999999n; // Infinity
-    const wethIsEth = false;
+    // Choose chain id to start fork
+    const chainId = ChainId.SEPOLIA;
+    const { client, rpcUrl, userAccount } = await setupExampleFork({ chainId });
 
-    // Get up to date swap result by querying onchain
-    const { chainId, swap, queryOutput } = await queryCustomPath();
+    // TODO: Fix query revert, see tenderly simulation: https://www.tdly.co/shared/simulation/f0b0a1de-4e88-4b8d-bf90-c25c4d2145ec
+    // Query swap results before sending transaction
+    const { swap, queryOutput } = await queryCustomPath({
+        rpcUrl,
+        chainId,
+        pools: ['0xA8c18CE5E987d7D82ccAccB93223e9bb5Df4A3c0'] as Address[], // https://test.balancer.fi/pools/sepolia/v3/0xa8c18ce5e987d7d82ccaccb93223e9bb5df4a3c0
+        tokenIn: {
+            address: TOKENS[chainId].WETH.address,
+            decimals: TOKENS[chainId].WETH.decimals,
+        },
+        tokenOut: {
+            address: TOKENS[chainId].BAL.address,
+            decimals: TOKENS[chainId].BAL.decimals,
+        },
+        swapKind: SwapKind.GivenIn,
+        protocolVersion: 3,
+        inputAmountRaw: parseUnits('1', TOKENS[chainId].WETH.decimals),
+        outputAmountRaw: parseUnits('1', TOKENS[chainId].BAL.decimals),
+    });
 
+    // Amount of tokenIn depends on swapKind
     let tokenIn: TokenAmount;
-
     if (queryOutput.swapKind === SwapKind.GivenIn) {
         tokenIn = queryOutput.amountIn;
     } else {
         tokenIn = queryOutput.expectedAmountIn;
     }
 
-    const client = createTestClient({
-        // account: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
-        chain: CHAINS[chainId],
-        mode: 'anvil',
-        transport: http(rpcUrl),
-    })
-        .extend(publicActions)
-        .extend(walletActions);
-
-    // Impersonate sender so we don't need private key
-    await client.impersonateAccount({ address: sender });
-
     // Approve Permit2 contract as spender of tokenIn
     await approveSpenderOnToken(
         client,
-        sender,
+        userAccount,
         tokenIn.token.address,
         PERMIT2[chainId],
     );
 
-    // Get Permit2 nonce for PermitDetails
-    const [, , nonce] = await client.readContract({
-        address: PERMIT2[chainId],
-        abi: permit2Abi,
-        functionName: 'allowance',
-        args: [sender, tokenIn.token.address, BALANCER_ROUTER[chainId]],
-    });
+    // User defines the following params for sending swap transaction
+    const sender = userAccount;
+    const recipient = userAccount;
+    const slippage = Slippage.fromPercentage('0.1');
+    const deadline = 999999999999999999n; // Infinity
+    const wethIsEth = false;
 
-    // Set up details for Permit2 signature
-    const details: PermitDetails[] = [
-        {
-            token: tokenIn.token.address,
-            amount: tokenIn.amount,
-            expiration: Number(MaxAllowanceExpiration),
-            nonce,
-        },
-    ];
-
-    // Sign Permit2 batch
-    const signedPermit2Batch = await signPermit2(
-        client,
-        sender,
-        chainId,
-        details,
-    );
-
-    const buildCallInput = {
+    const swapBuildCallInput: SwapBuildCallInput = {
         sender,
         recipient,
         slippage,
@@ -102,23 +77,42 @@ const swapV3 = async () => {
         queryOutput,
     };
 
-    // Build call data with Permit2 signature
-    const callData = swap.buildCallWithPermit2(
-        buildCallInput,
-        signedPermit2Batch,
-    ) as SwapBuildOutputExactOut | SwapBuildOutputExactIn;
+    // Use signature to permit2 approve transfer of tokens to Balancer's cannonical Router
+    const signedPermit2Batch = await Permit2Helper.signSwapApproval({
+        ...swapBuildCallInput,
+        client,
+        owner: sender,
+    });
 
-    if ('minAmountOut' in callData && 'expectedAmountOut' in queryOutput) {
+    // Build call with Permit2 signature
+    const swapCall = swap.buildCallWithPermit2(
+        swapBuildCallInput,
+        signedPermit2Batch,
+    );
+
+    if ('minAmountOut' in swapCall && 'expectedAmountOut' in queryOutput) {
         console.log(`Updated amount: ${queryOutput.expectedAmountOut.amount}`);
         console.log(
-            `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
+            `Min Amount Out: ${swapCall.minAmountOut.amount}\n\nTx Data:\nTo: ${swapCall.to}\nCallData: ${swapCall.callData}\nValue: ${swapCall.value}`,
         );
-    } else if ('maxAmountIn' in callData && 'expectedAmountIn' in queryOutput) {
+    } else if ('maxAmountIn' in swapCall && 'expectedAmountIn' in queryOutput) {
         console.log(`Updated amount: ${queryOutput.expectedAmountIn.amount}`);
         console.log(
-            `Max Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
+            `Max Amount In: ${swapCall.maxAmountIn.amount}\n\nTx Data:\nTo: ${swapCall.to}\nCallData: ${swapCall.callData}\nValue: ${swapCall.value}`,
         );
     }
+
+    // Send swap transaction
+    const hash = await client.sendTransaction({
+        account: userAccount,
+        data: swapCall.callData,
+        to: swapCall.to,
+        value: swapCall.value,
+    });
+
+    // TODO parse tx receipt logs to display results
+    const txReceipt = await client.waitForTransactionReceipt({ hash });
+    console.log('txReceipt', txReceipt);
 };
 
 export default swapV3;

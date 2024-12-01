@@ -1,12 +1,9 @@
-// use custom path to query and return the queryOutput
 /**
- * Example showing how to query swap using paths from the SOR
+ * Example showing how to query custom path, which explicitly chooses the pool(s) to swap through
  *
  * Run with:
  * pnpm example ./examples/swaps/queryCustomPath.ts
  */
-import { config } from 'dotenv';
-config();
 
 import {
     ChainId,
@@ -14,39 +11,50 @@ import {
     Swap,
     ExactInQueryOutput,
     ExactOutQueryOutput,
+    SwapInput,
+    Path,
+    TokenApi,
 } from '../../src';
+import { Address } from 'viem';
 
-import { Address, parseUnits } from 'viem';
+interface QueryCustomPath {
+    rpcUrl: string;
+    chainId: ChainId;
+    pools: Address[];
+    tokenIn: TokenApi;
+    tokenOut: TokenApi;
+    swapKind: SwapKind;
+    protocolVersion: 2 | 3;
+    inputAmountRaw: bigint;
+    outputAmountRaw: bigint;
+}
 
-const queryCustomPath = async () => {
-    // User defined
-    const rpcUrl = process.env.SEPOLIA_RPC_URL;
-    const chainId = ChainId.SEPOLIA;
-    const pool = '0xb27aC1DD8192163CFbD6F977C91D31A07E941B87' as Address; // Constant Product Pool from scaffold balancer v3
-    const tokenIn = {
-        address: '0x83f953D2461C6352120E06f5f8EcCD3e4d66d042' as Address, // MockToken1 from scaffold balancer v3
-        decimals: 18,
-    };
-    const tokenOut = {
-        address: '0x9d57eDCe10b7BdDA98997613c33ff7f3e34F4eAd' as Address,
-        decimals: 18,
-    };
-    const swapKind = SwapKind.GivenIn as SwapKind;
-    const tokens = [tokenIn, tokenOut];
-    const protocolVersion = 3 as const;
-    const inputAmountRaw = parseUnits('1', 18);
-    const outputAmountRaw = parseUnits('1', 18);
-
-    const customPaths = [
+export const queryCustomPath = async ({
+    rpcUrl,
+    chainId,
+    pools,
+    tokenIn,
+    tokenOut,
+    swapKind,
+    protocolVersion,
+    inputAmountRaw,
+    outputAmountRaw,
+}: QueryCustomPath): Promise<{
+    swap: Swap;
+    queryOutput: ExactInQueryOutput | ExactOutQueryOutput;
+}> => {
+    // User defines custom paths
+    const customPaths: Path[] = [
         {
-            pools: [pool],
-            tokens,
+            pools,
+            tokens: [tokenIn, tokenOut],
             protocolVersion,
             inputAmountRaw,
             outputAmountRaw,
         },
     ];
-    const swapInput = { chainId, swapKind, paths: customPaths };
+
+    const swapInput: SwapInput = { chainId, swapKind, paths: customPaths };
 
     // Swap object provides useful helpers for re-querying, building call, etc
     const swap = new Swap(swapInput);
@@ -64,9 +72,7 @@ const queryCustomPath = async () => {
     }
 
     // Get up to date swap result by querying onchain
-    const queryOutput = (await swap.query(rpcUrl)) as
-        | ExactInQueryOutput
-        | ExactOutQueryOutput;
+    const queryOutput = await swap.query(rpcUrl);
 
     // Construct transaction to make swap
     if (queryOutput.swapKind === SwapKind.GivenIn) {
@@ -81,7 +87,5 @@ const queryCustomPath = async () => {
         });
     }
 
-    return { swap, chainId, queryOutput };
+    return { swap, queryOutput };
 };
-
-export default queryCustomPath;

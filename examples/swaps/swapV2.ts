@@ -1,114 +1,105 @@
 /**
- * Example showing
+ * Example showing how to use Smart Order Router (SOR) to query and execute a swap
  *
  * Run with:
- * pnpm example ./examples/swaps/swap.ts
+ * pnpm example ./examples/swaps/swapV2.ts
  */
-import { config } from 'dotenv';
-config();
 
-import { setupFork } from '../lib/setupFork';
 import {
-    BalancerApi,
-    API_ENDPOINT,
     ChainId,
     Slippage,
     SwapKind,
     Token,
     TokenAmount,
-    Swap,
-    SwapBuildOutputExactIn,
-    SwapBuildOutputExactOut,
+    SwapBuildCallInput,
+    VAULT,
 } from '../../src';
+import { querySmartPath } from './querySmartPath';
+import { setupExampleFork } from '../lib/setupExampleFork';
+import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
 
-const swap = async () => {
-    await setupFork();
+const swapV2 = async () => {
+    const chainId = ChainId.MAINNET;
 
-    // User defined
-    // const rpcUrl = process.env.POLYGON_RPC_URL;
-    // const chainId = ChainId.POLYGON;
-    // const swapKind = SwapKind.GivenIn;
-    // const tokenIn = new Token(
-    //     chainId,
-    //     '0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6',
-    //     18,
-    //     'MaticX',
-    // );
-    // const tokenOut = new Token(
-    //     chainId,
-    //     '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-    //     18,
-    //     'WMATIC',
-    // );
-    // const wethIsEth = false;
-    // const slippage = Slippage.fromPercentage('0.1');
-    // const swapAmount =
-    //     swapKind === SwapKind.GivenIn
-    //         ? TokenAmount.fromHumanAmount(tokenIn, '1.2345678910')
-    //         : TokenAmount.fromHumanAmount(tokenOut, '1.2345678910');
-    // const sender = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-    // const recipient = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-    // const deadline = 999999999999999999n; // Infinity
+    // Start fork with desired chainId
+    const { client, rpcUrl, userAccount } = await setupExampleFork({ chainId });
 
-    // // API is used to fetch best path from available liquidity
-    // const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
+    // User defines these params for querying swap with SOR
+    const swapKind = SwapKind.GivenIn;
+    const tokenIn = new Token(
+        chainId,
+        TOKENS[chainId].WETH.address,
+        TOKENS[chainId].WETH.decimals,
+        'WETH',
+    );
+    const tokenOut = new Token(
+        chainId,
+        TOKENS[chainId].BAL.address,
+        TOKENS[chainId].BAL.decimals,
+        'BAL',
+    );
+    const swapAmount =
+        swapKind === SwapKind.GivenIn
+            ? TokenAmount.fromHumanAmount(tokenIn, '1')
+            : TokenAmount.fromHumanAmount(tokenOut, '1');
 
-    // const sorPaths = await balancerApi.sorSwapPaths.fetchSorSwapPaths({
-    //     chainId,
-    //     tokenIn: tokenIn.address,
-    //     tokenOut: tokenOut.address,
-    //     swapKind,
-    //     swapAmount,
-    // });
+    const { swap, queryOutput } = await querySmartPath({
+        rpcUrl,
+        chainId,
+        swapKind,
+        tokenIn,
+        tokenOut,
+        swapAmount,
+    });
 
-    // const swapInput = {
-    //     chainId,
-    //     paths: sorPaths,
-    //     swapKind,
-    //     userData: '0x',
-    // };
+    // User defines these params for sending transaction
+    const sender = userAccount;
+    const recipient = userAccount;
+    const slippage = Slippage.fromPercentage('0.1');
+    const deadline = 999999999999999999n; // Infinity
+    const wethIsEth = false;
 
-    // // Swap object provides useful helpers for re-querying, building call, etc
-    // const swap = new Swap(swapInput);
+    const swapBuildCallInput: SwapBuildCallInput = {
+        sender,
+        recipient,
+        slippage,
+        deadline,
+        wethIsEth,
+        queryOutput,
+    };
 
-    // console.log(
-    //     `Input token: ${swap.inputAmount.token.address}, Amount: ${swap.inputAmount.amount}`,
-    // );
-    // console.log(
-    //     `Output token: ${swap.outputAmount.token.address}, Amount: ${swap.outputAmount.amount}`,
-    // );
+    // TODO: Figure out why this approval is not working? (related to txReceipt TODO)
+    await approveSpenderOnToken(
+        client,
+        sender,
+        tokenIn.address,
+        VAULT[chainId],
+    );
 
-    // // Get up to date swap result by querying onchain
-    // const queryOutput = await swap.query(rpcUrl);
+    // Build call to make swap transaction
+    const swapCall = swap.buildCall(swapBuildCallInput);
 
-    // // Construct transaction to make swap
-    // if (queryOutput.swapKind === SwapKind.GivenIn) {
-    //     console.log(`Updated amount: ${queryOutput.expectedAmountOut.amount}`);
-    //     const callData = swap.buildCall({
-    //         slippage,
-    //         deadline,
-    //         queryOutput,
-    //         sender,
-    //         recipient,
-    //         wethIsEth,
-    //     }) as SwapBuildOutputExactIn;
-    //     console.log(
-    //         `Min Amount Out: ${callData.minAmountOut.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
-    //     );
-    // } else {
-    //     console.log(`Updated amount: ${queryOutput.expectedAmountIn.amount}`);
-    //     const callData = swap.buildCall({
-    //         slippage,
-    //         deadline,
-    //         queryOutput,
-    //         sender,
-    //         recipient,
-    //         wethIsEth,
-    //     }) as SwapBuildOutputExactOut;
-    //     console.log(
-    //         `Max Amount In: ${callData.maxAmountIn.amount}\n\nTx Data:\nTo: ${callData.to}\nCallData: ${callData.callData}\nValue: ${callData.value}`,
-    //     );
-    // }
+    if ('minAmountOut' in swapCall && 'expectedAmountOut' in queryOutput) {
+        console.log(
+            `Min Amount Out: ${swapCall.minAmountOut.amount}\n\nTx Data:\nTo: ${swapCall.to}\nCallData: ${swapCall.callData}\nValue: ${swapCall.value}`,
+        );
+    } else if ('maxAmountIn' in swapCall && 'expectedAmountIn' in queryOutput) {
+        console.log(
+            `Max Amount In: ${swapCall.maxAmountIn.amount}\n\nTx Data:\nTo: ${swapCall.to}\nCallData: ${swapCall.callData}\nValue: ${swapCall.value}`,
+        );
+    }
+
+    // Send swap transaction
+    const hash = await client.sendTransaction({
+        account: userAccount,
+        data: swapCall.callData,
+        to: swapCall.to,
+        value: swapCall.value,
+    });
+
+    // TODO: parse txReceipt logs for relevent data to display
+    const txReceipt = await client.getTransactionReceipt({ hash });
+    console.log('txReceipt', txReceipt);
 };
 
-export default swap;
+export default swapV2;

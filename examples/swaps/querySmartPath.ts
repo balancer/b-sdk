@@ -1,11 +1,9 @@
 /**
- * Example showing how to query swap using paths from the SOR
+ * Example showing how to query swap using the Smart Order Router (SOR)
  *
  * Run with:
  * pnpm example ./examples/swaps/querySmartPath.ts
  */
-import { config } from 'dotenv';
-config();
 
 import {
     BalancerApi,
@@ -15,30 +13,30 @@ import {
     Token,
     TokenAmount,
     Swap,
+    ExactInQueryOutput,
+    ExactOutQueryOutput,
 } from '../../src';
 
-const querySmartPath = async () => {
-    // User defined
-    const rpcUrl = process.env.MAINNET_RPC_URL;
-    const chainId = ChainId.MAINNET;
-    const swapKind = SwapKind.GivenIn as SwapKind;
-    const tokenIn = new Token(
-        chainId,
-        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        6,
-        'USDC',
-    );
-    const tokenOut = new Token(
-        chainId,
-        '0xba100000625a3754423978a60c9317c58a424e3D',
-        18,
-        'BAL',
-    );
-    const swapAmount =
-        swapKind === SwapKind.GivenIn
-            ? TokenAmount.fromHumanAmount(tokenIn, '100')
-            : TokenAmount.fromHumanAmount(tokenOut, '100');
+interface QuerySmartPath {
+    rpcUrl: string;
+    chainId: ChainId;
+    swapKind: SwapKind;
+    tokenIn: Token;
+    tokenOut: Token;
+    swapAmount: TokenAmount;
+}
 
+export const querySmartPath = async ({
+    rpcUrl,
+    chainId,
+    swapKind,
+    tokenIn,
+    tokenOut,
+    swapAmount,
+}: QuerySmartPath): Promise<{
+    swap: Swap;
+    queryOutput: ExactInQueryOutput | ExactOutQueryOutput;
+}> => {
     // API is used to fetch best path from available liquidity
     const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
 
@@ -83,7 +81,5 @@ const querySmartPath = async () => {
         console.log('Expected Amount In:', queryOutput.expectedAmountIn.amount);
     }
 
-    return { swap, chainId, queryOutput };
+    return { swap, queryOutput };
 };
-
-export default querySmartPath;
