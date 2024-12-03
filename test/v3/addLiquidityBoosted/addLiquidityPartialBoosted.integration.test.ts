@@ -28,27 +28,24 @@ import {
 } from '@/index';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
+    AddLiquidityBoostedTxInput,
     approveSpenderOnPermit2,
     approveSpenderOnToken,
-    areBigIntsWithinPercent,
-    sendTransactionGetBalances,
+    assertAddLiquidityBoostedProportional,
+    assertAddLiquidityBoostedUnbalanced,
+    doAddLiquidityBoosted,
     setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
-import { partialBoostedPool_USDT_stataDAI } from 'test/mockData/partialBoostedPool';
+import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
 
 const chainId = ChainId.SEPOLIA;
 const USDT = TOKENS[chainId].USDT_AAVE;
-const DAI = TOKENS[chainId].DAI_AAVE;
+const WETH = TOKENS[chainId].WETH;
 
-const parentBptToken = new Token(
-    chainId,
-    partialBoostedPool_USDT_stataDAI.address,
-    18,
-);
 // These are the underlying tokens
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
-const daiToken = new Token(chainId, DAI.address, DAI.decimals);
+const wethToken = new Token(chainId, WETH.address, WETH.decimals);
 
 describe('V3 add liquidity partial boosted', () => {
     let rpcUrl: string;
@@ -58,7 +55,7 @@ describe('V3 add liquidity partial boosted', () => {
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
     const amountsIn = [
         TokenAmount.fromHumanAmount(usdtToken, '1'),
-        TokenAmount.fromHumanAmount(daiToken, '2'),
+        TokenAmount.fromHumanAmount(wethToken, '0.02'),
     ];
 
     beforeAll(async () => {
@@ -75,15 +72,32 @@ describe('V3 add liquidity partial boosted', () => {
 
         testAddress = (await client.getAddresses())[0];
 
+        // fork setup
         await setTokenBalances(
             client,
             testAddress,
             amountsIn.map((t) => t.token.address),
-            [USDT.slot, DAI.slot] as number[],
+            [USDT.slot, WETH.slot] as number[],
             amountsIn.map((t) => parseUnits('1000', t.token.decimals)),
         );
-        // Uses Special RPC methods to revert state back to same snapshot for each test
-        // https://github.com/trufflesuite/ganache-cli-archive/blob/master/README.md
+
+        for (const token of partialBoostedPool_WETH_stataUSDT.tokens) {
+            // Approve Permit2 to spend account tokens
+            await approveSpenderOnToken(
+                client,
+                testAddress,
+                token.underlyingToken?.address ?? token.address,
+                PERMIT2[chainId],
+            );
+            // Approve Router to spend account tokens using Permit2
+            await approveSpenderOnPermit2(
+                client,
+                testAddress,
+                token.underlyingToken?.address ?? token.address,
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            );
+        }
+
         snapshot = await client.snapshot();
     });
 
@@ -95,10 +109,10 @@ describe('V3 add liquidity partial boosted', () => {
     });
 
     describe('unbalanced', async () => {
-        let addLiquidityInput: AddLiquidityBoostedUnbalancedInput;
+        let addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput;
 
         beforeAll(async () => {
-            addLiquidityInput = {
+            addLiquidityBoostedInput = {
                 amountsIn: amountsIn.map((a) => ({
                     address: a.token.address,
                     rawAmount: a.amount,
@@ -110,82 +124,75 @@ describe('V3 add liquidity partial boosted', () => {
             };
         });
 
-        test('add liquidity transaction', async () => {
-            for (const amount of addLiquidityInput.amountsIn) {
-                // Approve Permit2 to spend account tokens
-                await approveSpenderOnToken(
-                    client,
-                    testAddress,
-                    amount.address,
-                    PERMIT2[chainId],
-                );
-                // Approve Router to spend account tokens using Permit2
-                await approveSpenderOnPermit2(
-                    client,
-                    testAddress,
-                    amount.address,
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-                );
-            }
+        test('with tokens', async () => {
+            const wethIsEth = false;
 
-            const queryOutput = await addLiquidityBoosted.query(
-                addLiquidityInput,
-                partialBoostedPool_USDT_stataDAI,
-            );
-
-            expect(queryOutput.protocolVersion).toEqual(3);
-            expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
-            expect(queryOutput.bptOut.amount > 0n).to.be.true;
-            expect(queryOutput.amountsIn).to.deep.eq(amountsIn);
-
-            const addLiquidityBuildInput = {
-                ...queryOutput,
-                slippage: Slippage.fromPercentage('1'), // 1%,
+            const txInput: AddLiquidityBoostedTxInput = {
+                client,
+                addLiquidityBoosted,
+                addLiquidityBoostedInput,
+                testAddress,
+                poolStateWithUnderlyings: partialBoostedPool_WETH_stataUSDT,
+                slippage: Slippage.fromPercentage('1'),
+                wethIsEth,
             };
 
-            const addLiquidityBuildCallOutput = addLiquidityBoosted.buildCall(
-                addLiquidityBuildInput,
-            );
-            expect(addLiquidityBuildCallOutput.value === 0n).to.be.true;
-            expect(addLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            );
+            const {
+                addLiquidityBoostedQueryOutput,
+                addLiquidityBuildCallOutput,
+                tokenAmountsForBalanceCheck,
+                txOutput,
+            } = await doAddLiquidityBoosted(txInput);
 
-            // send add liquidity transaction and check balance changes
-            const { transactionReceipt, balanceDeltas } =
-                await sendTransactionGetBalances(
-                    [
-                        ...amountsIn.map((t) => t.token.address),
-                        queryOutput.bptOut.token.address,
-                    ],
-                    client,
-                    testAddress,
-                    addLiquidityBuildCallOutput.to,
-                    addLiquidityBuildCallOutput.callData,
-                    addLiquidityBuildCallOutput.value,
-                );
-
-            expect(transactionReceipt.status).to.eq('success');
-
-            expect(amountsIn.map((a) => a.amount)).to.deep.eq(
-                balanceDeltas.slice(0, -1),
+            assertAddLiquidityBoostedUnbalanced(
+                {
+                    addLiquidityBoostedQueryOutput,
+                    addLiquidityBuildCallOutput,
+                    tokenAmountsForBalanceCheck,
+                    txOutput,
+                },
+                wethIsEth,
             );
-            // Here we check that output diff is within an acceptable tolerance.
-            // !!! This should only be used in the case of buffers as all other cases can be equal
-            areBigIntsWithinPercent(
-                balanceDeltas[balanceDeltas.length - 1],
-                queryOutput.bptOut.amount,
-                0.001,
+        });
+
+        test('with native', async () => {
+            const wethIsEth = true;
+
+            const txInput: AddLiquidityBoostedTxInput = {
+                client,
+                addLiquidityBoosted,
+                addLiquidityBoostedInput,
+                testAddress,
+                poolStateWithUnderlyings: partialBoostedPool_WETH_stataUSDT,
+                slippage: Slippage.fromPercentage('1'),
+                wethIsEth,
+            };
+
+            const {
+                addLiquidityBoostedQueryOutput,
+                addLiquidityBuildCallOutput,
+                tokenAmountsForBalanceCheck,
+                txOutput,
+            } = await doAddLiquidityBoosted(txInput);
+
+            assertAddLiquidityBoostedUnbalanced(
+                {
+                    addLiquidityBoostedQueryOutput,
+                    addLiquidityBuildCallOutput,
+                    tokenAmountsForBalanceCheck,
+                    txOutput,
+                },
+                wethIsEth,
             );
         });
     });
 
     describe('proportional', async () => {
-        let addLiquidityInput: AddLiquidityBoostedProportionalInput;
+        let addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput;
         let referenceTokenAmount: TokenAmount;
         beforeAll(async () => {
             referenceTokenAmount = amountsIn[0];
-            addLiquidityInput = {
+            addLiquidityBoostedInput = {
                 referenceAmount: {
                     address: referenceTokenAmount.token.address,
                     rawAmount: referenceTokenAmount.amount,
@@ -197,76 +204,65 @@ describe('V3 add liquidity partial boosted', () => {
             };
         });
 
-        test('add liquidity transaction', async () => {
-            for (const token of partialBoostedPool_USDT_stataDAI.tokens) {
-                // Approve Permit2 to spend account tokens
-                await approveSpenderOnToken(
-                    client,
-                    testAddress,
-                    token.underlyingToken?.address ?? token.address,
-                    PERMIT2[chainId],
-                );
-                // Approve Router to spend account tokens using Permit2
-                await approveSpenderOnPermit2(
-                    client,
-                    testAddress,
-                    token.underlyingToken?.address ?? token.address,
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-                );
-            }
+        test('with tokens', async () => {
+            const wethIsEth = false;
 
-            const queryOutput = await addLiquidityBoosted.query(
-                addLiquidityInput,
-                partialBoostedPool_USDT_stataDAI,
-            );
-
-            expect(queryOutput.protocolVersion).toEqual(3);
-            expect(queryOutput.bptOut.token).to.deep.eq(parentBptToken);
-            expect(queryOutput.bptOut.amount > 0n).to.be.true;
-
-            const addLiquidityBuildInput = {
-                ...queryOutput,
-                slippage: Slippage.fromPercentage('1'), // 1%,
+            const txInput: AddLiquidityBoostedTxInput = {
+                client,
+                addLiquidityBoosted,
+                addLiquidityBoostedInput,
+                testAddress,
+                poolStateWithUnderlyings: partialBoostedPool_WETH_stataUSDT,
+                slippage: Slippage.fromPercentage('1'),
+                wethIsEth,
             };
 
-            const addLiquidityBuildCallOutput = addLiquidityBoosted.buildCall(
-                addLiquidityBuildInput,
+            const {
+                addLiquidityBoostedQueryOutput,
+                addLiquidityBuildCallOutput,
+                tokenAmountsForBalanceCheck,
+                txOutput,
+            } = await doAddLiquidityBoosted(txInput);
+
+            assertAddLiquidityBoostedProportional(
+                {
+                    addLiquidityBoostedQueryOutput,
+                    addLiquidityBuildCallOutput,
+                    tokenAmountsForBalanceCheck,
+                    txOutput,
+                },
+                wethIsEth,
             );
-            expect(addLiquidityBuildCallOutput.value === 0n).to.be.true;
-            expect(addLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            );
+        });
 
-            // send add liquidity transaction and check balance changes
+        test('with native', async () => {
+            const wethIsEth = true;
 
-            const tokensForBalanceCheck = [
-                ...queryOutput.amountsIn,
-                queryOutput.bptOut,
-            ];
+            const txInput: AddLiquidityBoostedTxInput = {
+                client,
+                addLiquidityBoosted,
+                addLiquidityBoostedInput,
+                testAddress,
+                poolStateWithUnderlyings: partialBoostedPool_WETH_stataUSDT,
+                slippage: Slippage.fromPercentage('1'),
+                wethIsEth,
+            };
 
-            const { transactionReceipt, balanceDeltas } =
-                await sendTransactionGetBalances(
-                    tokensForBalanceCheck.map((t) => t.token.address),
-                    client,
-                    testAddress,
-                    addLiquidityBuildCallOutput.to,
-                    addLiquidityBuildCallOutput.callData,
-                    addLiquidityBuildCallOutput.value,
-                );
+            const {
+                addLiquidityBoostedQueryOutput,
+                addLiquidityBuildCallOutput,
+                tokenAmountsForBalanceCheck,
+                txOutput,
+            } = await doAddLiquidityBoosted(txInput);
 
-            expect(transactionReceipt.status).to.eq('success');
-
-            // Here we check that output diff is within an acceptable tolerance.
-            // !!! This should only be used in the case of buffers as all other cases can be equal
-            tokensForBalanceCheck.forEach(
-                (token, i) =>
-                    expect(
-                        areBigIntsWithinPercent(
-                            balanceDeltas[i],
-                            token.amount,
-                            0.001,
-                        ),
-                    ).to.be.true,
+            assertAddLiquidityBoostedProportional(
+                {
+                    addLiquidityBoostedQueryOutput,
+                    addLiquidityBuildCallOutput,
+                    tokenAmountsForBalanceCheck,
+                    txOutput,
+                },
+                wethIsEth,
             );
         });
     });
