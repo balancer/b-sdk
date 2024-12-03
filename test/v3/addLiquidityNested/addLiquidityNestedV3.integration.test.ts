@@ -34,7 +34,6 @@ import {
     areBigIntsWithinPercent,
     sendTransactionGetBalances,
     setTokenBalances,
-    TxOutput,
 } from 'test/lib/utils';
 import {
     nestedWithBoostedPool,
