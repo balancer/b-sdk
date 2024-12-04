@@ -27,8 +27,8 @@ async function runAgainstFork() {
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     // 50BAL-50WETH
     const pool = {
-        id: '0x5e54dad6c2504d63473f95d8025b763fd5b893c6',
-        address: '0x5e54dad6c2504d63473f95d8025b763fd5b893c6' as Address,
+        id: '0x2ff3b96e0057a1f25f1d62ab800554ccdb268ab8',
+        address: '0x2ff3b96e0057a1f25f1d62ab800554ccdb268ab8' as Address,
     };
     const amountsIn = [
         {
