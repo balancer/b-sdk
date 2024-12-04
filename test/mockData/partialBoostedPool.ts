@@ -24,3 +24,28 @@ export const partialBoostedPool_USDT_stataDAI: PoolStateWithUnderlyings = {
         },
     ],
 };
+
+export const partialBoostedPool_WETH_stataUSDT: PoolStateWithUnderlyings = {
+    id: '0xf5a25990da505a9d4c3e0d876f3951e9edf9abc3',
+    address: '0xf5a25990da505a9d4c3e0d876f3951e9edf9abc3',
+    type: 'Weighted',
+    protocolVersion: 3,
+    tokens: [
+        {
+            index: 0,
+            address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+            decimals: 18,
+            underlyingToken: null,
+        },
+        {
+            index: 1,
+            address: '0x978206fae13faf5a8d293fb614326b237684b750',
+            decimals: 6,
+            underlyingToken: {
+                address: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
+                decimals: 6,
+                index: 1,
+            },
+        },
+    ],
+};

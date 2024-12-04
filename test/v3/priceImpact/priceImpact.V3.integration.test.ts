@@ -28,7 +28,11 @@ const WETH = TOKENS[chainId].WETH;
 describe('PriceImpact V3', () => {
     let rpcUrl: string;
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS.SEPOLIA,
+            undefined,
+            7178065n,
+        ));
     });
     /**
      * FIXME: Test pending a reference value for comparison/validation, because
