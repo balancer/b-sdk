@@ -18,6 +18,7 @@ import {
     Swap,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
+    SwapInput,
 } from '../../src';
 
 const swap = async () => {
@@ -58,7 +59,7 @@ const swap = async () => {
         swapAmount,
     });
 
-    const swapInput = {
+    const swapInput: SwapInput = {
         chainId,
         paths: sorPaths,
         swapKind,

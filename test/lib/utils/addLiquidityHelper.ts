@@ -19,6 +19,7 @@ import {
     Permit2Helper,
     AddLiquidityKind,
     ChainId,
+    isSameAddress,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
@@ -315,7 +316,7 @@ export function assertAddLiquiditySingleToken(
     // Expect only tokenIn to have amount > 0
     // (Note addLiquidityQueryOutput also has value for bpt if pre-minted)
     addLiquidityQueryOutput.amountsIn.forEach((a) => {
-        if (a.token.address === addLiquidityInput.tokenIn) {
+        if (isSameAddress(a.token.address, addLiquidityInput.tokenIn)) {
             expect(a.amount > 0n).to.be.true;
         } else {
             expect(a.amount).toEqual(0n);

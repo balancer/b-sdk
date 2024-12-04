@@ -113,25 +113,28 @@ const getUnderlyingBalances = async (
     tokenAmounts: TokenAmount[],
     publicClient: PublicClient,
 ) => {
-    // create one contract call for each underlying token
-    const getUnderlyingBalancesContracts = sortedTokens
-        .filter((token) => token.underlyingToken !== null)
-        .map((token, i) => ({
+    const underlyingTokens = sortedTokens
+        .map((token, index) => ({ token, index }))
+        .filter(({ token }) => token.underlyingToken !== null);
+
+    const getUnderlyingBalancesContracts = underlyingTokens.map(
+        ({ token, index }) => ({
             address: token.address,
             abi: erc4626Abi,
             functionName: 'previewRedeem' as const,
-            args: [tokenAmounts[i].amount] as const,
-        }));
+            args: [tokenAmounts[index].amount] as const,
+        }),
+    );
 
     // execute multicall to get on-chain balances for each underlying token
     const underlyingBalanceOutputs = await publicClient.multicall({
         contracts: [...getUnderlyingBalancesContracts],
     });
 
-    // throw error if any of the underlying balance calls failed
     if (
         underlyingBalanceOutputs.some((output) => output.status === 'failure')
     ) {
+        // throw error if any of the underlying balance calls failed
         throw new Error(
             'Error: Unable to get underlying balances for v3 pool.',
         );
