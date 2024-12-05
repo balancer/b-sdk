@@ -13,11 +13,12 @@ import {
     TokenAmount,
     SwapBuildCallInput,
     VAULT,
+    erc20Abi,
 } from '../../src';
 import { querySmartPath } from './querySmartPath';
 import { setupExampleFork } from '../lib/setupExampleFork';
 import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
-
+import { parseEventLogs } from 'viem';
 const swapV2 = async () => {
     // Choose chain id to start fork
     const chainId = ChainId.MAINNET;
@@ -79,16 +80,26 @@ const swapV2 = async () => {
     const swapCall = swap.buildCall(swapBuildCallInput);
 
     if ('minAmountOut' in swapCall && 'expectedAmountOut' in queryOutput) {
-        console.log(
-            `Min Amount Out: ${swapCall.minAmountOut.amount}\n\nTx Data:\nTo: ${swapCall.to}\nCallData: ${swapCall.callData}\nValue: ${swapCall.value}`,
-        );
+        console.table([
+            {
+                Type: 'Query Token Out',
+                Address: queryOutput.expectedAmountOut.token.address,
+                Expected: queryOutput.expectedAmountOut.amount,
+                Minimum: swapCall.minAmountOut.amount,
+            },
+        ]);
     } else if ('maxAmountIn' in swapCall && 'expectedAmountIn' in queryOutput) {
-        console.log(
-            `Max Amount In: ${swapCall.maxAmountIn.amount}\n\nTx Data:\nTo: ${swapCall.to}\nCallData: ${swapCall.callData}\nValue: ${swapCall.value}`,
-        );
+        console.table([
+            {
+                Type: 'Query Token In',
+                Address: queryOutput.expectedAmountIn.token.address,
+                Expected: queryOutput.expectedAmountIn.amount,
+                Maximum: swapCall.maxAmountIn.amount,
+            },
+        ]);
     }
 
-    // Send swap transaction
+    console.log('Sending swap transaction...');
     const hash = await client.sendTransaction({
         account: userAccount,
         data: swapCall.callData,
@@ -96,9 +107,22 @@ const swapV2 = async () => {
         value: swapCall.value,
     });
 
-    // TODO: parse txReceipt logs for relevent data to display
     const txReceipt = await client.getTransactionReceipt({ hash });
-    console.log('txReceipt', txReceipt);
+
+    const logs = parseEventLogs({
+        abi: erc20Abi,
+        eventName: 'Transfer',
+        logs: txReceipt.logs,
+    });
+
+    console.log('Swap Results:');
+    console.table(
+        logs.map((log, index) => ({
+            Type: index === 0 ? 'Token In' : 'Token Out',
+            Address: log.address,
+            Amount: log.args.value,
+        })),
+    );
 };
 
 export default swapV2;

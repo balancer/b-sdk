@@ -60,32 +60,26 @@ export const queryCustomPath = async ({
     const swap = new Swap(swapInput);
 
     if (swapKind === SwapKind.GivenIn) {
-        console.log('Given tokenIn:', {
-            address: tokenIn.address,
-            amount: inputAmountRaw,
-        });
+        console.table([
+            {
+                Type: 'Given Token In',
+                Address: tokenIn.address,
+                Amount: inputAmountRaw,
+            },
+        ]);
     } else {
-        console.log('Given tokenOut:', {
-            address: tokenOut.address,
-            amount: outputAmountRaw,
-        });
+        console.log('Given Token Out:');
+        console.table([
+            {
+                Type: 'Given Token Out',
+                Address: tokenOut.address,
+                Amount: outputAmountRaw,
+            },
+        ]);
     }
 
     // Get up to date swap result by querying onchain
     const queryOutput = await swap.query(rpcUrl);
-
-    // Construct transaction to make swap
-    if (queryOutput.swapKind === SwapKind.GivenIn) {
-        console.log('tokenOut:', {
-            address: tokenOut.address,
-            expectedAmount: queryOutput.expectedAmountOut.amount,
-        });
-    } else {
-        console.log('tokenIn:', {
-            address: tokenIn.address,
-            expectedAmount: queryOutput.expectedAmountIn.amount,
-        });
-    }
 
     return { swap, queryOutput };
 };

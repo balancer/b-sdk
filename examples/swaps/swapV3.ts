@@ -14,23 +14,23 @@ import {
     ChainId,
     Permit2Helper,
     SwapBuildCallInput,
+    erc20Abi,
 } from '../../src';
-import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
+import { TOKENS, POOLS, approveSpenderOnToken } from 'test/lib/utils';
 import { setupExampleFork } from '../lib/setupExampleFork';
 import { queryCustomPath } from './queryCustomPath';
-import { parseUnits, Address } from 'viem';
+import { parseUnits, parseEventLogs } from 'viem';
 
 const swapV3 = async () => {
     // Choose chain id to start fork
     const chainId = ChainId.SEPOLIA;
     const { client, rpcUrl, userAccount } = await setupExampleFork({ chainId });
 
-    // TODO: Fix query revert, see tenderly simulation: https://www.tdly.co/shared/simulation/f0b0a1de-4e88-4b8d-bf90-c25c4d2145ec
     // Query swap results before sending transaction
     const { swap, queryOutput } = await queryCustomPath({
         rpcUrl,
         chainId,
-        pools: ['0xA8c18CE5E987d7D82ccAccB93223e9bb5Df4A3c0'] as Address[], // https://test.balancer.fi/pools/sepolia/v3/0xa8c18ce5e987d7d82ccaccb93223e9bb5df4a3c0
+        pools: [POOLS[chainId].MOCK_WETH_BAL_POOL.id],
         tokenIn: {
             address: TOKENS[chainId].WETH.address,
             decimals: TOKENS[chainId].WETH.decimals,
@@ -41,7 +41,7 @@ const swapV3 = async () => {
         },
         swapKind: SwapKind.GivenIn,
         protocolVersion: 3,
-        inputAmountRaw: parseUnits('1', TOKENS[chainId].WETH.decimals),
+        inputAmountRaw: parseUnits('0.01', TOKENS[chainId].WETH.decimals),
         outputAmountRaw: parseUnits('1', TOKENS[chainId].BAL.decimals),
     });
 
@@ -91,18 +91,26 @@ const swapV3 = async () => {
     );
 
     if ('minAmountOut' in swapCall && 'expectedAmountOut' in queryOutput) {
-        console.log(`Updated amount: ${queryOutput.expectedAmountOut.amount}`);
-        console.log(
-            `Min Amount Out: ${swapCall.minAmountOut.amount}\n\nTx Data:\nTo: ${swapCall.to}\nCallData: ${swapCall.callData}\nValue: ${swapCall.value}`,
-        );
+        console.table([
+            {
+                Type: 'Query Token Out',
+                Address: queryOutput.expectedAmountOut.token.address,
+                Expected: queryOutput.expectedAmountOut.amount,
+                Minimum: swapCall.minAmountOut.amount,
+            },
+        ]);
     } else if ('maxAmountIn' in swapCall && 'expectedAmountIn' in queryOutput) {
-        console.log(`Updated amount: ${queryOutput.expectedAmountIn.amount}`);
-        console.log(
-            `Max Amount In: ${swapCall.maxAmountIn.amount}\n\nTx Data:\nTo: ${swapCall.to}\nCallData: ${swapCall.callData}\nValue: ${swapCall.value}`,
-        );
+        console.table([
+            {
+                Type: 'Query Token In',
+                Address: queryOutput.expectedAmountIn.token.address,
+                Expected: queryOutput.expectedAmountIn.amount,
+                Maximum: swapCall.maxAmountIn.amount,
+            },
+        ]);
     }
 
-    // Send swap transaction
+    console.log('Sending swap transaction...');
     const hash = await client.sendTransaction({
         account: userAccount,
         data: swapCall.callData,
@@ -110,9 +118,22 @@ const swapV3 = async () => {
         value: swapCall.value,
     });
 
-    // TODO parse tx receipt logs to display results
     const txReceipt = await client.waitForTransactionReceipt({ hash });
-    console.log('txReceipt', txReceipt);
+
+    const logs = parseEventLogs({
+        abi: erc20Abi,
+        eventName: 'Transfer',
+        logs: txReceipt.logs,
+    });
+
+    console.log('Swap Results:');
+    console.table(
+        logs.map((log, index) => ({
+            Type: index === 0 ? 'Token In' : 'Token Out',
+            Address: log.address,
+            Amount: log.args.value,
+        })),
+    );
 };
 
 export default swapV3;
