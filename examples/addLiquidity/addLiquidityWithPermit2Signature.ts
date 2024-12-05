@@ -1,11 +1,18 @@
 /**
- * Example showing how to add liquidity to a pool.
+ * Example showing how to add liquidity to a pool while approving tokens through Permit2 signature.
  * (Runs against a local Anvil fork)
  *
  * Run with:
- * pnpm example ./examples/addLiquidity/addLiquidityUnbalanced.ts
+ * pnpm example ./examples/addLiquidity/addLiquidityWithPermit2Signature.ts
  */
-import { Address, parseEther } from 'viem';
+import {
+    Address,
+    createTestClient,
+    http,
+    parseEther,
+    publicActions,
+    walletActions,
+} from 'viem';
 import {
     AddLiquidityInput,
     AddLiquidityKind,
@@ -15,16 +22,17 @@ import {
     PriceImpact,
     Slippage,
     TEST_API_ENDPOINT,
+    CHAINS,
+    Permit2Helper,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
-import { makeForkTx } from '../lib/makeForkTx';
 import { getSlot } from 'examples/lib/getSlot';
+import { makeForkTx } from 'examples/lib/makeForkTx';
 
 async function runAgainstFork() {
     // User defined inputs
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
     const chainId = ChainId.SEPOLIA;
-    const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     // 50BAL-50WETH
     const pool = {
         id: '0x2ff3b96e0057a1f25f1d62ab800554ccdb268ab8',
@@ -44,13 +52,29 @@ async function runAgainstFork() {
     ];
     const slippage = Slippage.fromPercentage('1'); // 1%
 
-    const call = await addLiquidityExample({
+    const client = createTestClient({
+        mode: 'anvil',
+        chain: CHAINS[chainId],
+        transport: http(rpcUrl),
+    })
+        .extend(publicActions)
+        .extend(walletActions);
+
+    const userAccount = (await client.getAddresses())[0];
+
+    // build add liquidity call with permit2 approvals
+    const call = await addLiquidityWithPermit2Signature({
+        client,
+        userAccount,
         rpcUrl,
         chainId,
         amountsIn,
         poolId: pool.id,
         slippage,
     });
+
+    // Skip Permit2 approval during fork setup so we can test approvals through signatures
+    const approveOnPermit2 = false;
 
     // Make the tx against the local fork and print the result
     await makeForkTx(
@@ -64,13 +88,17 @@ async function runAgainstFork() {
                 slot: getSlot(chainId, a.address),
                 rawBalance: a.rawAmount,
             })),
+            client,
         },
         [...amountsIn.map((a) => a.address), pool.address],
         call.protocolVersion,
+        approveOnPermit2,
     );
 }
 
-export const addLiquidityExample = async ({
+const addLiquidityWithPermit2Signature = async ({
+    client,
+    userAccount,
     rpcUrl,
     chainId,
     poolId,
@@ -107,13 +135,26 @@ export const addLiquidityExample = async ({
     );
     console.log(`BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
-    // Apply slippage to the BPT amount received from the query and construct the call
-    const call = addLiquidity.buildCall({
+    // Add liquidity build call input with slippage applied to BPT amount from query output
+    const addLiquidityBuildCallInput = {
         ...queryOutput,
         slippage,
         chainId,
         wethIsEth: false,
+    };
+
+    // Sign permit2 approvals
+    const permit2 = await Permit2Helper.signAddLiquidityApproval({
+        ...addLiquidityBuildCallInput,
+        client,
+        owner: userAccount,
     });
+
+    // Build call with permit2 approvals
+    const call = addLiquidity.buildCallWithPermit2(
+        addLiquidityBuildCallInput,
+        permit2,
+    );
 
     console.log('\nWith slippage applied:');
     console.log('Max tokens in:');

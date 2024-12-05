@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.33.2
+
+### Patch Changes
+
+- 863822c: Use correct index for underlying token redeem call.
+
 ## 0.33.1
 
 ### Patch Changes
