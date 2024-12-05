@@ -2,6 +2,8 @@ export * from './addLiquidity';
 export * from './addLiquidity/types';
 export * from './addLiquidityBoosted';
 export * from './addLiquidityBoosted/types';
+export * from './addLiquidityBuffer';
+export * from './addLiquidityBuffer/types';
 export * from './addLiquidityNested';
 export * from './addLiquidityNested/types';
 export * from './addLiquidityNested/addLiquidityNestedV2/types';
