@@ -10,7 +10,6 @@ import {
     publicActions,
     TestActions,
     walletActions,
-    zeroAddress,
 } from 'viem';
 
 import {
@@ -23,18 +22,15 @@ import {
     RemoveLiquidityNested,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     Slippage,
-    RemoveLiquidityNestedCallInputV3,
-    TokenAmount,
-    NATIVE_ASSETS,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
+import { approveSpenderOnToken } from 'test/lib/utils';
 import {
-    approveSpenderOnToken,
-    sendTransactionGetBalances,
-} from 'test/lib/utils';
-import {
+    assertRemoveLiquidityNested,
+    doRemoveLiquidityNested,
     GetNestedBpt,
+    RemoveLiquidityNestedTxInput,
     validateTokenAmounts,
 } from 'test/lib/utils/removeLiquidityNestedHelper';
 import {
@@ -103,6 +99,15 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
                 },
             ],
         );
+
+        // Removals do NOT use Permit2. Here we directly approave the Router to spend the users BPT using ERC20 approval
+        await approveSpenderOnToken(
+            client,
+            testAddress,
+            parentBptToken.address,
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+        );
+
         snapshot = await client.snapshot();
     });
 
@@ -136,157 +141,48 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
 
     describe('remove liquidity transaction, direct approval on router', async () => {
         test('with tokens', async () => {
-            const removeLiquidityInput: RemoveLiquidityNestedInput = {
+            const removeLiquidityNestedInput: RemoveLiquidityNestedInput = {
                 bptAmountIn: bptAmount,
                 chainId,
                 rpcUrl,
             };
 
-            // Removals do NOT use Permit2. Here we directly approave the Router to spend the users BPT using ERC20 approval
-            await approveSpenderOnToken(
+            const txInput: RemoveLiquidityNestedTxInput = {
                 client,
+                removeLiquidityNested,
+                removeLiquidityNestedInput,
                 testAddress,
-                parentBptToken.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            );
+                nestedPoolState: nestedWithBoostedPool,
+                slippage: Slippage.fromPercentage('1'), // 1%
+            };
 
-            const queryOutput = await removeLiquidityNested.query(
-                removeLiquidityInput,
-                nestedWithBoostedPool,
-            );
+            const output = await doRemoveLiquidityNested(txInput);
 
-            const removeLiquidityBuildInput = {
-                ...queryOutput,
-                slippage: Slippage.fromPercentage('1'), // 1%,
-            } as RemoveLiquidityNestedCallInputV3;
-
-            const addLiquidityBuildCallOutput = removeLiquidityNested.buildCall(
-                removeLiquidityBuildInput,
-            );
-
-            // Build call minAmountsOut should be query result with slippage applied
-            const expectedMinAmountsOut = queryOutput.amountsOut.map(
-                (amountOut) =>
-                    removeLiquidityBuildInput.slippage.applyTo(
-                        amountOut.amount,
-                        -1,
-                    ),
-            );
-            expect(expectedMinAmountsOut).to.deep.eq(
-                addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
-            );
-            expect(addLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            );
-
-            const tokenAmountsForBalanceCheck = [
-                ...queryOutput.amountsOut,
-                queryOutput.bptAmountIn,
-            ];
-
-            // send remove liquidity transaction and check balance changes
-            const { transactionReceipt, balanceDeltas } =
-                await sendTransactionGetBalances(
-                    tokenAmountsForBalanceCheck.map((t) => t.token.address),
-                    client,
-                    testAddress,
-                    addLiquidityBuildCallOutput.to,
-                    addLiquidityBuildCallOutput.callData,
-                );
-
-            expect(transactionReceipt.status).to.eq('success');
-
-            // Should match user bpt amount in and query result for amounts out
-            const expectedDeltas = tokenAmountsForBalanceCheck.map(
-                (t) => t.amount,
-            );
-            expect(expectedDeltas).to.deep.eq(balanceDeltas);
+            assertRemoveLiquidityNested(output, txInput.slippage);
         });
 
         test('with native', async () => {
             const wethIsEth = true;
-            const removeLiquidityInput: RemoveLiquidityNestedInput = {
+
+            const removeLiquidityNestedInput: RemoveLiquidityNestedInput = {
                 bptAmountIn: bptAmount,
                 chainId,
                 rpcUrl,
             };
 
-            // Removals do NOT use Permit2. Here we directly approave the Router to spend the users BPT using ERC20 approval
-            await approveSpenderOnToken(
+            const txInput: RemoveLiquidityNestedTxInput = {
                 client,
+                removeLiquidityNested,
+                removeLiquidityNestedInput,
                 testAddress,
-                parentBptToken.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            );
-
-            const queryOutput = await removeLiquidityNested.query(
-                removeLiquidityInput,
-                nestedWithBoostedPool,
-            );
-
-            const removeLiquidityBuildInput = {
-                ...queryOutput,
+                nestedPoolState: nestedWithBoostedPool,
                 slippage: Slippage.fromPercentage('1'), // 1%
                 wethIsEth,
-            } as RemoveLiquidityNestedCallInputV3;
+            };
 
-            const addLiquidityBuildCallOutput = removeLiquidityNested.buildCall(
-                removeLiquidityBuildInput,
-            );
+            const output = await doRemoveLiquidityNested(txInput);
 
-            // Build call minAmountsOut should be query result with slippage applied
-            const expectedMinAmountsOut = queryOutput.amountsOut.map(
-                (amountOut) =>
-                    removeLiquidityBuildInput.slippage.applyTo(
-                        amountOut.amount,
-                        -1,
-                    ),
-            );
-            expect(expectedMinAmountsOut).to.deep.eq(
-                addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
-            );
-            expect(addLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-            );
-
-            const tokenAmountsForBalanceCheck = [
-                ...queryOutput.amountsOut,
-                queryOutput.bptAmountIn,
-                // add zero address so we can check for native token balance change
-                TokenAmount.fromRawAmount(
-                    new Token(queryOutput.chainId, zeroAddress, 18),
-                    0n,
-                ),
-            ];
-
-            // send remove liquidity transaction and check balance changes
-            const { transactionReceipt, balanceDeltas } =
-                await sendTransactionGetBalances(
-                    tokenAmountsForBalanceCheck.map((t) => t.token.address),
-                    client,
-                    testAddress,
-                    addLiquidityBuildCallOutput.to,
-                    addLiquidityBuildCallOutput.callData,
-                );
-
-            expect(transactionReceipt.status).to.eq('success');
-
-            // Should match user bpt amount in and query result for amounts out
-            const expectedDeltas = tokenAmountsForBalanceCheck.map(
-                (t) => t.amount,
-            );
-
-            // move native token balance to the extra index if wethIsEth
-            if (wethIsEth) {
-                const wethIndex = queryOutput.amountsOut.findIndex((a) =>
-                    a.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped),
-                );
-                expectedDeltas[expectedDeltas.length - 1] =
-                    expectedDeltas[wethIndex];
-                expectedDeltas[wethIndex] = 0n;
-            }
-
-            expect(expectedDeltas).to.deep.eq(balanceDeltas);
+            assertRemoveLiquidityNested(output, txInput.slippage, wethIsEth);
         });
     });
 });
