@@ -277,30 +277,30 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
     },
     [ChainId.SEPOLIA]: {
         MOCK_WETH_BAL_POOL: {
-            address: '0x2ff3b96e0057a1f25f1d62ab800554ccdb268ab8',
-            id: '0x2ff3b96e0057a1f25f1d62ab800554ccdb268ab8',
+            address: '0xb790fa0ba5d563b814b0ca1716c414f6b99937b2',
+            id: '0xb790fa0ba5d563b814b0ca1716c414f6b99937b2',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         MOCK_BAL_DAI_POOL: {
-            address: '0xe69b70a86a4e1fd33da95693a1ae12be1c26c8ea',
+            address: '0xe69b70a86a4e1fd33da95693a1ae12be1c26c8ea', // TODO
             id: '0xe69b70a86a4e1fd33da95693a1ae12be1c26c8ea',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         MOCK_USDC_DAI_POOL: {
-            address: '0x946e59e9637f44eb122fe64b372aaf6ed0441da1',
-            id: '0x946e59e9637f44eb122fe64b372aaf6ed0441da1',
+            address: '0x86fde41ff01b35846eb2f27868fb2938addd44c4',
+            id: '0x86fde41ff01b35846eb2f27868fb2938addd44c4',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         // weth, usdc/dai
         MOCK_NESTED_POOL: {
-            address: '0xc9233cc69435591b193b50f702ac31e404a08b10',
-            id: '0xc9233cc69435591b193b50f702ac31e404a08b10',
+            address: '0xbfdbdb4d5b8e00bade87cf12ed58e6152f25ac3e',
+            id: '0xbfdbdb4d5b8e00bade87cf12ed58e6152f25ac3e',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
@@ -314,24 +314,24 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         },
         // stataUSDC, stataUSDT
         MOCK_BOOSTED_POOL: {
-            address: '0xd63db0b88dca565633fb8d70a70b9b8093d34a7e',
-            id: '0xd63db0b88dca565633fb8d70a70b9b8093d34a7e',
+            address: '0x59fa488dda749cdd41772bb068bb23ee955a6d7a',
+            id: '0x59fa488dda749cdd41772bb068bb23ee955a6d7a',
             type: PoolType.Stable,
             decimals: 18,
             slot: 0,
         },
         // boosted, weth
         NESTED_WITH_BOOSTED_POOL: {
-            address: '0x965f7d7387d81056ebf0edaf4a869dc46471a676',
-            id: '0x965f7d7387d81056ebf0edaf4a869dc46471a676',
+            address: '0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c',
+            id: '0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
         // usdc, dai
         MOCK_STABLE_POOL: {
-            address: '0x676f89b5e1563eef4d1344dc629812b1e9c1b0d7',
-            id: '0x676f89b5e1563eef4d1344dc629812b1e9c1b0d7',
+            address: '0x5b17fb19b8c44f126e87882e7baa32153edcaf1d',
+            id: '0x5b17fb19b8c44f126e87882e7baa32153edcaf1d',
             type: PoolType.Stable,
             decimals: 18,
             slot: 0,
