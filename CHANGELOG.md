@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 0.33.3
+
+### Patch Changes
+
+- 6ec44e1: Update to main deployments (Mainnet, Gnosis and Sepolia)
+- 688d857: Add permit and permit2 signature examples
+
 ## 0.33.2
 
 ### Patch Changes
