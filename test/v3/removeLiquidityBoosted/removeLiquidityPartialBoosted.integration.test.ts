@@ -36,7 +36,7 @@ import {
     sendTransactionGetBalances,
     TOKENS,
 } from 'test/lib/utils';
-import { validateTokenAmounts } from 'test/lib/utils/removeNestedHelpers';
+import { validateTokenAmounts } from 'test/lib/utils/removeLiquidityNestedHelper';
 import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
 
 const chainId = ChainId.SEPOLIA;

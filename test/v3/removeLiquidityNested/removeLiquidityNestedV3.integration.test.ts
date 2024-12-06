@@ -36,7 +36,7 @@ import {
 import {
     GetNestedBpt,
     validateTokenAmounts,
-} from 'test/lib/utils/removeNestedHelpers';
+} from 'test/lib/utils/removeLiquidityNestedHelper';
 import {
     nestedWithBoostedPool,
     NESTED_WITH_BOOSTED_POOL,
