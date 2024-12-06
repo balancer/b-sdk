@@ -36,11 +36,11 @@ describe('add liquidity test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS[ChainId[chainId]],
             undefined,
-            7164489n,
+            7220370n,
         ));
     });
 
-    describe.skip('getPoolStateWithBalancesV3', () => {
+    describe('getPoolStateWithBalancesV3', () => {
         test('<18 decimals tokens', async () => {
             const poolStateWithBalances = await getPoolStateWithBalancesV3(
                 poolState,
