@@ -35,4 +35,5 @@ export type RemoveLiquidityBoostedBuildCallInput = {
     protocolVersion: 3;
     chainId: number;
     slippage: Slippage;
+    wethIsEth?: boolean;
 };
