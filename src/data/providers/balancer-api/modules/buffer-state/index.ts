@@ -1,6 +1,7 @@
 import { BalancerApiClient } from '../../client';
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
 import { BufferState } from '@/entities';
+import { Address } from 'viem';
 
 export class Buffers {
     readonly bufferStateQuery = `
@@ -28,19 +29,25 @@ export class Buffers {
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
-        if (!data.isErc4626) {
+        const wrappedToken = data.tokenGetTokens[0] as {
+            address: Address;
+            decimals: number;
+            isErc4626: boolean;
+            underlyingTokenAddress: Address;
+        };
+        if (!wrappedToken.isErc4626) {
             throw new Error(
                 `Wrapped token address provided is not an ERC4626: ${wrappedTokenAddress}`,
             );
         }
         const bufferState: BufferState = {
             wrappedToken: {
-                address: data.address,
-                decimals: data.decimals,
+                address: wrappedToken.address,
+                decimals: wrappedToken.decimals,
             },
             underlyingToken: {
-                address: data.underlyingTokenAddress,
-                decimals: data.decimals,
+                address: wrappedToken.underlyingTokenAddress,
+                decimals: wrappedToken.decimals,
             },
         };
         return bufferState;
