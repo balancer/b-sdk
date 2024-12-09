@@ -33,7 +33,6 @@ import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import {
     approveSpenderOnPermit2,
     approveSpenderOnTokens,
-    approveTokens,
     sendTransactionGetBalances,
 } from 'test/lib/utils';
 
