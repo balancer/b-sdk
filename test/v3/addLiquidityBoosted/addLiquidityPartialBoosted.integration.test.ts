@@ -47,7 +47,7 @@ const WETH = TOKENS[chainId].WETH;
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
 const wethToken = new Token(chainId, WETH.address, WETH.decimals);
 
-describe.skip('V3 add liquidity partial boosted', () => {
+describe('V3 add liquidity partial boosted', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;

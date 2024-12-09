@@ -26,8 +26,8 @@ export const partialBoostedPool_USDT_stataDAI: PoolStateWithUnderlyings = {
 };
 
 export const partialBoostedPool_WETH_stataUSDT: PoolStateWithUnderlyings = {
-    id: '0xf5a25990da505a9d4c3e0d876f3951e9edf9abc3',
-    address: '0xf5a25990da505a9d4c3e0d876f3951e9edf9abc3',
+    id: '0x445A49D1Ad280B68026629fE029Ed0Fbef549a94',
+    address: '0x445A49D1Ad280B68026629fE029Ed0Fbef549a94',
     type: 'Weighted',
     protocolVersion: 3,
     tokens: [
