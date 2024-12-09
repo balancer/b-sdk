@@ -26,9 +26,16 @@ import {
     PublicWalletClient,
     AddLiquidityBufferInput,
     AddLiquidityBufferV3,
+    PERMIT2,
+    BALANCER_BUFFER_ROUTER,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
-import { approveTokens, sendTransactionGetBalances } from 'test/lib/utils';
+import {
+    approveSpenderOnPermit2,
+    approveSpenderOnTokens,
+    approveTokens,
+    sendTransactionGetBalances,
+} from 'test/lib/utils';
 
 async function runAgainstFork() {
     // User defined inputs
@@ -74,8 +81,27 @@ async function runAgainstFork() {
 
     const tokensForBalanceCheck = [wrappedTokenAddress, underlyingTokenAddress];
 
-    // approve router to spend the tokens via permit2
-    await approveTokens(client, userAccount, tokensForBalanceCheck, 3, true);
+    // approve permit2 to spend erc20 and erc4626 tokens
+    await approveSpenderOnTokens(
+        client,
+        userAccount,
+        tokensForBalanceCheck,
+        PERMIT2[chainId],
+    );
+
+    // approve buffer router to spend erc20 and erc4626 tokens via permit2
+    await approveSpenderOnPermit2(
+        client,
+        userAccount,
+        wrappedTokenAddress,
+        BALANCER_BUFFER_ROUTER[chainId],
+    );
+    await approveSpenderOnPermit2(
+        client,
+        userAccount,
+        underlyingTokenAddress,
+        BALANCER_BUFFER_ROUTER[chainId],
+    );
 
     // send the transaction
     console.log('\nSending tx...');
@@ -116,17 +142,17 @@ export const addLiquidityExample = async ({
     const bufferState =
         await balancerApi.buffers.fetchBufferState(wrappedTokenAddress);
 
-    // Construct the AddLiquidityInput, in this case an AddLiquidityUnbalanced
-    const addLiquidityInput: AddLiquidityBufferInput = {
+    // Construct the AddLiquidityBufferInput
+    const addLiquidityBufferInput: AddLiquidityBufferInput = {
         chainId,
         rpcUrl,
         exactSharesToIssue,
     };
 
     // Simulate addLiquidity to get the amount of BPT out
-    const addLiquidity = new AddLiquidityBufferV3();
-    const queryOutput = await addLiquidity.query(
-        addLiquidityInput,
+    const addLiquidityBuffer = new AddLiquidityBufferV3();
+    const queryOutput = await addLiquidityBuffer.query(
+        addLiquidityBufferInput,
         bufferState,
     );
 
@@ -140,7 +166,7 @@ export const addLiquidityExample = async ({
     );
 
     // Apply slippage to the BPT amount received from the query and construct the call
-    const call = addLiquidity.buildCall({
+    const call = addLiquidityBuffer.buildCall({
         ...queryOutput,
         slippage,
     });
@@ -151,13 +177,12 @@ export const addLiquidityExample = async ({
         `Max Underlying In: ${call.maxUnderlyingAmountIn.amount.toString()}`,
     );
 
-    return {
-        ...call,
-        protocolVersion: queryOutput.protocolVersion,
-    };
+    return call;
 };
 
 export default runAgainstFork;
+
+// helper functions
 
 const mintUSDC = async (
     client: PublicWalletClient & TestActions,
