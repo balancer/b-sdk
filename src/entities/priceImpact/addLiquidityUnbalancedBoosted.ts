@@ -82,33 +82,16 @@ export async function addLiquidityUnbalancedBoosted(
         if (deltas[i] === 0n) {
             deltaBPTs.push(0n);
         } else {
-            try {
-                deltaBPTs.push(
-                    await queryAddLiquidityForTokenDelta(
-                        addLiquidity,
-                        input,
-                        poolState,
-                        poolTokens,
-                        i,
-                        deltas[i],
-                    ),
-                );
-            } catch (err) {
-                // see https://viem.sh/docs/contract/simulateContract#handling-custom-errors
-                if (err instanceof BaseError) {
-                    const revertError = err.walk(
-                        (err) => err instanceof ContractFunctionRevertedError,
-                    );
-                    if (revertError instanceof ContractFunctionRevertedError) {
-                        const errorName = revertError.data?.errorName ?? '';
-                        if (errorName === 'WrapAmountTooSmall') {
-                            deltaBPTs.push(0n);
-                            continue;
-                        }
-                    }
-                }
-                throw err;
-            }
+            deltaBPTs.push(
+                await queryAddLiquidityForTokenDelta(
+                    addLiquidity,
+                    input,
+                    poolState,
+                    poolTokens,
+                    i,
+                    deltas[i],
+                ),
+            );
         }
     }
 
@@ -166,6 +149,18 @@ async function queryAddLiquidityForTokenDelta(
         );
         return delta < 0n ? -deltaBPT.amount : deltaBPT.amount;
     } catch (err) {
+        // see https://viem.sh/docs/contract/simulateContract#handling-custom-errors
+        if (err instanceof BaseError) {
+            const revertError = err.walk(
+                (err) => err instanceof ContractFunctionRevertedError,
+            );
+            if (revertError instanceof ContractFunctionRevertedError) {
+                const errorName = revertError.data?.errorName ?? '';
+                if (errorName === 'WrapAmountTooSmall') {
+                    return 0n;
+                }
+            }
+        }
         throw new Error(
             `Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Delta add step:\n${err}`,
         );
