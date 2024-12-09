@@ -320,6 +320,14 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
+        // weth, stataUSDT
+        MOCK_BOOSTED_POOL_WETH: {
+            address: '0xf5a25990da505a9d4c3e0d876f3951e9edf9abc3',
+            id: '0xf5a25990da505a9d4c3e0d876f3951e9edf9abc3',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
         // boosted, weth
         NESTED_WITH_BOOSTED_POOL: {
             address: '0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c',

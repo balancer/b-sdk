@@ -22,6 +22,7 @@ const poolId = POOLS[chainId].MOCK_USDC_DAI_POOL.id;
 const USDC = TOKENS[chainId].USDC;
 const DAI = TOKENS[chainId].DAI;
 
+// TODO: rewrite this as a unit test to avoid the need for updating hardcoded values
 describe('add liquidity test', () => {
     let poolState: PoolState;
     let rpcUrl: string;
@@ -33,14 +34,10 @@ describe('add liquidity test', () => {
         // get pool state from api
         poolState = await api.getPool(poolId);
 
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS[ChainId[chainId]],
-            undefined,
-            7164489n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
     });
 
-    describe.skip('getPoolStateWithBalancesV3', () => {
+    describe('getPoolStateWithBalancesV3', () => {
         test('<18 decimals tokens', async () => {
             const poolStateWithBalances = await getPoolStateWithBalancesV3(
                 poolState,
@@ -55,16 +52,16 @@ describe('add liquidity test', () => {
                         address: USDC.address,
                         decimals: USDC.decimals,
                         index: 0,
-                        balance: '5000',
+                        balance: '4982.377088',
                     },
                     {
                         address: DAI.address,
                         decimals: DAI.decimals,
                         index: 1,
-                        balance: '5000',
+                        balance: '4412.573626596067233661',
                     },
                 ],
-                totalShares: '4999.999999999899996138',
+                totalShares: '4685.71985547775593574',
             };
 
             expect(poolStateWithBalances).to.deep.eq(mockData);

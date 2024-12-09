@@ -15,6 +15,7 @@ import {
     getAmounts,
     getBptAmountFromReferenceAmountBoosted,
     getSortedTokens,
+    getValue,
 } from '@/entities/utils';
 
 import {
@@ -143,11 +144,12 @@ export class AddLiquidityBoostedV3 {
         input: AddLiquidityBoostedBuildCallInput,
     ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
+        const wethIsEth = input.wethIsEth ?? false;
         const args = [
             input.poolId,
             amounts.maxAmountsIn,
             amounts.minimumBpt,
-            false,
+            wethIsEth,
             input.userData,
         ] as const;
         let callData: Hex;
@@ -172,10 +174,13 @@ export class AddLiquidityBoostedV3 {
                 throw new Error('SingleToken not supported');
             }
         }
+
+        const value = getValue(input.amountsIn, wethIsEth);
+
         return {
             callData,
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
-            value: 0n, // Default to 0 as native not supported
+            value,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
                 amounts.minimumBpt,
