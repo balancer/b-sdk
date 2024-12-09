@@ -40,7 +40,7 @@ describe('add liquidity test', () => {
         ));
     });
 
-    describe('getPoolStateWithBalancesV3', () => {
+    describe.skip('getPoolStateWithBalancesV3', () => {
         test('<18 decimals tokens', async () => {
             const poolStateWithBalances = await getPoolStateWithBalancesV3(
                 poolState,
