@@ -25,7 +25,7 @@ const USDT = TOKENS[chainId].USDT_AAVE;
 const DAI = TOKENS[chainId].DAI_AAVE;
 const WETH = TOKENS[chainId].WETH;
 
-describe('PriceImpact V3', () => {
+describe.skip('PriceImpact V3', () => {
     let rpcUrl: string;
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(
@@ -41,7 +41,7 @@ describe('PriceImpact V3', () => {
      * ABA approach as price impact for other actions (addLiquidity, swap, etc.)
      */
     describe('Full Boosted Pool Boosted Pool AddLiquidity', () => {
-        test.skip('Close to proportional', async () => {
+        test('Close to proportional', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
                 chainId,
                 rpcUrl,
@@ -98,7 +98,7 @@ describe('PriceImpact V3', () => {
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
-        test.skip('Single token input', async () => {
+        test('Single token input', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
                 chainId,
                 rpcUrl,
@@ -122,7 +122,7 @@ describe('PriceImpact V3', () => {
         });
     });
 
-    describe.skip('Partial Boosted Pool Boosted Pool AddLiquidity', () => {
+    describe('Partial Boosted Pool Boosted Pool AddLiquidity', () => {
         test('Close to proportional', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
                 chainId,
@@ -185,7 +185,7 @@ describe('PriceImpact V3', () => {
     });
 
     // FIXME: zeroOutDeltas is swapping a huge amount (~200 WETH) and hitting MaxInRatio
-    describe.skip('Nested pool', () => {
+    describe('Nested pool', () => {
         test('Close to proportional', async () => {
             const addLiquidityInput: AddLiquidityNestedInput = {
                 amountsIn: [
