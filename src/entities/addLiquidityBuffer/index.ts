@@ -31,12 +31,6 @@ export class AddLiquidityBufferV3 {
         input: AddLiquidityBufferInput,
         bufferState: BufferState,
     ): Promise<AddLiquidityBufferQueryOutput> {
-        // TODO: validate input?
-        // this.inputValidator.validateAddLiquidityBuffer(input, {
-        //     ...poolState,
-        //     type: 'Buffer',
-        // });
-
         const { amountUnderlyingIn, amountWrappedIn } =
             await doAddLiquidityQuery(
                 input.rpcUrl,
