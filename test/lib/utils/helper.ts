@@ -27,6 +27,7 @@ import {
     BALANCER_BATCH_ROUTER,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     PublicWalletClient,
+    BALANCER_BUFFER_ROUTER,
 } from '@/utils';
 
 export type TxOutput = {
@@ -132,11 +133,21 @@ export const approveToken = async (
                     amount,
                     deadline,
                 );
+            // Approve BufferRouter to spend account tokens using Permit2
+            const bufferRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
+                client,
+                accountAddress,
+                tokenAddress,
+                BALANCER_BUFFER_ROUTER[chainId],
+                amount,
+                deadline,
+            );
             approved =
                 approved &&
                 routerApprovedOnPermit2 &&
                 batchRouterApprovedOnPermit2 &&
-                compositeRouterApprovedOnPermit2;
+                compositeRouterApprovedOnPermit2 &&
+                bufferRouterApprovedOnPermit2;
         }
     }
     return approved;
