@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.33.5
+
+### Patch Changes
+
+- 378a8f0: Fix price impact with near proportional inputs for AddLiquidityNested
+
 ## 0.33.4
 
 ### Patch Changes
