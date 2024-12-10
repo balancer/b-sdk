@@ -290,7 +290,8 @@ describe('SwapV3', () => {
                 );
             });
         });
-        describe('multi-hop swap', () => {
+        // BAL/DAI pool has no liquidity
+        describe.skip('multi-hop swap', () => {
             describe('path with swaps only', () => {
                 test('GivenIn', async () => {
                     const swap = new Swap({
@@ -517,7 +518,8 @@ describe('SwapV3', () => {
             });
         });
 
-        describe('multi-hop swap', () => {
+        // BAL/DAI pool has no liquidity
+        describe.skip('multi-hop swap', () => {
             describe('swap should be executed correctly', () => {
                 describe('path with swaps only', () => {
                     describe('wethIsEth: false', () => {
@@ -810,7 +812,8 @@ describe('SwapV3', () => {
             });
         });
 
-        describe('multi-hop swap', () => {
+        // BAL/DAI pool has no liquidity
+        describe.skip('multi-hop swap', () => {
             describe('swap should be executed correctly', () => {
                 describe('path with swaps only', () => {
                     describe('wethIsEth: false', () => {
