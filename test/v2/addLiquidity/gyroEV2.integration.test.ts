@@ -90,7 +90,7 @@ describe('GyroE V2 add liquidity test', () => {
         );
     });
 
-    describe.only('proportional', () => {
+    describe('proportional', () => {
         let addLiquidityInput: AddLiquidityProportionalInput;
         describe('with bpt', () => {
             beforeAll(() => {
