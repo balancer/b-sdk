@@ -124,7 +124,7 @@ function getCheck(output: AddLiquidityQueryOutput) {
     const kind = output.addLiquidityKind;
     switch (kind) {
         case AddLiquidityKind.Proportional:
-            return { ...check, bptOut, amountsIn };
+            return { ...check };
         case AddLiquidityKind.SingleToken:
             return { ...check, bptOut };
         case AddLiquidityKind.Unbalanced:
@@ -355,26 +355,6 @@ export function assertAddLiquidityProportional(
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
-    // replace referenceAmount into amountsIn or bptOut for comparison
-    const bptOut = addLiquidityQueryOutput.bptOut.token.isSameAddress(
-        addLiquidityInput.referenceAmount.address,
-    )
-        ? TokenAmount.fromRawAmount(
-              addLiquidityQueryOutput.bptOut.token,
-              addLiquidityInput.referenceAmount.rawAmount,
-          )
-        : addLiquidityQueryOutput.bptOut;
-    const amountsIn = addLiquidityOutput.addLiquidityQueryOutput.amountsIn.map(
-        (a) =>
-            a.token.isSameAddress(addLiquidityInput.referenceAmount.address) &&
-            !a.token.isSameAddress(poolState.address) // skip CSP BPT as token
-                ? TokenAmount.fromRawAmount(
-                      a.token,
-                      addLiquidityInput.referenceAmount.rawAmount,
-                  )
-                : a,
-    );
-
     let to: Address;
 
     switch (protocolVersion) {
@@ -391,15 +371,13 @@ export function assertAddLiquidityProportional(
             throw new Error(`Unsupported protocolVersion: ${protocolVersion}`);
     }
 
-    let expectedQueryOutput:
-        | Omit<AddLiquidityQueryOutput, 'bptIndex'>
-        | (Omit<AddLiquidityQueryOutput, 'bptOut' | 'bptIndex'> & {
-              userData: Hex;
-          }) = {
+    let expectedQueryOutput: Omit<
+        AddLiquidityQueryOutput,
+        'bptOut' | 'bptIndex' | 'amountsIn'
+    > & {
+        userData?: Hex;
+    } = {
         to,
-        // Query should use same referenceAmount as user sets
-        bptOut,
-        amountsIn,
         // Only expect tokenInIndex for AddLiquiditySingleToken
         tokenInIndex: undefined,
         // Should match inputs
@@ -416,6 +394,29 @@ export function assertAddLiquidityProportional(
     const queryCheck = getCheck(addLiquidityQueryOutput);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
+
+    if (
+        addLiquidityQueryOutput.bptOut.token.isSameAddress(
+            addLiquidityInput.referenceAmount.address,
+        )
+    ) {
+        // referenceAmount as bptOut - queryOutput should be an exact match with user provided input
+        expect(addLiquidityQueryOutput.bptOut.amount).toEqual(
+            addLiquidityInput.referenceAmount.rawAmount,
+        );
+    } else {
+        // referenceAmount as amountsIn - queryOutput can be 1 wei diff from user provided amount
+        addLiquidityQueryOutput.amountsIn.forEach((a) => {
+            if (
+                a.token.isSameAddress(addLiquidityInput.referenceAmount.address)
+            )
+                expect(
+                    Number(
+                        a.amount - addLiquidityInput.referenceAmount.rawAmount,
+                    ),
+                ).closeTo(0, 1);
+        });
+    }
 
     // Expect all assets in to have an amount > 0 apart from BPT if it exists
     addLiquidityQueryOutput.amountsIn.forEach((a) => {
