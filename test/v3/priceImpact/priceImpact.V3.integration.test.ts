@@ -10,6 +10,7 @@ import {
     AddLiquidityNestedInput,
     ChainId,
     PriceImpact,
+    PriceImpactAmount,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -58,7 +59,8 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            expect(priceImpactABA.decimal).greaterThan(0);
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000042');
+            expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
         test('Unbalanced', async () => {
@@ -85,7 +87,9 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            expect(priceImpactABA.decimal).greaterThan(0);
+            const priceImpactSpot =
+                PriceImpactAmount.fromDecimal('0.0005511004');
+            expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
         test('Single token input', async () => {
@@ -107,7 +111,8 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            expect(priceImpactABA.decimal).greaterThan(0);
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000492');
+            expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
 
@@ -136,7 +141,8 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            expect(priceImpactABA.decimal).greaterThan(0);
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000045');
+            expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
         test('Unbalanced', async () => {
@@ -163,7 +169,9 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            expect(priceImpactABA.decimal).greaterThan(0);
+            const priceImpactSpot =
+                PriceImpactAmount.fromDecimal('0.000396375');
+            expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
 
@@ -189,7 +197,10 @@ describe('PriceImpact V3', () => {
                 addLiquidityInput,
                 nestedWithBoostedPool,
             );
-            expect(priceImpactABA.decimal).greaterThan(0);
+            const priceImpactSpot = PriceImpactAmount.fromDecimal(
+                '0.005213821423105922',
+            );
+            expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
 });
