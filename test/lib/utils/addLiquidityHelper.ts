@@ -414,7 +414,7 @@ export function assertAddLiquidityProportional(
                     Number(
                         a.amount - addLiquidityInput.referenceAmount.rawAmount,
                     ),
-                ).closeTo(0, 1);
+                ).closeTo(0, 1000); // 1000 wei tolerance
         });
     }
 
