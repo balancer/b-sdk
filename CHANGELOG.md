@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 0.33.4
+
+### Patch Changes
+
+- 20aeefc: chore: debug v2 pool state multicall errors
+
 ## 0.33.3
 
 ### Patch Changes
