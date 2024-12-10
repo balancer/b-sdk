@@ -30,7 +30,7 @@ import {
     areBigIntsWithinPercent,
     sendTransactionGetBalances,
 } from 'test/lib/utils';
-import { GetNestedBpt } from 'test/lib/utils/removeNestedHelpers';
+import { GetNestedBpt } from 'test/lib/utils/removeLiquidityNestedHelper';
 import {
     nestedWithBoostedPool,
     USDC,

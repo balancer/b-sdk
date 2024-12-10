@@ -4,11 +4,13 @@ dotenv.config();
 
 import {
     createTestClient,
+    Hex,
     http,
     parseUnits,
     publicActions,
     TestActions,
     walletActions,
+    zeroAddress,
 } from 'viem';
 
 import {
@@ -22,6 +24,8 @@ import {
     RemoveLiquidityBoostedV3,
     RemoveLiquidityBoostedProportionalInput,
     RemoveLiquidityKind,
+    TokenAmount,
+    NATIVE_ASSETS,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -32,28 +36,29 @@ import {
     sendTransactionGetBalances,
     TOKENS,
 } from 'test/lib/utils';
-import { validateTokenAmounts } from 'test/lib/utils/removeNestedHelpers';
-import { partialBoostedPool_USDT_stataDAI } from 'test/mockData/partialBoostedPool';
+import { validateTokenAmounts } from 'test/lib/utils/removeLiquidityNestedHelper';
+import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
 
 const chainId = ChainId.SEPOLIA;
 const USDT = TOKENS[chainId].USDT_AAVE;
-const DAI = TOKENS[chainId].DAI_AAVE;
+const WETH = TOKENS[chainId].WETH;
 
 const parentBptToken = new Token(
     chainId,
-    partialBoostedPool_USDT_stataDAI.address,
+    partialBoostedPool_WETH_stataUSDT.address,
     18,
 );
 // These are the underlying tokens
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
-const daiToken = new Token(chainId, DAI.address, DAI.decimals);
+const daiToken = new Token(chainId, WETH.address, WETH.decimals);
 
-describe.skip('V3 remove liquidity partial boosted', () => {
+describe('V3 remove liquidity partial boosted', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     const removeLiquidityBoosted = new RemoveLiquidityBoostedV3();
     let bptAmount: bigint;
+    let snapshot: Hex;
 
     let removeLiquidityInput: RemoveLiquidityBoostedProportionalInput;
 
@@ -78,7 +83,7 @@ describe.skip('V3 remove liquidity partial boosted', () => {
             rpcUrl,
             testAddress,
             client,
-            partialBoostedPool_USDT_stataDAI,
+            partialBoostedPool_WETH_stataUSDT,
             [
                 {
                     address: USDT.address,
@@ -87,10 +92,10 @@ describe.skip('V3 remove liquidity partial boosted', () => {
                     slot: USDT.slot as number,
                 },
                 {
-                    address: DAI.address,
-                    rawAmount: parseUnits('2', DAI.decimals),
-                    decimals: DAI.decimals,
-                    slot: DAI.slot as number,
+                    address: WETH.address,
+                    rawAmount: parseUnits('0.02', WETH.decimals),
+                    decimals: WETH.decimals,
+                    slot: WETH.slot as number,
                 },
             ],
         );
@@ -99,24 +104,33 @@ describe.skip('V3 remove liquidity partial boosted', () => {
             chainId,
             rpcUrl,
             bptIn: {
-                address: partialBoostedPool_USDT_stataDAI.address,
+                address: partialBoostedPool_WETH_stataUSDT.address,
                 decimals: 18,
                 rawAmount: bptAmount,
             },
             kind: RemoveLiquidityKind.Proportional,
         };
+
+        snapshot = await client.snapshot();
+    });
+
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
     });
 
     test('query with underlying', async () => {
         const queryOutput = await removeLiquidityBoosted.query(
             removeLiquidityInput,
-            partialBoostedPool_USDT_stataDAI,
+            partialBoostedPool_WETH_stataUSDT,
         );
         expect(queryOutput.poolType).to.eq(
-            partialBoostedPool_USDT_stataDAI.type,
+            partialBoostedPool_WETH_stataUSDT.type,
         );
         expect(queryOutput.poolId).to.eq(
-            partialBoostedPool_USDT_stataDAI.address,
+            partialBoostedPool_WETH_stataUSDT.address,
         );
         expect(queryOutput.chainId).to.eq(chainId);
         expect(queryOutput.userData).to.eq('0x');
@@ -126,66 +140,158 @@ describe.skip('V3 remove liquidity partial boosted', () => {
             removeLiquidityInput.bptIn.rawAmount,
         );
         expect(queryOutput.amountsOut.length).to.eq(
-            partialBoostedPool_USDT_stataDAI.tokens.length,
+            partialBoostedPool_WETH_stataUSDT.tokens.length,
         );
         validateTokenAmounts(queryOutput.amountsOut, [usdtToken, daiToken]);
     });
 
-    test('remove liquidity transaction, direct approval on router', async () => {
-        // Removals do NOT use Permit2. Here we directly approave the Router to spend the users BPT using ERC20 approval
-        await approveSpenderOnToken(
-            client,
-            testAddress,
-            parentBptToken.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-        );
-
-        const queryOutput = await removeLiquidityBoosted.query(
-            removeLiquidityInput,
-            partialBoostedPool_USDT_stataDAI,
-        );
-
-        const removeLiquidityBuildInput = {
-            ...queryOutput,
-            slippage: Slippage.fromPercentage('1'), // 1%,
-        };
-
-        const addLiquidityBuildCallOutput = removeLiquidityBoosted.buildCall(
-            removeLiquidityBuildInput,
-        );
-
-        // Build call minAmountsOut should be query result with slippage applied
-        const expectedMinAmountsOut = queryOutput.amountsOut.map((amountOut) =>
-            removeLiquidityBuildInput.slippage.applyTo(amountOut.amount, -1),
-        );
-        expect(expectedMinAmountsOut).to.deep.eq(
-            addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
-        );
-        expect(addLiquidityBuildCallOutput.to).to.eq(
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-        );
-
-        // send remove liquidity transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [
-                    removeLiquidityInput.bptIn.address,
-                    ...queryOutput.amountsOut.map((a) => a.token.address),
-                ],
+    describe('remove liquidity transaction', async () => {
+        test('with tokens', async () => {
+            // Removals do NOT use Permit2. Here we directly approve the Router to spend the users BPT using ERC20 approval
+            await approveSpenderOnToken(
                 client,
                 testAddress,
-                addLiquidityBuildCallOutput.to,
-                addLiquidityBuildCallOutput.callData,
+                parentBptToken.address,
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
             );
-        expect(transactionReceipt.status).to.eq('success');
-        // Should match user bpt amount in and query result for amounts out
-        const expectedDeltas = [
-            removeLiquidityInput.bptIn.rawAmount,
-            ...queryOutput.amountsOut.map((amountOut) => amountOut.amount),
-        ];
-        // Here we check that output diff is within an acceptable tolerance as buffers can have difference in queries/result
-        expectedDeltas.forEach((delta, i) => {
-            areBigIntsWithinPercent(delta, balanceDeltas[i], 0.001);
+
+            const queryOutput = await removeLiquidityBoosted.query(
+                removeLiquidityInput,
+                partialBoostedPool_WETH_stataUSDT,
+            );
+
+            const removeLiquidityBuildInput = {
+                ...queryOutput,
+                slippage: Slippage.fromPercentage('1'), // 1%,
+            };
+
+            const removeLiquidityBuildCallOutput =
+                removeLiquidityBoosted.buildCall(removeLiquidityBuildInput);
+
+            // Build call minAmountsOut should be query result with slippage applied
+            const expectedMinAmountsOut = queryOutput.amountsOut.map(
+                (amountOut) =>
+                    removeLiquidityBuildInput.slippage.applyTo(
+                        amountOut.amount,
+                        -1,
+                    ),
+            );
+            expect(expectedMinAmountsOut).to.deep.eq(
+                removeLiquidityBuildCallOutput.minAmountsOut.map(
+                    (a) => a.amount,
+                ),
+            );
+            expect(removeLiquidityBuildCallOutput.to).to.eq(
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            );
+
+            // send remove liquidity transaction and check balance changes
+            const { transactionReceipt, balanceDeltas } =
+                await sendTransactionGetBalances(
+                    [
+                        removeLiquidityInput.bptIn.address,
+                        ...queryOutput.amountsOut.map((a) => a.token.address),
+                    ],
+                    client,
+                    testAddress,
+                    removeLiquidityBuildCallOutput.to,
+                    removeLiquidityBuildCallOutput.callData,
+                );
+            expect(transactionReceipt.status).to.eq('success');
+            // Should match user bpt amount in and query result for amounts out
+            const expectedDeltas = [
+                removeLiquidityInput.bptIn.rawAmount,
+                ...queryOutput.amountsOut.map((amountOut) => amountOut.amount),
+            ];
+            // Here we check that output diff is within an acceptable tolerance as buffers can have difference in queries/result
+            expectedDeltas.forEach((delta, i) => {
+                areBigIntsWithinPercent(delta, balanceDeltas[i], 0.001);
+            });
+        });
+
+        test('with native', async () => {
+            const wethIsEth = true;
+            // Removals do NOT use Permit2. Here we directly approve the Router to spend the users BPT using ERC20 approval
+            await approveSpenderOnToken(
+                client,
+                testAddress,
+                parentBptToken.address,
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            );
+
+            const queryOutput = await removeLiquidityBoosted.query(
+                removeLiquidityInput,
+                partialBoostedPool_WETH_stataUSDT,
+            );
+
+            const removeLiquidityBuildInput = {
+                ...queryOutput,
+                slippage: Slippage.fromPercentage('1'), // 1%
+                wethIsEth,
+            };
+
+            const removeLiquidityBuildCallOutput =
+                removeLiquidityBoosted.buildCall(removeLiquidityBuildInput);
+
+            // Build call minAmountsOut should be query result with slippage applied
+            const expectedMinAmountsOut = queryOutput.amountsOut.map(
+                (amountOut) =>
+                    removeLiquidityBuildInput.slippage.applyTo(
+                        amountOut.amount,
+                        -1,
+                    ),
+            );
+            expect(expectedMinAmountsOut).to.deep.eq(
+                removeLiquidityBuildCallOutput.minAmountsOut.map(
+                    (a) => a.amount,
+                ),
+            );
+            expect(removeLiquidityBuildCallOutput.to).to.eq(
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            );
+
+            const tokenAmountsForBalanceCheck = [
+                ...queryOutput.amountsOut,
+                queryOutput.bptIn,
+                // add zero address so we can check for native token balance change
+                TokenAmount.fromRawAmount(
+                    new Token(queryOutput.chainId, zeroAddress, 18),
+                    0n,
+                ),
+            ];
+
+            // send remove liquidity transaction and check balance changes
+            const { transactionReceipt, balanceDeltas } =
+                await sendTransactionGetBalances(
+                    tokenAmountsForBalanceCheck.map((a) => a.token.address),
+                    client,
+                    testAddress,
+                    removeLiquidityBuildCallOutput.to,
+                    removeLiquidityBuildCallOutput.callData,
+                );
+
+            expect(transactionReceipt.status).to.eq('success');
+            // Should match user bpt amount in and query result for amounts out
+
+            // add one extra index for native token balance
+            const expectedDeltas = tokenAmountsForBalanceCheck.map(
+                (t) => t.amount,
+            );
+
+            // move native token balance to the extra index if wethIsEth
+            if (wethIsEth) {
+                const wethIndex = queryOutput.amountsOut.findIndex((a) =>
+                    a.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped),
+                );
+                expectedDeltas[expectedDeltas.length - 1] =
+                    expectedDeltas[wethIndex];
+                expectedDeltas[wethIndex] = 0n;
+            }
+
+            // Here we check that output diff is within an acceptable tolerance as buffers can have difference in queries/result
+            expectedDeltas.forEach((delta, i) => {
+                areBigIntsWithinPercent(delta, balanceDeltas[i], 0.001);
+            });
         });
     });
 });

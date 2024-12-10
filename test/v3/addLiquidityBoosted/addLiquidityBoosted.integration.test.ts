@@ -172,9 +172,6 @@ describe('Boosted AddLiquidity', () => {
                         addLiquidityBuildCallOutput.minBptOut.amount,
                 ).to.be.true;
             });
-            test('with native', async () => {
-                // TODO
-            });
         });
         describe('add liquidity proportional', () => {
             test('with bpt', async () => {
@@ -345,9 +342,6 @@ describe('Boosted AddLiquidity', () => {
                     ),
                 );
             });
-            test('with native', async () => {
-                // TODO
-            });
         });
     });
 
@@ -426,9 +420,6 @@ describe('Boosted AddLiquidity', () => {
                     slippageAdjustedQueryOutput ===
                         addLiquidityBuildCallOutput.minBptOut.amount,
                 ).to.be.true;
-            });
-            test('with native', async () => {
-                // TODO
             });
         });
         describe('add liquidity proportional', () => {
@@ -526,9 +517,6 @@ describe('Boosted AddLiquidity', () => {
                         (a) => a.token,
                     ),
                 );
-            });
-            test('with native', async () => {
-                // TODO
             });
         });
     });
