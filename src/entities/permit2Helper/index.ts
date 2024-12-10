@@ -7,6 +7,7 @@ import {
 } from './allowanceTransfer';
 import {
     BALANCER_BATCH_ROUTER,
+    BALANCER_BUFFER_ROUTER,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     BALANCER_ROUTER,
     ChainId,
@@ -28,6 +29,7 @@ import { getLimitAmount } from '../swap/limits';
 import { TokenAmount } from '../tokenAmount';
 import { permit2Abi } from '@/abi';
 import { getAmountsCall } from '../addLiquidity/helpers';
+import { AddLiquidityBufferBuildCallInput } from '../addLiquidityBuffer/types';
 
 export * from './allowanceTransfer';
 export * from './constants';
@@ -150,6 +152,46 @@ export class Permit2Helper {
                 ),
             );
         }
+        return signPermit2(input.client, input.owner, spender, details);
+    }
+
+    static async signAddLiquidityBufferApproval(
+        input: AddLiquidityBufferBuildCallInput & {
+            client: PublicWalletClient;
+            owner: Address;
+            nonces?: number[];
+            expirations?: number[];
+        },
+    ): Promise<Permit2> {
+        if (input.nonces && input.nonces.length !== 2) {
+            throw new Error("Nonces length doesn't match amountsIn length");
+        }
+        if (input.expirations && input.expirations.length !== 2) {
+            throw new Error(
+                "Expirations length doesn't match amountsIn length",
+            );
+        }
+        const spender = BALANCER_BUFFER_ROUTER[input.chainId];
+        const details: PermitDetails[] = [
+            await getDetails(
+                input.client,
+                input.wrappedAmountIn.token.address,
+                input.owner,
+                spender,
+                input.wrappedAmountIn.amount,
+                input.expirations ? input.expirations[0] : undefined,
+                input.nonces ? input.nonces[0] : undefined,
+            ),
+            await getDetails(
+                input.client,
+                input.underlyingAmountIn.token.address,
+                input.owner,
+                spender,
+                input.underlyingAmountIn.amount,
+                input.expirations ? input.expirations[1] : undefined,
+                input.nonces ? input.nonces[1] : undefined,
+            ),
+        ];
         return signPermit2(input.client, input.owner, spender, details);
     }
 
