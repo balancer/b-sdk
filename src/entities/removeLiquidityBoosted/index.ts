@@ -111,7 +111,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
                 input.poolId,
                 input.bptIn.amount,
                 amounts.minAmountsOut,
-                false,
+                input.wethIsEth ?? false,
                 input.userData,
             ],
         });
@@ -120,7 +120,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             callData: callData,
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
             value: 0n, // always has 0 value
-            maxBptIn: input.bptIn, //TokenAmount
+            maxBptIn: input.bptIn,
             minAmountsOut: amounts.minAmountsOut.map((amount, i) => {
                 return TokenAmount.fromRawAmount(
                     input.amountsOut[i].token,

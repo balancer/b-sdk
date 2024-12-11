@@ -4,6 +4,7 @@ dotenv.config();
 
 import {
     createTestClient,
+    Hex,
     http,
     parseUnits,
     publicActions,
@@ -21,18 +22,17 @@ import {
     RemoveLiquidityNested,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     Slippage,
-    RemoveLiquidityNestedCallInputV3,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
+import { approveSpenderOnToken } from 'test/lib/utils';
 import {
-    approveSpenderOnToken,
-    sendTransactionGetBalances,
-} from 'test/lib/utils';
-import {
+    assertRemoveLiquidityNested,
+    doRemoveLiquidityNested,
     GetNestedBpt,
+    RemoveLiquidityNestedTxInput,
     validateTokenAmounts,
-} from 'test/lib/utils/removeNestedHelpers';
+} from 'test/lib/utils/removeLiquidityNestedHelper';
 import {
     nestedWithBoostedPool,
     NESTED_WITH_BOOSTED_POOL,
@@ -60,6 +60,7 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
     let testAddress: Address;
     const removeLiquidityNested = new RemoveLiquidityNested();
     let bptAmount: bigint;
+    let snapshot: Hex;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
@@ -98,6 +99,23 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
                 },
             ],
         );
+
+        // Removals do NOT use Permit2. Here we directly approave the Router to spend the users BPT using ERC20 approval
+        await approveSpenderOnToken(
+            client,
+            testAddress,
+            parentBptToken.address,
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+        );
+
+        snapshot = await client.snapshot();
+    });
+
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
     });
 
     test('query with underlying', async () => {
@@ -121,67 +139,50 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
         validateTokenAmounts(queryOutput.amountsOut, mainTokens);
     });
 
-    test('remove liquidity transaction, direct approval on router', async () => {
-        const removeLiquidityInput: RemoveLiquidityNestedInput = {
-            bptAmountIn: bptAmount,
-            chainId,
-            rpcUrl,
-        };
+    describe('remove liquidity transaction, direct approval on router', async () => {
+        test('with tokens', async () => {
+            const removeLiquidityNestedInput: RemoveLiquidityNestedInput = {
+                bptAmountIn: bptAmount,
+                chainId,
+                rpcUrl,
+            };
 
-        // Removals do NOT use Permit2. Here we directly approave the Router to spend the users BPT using ERC20 approval
-        await approveSpenderOnToken(
-            client,
-            testAddress,
-            parentBptToken.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-        );
-
-        const queryOutput = await removeLiquidityNested.query(
-            removeLiquidityInput,
-            nestedWithBoostedPool,
-        );
-
-        const removeLiquidityBuildInput = {
-            ...queryOutput,
-            slippage: Slippage.fromPercentage('1'), // 1%,
-        } as RemoveLiquidityNestedCallInputV3;
-
-        const addLiquidityBuildCallOutput = removeLiquidityNested.buildCall(
-            removeLiquidityBuildInput,
-        );
-
-        // Build call minAmountsOut should be query result with slippage applied
-        const expectedMinAmountsOut = queryOutput.amountsOut.map((amountOut) =>
-            removeLiquidityBuildInput.slippage.applyTo(amountOut.amount, -1),
-        );
-        expect(expectedMinAmountsOut).to.deep.eq(
-            addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
-        );
-        expect(addLiquidityBuildCallOutput.to).to.eq(
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
-        );
-
-        // send remove liquidity transaction and check balance changes
-        const { transactionReceipt, balanceDeltas } =
-            await sendTransactionGetBalances(
-                [
-                    queryOutput.bptAmountIn.token.address,
-                    ...mainTokens.map((t) => t.address),
-                ],
+            const txInput: RemoveLiquidityNestedTxInput = {
                 client,
+                removeLiquidityNested,
+                removeLiquidityNestedInput,
                 testAddress,
-                addLiquidityBuildCallOutput.to,
-                addLiquidityBuildCallOutput.callData,
-            );
-        expect(transactionReceipt.status).to.eq('success');
-        // Should match user bpt amount in and query result for amounts out
-        const expectedDeltas = [
-            removeLiquidityInput.bptAmountIn,
-            ...queryOutput.amountsOut.map((amountOut) => amountOut.amount),
-        ];
-        queryOutput.amountsOut.map(
-            (amountOut) => expect(amountOut.amount > 0n).to.be.true,
-        );
-        expect(expectedDeltas).to.deep.eq(balanceDeltas);
+                nestedPoolState: nestedWithBoostedPool,
+                slippage: Slippage.fromPercentage('1'), // 1%
+            };
+
+            const output = await doRemoveLiquidityNested(txInput);
+
+            assertRemoveLiquidityNested(output, txInput.slippage);
+        });
+
+        test('with native', async () => {
+            const wethIsEth = true;
+
+            const removeLiquidityNestedInput: RemoveLiquidityNestedInput = {
+                bptAmountIn: bptAmount,
+                chainId,
+                rpcUrl,
+            };
+
+            const txInput: RemoveLiquidityNestedTxInput = {
+                client,
+                removeLiquidityNested,
+                removeLiquidityNestedInput,
+                testAddress,
+                nestedPoolState: nestedWithBoostedPool,
+                slippage: Slippage.fromPercentage('1'), // 1%
+                wethIsEth,
+            };
+
+            const output = await doRemoveLiquidityNested(txInput);
+
+            assertRemoveLiquidityNested(output, txInput.slippage, wethIsEth);
+        });
     });
 });
