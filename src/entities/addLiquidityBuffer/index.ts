@@ -1,8 +1,3 @@
-// A user can add liquidity to a boosted pool in various forms. The following ways are
-// available:
-// 1. Unbalanced - addLiquidityUnbalancedToERC4626Pool
-// 2. Proportional - addLiquidityProportionalToERC4626Pool
-
 import { encodeFunctionData } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 
@@ -15,8 +10,6 @@ import { Token } from '../token';
 import { BALANCER_BUFFER_ROUTER } from '@/utils';
 import { balancerBufferRouterAbi, balancerRouterAbi } from '@/abi';
 
-import { InputValidator } from '../inputValidator/inputValidator';
-
 import {
     AddLiquidityBufferBuildCallInput,
     AddLiquidityBufferBuildCallOutput,
@@ -25,8 +18,6 @@ import {
 } from './types';
 
 export class AddLiquidityBufferV3 {
-    private readonly inputValidator: InputValidator = new InputValidator();
-
     async query(
         input: AddLiquidityBufferInput,
         bufferState: BufferState,

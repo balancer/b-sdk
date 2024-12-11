@@ -18,14 +18,20 @@ import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../lib/utils/createPoolHelper';
 import { CreatePoolTxInput } from '../../lib/utils/types';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
-
 describe('Create Composable Stable Pool tests', () => {
     const chainId = ChainId.MAINNET;
     let txInput: CreatePoolTxInput;
     let poolAddress: Address;
     let createPoolComposableStableInput: CreatePoolV2ComposableStableInput;
+    let rpcUrl: string;
+
     beforeAll(async () => {
+        // TODO: find out why findEventInReceiptLogs doesn't find the event when blockNumber is updated to 21373640n (this causes test to fail)
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS.MAINNET,
+            undefined,
+            18980070n,
+        ));
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
