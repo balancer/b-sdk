@@ -8,6 +8,7 @@ import {
     parseEther,
     parseUnits,
     publicActions,
+    TestActions,
     walletActions,
 } from 'viem';
 import {
@@ -27,6 +28,7 @@ import {
     InputAmount,
     PoolType,
     RemoveLiquiditySingleTokenExactOutInput,
+    PublicWalletClient,
 } from '../../../src';
 import { forkSetup } from '../../lib/utils/helper';
 import {
@@ -50,6 +52,9 @@ const wETH = TOKENS[chainId].WETH;
 describe('weighted remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
     let poolInput: PoolState;
+    let client: PublicWalletClient & TestActions;
+    let snapshot: Hex;
+
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
@@ -57,7 +62,7 @@ describe('weighted remove liquidity test', () => {
         // get pool state from api
         poolInput = await api.getPool(poolId);
 
-        const client = createTestClient({
+        client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
             transport: http(rpcUrl),
@@ -73,9 +78,7 @@ describe('weighted remove liquidity test', () => {
             testAddress: '0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f', // Balancer DAO Multisig
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
-    });
 
-    beforeEach(async () => {
         await forkSetup(
             txInput.client,
             txInput.testAddress,
@@ -83,6 +86,15 @@ describe('weighted remove liquidity test', () => {
             [0],
             [parseUnits('1000', 18)],
         );
+
+        snapshot = await client.snapshot();
+    });
+
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
+        });
+        snapshot = await client.snapshot();
     });
 
     describe('remove liquidity unbalanced', async () => {
