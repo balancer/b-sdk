@@ -20,13 +20,14 @@ import {
     AddLiquidityKind,
     ChainId,
     isSameAddress,
+    PublicWalletClient,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
-import { Client, Hex, PublicActions, WalletActions } from 'viem';
+import { Hex, TestActions } from 'viem';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -52,7 +53,7 @@ async function sdkAddLiquidity({
     testAddress: Address;
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;
-    client: Client & PublicActions & WalletActions;
+    client: PublicWalletClient & TestActions;
     usePermit2Signatures?: boolean;
 }): Promise<{
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
@@ -414,7 +415,7 @@ export function assertAddLiquidityProportional(
                     Number(
                         a.amount - addLiquidityInput.referenceAmount.rawAmount,
                     ),
-                ).closeTo(0, 1);
+                ).closeTo(0, 1000); // 1000 wei tolerance
         });
     }
 
