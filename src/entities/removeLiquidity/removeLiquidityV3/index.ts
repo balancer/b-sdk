@@ -1,11 +1,7 @@
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import {
-    calculateProportionalAmounts,
-    getPoolStateWithBalancesV3,
-    getSortedTokens,
-} from '@/entities/utils';
+import { getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
@@ -20,7 +16,6 @@ import {
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-    RemoveLiquidityRecoveryInput,
 } from '../types';
 import { doRemoveLiquiditySingleTokenExactOutQuery } from './doRemoveLiquiditySingleTokenExactOutQuery';
 import { doRemoveLiquiditySingleTokenExactInQuery } from './doRemoveLiquiditySingleTokenExactInQuery';
@@ -125,49 +120,6 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         };
 
         return output;
-    }
-
-    /**
-     * It's not possible to query Remove Liquidity Recovery in the same way as
-     * other remove liquidity kinds, but since it's not affected by fees or anything
-     * other than pool balances, we can calculate amountsOut as proportional amounts.
-     */
-    public async queryRemoveLiquidityRecovery(
-        input: RemoveLiquidityRecoveryInput,
-        poolState: PoolState,
-    ): Promise<RemoveLiquidityBaseQueryOutput> {
-        const poolStateWithBalances = await getPoolStateWithBalancesV3(
-            poolState,
-            input.chainId,
-            input.rpcUrl,
-        );
-
-        const { tokenAmounts } = calculateProportionalAmounts(
-            poolStateWithBalances,
-            input.bptIn,
-        );
-
-        const bptIn = TokenAmount.fromRawAmount(
-            new Token(input.chainId, input.bptIn.address, input.bptIn.decimals),
-            input.bptIn.rawAmount,
-        );
-        const amountsOut = tokenAmounts.map((amountIn) =>
-            TokenAmount.fromRawAmount(
-                new Token(input.chainId, amountIn.address, amountIn.decimals),
-                amountIn.rawAmount,
-            ),
-        );
-        return {
-            to: BALANCER_ROUTER[input.chainId],
-            poolType: poolState.type,
-            removeLiquidityKind: input.kind,
-            poolId: poolState.id,
-            bptIn,
-            amountsOut,
-            tokenOutIndex: undefined,
-            protocolVersion: poolState.protocolVersion,
-            chainId: input.chainId,
-        };
     }
 
     public buildCall(

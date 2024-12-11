@@ -4,15 +4,13 @@ import {
     RemoveLiquidityBase,
     RemoveLiquidityKind,
     RemoveLiquidityBuildCallOutput,
-    RemoveLiquidityQueryOutput,
-    RemoveLiquidityRecoveryInput,
 } from '../removeLiquidity/types';
 
 import { Permit } from '@/entities/permitHelper';
 
 import { balancerCompositeLiquidityRouterAbi } from '@/abi';
 
-import { PoolState, PoolStateWithUnderlyings } from '@/entities/types';
+import { PoolStateWithUnderlyings } from '@/entities/types';
 
 import { TokenAmount } from '@/entities/tokenAmount';
 import { Token } from '@/entities/token';
@@ -31,13 +29,6 @@ import { getSortedTokens } from '../utils';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
-
-    public async queryRemoveLiquidityRecovery(
-        _input: RemoveLiquidityRecoveryInput,
-        _poolState: PoolState,
-    ): Promise<RemoveLiquidityQueryOutput> {
-        throw new Error('Not implemented');
-    }
 
     public async query(
         input: RemoveLiquidityBoostedProportionalInput,
