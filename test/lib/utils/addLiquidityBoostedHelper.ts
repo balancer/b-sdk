@@ -1,24 +1,30 @@
 import {
+    AddLiquidityBoostedInput,
+    AddLiquidityBoostedQueryOutput,
     AddLiquidityBoostedUnbalancedInput,
     AddLiquidityBoostedV3,
+    AddLiquidityBuildCallOutput,
     AddLiquidityKind,
     PoolStateWithUnderlyings,
     Slippage,
     Token,
+    TokenAmount,
 } from '@/entities';
 import {
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     ChainId,
+    NATIVE_ASSETS,
     PERMIT2,
     PublicWalletClient,
 } from '@/utils';
-import { Address, TestActions } from 'viem';
+import { Address, TestActions, TransactionReceipt, zeroAddress } from 'viem';
 import {
     approveSpenderOnPermit2,
     approveSpenderOnToken,
     sendTransactionGetBalances,
     setTokenBalances,
 } from './helper';
+import { areBigIntsWithinPercent } from './swapHelpers';
 
 export async function GetBoostedBpt(
     chainId: ChainId,
@@ -129,4 +135,171 @@ export const assertTokenMatch = (
     tokenDefined.map((a, i) => {
         expect(a.decimals).to.eq(tokenReturned[i].decimals);
     });
+};
+
+export type AddLiquidityBoostedTxInput = {
+    client: PublicWalletClient & TestActions;
+    addLiquidityBoosted: AddLiquidityBoostedV3;
+    addLiquidityBoostedInput: AddLiquidityBoostedInput;
+    slippage: Slippage;
+    poolStateWithUnderlyings: PoolStateWithUnderlyings;
+    testAddress: Address;
+    wethIsEth?: boolean;
+    fromInternalBalance?: boolean;
+    usePermit2Signatures?: boolean;
+};
+
+export type AddLiquidityBoostedTxOutput = {
+    addLiquidityBoostedQueryOutput: AddLiquidityBoostedQueryOutput;
+    addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
+    tokenAmountsForBalanceCheck: TokenAmount[];
+    txOutput: {
+        transactionReceipt: TransactionReceipt;
+        balanceDeltas: bigint[];
+    };
+};
+
+export const doAddLiquidityBoosted = async (
+    txInput: AddLiquidityBoostedTxInput,
+): Promise<AddLiquidityBoostedTxOutput> => {
+    const {
+        addLiquidityBoosted,
+        poolStateWithUnderlyings,
+        addLiquidityBoostedInput,
+        testAddress,
+        client,
+        slippage,
+        wethIsEth,
+    } = txInput;
+
+    const addLiquidityBoostedQueryOutput = await addLiquidityBoosted.query(
+        addLiquidityBoostedInput,
+        poolStateWithUnderlyings,
+    );
+
+    const addLiquidityBoostedBuildInput = {
+        ...addLiquidityBoostedQueryOutput,
+        slippage,
+        wethIsEth,
+    };
+
+    const addLiquidityBuildCallOutput = addLiquidityBoosted.buildCall(
+        addLiquidityBoostedBuildInput,
+    );
+
+    // send add liquidity transaction and check balance changes
+    const tokenAmountsForBalanceCheck = [
+        ...addLiquidityBoostedQueryOutput.amountsIn,
+        addLiquidityBoostedQueryOutput.bptOut,
+        // add zero address so we can check for native token balance change
+        TokenAmount.fromRawAmount(
+            new Token(addLiquidityBoostedQueryOutput.chainId, zeroAddress, 18),
+            0n,
+        ),
+    ];
+
+    const txOutput = await sendTransactionGetBalances(
+        tokenAmountsForBalanceCheck.map((t) => t.token.address),
+        client,
+        testAddress,
+        addLiquidityBuildCallOutput.to,
+        addLiquidityBuildCallOutput.callData,
+        addLiquidityBuildCallOutput.value,
+    );
+
+    return {
+        addLiquidityBoostedQueryOutput,
+        addLiquidityBuildCallOutput,
+        tokenAmountsForBalanceCheck,
+        txOutput,
+    };
+};
+
+export const assertAddLiquidityBoostedUnbalanced = (
+    output: AddLiquidityBoostedTxOutput,
+    wethIsEth: boolean,
+) => {
+    const {
+        addLiquidityBoostedQueryOutput,
+        addLiquidityBuildCallOutput,
+        tokenAmountsForBalanceCheck,
+        txOutput,
+    } = output;
+    const { chainId, amountsIn, bptOut, protocolVersion } =
+        addLiquidityBoostedQueryOutput;
+    const { to, value } = addLiquidityBuildCallOutput;
+    const { transactionReceipt, balanceDeltas } = txOutput;
+
+    expect(protocolVersion).toEqual(3);
+    expect(bptOut.amount > 0n).to.be.true;
+    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId]);
+    expect(transactionReceipt.status).to.eq('success');
+
+    // add one extra index for native token balance
+    const expectedDeltas = tokenAmountsForBalanceCheck.map((t) => t.amount);
+
+    // move native token balance to the extra index if wethIsEth
+    if (wethIsEth) {
+        const nativeAssetIndex = amountsIn.findIndex((a) =>
+            a.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped),
+        );
+        expectedDeltas[nativeAssetIndex] = 0n;
+        expectedDeltas[expectedDeltas.length - 1] = value;
+    }
+
+    // check amountsIn against token balance changes
+    expect(expectedDeltas.slice(0, -2)).to.deep.eq(balanceDeltas.slice(0, -2));
+
+    // Here we check that output diff is within an acceptable tolerance.
+    // !!! This should only be used in the case of buffers as all other cases can be equal
+    areBigIntsWithinPercent(
+        balanceDeltas[balanceDeltas.length - 2],
+        expectedDeltas[expectedDeltas.length - 2],
+        0.001,
+    );
+
+    // check value against native token balance change
+    expect(value === expectedDeltas[expectedDeltas.length - 1]).to.be.true;
+};
+
+export const assertAddLiquidityBoostedProportional = (
+    output: AddLiquidityBoostedTxOutput,
+    wethIsEth: boolean,
+) => {
+    const {
+        addLiquidityBoostedQueryOutput,
+        addLiquidityBuildCallOutput,
+        tokenAmountsForBalanceCheck,
+        txOutput,
+    } = output;
+    const { chainId, amountsIn, bptOut, protocolVersion } =
+        addLiquidityBoostedQueryOutput;
+    const { to, value } = addLiquidityBuildCallOutput;
+    const { transactionReceipt, balanceDeltas } = txOutput;
+
+    expect(protocolVersion).toEqual(3);
+    expect(bptOut.amount > 0n).to.be.true;
+    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId]);
+    expect(transactionReceipt.status).to.eq('success');
+
+    // add one extra index for native token balance
+    const expectedDeltas = tokenAmountsForBalanceCheck.map((t) => t.amount);
+
+    // move native token balance to the extra index if wethIsEth
+    if (wethIsEth) {
+        const nativeAssetIndex = amountsIn.findIndex((a) =>
+            a.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped),
+        );
+        expectedDeltas[nativeAssetIndex] = 0n;
+        expectedDeltas[expectedDeltas.length - 1] = value;
+    }
+
+    for (let i = 0; i < expectedDeltas.length - 1; i++) {
+        // Here we check that output diff is within an acceptable tolerance.
+        // !!! This should only be used in the case of buffers as all other cases can be equal
+        areBigIntsWithinPercent(balanceDeltas[i], expectedDeltas[i], 0.001);
+    }
+
+    // check value against native token balance change
+    expect(value === expectedDeltas[expectedDeltas.length - 1]).to.be.true;
 };

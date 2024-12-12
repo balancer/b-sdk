@@ -40,4 +40,5 @@ export type AddLiquidityBoostedQueryOutput = {
 
 export type AddLiquidityBoostedBuildCallInput = {
     slippage: Slippage;
+    wethIsEth?: boolean;
 } & AddLiquidityBoostedQueryOutput;
