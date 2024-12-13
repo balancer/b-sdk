@@ -26,7 +26,6 @@ describe('Create Composable Stable Pool tests', () => {
     let rpcUrl: string;
 
     beforeAll(async () => {
-        // TODO: find out why findEventInReceiptLogs doesn't find the event when blockNumber is updated to 21373640n (this causes test to fail)
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.MAINNET,
             undefined,
