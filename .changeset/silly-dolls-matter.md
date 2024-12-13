@@ -2,4 +2,4 @@
 "@balancer/sdk": major
 ---
 
-Remove duplicate queryRemoveLiquidityRecovery
+Remove `queryRemoveLiquidityRecovery` from `RemoveLiquidity`. Please use `query` with `RemoveLiquidityRecoveryInput` instead.
