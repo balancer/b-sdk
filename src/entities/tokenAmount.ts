@@ -35,6 +35,14 @@ export class TokenAmount {
         return new TokenAmount(token, rawAmount);
     }
 
+    public static fromInputAmount(
+        input: InputAmount,
+        chainId: number,
+    ): TokenAmount {
+        const token = new Token(chainId, input.address, input.decimals);
+        return new TokenAmount(token, input.rawAmount);
+    }
+
     protected constructor(token: Token, amount: BigintIsh) {
         this.decimalScale = DECIMAL_SCALES[token.decimals];
         this.token = token;

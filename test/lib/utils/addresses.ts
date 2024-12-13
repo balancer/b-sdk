@@ -55,6 +55,10 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0xae78736cd615f374d3085123a210448e74fc6393',
             decimals: 18,
         },
+        gearboxUSDC: {
+            address: '0xda00000035fef4082F78dEF6A8903bee419FbF8E',
+            decimals: 6,
+        },
     },
     [ChainId.OPTIMISM]: {
         FRAX: {

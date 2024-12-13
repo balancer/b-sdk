@@ -10,6 +10,8 @@ export * from './addLiquidityNested/addLiquidityNestedV2/types';
 export * from './addLiquidityNested/addLiquidityNestedV3/types';
 export * from './createPool';
 export * from './encoders';
+export * from './initBuffer';
+export * from './initBuffer/types';
 export * from './initPool';
 export * from './permitHelper';
 export * from './permit2Helper';

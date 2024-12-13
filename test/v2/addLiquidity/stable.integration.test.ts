@@ -41,13 +41,13 @@ import {
 } from 'test/lib/utils';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
 const poolId = POOLS[chainId].wstETH_wETH_MSP.id; // B-stETH-STABLE
 
 describe('add liquidity stable test', () => {
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
+    let rpcUrl: string;
 
     beforeAll(async () => {
         // setup mock api
@@ -55,6 +55,13 @@ describe('add liquidity stable test', () => {
 
         // get pool state from api
         poolState = await api.getPool(poolId);
+
+        // TODO: figure out why these tests fail when udpating blockNumber to 21373640n
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS.MAINNET,
+            undefined,
+            18980070n,
+        ));
 
         const client = createTestClient({
             mode: 'anvil',
@@ -137,7 +144,7 @@ describe('add liquidity stable test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 chainId,
-                poolState.protocolVersion,
+                poolState.protocolVersion as 2 | 3,
                 wethIsEth,
             );
         });
@@ -190,7 +197,7 @@ describe('add liquidity stable test', () => {
                 addLiquidityOutput,
                 txInput.slippage,
                 chainId,
-                poolState.protocolVersion,
+                poolState.protocolVersion as 2 | 3,
                 wethIsEth,
             );
         });

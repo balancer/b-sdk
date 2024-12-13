@@ -98,7 +98,7 @@ describe('composable stable remove liquidity test', () => {
                 .filter((_, index) => index !== bptIndex);
 
             amountsOut = poolTokensWithoutBpt.map((t) => ({
-                rawAmount: parseUnits('20', t.decimals),
+                rawAmount: parseUnits('2', t.decimals),
                 decimals: t.decimals,
                 address: t.address,
             }));
@@ -152,7 +152,7 @@ describe('composable stable remove liquidity test', () => {
         let amountOut: InputAmount;
         beforeAll(() => {
             amountOut = {
-                rawAmount: parseUnits('20', wETH.decimals),
+                rawAmount: parseUnits('2', wETH.decimals),
                 decimals: wETH.decimals,
                 address: wETH.address,
             };
