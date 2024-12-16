@@ -1,5 +1,21 @@
 # @balancer/sdk
 
+## 1.0.0
+
+### Major Changes
+
+- b3d61f2: Remove `queryRemoveLiquidityRecovery` from `RemoveLiquidity`. Please use `query` with `RemoveLiquidityRecoveryInput` instead.
+
+### Minor Changes
+
+- 8aa2fb9: Add native token support to AddLiquidityNested and AddLiquidityBoosted
+- a6ebf0d: Add support for InitBuffer
+- 15567ec: Add support for addLiquidityBuffer
+
+### Patch Changes
+
+- e3fdf6c: Add extra integration tests for gyro pools
+
 ## 0.33.5
 
 ### Patch Changes
