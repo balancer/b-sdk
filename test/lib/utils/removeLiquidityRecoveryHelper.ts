@@ -36,11 +36,10 @@ export const sdkRemoveLiquidityRecovery = async ({
     removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
 }> => {
-    const removeLiquidityQueryOutput =
-        await removeLiquidity.queryRemoveLiquidityRecovery(
-            removeLiquidityRecoveryInput,
-            poolState,
-        );
+    const removeLiquidityQueryOutput = await removeLiquidity.query(
+        removeLiquidityRecoveryInput,
+        poolState,
+    );
 
     let removeLiquidityBuildInput: RemoveLiquidityBuildCallInput = {
         ...removeLiquidityQueryOutput,

@@ -61,12 +61,6 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         return output;
     }
 
-    public queryRemoveLiquidityRecovery(): never {
-        throw new Error(
-            'Remove Liquidity Recovery is not supported for Cow AMM pools',
-        );
-    }
-
     public buildCall(
         input: RemoveLiquidityBaseBuildCallInput,
     ): RemoveLiquidityBuildCallOutput {

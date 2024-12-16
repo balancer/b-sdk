@@ -4,7 +4,6 @@ import {
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
-    RemoveLiquidityRecoveryInput,
     RemoveLiquidityProportionalInput,
     RemoveLiquidityBaseBuildCallInput,
 } from './types';
@@ -42,39 +41,6 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
             case 3: {
                 const removeLiquidity = new RemoveLiquidityV3();
                 return removeLiquidity.query(input, poolState);
-            }
-        }
-    }
-
-    /**
-     * It's not possible to query Remove Liquidity Recovery in the same way as
-     * other remove liquidity kinds, so a separate handler is required for it.
-     * Since it's not affected by fees or anything other than pool balances,
-     * it's possible to calculate amountsOut as proportional amounts.
-     */
-    public async queryRemoveLiquidityRecovery(
-        input: RemoveLiquidityRecoveryInput,
-        poolState: PoolState,
-    ): Promise<RemoveLiquidityQueryOutput> {
-        this.inputValidator.validateRemoveLiquidityRecovery(input, poolState);
-        switch (poolState.protocolVersion) {
-            case 1: {
-                const removeLiquidity = new RemoveLiquidityCowAmm();
-                return removeLiquidity.queryRemoveLiquidityRecovery();
-            }
-            case 2: {
-                const removeLiquidity = new RemoveLiquidityV2(this.config);
-                return removeLiquidity.queryRemoveLiquidityRecovery(
-                    input,
-                    poolState,
-                );
-            }
-            case 3: {
-                const removeLiquidity = new RemoveLiquidityV3();
-                return removeLiquidity.queryRemoveLiquidityRecovery(
-                    input,
-                    poolState,
-                );
             }
         }
     }
