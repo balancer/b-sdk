@@ -1,19 +1,36 @@
-export const composableStableFactoryV5Abi_V2 = [
+export const composableStableFactoryV6Abi_V2 = [
     {
         inputs: [
-            { internalType: 'contract IVault', name: 'vault', type: 'address' },
+            {
+                internalType: 'contract IVault',
+                name: 'vault',
+                type: 'address',
+            },
             {
                 internalType: 'contract IProtocolFeePercentagesProvider',
                 name: 'protocolFeeProvider',
                 type: 'address',
             },
-            { internalType: 'string', name: 'factoryVersion', type: 'string' },
-            { internalType: 'string', name: 'poolVersion', type: 'string' },
+            {
+                internalType: 'string',
+                name: 'factoryVersion',
+                type: 'string',
+            },
+            {
+                internalType: 'string',
+                name: 'poolVersion',
+                type: 'string',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
-    { anonymous: false, inputs: [], name: 'FactoryDisabled', type: 'event' },
+    {
+        anonymous: false,
+        inputs: [],
+        name: 'FactoryDisabled',
+        type: 'event',
+    },
     {
         anonymous: false,
         inputs: [
@@ -29,8 +46,16 @@ export const composableStableFactoryV5Abi_V2 = [
     },
     {
         inputs: [
-            { internalType: 'string', name: 'name', type: 'string' },
-            { internalType: 'string', name: 'symbol', type: 'string' },
+            {
+                internalType: 'string',
+                name: 'name',
+                type: 'string',
+            },
+            {
+                internalType: 'string',
+                name: 'symbol',
+                type: 'string',
+            },
             {
                 internalType: 'contract IERC20[]',
                 name: 'tokens',
@@ -61,8 +86,16 @@ export const composableStableFactoryV5Abi_V2 = [
                 name: 'swapFeePercentage',
                 type: 'uint256',
             },
-            { internalType: 'address', name: 'owner', type: 'address' },
-            { internalType: 'bytes32', name: 'salt', type: 'bytes32' },
+            {
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+            {
+                internalType: 'bytes32',
+                name: 'salt',
+                type: 'bytes32',
+            },
         ],
         name: 'create',
         outputs: [
@@ -83,9 +116,21 @@ export const composableStableFactoryV5Abi_V2 = [
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'bytes4', name: 'selector', type: 'bytes4' }],
+        inputs: [
+            {
+                internalType: 'bytes4',
+                name: 'selector',
+                type: 'bytes4',
+            },
+        ],
         name: 'getActionId',
-        outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+        outputs: [
+            {
+                internalType: 'bytes32',
+                name: '',
+                type: 'bytes32',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -93,7 +138,11 @@ export const composableStableFactoryV5Abi_V2 = [
         inputs: [],
         name: 'getAuthorizer',
         outputs: [
-            { internalType: 'contract IAuthorizer', name: '', type: 'address' },
+            {
+                internalType: 'contract IAuthorizer',
+                name: '',
+                type: 'address',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -101,7 +150,13 @@ export const composableStableFactoryV5Abi_V2 = [
     {
         inputs: [],
         name: 'getCreationCode',
-        outputs: [{ internalType: 'bytes', name: '', type: 'bytes' }],
+        outputs: [
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -109,8 +164,16 @@ export const composableStableFactoryV5Abi_V2 = [
         inputs: [],
         name: 'getCreationCodeContracts',
         outputs: [
-            { internalType: 'address', name: 'contractA', type: 'address' },
-            { internalType: 'address', name: 'contractB', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'contractA',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'contractB',
+                type: 'address',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -136,7 +199,13 @@ export const composableStableFactoryV5Abi_V2 = [
     {
         inputs: [],
         name: 'getPoolVersion',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -157,7 +226,11 @@ export const composableStableFactoryV5Abi_V2 = [
         inputs: [],
         name: 'getVault',
         outputs: [
-            { internalType: 'contract IVault', name: '', type: 'address' },
+            {
+                internalType: 'contract IVault',
+                name: '',
+                type: 'address',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -165,21 +238,45 @@ export const composableStableFactoryV5Abi_V2 = [
     {
         inputs: [],
         name: 'isDisabled',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'isPoolFromFactory',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'version',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },

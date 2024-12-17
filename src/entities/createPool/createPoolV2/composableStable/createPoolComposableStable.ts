@@ -1,5 +1,5 @@
 import { Address, encodeFunctionData, parseEther } from 'viem';
-import { composableStableFactoryV5Abi_V2 } from '../../../../abi/composableStableFactoryV5.V2';
+import { composableStableFactoryV6Abi_V2 } from '../../../../abi/composableStableFactoryV6.V2';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
@@ -16,7 +16,7 @@ export class CreatePoolComposableStableV2 implements CreatePoolBase {
     ): CreatePoolBuildCallOutput {
         const args = this.parseCreateFunctionArgs(input);
         const encodedCall = encodeFunctionData({
-            abi: composableStableFactoryV5Abi_V2,
+            abi: composableStableFactoryV6Abi_V2,
             functionName: 'create',
             args,
         });
