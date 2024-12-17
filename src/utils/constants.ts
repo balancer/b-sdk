@@ -17,6 +17,7 @@ import {
     sepolia,
     mode,
     fraxtal,
+    sonic
 } from 'viem/chains';
 
 export const ZERO_ADDRESS: Address =
@@ -65,6 +66,7 @@ export enum ChainId {
     BSC = 56,
     GNOSIS_CHAIN = 100,
     POLYGON = 137,
+    SONIC = 146,
     ZKSYNC_TESTNET = 280,
     FANTOM = 250,
     FRAXTAL = 252,
@@ -92,6 +94,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.ARBITRUM_ONE]: 'ARBITRUM',
     [ChainId.AVALANCHE]: 'AVALANCHE',
     [ChainId.SEPOLIA]: 'SEPOLIA',
+    [ChainId.SONIC]: 'SONIC',
 };
 
 export const CHAINS: Record<number, Chain> = {
@@ -111,6 +114,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.AVALANCHE]: avalanche,
     [ChainId.BASE_GOERLI]: baseGoerli,
     [ChainId.SEPOLIA]: sepolia,
+    [ChainId.SONIC]: sonic,
 };
 
 /**
@@ -147,6 +151,7 @@ export const VAULT: Record<number, Address> = {
     [ChainId.POLYGON]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.ZKEVM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.SEPOLIA]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.SONIC]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
 export const VAULT_V3: Record<number, Address> = {
@@ -174,6 +179,7 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
     [ChainId.SEPOLIA]: '0x1802953277FD955f9a254B80Aa0582f193cF1d77',
+    //[ChainId.SONIC]: '', // not deployed yet, is this needed?
 };
 
 export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
@@ -359,6 +365,14 @@ export const NATIVE_ASSETS = {
         'MATIC',
         'Matic',
         '0xa2036f0538221a77a3937f1379699f44945018d0',
+    ),
+    [ChainId.SONIC]: new Token(
+        ChainId.SONIC,
+        NATIVE_ADDRESS,
+        18,
+        'S',
+        'Sonic',
+        '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',
     ),
 };
 
