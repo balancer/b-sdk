@@ -179,7 +179,7 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
     [ChainId.SEPOLIA]: '0x1802953277FD955f9a254B80Aa0582f193cF1d77',
-    //[ChainId.SONIC]: '', // not deployed yet, is this needed?
+    [ChainId.SONIC]: '0x4B29DB997Ec0efDFEF13bAeE2a2D7783bCf67f17',
 };
 
 export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
