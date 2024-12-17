@@ -30,7 +30,7 @@
     "dependencies": {
         "decimal.js-light": "^2.5.1",
         "lodash.clonedeep": "^4.5.0",
-        "viem": "^2.12.1"
+        "viem": "^2.21.55"
     },
     "devDependencies": {
         "@biomejs/biome": "^1.5.2",
