@@ -26,11 +26,7 @@ import { doCreatePool } from '../../lib/utils/createPoolHelper';
 import { forkSetup } from '../../lib/utils/helper';
 import { assertInitPool, doInitPool } from '../../lib/utils/initPoolHelper';
 
-const { rpcUrl } = await startFork(
-    ANVIL_NETWORKS.MAINNET,
-    undefined,
-    18980070n,
-);
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
 
 describe('Composable Stable Pool - Init Pool tests', async () => {
