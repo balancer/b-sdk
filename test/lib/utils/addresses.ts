@@ -288,8 +288,8 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             slot: 0,
         },
         MOCK_BAL_DAI_POOL: {
-            address: '0xe69b70a86a4e1fd33da95693a1ae12be1c26c8ea', // TODO
-            id: '0xe69b70a86a4e1fd33da95693a1ae12be1c26c8ea',
+            address: '0x3e099b16beeae7cfcf8a0921941394f1a9b00e0e',
+            id: '0x3e099b16beeae7cfcf8a0921941394f1a9b00e0e',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
