@@ -1,5 +1,13 @@
 # @balancer/sdk
 
+## 1.0.2
+
+### Patch Changes
+
+- eb5be5d: fix: update sonic multicall3 creation blocknumber
+- eb5be5d: fix: override multicall3 for sonic in viem chain definition
+- 1b47dfb: Skip flaky test
+
 ## 1.0.1
 
 ### Patch Changes
