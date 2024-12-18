@@ -26,11 +26,7 @@ describe('Create Composable Stable Pool tests', () => {
     let rpcUrl: string;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.MAINNET,
-            undefined,
-            18980070n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET));
         const client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
