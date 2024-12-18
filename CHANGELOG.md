@@ -1,5 +1,13 @@
 # @balancer/sdk
 
+## 1.0.1
+
+### Patch Changes
+
+- e5a0311: Bump composable stable pool factories to v6
+- 79c8144: Refactor swaps v3 integration tests
+- 1c58adc: Add support for Sonic chain
+
 ## 1.0.0
 
 ### Major Changes
