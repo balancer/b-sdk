@@ -16,6 +16,7 @@ export const doAddLiquiditySingleTokenQuery = async (
     tokenIn: Address,
     poolAddress: Address,
     bptOut: bigint,
+    block?: bigint,
 ): Promise<bigint> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -32,6 +33,7 @@ export const doAddLiquiditySingleTokenQuery = async (
         ],
         functionName: 'queryAddLiquiditySingleTokenExactOut',
         args: [poolAddress, tokenIn, bptOut, sender, userData],
+        blockNumber: block,
     });
     return amountIn;
 };

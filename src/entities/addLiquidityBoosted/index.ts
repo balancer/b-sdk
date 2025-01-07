@@ -44,6 +44,7 @@ export class AddLiquidityBoostedV3 {
     async query(
         input: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
+        block?: bigint,
     ): Promise<AddLiquidityBoostedQueryOutput> {
         this.inputValidator.validateAddLiquidityBoosted(input, {
             ...poolState,
@@ -85,6 +86,7 @@ export class AddLiquidityBoostedV3 {
                     input.userData ?? '0x',
                     poolState.address,
                     maxAmountsIn,
+                    block,
                 );
 
                 bptOut = TokenAmount.fromRawAmount(bptToken, bptAmountOut);
@@ -107,6 +109,7 @@ export class AddLiquidityBoostedV3 {
                         input.userData ?? '0x',
                         poolState.address,
                         bptAmount.rawAmount,
+                        block,
                     );
 
                 // Amounts are mapped to child tokens of the pool

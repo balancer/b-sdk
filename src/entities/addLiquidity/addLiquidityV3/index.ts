@@ -33,6 +33,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
         input: AddLiquidityInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<AddLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const bptToken = new Token(input.chainId, poolState.address, 18);
@@ -56,6 +57,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     input.userData ?? '0x',
                     poolState.address,
                     bptAmount.rawAmount,
+                    block,
                 );
 
                 amountsIn = sortedTokens.map((t, i) =>
@@ -79,6 +81,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     input.userData ?? '0x',
                     poolState.address,
                     maxAmountsIn,
+                    block,
                 );
                 bptOut = TokenAmount.fromRawAmount(bptToken, bptAmountOut);
                 amountsIn = sortedTokens.map((t, i) =>
@@ -100,6 +103,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     input.tokenIn,
                     poolState.address,
                     input.bptOut.rawAmount,
+                    block,
                 );
                 amountsIn = sortedTokens.map((t) => {
                     if (t.isSameAddress(input.tokenIn))

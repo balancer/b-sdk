@@ -15,6 +15,7 @@ export const doAddLiquidityProportionalQuery = async (
     userData: Hex,
     poolAddress: Address,
     bptOut: bigint,
+    block?: bigint,
 ): Promise<bigint[]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -31,6 +32,7 @@ export const doAddLiquidityProportionalQuery = async (
         ],
         functionName: 'queryAddLiquidityProportional',
         args: [poolAddress, bptOut, sender, userData],
+        blockNumber: block,
     });
 
     return [...amountsIn];
