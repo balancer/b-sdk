@@ -1,56 +1,56 @@
 {
-  "name": "@balancer/sdk",
-  "description": "SDK for interacting with the Balancer protocol",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/balancer/b-sdk"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "version": "1.0.2",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "typings": "dist/index.d.ts",
-  "files": [
-    "dist/"
-  ],
-  "scripts": {
-    "build": "tsup",
-    "format": "biome format --write .",
-    "lint": "dpdm -T ./src && biome check .",
-    "test": "vitest dev",
-    "test:ci": "vitest run",
-    "changeset": "changeset",
-    "changeset:release": "pnpm build && changeset publish",
-    "example": "npx tsx ./examples/lib/executeExample.ts"
-  },
-  "dependencies": {
-    "decimal.js-light": "^2.5.1",
-    "lodash.clonedeep": "^4.5.0",
-    "viem": "^2.22.3"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.5.2",
-    "@changesets/cli": "^2.27.1",
-    "@types/async-retry": "^1.4.8",
-    "@types/lodash.clonedeep": "^4.5.9",
-    "@types/node": "^18.19.7",
-    "@viem/anvil": "^0.0.6",
-    "dotenv": "^16.3.1",
-    "dpdm": "^3.14.0",
-    "pino-pretty": "^10.3.1",
-    "ts-node": "^10.9.2",
-    "tsup": "^8.0.1",
-    "typescript": "^5.7.2",
-    "vite": "^5.2.10",
-    "vite-tsconfig-paths": "^4.2.3",
-    "vitest": "^1.2.0"
-  },
-  "packageManager": "pnpm@^8.6.0",
-  "engines": {
-    "node": ">=18.x"
-  }
+    "name": "@balancer/sdk",
+    "description": "SDK for interacting with the Balancer protocol",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/balancer/b-sdk"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "version": "1.0.2",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "typings": "dist/index.d.ts",
+    "files": [
+        "dist/"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "format": "biome format --write .",
+        "lint": "dpdm -T ./src && biome check .",
+        "test": "vitest dev",
+        "test:ci": "vitest run",
+        "changeset": "changeset",
+        "changeset:release": "pnpm build && changeset publish",
+        "example": "npx tsx ./examples/lib/executeExample.ts"
+    },
+    "dependencies": {
+        "decimal.js-light": "^2.5.1",
+        "lodash.clonedeep": "^4.5.0",
+        "viem": "^2.22.3"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^1.5.2",
+        "@changesets/cli": "^2.27.1",
+        "@types/async-retry": "^1.4.8",
+        "@types/lodash.clonedeep": "^4.5.9",
+        "@types/node": "^18.19.7",
+        "@viem/anvil": "^0.0.6",
+        "dotenv": "^16.3.1",
+        "dpdm": "^3.14.0",
+        "pino-pretty": "^10.3.1",
+        "ts-node": "^10.9.2",
+        "tsup": "^8.0.1",
+        "typescript": "^5.7.2",
+        "vite": "^5.2.10",
+        "vite-tsconfig-paths": "^4.2.3",
+        "vitest": "^1.2.0"
+    },
+    "packageManager": "pnpm@^8.6.0",
+    "engines": {
+        "node": ">=18.x"
+    }
 }
