@@ -25,6 +25,7 @@ export const getPoolStateWithBalancesCowAmm = async (
     poolState: PoolState,
     chainId: number,
     rpcUrl: string,
+    block?: bigint,
 ): Promise<PoolStateWithBalances> => {
     const totalSupplyContract = {
         address: poolState.address,
@@ -48,6 +49,7 @@ export const getPoolStateWithBalancesCowAmm = async (
             totalSupplyContract,
             ...getBalanceContracts,
         ] as MulticallContract[],
+        blockNumber: block,
     });
 
     if (outputs.some((output) => output.status === 'failure')) {

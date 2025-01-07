@@ -10,7 +10,7 @@ import { RemoveLiquidityRecoveryInput } from '../types';
 import { Address } from '@/types';
 
 export const doRemoveLiquidityRecoveryQuery = async (
-    { chainId, rpcUrl, bptIn }: RemoveLiquidityRecoveryInput,
+    { chainId, rpcUrl, bptIn, block }: RemoveLiquidityRecoveryInput,
     poolAddress: Address,
 ): Promise<readonly bigint[]> => {
     // remove liquidity recovery requires bptAmountsIn and returns amountsOut
@@ -29,6 +29,7 @@ export const doRemoveLiquidityRecoveryQuery = async (
         ],
         functionName: 'queryRemoveLiquidityRecovery',
         args: [poolAddress, bptIn.rawAmount],
+        blockNumber: block,
     });
     return amountsOut;
 };

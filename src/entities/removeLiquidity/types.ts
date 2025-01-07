@@ -24,6 +24,7 @@ export type RemoveLiquidityBaseInput = {
     rpcUrl: string;
     sender?: Address;
     userData?: Hex;
+    block?: bigint;
 };
 
 export type RemoveLiquidityUnbalancedInput = RemoveLiquidityBaseInput & {
@@ -100,6 +101,7 @@ export interface RemoveLiquidityBase {
     query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<RemoveLiquidityQueryOutput>;
     buildCall(
         input: RemoveLiquidityBuildCallInput,

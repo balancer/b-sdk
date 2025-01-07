@@ -16,6 +16,7 @@ export const doRemoveLiquiditySingleTokenExactInQuery = async (
     poolAddress: Address,
     tokenOut: Address,
     exactBptAmountIn: bigint,
+    block?: bigint,
 ): Promise<bigint> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -31,6 +32,7 @@ export const doRemoveLiquiditySingleTokenExactInQuery = async (
         ],
         functionName: 'queryRemoveLiquiditySingleTokenExactIn',
         args: [poolAddress, exactBptAmountIn, tokenOut, sender, userData],
+        blockNumber: block,
     });
     return amountOut;
 };
