@@ -10,6 +10,7 @@ export const doRemoveLiquidityProportionalQuery = async (
     sender: Address,
     userData: Hex,
     poolAddress: Address,
+    block?: bigint,
 ): Promise<bigint[]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -21,6 +22,7 @@ export const doRemoveLiquidityProportionalQuery = async (
         abi: balancerCompositeLiquidityRouterAbi,
         functionName: 'queryRemoveLiquidityProportionalFromERC4626Pool',
         args: [poolAddress, exactBptAmountIn, sender, userData],
+        blockNumber: block,
     });
     // underlying amounts (not pool token amounts)
     return [...underlyingAmountsOut];

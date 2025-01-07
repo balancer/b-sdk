@@ -15,6 +15,7 @@ export const doRemoveLiquidityProportionalQuery = async (
     userData: Hex,
     poolAddress: Address,
     exactBptAmountIn: bigint,
+    block?: bigint,
 ): Promise<readonly bigint[]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -30,6 +31,7 @@ export const doRemoveLiquidityProportionalQuery = async (
         ],
         functionName: 'queryRemoveLiquidityProportional',
         args: [poolAddress, exactBptAmountIn, sender, userData],
+        blockNumber: block,
     });
     return amountsOut;
 };

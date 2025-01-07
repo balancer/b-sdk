@@ -39,6 +39,7 @@ export class AddLiquidityNestedV3 {
     async query(
         input: AddLiquidityNestedInputV3,
         nestedPoolState: NestedPoolState,
+        block?: bigint,
     ): Promise<AddLiquidityNestedQueryOutputV3> {
         validateQueryInput(input, nestedPoolState);
 
@@ -63,6 +64,7 @@ export class AddLiquidityNestedV3 {
             maxAmountsIn,
             input.sender ?? zeroAddress,
             input.userData ?? '0x',
+            block,
         );
 
         const bptToken = new Token(input.chainId, parentPool.address, 18);
@@ -140,6 +142,7 @@ export class AddLiquidityNestedV3 {
         maxAmountsIn: bigint[],
         sender: Address,
         userData: Hex,
+        block?: bigint,
     ) => {
         const client = createPublicClient({
             transport: http(rpcUrl),
@@ -156,6 +159,7 @@ export class AddLiquidityNestedV3 {
             ],
             functionName: 'queryAddLiquidityUnbalancedNestedPool',
             args: [parentPool, tokensIn, maxAmountsIn, sender, userData],
+            blockNumber: block,
         });
         return bptAmountOut;
     };

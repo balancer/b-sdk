@@ -24,6 +24,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<RemoveLiquidityQueryOutput> {
         this.inputValidator.validateRemoveLiquidity(input, poolState);
         switch (poolState.protocolVersion) {
@@ -32,6 +33,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
                 return removeLiquidity.query(
                     input as RemoveLiquidityProportionalInput,
                     poolState,
+                    block,
                 );
             }
             case 2: {
@@ -40,7 +42,7 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
             }
             case 3: {
                 const removeLiquidity = new RemoveLiquidityV3();
-                return removeLiquidity.query(input, poolState);
+                return removeLiquidity.query(input, poolState, block);
             }
         }
     }

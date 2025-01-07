@@ -22,6 +22,7 @@ export class AddLiquidity implements AddLiquidityBase {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<AddLiquidityQueryOutput> {
         this.inputValidator.validateAddLiquidity(input, poolState);
         switch (poolState.protocolVersion) {
@@ -30,6 +31,7 @@ export class AddLiquidity implements AddLiquidityBase {
                 return addLiquidity.query(
                     input as AddLiquidityProportionalInput,
                     poolState,
+                    block,
                 );
             }
             case 2: {
@@ -38,7 +40,7 @@ export class AddLiquidity implements AddLiquidityBase {
             }
             case 3: {
                 const addLiquidity = new AddLiquidityV3();
-                return addLiquidity.query(input, poolState);
+                return addLiquidity.query(input, poolState, block);
             }
         }
     }

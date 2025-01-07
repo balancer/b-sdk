@@ -33,6 +33,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = getAmountsQuery(sortedTokens, input);
@@ -54,6 +55,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                             poolState.address,
                             input.amountOut.address,
                             input.amountOut.rawAmount,
+                            block,
                         );
                     minAmountsOut = amounts.minAmountsOut;
                 }
@@ -70,6 +72,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                             poolState.address,
                             input.tokenOut,
                             input.bptIn.rawAmount,
+                            block,
                         );
                     minAmountsOut = sortedTokens.map((t) => {
                         return t.isSameAddress(input.tokenOut)
@@ -88,6 +91,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                         input.userData ?? '0x',
                         poolState.address,
                         input.bptIn.rawAmount,
+                        block,
                     );
                 }
                 break;

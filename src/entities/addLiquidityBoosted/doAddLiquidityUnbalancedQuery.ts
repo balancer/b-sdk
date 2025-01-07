@@ -18,6 +18,7 @@ export const doAddLiquidityUnbalancedQuery = async (
     userData: Hex,
     poolAddress: Address,
     exactUnderlyingAmountsIn: bigint[],
+    block?: bigint,
 ): Promise<bigint> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -34,6 +35,7 @@ export const doAddLiquidityUnbalancedQuery = async (
         ],
         functionName: 'queryAddLiquidityUnbalancedToERC4626Pool',
         args: [poolAddress, exactUnderlyingAmountsIn, sender, userData],
+        blockNumber: block,
     });
     return bptAmountOut;
 };

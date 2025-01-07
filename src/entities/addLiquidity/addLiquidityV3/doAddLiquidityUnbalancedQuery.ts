@@ -15,6 +15,7 @@ export const doAddLiquidityUnbalancedQuery = async (
     userData: Hex,
     poolAddress: Address,
     maxAmountsIn: bigint[],
+    block?: bigint,
 ) => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -31,6 +32,7 @@ export const doAddLiquidityUnbalancedQuery = async (
         ],
         functionName: 'queryAddLiquidityUnbalanced',
         args: [poolAddress, maxAmountsIn, sender, userData],
+        blockNumber: block,
     });
     return bptAmountOut;
 };

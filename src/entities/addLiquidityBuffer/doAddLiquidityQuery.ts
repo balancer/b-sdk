@@ -13,6 +13,7 @@ export const doAddLiquidityQuery = async (
     chainId: ChainId,
     wrappedToken: Address,
     exactSharesToIssue: bigint,
+    block?: bigint,
 ): Promise<{ amountUnderlyingIn: bigint; amountWrappedIn: bigint }> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -31,6 +32,7 @@ export const doAddLiquidityQuery = async (
         ],
         functionName: 'queryAddLiquidityToBuffer',
         args: [wrappedToken, exactSharesToIssue],
+        blockNumber: block,
     });
     return { amountUnderlyingIn, amountWrappedIn };
 };

@@ -23,11 +23,13 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityProportionalInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
         const poolStateWithBalances = await getPoolStateWithBalancesCowAmm(
             poolState,
             input.chainId,
             input.rpcUrl,
+            block,
         );
 
         const { tokenAmounts } = calculateProportionalAmountsCowAmm(

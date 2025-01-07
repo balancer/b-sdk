@@ -27,6 +27,7 @@ export class RemoveLiquidityNestedV3 {
     async query(
         input: RemoveLiquidityNestedProportionalInputV3,
         nestedPoolState: NestedPoolState,
+        block?: bigint,
     ): Promise<RemoveLiquidityNestedQueryOutputV3> {
         // Address of the highest level pool (which contains BPTs of other pools), i.e. the pool we wish to join
         const parentPool = nestedPoolState.pools.reduce((max, curr) =>
@@ -48,6 +49,7 @@ export class RemoveLiquidityNestedV3 {
                 mainTokens.map((t) => t.address),
                 input.sender ?? zeroAddress,
                 input.userData ?? '0x',
+                block,
             );
 
         return {
@@ -102,6 +104,7 @@ export class RemoveLiquidityNestedV3 {
         tokensOut: Address[],
         sender: Address,
         userData: Hex,
+        block?: bigint,
     ) => {
         const client = createPublicClient({
             transport: http(rpcUrl),
@@ -118,6 +121,7 @@ export class RemoveLiquidityNestedV3 {
             ],
             functionName: 'queryRemoveLiquidityProportionalNestedPool',
             args: [parentPool, exactBptAmountIn, tokensOut, sender, userData],
+            blockNumber: block,
         });
         return amountsOut;
     };

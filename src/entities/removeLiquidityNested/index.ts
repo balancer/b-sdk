@@ -16,6 +16,7 @@ export class RemoveLiquidityNested {
     async query(
         input: RemoveLiquidityNestedInput,
         nestedPoolState: NestedPoolState,
+        block?: bigint,
     ): Promise<RemoveLiquidityNestedQueryOutput> {
         validateNestedPoolState(nestedPoolState);
         switch (nestedPoolState.protocolVersion) {
@@ -30,7 +31,7 @@ export class RemoveLiquidityNested {
             }
             case 3: {
                 const removeLiquidity = new RemoveLiquidityNestedV3();
-                return removeLiquidity.query(input, nestedPoolState);
+                return removeLiquidity.query(input, nestedPoolState, block);
             }
         }
     }

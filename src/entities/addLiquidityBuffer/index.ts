@@ -21,6 +21,7 @@ export class AddLiquidityBufferV3 {
     async query(
         input: AddLiquidityBufferInput,
         bufferState: BufferState,
+        block?: bigint,
     ): Promise<AddLiquidityBufferQueryOutput> {
         const { amountUnderlyingIn, amountWrappedIn } =
             await doAddLiquidityQuery(
@@ -28,6 +29,7 @@ export class AddLiquidityBufferV3 {
                 input.chainId,
                 bufferState.wrappedToken.address,
                 input.exactSharesToIssue,
+                block,
             );
         const underlyingToken = new Token(
             input.chainId,

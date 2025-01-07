@@ -33,6 +33,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityBoostedProportionalInput,
         poolState: PoolStateWithUnderlyings,
+        block?: bigint,
     ): Promise<RemoveLiquidityBoostedQueryOutput> {
         this.inputValidator.validateRemoveLiquidity(input, {
             ...poolState,
@@ -45,6 +46,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             input.sender ?? zeroAddress,
             input.userData ?? '0x',
             poolState.address,
+            block,
         );
 
         // Child tokens are the lowest most tokens. This will be underlying if it exists.

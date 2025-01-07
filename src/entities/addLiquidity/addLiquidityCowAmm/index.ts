@@ -23,12 +23,14 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
     async query(
         input: AddLiquidityProportionalInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<AddLiquidityBaseQueryOutput> {
         // get a single poolState on-chain that will be used to get bptAmount from referenceAmount and then to simulate an add liquidity proportional query
         const poolStateWithBalances = await getPoolStateWithBalancesCowAmm(
             poolState,
             input.chainId,
             input.rpcUrl,
+            block,
         );
 
         // get bptAmount from referenceAmount

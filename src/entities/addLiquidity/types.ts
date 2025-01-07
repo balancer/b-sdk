@@ -72,6 +72,7 @@ export interface AddLiquidityBase {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<AddLiquidityQueryOutput>;
     buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput;
     buildCallWithPermit2(
