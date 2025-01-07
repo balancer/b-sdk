@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 1.1.0
+
+### Minor Changes
+
+- 00d2037: Add query blockno param for add/remove liq (not V2).
+
 ## 1.0.2
 
 ### Patch Changes
