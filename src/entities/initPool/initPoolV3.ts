@@ -7,6 +7,7 @@ import { getSortedTokens, parseInitializeArgs, getAmounts } from '../utils';
 import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { getValue } from '../utils/getValue';
+import { Permit2 } from '@/entities/permit2Helper';
 
 export class InitPoolV3 implements InitPoolBase {
     buildCall(
@@ -37,6 +38,33 @@ export class InitPoolV3 implements InitPoolBase {
             callData,
             to: BALANCER_ROUTER[input.chainId] as Address,
             value: getValue(amountsIn, !!input.wethIsEth),
+        };
+    }
+
+    buildCallWithPermit2(
+        input: InitPoolInputV3,
+        poolState: PoolState,
+        permit2: Permit2,
+    ): InitPoolBuildOutput {
+        const buildCallOutput = this.buildCall(input, poolState);
+
+        const args = [
+            [],
+            [],
+            permit2.batch,
+            permit2.signature,
+            [buildCallOutput.callData],
+        ] as const;
+
+        const callData = encodeFunctionData({
+            abi: balancerRouterAbi,
+            functionName: 'permitBatchAndCall',
+            args,
+        });
+
+        return {
+            ...buildCallOutput,
+            callData,
         };
     }
 

@@ -9,7 +9,7 @@ import {
 } from './types';
 import { InitPoolV2 } from './initPoolV2';
 import { InitPoolV3 } from './initPoolV3';
-
+import { Permit2 } from '@/entities/permit2Helper';
 export * from './types';
 
 export class InitPool {
@@ -35,5 +35,16 @@ export class InitPool {
                     `SDK does not support init for vault version: ${poolState.protocolVersion}`,
                 );
         }
+    }
+
+    buildCallWithPermit2(
+        input: InitPoolInputV3,
+        poolState: PoolState,
+        permit2: Permit2,
+    ): InitPoolBuildOutput {
+        this.inputValidator.validateInitPool(input, poolState);
+
+        const initPool = new InitPoolV3();
+        return initPool.buildCallWithPermit2(input, poolState, permit2);
     }
 }
