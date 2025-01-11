@@ -9,15 +9,14 @@ import { config } from 'dotenv';
 config();
 
 import {
-    // createTestClient,
+    createTestClient,
     http,
     publicActions,
-    // walletActions,
+    walletActions,
     zeroAddress,
     parseUnits,
-    createWalletClient,
-    getContract,
-    PrivateKeyAccount,
+    // createWalletClient,
+    // getContract,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
@@ -29,24 +28,17 @@ import {
     CHAINS,
     InitPoolDataProvider,
     InitPool,
-    InitPoolInput,
+    InitPoolInputV3,
     TokenType,
     PERMIT2,
-    BALANCER_ROUTER,
-    permit2Abi,
-    erc20Abi,
-    MaxAllowanceExpiration,
-    PermitDetails,
-    Permit2Batch,
-    MaxSigDeadline,
-    AllowanceTransfer,
-    balancerRouterAbi,
-    PublicWalletClient,
+    // erc20Abi,
+    Permit2Helper,
 } from 'src';
-// import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
+import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
-// import { makeForkTx } from 'examples/lib/makeForkTx';
-// import { getSlot } from 'examples/lib/getSlot';
+import { makeForkTx } from 'examples/lib/makeForkTx';
+import { getSlot } from 'examples/lib/getSlot';
+import { approveSpenderOnTokens } from 'test/lib/utils/helper';
 
 const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
 const AAVE_FAUCET_USDT = {
@@ -60,30 +52,35 @@ const STATA_ETH_DAI = {
 };
 
 async function runAgainstFork() {
-    // User defined inputs
-    // const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
-    const rpcUrl = process.env.SEPOLIA_RPC_URL;
+    // Use this rpcUrl to run against a local fork
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
+
+    // Use this rpcUrl to run against a live network
+    // const rpcUrl = process.env.SEPOLIA_RPC_URL;
+
+    if (!rpcUrl) throw new Error('rpcUrl is undefined');
+
     const chainId = ChainId.SEPOLIA;
 
     const userAccount = privateKeyToAccount(
         process.env.PRIVATE_KEY as `0x${string}`,
     );
 
-    // Use this client to submit txs to live network
-    const client = createWalletClient({
+    // Use this client to run against a local fork
+    const client = createTestClient({
+        mode: 'anvil',
         chain: CHAINS[chainId],
         transport: http(rpcUrl),
-        account: userAccount,
-    }).extend(publicActions);
+    })
+        .extend(publicActions)
+        .extend(walletActions);
 
-    // Use this client to run against a local fork
-    // const client = createTestClient({
-    //     mode: 'anvil',
+    // Use this client to submit txs to live network
+    // const client = createWalletClient({
     //     chain: CHAINS[chainId],
     //     transport: http(rpcUrl),
-    // })
-    //     .extend(publicActions)
-    //     .extend(walletActions);
+    //     account: userAccount,
+    // }).extend(publicActions);
 
     const createPoolInput: CreatePoolV3StableInput = {
         name: 'USDT stataDAI partially boosted',
@@ -133,81 +130,29 @@ async function runAgainstFork() {
     const poolAddress = await createPool({ client, call, userAccount });
     console.log('Created Pool Address: ', poolAddress);
 
-    // Approve permit2 contract to spend tokens used for init
-    for (const token of initAmounts) {
-        const tokenContract = getContract({
-            address: token.address,
-            abi: erc20Abi,
-            client,
-        });
-        await tokenContract.write.approve([PERMIT2[chainId], token.rawAmount]);
-    }
-
-    // Build the init pool call using the SDK
-    const initCall = await initPool({
-        chainId,
-        rpcUrl,
-        userAccount,
-        poolAddress,
-        initAmounts,
-    });
-
-    // Set up batch and sig for permit2
-    const { batch, signature } = await createPermit2({
+    // Helper to approve permit2 contract to spend tokens used for init
+    await approveSpenderOnTokens(
         client,
-        userAccount,
-        initAmounts,
-        chainId,
-    });
+        userAccount.address,
+        initAmounts.map((t) => t.address),
+        PERMIT2[chainId],
+    );
 
-    // Init the pool with permitBatchAndCall
-    const router = getContract({
-        address: BALANCER_ROUTER[chainId],
-        abi: balancerRouterAbi,
-        client,
-    });
-    const args = [[], [], batch, signature, [initCall.callData]] as const;
-    const hash = await router.write.permitBatchAndCall(args);
-    console.log('hash', hash);
+    // Use this to approve permit2 contract on live network
+    // for (const token of initAmounts) {
+    //     const tokenContract = getContract({
+    //         address: token.address,
+    //         abi: erc20Abi,
+    //         client,
+    //     });
+    //     await tokenContract.write.approve(PERMIT2[chainId], token.rawAmount);
+    // }
 
-    // Make the tx against the local fork and print the result
-    // await makeForkTx(
-    //     initCall,
-    //     {
-    //         rpcUrl,
-    //         chainId,
-    //         impersonateAccount: userAccount.address,
-    //         forkTokens: initAmounts.map((a) => ({
-    //             address: a.address,
-    //             slot: getSlot(chainId, a.address),
-    //             rawBalance: a.rawAmount,
-    //         })),
-    //     },
-    //     [...initAmounts.map((a) => a.address), poolAddress],
-    //     createPoolInput.protocolVersion,
-    // );
-}
-
-const createPoolCall = async (createPoolInput) => {
-    const createPool = new CreatePool();
-    const call = createPool.buildCall(createPoolInput);
-    return call;
-};
-
-const initPool = async ({
-    chainId,
-    rpcUrl,
-    userAccount,
-    poolAddress,
-    initAmounts,
-}) => {
     const initPool = new InitPool();
     const poolType = PoolType.Stable;
     const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
 
-    const initPoolInput: InitPoolInput = {
-        sender: userAccount,
-        recipient: userAccount,
+    const initPoolInput: InitPoolInputV3 = {
         amountsIn: initAmounts,
         chainId,
         minBptAmountOut: 0n,
@@ -218,9 +163,51 @@ const initPool = async ({
         poolType,
         3,
     );
+    const permit2 = await Permit2Helper.signInitPoolApproval({
+        ...initPoolInput,
+        client,
+        owner: userAccount.address,
+    });
 
-    const call = initPool.buildCall(initPoolInput, poolState);
+    const initPoolCall = initPool.buildCallWithPermit2(
+        initPoolInput,
+        poolState,
+        permit2,
+    );
     console.log('init pool call', call);
+
+    // Make the tx against the local fork and print the result
+    await makeForkTx(
+        initPoolCall,
+        {
+            rpcUrl,
+            chainId,
+            impersonateAccount: userAccount.address,
+            forkTokens: initAmounts.map((a) => ({
+                address: a.address,
+                slot: getSlot(chainId, a.address),
+                rawBalance: a.rawAmount,
+            })),
+        },
+        [...initAmounts.map((a) => a.address), poolAddress],
+        createPoolInput.protocolVersion,
+    );
+
+    // Send the tx to a live network
+    // const txHash = await client.sendTransaction({
+    //     to: initPoolCall.to,
+    //     data: initPoolCall.callData,
+    //     account: userAccount,
+    // });
+    // const txReceipt = await client.waitForTransactionReceipt({
+    //     hash: txHash,
+    // });
+    // console.log('txReceipt', txReceipt);
+}
+
+const createPoolCall = async (createPoolInput) => {
+    const createPool = new CreatePool();
+    const call = createPool.buildCall(createPoolInput);
     return call;
 };
 
@@ -245,70 +232,6 @@ async function createPool({ client, call, userAccount }) {
         args: { pool: poolAddress },
     } = poolCreatedEvent;
     return poolAddress;
-}
-
-async function createPermit2({
-    client,
-    userAccount,
-    initAmounts,
-    chainId,
-}: {
-    client: PublicWalletClient;
-    userAccount: PrivateKeyAccount;
-    initAmounts: {
-        address: `0x${string}`;
-        rawAmount: bigint;
-        decimals: number;
-    }[];
-    chainId: ChainId;
-}) {
-    const owner = userAccount.address;
-    const permit2Contract = getContract({
-        address: PERMIT2[chainId],
-        abi: permit2Abi,
-        client,
-    });
-
-    const details: PermitDetails[] = await Promise.all(
-        initAmounts.map(async (token) => {
-            const [, , nonce] = await permit2Contract.read.allowance([
-                owner,
-                token.address,
-                BALANCER_ROUTER[chainId],
-            ]);
-
-            return {
-                token: token.address,
-                amount: token.rawAmount,
-                expiration: Number(MaxAllowanceExpiration),
-                nonce,
-            };
-        }),
-    );
-
-    const batch: Permit2Batch = {
-        details,
-        spender: BALANCER_ROUTER[chainId],
-        sigDeadline: MaxSigDeadline,
-    };
-
-    const { domain, types, values } = AllowanceTransfer.getPermitData(
-        batch,
-        PERMIT2[chainId],
-        chainId,
-    );
-
-    const signature = await client.signTypedData({
-        account: userAccount,
-        message: {
-            ...values,
-        },
-        domain,
-        primaryType: 'PermitBatch',
-        types,
-    });
-
-    return { batch, signature };
 }
 
 export default runAgainstFork;
