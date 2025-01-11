@@ -18,16 +18,22 @@ import {
     TokenType,
     CreatePoolV3WeightedInput,
     InitPoolDataProvider,
-    Slippage,
+    InitPool,
+    Permit2Helper,
+    PERMIT2,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
-import { forkSetup } from 'test/lib/utils/helper';
 import { doCreatePool } from '../../../lib/utils/createPoolHelper';
 import { TOKENS } from 'test/lib/utils/addresses';
-import { doInitPool, assertInitPool } from 'test/lib/utils/initPoolHelper';
+import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import { PublicWalletClient } from '@/utils';
 import { VAULT_V3 } from 'src/utils/constants';
 import { vaultExtensionAbi_V3 } from 'src/abi/';
+import {
+    setTokenBalances,
+    approveSpenderOnTokens,
+    sendTransactionGetBalances,
+} from 'test/lib/utils/helper';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const protocolVersion = 3;
@@ -109,14 +115,19 @@ describe('create weighted pool test', () => {
             protocolVersion,
         );
 
-        await forkSetup(
+        await setTokenBalances(
             client,
             testAddress,
-            [...poolState.tokens.map((t) => t.address)],
+            poolState.tokens.map((t) => t.address),
             [WETH.slot!, BAL.slot!],
-            [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
-            undefined,
-            protocolVersion,
+            poolState.tokens.map((t) => parseUnits('100', t.decimals)),
+        );
+
+        await approveSpenderOnTokens(
+            client,
+            testAddress,
+            poolState.tokens.map((t) => t.address),
+            PERMIT2[chainId],
         );
 
         const initPoolInput = {
@@ -136,14 +147,27 @@ describe('create weighted pool test', () => {
             chainId,
         };
 
-        const addLiquidityOutput = await doInitPool({
+        const initPool = new InitPool();
+        const permit2 = await Permit2Helper.signInitPoolApproval({
+            ...initPoolInput,
             client,
-            testAddress,
+            owner: testAddress,
+        });
+        const initPoolBuildOutput = initPool.buildCallWithPermit2(
             initPoolInput,
             poolState,
-            slippage: Slippage.fromPercentage('0.01'),
-        });
+            permit2,
+        );
 
-        assertInitPool(initPoolInput, addLiquidityOutput);
+        const txOutput = await sendTransactionGetBalances(
+            [BAL.address, WETH.address],
+            client,
+            testAddress,
+            initPoolBuildOutput.to,
+            initPoolBuildOutput.callData,
+            initPoolBuildOutput.value,
+        );
+
+        assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
     }, 120_000);
 });

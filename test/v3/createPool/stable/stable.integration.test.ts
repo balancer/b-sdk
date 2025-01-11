@@ -123,7 +123,6 @@ describe('create stable pool test', () => {
             poolState.tokens.map((t) => parseUnits('100', t.decimals)),
         );
 
-        // Approve on token contracts for Permit2 contract to spend tokens
         await approveSpenderOnTokens(
             client,
             testAddress,

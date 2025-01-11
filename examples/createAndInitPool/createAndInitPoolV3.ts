@@ -1,5 +1,7 @@
 /**
- * Quick script to deploy partially boosted pool we need for testing
+ * Example script to create and init a v3 pool
+ *
+ * Change the default export to runAgainstFork or runAgainstNetwork
  *
  * Run with:
  * pnpm example ./examples/createAndInitPool/createAndInitPoolV3.ts
@@ -15,8 +17,9 @@ import {
     walletActions,
     zeroAddress,
     parseUnits,
-    // createWalletClient,
-    // getContract,
+    createWalletClient,
+    getContract,
+    Address,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
@@ -31,7 +34,7 @@ import {
     InitPoolInputV3,
     TokenType,
     PERMIT2,
-    // erc20Abi,
+    erc20Abi,
     Permit2Helper,
 } from 'src';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
@@ -40,7 +43,10 @@ import { makeForkTx } from 'examples/lib/makeForkTx';
 import { getSlot } from 'examples/lib/getSlot';
 import { approveSpenderOnTokens } from 'test/lib/utils/helper';
 
-const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
+// Create pool config
+const chainId = ChainId.SEPOLIA;
+const poolType = PoolType.Stable;
+const swapFeePercentageDecimals = 16;
 const AAVE_FAUCET_USDT = {
     address: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0' as `0x${string}`,
     decimals: 6,
@@ -50,23 +56,57 @@ const STATA_ETH_DAI = {
     rateProvider: '0x22db61f3a8d81d3d427a157fdae8c7eb5b5fd373' as `0x${string}`,
     decimals: 18,
 };
+const createPoolInput: CreatePoolV3StableInput = {
+    name: 'USDT stataDAI partially boosted',
+    symbol: 'USDT-stataDAI',
+    poolType,
+    tokens: [
+        {
+            address: AAVE_FAUCET_USDT.address,
+            rateProvider: zeroAddress,
+            tokenType: TokenType.STANDARD,
+            paysYieldFees: false,
+        },
+        {
+            address: STATA_ETH_DAI.address,
+            rateProvider: STATA_ETH_DAI.rateProvider,
+            tokenType: TokenType.TOKEN_WITH_RATE,
+            paysYieldFees: true,
+        },
+    ],
+    amplificationParameter: BigInt(33),
+    swapFeePercentage: parseUnits('0.001', swapFeePercentageDecimals),
+    pauseManager: zeroAddress,
+    swapFeeManager: zeroAddress,
+    poolHooksContract: zeroAddress,
+    enableDonation: false,
+    disableUnbalancedLiquidity: false,
+    protocolVersion: 3,
+    chainId,
+};
 
-async function runAgainstFork() {
-    // Use this rpcUrl to run against a local fork
+// Init pool config
+const amountsIn = [
+    {
+        address: AAVE_FAUCET_USDT.address,
+        rawAmount: parseUnits('3', AAVE_FAUCET_USDT.decimals),
+        decimals: AAVE_FAUCET_USDT.decimals,
+    },
+    {
+        address: STATA_ETH_DAI.address,
+        rawAmount: parseUnits('3', STATA_ETH_DAI.decimals),
+        decimals: STATA_ETH_DAI.decimals,
+    },
+];
+const initPoolInput: InitPoolInputV3 = {
+    amountsIn: amountsIn,
+    chainId,
+    minBptAmountOut: 0n,
+};
+
+export async function runAgainstFork() {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 
-    // Use this rpcUrl to run against a live network
-    // const rpcUrl = process.env.SEPOLIA_RPC_URL;
-
-    if (!rpcUrl) throw new Error('rpcUrl is undefined');
-
-    const chainId = ChainId.SEPOLIA;
-
-    const userAccount = privateKeyToAccount(
-        process.env.PRIVATE_KEY as `0x${string}`,
-    );
-
-    // Use this client to run against a local fork
     const client = createTestClient({
         mode: 'anvil',
         chain: CHAINS[chainId],
@@ -74,152 +114,105 @@ async function runAgainstFork() {
     })
         .extend(publicActions)
         .extend(walletActions);
+    const userAccount = (await client.getAddresses())[0];
 
-    // Use this client to submit txs to live network
-    // const client = createWalletClient({
-    //     chain: CHAINS[chainId],
-    //     transport: http(rpcUrl),
-    //     account: userAccount,
-    // }).extend(publicActions);
+    // Create the pool and parse the tx receipt to get the pool address
+    const poolAddress = await createPool({ client, userAccount });
 
-    const createPoolInput: CreatePoolV3StableInput = {
-        name: 'USDT stataDAI partially boosted',
-        symbol: 'USDT-stataDAI',
-        poolType: PoolType.Stable,
-        tokens: [
-            {
-                address: AAVE_FAUCET_USDT.address,
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-                paysYieldFees: false,
-            },
-            {
-                address: STATA_ETH_DAI.address,
-                rateProvider: STATA_ETH_DAI.rateProvider,
-                tokenType: TokenType.TOKEN_WITH_RATE,
-                paysYieldFees: true,
-            },
-        ],
-        amplificationParameter: BigInt(33),
-        swapFeePercentage: parseUnits('0.001', SWAP_FEE_PERCENTAGE_DECIMALS),
-        pauseManager: zeroAddress,
-        swapFeeManager: zeroAddress,
-        poolHooksContract: zeroAddress,
-        enableDonation: false,
-        disableUnbalancedLiquidity: false,
-        protocolVersion: 3,
-        chainId,
-    };
-    const initAmounts = [
-        {
-            address: AAVE_FAUCET_USDT.address,
-            rawAmount: parseUnits('10', AAVE_FAUCET_USDT.decimals),
-            decimals: AAVE_FAUCET_USDT.decimals,
-        },
-        {
-            address: STATA_ETH_DAI.address,
-            rawAmount: parseUnits('10', STATA_ETH_DAI.decimals),
-            decimals: STATA_ETH_DAI.decimals,
-        },
-    ];
-
-    // Build the create pool call using the SDK
-    const call = await createPoolCall(createPoolInput);
-
-    // Submit the create pool tx and wait for the PoolCreated event to find pool address
-    const poolAddress = await createPool({ client, call, userAccount });
-    console.log('Created Pool Address: ', poolAddress);
-
-    // Helper to approve permit2 contract to spend tokens used for init
+    // Approve the cannonical permit2 contract to spend tokens that will be used for pool init
     await approveSpenderOnTokens(
         client,
-        userAccount.address,
-        initAmounts.map((t) => t.address),
+        userAccount,
+        amountsIn.map((t) => t.address),
         PERMIT2[chainId],
     );
 
-    // Use this to approve permit2 contract on live network
-    // for (const token of initAmounts) {
-    //     const tokenContract = getContract({
-    //         address: token.address,
-    //         abi: erc20Abi,
-    //         client,
-    //     });
-    //     await tokenContract.write.approve(PERMIT2[chainId], token.rawAmount);
-    // }
-
-    const initPool = new InitPool();
-    const poolType = PoolType.Stable;
-    const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-
-    const initPoolInput: InitPoolInputV3 = {
-        amountsIn: initAmounts,
-        chainId,
-        minBptAmountOut: 0n,
-    };
-
-    const poolState = await initPoolDataProvider.getInitPoolData(
-        poolAddress,
-        poolType,
-        3,
-    );
-    const permit2 = await Permit2Helper.signInitPoolApproval({
-        ...initPoolInput,
+    // Build the init pool call
+    const initPoolCall = await buildInitPoolCall({
         client,
-        owner: userAccount.address,
+        rpcUrl,
+        userAccount,
+        poolAddress,
     });
 
-    const initPoolCall = initPool.buildCallWithPermit2(
-        initPoolInput,
-        poolState,
-        permit2,
-    );
-    console.log('init pool call', call);
-
-    // Make the tx against the local fork and print the result
+    // Send the init pool tx to local anvil fork
     await makeForkTx(
         initPoolCall,
         {
             rpcUrl,
             chainId,
-            impersonateAccount: userAccount.address,
-            forkTokens: initAmounts.map((a) => ({
+            impersonateAccount: userAccount,
+            forkTokens: amountsIn.map((a) => ({
                 address: a.address,
                 slot: getSlot(chainId, a.address),
                 rawBalance: a.rawAmount,
             })),
         },
-        [...initAmounts.map((a) => a.address), poolAddress],
+        [...amountsIn.map((a) => a.address), poolAddress],
         createPoolInput.protocolVersion,
     );
-
-    // Send the tx to a live network
-    // const txHash = await client.sendTransaction({
-    //     to: initPoolCall.to,
-    //     data: initPoolCall.callData,
-    //     account: userAccount,
-    // });
-    // const txReceipt = await client.waitForTransactionReceipt({
-    //     hash: txHash,
-    // });
-    // console.log('txReceipt', txReceipt);
 }
 
-const createPoolCall = async (createPoolInput) => {
+export default async function runAgainstNetwork() {
+    const rpcUrl = process.env.SEPOLIA_RPC_URL;
+    if (!rpcUrl) throw new Error('rpcUrl is undefined');
+
+    const userAccount = privateKeyToAccount(
+        process.env.PRIVATE_KEY as `0x${string}`,
+    );
+    const client = createWalletClient({
+        chain: CHAINS[chainId],
+        transport: http(rpcUrl),
+        account: userAccount,
+    }).extend(publicActions);
+
+    // Create the pool and parse the tx receipt to get the pool address
+    const poolAddress = await createPool({ client, userAccount });
+
+    // Approve the cannonical permit2 contract to spend tokens that will be used for pool init
+    for (const token of amountsIn) {
+        const tokenContract = getContract({
+            address: token.address,
+            abi: erc20Abi,
+            client,
+        });
+        await tokenContract.write.approve([PERMIT2[chainId], token.rawAmount]);
+    }
+
+    // Build the init pool call
+    const initPoolCall = await buildInitPoolCall({
+        client,
+        rpcUrl,
+        userAccount: userAccount.address,
+        poolAddress,
+    });
+
+    // Send the init pool tx
+    const initPoolTxHash = await client.sendTransaction({
+        to: initPoolCall.to,
+        data: initPoolCall.callData,
+        account: userAccount,
+    });
+    const initPoolTxReceipt = await client.waitForTransactionReceipt({
+        hash: initPoolTxHash,
+    });
+    console.log('initPoolTxReceipt', initPoolTxReceipt);
+}
+
+async function createPool({ client, userAccount }): Promise<Address> {
+    // Build the create pool call
     const createPool = new CreatePool();
     const call = createPool.buildCall(createPoolInput);
-    return call;
-};
+    console.log('create pool call:', call);
 
-async function createPool({ client, call, userAccount }) {
+    // Send the create pool tx
     const hash = await client.sendTransaction({
         to: call.to,
         data: call.callData,
         account: userAccount,
     });
-    const transactionReceipt = await client.waitForTransactionReceipt({
-        hash,
-    });
+
+    const transactionReceipt = await client.waitForTransactionReceipt({ hash });
 
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
@@ -231,7 +224,35 @@ async function createPool({ client, call, userAccount }) {
     const {
         args: { pool: poolAddress },
     } = poolCreatedEvent;
+    console.log('Created Pool Address: ', poolAddress);
+
     return poolAddress;
 }
 
-export default runAgainstFork;
+async function buildInitPoolCall({ client, rpcUrl, userAccount, poolAddress }) {
+    // Fetch the necessary pool state
+    const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
+    const poolState = await initPoolDataProvider.getInitPoolData(
+        poolAddress,
+        poolType,
+        3,
+    );
+
+    // Sign permit2 approval
+    const permit2 = await Permit2Helper.signInitPoolApproval({
+        ...initPoolInput,
+        client,
+        owner: userAccount,
+    });
+
+    // Build the init pool call
+    const initPool = new InitPool();
+    const call = initPool.buildCallWithPermit2(
+        initPoolInput,
+        poolState,
+        permit2,
+    );
+    console.log('init pool call:', call);
+
+    return call;
+}
