@@ -358,7 +358,7 @@ const getNonce = async (
         functionName: 'allowance',
         args: [owner, token, spender],
     });
-    const nonce = result[1];
+    const nonce = result[2];
 
     return nonce;
 };
