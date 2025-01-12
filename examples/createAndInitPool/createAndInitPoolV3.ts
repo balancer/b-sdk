@@ -20,6 +20,7 @@ import {
     createWalletClient,
     getContract,
     Address,
+    parseEther,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
@@ -43,70 +44,63 @@ import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
 import { makeForkTx } from 'examples/lib/makeForkTx';
 import { getSlot } from 'examples/lib/getSlot';
 import { approveSpenderOnTokens } from 'test/lib/utils/helper';
+import { TOKENS } from 'test/lib/utils/addresses';
 
 // Create pool config
 const chainId = ChainId.SEPOLIA;
 const poolType = PoolType.Stable;
 const protocolVersion = 3;
-const swapFeePercentageDecimals = 16;
-const AAVE_FAUCET_USDT = {
-    address: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0' as `0x${string}`,
-    decimals: 6,
-};
-const STATA_ETH_DAI = {
-    address: '0xDE46e43F46ff74A23a65EBb0580cbe3dFE684a17' as `0x${string}`,
-    rateProvider: '0x22db61f3a8d81d3d427a157fdae8c7eb5b5fd373' as `0x${string}`,
-    decimals: 18,
-};
+const DAI = TOKENS[chainId].DAI;
+const USDC = TOKENS[chainId].USDC;
 const createPoolInput: CreatePoolV3StableInput = {
-    name: 'USDT stataDAI partially boosted',
-    symbol: 'USDT-stataDAI',
-    poolType,
+    poolType: PoolType.Stable,
+    name: 'DAI/USDC Stable Pool',
+    symbol: 'DAI-USDC',
     tokens: [
         {
-            address: AAVE_FAUCET_USDT.address,
+            address: DAI.address,
             rateProvider: zeroAddress,
             tokenType: TokenType.STANDARD,
             paysYieldFees: false,
         },
         {
-            address: STATA_ETH_DAI.address,
-            rateProvider: STATA_ETH_DAI.rateProvider,
-            tokenType: TokenType.TOKEN_WITH_RATE,
-            paysYieldFees: true,
+            address: USDC.address,
+            rateProvider: zeroAddress,
+            tokenType: TokenType.STANDARD,
+            paysYieldFees: false,
         },
     ],
-    amplificationParameter: BigInt(33),
-    swapFeePercentage: parseUnits('0.001', swapFeePercentageDecimals),
+    amplificationParameter: 420n, // min 1n to max 5000n
+    swapFeePercentage: parseEther('0.001'), // stable pools allow min 1e12 to max 10e16
+    poolHooksContract: zeroAddress,
     pauseManager: zeroAddress,
     swapFeeManager: zeroAddress,
-    poolHooksContract: zeroAddress,
+    chainId,
+    protocolVersion: 3,
     enableDonation: false,
     disableUnbalancedLiquidity: false,
-    protocolVersion,
-    chainId,
 };
 
 // Init pool config
 const amountsIn = [
     {
-        address: AAVE_FAUCET_USDT.address,
-        rawAmount: parseUnits('1', AAVE_FAUCET_USDT.decimals),
-        decimals: AAVE_FAUCET_USDT.decimals,
+        address: DAI.address,
+        rawAmount: parseUnits('1', DAI.decimals),
+        decimals: DAI.decimals,
     },
     {
-        address: STATA_ETH_DAI.address,
-        rawAmount: parseUnits('1', STATA_ETH_DAI.decimals),
-        decimals: STATA_ETH_DAI.decimals,
+        address: USDC.address,
+        rawAmount: parseUnits('1', USDC.decimals),
+        decimals: USDC.decimals,
     },
 ];
 const initPoolInput: InitPoolInputV3 = {
-    amountsIn: amountsIn,
     chainId,
+    amountsIn: amountsIn,
     minBptAmountOut: 0n,
 };
 
-export async function runAgainstFork() {
+export default async function runAgainstFork() {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 
     const client = createTestClient({
@@ -155,7 +149,7 @@ export async function runAgainstFork() {
     );
 }
 
-export default async function runAgainstNetwork() {
+export async function runAgainstNetwork() {
     const rpcUrl = process.env.SEPOLIA_RPC_URL;
     if (!rpcUrl) throw new Error('rpcUrl is undefined');
 
