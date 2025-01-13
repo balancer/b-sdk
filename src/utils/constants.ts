@@ -17,23 +17,8 @@ import {
     sepolia,
     mode,
     fraxtal,
-    sonic as sonicOriginal,
+    sonic,
 } from 'viem/chains';
-
-const sonicContractsWithMulticall3 = {
-    // TODO: there are other missing contract properties in sonic definition in the current viem/wagmi version
-    // They could cause other issues ()
-    ...sonicOriginal.contracts,
-    multicall3: {
-        address: '0xcA11bde05977b3631167028862bE2a173976CA11',
-        blockCreated: 60,
-    },
-};
-
-export const sonic: Chain = {
-    ...sonicOriginal,
-    contracts: sonicContractsWithMulticall3,
-} as Chain;
 
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
