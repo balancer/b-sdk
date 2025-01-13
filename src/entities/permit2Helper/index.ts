@@ -1,5 +1,5 @@
 import { Address, Hex, SwapKind } from '@/types';
-import { Client, PublicActions, WalletActions } from 'viem';
+import { Client, PublicActions, WalletActions, Account } from 'viem';
 import {
     AllowanceTransfer,
     Permit2Batch,
@@ -45,7 +45,7 @@ export class Permit2Helper {
     static async signInitPoolApproval(
         input: InitPoolInputV3 & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
@@ -290,7 +290,7 @@ export class Permit2Helper {
 
 const signPermit2 = async (
     client: Client & WalletActions,
-    owner: Address,
+    owner: Address | Account,
     spender: Address,
     details: PermitDetails[],
     sigDeadline = MaxSigDeadline,
@@ -323,15 +323,16 @@ const signPermit2 = async (
 const getDetails = async (
     client: Client & PublicActions,
     token: Address,
-    owner: Address,
+    owner: Address | Account,
     spender: Address,
     amount = MaxAllowanceTransferAmount,
     expiration = Number(MaxAllowanceExpiration),
     nonce?: number,
 ) => {
+    const _owner = typeof owner === 'string' ? owner : owner.address;
     let _nonce: number;
     if (nonce === undefined) {
-        _nonce = await getNonce(client, token, owner, spender);
+        _nonce = await getNonce(client, token, _owner, spender);
     } else {
         _nonce = nonce;
     }

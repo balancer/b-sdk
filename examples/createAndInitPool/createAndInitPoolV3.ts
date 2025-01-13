@@ -21,6 +21,7 @@ import {
     getContract,
     Address,
     parseEther,
+    Account,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
@@ -180,7 +181,7 @@ export async function runAgainstNetwork() {
     const initPoolCall = await buildInitPoolCall({
         client,
         rpcUrl,
-        account: account.address,
+        account: account,
         poolAddress,
     });
 
@@ -235,7 +236,7 @@ async function buildInitPoolCall({
 }: {
     client: PublicWalletClient;
     rpcUrl: string;
-    account: Address;
+    account: Address | Account;
     poolAddress: Address;
 }) {
     // Fetch the necessary pool state
