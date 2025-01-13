@@ -158,9 +158,7 @@ export async function runAgainstNetwork() {
         chain: CHAINS[chainId],
         transport: http(rpcUrl),
         account: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
-    })
-        .extend(walletActions)
-        .extend(publicActions);
+    }).extend(publicActions);
 
     const { account } = client;
 
