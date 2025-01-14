@@ -76,7 +76,7 @@ export class Permit2Helper {
     static async signAddLiquidityApproval(
         input: AddLiquidityBaseBuildCallInput & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
@@ -109,7 +109,7 @@ export class Permit2Helper {
         amountsIn: TokenAmount[];
         chainId: ChainId;
         client: PublicWalletClient;
-        owner: Address;
+        owner: Address | Account;
         nonces?: number[];
         expirations?: number[];
     }): Promise<Permit2> {
@@ -140,7 +140,7 @@ export class Permit2Helper {
     static async signAddLiquidityBoostedApproval(
         input: AddLiquidityBaseBuildCallInput & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
@@ -173,7 +173,7 @@ export class Permit2Helper {
     static async signAddLiquidityBufferApproval(
         input: AddLiquidityBufferBuildCallInput & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
@@ -206,7 +206,7 @@ export class Permit2Helper {
     static async signInitBufferApproval(
         input: InitBufferBuildCallInput & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
@@ -239,7 +239,7 @@ export class Permit2Helper {
     static async signSwapApproval(
         input: SwapBuildCallInputBase & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonce?: number;
             expiration?: number;
         },
