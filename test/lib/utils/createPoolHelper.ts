@@ -3,25 +3,29 @@ import {
     Address,
     PoolType,
     weightedPoolFactoryV4Abi_V2,
-    composableStableFactoryV5Abi_V2,
+    composableStableFactoryV6Abi_V2,
     weightedPoolFactoryAbi_V3,
+    stablePoolFactoryAbi_V3,
 } from 'src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
+import { CreatePool } from 'src';
 
 export async function doCreatePool(
     txInput: CreatePoolTxInput,
 ): Promise<Address> {
-    const { client, createPool, createPoolInput, testAddress } = txInput;
+    const { client, createPoolInput, testAddress } = txInput;
 
+    const createPool = new CreatePool();
     const { callData, to } = createPool.buildCall(createPoolInput);
 
     const abis = {
         2: {
             [PoolType.Weighted]: weightedPoolFactoryV4Abi_V2,
-            [PoolType.ComposableStable]: composableStableFactoryV5Abi_V2,
+            [PoolType.ComposableStable]: composableStableFactoryV6Abi_V2,
         },
         3: {
             [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
+            [PoolType.Stable]: stablePoolFactoryAbi_V3,
         },
     };
 

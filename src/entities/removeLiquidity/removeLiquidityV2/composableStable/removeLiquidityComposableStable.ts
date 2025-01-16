@@ -8,6 +8,7 @@ import {
     RemoveLiquidityBase,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
+    RemoveLiquidityKind,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
 } from '../../types';
@@ -28,6 +29,10 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         input: RemoveLiquidityInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
+        if (input.kind === RemoveLiquidityKind.Recovery) {
+            return this.queryRemoveLiquidityRecovery(input, poolState);
+        }
+
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const bptIndex = poolState.tokens.findIndex(
             (t) => t.address === poolState.address,
@@ -67,6 +72,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         );
 
         return {
+            to: VAULT[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -79,7 +85,9 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
         };
     }
 
-    public async queryRemoveLiquidityRecovery(
+    // RemoveLiquidityRecovery doesn't have a proper query method on v2, so
+    // this method replicates SC behavior off-chain
+    private async queryRemoveLiquidityRecovery(
         input: RemoveLiquidityRecoveryInput,
         poolState: PoolState,
     ): Promise<RemoveLiquidityQueryOutput> {
@@ -114,6 +122,7 @@ export class RemoveLiquidityComposableStable implements RemoveLiquidityBase {
             TokenAmount.fromRawAmount(bptToken, 0n),
         );
         return {
+            to: VAULT[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,

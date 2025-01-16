@@ -23,11 +23,13 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityProportionalInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
         const poolStateWithBalances = await getPoolStateWithBalancesCowAmm(
             poolState,
             input.chainId,
             input.rpcUrl,
+            block,
         );
 
         const { tokenAmounts } = calculateProportionalAmountsCowAmm(
@@ -47,6 +49,7 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         );
 
         const output: RemoveLiquidityBaseQueryOutput = {
+            to: poolState.id,
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -58,12 +61,6 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         };
 
         return output;
-    }
-
-    public queryRemoveLiquidityRecovery(): never {
-        throw new Error(
-            'Remove Liquidity Recovery is not supported for Cow AMM pools',
-        );
     }
 
     public buildCall(

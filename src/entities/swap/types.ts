@@ -9,6 +9,7 @@ export type SwapInput = {
     chainId: number;
     paths: Path[];
     swapKind: SwapKind;
+    userData?: Hex;
 };
 
 export type SwapBuildCallInputBase = {
@@ -39,6 +40,7 @@ export type SwapBuildOutputExactOut = SwapBuildOutputBase & {
 export type QueryOutputBase = {
     swapKind: SwapKind;
     pathAmounts?: bigint[];
+    to: Address;
 };
 
 export type ExactInQueryOutput = QueryOutputBase & {

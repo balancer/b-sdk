@@ -1,10 +1,4 @@
-import {
-    Address,
-    Client,
-    PublicActions,
-    TestActions,
-    WalletActions,
-} from 'viem';
+import { Address, TestActions } from 'viem';
 import {
     ChainId,
     Slippage,
@@ -16,11 +10,12 @@ import {
     SwapBuildCallInput,
     SwapKind,
     Permit2Helper,
+    PublicWalletClient,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
 // Helper function to check if two BigInts are within a given percentage
-function areBigIntsWithinPercent(
+export function areBigIntsWithinPercent(
     value1: bigint,
     value2: bigint,
     percent: number,
@@ -48,7 +43,7 @@ export async function assertSwapExactIn({
     },
 }: {
     contractToCall: Address;
-    client: Client & PublicActions & TestActions & WalletActions;
+    client: PublicWalletClient & TestActions;
     rpcUrl: string;
     chainId: ChainId;
     swap: Swap;
@@ -174,7 +169,7 @@ export async function assertSwapExactOut({
     },
 }: {
     contractToCall: Address;
-    client: Client & PublicActions & TestActions & WalletActions;
+    client: PublicWalletClient & TestActions;
     rpcUrl: string;
     chainId: ChainId;
     swap: Swap;

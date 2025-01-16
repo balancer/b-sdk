@@ -27,16 +27,16 @@ import {
     InputAmount,
     PoolType,
     RemoveLiquiditySingleTokenExactOutInput,
+    removeLiquidityProportionalOnlyError,
 } from '../../../src';
-import { forkSetup } from '../../lib/utils/helper';
 import {
     assertRemoveLiquidityProportional,
     doRemoveLiquidity,
-} from '../../lib/utils/removeLiquidityHelper';
-import { RemoveLiquidityTxInput } from '../../lib/utils/types';
+    forkSetup,
+    RemoveLiquidityTxInput,
+    TOKENS,
+} from '../../lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
-import { InputValidatorGyro } from '../../../src/entities/inputValidator/gyro/inputValidatorGyro';
-import { TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.POLYGON;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.POLYGON);
@@ -47,13 +47,13 @@ const USDC = TOKENS[chainId].USDC;
 
 describe('Gyro3 remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
-    let poolInput: PoolState;
+    let poolState: PoolState;
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
-        poolInput = await api.getPool(poolId);
+        poolState = await api.getPool(poolId);
 
         const client = createTestClient({
             mode: 'anvil',
@@ -67,7 +67,7 @@ describe('Gyro3 remove liquidity test', () => {
             client,
             removeLiquidity: new RemoveLiquidity(),
             slippage: Slippage.fromPercentage('1'), // 1%
-            poolState: poolInput,
+            poolState: poolState,
             testAddress: '0xe84f75fc9caa49876d0ba18d309da4231d44e94d', // MATIC Holder Wallet, must hold amount of matic to approve tokens
             removeLiquidityInput: {} as RemoveLiquidityInput,
         };
@@ -89,7 +89,7 @@ describe('Gyro3 remove liquidity test', () => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('0.01'),
                 decimals: 18,
-                address: poolInput.address,
+                address: poolState.address,
             };
             input = {
                 bptIn,
@@ -109,6 +109,7 @@ describe('Gyro3 remove liquidity test', () => {
                 input,
                 removeLiquidityOutput,
                 txInput.slippage,
+                chainId,
             );
             //Removed test with native, because there are no GyroE V1 pool with wrapped native asset in any network
         });
@@ -118,7 +119,7 @@ describe('Gyro3 remove liquidity test', () => {
         let input: Omit<RemoveLiquidityUnbalancedInput, 'amountsOut'>;
         let amountsOut: InputAmount[];
         beforeAll(() => {
-            amountsOut = poolInput.tokens.map((t) => ({
+            amountsOut = poolState.tokens.map((t) => ({
                 rawAmount: parseUnits('0.001', t.decimals),
                 decimals: t.decimals,
                 address: t.address,
@@ -137,7 +138,10 @@ describe('Gyro3 remove liquidity test', () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
             ).rejects.toThrowError(
-                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+                removeLiquidityProportionalOnlyError(
+                    removeLiquidityInput.kind,
+                    poolState.type,
+                ),
             );
         });
     });
@@ -165,7 +169,10 @@ describe('Gyro3 remove liquidity test', () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
             ).rejects.toThrowError(
-                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+                removeLiquidityProportionalOnlyError(
+                    removeLiquidityInput.kind,
+                    poolState.type,
+                ),
             );
         });
     });
@@ -176,7 +183,7 @@ describe('Gyro3 remove liquidity test', () => {
             const bptIn: InputAmount = {
                 rawAmount: parseEther('1'),
                 decimals: 18,
-                address: poolInput.address,
+                address: poolState.address,
             };
             const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
             input = {
@@ -191,7 +198,10 @@ describe('Gyro3 remove liquidity test', () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput: input }),
             ).rejects.toThrowError(
-                InputValidatorGyro.removeLiquidityKindNotSupportedByGyro,
+                removeLiquidityProportionalOnlyError(
+                    input.kind,
+                    poolState.type,
+                ),
             );
         });
     });

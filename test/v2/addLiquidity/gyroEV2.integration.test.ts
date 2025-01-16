@@ -28,6 +28,7 @@ import {
     AddLiquidityUnbalancedInput,
     AddLiquiditySingleTokenInput,
     PoolType,
+    addLiquidityProportionalOnlyError,
 } from '../../../src';
 import { forkSetup } from '../../lib/utils/helper';
 import {
@@ -36,7 +37,6 @@ import {
 } from '../../lib/utils/addLiquidityHelper';
 import { AddLiquidityTxInput } from '../../lib/utils/types';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
-import { InputValidatorGyro } from '../../../src/entities/inputValidator/gyro/inputValidatorGyro';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
@@ -92,11 +92,57 @@ describe('GyroE V2 add liquidity test', () => {
 
     describe('proportional', () => {
         let addLiquidityInput: AddLiquidityProportionalInput;
-        beforeAll(() => {
+        describe('with bpt', () => {
+            beforeAll(() => {
+                const referenceAmount: InputAmount = {
+                    rawAmount: parseEther('2'),
+                    decimals: 18,
+                    address: poolState.address,
+                };
+                addLiquidityInput = {
+                    referenceAmount,
+                    chainId,
+                    rpcUrl,
+                    kind: AddLiquidityKind.Proportional,
+                };
+            });
+            test('with tokens', async () => {
+                const addLiquidityOutput = await doAddLiquidity({
+                    ...txInput,
+                    addLiquidityInput,
+                });
+
+                assertAddLiquidityProportional(
+                    txInput.poolState,
+                    addLiquidityInput,
+                    addLiquidityOutput,
+                    txInput.slippage,
+                    chainId,
+                );
+            });
+            test('with native', async () => {
+                const wethIsEth = true;
+                const addLiquidityOutput = await doAddLiquidity({
+                    ...txInput,
+                    addLiquidityInput,
+                    wethIsEth,
+                });
+                assertAddLiquidityProportional(
+                    txInput.poolState,
+                    addLiquidityInput,
+                    addLiquidityOutput,
+                    txInput.slippage,
+                    chainId,
+                    2,
+                    wethIsEth,
+                );
+            });
+        });
+        test('with reference amount (non-bpt)', async () => {
             const referenceAmount: InputAmount = {
-                rawAmount: parseEther('2'),
-                decimals: 18,
-                address: poolState.address,
+                rawAmount: parseUnits('1', poolState.tokens[0].decimals),
+                decimals: poolState.tokens[0].decimals,
+                address: poolState.tokens[0].address,
             };
             addLiquidityInput = {
                 referenceAmount,
@@ -104,8 +150,6 @@ describe('GyroE V2 add liquidity test', () => {
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,
             };
-        });
-        test('with tokens', async () => {
             const addLiquidityOutput = await doAddLiquidity({
                 ...txInput,
                 addLiquidityInput,
@@ -116,22 +160,7 @@ describe('GyroE V2 add liquidity test', () => {
                 addLiquidityInput,
                 addLiquidityOutput,
                 txInput.slippage,
-            );
-        });
-        test('with native', async () => {
-            const wethIsEth = true;
-            const addLiquidityOutput = await doAddLiquidity({
-                ...txInput,
-                addLiquidityInput,
-                wethIsEth,
-            });
-            assertAddLiquidityProportional(
-                txInput.poolState,
-                addLiquidityInput,
-                addLiquidityOutput,
-                txInput.slippage,
-                2,
-                wethIsEth,
+                chainId,
             );
         });
     });
@@ -162,7 +191,10 @@ describe('GyroE V2 add liquidity test', () => {
                     addLiquidityInput,
                 }),
             ).rejects.toThrowError(
-                InputValidatorGyro.addLiquidityKindNotSupportedByGyro,
+                addLiquidityProportionalOnlyError(
+                    addLiquidityInput.kind,
+                    poolState.type,
+                ),
             );
         });
     });
@@ -192,7 +224,10 @@ describe('GyroE V2 add liquidity test', () => {
                     addLiquidityInput,
                 }),
             ).rejects.toThrowError(
-                InputValidatorGyro.addLiquidityKindNotSupportedByGyro,
+                addLiquidityProportionalOnlyError(
+                    addLiquidityInput.kind,
+                    poolState.type,
+                ),
             );
         });
     });

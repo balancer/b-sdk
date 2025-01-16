@@ -1,22 +1,22 @@
 import {
     balancerRouterAbi,
     permit2Abi,
-    vaultExtensionV3Abi,
+    vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
-import { BALANCER_ROUTER, CHAINS } from '@/utils';
-import { createPublicClient, http } from 'viem';
-import { RemoveLiquiditySingleTokenExactInInput } from '../types';
+import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
+import { createPublicClient, Hex, http } from 'viem';
 import { Address } from '@/types';
 
 export const doRemoveLiquiditySingleTokenExactInQuery = async (
-    {
-        chainId,
-        rpcUrl,
-        bptIn,
-        tokenOut,
-    }: RemoveLiquiditySingleTokenExactInInput,
+    rpcUrl: string,
+    chainId: ChainId,
+    sender: Address,
+    userData: Hex,
     poolAddress: Address,
+    tokenOut: Address,
+    exactBptAmountIn: bigint,
+    block?: bigint,
 ): Promise<bigint> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -27,11 +27,12 @@ export const doRemoveLiquiditySingleTokenExactInQuery = async (
         abi: [
             ...balancerRouterAbi,
             ...vaultV3Abi,
-            ...vaultExtensionV3Abi,
+            ...vaultExtensionAbi_V3,
             ...permit2Abi,
         ],
         functionName: 'queryRemoveLiquiditySingleTokenExactIn',
-        args: [poolAddress, bptIn.rawAmount, tokenOut, '0x'],
+        args: [poolAddress, exactBptAmountIn, tokenOut, sender, userData],
+        blockNumber: block,
     });
     return amountOut;
 };

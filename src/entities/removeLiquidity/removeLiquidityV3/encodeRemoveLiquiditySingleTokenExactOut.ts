@@ -5,7 +5,7 @@ import { balancerRouterAbi } from '@/abi';
 import { Hex } from '@/types';
 
 export const encodeRemoveLiquiditySingleTokenExactOut = (
-    input: RemoveLiquidityBaseBuildCallInput,
+    input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
     maxBptAmountIn: bigint,
 ): Hex => {
     // just a sanity check as this is already checked in InputValidator
@@ -21,7 +21,7 @@ export const encodeRemoveLiquiditySingleTokenExactOut = (
             input.amountsOut[input.tokenOutIndex].token.address,
             input.amountsOut[input.tokenOutIndex].amount,
             !!input.wethIsEth,
-            '0x',
+            input.userData,
         ],
     });
 };

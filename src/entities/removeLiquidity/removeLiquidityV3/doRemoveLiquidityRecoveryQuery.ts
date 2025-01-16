@@ -1,7 +1,7 @@
 import {
     balancerRouterAbi,
     permit2Abi,
-    vaultExtensionV3Abi,
+    vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
 import { BALANCER_ROUTER, CHAINS } from '@/utils';
@@ -10,7 +10,7 @@ import { RemoveLiquidityRecoveryInput } from '../types';
 import { Address } from '@/types';
 
 export const doRemoveLiquidityRecoveryQuery = async (
-    { chainId, rpcUrl, bptIn }: RemoveLiquidityRecoveryInput,
+    { chainId, rpcUrl, bptIn, block }: RemoveLiquidityRecoveryInput,
     poolAddress: Address,
 ): Promise<readonly bigint[]> => {
     // remove liquidity recovery requires bptAmountsIn and returns amountsOut
@@ -24,11 +24,12 @@ export const doRemoveLiquidityRecoveryQuery = async (
         abi: [
             ...balancerRouterAbi,
             ...vaultV3Abi,
-            ...vaultExtensionV3Abi,
+            ...vaultExtensionAbi_V3,
             ...permit2Abi,
         ],
         functionName: 'queryRemoveLiquidityRecovery',
         args: [poolAddress, bptIn.rawAmount],
+        blockNumber: block,
     });
     return amountsOut;
 };

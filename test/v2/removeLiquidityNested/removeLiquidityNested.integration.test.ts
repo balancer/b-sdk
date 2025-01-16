@@ -3,15 +3,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
-    Client,
     createTestClient,
     http,
     parseUnits,
     publicActions,
-    PublicActions,
     TestActions,
     TransactionReceipt,
-    WalletActions,
     walletActions,
 } from 'viem';
 
@@ -24,12 +21,14 @@ import {
     NestedPoolState,
     PoolType,
     Relayer,
-    RemoveLiquidityNested,
-    RemoveLiquidityNestedProportionalInput,
-    RemoveLiquidityNestedSingleTokenInput,
+    RemoveLiquidityNestedProportionalInputV2,
+    RemoveLiquidityNestedSingleTokenInputV2,
     replaceWrapped,
     Slippage,
     TokenAmount,
+    PublicWalletClient,
+    RemoveLiquidityNestedCallInputV2,
+    RemoveLiquidityNested,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -41,7 +40,7 @@ type TxInput = {
     chainId: ChainId;
     rpcUrl: string;
     testAddress: Address;
-    client: Client & PublicActions & TestActions & WalletActions;
+    client: PublicWalletClient & TestActions;
     tokenOut?: Address;
     wethIsEth?: boolean;
 };
@@ -49,7 +48,7 @@ type TxInput = {
 describe('remove liquidity nested test', () => {
     let chainId: ChainId;
     let rpcUrl: string;
-    let client: Client & PublicActions & TestActions & WalletActions;
+    let client: PublicWalletClient & TestActions;
     let poolId: Hex;
     let testAddress: Address;
 
@@ -246,8 +245,8 @@ export const doTransaction = async ({
     // setup remove liquidity helper
     const removeLiquidityNested = new RemoveLiquidityNested();
     const removeLiquidityInput:
-        | RemoveLiquidityNestedProportionalInput
-        | RemoveLiquidityNestedSingleTokenInput = {
+        | RemoveLiquidityNestedProportionalInputV2
+        | RemoveLiquidityNestedSingleTokenInputV2 = {
         bptAmountIn: amountIn,
         chainId,
         rpcUrl,
@@ -267,13 +266,16 @@ export const doTransaction = async ({
         client,
     );
 
-    const { callData, to, minAmountsOut } = removeLiquidityNested.buildCall({
+    const buildCallInput = {
         ...queryOutput,
         slippage,
         accountAddress: testAddress,
         relayerApprovalSignature: signature,
         wethIsEth,
-    });
+    } as RemoveLiquidityNestedCallInputV2;
+
+    const { callData, to, minAmountsOut } =
+        removeLiquidityNested.buildCall(buildCallInput);
 
     let tokensOut = minAmountsOut.map((a) => a.token);
     if (wethIsEth) {
@@ -318,6 +320,7 @@ class MockApi {
         )
             throw Error();
         return {
+            protocolVersion: 2,
             pools: [
                 {
                     id: '0x08775ccb6674d6bdceb0797c364c2653ed84f3840002000000000000000004f0',

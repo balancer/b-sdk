@@ -1,9 +1,9 @@
-import { encodeFunctionData } from 'viem';
+import { encodeFunctionData, Hex } from 'viem';
 import { RemoveLiquidityBaseBuildCallInput } from '../types';
 import { balancerRouterAbi } from '@/abi';
 
 export const encodeRemoveLiquiditySingleTokenExactIn = (
-    input: RemoveLiquidityBaseBuildCallInput,
+    input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
     minAmountsOut: bigint[],
 ) => {
     // just a sanity check as this is already checked in InputValidator
@@ -21,7 +21,7 @@ export const encodeRemoveLiquiditySingleTokenExactIn = (
             input.amountsOut[input.tokenOutIndex].token.address,
             minAmountsOut[input.tokenOutIndex],
             !!input.wethIsEth,
-            '0x',
+            input.userData,
         ],
     });
 };

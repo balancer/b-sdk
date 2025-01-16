@@ -13,7 +13,18 @@ export const weightedPoolFactoryAbi_V3 = [
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
+    { inputs: [], name: 'Create2EmptyBytecode', type: 'error' },
+    { inputs: [], name: 'Create2FailedDeployment', type: 'error' },
+    {
+        inputs: [
+            { internalType: 'uint256', name: 'balance', type: 'uint256' },
+            { internalType: 'uint256', name: 'needed', type: 'uint256' },
+        ],
+        name: 'Create2InsufficientBalance',
+        type: 'error',
+    },
     { inputs: [], name: 'Disabled', type: 'error' },
+    { inputs: [], name: 'IndexOutOfBounds', type: 'error' },
     { inputs: [], name: 'PoolPauseWindowDurationOverflow', type: 'error' },
     { inputs: [], name: 'SenderNotAllowed', type: 'error' },
     { inputs: [], name: 'StandardPoolWithCreator', type: 'error' },
@@ -178,7 +189,10 @@ export const weightedPoolFactoryAbi_V3 = [
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'bytes32', name: 'salt', type: 'bytes32' }],
+        inputs: [
+            { internalType: 'bytes', name: 'constructorArgs', type: 'bytes' },
+            { internalType: 'bytes32', name: 'salt', type: 'bytes32' },
+        ],
         name: 'getDeploymentAddress',
         outputs: [{ internalType: 'address', name: '', type: 'address' }],
         stateMutability: 'view',
@@ -207,8 +221,34 @@ export const weightedPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'getPoolCount',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
         name: 'getPoolVersion',
         outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getPools',
+        outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { internalType: 'uint256', name: 'start', type: 'uint256' },
+            { internalType: 'uint256', name: 'count', type: 'uint256' },
+        ],
+        name: 'getPoolsInRange',
+        outputs: [
+            { internalType: 'address[]', name: 'pools', type: 'address[]' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },

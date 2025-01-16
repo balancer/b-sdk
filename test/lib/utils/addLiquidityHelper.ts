@@ -18,13 +18,16 @@ import {
     VAULT,
     Permit2Helper,
     AddLiquidityKind,
+    ChainId,
+    isSameAddress,
+    PublicWalletClient,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
-import { Client, PublicActions, WalletActions } from 'viem';
+import { Hex, TestActions } from 'viem';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -50,7 +53,7 @@ async function sdkAddLiquidity({
     testAddress: Address;
     wethIsEth?: boolean;
     fromInternalBalance?: boolean;
-    client: Client & PublicActions & WalletActions;
+    client: PublicWalletClient & TestActions;
     usePermit2Signatures?: boolean;
 }): Promise<{
     addLiquidityBuildCallOutput: AddLiquidityBuildCallOutput;
@@ -122,7 +125,7 @@ function getCheck(output: AddLiquidityQueryOutput) {
     const kind = output.addLiquidityKind;
     switch (kind) {
         case AddLiquidityKind.Proportional:
-            return { ...check, bptOut, amountsIn };
+            return { ...check };
         case AddLiquidityKind.SingleToken:
             return { ...check, bptOut };
         case AddLiquidityKind.Unbalanced:
@@ -188,6 +191,7 @@ export function assertAddLiquidityUnbalanced(
     addLiquidityInput: AddLiquidityUnbalancedInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -208,12 +212,14 @@ export function assertAddLiquidityUnbalanced(
         return TokenAmount.fromRawAmount(token, input.rawAmount);
     });
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'bptOut' | 'bptIndex'
-    > = {
+    let expectedQueryOutput:
+        | Omit<AddLiquidityQueryOutput, 'bptOut' | 'bptIndex'>
+        | (Omit<AddLiquidityQueryOutput, 'bptOut' | 'bptIndex'> & {
+              userData: Hex;
+          }) = {
         // | Omit<AddLiquidityV2BaseQueryOutput, 'amountsIn' | 'bptIndex'> = {
         // Query should use same amountsIn as input
+        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
         amountsIn: expectedAmountsIn,
         tokenInIndex: undefined,
         // Should match inputs
@@ -223,6 +229,9 @@ export function assertAddLiquidityUnbalanced(
         protocolVersion: poolState.protocolVersion,
         chainId: addLiquidityInput.chainId,
     };
+
+    if (protocolVersion === 3)
+        expectedQueryOutput = { ...expectedQueryOutput, userData: '0x' };
 
     const queryCheck = getCheck(addLiquidityQueryOutput);
 
@@ -256,6 +265,7 @@ export function assertAddLiquiditySingleToken(
     addLiquidityInput: AddLiquiditySingleTokenInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
@@ -275,11 +285,13 @@ export function assertAddLiquiditySingleToken(
         (t) => t.address !== poolState.address,
     );
 
-    const expectedQueryOutput: Omit<
-        AddLiquidityQueryOutput,
-        'amountsIn' | 'bptIndex'
-    > = {
+    let expectedQueryOutput:
+        | Omit<AddLiquidityQueryOutput, 'amountsIn' | 'bptIndex'>
+        | (Omit<AddLiquidityQueryOutput, 'bptOut' | 'bptIndex'> & {
+              userData: Hex;
+          }) = {
         // Query should use same bpt out as user sets
+        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
         bptOut: TokenAmount.fromRawAmount(
             bptToken,
             addLiquidityInput.bptOut.rawAmount,
@@ -295,6 +307,9 @@ export function assertAddLiquiditySingleToken(
         chainId: addLiquidityInput.chainId,
     };
 
+    if (protocolVersion === 3)
+        expectedQueryOutput = { ...expectedQueryOutput, userData: '0x' };
+
     const queryCheck = getCheck(addLiquidityQueryOutput);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
@@ -302,7 +317,7 @@ export function assertAddLiquiditySingleToken(
     // Expect only tokenIn to have amount > 0
     // (Note addLiquidityQueryOutput also has value for bpt if pre-minted)
     addLiquidityQueryOutput.amountsIn.forEach((a) => {
-        if (a.token.address === addLiquidityInput.tokenIn) {
+        if (isSameAddress(a.token.address, addLiquidityInput.tokenIn)) {
             expect(a.amount > 0n).to.be.true;
         } else {
             expect(a.amount).toEqual(0n);
@@ -334,36 +349,36 @@ export function assertAddLiquidityProportional(
     addLiquidityInput: AddLiquidityProportionalInput,
     addLiquidityOutput: AddLiquidityOutput,
     slippage: Slippage,
+    chainId: ChainId,
     protocolVersion: 1 | 2 | 3 = 2,
     wethIsEth?: boolean,
 ) {
     const { txOutput, addLiquidityQueryOutput, addLiquidityBuildCallOutput } =
         addLiquidityOutput;
 
-    // replace referenceAmount into amountsIn or bptOut for comparison
-    const bptOut = addLiquidityQueryOutput.bptOut.token.isSameAddress(
-        addLiquidityInput.referenceAmount.address,
-    )
-        ? TokenAmount.fromRawAmount(
-              addLiquidityQueryOutput.bptOut.token,
-              addLiquidityInput.referenceAmount.rawAmount,
-          )
-        : addLiquidityQueryOutput.bptOut;
-    const amountsIn = addLiquidityOutput.addLiquidityQueryOutput.amountsIn.map(
-        (a) =>
-            a.token.isSameAddress(addLiquidityInput.referenceAmount.address) &&
-            !a.token.isSameAddress(poolState.address) // skip CSP BPT as token
-                ? TokenAmount.fromRawAmount(
-                      a.token,
-                      addLiquidityInput.referenceAmount.rawAmount,
-                  )
-                : a,
-    );
+    let to: Address;
 
-    const expectedQueryOutput: Omit<AddLiquidityQueryOutput, 'bptIndex'> = {
-        // Query should use same referenceAmount as user sets
-        bptOut,
-        amountsIn,
+    switch (protocolVersion) {
+        case 1:
+            to = poolState.address;
+            break;
+        case 2:
+            to = VAULT[chainId];
+            break;
+        case 3:
+            to = BALANCER_ROUTER[chainId];
+            break;
+        default:
+            throw new Error(`Unsupported protocolVersion: ${protocolVersion}`);
+    }
+
+    let expectedQueryOutput: Omit<
+        AddLiquidityQueryOutput,
+        'bptOut' | 'bptIndex' | 'amountsIn'
+    > & {
+        userData?: Hex;
+    } = {
+        to,
         // Only expect tokenInIndex for AddLiquiditySingleToken
         tokenInIndex: undefined,
         // Should match inputs
@@ -374,9 +389,35 @@ export function assertAddLiquidityProportional(
         chainId: addLiquidityInput.chainId,
     };
 
+    if (protocolVersion === 3)
+        expectedQueryOutput = { ...expectedQueryOutput, userData: '0x' };
+
     const queryCheck = getCheck(addLiquidityQueryOutput);
 
     expect(queryCheck).to.deep.eq(expectedQueryOutput);
+
+    if (
+        addLiquidityQueryOutput.bptOut.token.isSameAddress(
+            addLiquidityInput.referenceAmount.address,
+        )
+    ) {
+        // referenceAmount as bptOut - queryOutput should be an exact match with user provided input
+        expect(addLiquidityQueryOutput.bptOut.amount).toEqual(
+            addLiquidityInput.referenceAmount.rawAmount,
+        );
+    } else {
+        // referenceAmount as amountsIn - queryOutput can be 1 wei diff from user provided amount
+        addLiquidityQueryOutput.amountsIn.forEach((a) => {
+            if (
+                a.token.isSameAddress(addLiquidityInput.referenceAmount.address)
+            )
+                expect(
+                    Number(
+                        a.amount - addLiquidityInput.referenceAmount.rawAmount,
+                    ),
+                ).closeTo(0, 1000); // 1000 wei tolerance
+        });
+    }
 
     // Expect all assets in to have an amount > 0 apart from BPT if it exists
     addLiquidityQueryOutput.amountsIn.forEach((a) => {

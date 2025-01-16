@@ -1,4 +1,5 @@
 import { NestedPoolState } from '../types';
+import { isPoolToken } from './isPoolToken';
 
 export function validateNestedPoolState(
     nestedPoolState: NestedPoolState,
@@ -18,9 +19,11 @@ export function validateNestedPoolState(
     const topLevel = Math.max(...nestedPoolState.pools.map((p) => p.level));
 
     nestedPoolState.mainTokens.forEach((t) => {
-        const poolsWithToken = nestedPoolState.pools.filter((p) =>
-            p.tokens.some((pt) => pt.address === t.address),
-        );
+        // Can join with main token or underlying token
+        const poolsWithToken = nestedPoolState.pools.filter((p) => {
+            const poolToken = isPoolToken(p.tokens, t.address);
+            return poolToken.isPoolToken;
+        });
 
         if (poolsWithToken.length < 1)
             throw new Error(

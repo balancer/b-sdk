@@ -93,7 +93,7 @@ const removeLiquidity = async ({
 
     // Simulate removing liquidity to get the tokens out
     const removeLiquidity = new RemoveLiquidity();
-    const queryOutput = await removeLiquidity.queryRemoveLiquidityRecovery(
+    const queryOutput = await removeLiquidity.query(
         removeLiquidityRecoveryInput,
         poolState,
     );

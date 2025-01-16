@@ -8,6 +8,7 @@ export const balancerRouterAbi = [
                 name: 'permit2',
                 type: 'address',
             },
+            { internalType: 'string', name: 'routerVersion', type: 'string' },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -22,10 +23,20 @@ export const balancerRouterAbi = [
         name: 'AddressInsufficientBalance',
         type: 'error',
     },
+    { inputs: [], name: 'ErrorSelectorNotFound', type: 'error' },
     { inputs: [], name: 'EthTransfer', type: 'error' },
     { inputs: [], name: 'FailedInnerCall', type: 'error' },
+    { inputs: [], name: 'InputLengthMismatch', type: 'error' },
     { inputs: [], name: 'InsufficientEth', type: 'error' },
     { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
+    {
+        inputs: [
+            { internalType: 'uint8', name: 'bits', type: 'uint8' },
+            { internalType: 'uint256', name: 'value', type: 'uint256' },
+        ],
+        name: 'SafeCastOverflowedUintDowncast',
+        type: 'error',
+    },
     {
         inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
         name: 'SafeERC20FailedOperation',
@@ -153,58 +164,6 @@ export const balancerRouterAbi = [
     },
     {
         inputs: [
-            {
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amountUnderlyingRaw',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amountWrappedRaw',
-                type: 'uint256',
-            },
-            { internalType: 'address', name: 'sharesOwner', type: 'address' },
-        ],
-        name: 'addLiquidityToBuffer',
-        outputs: [
-            { internalType: 'uint256', name: 'issuedShares', type: 'uint256' },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amountUnderlyingRaw',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amountWrappedRaw',
-                type: 'uint256',
-            },
-            { internalType: 'address', name: 'sharesOwner', type: 'address' },
-        ],
-        name: 'addLiquidityToBufferHook',
-        outputs: [
-            { internalType: 'uint256', name: 'issuedShares', type: 'uint256' },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
             { internalType: 'address', name: 'pool', type: 'address' },
             {
                 internalType: 'uint256[]',
@@ -319,7 +278,7 @@ export const balancerRouterAbi = [
         outputs: [
             { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
         ],
-        stateMutability: 'nonpayable',
+        stateMutability: 'payable',
         type: 'function',
     },
     {
@@ -422,6 +381,7 @@ export const balancerRouterAbi = [
                 name: 'minBptAmountOut',
                 type: 'uint256',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryAddLiquidityCustom',
@@ -472,7 +432,7 @@ export const balancerRouterAbi = [
             { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
             { internalType: 'bytes', name: 'returnData', type: 'bytes' },
         ],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -483,6 +443,7 @@ export const balancerRouterAbi = [
                 name: 'exactBptAmountOut',
                 type: 'uint256',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryAddLiquidityProportional',
@@ -505,6 +466,7 @@ export const balancerRouterAbi = [
                 name: 'exactBptAmountOut',
                 type: 'uint256',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryAddLiquiditySingleTokenExactOut',
@@ -522,6 +484,7 @@ export const balancerRouterAbi = [
                 name: 'exactAmountsIn',
                 type: 'uint256[]',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryAddLiquidityUnbalanced',
@@ -544,6 +507,7 @@ export const balancerRouterAbi = [
                 name: 'minAmountsOut',
                 type: 'uint256[]',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryRemoveLiquidityCustom',
@@ -613,6 +577,7 @@ export const balancerRouterAbi = [
                 name: 'exactBptAmountIn',
                 type: 'uint256',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryRemoveLiquidityProportional',
@@ -680,6 +645,7 @@ export const balancerRouterAbi = [
                 name: 'tokenOut',
                 type: 'address',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryRemoveLiquiditySingleTokenExactIn',
@@ -702,6 +668,7 @@ export const balancerRouterAbi = [
                 name: 'exactAmountOut',
                 type: 'uint256',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'queryRemoveLiquiditySingleTokenExactOut',
@@ -757,7 +724,7 @@ export const balancerRouterAbi = [
         ],
         name: 'querySwapHook',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'payable',
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {
@@ -774,6 +741,7 @@ export const balancerRouterAbi = [
                 type: 'address',
             },
             { internalType: 'uint256', name: 'exactAmountIn', type: 'uint256' },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'querySwapSingleTokenExactIn',
@@ -805,6 +773,7 @@ export const balancerRouterAbi = [
                 name: 'exactAmountOut',
                 type: 'uint256',
             },
+            { internalType: 'address', name: 'sender', type: 'address' },
             { internalType: 'bytes', name: 'userData', type: 'bytes' },
         ],
         name: 'querySwapSingleTokenExactOut',
@@ -844,58 +813,7 @@ export const balancerRouterAbi = [
             },
             { internalType: 'bytes', name: 'returnData', type: 'bytes' },
         ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'sharesToRemove',
-                type: 'uint256',
-            },
-        ],
-        name: 'removeLiquidityFromBuffer',
-        outputs: [
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'contract IERC4626',
-                name: 'wrappedToken',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'sharesToRemove',
-                type: 'uint256',
-            },
-            { internalType: 'address', name: 'sharesOwner', type: 'address' },
-        ],
-        name: 'removeLiquidityFromBufferHook',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: 'removedUnderlyingBalanceRaw',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'removedWrappedBalanceRaw',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'nonpayable',
+        stateMutability: 'payable',
         type: 'function',
     },
     {
@@ -979,6 +897,11 @@ export const balancerRouterAbi = [
                 name: 'exactBptAmountIn',
                 type: 'uint256',
             },
+            {
+                internalType: 'uint256[]',
+                name: 'minAmountsOut',
+                type: 'uint256[]',
+            },
         ],
         name: 'removeLiquidityRecovery',
         outputs: [
@@ -988,7 +911,7 @@ export const balancerRouterAbi = [
                 type: 'uint256[]',
             },
         ],
-        stateMutability: 'nonpayable',
+        stateMutability: 'payable',
         type: 'function',
     },
     {
@@ -999,6 +922,11 @@ export const balancerRouterAbi = [
                 internalType: 'uint256',
                 name: 'exactBptAmountIn',
                 type: 'uint256',
+            },
+            {
+                internalType: 'uint256[]',
+                name: 'minAmountsOut',
+                type: 'uint256[]',
             },
         ],
         name: 'removeLiquidityRecoveryHook',
@@ -1163,6 +1091,13 @@ export const balancerRouterAbi = [
         name: 'swapSingleTokenHook',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'version',
+        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        stateMutability: 'view',
         type: 'function',
     },
     { stateMutability: 'payable', type: 'receive' },

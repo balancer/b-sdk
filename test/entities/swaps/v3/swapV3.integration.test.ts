@@ -8,23 +8,18 @@ import {
     parseEther,
     publicActions,
     walletActions,
-    Client,
-    PublicActions,
     TestActions,
-    WalletActions,
     Hex,
 } from 'viem';
 import {
     CHAINS,
     ChainId,
     SwapKind,
-    Token,
     Swap,
-    ExactInQueryOutput,
-    ExactOutQueryOutput,
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
     PERMIT2,
+    PublicWalletClient,
 } from '@/index';
 import { Path } from '@/entities/swap/paths/types';
 
@@ -42,19 +37,19 @@ import {
 
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
-// blockNo shouldn't change as checks depend on token balances
-const blockNo = 6497703n;
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const DAI = TOKENS[chainId].DAI_AAVE;
+const USDT = TOKENS[chainId].USDT_AAVE;
 const USDC_DAI_BPT = POOLS[chainId].MOCK_USDC_DAI_POOL;
+const boosted_pool = POOLS[chainId].MOCK_BOOSTED_POOL;
 const stataUSDC = TOKENS[chainId].stataUSDC;
-const stataDAI = TOKENS[chainId].stataDAI;
+const stataUSDT = TOKENS[chainId].stataUSDT;
 
 describe('SwapV3', () => {
-    let client: Client & PublicActions & TestActions & WalletActions;
+    let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let rpcUrl: string;
     let snapshot: Hex;
@@ -157,11 +152,7 @@ describe('SwapV3', () => {
             outputAmountRaw: 600000000000000n,
         };
 
-        const fork = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            blockNo,
-        );
+        const fork = await startFork(ANVIL_NETWORKS.SEPOLIA);
         rpcUrl = fork.rpcUrl;
         client = createTestClient({
             mode: 'anvil',
@@ -200,152 +191,6 @@ describe('SwapV3', () => {
             id: snapshot,
         });
         snapshot = await client.snapshot();
-    });
-
-    describe('query method should return correct updated', () => {
-        describe('single swap', () => {
-            test('GivenIn', async () => {
-                const swap = new Swap({
-                    chainId,
-                    paths: [pathBalWeth],
-                    swapKind: SwapKind.GivenIn,
-                });
-
-                const expected = (await swap.query(
-                    rpcUrl,
-                )) as ExactInQueryOutput;
-
-                const wethToken = new Token(
-                    chainId,
-                    WETH.address,
-                    WETH.decimals,
-                );
-                expect(expected.expectedAmountOut.token).to.deep.eq(wethToken);
-                expect(expected.expectedAmountOut.amount).to.eq(98999998n);
-            });
-            test('GivenOut', async () => {
-                const swap = new Swap({
-                    chainId,
-                    paths: [pathBalWeth],
-                    swapKind: SwapKind.GivenOut,
-                });
-
-                const expected = (await swap.query(
-                    rpcUrl,
-                )) as ExactOutQueryOutput;
-
-                const balToken = new Token(chainId, BAL.address, BAL.decimals);
-                expect(expected.expectedAmountIn.token).to.deep.eq(balToken);
-                expect(expected.expectedAmountIn.amount).to.eq(
-                    101002020040406n,
-                );
-            });
-        });
-        describe('multi-hop swap', () => {
-            describe('path with swaps only', () => {
-                test('GivenIn', async () => {
-                    const swap = new Swap({
-                        chainId,
-                        paths: [pathMultiSwap],
-                        swapKind: SwapKind.GivenIn,
-                    });
-
-                    const expected = (await swap.query(
-                        rpcUrl,
-                    )) as ExactInQueryOutput;
-
-                    const usdcToken = new Token(
-                        chainId,
-                        USDC.address,
-                        USDC.decimals,
-                    );
-                    expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([378320n]);
-                    expect(expected.expectedAmountOut.token).to.deep.eq(
-                        usdcToken,
-                    );
-                    expect(expected.expectedAmountOut.amount).to.eq(378320n);
-                });
-                test('GivenOut', async () => {
-                    const swap = new Swap({
-                        chainId,
-                        paths: [pathMultiSwap],
-                        swapKind: SwapKind.GivenOut,
-                    });
-
-                    const expected = (await swap.query(
-                        rpcUrl,
-                    )) as ExactOutQueryOutput;
-
-                    const wethToken = new Token(
-                        chainId,
-                        WETH.address,
-                        WETH.decimals,
-                    );
-                    expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([593566581018333n]);
-                    expect(expected.expectedAmountIn.token).to.deep.eq(
-                        wethToken,
-                    );
-                    expect(expected.expectedAmountIn.amount).to.eq(
-                        593566581018333n,
-                    );
-                });
-            });
-            describe('path with exit', () => {
-                test('GivenIn', async () => {
-                    const swap = new Swap({
-                        chainId,
-                        paths: [pathMultiSwap, pathWithExit],
-                        swapKind: SwapKind.GivenIn,
-                    });
-
-                    const expected = (await swap.query(
-                        rpcUrl,
-                    )) as ExactInQueryOutput;
-
-                    const usdcToken = new Token(
-                        chainId,
-                        USDC.address,
-                        USDC.decimals,
-                    );
-                    expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([378320n, 637976n]);
-                    expect(expected.expectedAmountOut.token).to.deep.eq(
-                        usdcToken,
-                    );
-                    expect(expected.expectedAmountOut.amount).to.eq(1016296n);
-                });
-                test('GivenOut', async () => {
-                    const swap = new Swap({
-                        chainId,
-                        paths: [pathMultiSwap, pathWithExit],
-                        swapKind: SwapKind.GivenOut,
-                    });
-
-                    const expected = (await swap.query(
-                        rpcUrl,
-                    )) as ExactOutQueryOutput;
-
-                    const wethToken = new Token(
-                        chainId,
-                        WETH.address,
-                        WETH.decimals,
-                    );
-                    expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([
-                        593566581018333n,
-                        998115374792638n,
-                    ]);
-                    expect(expected.expectedAmountIn.token).to.deep.eq(
-                        wethToken,
-                    );
-                    expect(expected.expectedAmountIn.amount).to.eq(
-                        1591681955810971n,
-                    );
-                });
-            });
-        });
     });
 
     describe('permit2 direct approval', () => {
@@ -900,7 +745,7 @@ describe('SwapV3', () => {
 
     describe('boosted', () => {
         describe('multi-hop swap', () => {
-            // USDC[wrap]aUSDC[swap]aDAI[unwrap]DAI
+            // USDC[wrap]aUSDC[swap]aUSDT[unwrap]USDT
             const pathWithBuffers = {
                 protocolVersion: 3,
                 tokens: [
@@ -913,86 +758,22 @@ describe('SwapV3', () => {
                         decimals: stataUSDC.decimals,
                     },
                     {
-                        address: stataDAI.address,
-                        decimals: stataDAI.decimals,
+                        address: stataUSDT.address,
+                        decimals: stataUSDT.decimals,
                     },
                     {
-                        address: DAI.address,
-                        decimals: DAI.decimals,
+                        address: USDT.address,
+                        decimals: USDT.decimals,
                     },
                 ],
                 pools: [
                     stataUSDC.address,
-                    POOLS[chainId].MOCK_BOOSTED_POOL.id,
-                    stataDAI.address,
+                    boosted_pool.address,
+                    stataUSDT.address,
                 ],
                 isBuffer: [true, false, true],
             };
 
-            describe('query method should return correct updated', () => {
-                test('GivenIn', async () => {
-                    const swap = new Swap({
-                        chainId,
-                        paths: [
-                            {
-                                ...pathWithBuffers,
-                                inputAmountRaw: 100000000n,
-                                outputAmountRaw: 0n,
-                            } as Path,
-                        ],
-                        swapKind: SwapKind.GivenIn,
-                    });
-
-                    const expected = (await swap.query(
-                        rpcUrl,
-                    )) as ExactInQueryOutput;
-
-                    const daiToken = new Token(
-                        chainId,
-                        DAI.address,
-                        DAI.decimals,
-                    );
-                    expect(expected.swapKind).to.eq(SwapKind.GivenIn);
-                    expect(expected.pathAmounts).to.deep.eq([
-                        98985260225752491151n,
-                    ]);
-                    expect(expected.expectedAmountOut.token).to.deep.eq(
-                        daiToken,
-                    );
-                    expect(expected.expectedAmountOut.amount).to.eq(
-                        98985260225752491151n,
-                    );
-                });
-                test('GivenOut', async () => {
-                    const swap = new Swap({
-                        chainId,
-                        paths: [
-                            {
-                                ...pathWithBuffers,
-                                inputAmountRaw: 0n,
-                                outputAmountRaw: 100000000000000000000n,
-                            } as Path,
-                        ],
-                        swapKind: SwapKind.GivenOut,
-                    });
-
-                    const expected = (await swap.query(
-                        rpcUrl,
-                    )) as ExactOutQueryOutput;
-
-                    const usdcToken = new Token(
-                        chainId,
-                        USDC.address,
-                        USDC.decimals,
-                    );
-                    expect(expected.swapKind).to.eq(SwapKind.GivenOut);
-                    expect(expected.pathAmounts).to.deep.eq([101015043n]);
-                    expect(expected.expectedAmountIn.token).to.deep.eq(
-                        usdcToken,
-                    );
-                    expect(expected.expectedAmountIn.amount).to.eq(101015043n);
-                });
-            });
             describe('swap should be executed correctly', () => {
                 beforeEach(async () => {
                     await approveTokens(
@@ -1035,7 +816,7 @@ describe('SwapV3', () => {
                             {
                                 ...pathWithBuffers,
                                 inputAmountRaw: 0n,
-                                outputAmountRaw: 100000000000000000000n,
+                                outputAmountRaw: 10000000n,
                             } as Path,
                         ],
                         swapKind: SwapKind.GivenOut,

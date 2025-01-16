@@ -81,6 +81,7 @@ export const weightedPoolAbi_V3 = [
         name: 'StringTooLong',
         type: 'error',
     },
+    { inputs: [], name: 'WeightedPoolBptRateUnsupported', type: 'error' },
     { inputs: [], name: 'ZeroDivision', type: 'error' },
     { inputs: [], name: 'ZeroInvariant', type: 'error' },
     {
@@ -208,6 +209,7 @@ export const weightedPoolAbi_V3 = [
                 name: 'balancesLiveScaled18',
                 type: 'uint256[]',
             },
+            { internalType: 'enum Rounding', name: 'rounding', type: 'uint8' },
         ],
         name: 'computeInvariant',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
@@ -336,7 +338,7 @@ export const weightedPoolAbi_V3 = [
         inputs: [],
         name: 'getRate',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
+        stateMutability: 'pure',
         type: 'function',
     },
     {
@@ -440,9 +442,19 @@ export const weightedPoolAbi_V3 = [
                         type: 'uint256',
                     },
                     {
-                        internalType: 'uint256',
-                        name: 'bptRate',
-                        type: 'uint256',
+                        internalType: 'bool',
+                        name: 'isPoolInitialized',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'isPoolPaused',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'isPoolInRecoveryMode',
+                        type: 'bool',
                     },
                 ],
                 internalType: 'struct WeightedPoolDynamicData',
@@ -481,6 +493,13 @@ export const weightedPoolAbi_V3 = [
             },
         ],
         stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'incrementNonce',
+        outputs: [],
+        stateMutability: 'nonpayable',
         type: 'function',
     },
     {

@@ -1,4 +1,5 @@
 {
+
   "name": "@sammohdnak/tide-sdk",
   "description": "SDK for interacting with the Tide protocol in Puslechain",
   "license": "MIT",

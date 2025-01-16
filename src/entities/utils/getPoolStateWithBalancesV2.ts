@@ -34,6 +34,16 @@ export const getPoolStateWithBalancesV2 = async (
     });
 
     if (outputs.some((output) => output.status === 'failure')) {
+        console.log(
+            'Multicall error/s getting pool state with balances for v2 pool',
+            {
+                errors: outputs
+                    .filter((o) => o.status === 'failure')
+                    .map((o) => o.error),
+                chainId,
+                poolId: poolState.id,
+            },
+        );
         throw new Error(
             'Error: Unable to get pool state with balances for v2 pool.',
         );

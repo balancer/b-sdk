@@ -1,5 +1,207 @@
 # @balancer/sdk
 
+## 1.1.0
+
+### Minor Changes
+
+- 00d2037: Add query blockno param for add/remove liq (not V2).
+
+## 1.0.2
+
+### Patch Changes
+
+- eb5be5d: fix: update sonic multicall3 creation blocknumber
+- eb5be5d: fix: override multicall3 for sonic in viem chain definition
+- 1b47dfb: Skip flaky test
+
+## 1.0.1
+
+### Patch Changes
+
+- e5a0311: Bump composable stable pool factories to v6
+- 79c8144: Refactor swaps v3 integration tests
+- 1c58adc: Add support for Sonic chain
+
+## 1.0.0
+
+### Major Changes
+
+- b3d61f2: Remove `queryRemoveLiquidityRecovery` from `RemoveLiquidity`. Please use `query` with `RemoveLiquidityRecoveryInput` instead.
+
+### Minor Changes
+
+- 8aa2fb9: Add native token support to AddLiquidityNested and AddLiquidityBoosted
+- a6ebf0d: Add support for InitBuffer
+- 15567ec: Add support for addLiquidityBuffer
+
+### Patch Changes
+
+- e3fdf6c: Add extra integration tests for gyro pools
+
+## 0.33.5
+
+### Patch Changes
+
+- 378a8f0: Fix price impact with near proportional inputs for AddLiquidityNested
+
+## 0.33.4
+
+### Patch Changes
+
+- 20aeefc: chore: debug v2 pool state multicall errors
+
+## 0.33.3
+
+### Patch Changes
+
+- 6ec44e1: Update to main deployments (Mainnet, Gnosis and Sepolia)
+- 688d857: Add permit and permit2 signature examples
+
+## 0.33.2
+
+### Patch Changes
+
+- 863822c: Use correct index for underlying token redeem call.
+
+## 0.33.1
+
+### Patch Changes
+
+- b2b9411: Enable add liquidity proportional for stable pools on v3
+
+## 0.33.0
+
+### Minor Changes
+
+- 2d192ff: Update to testnet deployment 11
+
+## 0.32.2
+
+### Patch Changes
+
+- c5e3ffd: Refactor nestedPoolState logic to fetch mainTokens from api
+- ac0c5a5: Add proportional helper to calculate BPT from a reference amount for boosted pools
+- 2712ee0: Fix getPoolStateWithBalancesV3 with less 18 decimals tokens
+- 1455fde: Fix circular dependency on price impact implementation
+
+## 0.32.1
+
+### Patch Changes
+
+- 603fbd5: fix: nested single token remove v2 validation
+
+## 0.32.0
+
+### Minor Changes
+
+- b927594: Tidy nested types. Share common with boosted.
+  Support for V3 addLiquidityNested PI (including nested boosted).
+- f2f1e42: BPT swaps as first step & change of batch router address
+
+### Patch Changes
+
+- dcd1f0d: PriceImpact error handling and messaging improvements.
+  - Catch any errors with initial add/remove steps - these are thrown because the user input is valid, e.g. would cause INVARIANT_GROWTH errors
+  - Catch any errors in query during unbalanced calc steps and throw message that will help with debug - e.g. caused by delta amounts
+- 52fed3d: Fix PI test.
+
+## 0.31.2
+
+### Patch Changes
+
+- 72a96fb: fix: validateBuffer check for V2 buffer array.
+
+## 0.31.1
+
+### Patch Changes
+
+- 46bcb86: Update CompositeRouter address (deploy10 version with bug fix).
+  Remove CompositeRouter workarounds for Boosted Price Impact.
+
+## 0.31.0
+
+### Minor Changes
+
+- a1b87c6: Add to field to query outputs. Useful for correct approval spender before build.
+- e234fc1: Remove Swap Price Impact function and tests.
+- 4e32362: Add optional sender and userData inputs for add/remove/swap queries. Sender can be used to query accurate result when pool may have hook thats behaviour is affected by sender, e.g. loyalty fee hook.
+
+### Patch Changes
+
+- 2a664ce: Make boosted add/remove support partial boosted.
+- a33d0fc: Expose isBatchSwap on swap class
+
+## 0.30.1
+
+### Patch Changes
+
+- a080968: chore: remove unused totalShares field from PoolStateWithUnderlyings type
+
+## 0.30.0
+
+### Minor Changes
+
+- 1ce9784: added add and remove liquidity for boosted pools
+
+## 0.29.1
+
+### Patch Changes
+
+- 84f3259: Full nested pool support and tests.
+
+## 0.29.0
+
+### Minor Changes
+
+- 8d4d0ee: Add add/remove support for V3 nested pools.
+- ae2c177: Update to Deploy 10.
+
+### Patch Changes
+
+- 1a85f89: Re-deploy force.
+
+## 0.28.2
+
+### Patch Changes
+
+- 5442afb: Add support for userData to v3 swaps
+
+## 0.28.1
+
+### Patch Changes
+
+- d64eb0f: Update vault extension ABI to deploy9 version.
+
+## 0.28.0
+
+### Minor Changes
+
+- b00b8d0: Update to deploy 9
+- 128313b: Support for v3 stable pool creation
+
+## 0.27.0
+
+### Minor Changes
+
+- cc78c64: Add zero address sender to multicall calls to avoid issues with Nethermind/Geth nodes
+
+## 0.26.1
+
+### Patch Changes
+
+- 2be2b58: Add OPTIMISM_RPC_URL to test envs
+- 503f72a: Exposes PublicWalletClient type
+
+## 0.26.0
+
+### Minor Changes
+
+- c2c454d: Update to 8th testnet release of v3
+
+### Patch Changes
+
+- 74322d3: Add vault and vault extension abis to any router interactions to enable decoded error messages.
+
 ## 0.25.0
 
 ### Minor Changes

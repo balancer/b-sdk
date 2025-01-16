@@ -18,6 +18,8 @@ export enum AddLiquidityKind {
 export type AddLiquidityBaseInput = {
     chainId: number;
     rpcUrl: string;
+    sender?: Address;
+    userData?: Hex;
 };
 
 export type AddLiquidityUnbalancedInput = AddLiquidityBaseInput & {
@@ -50,6 +52,7 @@ export type AddLiquidityBaseQueryOutput = {
     chainId: number;
     tokenInIndex?: number;
     protocolVersion: 1 | 2 | 3;
+    to: Address;
 };
 
 export type AddLiquidityQueryOutput =
@@ -69,6 +72,7 @@ export interface AddLiquidityBase {
     query(
         input: AddLiquidityInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<AddLiquidityQueryOutput>;
     buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput;
     buildCallWithPermit2(

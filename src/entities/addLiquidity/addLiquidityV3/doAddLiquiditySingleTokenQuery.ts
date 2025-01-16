@@ -1,18 +1,22 @@
-import { createPublicClient, http } from 'viem';
-import { AddLiquiditySingleTokenInput } from '../types';
-import { BALANCER_ROUTER, CHAINS } from '@/utils';
+import { createPublicClient, Hex, http } from 'viem';
+import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
 import {
     balancerRouterAbi,
     permit2Abi,
-    vaultExtensionV3Abi,
+    vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
 import { Address } from '@/types';
 
 export const doAddLiquiditySingleTokenQuery = async (
-    { rpcUrl, chainId, tokenIn }: AddLiquiditySingleTokenInput,
+    rpcUrl: string,
+    chainId: ChainId,
+    sender: Address,
+    userData: Hex,
+    tokenIn: Address,
     poolAddress: Address,
     bptOut: bigint,
+    block?: bigint,
 ): Promise<bigint> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -24,11 +28,12 @@ export const doAddLiquiditySingleTokenQuery = async (
         abi: [
             ...balancerRouterAbi,
             ...vaultV3Abi,
-            ...vaultExtensionV3Abi,
+            ...vaultExtensionAbi_V3,
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquiditySingleTokenExactOut',
-        args: [poolAddress, tokenIn, bptOut, '0x'],
+        args: [poolAddress, tokenIn, bptOut, sender, userData],
+        blockNumber: block,
     });
     return amountIn;
 };

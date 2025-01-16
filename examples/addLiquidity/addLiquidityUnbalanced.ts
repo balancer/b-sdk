@@ -25,10 +25,10 @@ async function runAgainstFork() {
     const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
     const chainId = ChainId.SEPOLIA;
     const userAccount = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
-    // 80BAL-20WETH
+    // 50BAL-50WETH
     const pool = {
-        id: '0x03Bf996C7BD45B3386cb41875761d45e27EaB284',
-        address: '0x03Bf996C7BD45B3386cb41875761d45e27EaB284' as Address,
+        id: '0x2ff3b96e0057a1f25f1d62ab800554ccdb268ab8',
+        address: '0x2ff3b96e0057a1f25f1d62ab800554ccdb268ab8' as Address,
     };
     const amountsIn = [
         {
@@ -44,7 +44,7 @@ async function runAgainstFork() {
     ];
     const slippage = Slippage.fromPercentage('1'); // 1%
 
-    const call = await addLiquidity({
+    const call = await addLiquidityExample({
         rpcUrl,
         chainId,
         amountsIn,
@@ -70,7 +70,7 @@ async function runAgainstFork() {
     );
 }
 
-const addLiquidity = async ({
+export const addLiquidityExample = async ({
     rpcUrl,
     chainId,
     poolId,

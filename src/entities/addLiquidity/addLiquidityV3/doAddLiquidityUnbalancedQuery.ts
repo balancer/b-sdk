@@ -1,18 +1,21 @@
-import { createPublicClient, http } from 'viem';
-import { AddLiquidityUnbalancedInput } from '../types';
-import { BALANCER_ROUTER, CHAINS } from '@/utils';
+import { createPublicClient, Hex, http } from 'viem';
+import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
 import {
     balancerRouterAbi,
     permit2Abi,
-    vaultExtensionV3Abi,
+    vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
 import { Address } from '@/types';
 
 export const doAddLiquidityUnbalancedQuery = async (
-    { rpcUrl, chainId }: AddLiquidityUnbalancedInput,
+    rpcUrl: string,
+    chainId: ChainId,
+    sender: Address,
+    userData: Hex,
     poolAddress: Address,
     maxAmountsIn: bigint[],
+    block?: bigint,
 ) => {
     const client = createPublicClient({
         transport: http(rpcUrl),
@@ -24,11 +27,12 @@ export const doAddLiquidityUnbalancedQuery = async (
         abi: [
             ...balancerRouterAbi,
             ...vaultV3Abi,
-            ...vaultExtensionV3Abi,
+            ...vaultExtensionAbi_V3,
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquidityUnbalanced',
-        args: [poolAddress, maxAmountsIn, '0x'],
+        args: [poolAddress, maxAmountsIn, sender, userData],
+        blockNumber: block,
     });
     return bptAmountOut;
 };

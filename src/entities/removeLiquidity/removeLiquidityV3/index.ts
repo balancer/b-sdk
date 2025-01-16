@@ -1,11 +1,7 @@
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import {
-    calculateProportionalAmounts,
-    getPoolStateWithBalancesV3,
-    getSortedTokens,
-} from '@/entities/utils';
+import { getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
 import {
     BALANCER_ROUTER,
@@ -20,7 +16,6 @@ import {
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
-    RemoveLiquidityRecoveryInput,
 } from '../types';
 import { doRemoveLiquiditySingleTokenExactOutQuery } from './doRemoveLiquiditySingleTokenExactOutQuery';
 import { doRemoveLiquiditySingleTokenExactInQuery } from './doRemoveLiquiditySingleTokenExactInQuery';
@@ -38,6 +33,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
         input: RemoveLiquidityInput,
         poolState: PoolState,
+        block?: bigint,
     ): Promise<RemoveLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
         const amounts = getAmountsQuery(sortedTokens, input);
@@ -52,8 +48,14 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 {
                     maxBptAmountIn =
                         await doRemoveLiquiditySingleTokenExactOutQuery(
-                            input,
+                            input.rpcUrl,
+                            input.chainId,
+                            input.sender ?? zeroAddress,
+                            input.userData ?? '0x',
                             poolState.address,
+                            input.amountOut.address,
+                            input.amountOut.rawAmount,
+                            block,
                         );
                     minAmountsOut = amounts.minAmountsOut;
                 }
@@ -63,8 +65,14 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                     maxBptAmountIn = amounts.maxBptAmountIn;
                     const minAmountOut =
                         await doRemoveLiquiditySingleTokenExactInQuery(
-                            input,
+                            input.rpcUrl,
+                            input.chainId,
+                            input.sender ?? zeroAddress,
+                            input.userData ?? '0x',
                             poolState.address,
+                            input.tokenOut,
+                            input.bptIn.rawAmount,
+                            block,
                         );
                     minAmountsOut = sortedTokens.map((t) => {
                         return t.isSameAddress(input.tokenOut)
@@ -77,8 +85,13 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 {
                     maxBptAmountIn = amounts.maxBptAmountIn;
                     minAmountsOut = await doRemoveLiquidityProportionalQuery(
-                        input,
+                        input.rpcUrl,
+                        input.chainId,
+                        input.sender ?? zeroAddress,
+                        input.userData ?? '0x',
                         poolState.address,
+                        input.bptIn.rawAmount,
+                        block,
                     );
                 }
                 break;
@@ -95,7 +108,8 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
-        const output: RemoveLiquidityBaseQueryOutput = {
+        const output: RemoveLiquidityBaseQueryOutput & { userData: Hex } = {
+            to: BALANCER_ROUTER[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -106,55 +120,14 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
             tokenOutIndex: amounts.tokenOutIndex,
             protocolVersion: poolState.protocolVersion,
             chainId: input.chainId,
+            userData: input.userData ?? '0x',
         };
 
         return output;
     }
 
-    /**
-     * It's not possible to query Remove Liquidity Recovery in the same way as
-     * other remove liquidity kinds, but since it's not affected by fees or anything
-     * other than pool balances, we can calculate amountsOut as proportional amounts.
-     */
-    public async queryRemoveLiquidityRecovery(
-        input: RemoveLiquidityRecoveryInput,
-        poolState: PoolState,
-    ): Promise<RemoveLiquidityBaseQueryOutput> {
-        const poolStateWithBalances = await getPoolStateWithBalancesV3(
-            poolState,
-            input.chainId,
-            input.rpcUrl,
-        );
-
-        const { tokenAmounts } = calculateProportionalAmounts(
-            poolStateWithBalances,
-            input.bptIn,
-        );
-
-        const bptIn = TokenAmount.fromRawAmount(
-            new Token(input.chainId, input.bptIn.address, input.bptIn.decimals),
-            input.bptIn.rawAmount,
-        );
-        const amountsOut = tokenAmounts.map((amountIn) =>
-            TokenAmount.fromRawAmount(
-                new Token(input.chainId, amountIn.address, amountIn.decimals),
-                amountIn.rawAmount,
-            ),
-        );
-        return {
-            poolType: poolState.type,
-            removeLiquidityKind: input.kind,
-            poolId: poolState.id,
-            bptIn,
-            amountsOut,
-            tokenOutIndex: undefined,
-            protocolVersion: poolState.protocolVersion,
-            chainId: input.chainId,
-        };
-    }
-
     public buildCall(
-        input: RemoveLiquidityBaseBuildCallInput,
+        input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
     ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
@@ -188,7 +161,10 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 break;
             case RemoveLiquidityKind.Recovery:
                 {
-                    callData = encodeRemoveLiquidityRecovery(input);
+                    callData = encodeRemoveLiquidityRecovery(
+                        input,
+                        amounts.minAmountsOut,
+                    );
                 }
                 break;
         }
@@ -208,7 +184,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     }
 
     public buildCallWithPermit(
-        input: RemoveLiquidityBaseBuildCallInput,
+        input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
         permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);

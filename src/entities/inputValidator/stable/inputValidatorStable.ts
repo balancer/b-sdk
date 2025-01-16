@@ -6,18 +6,41 @@ import { PoolState } from '@/entities/types';
 import { addLiquidityProportionalNotSupportedOnPoolTypeError } from '@/utils';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { validateTokensAddLiquidity } from '../utils/validateTokens';
-import { CreatePoolInput } from '@/entities/createPool';
+import { CreatePoolV3StableInput } from '@/entities/createPool';
 
+export const MAX_AMP = 5000n;
+export const MIN_AMP = 1n;
+export const MAX_TOKENS = 5;
 export class InputValidatorStable extends InputValidatorBase {
-    validateCreatePool(_: CreatePoolInput): void {
-        throw new Error('Create pool not supported for this pool type');
+    validateCreatePool(input: CreatePoolV3StableInput) {
+        super.validateCreatePool(input);
+
+        if (input.tokens.length > MAX_TOKENS) {
+            throw new Error(
+                `Stable pools can only have a maximum of ${MAX_TOKENS} tokens`,
+            );
+        }
+
+        if (input.amplificationParameter < MIN_AMP) {
+            throw new Error(
+                `Amplification parameter below minimum of ${MIN_AMP}`,
+            );
+        }
+        if (input.amplificationParameter > MAX_AMP) {
+            throw new Error(
+                `Amplification parameter above maximum of ${MAX_AMP}`,
+            );
+        }
     }
 
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
     ): void {
-        if (addLiquidityInput.kind === AddLiquidityKind.Proportional) {
+        if (
+            poolState.protocolVersion === 2 &&
+            addLiquidityInput.kind === AddLiquidityKind.Proportional
+        ) {
             throw addLiquidityProportionalNotSupportedOnPoolTypeError(
                 poolState.type,
             );

@@ -17,10 +17,17 @@ import {
     sepolia,
     mode,
     fraxtal,
+    sonic,
 } from 'viem/chains';
 
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
+/*
+    Using empty account (undefined by default) in some multicall requests causes failures in some nodes
+    More info: https://github.com/wevm/viem/issues/2792
+*/
+export const EMPTY_SENDER = { account: ZERO_ADDRESS };
+
 const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
@@ -59,6 +66,7 @@ export enum ChainId {
     BSC = 56,
     GNOSIS_CHAIN = 100,
     POLYGON = 137,
+    SONIC = 146,
     ZKSYNC_TESTNET = 280,
     FANTOM = 250,
     FRAXTAL = 252,
@@ -86,6 +94,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.ARBITRUM_ONE]: 'ARBITRUM',
     [ChainId.AVALANCHE]: 'AVALANCHE',
     [ChainId.SEPOLIA]: 'SEPOLIA',
+    [ChainId.SONIC]: 'SONIC',
 };
 
 export const CHAINS: Record<number, Chain> = {
@@ -105,6 +114,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.AVALANCHE]: avalanche,
     [ChainId.BASE_GOERLI]: baseGoerli,
     [ChainId.SEPOLIA]: sepolia,
+    [ChainId.SONIC]: sonic,
 };
 
 /**
@@ -141,10 +151,13 @@ export const VAULT: Record<number, Address> = {
     [ChainId.POLYGON]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.ZKEVM]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.SEPOLIA]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    [ChainId.SONIC]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
 export const VAULT_V3: Record<number, Address> = {
+
     [ChainId.SEPOLIA]: '0x3958583A272Fc26dFb87B62917a3cC2C13b010f5', //Updated for Tide
+
 };
 
 export const BALANCER_QUERIES: Record<number, Address> = {
@@ -160,6 +173,7 @@ export const BALANCER_QUERIES: Record<number, Address> = {
     [ChainId.POLYGON]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
     [ChainId.ZKEVM]: '0x809b79b53f18e9bc08a961ed4678b901ac93213a',
     [ChainId.SEPOLIA]: '0x1802953277FD955f9a254B80Aa0582f193cF1d77',
+    [ChainId.SONIC]: '0x4B29DB997Ec0efDFEF13bAeE2a2D7783bCf67f17',
 };
 
 export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
@@ -174,38 +188,76 @@ export const WEIGHTED_POOL_FACTORY_BALANCER_V2: Record<number, Address> = {
     [ChainId.POLYGON]: '0xfc8a407bba312ac761d8bfe04ce1201904842b76',
     [ChainId.ZKEVM]: '0x03f3fb107e74f2eac9358862e91ad3c692712054',
 };
+
 export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0x944E71BfD43c863784c075893203EF84c37C218C', //Updated for Tide
 };
+
 export const COMPOSABLE_STABLE_POOL_FACTORY: Record<number, Address> = {
-    [ChainId.ARBITRUM_ONE]: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
-    [ChainId.AVALANCHE]: '0xe42ffa682a26ef8f25891db4882932711d42e467',
-    [ChainId.BASE]: '0x8df317a729fcaa260306d7de28888932cb579b88',
+    [ChainId.ARBITRUM_ONE]: '0x4bdCc2fb18AEb9e2d281b0278D946445070EAda7',
+    [ChainId.AVALANCHE]: '0xb9F8AB3ED3F3aCBa64Bc6cd2DcA74B7F38fD7B88',
+    [ChainId.BASE]: '0x956CCab09898C0AF2aCa5e6C229c3aD4E93d9288',
     [ChainId.FRAXTAL]: '0x4bdCc2fb18AEb9e2d281b0278D946445070EAda7',
-    [ChainId.GNOSIS_CHAIN]: '0x4bdcc2fb18aeb9e2d281b0278d946445070eada7',
-    [ChainId.MAINNET]: '0xdb8d758bcb971e482b2c45f7f8a7740283a1bd3a',
+    [ChainId.GNOSIS_CHAIN]: '0x47B489bf5836f83ABD928C316F8e39bC0587B020',
+    [ChainId.MAINNET]: '0x5B42eC6D40f7B7965BE5308c70e2603c0281C1E9',
     [ChainId.MODE]: '0x5DbAd78818D4c8958EfF2d5b95b28385A22113Cd',
-    [ChainId.OPTIMISM]: '0x043a2dad730d585c44fb79d2614f295d2d625412',
-    [ChainId.POLYGON]: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
-    [ChainId.ZKEVM]: '0x577e5993b9cc480f07f98b5ebd055604bd9071c4',
-    [ChainId.SEPOLIA]: '0x3406594FBE49BBF5B37c096CcEc44b3bE4CF3370',//Was not in OG Balancer Repo. Added for Sepolia for Tide //TODO Need to check if this works
+
+    [ChainId.OPTIMISM]: '0x4bdCc2fb18AEb9e2d281b0278D946445070EAda7',
+    [ChainId.POLYGON]: '0xEAedc32a51c510d35ebC11088fD5fF2b47aACF2E',
+    [ChainId.SEPOLIA]: '0x05503B3aDE04aCA81c8D6F88eCB73Ba156982D2B',
+    [ChainId.ZKEVM]: '0xf23b4DB826DbA14c0e857029dfF076b1c0264843',
+};
+
+export const WEIGHTED_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x7532d5a3bE916e4a4D900240F49F0BABd4FD855C',
+    [ChainId.MAINNET]: '0x201efd508c8DfE9DE1a13c2452863A78CB2a86Cc',
+    [ChainId.GNOSIS_CHAIN]: '0xEB1eeaBF0126d813589C3D2CfeFFE410D9aE3863',
+};
+
+export const STABLE_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0xd67F485C07D258B3e93835a3799d862ffcB55923',
+    [ChainId.MAINNET]: '0xB9d01CA61b9C181dA1051bFDd28e1097e920AB14',
+    [ChainId.GNOSIS_CHAIN]: '0x22625eEDd92c81a219A83e1dc48f88d54786B017',
 };
 
 export const BALANCER_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xf41baB917790eB98097Ac8Cc822Fa0519e41e149',  //Updated for Tide
+    [ChainId.SEPOLIA]: '0x0BF61f706105EA44694f2e92986bD01C39930280',
+    [ChainId.MAINNET]: '0x5C6fb490BDFD3246EB0bB062c168DeCAF4bD9FDd',
+    [ChainId.GNOSIS_CHAIN]: '0x84813aA3e079A665C0B80F944427eE83cBA63617',
 };
 
 export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x090Bda0031DA28985B5622cf1d2bf7AA5Ae1C759', //Updated for Tide
+    [ChainId.SEPOLIA]: '0xC85b652685567C1B074e8c0D4389f83a2E458b1C',
+    [ChainId.MAINNET]: '0x136f1EFcC3f8f88516B9E94110D56FDBfB1778d1',
+    [ChainId.GNOSIS_CHAIN]: '0xe2fa4e1d17725e72dcdAfe943Ecf45dF4B9E285b',
+};
+
+export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0xc6674C0c7694E9b990eAc939E74F8cc3DD39B4b0',
+    [ChainId.MAINNET]: '0x1CD776897ef4f647bf8241Ec69549e4A9cb1D608',
+    [ChainId.GNOSIS_CHAIN]: '0xC1A64500E035D9159C8826E982dFb802003227f0',
+};
+
+export const BALANCER_BUFFER_ROUTER: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0xb5F3A41515457CC6E2716c62a011D260441CcfC9',
+    [ChainId.MAINNET]: '0x9179C06629ef7f17Cb5759F501D89997FE0E7b45',
+    [ChainId.GNOSIS_CHAIN]: '0x86e67E115f96DF37239E0479441303De0de7bc2b',
 };
 
 export const PERMIT2: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x99FE8348aDA1f369e9d8295e8335BED2C8c9e916', //Updated for Tide
+    [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.MAINNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.GNOSIS_CHAIN]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+
 };
 
+// TODO: Figure out Authorizer addresses
 export const AUTHORIZER: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0xa331d84ec860bf466b4cdccfb4ac09a1b43f3ae6',
 };
+
+export const ADMIN_OF_AUTHORIZER = '0x171C0fF5943CE5f133130436A29bF61E26516003'; // do we plan to use same EoA for all chains?
+
 /**
  * Native Assets
  */
@@ -315,14 +367,14 @@ export const NATIVE_ASSETS = {
         'Matic',
         '0xa2036f0538221a77a3937f1379699f44945018d0',
     ),
-};
-
-export const ACTION_IDS_AND_ADMIN = {
-    grantRole: {
-        actionId:
-            '0x89ac05fcc5f8d988ec0e8d12117301c9b69403c1cc7666180222f23eb0886f45',
-        admin: '0x171C0fF5943CE5f133130436A29bF61E26516003',
-    },
+    [ChainId.SONIC]: new Token(
+        ChainId.SONIC,
+        NATIVE_ADDRESS,
+        18,
+        'S',
+        'Sonic',
+        '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',
+    ),
 };
 
 export const ETH = NATIVE_ASSETS[ChainId.MAINNET];
