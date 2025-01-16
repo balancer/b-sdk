@@ -163,7 +163,7 @@ const getTokenAmountsAndTotalShares = async (
     const getBalanceContracts = {
         address: VAULT_V3[chainId],
         abi: vaultExtensionAbi_V3,
-        functionName: 'getCurrentLiveBalances' as const,
+        functionName: 'getPoolTokenInfo' as const,
         args: [poolState.address] as const,
     };
 
@@ -181,10 +181,19 @@ const getTokenAmountsAndTotalShares = async (
 
     // extract total supply and balances from multicall outputs
     const totalShares = outputs[0].result as bigint;
-    const balancesScale18 = outputs[1].result as bigint[];
+    const [_, __, balancesRaw] = outputs[1].result as readonly [
+        readonly `0x${string}`[],
+        readonly {
+            tokenType: number;
+            rateProvider: `0x${string}`;
+            paysYieldFees: boolean;
+        }[],
+        readonly bigint[],
+        readonly bigint[],
+    ];
     const poolTokens = getSortedTokens(poolState.tokens, chainId);
     const tokenAmounts = poolTokens.map((token, i) =>
-        TokenAmount.fromScale18Amount(token, balancesScale18[i]),
+        TokenAmount.fromRawAmount(token, balancesRaw[i]),
     );
 
     return { tokenAmounts, totalShares };
