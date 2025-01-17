@@ -197,6 +197,16 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
             slot: 3,
         },
+        sDAI: {
+            address: '0xaf204776c7245bf4147c2612bf6e5972ee483701',
+            decimals: 18,
+            slot: 0,
+        },
+        BRLA: {
+            address: '0xfecb3f7c54e2caae9dc6ac9060a822d47e053760',
+            decimals: 18,
+            slot: 51,
+        },
     },
 };
 
@@ -250,6 +260,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
             address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
             type: PoolType.MetaStable,
+            decimals: 18,
+            slot: 0,
+        },
+        steakUSDC_csUSDL: {
+            id: '0x5dd88b3aa3143173eb26552923922bdf33f50949',
+            address: '0x5dd88b3aa3143173eb26552923922bdf33f50949',
+            type: PoolType.Stable,
             decimals: 18,
             slot: 0,
         },
@@ -344,6 +361,15 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         MOCK_STABLE_POOL: {
             address: '0x5b17fb19b8c44f126e87882e7baa32153edcaf1d',
             id: '0x5b17fb19b8c44f126e87882e7baa32153edcaf1d',
+            type: PoolType.Stable,
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.GNOSIS_CHAIN]: {
+        SDAI_BRLA_POOL: {
+            address: '0xa91c3c043051e7e680b61d79b3a733d3e2c0fb5e',
+            id: '0xa91c3c043051e7e680b61d79b3a733d3e2c0fb5e',
             type: PoolType.Stable,
             decimals: 18,
             slot: 0,
