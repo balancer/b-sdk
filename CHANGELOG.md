@@ -1,5 +1,15 @@
 # @balancer/sdk
 
+## 1.2.0
+
+### Minor Changes
+
+- 80b3e49: Add Sonic V3 support.
+
+### Patch Changes
+
+- 411ff7e: Bump viem version and undo custom sonic setup (as multicall3 is already defined in the new viem version)
+
 ## 1.1.0
 
 ### Minor Changes
