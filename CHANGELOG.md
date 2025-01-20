@@ -1,5 +1,15 @@
 # @balancer/sdk
 
+## 1.3.0
+
+### Minor Changes
+
+- 0734b88: permit2 helpers for pool init
+
+### Patch Changes
+
+- 4a68326: Fix getPoolStateWithBalancesV3 helper
+
 ## 1.2.0
 
 ### Minor Changes
