@@ -102,7 +102,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'GNOSIS_CHAIN_RPC_URL',
         fallBackRpc: 'https://rpc.ankr.com/gnosis',
         port: ANVIL_PORTS.GNOSIS_CHAIN,
-        forkBlockNumber: 35214423n,
+        forkBlockNumber: 38091627n,
     },
 };
 
