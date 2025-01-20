@@ -1,5 +1,5 @@
 import { Address, Hex, SwapKind } from '@/types';
-import { Client, PublicActions, WalletActions } from 'viem';
+import { Client, PublicActions, WalletActions, Account } from 'viem';
 import {
     AllowanceTransfer,
     Permit2Batch,
@@ -20,6 +20,7 @@ import {
     MaxSigDeadline,
 } from './constants';
 import { AddLiquidityBaseBuildCallInput } from '../addLiquidity/types';
+import { InitPoolInputV3 } from '../initPool/types';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
@@ -41,25 +42,50 @@ export type Permit2 = {
 };
 
 export class Permit2Helper {
-    static async signAddLiquidityApproval(
-        input: AddLiquidityBaseBuildCallInput & {
+    static async signInitPoolApproval(
+        input: InitPoolInputV3 & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
     ): Promise<Permit2> {
-        if (input.nonces && input.nonces.length !== input.amountsIn.length) {
-            throw new Error("Nonces length doesn't match amountsIn length");
-        }
-        if (
-            input.expirations &&
-            input.expirations.length !== input.amountsIn.length
-        ) {
-            throw new Error(
-                "Expirations length doesn't match amountsIn length",
+        validateNoncesAndExpirations(
+            input.nonces,
+            input.expirations,
+            input.amountsIn.length,
+        );
+        const spender = BALANCER_ROUTER[input.chainId];
+        const details: PermitDetails[] = [];
+        for (let i = 0; i < input.amountsIn.length; i++) {
+            details.push(
+                await getDetails(
+                    input.client,
+                    input.amountsIn[i].address,
+                    input.owner,
+                    spender,
+                    input.amountsIn[i].rawAmount,
+                    input.expirations ? input.expirations[i] : undefined,
+                    input.nonces ? input.nonces[i] : undefined,
+                ),
             );
         }
+        return signPermit2(input.client, input.owner, spender, details);
+    }
+
+    static async signAddLiquidityApproval(
+        input: AddLiquidityBaseBuildCallInput & {
+            client: PublicWalletClient;
+            owner: Address | Account;
+            nonces?: number[];
+            expirations?: number[];
+        },
+    ): Promise<Permit2> {
+        validateNoncesAndExpirations(
+            input.nonces,
+            input.expirations,
+            input.amountsIn.length,
+        );
         const amounts = getAmountsCall(input);
         const spender = BALANCER_ROUTER[input.chainId];
         const details: PermitDetails[] = [];
@@ -83,21 +109,15 @@ export class Permit2Helper {
         amountsIn: TokenAmount[];
         chainId: ChainId;
         client: PublicWalletClient;
-        owner: Address;
+        owner: Address | Account;
         nonces?: number[];
         expirations?: number[];
     }): Promise<Permit2> {
-        if (input.nonces && input.nonces.length !== input.amountsIn.length) {
-            throw new Error("Nonces length doesn't match amountsIn length");
-        }
-        if (
-            input.expirations &&
-            input.expirations.length !== input.amountsIn.length
-        ) {
-            throw new Error(
-                "Expirations length doesn't match amountsIn length",
-            );
-        }
+        validateNoncesAndExpirations(
+            input.nonces,
+            input.expirations,
+            input.amountsIn.length,
+        );
         const maxAmountsIn = input.amountsIn.map((a) => a.amount);
         const spender = BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId];
         const details: PermitDetails[] = [];
@@ -120,22 +140,16 @@ export class Permit2Helper {
     static async signAddLiquidityBoostedApproval(
         input: AddLiquidityBaseBuildCallInput & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
     ): Promise<Permit2> {
-        if (input.nonces && input.nonces.length !== input.amountsIn.length) {
-            throw new Error("Nonces length doesn't match amountsIn length");
-        }
-        if (
-            input.expirations &&
-            input.expirations.length !== input.amountsIn.length
-        ) {
-            throw new Error(
-                "Expirations length doesn't match amountsIn length",
-            );
-        }
+        validateNoncesAndExpirations(
+            input.nonces,
+            input.expirations,
+            input.amountsIn.length,
+        );
         const amounts = getAmountsCall(input);
         const spender = BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId];
         const details: PermitDetails[] = [];
@@ -159,19 +173,12 @@ export class Permit2Helper {
     static async signAddLiquidityBufferApproval(
         input: AddLiquidityBufferBuildCallInput & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
     ): Promise<Permit2> {
-        if (input.nonces && input.nonces.length !== 2) {
-            throw new Error("Nonces length doesn't match amountsIn length");
-        }
-        if (input.expirations && input.expirations.length !== 2) {
-            throw new Error(
-                "Expirations length doesn't match amountsIn length",
-            );
-        }
+        validateNoncesAndExpirations(input.nonces, input.expirations, 2);
         const spender = BALANCER_BUFFER_ROUTER[input.chainId];
         const details: PermitDetails[] = [
             await getDetails(
@@ -199,19 +206,12 @@ export class Permit2Helper {
     static async signInitBufferApproval(
         input: InitBufferBuildCallInput & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonces?: number[];
             expirations?: number[];
         },
     ): Promise<Permit2> {
-        if (input.nonces && input.nonces.length !== 2) {
-            throw new Error("Nonces length doesn't match amountsIn length");
-        }
-        if (input.expirations && input.expirations.length !== 2) {
-            throw new Error(
-                "Expirations length doesn't match amountsIn length",
-            );
-        }
+        validateNoncesAndExpirations(input.nonces, input.expirations, 2);
         const spender = BALANCER_BUFFER_ROUTER[input.chainId];
         const details: PermitDetails[] = [
             await getDetails(
@@ -239,7 +239,7 @@ export class Permit2Helper {
     static async signSwapApproval(
         input: SwapBuildCallInputBase & {
             client: PublicWalletClient;
-            owner: Address;
+            owner: Address | Account;
             nonce?: number;
             expiration?: number;
         },
@@ -290,7 +290,7 @@ export class Permit2Helper {
 
 const signPermit2 = async (
     client: Client & WalletActions,
-    owner: Address,
+    owner: Address | Account,
     spender: Address,
     details: PermitDetails[],
     sigDeadline = MaxSigDeadline,
@@ -323,15 +323,16 @@ const signPermit2 = async (
 const getDetails = async (
     client: Client & PublicActions,
     token: Address,
-    owner: Address,
+    owner: Address | Account,
     spender: Address,
     amount = MaxAllowanceTransferAmount,
     expiration = Number(MaxAllowanceExpiration),
     nonce?: number,
 ) => {
+    const _owner = typeof owner === 'string' ? owner : owner.address;
     let _nonce: number;
     if (nonce === undefined) {
-        _nonce = await getNonce(client, token, owner, spender);
+        _nonce = await getNonce(client, token, _owner, spender);
     } else {
         _nonce = nonce;
     }
@@ -358,7 +359,20 @@ const getNonce = async (
         functionName: 'allowance',
         args: [owner, token, spender],
     });
-    const nonce = result[1];
+    const nonce = result[2];
 
     return nonce;
+};
+
+const validateNoncesAndExpirations = (
+    nonces: number[] | undefined,
+    expirations: number[] | undefined,
+    expectedLength: number,
+) => {
+    if (nonces && nonces.length !== expectedLength) {
+        throw new Error("Nonces length doesn't match expected length");
+    }
+    if (expirations && expirations.length !== expectedLength) {
+        throw new Error("Expirations length doesn't match expected length");
+    }
 };
