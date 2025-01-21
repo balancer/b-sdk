@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 1.4.0
+
+### Minor Changes
+
+- bd1aa32: Add Base and Arbitrum support for V3
+
 ## 1.3.0
 
 ### Minor Changes
