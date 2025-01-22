@@ -1,6 +1,4 @@
-import { InitPoolInput } from '@/entities/initPool';
 import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
-import { CreatePoolInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
@@ -17,11 +15,6 @@ import {
 } from '@/utils';
 
 export class InputValidatorGyro extends InputValidatorBase {
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
-        throw new Error('Method not implemented.');
-    }
-
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
@@ -46,10 +39,5 @@ export class InputValidatorGyro extends InputValidatorBase {
             );
         }
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);
-    }
-
-    validateCreatePool(input: CreatePoolInput): void {
-        console.log(input);
-        throw new Error('Method not implemented.');
     }
 }
