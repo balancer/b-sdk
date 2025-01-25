@@ -134,7 +134,7 @@ async function getAddBoostedUnbalancedResult(
         rpcUrl,
         amountsIn,
         kind: AddLiquidityKind.Unbalanced,
-        wrapUnderlying: [true, true],
+        wrapUnderlying: [true, true], // TODO: Handle more elegantly?
     };
 
     const priceImpactAmount = await addLiquidityUnbalancedBoosted(
