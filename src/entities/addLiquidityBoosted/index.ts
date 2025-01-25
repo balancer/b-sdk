@@ -32,18 +32,15 @@ import {
     balancerRouterAbi,
 } from '@/abi';
 
-import { InputValidator } from '../inputValidator/inputValidator';
-
 import { Hex } from '@/types';
 import {
     AddLiquidityBoostedBuildCallInput,
     AddLiquidityBoostedInput,
     AddLiquidityBoostedQueryOutput,
 } from './types';
+import { AddLiquidity } from '../addLiquidity';
 
-export class AddLiquidityBoostedV3 {
-    private readonly inputValidator: InputValidator = new InputValidator();
-
+export class AddLiquidityBoostedV3 extends AddLiquidity {
     async query(
         input: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,

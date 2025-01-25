@@ -102,7 +102,6 @@ describe('remove liquidity test', () => {
         });
         snapshot = await client.snapshot();
 
-        // Approve the Vault to spend Tokens on the users behalf via Permit2
         for (const token of boostedPool_USDC_USDT.tokens) {
             await approveSpenderOnPermit2(
                 client,
@@ -126,7 +125,7 @@ describe('remove liquidity test', () => {
 
         await doAddLiquidity({
             client,
-            addLiquidity: new AddLiquidityBoostedV3(), // TODO: debug linter type complaint
+            addLiquidity: new AddLiquidityBoostedV3(),
             addLiquidityInput,
             slippage: Slippage.fromPercentage('1'),
             poolState: boostedPool_USDC_USDT,
