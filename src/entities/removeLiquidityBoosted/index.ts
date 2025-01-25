@@ -8,7 +8,7 @@ import {
 
 import { Permit } from '@/entities/permitHelper';
 
-import { balancerCompositeLiquidityRouterAbi } from '@/abi';
+import { balancerCompositeLiquidityRouterBoostedAbi } from '@/abi';
 
 import { PoolStateWithUnderlyings } from '@/entities/types';
 
@@ -18,7 +18,7 @@ import { Token } from '@/entities/token';
 import { getAmountsCall } from '../removeLiquidity/helper';
 
 import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportionalQuery';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER } from '@/utils';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
 import {
     RemoveLiquidityBoostedBuildCallInput,
     RemoveLiquidityBoostedProportionalInput,
@@ -46,6 +46,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             input.sender ?? zeroAddress,
             input.userData ?? '0x',
             poolState.address,
+            input.unwrapWrapped,
             block,
         );
 
@@ -76,9 +77,10 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBoostedQueryOutput = {
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
             poolType: poolState.type,
             poolId: poolState.address,
+            unwrapWrapped: input.unwrapWrapped,
             removeLiquidityKind: RemoveLiquidityKind.Proportional,
             bptIn: TokenAmount.fromRawAmount(bptToken, input.bptIn.rawAmount),
             amountsOut,
@@ -98,10 +100,11 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const amounts = getAmountsCall(input);
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterAbi,
+            abi: balancerCompositeLiquidityRouterBoostedAbi,
             functionName: 'removeLiquidityProportionalFromERC4626Pool',
             args: [
                 input.poolId,
+                input.unwrapWrapped,
                 input.bptIn.amount,
                 amounts.minAmountsOut,
                 input.wethIsEth ?? false,
@@ -111,7 +114,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
 
         return {
             callData: callData,
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
             value: 0n, // always has 0 value
             maxBptIn: input.bptIn,
             minAmountsOut: amounts.minAmountsOut.map((amount, i) => {
@@ -138,7 +141,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterAbi,
+            abi: balancerCompositeLiquidityRouterBoostedAbi,
             functionName: 'permitBatchAndCall',
             args,
         });

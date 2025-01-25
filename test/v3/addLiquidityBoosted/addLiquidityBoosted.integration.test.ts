@@ -26,11 +26,12 @@ import {
     PublicWalletClient,
     AddLiquidityBoostedBuildCallInput,
     AddLiquidityBoostedInput,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
 } from '../../../src';
 import {
     setTokenBalances,
     approveSpenderOnTokens,
-    approveTokens,
+    approveSpenderOnPermit2,
     areBigIntsWithinPercent,
     TOKENS,
     assertTokenMatch,
@@ -39,11 +40,12 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 
-const protocolVersion = 3;
+// const protocolVersion = 3;
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const USDT = TOKENS[chainId].USDT_AAVE;
+const wrapUnderlying = [true, true];
 
 describe('Boosted AddLiquidity', () => {
     let client: PublicWalletClient & TestActions;
@@ -53,7 +55,11 @@ describe('Boosted AddLiquidity', () => {
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS[ChainId[chainId]],
+            undefined,
+            7562540n, // block after new composite liquidity router deployed
+        ));
 
         client = createTestClient({
             mode: 'anvil',
@@ -98,12 +104,14 @@ describe('Boosted AddLiquidity', () => {
     describe('permit 2 direct approval', () => {
         beforeEach(async () => {
             // Here We approve the Vault to spend Tokens on the users behalf via Permit2
-            await approveTokens(
-                client,
-                testAddress as Address,
-                [USDT.address, USDC.address] as Address[],
-                protocolVersion,
-            );
+            for (const token of boostedPool_USDC_USDT.tokens) {
+                await approveSpenderOnPermit2(
+                    client,
+                    testAddress,
+                    token.underlyingToken?.address ?? token.address,
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                );
+            }
         });
         describe('add liquidity unbalanced', () => {
             test('with tokens', async () => {
@@ -122,6 +130,7 @@ describe('Boosted AddLiquidity', () => {
                             address: USDT.address as Address,
                         },
                     ],
+                    wrapUnderlying,
                     kind: AddLiquidityKind.Unbalanced,
                     userData: '0x',
                 };
@@ -138,7 +147,7 @@ describe('Boosted AddLiquidity', () => {
                     };
 
                 const addLiquidityBuildCallOutput =
-                    await addLiquidityBoosted.buildCall(addLiquidityBuildInput);
+                    addLiquidityBoosted.buildCall(addLiquidityBuildInput);
 
                 const { transactionReceipt, balanceDeltas } =
                     await sendTransactionGetBalances(
@@ -184,6 +193,7 @@ describe('Boosted AddLiquidity', () => {
                             decimals: 18,
                             address: boostedPool_USDC_USDT.address,
                         },
+                        wrapUnderlying,
                         kind: AddLiquidityKind.Proportional,
                     };
                 const addLiquidityQueryOutput = await addLiquidityBoosted.query(
@@ -268,6 +278,7 @@ describe('Boosted AddLiquidity', () => {
                             decimals: 6,
                             address: USDC.address,
                         },
+                        wrapUnderlying,
                         kind: AddLiquidityKind.Proportional,
                     };
                 const addLiquidityQueryOutput = await addLiquidityBoosted.query(
@@ -363,6 +374,7 @@ describe('Boosted AddLiquidity', () => {
                             address: USDT.address as Address,
                         },
                     ],
+                    wrapUnderlying,
                     kind: AddLiquidityKind.Unbalanced,
                 };
 
@@ -433,6 +445,7 @@ describe('Boosted AddLiquidity', () => {
                             decimals: 18,
                             address: boostedPool_USDC_USDT.address,
                         },
+                        wrapUnderlying,
                         kind: AddLiquidityKind.Proportional,
                     };
 

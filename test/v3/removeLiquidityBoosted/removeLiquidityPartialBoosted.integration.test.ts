@@ -19,7 +19,7 @@ import {
     CHAINS,
     PublicWalletClient,
     Token,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     Slippage,
     RemoveLiquidityBoostedV3,
     RemoveLiquidityBoostedProportionalInput,
@@ -50,7 +50,8 @@ const parentBptToken = new Token(
 );
 // These are the underlying tokens
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
-const daiToken = new Token(chainId, WETH.address, WETH.decimals);
+const wethToken = new Token(chainId, WETH.address, WETH.decimals);
+const unwrapWrapped = [false, true]; // unwrapWrapped must match order of on chain state for pool tokens
 
 describe('V3 remove liquidity partial boosted', () => {
     let rpcUrl: string;
@@ -63,7 +64,11 @@ describe('V3 remove liquidity partial boosted', () => {
     let removeLiquidityInput: RemoveLiquidityBoostedProportionalInput;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS[ChainId[chainId]],
+            undefined,
+            7562540n, // block after new composite liquidity router deployed
+        ));
 
         client = createTestClient({
             mode: 'anvil',
@@ -98,6 +103,7 @@ describe('V3 remove liquidity partial boosted', () => {
                     slot: WETH.slot as number,
                 },
             ],
+            unwrapWrapped,
         );
 
         removeLiquidityInput = {
@@ -108,6 +114,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 decimals: 18,
                 rawAmount: bptAmount,
             },
+            unwrapWrapped,
             kind: RemoveLiquidityKind.Proportional,
         };
 
@@ -142,7 +149,7 @@ describe('V3 remove liquidity partial boosted', () => {
         expect(queryOutput.amountsOut.length).to.eq(
             partialBoostedPool_WETH_stataUSDT.tokens.length,
         );
-        validateTokenAmounts(queryOutput.amountsOut, [usdtToken, daiToken]);
+        validateTokenAmounts(queryOutput.amountsOut, [usdtToken, wethToken]);
     });
 
     describe('remove liquidity transaction', async () => {
@@ -152,7 +159,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 client,
                 testAddress,
                 parentBptToken.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             );
 
             const queryOutput = await removeLiquidityBoosted.query(
@@ -182,7 +189,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 ),
             );
             expect(removeLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             );
 
             // send remove liquidity transaction and check balance changes
@@ -216,7 +223,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 client,
                 testAddress,
                 parentBptToken.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             );
 
             const queryOutput = await removeLiquidityBoosted.query(
@@ -247,7 +254,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 ),
             );
             expect(removeLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             );
 
             const tokenAmountsForBalanceCheck = [

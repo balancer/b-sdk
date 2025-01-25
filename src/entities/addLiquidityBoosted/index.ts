@@ -26,8 +26,11 @@ import {
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuery';
 import { Token } from '../token';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER } from '@/utils';
-import { balancerCompositeLiquidityRouterAbi, balancerRouterAbi } from '@/abi';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
+import {
+    balancerCompositeLiquidityRouterBoostedAbi,
+    balancerRouterAbi,
+} from '@/abi';
 
 import { InputValidator } from '../inputValidator/inputValidator';
 
@@ -85,6 +88,7 @@ export class AddLiquidityBoostedV3 {
                     input.sender ?? zeroAddress,
                     input.userData ?? '0x',
                     poolState.address,
+                    input.wrapUnderlying,
                     maxAmountsIn,
                     block,
                 );
@@ -109,6 +113,7 @@ export class AddLiquidityBoostedV3 {
                         input.userData ?? '0x',
                         poolState.address,
                         bptAmount.rawAmount,
+                        input.wrapUnderlying,
                         block,
                     );
 
@@ -132,12 +137,13 @@ export class AddLiquidityBoostedV3 {
             poolId: poolState.id,
             poolType: poolState.type,
             addLiquidityKind: input.kind,
+            wrapUnderlying: input.wrapUnderlying,
             bptOut,
             amountsIn,
             chainId: input.chainId,
             protocolVersion: 3,
             userData: input.userData ?? '0x',
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
         };
 
         return output;
@@ -150,6 +156,7 @@ export class AddLiquidityBoostedV3 {
         const wethIsEth = input.wethIsEth ?? false;
         const args = [
             input.poolId,
+            input.wrapUnderlying,
             amounts.maxAmountsIn,
             amounts.minimumBpt,
             wethIsEth,
@@ -159,7 +166,7 @@ export class AddLiquidityBoostedV3 {
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Unbalanced: {
                 callData = encodeFunctionData({
-                    abi: balancerCompositeLiquidityRouterAbi,
+                    abi: balancerCompositeLiquidityRouterBoostedAbi,
                     functionName: 'addLiquidityUnbalancedToERC4626Pool',
                     args,
                 });
@@ -167,7 +174,7 @@ export class AddLiquidityBoostedV3 {
             }
             case AddLiquidityKind.Proportional: {
                 callData = encodeFunctionData({
-                    abi: balancerCompositeLiquidityRouterAbi,
+                    abi: balancerCompositeLiquidityRouterBoostedAbi,
                     functionName: 'addLiquidityProportionalToERC4626Pool',
                     args,
                 });
@@ -182,7 +189,7 @@ export class AddLiquidityBoostedV3 {
 
         return {
             callData,
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
             value,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,

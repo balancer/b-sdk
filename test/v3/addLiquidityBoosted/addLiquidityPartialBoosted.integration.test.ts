@@ -13,7 +13,7 @@ import {
 } from 'viem';
 import {
     Address,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     CHAINS,
     ChainId,
     PERMIT2,
@@ -57,10 +57,15 @@ describe('V3 add liquidity partial boosted', () => {
         TokenAmount.fromHumanAmount(usdtToken, '1'),
         TokenAmount.fromHumanAmount(wethToken, '0.02'),
     ];
+    const wrapUnderlying = [false, true]; // order must match on-chain state for pool tokens
 
     beforeAll(async () => {
         // setup chain and test client
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS[ChainId[chainId]],
+            undefined,
+            7562550n, // block after new composite liquidity router deployed
+        ));
 
         client = createTestClient({
             mode: 'anvil',
@@ -94,7 +99,7 @@ describe('V3 add liquidity partial boosted', () => {
                 client,
                 testAddress,
                 token.underlyingToken?.address ?? token.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             );
         }
 
@@ -118,6 +123,7 @@ describe('V3 add liquidity partial boosted', () => {
                     rawAmount: a.amount,
                     decimals: a.token.decimals,
                 })),
+                wrapUnderlying,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Unbalanced,
@@ -198,6 +204,7 @@ describe('V3 add liquidity partial boosted', () => {
                     rawAmount: referenceTokenAmount.amount,
                     decimals: referenceTokenAmount.token.decimals,
                 },
+                wrapUnderlying,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,

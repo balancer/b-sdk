@@ -11,7 +11,7 @@ import {
     TokenAmount,
 } from '@/entities';
 import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     ChainId,
     NATIVE_ASSETS,
     PERMIT2,
@@ -38,6 +38,7 @@ export async function GetBoostedBpt(
         decimals: number;
         slot: number;
     }[],
+    wrapUnderlying: boolean[],
 ): Promise<bigint> {
     await setTokenBalances(
         client,
@@ -49,6 +50,7 @@ export async function GetBoostedBpt(
 
     const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
         amountsIn,
+        wrapUnderlying,
         chainId,
         rpcUrl,
         kind: AddLiquidityKind.Unbalanced,
@@ -69,7 +71,7 @@ export async function GetBoostedBpt(
             client,
             testAddress,
             amount.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
         );
     }
 
@@ -114,7 +116,7 @@ export async function GetBoostedBpt(
             client,
             testAddress,
             amount.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             0n,
         );
     }
@@ -232,7 +234,7 @@ export const assertAddLiquidityBoostedUnbalanced = (
 
     expect(protocolVersion).toEqual(3);
     expect(bptOut.amount > 0n).to.be.true;
-    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId]);
+    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId]);
     expect(transactionReceipt.status).to.eq('success');
 
     // add one extra index for native token balance
@@ -279,7 +281,7 @@ export const assertAddLiquidityBoostedProportional = (
 
     expect(protocolVersion).toEqual(3);
     expect(bptOut.amount > 0n).to.be.true;
-    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId]);
+    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId]);
     expect(transactionReceipt.status).to.eq('success');
 
     // add one extra index for native token balance

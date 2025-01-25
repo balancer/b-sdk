@@ -25,7 +25,7 @@ import {
     PERMIT2,
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     PublicWalletClient,
     BALANCER_BUFFER_ROUTER,
 } from '@/utils';
@@ -129,7 +129,7 @@ export const approveToken = async (
                     client,
                     accountAddress,
                     tokenAddress,
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
                     amount,
                     deadline,
                 );
@@ -331,9 +331,9 @@ export async function sendTransactionGetBalances(
     // TODO - Leave this in as useful as basis for manual debug
     // await client.simulateContract({
     //     address:
-    //         BALANCER_COMPOSITE_LIQUIDITY_ROUTER[client.chain?.id as number],
+    //         BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[client.chain?.id as number],
     //     abi: [
-    //         ...balancerCompositeLiquidityRouterAbi,
+    //         ...balancerCompositeLiquidityRouterNestedAbi,
     //         ...vaultV3Abi,
     //         ...vaultExtensionAbi_V3,
     //         ...permit2Abi,

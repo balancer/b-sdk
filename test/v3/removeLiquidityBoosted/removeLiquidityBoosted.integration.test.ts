@@ -14,29 +14,27 @@ import {
 } from 'viem';
 
 import {
-    AddLiquidityProportionalInput,
+    AddLiquidityBoostedInput,
     AddLiquidityKind,
     RemoveLiquidityKind,
     Slippage,
     Hex,
     CHAINS,
     ChainId,
-    AddLiquidityInput,
     PERMIT2,
     Token,
     PublicWalletClient,
     AddLiquidityBoostedV3,
     RemoveLiquidityBoostedV3,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     RemoveLiquidityBoostedProportionalInput,
     PermitHelper,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
 } from 'src';
 import {
-    AddLiquidityTxInput,
     doAddLiquidity,
     setTokenBalances,
     approveSpenderOnTokens,
-    approveTokens,
+    approveSpenderOnPermit2,
     sendTransactionGetBalances,
     assertTokenMatch,
     TOKENS,
@@ -46,21 +44,23 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 
-const protocolVersion = 3;
-
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const USDT = TOKENS[chainId].USDT_AAVE;
+const unwrapWrapped = [true, true]; // unwrapWrapped must match order of on chain state for pool tokens
 
 describe('remove liquidity test', () => {
     let client: PublicWalletClient & TestActions;
-    let txInput: AddLiquidityTxInput;
     let rpcUrl: string;
     let snapshot: Hex;
     let testAddress: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS[ChainId[chainId]],
+            undefined,
+            7562540n, // block after new composite liquidity router deployed
+        ));
 
         client = createTestClient({
             mode: 'anvil',
@@ -95,36 +95,24 @@ describe('remove liquidity test', () => {
         snapshot = await client.snapshot();
     });
 
+    // Add liquidity before each test to prepare for remove liquidity
     beforeEach(async () => {
         await client.revert({
             id: snapshot,
         });
         snapshot = await client.snapshot();
 
-        // subapprovals for permit2 to the vault
-        // fine to do before each because it does not impact the
-        // requirement for BPT permits. (which are permits, not permit2)
-        // Here We approve the Vault to spend Tokens on the users behalf via Permit2
-        await approveTokens(
-            client,
-            testAddress as Address,
-            [USDT.address, USDC.address] as Address[],
-            protocolVersion,
-        );
+        // Approve the Vault to spend Tokens on the users behalf via Permit2
+        for (const token of boostedPool_USDC_USDT.tokens) {
+            await approveSpenderOnPermit2(
+                client,
+                testAddress,
+                token.underlyingToken?.address ?? token.address,
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+            );
+        }
 
-        // join the pool - via direct approval
-        const slippage: Slippage = Slippage.fromPercentage('1');
-
-        txInput = {
-            client,
-            addLiquidity: new AddLiquidityBoostedV3(),
-            slippage: slippage,
-            poolState: boostedPool_USDC_USDT,
-            testAddress,
-            addLiquidityInput: {} as AddLiquidityInput,
-        };
-
-        const input: AddLiquidityProportionalInput = {
+        const addLiquidityInput: AddLiquidityBoostedInput = {
             chainId: chainId,
             rpcUrl: rpcUrl,
             referenceAmount: {
@@ -133,11 +121,16 @@ describe('remove liquidity test', () => {
                 address: boostedPool_USDC_USDT.address,
             },
             kind: AddLiquidityKind.Proportional,
+            wrapUnderlying: [true, true],
         };
 
-        const _addLiquidityOutput = await doAddLiquidity({
-            ...txInput,
-            addLiquidityInput: input,
+        await doAddLiquidity({
+            client,
+            addLiquidity: new AddLiquidityBoostedV3(), // TODO: debug linter type complaint
+            addLiquidityInput,
+            slippage: Slippage.fromPercentage('1'),
+            poolState: boostedPool_USDC_USDT,
+            testAddress,
         });
     });
     describe('direct approval', () => {
@@ -147,7 +140,7 @@ describe('remove liquidity test', () => {
                 client,
                 testAddress,
                 [boostedPool_USDC_USDT.address] as Address[],
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             );
         });
         test('remove liquidity proportional', async () => {
@@ -162,6 +155,7 @@ describe('remove liquidity test', () => {
                         decimals: 18,
                         address: boostedPool_USDC_USDT.address,
                     },
+                    unwrapWrapped,
                     kind: RemoveLiquidityKind.Proportional,
                 };
 
@@ -254,6 +248,7 @@ describe('remove liquidity test', () => {
                         decimals: 18,
                         address: boostedPool_USDC_USDT.address,
                     },
+                    unwrapWrapped,
                     kind: RemoveLiquidityKind.Proportional,
                     sender: testAddress,
                     userData: '0x123',

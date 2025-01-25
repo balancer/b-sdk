@@ -32,8 +32,13 @@ const WETH = TOKENS[chainId].WETH;
 describe('PriceImpact V3', () => {
     let rpcUrl: string;
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS[ChainId[chainId]],
+            undefined,
+            7562540n, // block after new composite liquidity router deployed
+        ));
     });
+
     describe('Full Boosted Pool Boosted Pool AddLiquidity', () => {
         test('Close to proportional', async () => {
             const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
@@ -51,6 +56,7 @@ describe('PriceImpact V3', () => {
                         address: USDT.address as Address,
                     },
                 ],
+                wrapUnderlying: [true, true],
                 kind: AddLiquidityKind.Unbalanced,
                 userData: '0x',
             };
@@ -59,7 +65,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000042');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000605');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -80,6 +86,7 @@ describe('PriceImpact V3', () => {
                     },
                 ],
                 kind: AddLiquidityKind.Unbalanced,
+                wrapUnderlying: [true, true],
                 userData: '0x',
             };
             const priceImpactABA =
@@ -88,7 +95,7 @@ describe('PriceImpact V3', () => {
                     boostedPool_USDC_USDT,
                 );
             const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.0005511004');
+                PriceImpactAmount.fromDecimal('0.00183097705');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -104,6 +111,7 @@ describe('PriceImpact V3', () => {
                     },
                 ],
                 kind: AddLiquidityKind.Unbalanced,
+                wrapUnderlying: [true, true],
                 userData: '0x',
             };
             const priceImpactABA =
@@ -111,7 +119,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000492');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000211');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
@@ -134,6 +142,7 @@ describe('PriceImpact V3', () => {
                     },
                 ],
                 kind: AddLiquidityKind.Unbalanced,
+                wrapUnderlying: [false, true],
                 userData: '0x',
             };
             const priceImpactABA =
@@ -141,7 +150,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0000045');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0008225');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -162,6 +171,7 @@ describe('PriceImpact V3', () => {
                     },
                 ],
                 kind: AddLiquidityKind.Unbalanced,
+                wrapUnderlying: [false, true],
                 userData: '0x',
             };
             const priceImpactABA =
@@ -169,8 +179,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.000396375');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.00171675');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
@@ -198,7 +207,7 @@ describe('PriceImpact V3', () => {
                 nestedWithBoostedPool,
             );
             const priceImpactSpot = PriceImpactAmount.fromDecimal(
-                '0.005213821423105922',
+                '0.004208136163133692',
             );
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });

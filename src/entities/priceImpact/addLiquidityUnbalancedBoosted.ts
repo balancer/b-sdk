@@ -66,6 +66,7 @@ export async function addLiquidityUnbalancedBoosted(
         chainId: input.chainId,
         rpcUrl: input.rpcUrl,
         bptIn: bptOut.toInputAmount(),
+        unwrapWrapped: input.wrapUnderlying,
         kind: RemoveLiquidityKind.Proportional,
     };
     const { amountsOut } = await removeLiquidity.query(

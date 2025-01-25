@@ -14,9 +14,9 @@ import {
 import { Token } from '@/entities/token';
 import { getAmounts, getValue } from '@/entities/utils';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, CHAINS } from '@/utils';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
 import {
-    balancerCompositeLiquidityRouterAbi,
+    balancerCompositeLiquidityRouterNestedAbi,
     permit2Abi,
     vaultExtensionAbi_V3,
     vaultV3Abi,
@@ -70,7 +70,7 @@ export class AddLiquidityNestedV3 {
         const bptToken = new Token(input.chainId, parentPool.address, 18);
 
         return {
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[input.chainId],
             parentPool: parentPool.address,
             chainId: input.chainId,
             amountsIn: mainTokens.map((t, i) =>
@@ -90,7 +90,7 @@ export class AddLiquidityNestedV3 {
         const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
         const wethIsEth = input.wethIsEth ?? false;
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbi,
             functionName: 'addLiquidityUnbalancedNestedPool',
             args: [
                 input.parentPool,
@@ -103,7 +103,7 @@ export class AddLiquidityNestedV3 {
         });
         return {
             callData,
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[input.chainId],
             value: getValue(input.amountsIn, wethIsEth),
             minBptOut,
         };
@@ -124,7 +124,7 @@ export class AddLiquidityNestedV3 {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbi,
             functionName: 'permitBatchAndCall',
             args,
         });
@@ -150,9 +150,9 @@ export class AddLiquidityNestedV3 {
         });
 
         const { result: bptAmountOut } = await client.simulateContract({
-            address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
             abi: [
-                ...balancerCompositeLiquidityRouterAbi,
+                ...balancerCompositeLiquidityRouterNestedAbi,
                 ...vaultV3Abi,
                 ...vaultExtensionAbi_V3,
                 ...permit2Abi,

@@ -14,7 +14,7 @@ import {
 } from 'viem';
 import {
     Address,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     CHAINS,
     ChainId,
     PERMIT2,
@@ -158,7 +158,7 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
                     client,
                     testAddress,
                     amount.address,
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
                 );
             }
 
@@ -177,7 +177,7 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
             );
             expect(addLiquidityBuildCallOutput.value === 0n).to.be.true;
             expect(addLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
             );
 
             // send add liquidity transaction and check balance changes
@@ -244,7 +244,7 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
                     client,
                     testAddress,
                     amount.address,
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
                 );
             }
 
@@ -267,7 +267,7 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
                     addLiquidityInput.amountsIn[0].rawAmount,
             ).to.be.true;
             expect(addLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
             );
 
             // send add liquidity transaction and check balance changes

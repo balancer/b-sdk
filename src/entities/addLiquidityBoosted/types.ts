@@ -9,6 +9,7 @@ export type AddLiquidityBoostedProportionalInput = {
     rpcUrl: string;
     referenceAmount: InputAmount;
     kind: AddLiquidityKind.Proportional;
+    wrapUnderlying: boolean[];
     sender?: Address;
     userData?: Hex;
 };
@@ -18,6 +19,7 @@ export type AddLiquidityBoostedUnbalancedInput = {
     rpcUrl: string;
     amountsIn: InputAmount[];
     kind: AddLiquidityKind.Unbalanced;
+    wrapUnderlying: boolean[];
     sender?: Address;
     userData?: Hex;
 };
@@ -30,6 +32,7 @@ export type AddLiquidityBoostedQueryOutput = {
     poolId: Hex;
     poolType: string;
     addLiquidityKind: AddLiquidityKind;
+    wrapUnderlying: boolean[];
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
     chainId: number;
