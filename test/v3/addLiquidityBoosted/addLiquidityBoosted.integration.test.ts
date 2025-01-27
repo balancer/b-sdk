@@ -6,6 +6,7 @@ config();
 import {
     Address,
     createTestClient,
+    erc4626Abi,
     http,
     parseUnits,
     publicActions,
@@ -50,7 +51,7 @@ import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const USDT = TOKENS[chainId].USDT_AAVE;
-const stataUSDC = TOKENS[chainId].stataUSDC;
+const stataUSDT = TOKENS[chainId].stataUSDT;
 
 // These are the underlying tokens
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
@@ -83,20 +84,35 @@ describe('Boosted AddLiquidity', () => {
         await setTokenBalances(
             client,
             testAddress,
-            [USDT.address, USDC.address, stataUSDC.address] as Address[],
-            [USDT.slot, USDC.slot, stataUSDC.slot] as number[],
+            [USDT.address, USDC.address] as Address[],
+            [USDT.slot, USDC.slot] as number[],
             [
-                parseUnits('100', USDT.decimals),
-                parseUnits('100', USDC.decimals),
-                parseUnits('100', stataUSDC.decimals),
+                parseUnits('1000', USDT.decimals),
+                parseUnits('1000', USDC.decimals),
             ],
         );
+
+        // set erc4626 token balance
+        await approveSpenderOnTokens(
+            client,
+            testAddress,
+            [USDT.address],
+            stataUSDT.address,
+        );
+        await client.writeContract({
+            account: testAddress,
+            chain: CHAINS[chainId],
+            abi: erc4626Abi,
+            address: stataUSDT.address,
+            functionName: 'deposit',
+            args: [parseUnits('500', USDT.decimals), testAddress],
+        });
 
         // approve Permit2 to spend users DAI/USDC, does not include the sub approvals
         await approveSpenderOnTokens(
             client,
             testAddress,
-            [USDT.address, USDC.address] as Address[],
+            [USDT.address, USDC.address, stataUSDT.address] as Address[],
             PERMIT2[chainId],
         );
 
@@ -112,14 +128,23 @@ describe('Boosted AddLiquidity', () => {
 
     describe('permit 2 direct approval', () => {
         beforeEach(async () => {
-            // Here We approve the Vault to spend Tokens on the users behalf via Permit2
+            // Here we approve the Vault to spend tokens on the users behalf via Permit2
             for (const token of boostedPool_USDC_USDT.tokens) {
                 await approveSpenderOnPermit2(
                     client,
                     testAddress,
-                    token.underlyingToken?.address ?? token.address,
+                    token.address,
                     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
                 );
+
+                if (token.underlyingToken) {
+                    await approveSpenderOnPermit2(
+                        client,
+                        testAddress,
+                        token.underlyingToken.address,
+                        BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                    );
+                }
             }
         });
         describe('unbalanced', () => {
@@ -257,8 +282,7 @@ describe('Boosted AddLiquidity', () => {
                 );
             });
 
-            // TODO: test case where only one underlying is wrapped
-            test.skip('with only one underlying token wrapped', async () => {
+            test('with only one underlying token wrapped', async () => {
                 const referenceAmount = {
                     rawAmount: 481201n,
                     decimals: 6,

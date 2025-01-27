@@ -3,7 +3,11 @@ import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
 import { isSameAddress, MathSol } from '@/utils';
 import { AddLiquidityProportionalInput } from '../addLiquidity/types';
-import { PoolState, PoolStateWithUnderlyingBalances, PoolStateWithUnderlyings } from '../types';
+import {
+    PoolState,
+    PoolStateWithUnderlyingBalances,
+    PoolStateWithUnderlyings,
+} from '../types';
 import { getPoolStateWithBalancesV2 } from './getPoolStateWithBalancesV2';
 import {
     getBoostedPoolStateWithBalancesV3,
@@ -162,6 +166,7 @@ export const getBptAmountFromReferenceAmountBoosted = async (
         ({ bptAmount } = calculateProportionalAmountsBoosted(
             poolStateWithUnderlyingBalances,
             input.referenceAmount,
+            input.wrapUnderlying,
         ));
     }
     return bptAmount;
@@ -170,13 +175,22 @@ export const getBptAmountFromReferenceAmountBoosted = async (
 export const calculateProportionalAmountsBoosted = (
     poolStateWithUnderlyingBalances: PoolStateWithUnderlyingBalances,
     referenceAmount: InputAmount,
+    wrapUnderlying: boolean[],
 ): { tokenAmounts: InputAmount[]; bptAmount: InputAmount } => {
     const poolStateWithBalances = {
         ...poolStateWithUnderlyingBalances,
-        tokens: poolStateWithUnderlyingBalances.tokens.map(
-            (t) => t.underlyingToken ?? t,
-        ),
+        tokens: poolStateWithUnderlyingBalances.tokens.map((t, i) => {
+            if (wrapUnderlying[i]) {
+                if (!t.underlyingToken) {
+                    throw new Error(
+                        'Underlying token not found for wrapped token',
+                    );
+                }
+                return t.underlyingToken;
+            }
+            return t;
+        }),
     };
 
     return calculateProportionalAmounts(poolStateWithBalances, referenceAmount);
-}
+};
