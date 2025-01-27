@@ -3,7 +3,7 @@ import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
 import { isSameAddress, MathSol } from '@/utils';
 import { AddLiquidityProportionalInput } from '../addLiquidity/types';
-import { PoolState, PoolStateWithUnderlyings } from '../types';
+import { PoolState, PoolStateWithUnderlyingBalances, PoolStateWithUnderlyings } from '../types';
 import { getPoolStateWithBalancesV2 } from './getPoolStateWithBalancesV2';
 import {
     getBoostedPoolStateWithBalancesV3,
@@ -159,18 +159,24 @@ export const getBptAmountFromReferenceAmountBoosted = async (
                 input.rpcUrl,
             );
 
-        // use underlying tokens as tokens if they exist (in case of a partial boosted pool)
-        const poolStateWithBalances = {
-            ...poolStateWithUnderlyingBalances,
-            tokens: poolStateWithUnderlyingBalances.tokens.map(
-                (t) => t.underlyingToken ?? t,
-            ),
-        };
-
-        ({ bptAmount } = calculateProportionalAmounts(
-            poolStateWithBalances,
+        ({ bptAmount } = calculateProportionalAmountsBoosted(
+            poolStateWithUnderlyingBalances,
             input.referenceAmount,
         ));
     }
     return bptAmount;
 };
+
+export const calculateProportionalAmountsBoosted = (
+    poolStateWithUnderlyingBalances: PoolStateWithUnderlyingBalances,
+    referenceAmount: InputAmount,
+): { tokenAmounts: InputAmount[]; bptAmount: InputAmount } => {
+    const poolStateWithBalances = {
+        ...poolStateWithUnderlyingBalances,
+        tokens: poolStateWithUnderlyingBalances.tokens.map(
+            (t) => t.underlyingToken ?? t,
+        ),
+    };
+
+    return calculateProportionalAmounts(poolStateWithBalances, referenceAmount);
+}
