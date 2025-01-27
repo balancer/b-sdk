@@ -40,8 +40,6 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 
-// const protocolVersion = 3;
-
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const USDT = TOKENS[chainId].USDT_AAVE;
@@ -55,11 +53,7 @@ describe('Boosted AddLiquidity', () => {
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS[ChainId[chainId]],
-            undefined,
-            7562540n, // block after new composite liquidity router deployed
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         client = createTestClient({
             mode: 'anvil',

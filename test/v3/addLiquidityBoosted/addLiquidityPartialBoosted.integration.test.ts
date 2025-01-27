@@ -61,11 +61,7 @@ describe('V3 add liquidity partial boosted', () => {
 
     beforeAll(async () => {
         // setup chain and test client
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS[ChainId[chainId]],
-            undefined,
-            7562550n, // block after new composite liquidity router deployed
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         client = createTestClient({
             mode: 'anvil',

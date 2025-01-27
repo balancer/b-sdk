@@ -56,11 +56,7 @@ describe('remove liquidity test', () => {
     let testAddress: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS[ChainId[chainId]],
-            undefined,
-            7562540n, // block after new composite liquidity router deployed
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         client = createTestClient({
             mode: 'anvil',
