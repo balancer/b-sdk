@@ -38,9 +38,11 @@ import {
     AddLiquidityBoostedInput,
     AddLiquidityBoostedQueryOutput,
 } from './types';
-import { AddLiquidity } from '../addLiquidity';
+import { InputValidator } from '../inputValidator/inputValidator';
 
-export class AddLiquidityBoostedV3 extends AddLiquidity {
+export class AddLiquidityBoostedV3 {
+    private readonly inputValidator: InputValidator = new InputValidator();
+
     async query(
         input: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
