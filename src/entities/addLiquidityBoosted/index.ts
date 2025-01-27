@@ -104,7 +104,7 @@ export class AddLiquidityBoostedV3 {
                     poolState,
                 );
 
-                const exactAmountsInNumbers =
+                const [tokensIn, exactAmountsInNumbers] =
                     await doAddLiquidityProportionalQuery(
                         input.rpcUrl,
                         input.chainId,
@@ -116,13 +116,33 @@ export class AddLiquidityBoostedV3 {
                         block,
                     );
 
-                // Amounts are mapped to child tokens of the pool
-                amountsIn = childTokens.map((t, i) =>
-                    TokenAmount.fromRawAmount(
-                        new Token(input.chainId, t.address, t.decimals),
+                amountsIn = tokensIn.map((tokenInAddress, i) => {
+                    const decimals = poolState.tokens.find((t) => {
+                        const tokenAddress = tokenInAddress.toLowerCase();
+                        return (
+                            t.address.toLowerCase() === tokenAddress ||
+                            (t.underlyingToken &&
+                                t.underlyingToken.address.toLowerCase() ===
+                                    tokenAddress)
+                        );
+                    })?.decimals;
+
+                    if (!decimals)
+                        throw new Error(
+                            `Token decimals missing for ${tokenInAddress}`,
+                        );
+
+                    const token = new Token(
+                        input.chainId,
+                        tokenInAddress,
+                        decimals,
+                    );
+
+                    return TokenAmount.fromRawAmount(
+                        token,
                         exactAmountsInNumbers[i],
-                    ),
-                );
+                    );
+                });
 
                 bptOut = TokenAmount.fromRawAmount(
                     bptToken,

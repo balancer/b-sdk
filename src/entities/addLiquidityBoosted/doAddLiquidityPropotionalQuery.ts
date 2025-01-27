@@ -21,14 +21,14 @@ export const doAddLiquidityProportionalQuery = async (
     exactBptAmountOut: bigint,
     wrapUnderlying: boolean[],
     block?: bigint,
-): Promise<bigint[]> => {
+): Promise<[Address[], bigint[]]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
         chain: CHAINS[chainId],
     });
 
     const {
-        result: [, exactAmountsIn],
+        result: [tokensIn, exactAmountsIn],
     } = await client.simulateContract({
         address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
         abi: [
@@ -47,5 +47,6 @@ export const doAddLiquidityProportionalQuery = async (
         ],
         blockNumber: block,
     });
-    return [...exactAmountsIn];
+
+    return [[...tokensIn], [...exactAmountsIn]];
 };

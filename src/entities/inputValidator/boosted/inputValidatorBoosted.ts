@@ -14,20 +14,22 @@ export class InputValidatorBoosted extends InputValidatorBase {
         }
 
         if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {
-            // Child tokens are the lower most tokens of the pool, this will be the underlying token if it exists
-            const childTokens = poolState.tokens.map((t) => {
-                if (t.underlyingToken)
-                    return t.underlyingToken.address.toLowerCase();
-                return t.address.toLowerCase();
-            });
+            // List of all tokens that can be added to the pool
+            const poolTokens = poolState.tokens
+                .flatMap((token) => [
+                    token.address,
+                    token.underlyingToken?.address,
+                ])
+                .filter(Boolean);
+
             addLiquidityInput.amountsIn.forEach((a) => {
                 if (
-                    !childTokens.includes(
+                    !poolTokens.includes(
                         a.address.toLowerCase() as `0x${string}`,
                     )
                 ) {
                     throw new Error(
-                        `Address ${a.address} is not contained in the pool's child tokens.`,
+                        `Address ${a.address} is not contained in the pool's parent or child tokens.`,
                     );
                 }
             });

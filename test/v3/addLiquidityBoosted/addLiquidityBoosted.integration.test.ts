@@ -148,7 +148,8 @@ describe('Boosted AddLiquidity', () => {
             }
         });
         describe('unbalanced', () => {
-            test('with tokens', async () => {
+            test('with both underlying tokens wrapped', async () => {
+                const wrapUnderlying = [true, true];
                 const wethIsEth = false;
                 const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
                     {
@@ -159,7 +160,58 @@ describe('Boosted AddLiquidity', () => {
                             rawAmount: a.amount,
                             decimals: a.token.decimals,
                         })),
-                        wrapUnderlying: [true, true],
+                        wrapUnderlying,
+                        kind: AddLiquidityKind.Unbalanced,
+                    };
+
+                const txInput: AddLiquidityBoostedTxInput = {
+                    client,
+                    addLiquidityBoosted,
+                    addLiquidityBoostedInput,
+                    testAddress,
+                    poolStateWithUnderlyings: boostedPool_USDC_USDT,
+                    slippage: Slippage.fromPercentage('1'),
+                    wethIsEth,
+                };
+
+                const {
+                    addLiquidityBoostedQueryOutput,
+                    addLiquidityBuildCallOutput,
+                    tokenAmountsForBalanceCheck,
+                    txOutput,
+                } = await doAddLiquidityBoosted(txInput);
+
+                assertAddLiquidityBoostedUnbalanced(
+                    {
+                        addLiquidityBoostedQueryOutput,
+                        addLiquidityBuildCallOutput,
+                        tokenAmountsForBalanceCheck,
+                        txOutput,
+                    },
+                    wethIsEth,
+                );
+            });
+
+            test('with only one underlying token wrapped', async () => {
+                const wrapUnderlying = [true, false];
+                const wethIsEth = false;
+                const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
+                    {
+                        chainId,
+                        rpcUrl,
+                        amountsIn: [
+                            {
+                                address: USDC.address,
+                                rawAmount: 1000000n,
+                                decimals: USDC.decimals,
+                            },
+                            {
+                                address: stataUSDT.address,
+                                rawAmount: 2000000n,
+                                decimals: stataUSDT.decimals,
+                            },
+                        ],
+                        wrapUnderlying,
                         kind: AddLiquidityKind.Unbalanced,
                     };
 
@@ -326,6 +378,34 @@ describe('Boosted AddLiquidity', () => {
                     wethIsEth,
                 );
             });
+        });
+
+        test('query returns correct tokens', async () => {
+            const referenceAmount = {
+                rawAmount: 481201n,
+                decimals: 6,
+                address: USDC.address,
+            };
+            const wrapUnderlying = [true, false];
+
+            const addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput =
+                {
+                    chainId,
+                    rpcUrl,
+                    referenceAmount,
+                    wrapUnderlying,
+                    kind: AddLiquidityKind.Proportional,
+                };
+
+            const addLiquidityQueryOutput = await addLiquidityBoosted.query(
+                addLiquidityBoostedInput,
+                boostedPool_USDC_USDT,
+            );
+
+            const amountsIn = addLiquidityQueryOutput.amountsIn;
+
+            expect(amountsIn[0].token.address).to.eq(usdcToken.address);
+            expect(amountsIn[1].token.address).to.eq(stataUSDT.address);
         });
     });
 
