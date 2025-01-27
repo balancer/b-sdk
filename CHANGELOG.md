@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 1.4.1
+
+### Patch Changes
+
+- cca357f: Export calculateProportionalAmountsBoosted helper
+
 ## 1.4.0
 
 ### Minor Changes
