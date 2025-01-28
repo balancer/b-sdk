@@ -58,27 +58,43 @@ export class AddLiquidityBoostedV3 {
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
 
-        // Child tokens are the lowest most tokens. This will be underlying if it exists.
-        const childTokens = poolState.tokens.map((t) => {
-            if (t.underlyingToken) {
-                return t.underlyingToken;
-            }
-            return {
-                address: t.address,
-                decimals: t.decimals,
-                index: t.index,
-            };
-        });
-
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
+                // Use poolState to add token index to amountsIn
+                const tokensIn = input.amountsIn.map((amountIn) => {
+                    const tokenIn = poolState.tokens.find((t) => {
+                        const amountInAddress = amountIn.address.toLowerCase();
+                        return (
+                            t.address.toLowerCase() === amountInAddress ||
+                            (t.underlyingToken &&
+                                t.underlyingToken.address.toLowerCase() ===
+                                    amountInAddress)
+                        );
+                    });
+
+                    if (!tokenIn) {
+                        throw new Error(
+                            `Token not found in poolState: ${amountIn.address}`,
+                        );
+                    }
+
+                    const matchedToken =
+                        tokenIn.underlyingToken?.address.toLowerCase() ===
+                        amountIn.address.toLowerCase()
+                            ? tokenIn.underlyingToken
+                            : tokenIn;
+
+                    return {
+                        address: matchedToken.address,
+                        decimals: matchedToken.decimals,
+                        index: matchedToken.index,
+                    };
+                });
+
                 // It is allowed not not provide the same amount of TokenAmounts as inputs
                 // as the pool has tokens, in this case, the input tokens are filled with
                 // a default value ( 0 in this case ) to assure correct amounts in as the pool has tokens.
-                const sortedTokens = getSortedTokens(
-                    childTokens,
-                    input.chainId,
-                );
+                const sortedTokens = getSortedTokens(tokensIn, input.chainId);
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
 
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(

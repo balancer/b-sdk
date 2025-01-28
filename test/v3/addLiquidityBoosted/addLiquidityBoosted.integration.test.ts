@@ -56,6 +56,11 @@ const stataUSDT = TOKENS[chainId].stataUSDT;
 // These are the underlying tokens
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
 const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
+const stataUsdtToken = new Token(
+    chainId,
+    stataUSDT.address,
+    stataUSDT.decimals,
+);
 
 describe('Boosted AddLiquidity', () => {
     let client: PublicWalletClient & TestActions;
@@ -63,10 +68,24 @@ describe('Boosted AddLiquidity', () => {
     let snapshot: Hex;
     let testAddress: Address;
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
-    const amountsIn = [
+
+    const amountsInForSingleWrap = [
+        TokenAmount.fromHumanAmount(usdcToken, '1'),
+        TokenAmount.fromHumanAmount(stataUsdtToken, '2'),
+    ].map((a) => ({
+        address: a.token.address,
+        rawAmount: a.amount,
+        decimals: a.token.decimals,
+    }));
+
+    const amountsInForDoubleWrap = [
         TokenAmount.fromHumanAmount(usdcToken, '1'),
         TokenAmount.fromHumanAmount(usdtToken, '1'),
-    ];
+    ].map((a) => ({
+        address: a.token.address,
+        rawAmount: a.amount,
+        decimals: a.token.decimals,
+    }));
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
@@ -126,31 +145,56 @@ describe('Boosted AddLiquidity', () => {
         snapshot = await client.snapshot();
     });
 
-    test('query returns correct token addresses', async () => {
-        const referenceAmount = {
-            rawAmount: 481201n,
-            decimals: 6,
-            address: USDC.address,
-        };
-        const wrapUnderlying = [true, false];
+    describe('query', () => {
+        test('unbalanced returns correct tokens', async () => {
+            const wrapUnderlying = [true, false];
+            const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
+                {
+                    chainId,
+                    rpcUrl,
+                    amountsIn: amountsInForSingleWrap,
+                    wrapUnderlying,
+                    kind: AddLiquidityKind.Unbalanced,
+                };
 
-        const addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput = {
-            chainId,
-            rpcUrl,
-            referenceAmount,
-            wrapUnderlying,
-            kind: AddLiquidityKind.Proportional,
-        };
+            const addLiquidityQueryOutput = await addLiquidityBoosted.query(
+                addLiquidityBoostedInput,
+                boostedPool_USDC_USDT,
+            );
 
-        const addLiquidityQueryOutput = await addLiquidityBoosted.query(
-            addLiquidityBoostedInput,
-            boostedPool_USDC_USDT,
-        );
+            const amountsIn = addLiquidityQueryOutput.amountsIn;
 
-        const amountsIn = addLiquidityQueryOutput.amountsIn;
+            expect(amountsIn[0].token.address).to.eq(usdcToken.address);
+            expect(amountsIn[1].token.address).to.eq(stataUSDT.address);
+        });
 
-        expect(amountsIn[0].token.address).to.eq(usdcToken.address);
-        expect(amountsIn[1].token.address).to.eq(stataUSDT.address);
+        test('proportional returns correct tokens', async () => {
+            const wrapUnderlying = [true, false];
+            const referenceAmount = {
+                rawAmount: 481201n,
+                decimals: 6,
+                address: USDC.address,
+            };
+
+            const addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput =
+                {
+                    chainId,
+                    rpcUrl,
+                    referenceAmount,
+                    wrapUnderlying,
+                    kind: AddLiquidityKind.Proportional,
+                };
+
+            const addLiquidityQueryOutput = await addLiquidityBoosted.query(
+                addLiquidityBoostedInput,
+                boostedPool_USDC_USDT,
+            );
+
+            const amountsIn = addLiquidityQueryOutput.amountsIn;
+
+            expect(amountsIn[0].token.address).to.eq(usdcToken.address);
+            expect(amountsIn[1].token.address).to.eq(stataUSDT.address);
+        });
     });
 
     describe('permit 2 direct approval', () => {
@@ -182,11 +226,7 @@ describe('Boosted AddLiquidity', () => {
                     {
                         chainId,
                         rpcUrl,
-                        amountsIn: amountsIn.map((a) => ({
-                            address: a.token.address,
-                            rawAmount: a.amount,
-                            decimals: a.token.decimals,
-                        })),
+                        amountsIn: amountsInForDoubleWrap,
                         wrapUnderlying,
                         kind: AddLiquidityKind.Unbalanced,
                     };
@@ -226,18 +266,7 @@ describe('Boosted AddLiquidity', () => {
                     {
                         chainId,
                         rpcUrl,
-                        amountsIn: [
-                            {
-                                address: USDC.address,
-                                rawAmount: 1000000n,
-                                decimals: USDC.decimals,
-                            },
-                            {
-                                address: stataUSDT.address,
-                                rawAmount: 2000000n,
-                                decimals: stataUSDT.decimals,
-                            },
-                        ],
+                        amountsIn: amountsInForSingleWrap,
                         wrapUnderlying,
                         kind: AddLiquidityKind.Unbalanced,
                     };
@@ -414,18 +443,7 @@ describe('Boosted AddLiquidity', () => {
                 const input: AddLiquidityBoostedInput = {
                     chainId,
                     rpcUrl,
-                    amountsIn: [
-                        {
-                            rawAmount: 1000000n,
-                            decimals: 6,
-                            address: USDC.address as Address,
-                        },
-                        {
-                            rawAmount: 1000000n,
-                            decimals: 6,
-                            address: USDT.address as Address,
-                        },
-                    ],
+                    amountsIn: amountsInForDoubleWrap,
                     wrapUnderlying: [true, true],
                     kind: AddLiquidityKind.Unbalanced,
                 };
