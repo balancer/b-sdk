@@ -126,6 +126,33 @@ describe('Boosted AddLiquidity', () => {
         snapshot = await client.snapshot();
     });
 
+    test('query returns correct token addresses', async () => {
+        const referenceAmount = {
+            rawAmount: 481201n,
+            decimals: 6,
+            address: USDC.address,
+        };
+        const wrapUnderlying = [true, false];
+
+        const addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput = {
+            chainId,
+            rpcUrl,
+            referenceAmount,
+            wrapUnderlying,
+            kind: AddLiquidityKind.Proportional,
+        };
+
+        const addLiquidityQueryOutput = await addLiquidityBoosted.query(
+            addLiquidityBoostedInput,
+            boostedPool_USDC_USDT,
+        );
+
+        const amountsIn = addLiquidityQueryOutput.amountsIn;
+
+        expect(amountsIn[0].token.address).to.eq(usdcToken.address);
+        expect(amountsIn[1].token.address).to.eq(stataUSDT.address);
+    });
+
     describe('permit 2 direct approval', () => {
         beforeEach(async () => {
             // Here we approve the Vault to spend tokens on the users behalf via Permit2
@@ -378,34 +405,6 @@ describe('Boosted AddLiquidity', () => {
                     wethIsEth,
                 );
             });
-        });
-
-        test('query returns correct tokens', async () => {
-            const referenceAmount = {
-                rawAmount: 481201n,
-                decimals: 6,
-                address: USDC.address,
-            };
-            const wrapUnderlying = [true, false];
-
-            const addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput =
-                {
-                    chainId,
-                    rpcUrl,
-                    referenceAmount,
-                    wrapUnderlying,
-                    kind: AddLiquidityKind.Proportional,
-                };
-
-            const addLiquidityQueryOutput = await addLiquidityBoosted.query(
-                addLiquidityBoostedInput,
-                boostedPool_USDC_USDT,
-            );
-
-            const amountsIn = addLiquidityQueryOutput.amountsIn;
-
-            expect(amountsIn[0].token.address).to.eq(usdcToken.address);
-            expect(amountsIn[1].token.address).to.eq(stataUSDT.address);
         });
     });
 

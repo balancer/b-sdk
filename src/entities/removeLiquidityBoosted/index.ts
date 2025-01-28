@@ -25,7 +25,6 @@ import {
     RemoveLiquidityBoostedQueryOutput,
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
-import { getSortedTokens } from '../utils';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -39,38 +38,36 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             ...poolState,
             type: 'Boosted',
         });
-        const underlyingAmountsOut = await doRemoveLiquidityProportionalQuery(
-            input.rpcUrl,
-            input.chainId,
-            input.bptIn.rawAmount,
-            input.sender ?? zeroAddress,
-            input.userData ?? '0x',
-            poolState.address,
-            input.unwrapWrapped,
-            block,
-        );
 
-        // Child tokens are the lowest most tokens. This will be underlying if it exists.
-        const childTokens = poolState.tokens.map((t) => {
-            if (t.underlyingToken) {
-                return t.underlyingToken;
-            }
-            return {
-                address: t.address,
-                decimals: t.decimals,
-                index: t.index,
-            };
-        });
-
-        const sortedChildTokens = getSortedTokens(childTokens, input.chainId);
-
-        // amountsOut are in child tokens sorted in token registration order of wrapped tokens in the pool
-        const amountsOut = underlyingAmountsOut.map((amount, i) => {
-            const token = new Token(
+        const [tokensOut, underlyingAmountsOut] =
+            await doRemoveLiquidityProportionalQuery(
+                input.rpcUrl,
                 input.chainId,
-                sortedChildTokens[i].address,
-                sortedChildTokens[i].decimals,
+                input.bptIn.rawAmount,
+                input.sender ?? zeroAddress,
+                input.userData ?? '0x',
+                poolState.address,
+                input.unwrapWrapped,
+                block,
             );
+
+        // tokens out can be underlying or yield-bearing variant
+        const amountsOut = underlyingAmountsOut.map((amount, i) => {
+            const tokenOut = tokensOut[i];
+
+            const decimals = poolState.tokens.find((t) => {
+                return (
+                    t.address.toLowerCase() === tokenOut.toLowerCase() ||
+                    (t.underlyingToken &&
+                        t.underlyingToken.address.toLowerCase() ===
+                            tokenOut.toLowerCase())
+                );
+            })?.decimals;
+
+            if (!decimals)
+                throw new Error(`Token decimals missing for ${tokenOut}`);
+
+            const token = new Token(input.chainId, tokenOut, decimals);
             return TokenAmount.fromRawAmount(token, amount);
         });
 

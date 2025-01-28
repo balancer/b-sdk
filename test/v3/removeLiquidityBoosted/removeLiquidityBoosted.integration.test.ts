@@ -47,9 +47,9 @@ import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const USDT = TOKENS[chainId].USDT_AAVE;
-const unwrapWrapped = [true, true]; // unwrapWrapped must match order of on chain state for pool tokens
+const stataUSDT = TOKENS[chainId].stataUSDT;
 
-describe('remove liquidity test', () => {
+describe('remove liquidity boosted proportional', () => {
     let client: PublicWalletClient & TestActions;
     let rpcUrl: string;
     let snapshot: Hex;
@@ -128,6 +128,35 @@ describe('remove liquidity test', () => {
             testAddress,
         });
     });
+
+    test('query returns correct token addresses', async () => {
+        const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
+
+        const removeLiquidityInput: RemoveLiquidityBoostedProportionalInput = {
+            chainId: chainId,
+            rpcUrl: rpcUrl,
+            bptIn: {
+                rawAmount: 1000000000000000000n,
+                decimals: 18,
+                address: boostedPool_USDC_USDT.address,
+            },
+            unwrapWrapped: [true, false],
+            kind: RemoveLiquidityKind.Proportional,
+        };
+
+        const removeLiquidityQueryOutput = await removeLiquidityBoostedV3.query(
+            removeLiquidityInput,
+            boostedPool_USDC_USDT,
+        );
+
+        const amountsOut = removeLiquidityQueryOutput.amountsOut;
+
+        expect(amountsOut[0].token.address).to.eq(USDC.address.toLowerCase());
+        expect(amountsOut[1].token.address).to.eq(
+            stataUSDT.address.toLowerCase(),
+        );
+    });
+
     describe('direct approval', () => {
         beforeEach(async () => {
             // Approve the Composite liquidity router.
@@ -138,7 +167,7 @@ describe('remove liquidity test', () => {
                 BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             );
         });
-        test('remove liquidity proportional', async () => {
+        test('unwrap both tokens', async () => {
             const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
 
             const removeLiquidityInput: RemoveLiquidityBoostedProportionalInput =
@@ -150,7 +179,7 @@ describe('remove liquidity test', () => {
                         decimals: 18,
                         address: boostedPool_USDC_USDT.address,
                     },
-                    unwrapWrapped,
+                    unwrapWrapped: [true, true],
                     kind: RemoveLiquidityKind.Proportional,
                 };
 
@@ -229,6 +258,98 @@ describe('remove liquidity test', () => {
                 ),
             );
         });
+
+        test('unwrap only one token', async () => {
+            const removeLiquidityBoostedV3 = new RemoveLiquidityBoostedV3();
+
+            const removeLiquidityInput: RemoveLiquidityBoostedProportionalInput =
+                {
+                    chainId: chainId,
+                    rpcUrl: rpcUrl,
+                    bptIn: {
+                        rawAmount: 1000000000000000000n,
+                        decimals: 18,
+                        address: boostedPool_USDC_USDT.address,
+                    },
+                    unwrapWrapped: [true, false],
+                    kind: RemoveLiquidityKind.Proportional,
+                };
+
+            const removeLiquidityQueryOutput =
+                await removeLiquidityBoostedV3.query(
+                    removeLiquidityInput,
+                    boostedPool_USDC_USDT,
+                );
+
+            const removeLiquidityBuildInput = {
+                ...removeLiquidityQueryOutput,
+                slippage: Slippage.fromPercentage('1'),
+            };
+
+            const removeLiquidityBuildCallOutput =
+                removeLiquidityBoostedV3.buildCall(removeLiquidityBuildInput);
+
+            const { transactionReceipt, balanceDeltas } =
+                await sendTransactionGetBalances(
+                    [
+                        boostedPool_USDC_USDT.address,
+                        USDC.address as `0x${string}`,
+                        stataUSDT.address as `0x${string}`,
+                    ],
+                    client,
+                    testAddress,
+                    removeLiquidityBuildCallOutput.to,
+                    removeLiquidityBuildCallOutput.callData,
+                );
+            expect(transactionReceipt.status).to.eq('success');
+            expect(
+                removeLiquidityQueryOutput.amountsOut.map((amount) => {
+                    expect(amount.amount > 0).to.be.true;
+                }),
+            );
+
+            const expectedDeltas = [
+                removeLiquidityQueryOutput.bptIn.amount,
+                ...removeLiquidityQueryOutput.amountsOut.map(
+                    (amountOut) => amountOut.amount,
+                ),
+            ];
+            // Here we check that output diff is within an acceptable tolerance as buffers can have difference in queries/result
+            expectedDeltas.forEach((delta, i) => {
+                areBigIntsWithinPercent(delta, balanceDeltas[i], 0.001);
+            });
+            const expectedMinAmountsOut =
+                removeLiquidityQueryOutput.amountsOut.map((amountOut) =>
+                    removeLiquidityBuildInput.slippage.applyTo(
+                        amountOut.amount,
+                        -1,
+                    ),
+                );
+            expect(expectedMinAmountsOut).to.deep.eq(
+                removeLiquidityBuildCallOutput.minAmountsOut.map(
+                    (a) => a.amount,
+                ),
+            );
+
+            // make sure to pass Tokens in correct order
+            assertTokenMatch(
+                [
+                    new Token(
+                        111555111,
+                        USDC.address as Address,
+                        USDC.decimals,
+                    ),
+                    new Token(
+                        111555111,
+                        stataUSDT.address as Address,
+                        stataUSDT.decimals,
+                    ),
+                ],
+                removeLiquidityBuildCallOutput.minAmountsOut.map(
+                    (a) => a.token,
+                ),
+            );
+        });
     });
     describe('permit approval', () => {
         test('remove liquidity proportional', async () => {
@@ -243,7 +364,7 @@ describe('remove liquidity test', () => {
                         decimals: 18,
                         address: boostedPool_USDC_USDT.address,
                     },
-                    unwrapWrapped,
+                    unwrapWrapped: [true, true],
                     kind: RemoveLiquidityKind.Proportional,
                     sender: testAddress,
                     userData: '0x123',

@@ -17,7 +17,7 @@ import { Hex } from 'viem';
 
 export class AddLiquidity implements AddLiquidityBase {
     constructor(public config?: AddLiquidityConfig) {}
-    protected readonly inputValidator: InputValidator = new InputValidator();
+    private readonly inputValidator: InputValidator = new InputValidator();
 
     query(
         input: AddLiquidityInput,
