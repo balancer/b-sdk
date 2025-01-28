@@ -17,8 +17,8 @@ export class InputValidatorBoosted extends InputValidatorBase {
             // List of all tokens that can be added to the pool
             const poolTokens = poolState.tokens
                 .flatMap((token) => [
-                    token.address,
-                    token.underlyingToken?.address,
+                    token.address.toLowerCase(),
+                    token.underlyingToken?.address.toLowerCase(),
                 ])
                 .filter(Boolean);
 
