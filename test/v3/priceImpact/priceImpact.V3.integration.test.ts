@@ -199,6 +199,7 @@ describe('PriceImpact V3', () => {
                         decimals: USDC.decimals,
                     },
                 ],
+                wrapUnderlying: [false, true],
                 chainId,
                 rpcUrl,
             };
@@ -207,7 +208,7 @@ describe('PriceImpact V3', () => {
                 nestedWithBoostedPool,
             );
             const priceImpactSpot = PriceImpactAmount.fromDecimal(
-                '0.004208136163133692',
+                '0.10540652060304274',
             );
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });

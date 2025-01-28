@@ -9,6 +9,14 @@ import {
     AddLiquidityNestedInputV3,
     AddLiquidityNestedQueryOutputV3,
 } from './addLiquidityNestedV3/types';
+import { InputAmount } from '@/types';
+import { ChainId } from '@/utils';
+
+export type AddLiquidityNestedBaseInput = {
+    amountsIn: InputAmount[];
+    chainId: ChainId;
+    rpcUrl: string;
+};
 
 export type AddLiquidityNestedInput =
     | AddLiquidityNestedInputV2

@@ -1,15 +1,13 @@
 import { Address, Hex } from 'viem';
-import { InputAmount, PoolType } from '../../../types';
+import { PoolType } from '../../../types';
 import { ChainId } from '../../../utils';
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
 import { PoolKind } from '../../types';
 import { Slippage } from '@/entities/slippage';
+import { AddLiquidityNestedBaseInput } from '../types';
 
-export type AddLiquidityNestedInputV2 = {
-    amountsIn: InputAmount[];
-    chainId: ChainId;
-    rpcUrl: string;
+export type AddLiquidityNestedInputV2 = AddLiquidityNestedBaseInput & {
     fromInternalBalance?: boolean;
 };
 

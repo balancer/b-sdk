@@ -1,13 +1,11 @@
 import { Slippage } from '@/entities/slippage';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { InputAmount } from '@/types';
 import { ChainId } from '@/utils';
 import { Address, Hex } from 'viem';
+import { AddLiquidityNestedBaseInput } from '../types';
 
-export type AddLiquidityNestedInputV3 = {
-    amountsIn: InputAmount[];
-    chainId: ChainId;
-    rpcUrl: string;
+export type AddLiquidityNestedInputV3 = AddLiquidityNestedBaseInput & {
+    wrapUnderlying?: boolean[];
     sender?: Address;
     userData?: Hex;
 };
