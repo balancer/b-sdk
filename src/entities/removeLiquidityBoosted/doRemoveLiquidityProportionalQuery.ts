@@ -21,7 +21,7 @@ export const doRemoveLiquidityProportionalQuery = async (
     poolAddress: Address,
     unwrapWrapped: boolean[],
     block?: bigint,
-): Promise<[`0x${string}`[], bigint[]]> => {
+): Promise<[Address[], bigint[]]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
         chain: CHAINS[chainId],
