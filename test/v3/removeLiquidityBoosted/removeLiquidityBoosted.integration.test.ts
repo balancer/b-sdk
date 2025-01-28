@@ -116,7 +116,7 @@ describe('remove liquidity boosted proportional', () => {
                 address: boostedPool_USDC_USDT.address,
             },
             kind: AddLiquidityKind.Proportional,
-            wrapUnderlying: [true, true],
+            tokensIn: [USDC.address, USDT.address],
         };
 
         await doAddLiquidity({

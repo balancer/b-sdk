@@ -87,6 +87,9 @@ describe('Boosted AddLiquidity', () => {
         decimals: a.token.decimals,
     }));
 
+    const tokensInForSingleWrap = [USDC.address, stataUSDT.address];
+    const tokensInForDoubleWrap = [USDC.address, USDT.address];
+
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
@@ -147,13 +150,11 @@ describe('Boosted AddLiquidity', () => {
 
     describe('query', () => {
         test('unbalanced returns correct tokens', async () => {
-            const wrapUnderlying = [true, false];
             const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
                 {
                     chainId,
                     rpcUrl,
                     amountsIn: amountsInForSingleWrap,
-                    wrapUnderlying,
                     kind: AddLiquidityKind.Unbalanced,
                 };
 
@@ -169,7 +170,6 @@ describe('Boosted AddLiquidity', () => {
         });
 
         test('proportional returns correct tokens', async () => {
-            const wrapUnderlying = [true, false];
             const referenceAmount = {
                 rawAmount: 481201n,
                 decimals: 6,
@@ -181,7 +181,7 @@ describe('Boosted AddLiquidity', () => {
                     chainId,
                     rpcUrl,
                     referenceAmount,
-                    wrapUnderlying,
+                    tokensIn: tokensInForSingleWrap,
                     kind: AddLiquidityKind.Proportional,
                 };
 
@@ -220,14 +220,12 @@ describe('Boosted AddLiquidity', () => {
         });
         describe('unbalanced', () => {
             test('with both underlying tokens wrapped', async () => {
-                const wrapUnderlying = [true, true];
                 const wethIsEth = false;
                 const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
                     {
                         chainId,
                         rpcUrl,
                         amountsIn: amountsInForDoubleWrap,
-                        wrapUnderlying,
                         kind: AddLiquidityKind.Unbalanced,
                     };
 
@@ -260,14 +258,12 @@ describe('Boosted AddLiquidity', () => {
             });
 
             test('with only one underlying token wrapped', async () => {
-                const wrapUnderlying = [true, false];
                 const wethIsEth = false;
                 const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
                     {
                         chainId,
                         rpcUrl,
                         amountsIn: amountsInForSingleWrap,
-                        wrapUnderlying,
                         kind: AddLiquidityKind.Unbalanced,
                     };
 
@@ -306,7 +302,6 @@ describe('Boosted AddLiquidity', () => {
                     decimals: 18,
                     address: boostedPool_USDC_USDT.address,
                 };
-                const wrapUnderlying = [true, true];
                 const wethIsEth = false;
 
                 const addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput =
@@ -314,7 +309,7 @@ describe('Boosted AddLiquidity', () => {
                         chainId,
                         rpcUrl,
                         referenceAmount,
-                        wrapUnderlying,
+                        tokensIn: tokensInForDoubleWrap,
                         kind: AddLiquidityKind.Proportional,
                     };
 
@@ -351,7 +346,6 @@ describe('Boosted AddLiquidity', () => {
                     decimals: 6,
                     address: USDC.address,
                 };
-                const wrapUnderlying = [true, true];
                 const wethIsEth = false;
 
                 const addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput =
@@ -359,9 +353,10 @@ describe('Boosted AddLiquidity', () => {
                         chainId,
                         rpcUrl,
                         referenceAmount,
-                        wrapUnderlying,
+                        tokensIn: tokensInForDoubleWrap,
                         kind: AddLiquidityKind.Proportional,
                     };
+
                 const txInput: AddLiquidityBoostedTxInput = {
                     client,
                     addLiquidityBoosted,
@@ -396,7 +391,6 @@ describe('Boosted AddLiquidity', () => {
                     decimals: 6,
                     address: USDC.address,
                 };
-                const wrapUnderlying = [true, false];
                 const wethIsEth = false;
 
                 const addLiquidityBoostedInput: AddLiquidityBoostedProportionalInput =
@@ -404,7 +398,7 @@ describe('Boosted AddLiquidity', () => {
                         chainId,
                         rpcUrl,
                         referenceAmount,
-                        wrapUnderlying,
+                        tokensIn: tokensInForSingleWrap,
                         kind: AddLiquidityKind.Proportional,
                     };
                 const txInput: AddLiquidityBoostedTxInput = {
@@ -444,7 +438,6 @@ describe('Boosted AddLiquidity', () => {
                     chainId,
                     rpcUrl,
                     amountsIn: amountsInForDoubleWrap,
-                    wrapUnderlying: [true, true],
                     kind: AddLiquidityKind.Unbalanced,
                 };
 
@@ -515,7 +508,7 @@ describe('Boosted AddLiquidity', () => {
                             decimals: 18,
                             address: boostedPool_USDC_USDT.address,
                         },
-                        wrapUnderlying: [true, true],
+                        tokensIn: tokensInForDoubleWrap,
                         kind: AddLiquidityKind.Proportional,
                     };
 

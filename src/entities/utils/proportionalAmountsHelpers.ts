@@ -146,6 +146,7 @@ export const getBptAmountFromReferenceAmount = async (
 export const getBptAmountFromReferenceAmountBoosted = async (
     input: AddLiquidityBoostedProportionalInput,
     poolStateWithUnderlyings: PoolStateWithUnderlyings,
+    wrapUnderlying: boolean[],
 ): Promise<InputAmount> => {
     let bptAmount: InputAmount;
     if (
@@ -166,7 +167,7 @@ export const getBptAmountFromReferenceAmountBoosted = async (
         ({ bptAmount } = calculateProportionalAmountsBoosted(
             poolStateWithUnderlyingBalances,
             input.referenceAmount,
-            input.wrapUnderlying,
+            wrapUnderlying,
         ));
     }
     return bptAmount;
