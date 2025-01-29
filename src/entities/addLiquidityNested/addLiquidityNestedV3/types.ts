@@ -5,7 +5,6 @@ import { Address, Hex } from 'viem';
 import { AddLiquidityNestedBaseInput } from '../types';
 
 export type AddLiquidityNestedInputV3 = AddLiquidityNestedBaseInput & {
-    wrapUnderlying?: boolean[];
     sender?: Address;
     userData?: Hex;
 };

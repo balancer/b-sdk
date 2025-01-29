@@ -64,14 +64,13 @@ export async function addLiquidityNested(
             });
         }
         let addResult: AddResult;
-        if (isBoostedPool && 'wrapUnderlying' in input && input.wrapUnderlying)
+        if (isBoostedPool)
             addResult = await getAddBoostedUnbalancedResult(
                 addLiquidityBoosted,
                 input.chainId,
                 input.rpcUrl,
                 pool as NestedPoolV3,
                 amountsIn,
-                input.wrapUnderlying,
             );
         else
             addResult = await getAddUnbalancedResult(
@@ -129,14 +128,12 @@ async function getAddBoostedUnbalancedResult(
     rpcUrl: string,
     pool: NestedPoolV3,
     amountsIn: InputAmount[],
-    wrapUnderlying: boolean[],
 ): Promise<AddResult> {
     const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
         chainId,
         rpcUrl,
         amountsIn,
         kind: AddLiquidityKind.Unbalanced,
-        wrapUnderlying,
     };
 
     const priceImpactAmount = await addLiquidityUnbalancedBoosted(

@@ -55,10 +55,12 @@ export class AddLiquidityBoostedV3 {
         });
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
+        const wrapUnderlying: boolean[] = new Array(
+            poolState.tokens.length,
+        ).fill(false);
 
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
-        let wrapUnderlying: boolean[];
 
         type ExtendedMinimalToken = MinimalToken & {
             isUnderlyingToken: boolean;
@@ -87,8 +89,8 @@ export class AddLiquidityBoostedV3 {
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
                 // Infer wrapUnderlying from token addreses provided by amountsIn
-                const tokensIn: ExtendedMinimalToken[] = input.amountsIn
-                    .map((amountIn) => {
+                const tokensIn: ExtendedMinimalToken[] = input.amountsIn.map(
+                    (amountIn) => {
                         const amountInAddress = amountIn.address.toLowerCase();
                         const token = poolStateTokenMap[amountInAddress];
                         if (!token) {
@@ -96,17 +98,18 @@ export class AddLiquidityBoostedV3 {
                                 `Token not found in poolState: ${amountInAddress}`,
                             );
                         }
-
                         return token;
-                    })
-                    .sort((a, b) => a.index - b.index); // Sort by index to ensure match for wrapUnderlying values
+                    },
+                );
+                tokensIn.forEach((t) => {
+                    wrapUnderlying[t.index] = t.isUnderlyingToken;
+                });
 
                 // It is allowed not not provide the same amount of TokenAmounts as inputs
                 // as the pool has tokens, in this case, the input tokens are filled with
                 // a default value ( 0 in this case ) to assure correct amounts in as the pool has tokens.
                 const sortedTokens = getSortedTokens(tokensIn, input.chainId);
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
-                wrapUnderlying = tokensIn.map((t) => t.isUnderlyingToken);
 
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
                     input.rpcUrl,
@@ -126,15 +129,17 @@ export class AddLiquidityBoostedV3 {
                 break;
             }
             case AddLiquidityKind.Proportional: {
-                //User provides tokensIn addresses so we can infer if they need to be wrapped
-                wrapUnderlying = input.tokensIn
-                    .map((t) => {
-                        const token = poolStateTokenMap[t.toLowerCase()];
-                        if (!token)
-                            throw new Error(`Invalid token address: ${t}`);
-                        return token.isUnderlyingToken;
-                    })
-                    .sort((a, b) => a.index - b.index); // sort to match on chain order
+                // User provides tokensIn addresses so we can infer if they need to be wrapped
+
+                input.tokensIn.forEach((t) => {
+                    const tokenWithDetails =
+                        poolStateTokenMap[t.toLowerCase() as Address];
+                    if (!tokenWithDetails) {
+                        throw new Error(`Invalid token address: ${t}`);
+                    }
+                    wrapUnderlying[tokenWithDetails.index] =
+                        tokenWithDetails.isUnderlyingToken;
+                });
 
                 const bptAmount = await getBptAmountFromReferenceAmountBoosted(
                     input,

@@ -52,7 +52,6 @@ describe('PriceImpact V3', () => {
                         address: USDT.address as Address,
                     },
                 ],
-                wrapUnderlying: [true, true],
                 kind: AddLiquidityKind.Unbalanced,
                 userData: '0x',
             };
@@ -82,7 +81,6 @@ describe('PriceImpact V3', () => {
                     },
                 ],
                 kind: AddLiquidityKind.Unbalanced,
-                wrapUnderlying: [true, true],
                 userData: '0x',
             };
             const priceImpactABA =
@@ -107,7 +105,6 @@ describe('PriceImpact V3', () => {
                     },
                 ],
                 kind: AddLiquidityKind.Unbalanced,
-                wrapUnderlying: [true, true],
                 userData: '0x',
             };
             const priceImpactABA =
@@ -138,7 +135,6 @@ describe('PriceImpact V3', () => {
                     },
                 ],
                 kind: AddLiquidityKind.Unbalanced,
-                wrapUnderlying: [false, true],
                 userData: '0x',
             };
             const priceImpactABA =
@@ -167,7 +163,6 @@ describe('PriceImpact V3', () => {
                     },
                 ],
                 kind: AddLiquidityKind.Unbalanced,
-                wrapUnderlying: [false, true],
                 userData: '0x',
             };
             const priceImpactABA =
@@ -195,7 +190,6 @@ describe('PriceImpact V3', () => {
                         decimals: USDC.decimals,
                     },
                 ],
-                wrapUnderlying: [false, true],
                 chainId,
                 rpcUrl,
             };

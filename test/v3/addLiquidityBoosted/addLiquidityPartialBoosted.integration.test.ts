@@ -57,7 +57,6 @@ describe('V3 add liquidity partial boosted', () => {
         TokenAmount.fromHumanAmount(usdtToken, '1'),
         TokenAmount.fromHumanAmount(wethToken, '0.02'),
     ];
-    const wrapUnderlying = [false, true]; // order must match on-chain state for pool tokens
 
     beforeAll(async () => {
         // setup chain and test client
@@ -119,7 +118,6 @@ describe('V3 add liquidity partial boosted', () => {
                     rawAmount: a.amount,
                     decimals: a.token.decimals,
                 })),
-                wrapUnderlying,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Unbalanced,
@@ -200,16 +198,15 @@ describe('V3 add liquidity partial boosted', () => {
                     rawAmount: referenceTokenAmount.amount,
                     decimals: referenceTokenAmount.token.decimals,
                 },
-                wrapUnderlying,
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,
+                tokensIn: [USDT.address, WETH.address],
             };
         });
 
         test('with tokens', async () => {
             const wethIsEth = false;
-
             const txInput: AddLiquidityBoostedTxInput = {
                 client,
                 addLiquidityBoosted,
