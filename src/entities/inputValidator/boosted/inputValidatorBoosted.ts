@@ -3,6 +3,7 @@ import { PoolStateWithUnderlyings } from '@/entities/types';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { AddLiquidityKind } from '@/entities/addLiquidity/types';
 import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
+import { isSameAddress } from '@/utils';
 
 export class InputValidatorBoosted extends InputValidatorBase {
     validateAddLiquidityBoosted(
@@ -30,6 +31,29 @@ export class InputValidatorBoosted extends InputValidatorBase {
                     );
                 }
             });
+        }
+
+        if (addLiquidityInput.kind === AddLiquidityKind.Proportional) {
+            // if referenceAmount is not the BPT, it must be included in tokensIn
+            if (
+                !isSameAddress(
+                    addLiquidityInput.referenceAmount.address,
+                    poolState.address,
+                )
+            ) {
+                if (
+                    addLiquidityInput.tokensIn.findIndex((tokenIn) =>
+                        isSameAddress(
+                            tokenIn,
+                            addLiquidityInput.referenceAmount.address,
+                        ),
+                    ) === -1
+                ) {
+                    throw new Error(
+                        'tokensIn must contain referenceAmount token address',
+                    );
+                }
+            }
         }
     }
 }
