@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.0.0
+
+### Major Changes
+
+- 187fac2: new composite router for boosted operations with ability to wrap/unwrap single token
+
 ## 1.4.2
 
 ### Patch Changes
