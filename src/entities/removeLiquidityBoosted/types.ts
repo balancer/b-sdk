@@ -8,7 +8,7 @@ export type RemoveLiquidityBoostedProportionalInput = {
     chainId: number;
     rpcUrl: string;
     bptIn: InputAmount;
-    unwrapWrapped: boolean[];
+    tokensOut: Address[];
     kind: RemoveLiquidityKind.Proportional;
     sender?: Address;
     userData?: Hex;

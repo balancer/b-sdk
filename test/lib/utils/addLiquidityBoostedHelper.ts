@@ -38,7 +38,6 @@ export async function GetBoostedBpt(
         decimals: number;
         slot: number;
     }[],
-    wrapUnderlying: boolean[],
 ): Promise<bigint> {
     await setTokenBalances(
         client,
@@ -50,7 +49,6 @@ export async function GetBoostedBpt(
 
     const addLiquidityInput: AddLiquidityBoostedUnbalancedInput = {
         amountsIn,
-        wrapUnderlying,
         chainId,
         rpcUrl,
         kind: AddLiquidityKind.Unbalanced,

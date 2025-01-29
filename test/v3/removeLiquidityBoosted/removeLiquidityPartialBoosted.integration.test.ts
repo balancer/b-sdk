@@ -51,7 +51,6 @@ const parentBptToken = new Token(
 // These are the underlying tokens
 const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
 const wethToken = new Token(chainId, WETH.address, WETH.decimals);
-const unwrapWrapped = [false, true]; // unwrapWrapped must match order of on chain state for pool tokens
 
 describe('V3 remove liquidity partial boosted', () => {
     let rpcUrl: string;
@@ -99,7 +98,6 @@ describe('V3 remove liquidity partial boosted', () => {
                     slot: WETH.slot as number,
                 },
             ],
-            unwrapWrapped,
         );
 
         removeLiquidityInput = {
@@ -110,7 +108,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 decimals: 18,
                 rawAmount: bptAmount,
             },
-            unwrapWrapped,
+            tokensOut: [USDT.address, WETH.address],
             kind: RemoveLiquidityKind.Proportional,
         };
 

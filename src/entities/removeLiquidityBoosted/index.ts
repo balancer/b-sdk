@@ -1,4 +1,4 @@
-import { encodeFunctionData, zeroAddress } from 'viem';
+import { Address, encodeFunctionData, zeroAddress } from 'viem';
 
 import {
     RemoveLiquidityBase,
@@ -25,6 +25,7 @@ import {
     RemoveLiquidityBoostedQueryOutput,
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
+import { MinimalToken } from '@/data';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -39,6 +40,45 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             type: 'Boosted',
         });
 
+        type ExtendedMinimalToken = MinimalToken & {
+            isUnderlyingToken: boolean;
+        };
+
+        // Build a useful map of all pool tokens with an isUnderlyingToken flag
+        const poolStateTokenMap: Record<Address, ExtendedMinimalToken> = {};
+        poolState.tokens.forEach((t) => {
+            const underlyingToken = t.underlyingToken;
+            poolStateTokenMap[t.address.toLowerCase()] = {
+                index: t.index,
+                decimals: t.decimals,
+                address: t.address,
+                isUnderlyingToken: false,
+            };
+            if (underlyingToken) {
+                poolStateTokenMap[underlyingToken.address.toLowerCase()] = {
+                    index: underlyingToken.index,
+                    decimals: underlyingToken.decimals,
+                    address: underlyingToken.address,
+                    isUnderlyingToken: true,
+                };
+            }
+        });
+
+        const sortedTokensOutWithDetails = input.tokensOut
+            .map((t) => {
+                const tokenWithDetails =
+                    poolStateTokenMap[t.toLowerCase() as Address];
+                if (!tokenWithDetails) {
+                    throw new Error(`Invalid token address: ${t}`);
+                }
+                return tokenWithDetails;
+            })
+            .sort((a, b) => a.index - b.index);
+
+        const unwrapWrapped: boolean[] = sortedTokensOutWithDetails.map(
+            (t) => t.isUnderlyingToken,
+        );
+
         const [tokensOut, underlyingAmountsOut] =
             await doRemoveLiquidityProportionalQuery(
                 input.rpcUrl,
@@ -47,7 +87,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
                 input.sender ?? zeroAddress,
                 input.userData ?? '0x',
                 poolState.address,
-                input.unwrapWrapped,
+                unwrapWrapped,
                 block,
             );
 
@@ -77,7 +117,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
             poolType: poolState.type,
             poolId: poolState.address,
-            unwrapWrapped: input.unwrapWrapped,
+            unwrapWrapped,
             removeLiquidityKind: RemoveLiquidityKind.Proportional,
             bptIn: TokenAmount.fromRawAmount(bptToken, input.bptIn.rawAmount),
             amountsOut,

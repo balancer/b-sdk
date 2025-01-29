@@ -55,9 +55,7 @@ export class AddLiquidityBoostedV3 {
         });
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
-        const wrapUnderlying: boolean[] = new Array(
-            poolState.tokens.length,
-        ).fill(false);
+        const wrapUnderlying: boolean[] = [];
 
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
@@ -89,8 +87,8 @@ export class AddLiquidityBoostedV3 {
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
                 // Infer wrapUnderlying from token addreses provided by amountsIn
-                const tokensIn: ExtendedMinimalToken[] = input.amountsIn.map(
-                    (amountIn) => {
+                const tokensIn: ExtendedMinimalToken[] = input.amountsIn
+                    .map((amountIn) => {
                         const amountInAddress = amountIn.address.toLowerCase();
                         const token = poolStateTokenMap[amountInAddress];
                         if (!token) {
@@ -99,10 +97,11 @@ export class AddLiquidityBoostedV3 {
                             );
                         }
                         return token;
-                    },
-                );
+                    })
+                    .sort((a, b) => a.index - b.index); // sort by index so wrapUnderlying is in correct order
+
                 tokensIn.forEach((t) => {
-                    wrapUnderlying[t.index] = t.isUnderlyingToken;
+                    wrapUnderlying.push(t.isUnderlyingToken);
                 });
 
                 // It is allowed not not provide the same amount of TokenAmounts as inputs
@@ -131,14 +130,19 @@ export class AddLiquidityBoostedV3 {
             case AddLiquidityKind.Proportional: {
                 // User provides tokensIn addresses so we can infer if they need to be wrapped
 
-                input.tokensIn.forEach((t) => {
-                    const tokenWithDetails =
-                        poolStateTokenMap[t.toLowerCase() as Address];
-                    if (!tokenWithDetails) {
-                        throw new Error(`Invalid token address: ${t}`);
-                    }
-                    wrapUnderlying[tokenWithDetails.index] =
-                        tokenWithDetails.isUnderlyingToken;
+                const sortedTokensInWithDetails = input.tokensIn
+                    .map((t) => {
+                        const tokenWithDetails =
+                            poolStateTokenMap[t.toLowerCase() as Address];
+                        if (!tokenWithDetails) {
+                            throw new Error(`Invalid token address: ${t}`);
+                        }
+                        return tokenWithDetails;
+                    })
+                    .sort((a, b) => a.index - b.index);
+
+                sortedTokensInWithDetails.forEach((t) => {
+                    wrapUnderlying.push(t.isUnderlyingToken);
                 });
 
                 const bptAmount = await getBptAmountFromReferenceAmountBoosted(

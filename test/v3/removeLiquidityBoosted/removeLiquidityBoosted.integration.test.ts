@@ -140,7 +140,7 @@ describe('remove liquidity boosted proportional', () => {
                 decimals: 18,
                 address: boostedPool_USDC_USDT.address,
             },
-            unwrapWrapped: [true, false],
+            tokensOut: [USDC.address, stataUSDT.address],
             kind: RemoveLiquidityKind.Proportional,
         };
 
@@ -179,7 +179,7 @@ describe('remove liquidity boosted proportional', () => {
                         decimals: 18,
                         address: boostedPool_USDC_USDT.address,
                     },
-                    unwrapWrapped: [true, true],
+                    tokensOut: [USDC.address, USDT.address],
                     kind: RemoveLiquidityKind.Proportional,
                 };
 
@@ -271,7 +271,7 @@ describe('remove liquidity boosted proportional', () => {
                         decimals: 18,
                         address: boostedPool_USDC_USDT.address,
                     },
-                    unwrapWrapped: [true, false],
+                    tokensOut: [USDC.address, stataUSDT.address],
                     kind: RemoveLiquidityKind.Proportional,
                 };
 
@@ -364,7 +364,7 @@ describe('remove liquidity boosted proportional', () => {
                         decimals: 18,
                         address: boostedPool_USDC_USDT.address,
                     },
-                    unwrapWrapped: [true, true],
+                    tokensOut: [USDC.address, USDT.address],
                     kind: RemoveLiquidityKind.Proportional,
                     sender: testAddress,
                     userData: '0x123',
