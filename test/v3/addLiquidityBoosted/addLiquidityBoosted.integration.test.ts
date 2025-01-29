@@ -69,6 +69,7 @@ describe('Boosted AddLiquidity', () => {
     let testAddress: Address;
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
 
+    // for unbalanced inputs
     const amountsInForSingleWrap = [
         TokenAmount.fromHumanAmount(usdcToken, '1'),
         TokenAmount.fromHumanAmount(stataUsdtToken, '2'),
@@ -77,7 +78,6 @@ describe('Boosted AddLiquidity', () => {
         rawAmount: a.amount,
         decimals: a.token.decimals,
     }));
-
     const amountsInForDoubleWrap = [
         TokenAmount.fromHumanAmount(usdcToken, '1'),
         TokenAmount.fromHumanAmount(usdtToken, '1'),
@@ -87,6 +87,7 @@ describe('Boosted AddLiquidity', () => {
         decimals: a.token.decimals,
     }));
 
+    // for proportional inputs
     const tokensInForSingleWrap = [USDC.address, stataUSDT.address];
     const tokensInForDoubleWrap = [USDC.address, USDT.address];
 
