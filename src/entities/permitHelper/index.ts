@@ -1,5 +1,6 @@
+import { Account, Address, Hex } from 'viem';
+
 import { weightedPoolAbi_V3 } from '@/abi';
-import { Hex } from '@/types';
 import {
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
     BALANCER_ROUTER,
@@ -36,19 +37,17 @@ export class PermitHelper {
     static signRemoveLiquidityApproval = async (
         input: RemoveLiquidityBaseBuildCallInput & {
             client: PublicWalletClient;
-            owner: Hex;
+            owner: Hex | Account;
             nonce?: bigint;
             deadline?: bigint;
         },
     ): Promise<Permit> => {
         const amounts = getAmountsCall(input);
+        const _owner =
+            typeof input.owner === 'string' ? input.owner : input.owner.address;
         const nonce =
             input.nonce ??
-            (await getNonce(
-                input.client,
-                input.bptIn.token.address,
-                input.owner,
-            ));
+            (await getNonce(input.client, input.bptIn.token.address, _owner));
         const { permitApproval, permitSignature } = await signPermit(
             input.client,
             input.bptIn.token.address,
@@ -65,16 +64,18 @@ export class PermitHelper {
         bptAmountIn: TokenAmount;
         chainId: ChainId;
         client: PublicWalletClient;
-        owner: Hex;
+        owner: Hex | Account;
         nonce?: bigint;
         deadline?: bigint;
     }): Promise<Permit> => {
+        const _owner =
+            typeof input.owner === 'string' ? input.owner : input.owner.address;
         const nonce =
             input.nonce ??
             (await getNonce(
                 input.client,
                 input.bptAmountIn.token.address,
-                input.owner,
+                _owner,
             ));
         const { permitApproval, permitSignature } = await signPermit(
             input.client,
@@ -91,19 +92,17 @@ export class PermitHelper {
     static signRemoveLiquidityBoostedApproval = async (
         input: RemoveLiquidityBaseBuildCallInput & {
             client: PublicWalletClient;
-            owner: Hex;
+            owner: Hex | Account;
             nonce?: bigint;
             deadline?: bigint;
         },
     ): Promise<Permit> => {
         const amounts = getAmountsCall(input);
+        const _owner =
+            typeof input.owner === 'string' ? input.owner : input.owner.address;
         const nonce =
             input.nonce ??
-            (await getNonce(
-                input.client,
-                input.bptIn.token.address,
-                input.owner,
-            ));
+            (await getNonce(input.client, input.bptIn.token.address, _owner));
         const { permitApproval, permitSignature } = await signPermit(
             input.client,
             input.bptIn.token.address,
@@ -124,9 +123,9 @@ export class PermitHelper {
  */
 const signPermit = async (
     client: PublicWalletClient,
-    token: Hex,
-    owner: Hex,
-    spender: Hex,
+    token: Address,
+    owner: Address | Account,
+    spender: Address,
     nonce: bigint,
     amount = MAX_UINT256,
     deadline = MAX_UINT256,
@@ -144,8 +143,10 @@ const signPermit = async (
         ],
     };
 
+    const _owner = typeof owner === 'string' ? owner : owner.address;
+
     const message = {
-        owner,
+        owner: _owner,
         spender,
         value: amount,
         nonce,
@@ -162,7 +163,7 @@ const signPermit = async (
     });
     const permitApproval = {
         token,
-        owner,
+        owner: _owner,
         spender,
         amount,
         nonce,
