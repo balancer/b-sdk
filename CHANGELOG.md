@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 1.4.2
+
+### Patch Changes
+
+- dfdaa39: Add Missing isBuffer field for sorGetSwapPaths query.
+- da7dc97: Fix PermitHelper owner to support viem Account as input
+
 ## 1.4.1
 
 ### Patch Changes
