@@ -8,6 +8,7 @@ export type RemoveLiquidityBoostedProportionalInput = {
     chainId: number;
     rpcUrl: string;
     bptIn: InputAmount;
+    tokensOut: Address[];
     kind: RemoveLiquidityKind.Proportional;
     sender?: Address;
     userData?: Hex;
@@ -17,6 +18,7 @@ export type RemoveLiquidityBoostedQueryOutput = {
     poolType: string;
     poolId: Address;
     removeLiquidityKind: RemoveLiquidityKind.Proportional;
+    unwrapWrapped: boolean[];
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
     protocolVersion: 3;
@@ -32,6 +34,7 @@ export type RemoveLiquidityBoostedBuildCallInput = {
     removeLiquidityKind: RemoveLiquidityKind.Proportional;
     bptIn: TokenAmount;
     amountsOut: TokenAmount[];
+    unwrapWrapped: boolean[];
     protocolVersion: 3;
     chainId: number;
     slippage: Slippage;

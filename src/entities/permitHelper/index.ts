@@ -2,7 +2,8 @@ import { Account, Address, Hex } from 'viem';
 
 import { weightedPoolAbi_V3 } from '@/abi';
 import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     BALANCER_ROUTER,
     ChainId,
     MAX_UINT256,
@@ -81,7 +82,7 @@ export class PermitHelper {
             input.client,
             input.bptAmountIn.token.address,
             input.owner,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[input.chainId],
             nonce,
             input.bptAmountIn.amount, // maxBptIn
             input.deadline,
@@ -107,7 +108,7 @@ export class PermitHelper {
             input.client,
             input.bptIn.token.address,
             input.owner,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
             nonce,
             amounts.maxBptAmountIn,
             input.deadline,

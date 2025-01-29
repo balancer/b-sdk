@@ -23,7 +23,7 @@ import {
     AddLiquidityNestedInput,
     AddLiquidityNestedQueryOutputV3,
     Permit2Helper,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
 } from '@/index';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
@@ -129,7 +129,7 @@ describe('V3 add liquidity nested test, with Permit2 signature', () => {
             );
         expect(addLiquidityBuildCallOutput.value === 0n).to.be.true;
         expect(addLiquidityBuildCallOutput.to).to.eq(
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
         );
 
         // send add liquidity transaction and check balance changes

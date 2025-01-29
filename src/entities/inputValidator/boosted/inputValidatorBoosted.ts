@@ -1,7 +1,9 @@
+import { Address } from 'viem';
 import { PoolStateWithUnderlyings } from '@/entities/types';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { AddLiquidityKind } from '@/entities/addLiquidity/types';
 import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
+import { isSameAddress } from '@/utils';
 
 export class InputValidatorBoosted extends InputValidatorBase {
     validateAddLiquidityBoosted(
@@ -14,23 +16,44 @@ export class InputValidatorBoosted extends InputValidatorBase {
         }
 
         if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {
-            // Child tokens are the lower most tokens of the pool, this will be the underlying token if it exists
-            const childTokens = poolState.tokens.map((t) => {
-                if (t.underlyingToken)
-                    return t.underlyingToken.address.toLowerCase();
-                return t.address.toLowerCase();
-            });
+            // List of all tokens that can be added to the pool
+            const poolTokens = poolState.tokens
+                .flatMap((token) => [
+                    token.address.toLowerCase(),
+                    token.underlyingToken?.address.toLowerCase(),
+                ])
+                .filter(Boolean);
+
             addLiquidityInput.amountsIn.forEach((a) => {
-                if (
-                    !childTokens.includes(
-                        a.address.toLowerCase() as `0x${string}`,
-                    )
-                ) {
+                if (!poolTokens.includes(a.address.toLowerCase() as Address)) {
                     throw new Error(
-                        `Address ${a.address} is not contained in the pool's child tokens.`,
+                        `Address ${a.address} is not contained in the pool's parent or child tokens.`,
                     );
                 }
             });
+        }
+
+        if (addLiquidityInput.kind === AddLiquidityKind.Proportional) {
+            // if referenceAmount is not the BPT, it must be included in tokensIn
+            if (
+                !isSameAddress(
+                    addLiquidityInput.referenceAmount.address,
+                    poolState.address,
+                )
+            ) {
+                if (
+                    addLiquidityInput.tokensIn.findIndex((tokenIn) =>
+                        isSameAddress(
+                            tokenIn,
+                            addLiquidityInput.referenceAmount.address,
+                        ),
+                    ) === -1
+                ) {
+                    throw new Error(
+                        'tokensIn must contain referenceAmount token address',
+                    );
+                }
+            }
         }
     }
 }

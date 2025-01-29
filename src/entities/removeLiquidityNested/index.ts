@@ -10,7 +10,7 @@ import {
 import { RemoveLiquidityNestedV3 } from './removeLiquidityNestedV3';
 import { validateBuildCallInput } from './removeLiquidityNestedV2/validateInputs';
 import { Address, encodeFunctionData, Hex, zeroAddress } from 'viem';
-import { balancerCompositeLiquidityRouterAbi } from '@/abi';
+import { balancerCompositeLiquidityRouterNestedAbi } from '@/abi';
 
 export class RemoveLiquidityNested {
     async query(
@@ -66,7 +66,7 @@ export class RemoveLiquidityNested {
             [buildCallOutput.callData],
         ] as const;
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbi,
             functionName: 'permitBatchAndCall',
             args,
         });
