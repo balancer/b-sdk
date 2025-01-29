@@ -25,7 +25,7 @@ import {
     RemoveLiquidityBoostedQueryOutput,
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
-import { MinimalToken } from '@/data';
+import { buildPoolStateTokenMap } from '@/entities/utils';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -40,44 +40,19 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             type: 'Boosted',
         });
 
-        type ExtendedMinimalToken = MinimalToken & {
-            isUnderlyingToken: boolean;
-        };
+        const poolStateTokenMap = buildPoolStateTokenMap(poolState);
 
-        // Build a useful map of all pool tokens with an isUnderlyingToken flag
-        const poolStateTokenMap: Record<Address, ExtendedMinimalToken> = {};
-        poolState.tokens.forEach((t) => {
-            const underlyingToken = t.underlyingToken;
-            poolStateTokenMap[t.address.toLowerCase()] = {
-                index: t.index,
-                decimals: t.decimals,
-                address: t.address,
-                isUnderlyingToken: false,
-            };
-            if (underlyingToken) {
-                poolStateTokenMap[underlyingToken.address.toLowerCase()] = {
-                    index: underlyingToken.index,
-                    decimals: underlyingToken.decimals,
-                    address: underlyingToken.address,
-                    isUnderlyingToken: true,
-                };
-            }
-        });
-
-        const sortedTokensOutWithDetails = input.tokensOut
+        // Infer if token should be unwrapped using the tokensOut provided by user
+        const unwrapWrapped = input.tokensOut
             .map((t) => {
-                const tokenWithDetails =
-                    poolStateTokenMap[t.toLowerCase() as Address];
-                if (!tokenWithDetails) {
+                const tokenOut = poolStateTokenMap[t.toLowerCase() as Address];
+                if (!tokenOut) {
                     throw new Error(`Invalid token address: ${t}`);
                 }
-                return tokenWithDetails;
+                return tokenOut;
             })
-            .sort((a, b) => a.index - b.index);
-
-        const unwrapWrapped: boolean[] = sortedTokensOutWithDetails.map(
-            (t) => t.isUnderlyingToken,
-        );
+            .sort((a, b) => a.index - b.index) // sort by index to match the order of the pool tokens
+            .map((t) => t.isUnderlyingToken);
 
         const [tokensOut, underlyingAmountsOut] =
             await doRemoveLiquidityProportionalQuery(
@@ -91,21 +66,10 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
                 block,
             );
 
-        // tokens out can be underlying or yield-bearing variant
         const amountsOut = underlyingAmountsOut.map((amount, i) => {
             const tokenOut = tokensOut[i];
-
-            const decimals = poolState.tokens.find((t) => {
-                return (
-                    t.address.toLowerCase() === tokenOut.toLowerCase() ||
-                    (t.underlyingToken &&
-                        t.underlyingToken.address.toLowerCase() ===
-                            tokenOut.toLowerCase())
-                );
-            })?.decimals;
-
-            if (!decimals)
-                throw new Error(`Token decimals missing for ${tokenOut}`);
+            const { decimals } =
+                poolStateTokenMap[tokenOut.toLowerCase() as Address];
 
             const token = new Token(input.chainId, tokenOut, decimals);
             return TokenAmount.fromRawAmount(token, amount);

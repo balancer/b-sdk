@@ -219,6 +219,44 @@ describe('Boosted AddLiquidity', () => {
             }
         });
         describe('unbalanced', () => {
+            test('with only one token', async () => {
+                const wethIsEth = false;
+                const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
+                    {
+                        chainId,
+                        rpcUrl,
+                        amountsIn: [amountsInForDoubleWrap[0]],
+                        kind: AddLiquidityKind.Unbalanced,
+                    };
+
+                const txInput: AddLiquidityBoostedTxInput = {
+                    client,
+                    addLiquidityBoosted,
+                    addLiquidityBoostedInput,
+                    testAddress,
+                    poolStateWithUnderlyings: boostedPool_USDC_USDT,
+                    slippage: Slippage.fromPercentage('1'),
+                    wethIsEth,
+                };
+
+                const {
+                    addLiquidityBoostedQueryOutput,
+                    addLiquidityBuildCallOutput,
+                    tokenAmountsForBalanceCheck,
+                    txOutput,
+                } = await doAddLiquidityBoosted(txInput);
+
+                assertAddLiquidityBoostedUnbalanced(
+                    {
+                        addLiquidityBoostedQueryOutput,
+                        addLiquidityBuildCallOutput,
+                        tokenAmountsForBalanceCheck,
+                        txOutput,
+                    },
+                    wethIsEth,
+                );
+            });
+
             test('with both underlying tokens wrapped', async () => {
                 const wethIsEth = false;
                 const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
@@ -295,6 +333,7 @@ describe('Boosted AddLiquidity', () => {
                 );
             });
         });
+
         describe('proportional', () => {
             test('with bpt as reference token', async () => {
                 const referenceAmount = {
