@@ -107,7 +107,7 @@ describe('Boosted AddLiquidity', () => {
         await setTokenBalances(
             client,
             testAddress,
-            [USDT.address, USDC.address] as Address[],
+            [USDT.address, USDC.address],
             [USDT.slot, USDC.slot] as number[],
             [
                 parseUnits('1000', USDT.decimals),
@@ -135,7 +135,7 @@ describe('Boosted AddLiquidity', () => {
         await approveSpenderOnTokens(
             client,
             testAddress,
-            [USDT.address, USDC.address, stataUSDT.address] as Address[],
+            [USDT.address, USDC.address, stataUSDT.address],
             PERMIT2[chainId],
         );
 
@@ -508,8 +508,8 @@ describe('Boosted AddLiquidity', () => {
                     await sendTransactionGetBalances(
                         [
                             addLiquidityQueryOutput.bptOut.token.address,
-                            USDC.address as `0x${string}`,
-                            USDT.address as `0x${string}`,
+                            USDC.address,
+                            USDT.address,
                         ],
                         client,
                         testAddress,
@@ -570,7 +570,7 @@ describe('Boosted AddLiquidity', () => {
                     });
 
                 const addLiquidityBuildCallOutput =
-                    await addLiquidityBoosted.buildCallWithPermit2(
+                    addLiquidityBoosted.buildCallWithPermit2(
                         addLiquidityBuildInput,
                         permit2,
                     );
@@ -579,8 +579,8 @@ describe('Boosted AddLiquidity', () => {
                     await sendTransactionGetBalances(
                         [
                             addLiquidityQueryOutput.bptOut.token.address,
-                            USDC.address as `0x${string}`,
-                            USDT.address as `0x${string}`,
+                            USDC.address,
+                            USDT.address,
                         ],
                         client,
                         testAddress,
@@ -618,16 +618,8 @@ describe('Boosted AddLiquidity', () => {
                 // make sure to pass Tokens in correct order. Same as poolTokens but as underlyings instead
                 assertTokenMatch(
                     [
-                        new Token(
-                            111555111,
-                            USDC.address as Address,
-                            USDC.decimals,
-                        ),
-                        new Token(
-                            111555111,
-                            USDT.address as Address,
-                            USDT.decimals,
-                        ),
+                        new Token(111555111, USDC.address, USDC.decimals),
+                        new Token(111555111, USDT.address, USDT.decimals),
                     ],
                     addLiquidityBuildCallOutput.maxAmountsIn.map(
                         (a) => a.token,

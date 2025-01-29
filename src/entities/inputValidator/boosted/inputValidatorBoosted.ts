@@ -1,3 +1,4 @@
+import { Address } from 'viem';
 import { PoolStateWithUnderlyings } from '@/entities/types';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { AddLiquidityKind } from '@/entities/addLiquidity/types';
@@ -23,11 +24,7 @@ export class InputValidatorBoosted extends InputValidatorBase {
                 .filter(Boolean);
 
             addLiquidityInput.amountsIn.forEach((a) => {
-                if (
-                    !poolTokens.includes(
-                        a.address.toLowerCase() as `0x${string}`,
-                    )
-                ) {
+                if (!poolTokens.includes(a.address.toLowerCase() as Address)) {
                     throw new Error(
                         `Address ${a.address} is not contained in the pool's parent or child tokens.`,
                     );

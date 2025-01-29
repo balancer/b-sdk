@@ -199,11 +199,7 @@ describe('remove liquidity boosted proportional', () => {
 
             const { transactionReceipt, balanceDeltas } =
                 await sendTransactionGetBalances(
-                    [
-                        boostedPool_USDC_USDT.address,
-                        USDC.address as `0x${string}`,
-                        USDT.address as `0x${string}`,
-                    ],
+                    [boostedPool_USDC_USDT.address, USDC.address, USDT.address],
                     client,
                     testAddress,
                     removeLiquidityBuildCallOutput.to,
@@ -293,8 +289,8 @@ describe('remove liquidity boosted proportional', () => {
                 await sendTransactionGetBalances(
                     [
                         boostedPool_USDC_USDT.address,
-                        USDC.address as `0x${string}`,
-                        stataUSDT.address as `0x${string}`,
+                        USDC.address,
+                        stataUSDT.address,
                     ],
                     client,
                     testAddress,
@@ -397,11 +393,7 @@ describe('remove liquidity boosted proportional', () => {
 
             const { transactionReceipt, balanceDeltas } =
                 await sendTransactionGetBalances(
-                    [
-                        boostedPool_USDC_USDT.address,
-                        USDC.address as `0x${string}`,
-                        USDT.address as `0x${string}`,
-                    ],
+                    [boostedPool_USDC_USDT.address, USDC.address, USDT.address],
                     client,
                     testAddress,
                     removeLiquidityBuildCallOutput.to,

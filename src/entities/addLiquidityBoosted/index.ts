@@ -153,7 +153,7 @@ export class AddLiquidityBoostedV3 {
                     );
 
                 amountsIn = tokensIn.map((t, i) => {
-                    const tokenInAddress = t.toLowerCase() as `0x${string}`;
+                    const tokenInAddress = t.toLowerCase() as Address;
                     const { decimals } = poolStateTokenMap[tokenInAddress];
                     const token = new Token(
                         input.chainId,
