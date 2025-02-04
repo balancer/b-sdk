@@ -1,11 +1,6 @@
-// pnpm test -- nestedPoolStateValidation.test.ts
+// pnpm test -- validateNestedPoolState.test.ts
 import { describe, expect, test } from 'vitest';
-import {
-    NestedPoolState,
-    NestedPoolV2,
-    Token,
-    validateNestedPoolState,
-} from '..';
+import { NestedPoolState, NestedPoolV2, validateNestedPoolState } from '../src';
 import { PoolType } from '@/types';
 import {
     mapPoolToNestedPoolStateV2,
@@ -37,7 +32,7 @@ describe('nested pool state validations', () => {
         });
     });
 
-    describe.only("A main token can't be token of > 1 pool", () => {
+    describe("A main token can't be token of > 1 pool", () => {
         test('should not throw', () => {
             // Test the exact error message
             expect(() =>
