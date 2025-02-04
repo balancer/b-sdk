@@ -2,7 +2,7 @@ name: Main
 
 on:
   push:
-    branches: [main, debug/wrongComposableStable]
+    branches: [main]
 
 jobs:
   checks:
