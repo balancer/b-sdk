@@ -6,6 +6,12 @@
 
 - 187fac2: new composite router for boosted operations with ability to wrap/unwrap single token
 
+## 1.4.3
+
+### Patch Changes
+
+- ac22bc9: V2 nested mapping should not use underlying token.
+
 ## 1.4.2
 
 ### Patch Changes
