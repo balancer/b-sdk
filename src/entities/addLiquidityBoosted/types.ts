@@ -7,6 +7,7 @@ import { Slippage } from '../slippage';
 export type AddLiquidityBoostedProportionalInput = {
     chainId: number;
     rpcUrl: string;
+    tokensIn: Address[];
     referenceAmount: InputAmount;
     kind: AddLiquidityKind.Proportional;
     sender?: Address;
@@ -30,6 +31,7 @@ export type AddLiquidityBoostedQueryOutput = {
     poolId: Hex;
     poolType: string;
     addLiquidityKind: AddLiquidityKind;
+    wrapUnderlying: boolean[];
     bptOut: TokenAmount;
     amountsIn: TokenAmount[];
     chainId: number;

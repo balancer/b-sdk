@@ -24,7 +24,7 @@ import {
     AddLiquidityNestedInput,
     TEST_API_ENDPOINT,
     PERMIT2,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
 } from '../../src';
 import {
     ANVIL_NETWORKS,
@@ -133,7 +133,7 @@ const addLiquidityNested = async () => {
             client,
             userAccount,
             amount.token.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
         );
     }
 

@@ -14,7 +14,7 @@ import {
     TokenAmount,
 } from '@/entities';
 import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     ChainId,
     NATIVE_ASSETS,
     PERMIT2,
@@ -71,7 +71,7 @@ export async function GetNestedBpt(
             client,
             testAddress,
             amount.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
         );
     }
 
@@ -116,7 +116,7 @@ export async function GetNestedBpt(
             client,
             testAddress,
             amount.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
             0n,
         );
     }
@@ -280,7 +280,7 @@ export const assertRemoveLiquidityNested = (
     expect(expectedMinAmountsOut).to.deep.eq(
         minAmountsOut.map((a) => a.amount),
     );
-    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId]);
+    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId]);
 
     expect(transactionReceipt.status).to.eq('success');
 

@@ -2,41 +2,40 @@
 // available:
 // 1. Unbalanced - addLiquidityUnbalancedToERC4626Pool
 // 2. Proportional - addLiquidityProportionalToERC4626Pool
-import { encodeFunctionData, zeroAddress } from 'viem';
+import { encodeFunctionData, zeroAddress, Address } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
-
 import { Permit2 } from '@/entities/permit2Helper';
-
 import { getAmountsCall } from '../addLiquidity/helpers';
-
 import { PoolStateWithUnderlyings } from '@/entities/types';
-
 import {
     getAmounts,
     getBptAmountFromReferenceAmountBoosted,
     getSortedTokens,
     getValue,
 } from '@/entities/utils';
-
 import {
     AddLiquidityBuildCallOutput,
     AddLiquidityKind,
 } from '../addLiquidity/types';
-
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuery';
 import { Token } from '../token';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER } from '@/utils';
-import { balancerCompositeLiquidityRouterAbi, balancerRouterAbi } from '@/abi';
-
-import { InputValidator } from '../inputValidator/inputValidator';
-
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
+import {
+    balancerCompositeLiquidityRouterBoostedAbi,
+    balancerRouterAbi,
+} from '@/abi';
 import { Hex } from '@/types';
 import {
     AddLiquidityBoostedBuildCallInput,
     AddLiquidityBoostedInput,
     AddLiquidityBoostedQueryOutput,
 } from './types';
+import { InputValidator } from '../inputValidator/inputValidator';
+import {
+    buildPoolStateTokenMap,
+    MinimalTokenWithIsUnderlyingFlag,
+} from '@/entities/utils';
 
 export class AddLiquidityBoostedV3 {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -52,31 +51,58 @@ export class AddLiquidityBoostedV3 {
         });
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
+        const wrapUnderlying: boolean[] = new Array(
+            poolState.tokens.length,
+        ).fill(false);
 
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];
 
-        // Child tokens are the lowest most tokens. This will be underlying if it exists.
-        const childTokens = poolState.tokens.map((t) => {
-            if (t.underlyingToken) {
-                return t.underlyingToken;
-            }
-            return {
-                address: t.address,
-                decimals: t.decimals,
-                index: t.index,
-            };
-        });
+        const poolStateTokenMap = buildPoolStateTokenMap(poolState);
 
         switch (input.kind) {
             case AddLiquidityKind.Unbalanced: {
+                // Use amountsIn provided by use to infer if token should be wrapped
+                const tokensIn: MinimalTokenWithIsUnderlyingFlag[] =
+                    input.amountsIn.map((amountIn) => {
+                        const amountInAddress = amountIn.address.toLowerCase();
+                        const token = poolStateTokenMap[amountInAddress];
+                        if (!token) {
+                            throw new Error(
+                                `Token not found in poolState: ${amountInAddress}`,
+                            );
+                        }
+                        return token;
+                    });
+
+                // if user provides fewer than the number of pool tokens,
+                // fill remaining indexes because composite router requires
+                // length of pool tokens to match maxAmountsIn and wrapUnderlying
+                if (tokensIn.length < poolState.tokens.length) {
+                    const existingIndices = new Set(
+                        tokensIn.map((t) => t.index),
+                    );
+                    poolState.tokens.forEach((poolToken) => {
+                        if (!existingIndices.has(poolToken.index)) {
+                            tokensIn.push({
+                                index: poolToken.index,
+                                decimals: poolToken.decimals,
+                                address: poolToken.address,
+                                isUnderlyingToken: false,
+                            });
+                        }
+                    });
+                }
+
+                // wrap if token is underlying
+                tokensIn.forEach((t) => {
+                    wrapUnderlying[t.index] = t.isUnderlyingToken;
+                });
+
                 // It is allowed not not provide the same amount of TokenAmounts as inputs
                 // as the pool has tokens, in this case, the input tokens are filled with
                 // a default value ( 0 in this case ) to assure correct amounts in as the pool has tokens.
-                const sortedTokens = getSortedTokens(
-                    childTokens,
-                    input.chainId,
-                );
+                const sortedTokens = getSortedTokens(tokensIn, input.chainId);
                 const maxAmountsIn = getAmounts(sortedTokens, input.amountsIn);
 
                 const bptAmountOut = await doAddLiquidityUnbalancedQuery(
@@ -85,6 +111,7 @@ export class AddLiquidityBoostedV3 {
                     input.sender ?? zeroAddress,
                     input.userData ?? '0x',
                     poolState.address,
+                    wrapUnderlying,
                     maxAmountsIn,
                     block,
                 );
@@ -93,15 +120,27 @@ export class AddLiquidityBoostedV3 {
                 amountsIn = sortedTokens.map((t, i) =>
                     TokenAmount.fromRawAmount(t, maxAmountsIn[i]),
                 );
+
                 break;
             }
             case AddLiquidityKind.Proportional: {
+                // User provides addresses via input.tokensIn so we can infer if they need to be wrapped
+                input.tokensIn.forEach((t) => {
+                    const tokenIn =
+                        poolStateTokenMap[t.toLowerCase() as Address];
+                    if (!tokenIn) {
+                        throw new Error(`Invalid token address: ${t}`);
+                    }
+                    wrapUnderlying[tokenIn.index] = tokenIn.isUnderlyingToken;
+                });
+
                 const bptAmount = await getBptAmountFromReferenceAmountBoosted(
                     input,
                     poolState,
+                    wrapUnderlying,
                 );
 
-                const exactAmountsInNumbers =
+                const [tokensIn, exactAmountsInNumbers] =
                     await doAddLiquidityProportionalQuery(
                         input.rpcUrl,
                         input.chainId,
@@ -109,16 +148,24 @@ export class AddLiquidityBoostedV3 {
                         input.userData ?? '0x',
                         poolState.address,
                         bptAmount.rawAmount,
+                        wrapUnderlying,
                         block,
                     );
 
-                // Amounts are mapped to child tokens of the pool
-                amountsIn = childTokens.map((t, i) =>
-                    TokenAmount.fromRawAmount(
-                        new Token(input.chainId, t.address, t.decimals),
+                amountsIn = tokensIn.map((t, i) => {
+                    const tokenInAddress = t.toLowerCase() as Address;
+                    const { decimals } = poolStateTokenMap[tokenInAddress];
+                    const token = new Token(
+                        input.chainId,
+                        tokenInAddress,
+                        decimals,
+                    );
+
+                    return TokenAmount.fromRawAmount(
+                        token,
                         exactAmountsInNumbers[i],
-                    ),
-                );
+                    );
+                });
 
                 bptOut = TokenAmount.fromRawAmount(
                     bptToken,
@@ -132,12 +179,13 @@ export class AddLiquidityBoostedV3 {
             poolId: poolState.id,
             poolType: poolState.type,
             addLiquidityKind: input.kind,
+            wrapUnderlying,
             bptOut,
             amountsIn,
             chainId: input.chainId,
             protocolVersion: 3,
             userData: input.userData ?? '0x',
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
         };
 
         return output;
@@ -150,6 +198,7 @@ export class AddLiquidityBoostedV3 {
         const wethIsEth = input.wethIsEth ?? false;
         const args = [
             input.poolId,
+            input.wrapUnderlying,
             amounts.maxAmountsIn,
             amounts.minimumBpt,
             wethIsEth,
@@ -159,7 +208,7 @@ export class AddLiquidityBoostedV3 {
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Unbalanced: {
                 callData = encodeFunctionData({
-                    abi: balancerCompositeLiquidityRouterAbi,
+                    abi: balancerCompositeLiquidityRouterBoostedAbi,
                     functionName: 'addLiquidityUnbalancedToERC4626Pool',
                     args,
                 });
@@ -167,7 +216,7 @@ export class AddLiquidityBoostedV3 {
             }
             case AddLiquidityKind.Proportional: {
                 callData = encodeFunctionData({
-                    abi: balancerCompositeLiquidityRouterAbi,
+                    abi: balancerCompositeLiquidityRouterBoostedAbi,
                     functionName: 'addLiquidityProportionalToERC4626Pool',
                     args,
                 });
@@ -182,7 +231,7 @@ export class AddLiquidityBoostedV3 {
 
         return {
             callData,
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
             value,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,

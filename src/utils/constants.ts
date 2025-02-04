@@ -254,13 +254,23 @@ export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
     [ChainId.BASE]: '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
 };
 
-export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER: Record<number, Address> = {
+export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED: Record<
+    number,
+    Address
+> = {
     [ChainId.SEPOLIA]: '0xc6674C0c7694E9b990eAc939E74F8cc3DD39B4b0',
     [ChainId.MAINNET]: '0x1CD776897ef4f647bf8241Ec69549e4A9cb1D608',
     [ChainId.GNOSIS_CHAIN]: '0xC1A64500E035D9159C8826E982dFb802003227f0',
     [ChainId.SONIC]: '0xcf21664262774eBB2C2b559e13b47F6cA10F3E65',
     [ChainId.ARBITRUM_ONE]: '0x1311Fbc9F60359639174c1e7cC2032DbDb5Cc4d1',
     [ChainId.BASE]: '0xf23b4DB826DbA14c0e857029dfF076b1c0264843',
+};
+
+export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED: Record<
+    number,
+    Address
+> = {
+    [ChainId.SEPOLIA]: '0x6A20a4b6DcFF78e6D21BF0dbFfD58C96644DB9cb',
 };
 
 export const BALANCER_BUFFER_ROUTER: Record<number, Address> = {

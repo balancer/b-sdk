@@ -140,10 +140,7 @@ describe('Buffer AddLiquidity', () => {
 
             const { transactionReceipt, balanceDeltas } =
                 await sendTransactionGetBalances(
-                    [
-                        stataUSDC.address as `0x${string}`,
-                        USDC.address as `0x${string}`,
-                    ],
+                    [stataUSDC.address, USDC.address],
                     client,
                     testAddress,
                     addLiquidityBufferBuildCallOutput.to,

@@ -10,3 +10,4 @@ export * from './parseInitializeArgs';
 export * from './proportionalAmountsHelpers';
 export * from './replaceWrapped';
 export * from './validateNestedPoolState';
+export * from './boostedPoolHelpers';

@@ -8,7 +8,8 @@ import {
 import {
     BALANCER_BATCH_ROUTER,
     BALANCER_BUFFER_ROUTER,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     BALANCER_ROUTER,
     ChainId,
     PERMIT2,
@@ -119,7 +120,8 @@ export class Permit2Helper {
             input.amountsIn.length,
         );
         const maxAmountsIn = input.amountsIn.map((a) => a.amount);
-        const spender = BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId];
+        const spender =
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[input.chainId];
         const details: PermitDetails[] = [];
         for (let i = 0; i < input.amountsIn.length; i++) {
             details.push(
@@ -151,7 +153,8 @@ export class Permit2Helper {
             input.amountsIn.length,
         );
         const amounts = getAmountsCall(input);
-        const spender = BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId];
+        const spender =
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId];
         const details: PermitDetails[] = [];
 
         for (let i = 0; i < input.amountsIn.length; i++) {

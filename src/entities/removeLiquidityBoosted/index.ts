@@ -1,4 +1,4 @@
-import { encodeFunctionData, zeroAddress } from 'viem';
+import { Address, encodeFunctionData, zeroAddress } from 'viem';
 
 import {
     RemoveLiquidityBase,
@@ -8,7 +8,7 @@ import {
 
 import { Permit } from '@/entities/permitHelper';
 
-import { balancerCompositeLiquidityRouterAbi } from '@/abi';
+import { balancerCompositeLiquidityRouterBoostedAbi } from '@/abi';
 
 import { PoolStateWithUnderlyings } from '@/entities/types';
 
@@ -18,14 +18,14 @@ import { Token } from '@/entities/token';
 import { getAmountsCall } from '../removeLiquidity/helper';
 
 import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportionalQuery';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER } from '@/utils';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
 import {
     RemoveLiquidityBoostedBuildCallInput,
     RemoveLiquidityBoostedProportionalInput,
     RemoveLiquidityBoostedQueryOutput,
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
-import { getSortedTokens } from '../utils';
+import { buildPoolStateTokenMap } from '@/entities/utils';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -39,46 +39,49 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             ...poolState,
             type: 'Boosted',
         });
-        const underlyingAmountsOut = await doRemoveLiquidityProportionalQuery(
-            input.rpcUrl,
-            input.chainId,
-            input.bptIn.rawAmount,
-            input.sender ?? zeroAddress,
-            input.userData ?? '0x',
-            poolState.address,
-            block,
-        );
 
-        // Child tokens are the lowest most tokens. This will be underlying if it exists.
-        const childTokens = poolState.tokens.map((t) => {
-            if (t.underlyingToken) {
-                return t.underlyingToken;
-            }
-            return {
-                address: t.address,
-                decimals: t.decimals,
-                index: t.index,
-            };
-        });
+        const poolStateTokenMap = buildPoolStateTokenMap(poolState);
 
-        const sortedChildTokens = getSortedTokens(childTokens, input.chainId);
+        // Infer if token should be unwrapped using the tokensOut provided by user
+        const unwrapWrapped = input.tokensOut
+            .map((t) => {
+                const tokenOut = poolStateTokenMap[t.toLowerCase() as Address];
+                if (!tokenOut) {
+                    throw new Error(`Invalid token address: ${t}`);
+                }
+                return tokenOut;
+            })
+            .sort((a, b) => a.index - b.index) // sort by index to match the order of the pool tokens
+            .map((t) => t.isUnderlyingToken);
 
-        // amountsOut are in child tokens sorted in token registration order of wrapped tokens in the pool
-        const amountsOut = underlyingAmountsOut.map((amount, i) => {
-            const token = new Token(
+        const [tokensOut, underlyingAmountsOut] =
+            await doRemoveLiquidityProportionalQuery(
+                input.rpcUrl,
                 input.chainId,
-                sortedChildTokens[i].address,
-                sortedChildTokens[i].decimals,
+                input.bptIn.rawAmount,
+                input.sender ?? zeroAddress,
+                input.userData ?? '0x',
+                poolState.address,
+                unwrapWrapped,
+                block,
             );
+
+        const amountsOut = underlyingAmountsOut.map((amount, i) => {
+            const tokenOut = tokensOut[i];
+            const { decimals } =
+                poolStateTokenMap[tokenOut.toLowerCase() as Address];
+
+            const token = new Token(input.chainId, tokenOut, decimals);
             return TokenAmount.fromRawAmount(token, amount);
         });
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBoostedQueryOutput = {
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
             poolType: poolState.type,
             poolId: poolState.address,
+            unwrapWrapped,
             removeLiquidityKind: RemoveLiquidityKind.Proportional,
             bptIn: TokenAmount.fromRawAmount(bptToken, input.bptIn.rawAmount),
             amountsOut,
@@ -98,10 +101,11 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const amounts = getAmountsCall(input);
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterAbi,
+            abi: balancerCompositeLiquidityRouterBoostedAbi,
             functionName: 'removeLiquidityProportionalFromERC4626Pool',
             args: [
                 input.poolId,
+                input.unwrapWrapped,
                 input.bptIn.amount,
                 amounts.minAmountsOut,
                 input.wethIsEth ?? false,
@@ -111,7 +115,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
 
         return {
             callData: callData,
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
             value: 0n, // always has 0 value
             maxBptIn: input.bptIn,
             minAmountsOut: amounts.minAmountsOut.map((amount, i) => {
@@ -138,7 +142,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterAbi,
+            abi: balancerCompositeLiquidityRouterBoostedAbi,
             functionName: 'permitBatchAndCall',
             args,
         });
