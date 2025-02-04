@@ -8,6 +8,7 @@ import { CreatePoolV2 } from './createPoolV2';
 import { CreatePoolV3 } from './createPoolV3';
 
 export * from './types';
+export * from './createPoolV3/gyroECLP/createPoolGyroECLP';
 
 export class CreatePool implements CreatePoolBase {
     private readonly inputValidator: InputValidator;

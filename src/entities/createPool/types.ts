@@ -1,5 +1,6 @@
 import { PoolType, TokenType } from '@/types';
 import { Address, Hex } from 'viem';
+import { CreatePoolGyroECLPInput } from './createPoolV3/gyroECLP/createPoolGyroECLP';
 
 export interface CreatePoolBase {
     buildCall(input: CreatePoolInput): CreatePoolBuildCallOutput;
@@ -74,7 +75,8 @@ export type CreatePoolInput =
     | CreatePoolV2WeightedInput
     | CreatePoolV2ComposableStableInput
     | CreatePoolV3WeightedInput
-    | CreatePoolV3StableInput;
+    | CreatePoolV3StableInput
+    | CreatePoolGyroECLPInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;
