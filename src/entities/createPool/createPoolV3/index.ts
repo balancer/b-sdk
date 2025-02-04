@@ -6,6 +6,7 @@ import {
 } from '../types';
 import { CreatePoolWeightedV3 } from './weighted/createPoolWeighted';
 import { CreatePoolStableV3 } from './stable/createPoolStable';
+import { CreatePoolStableSurge } from './stableSurge/createStableSurge';
 
 export class CreatePoolV3 implements CreatePoolBase {
     private readonly createPoolTypes: Record<string, CreatePoolBase> = {};
@@ -14,6 +15,7 @@ export class CreatePoolV3 implements CreatePoolBase {
         this.createPoolTypes = {
             [PoolType.Weighted]: new CreatePoolWeightedV3(),
             [PoolType.Stable]: new CreatePoolStableV3(),
+            [PoolType.StableSurge]: new CreatePoolStableSurge(),
         };
     }
 

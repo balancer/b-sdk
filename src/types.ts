@@ -11,6 +11,7 @@ export enum PoolType {
     GyroE = 'GyroE',
     MetaStable = 'MetaStable',
     Stable = 'Stable',
+    StableSurge = 'StableSurge',
     Weighted = 'Weighted',
     Boosted = 'Boosted',
 }
