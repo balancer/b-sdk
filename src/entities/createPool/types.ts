@@ -59,6 +59,14 @@ export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
         paysYieldFees: boolean;
     }[];
 };
+
+export type CreatePoolStableSurgeInput = Omit<
+    CreatePoolV3StableInput,
+    'poolHooksContract' | 'poolType'
+> & {
+    poolType: PoolType.StableSurge;
+};
+
 export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Weighted;
     tokens: {
@@ -74,7 +82,8 @@ export type CreatePoolInput =
     | CreatePoolV2WeightedInput
     | CreatePoolV2ComposableStableInput
     | CreatePoolV3WeightedInput
-    | CreatePoolV3StableInput;
+    | CreatePoolV3StableInput
+    | CreatePoolStableSurgeInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;

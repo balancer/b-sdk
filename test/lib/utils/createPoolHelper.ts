@@ -9,6 +9,7 @@ import {
 } from 'src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
 import { CreatePool } from 'src';
+import { stableSurgeFactoryAbi } from '@/abi/stableSurgeFactory';
 
 export async function doCreatePool(
     txInput: CreatePoolTxInput,
@@ -26,6 +27,7 @@ export async function doCreatePool(
         3: {
             [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
             [PoolType.Stable]: stablePoolFactoryAbi_V3,
+            [PoolType.StableSurge]: stableSurgeFactoryAbi,
         },
     };
 
