@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.1.0
+
+### Minor Changes
+
+- 7a62a77: Add StableSurge create support.
+
 ## 2.0.0
 
 ### Major Changes
