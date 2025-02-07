@@ -19,10 +19,11 @@ import {
     API_ENDPOINT,
     AddLiquidityBoostedUnbalancedInput,
 } from 'src';
+import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 
 const addLiquidityPriceImpact = async () => {
     // User defined
-    const rpcUrl = process.env.SONIC_RPC_URL as string;
+    const { rpcUrl } = await startFork(ANVIL_NETWORKS.SONIC);
     const chainId = ChainId.SONIC;
     const poolId = '0x43026d483f42fb35efe03c20b251142d022783f2'; // BeefyUSDC.e / scUSD
 

@@ -53,7 +53,7 @@ export function buildPoolStateTokenMap(
         };
         if (underlyingToken) {
             map[underlyingToken.address.toLowerCase()] = {
-                index: underlyingToken.index,
+                index: t.index,
                 decimals: underlyingToken.decimals,
                 address: underlyingToken.address,
                 isUnderlyingToken: true,
