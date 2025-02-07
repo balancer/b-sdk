@@ -26,9 +26,7 @@ import {
     TokenAmount,
     NATIVE_ASSETS,
 } from 'src';
-import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED
-} from '@/utils/constantsV3';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils/constantsV3';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {

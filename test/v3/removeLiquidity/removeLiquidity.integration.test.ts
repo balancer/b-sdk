@@ -38,12 +38,12 @@ import {
     vaultAdminAbi_V3,
     PublicWalletClient,
 } from 'src';
-import {     
+import {
     BALANCER_ROUTER,
     VAULT_V3,
     VAULT_ADMIN,
     ADMIN_OF_AUTHORIZER,
-    AUTHORIZER
+    AUTHORIZER,
 } from 'src/utils/constantsV3';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';

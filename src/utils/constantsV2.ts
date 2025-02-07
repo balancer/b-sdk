@@ -86,4 +86,4 @@ export const DEFAULT_FUND_MANAGMENT = {
     recipient: ZERO_ADDRESS,
     fromInternalBalance: false,
     toInternalBalance: false,
-}; 
+};

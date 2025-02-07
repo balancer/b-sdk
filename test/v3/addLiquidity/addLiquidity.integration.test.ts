@@ -27,7 +27,6 @@ import {
     AddLiquidityInput,
     InputAmount,
     PoolType,
-    PERMIT2,
     PublicWalletClient,
 } from '@/index';
 import {

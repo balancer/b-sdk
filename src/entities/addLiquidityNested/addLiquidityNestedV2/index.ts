@@ -18,7 +18,6 @@ import {
     AddLiquidityNestedCallInputV2,
     AddLiquidityNestedQueryOutputV2,
 } from './types';
-import { VAULT } from '@/utils/constantsV2';
 
 export class AddLiquidityNestedV2 {
     async query(

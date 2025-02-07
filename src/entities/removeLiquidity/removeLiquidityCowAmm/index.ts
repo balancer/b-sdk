@@ -18,8 +18,6 @@ import {
 import { encodeFunctionData } from 'viem';
 import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 import { buildCallWithPermit2ProtocolVersionError } from '@/utils';
-import { DEFAULT_USERDATA, ChainId } from '@/utils/constants';
-import { DEFAULT_FUND_MANAGMENT } from '@/utils/constantsV2';
 
 export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
     public async query(

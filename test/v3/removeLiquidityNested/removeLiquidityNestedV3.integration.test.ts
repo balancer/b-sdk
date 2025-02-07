@@ -23,9 +23,7 @@ import {
     Slippage,
 } from 'src';
 
-import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
-} from '@/utils/constantsV3';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED } from '@/utils/constantsV3';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { approveSpenderOnToken } from 'test/lib/utils';

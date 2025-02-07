@@ -13,15 +13,8 @@ import {
     Token,
     TokenAmount,
 } from '@/entities';
-import {
-    ChainId,
-    NATIVE_ASSETS,
-    PERMIT2,
-    PublicWalletClient,
-} from '@/utils';
-import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
-} from '@/utils/constantsV3';
+import { ChainId, NATIVE_ASSETS, PERMIT2, PublicWalletClient } from '@/utils';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED } from '@/utils/constantsV3';
 import {
     approveSpenderOnPermit2,
     approveSpenderOnToken,

@@ -34,7 +34,6 @@ import {
     approveSpenderOnTokens,
     sendTransactionGetBalances,
 } from 'test/lib/utils/helper';
-import { WEIGHTED_POOL_FACTORY_BALANCER_V3 } from '@/utils/constantsV3';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const protocolVersion = 3;

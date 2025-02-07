@@ -7,9 +7,7 @@ import {
 import { ChainId, CHAINS } from '@/utils';
 import { createPublicClient, Hex, http } from 'viem';
 import { Address } from '@/types';
-import {
-    BALANCER_ROUTER,
-} from '@/utils/constantsV3';
+import { BALANCER_ROUTER } from '@/utils/constantsV3';
 
 export const doRemoveLiquidityProportionalQuery = async (
     rpcUrl: string,

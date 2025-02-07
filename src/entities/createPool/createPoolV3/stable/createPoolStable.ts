@@ -10,7 +10,6 @@ import { stablePoolFactoryAbi_V3 } from '@/abi';
 import { STABLE_POOL_FACTORY_BALANCER_V3 } from '@/utils/constantsV3';
 import { sortByAddress } from '@/utils';
 import { Hex } from '@/types';
-import { STABLE_SURGE_FACTORY } from '@/utils/constantsV3';
 
 export class CreatePoolStableV3 implements CreatePoolBase {
     buildCall(input: CreatePoolV3StableInput): CreatePoolBuildCallOutput {

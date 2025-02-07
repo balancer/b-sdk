@@ -67,7 +67,10 @@ export const BALANCER_BATCH_ROUTER: Record<number, Address> = {
 };
 
 // V3
-export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED: Record<number, Address> = {
+export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED: Record<
+    number,
+    Address
+> = {
     [ChainId.SEPOLIA]: '0xc6674C0c7694E9b990eAc939E74F8cc3DD39B4b0',
     [ChainId.MAINNET]: '0x1CD776897ef4f647bf8241Ec69549e4A9cb1D608',
     [ChainId.GNOSIS_CHAIN]: '0xC1A64500E035D9159C8826E982dFb802003227f0',
@@ -77,7 +80,10 @@ export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED: Record<number, Address>
 };
 
 // V3
-export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED: Record<number, Address> = {
+export const BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED: Record<
+    number,
+    Address
+> = {
     [ChainId.SEPOLIA]: '0x6A20a4b6DcFF78e6D21BF0dbFfD58C96644DB9cb',
 };
 
@@ -96,4 +102,4 @@ export const AUTHORIZER: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0xa331d84ec860bf466b4cdccfb4ac09a1b43f3ae6',
 };
 
-export const ADMIN_OF_AUTHORIZER = '0x171C0fF5943CE5f133130436A29bF61E26516003'; 
+export const ADMIN_OF_AUTHORIZER = '0x171C0fF5943CE5f133130436A29bF61E26516003';

@@ -9,10 +9,7 @@ import {
     getSortedTokens,
 } from '@/entities/utils';
 import { Hex } from '@/types';
-import {
-    BALANCER_ROUTER,
-    BALANCER_BATCH_ROUTER,
-} from '@/utils/constantsV3';
+import { BALANCER_ROUTER } from '@/utils/constantsV3';
 import { addLiquiditySingleTokenShouldHaveTokenInIndexError } from '@/utils';
 import { getAmountsCall } from '../helpers';
 import {

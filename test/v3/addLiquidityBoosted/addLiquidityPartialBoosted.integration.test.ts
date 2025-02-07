@@ -25,9 +25,7 @@ import {
     AddLiquidityBoostedUnbalancedInput,
     AddLiquidityBoostedProportionalInput,
 } from '@/index';
-import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
-} from '@/utils/constantsV3';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils/constantsV3';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     AddLiquidityBoostedTxInput,

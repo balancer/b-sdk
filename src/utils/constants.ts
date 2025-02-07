@@ -20,7 +20,8 @@ import {
     sonic,
 } from 'viem/chains';
 
-export const ZERO_ADDRESS: Address = '0x0000000000000000000000000000000000000000';
+export const ZERO_ADDRESS: Address =
+    '0x0000000000000000000000000000000000000000';
 /*
     Using empty account (undefined by default) in some multicall requests causes failures in some nodes
     More info: https://github.com/wevm/viem/issues/2792
@@ -30,7 +31,8 @@ export const EMPTY_SENDER = { account: ZERO_ADDRESS };
 const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
-export const MAX_UINT256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935n;
+export const MAX_UINT256 =
+    115792089237316195423570985008687907853269984665640564039457584007913129639935n;
 export const PREMINTED_STABLE_BPT = 2596148429267413814265248164610048n; // 2**111
 
 export const DECIMAL_SCALES = {
