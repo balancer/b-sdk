@@ -3,9 +3,9 @@ import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import {
     buildCallWithPermit2ProtocolVersionError,
-    VAULT,
     ZERO_ADDRESS,
 } from '@/utils';
+import { VAULT } from '@/utils/constantsV2';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,

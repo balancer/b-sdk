@@ -27,13 +27,14 @@ import { doCreatePool } from '../../../lib/utils/createPoolHelper';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import { PublicWalletClient } from '@/utils';
-import { VAULT_V3 } from 'src/utils/constants';
+import { VAULT_V3 } from '@/utils/constantsV3';
 import { vaultExtensionAbi_V3 } from 'src/abi/';
 import {
     setTokenBalances,
     approveSpenderOnTokens,
     sendTransactionGetBalances,
 } from 'test/lib/utils/helper';
+import { WEIGHTED_POOL_FACTORY_BALANCER_V3 } from '@/utils/constantsV3';
 
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const protocolVersion = 3;

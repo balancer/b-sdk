@@ -1,9 +1,11 @@
 import { createPublicClient, Hex, http } from 'viem';
 import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     ChainId,
     CHAINS,
 } from '@/utils';
+import {
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+} from '@/utils/constantsV3';
 import { Address } from '@/types';
 import {
     balancerCompositeLiquidityRouterBoostedAbi,

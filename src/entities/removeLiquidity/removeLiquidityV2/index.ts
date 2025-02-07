@@ -11,6 +11,7 @@ import { RemoveLiquidityWeighted } from './weighted/removeLiquidityWeighted';
 import { RemoveLiquidityComposableStable } from './composableStable/removeLiquidityComposableStable';
 import { PoolType } from '@/types';
 import { RemoveLiquidityStable } from './stable/removeLiquidityStable';
+import { VAULT } from '@/utils/constantsV2';
 
 export class RemoveLiquidityV2 implements RemoveLiquidityBase {
     private readonly removeLiquidityTypes: Record<string, RemoveLiquidityBase> =

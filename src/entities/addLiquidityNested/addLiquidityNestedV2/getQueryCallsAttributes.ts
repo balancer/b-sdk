@@ -2,10 +2,10 @@ import { Address, PoolType } from '@/types';
 import { Token } from '@/entities/token';
 import {
     ZERO_ADDRESS,
-    BALANCER_RELAYER,
     getPoolAddress,
     ChainId,
 } from '@/utils';
+import { BALANCER_RELAYER } from '@/utils/constantsV2';
 import {
     AddLiquidityNestedCallAttributes,
     AddLiquidityNestedInputV2,

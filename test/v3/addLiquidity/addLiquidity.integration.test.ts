@@ -43,6 +43,7 @@ import {
     approveTokens,
 } from '../../lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+import { PERMIT2 } from '@/utils/constants';
 
 const protocolVersion = 3;
 

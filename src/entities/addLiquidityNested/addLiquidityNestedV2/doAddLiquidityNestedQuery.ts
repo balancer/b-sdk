@@ -6,11 +6,11 @@ import {
 } from 'viem';
 import { Hex } from '../../../types';
 import {
-    BALANCER_RELAYER,
     CHAINS,
     ChainId,
     EMPTY_SENDER,
 } from '../../../utils';
+import { BALANCER_RELAYER } from '@/utils/constantsV2';
 import {
     balancerRelayerAbi,
     permit2Abi,

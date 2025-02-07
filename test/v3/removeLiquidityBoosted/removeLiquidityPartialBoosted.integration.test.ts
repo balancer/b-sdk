@@ -19,7 +19,6 @@ import {
     CHAINS,
     PublicWalletClient,
     Token,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     Slippage,
     RemoveLiquidityBoostedV3,
     RemoveLiquidityBoostedProportionalInput,
@@ -27,6 +26,9 @@ import {
     TokenAmount,
     NATIVE_ASSETS,
 } from 'src';
+import {
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED
+} from '@/utils/constantsV3';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {

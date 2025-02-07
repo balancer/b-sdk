@@ -19,16 +19,18 @@ import {
 
 import { erc20Abi, permit2Abi } from '@/abi';
 import {
-    VAULT,
     MAX_UINT256,
     ZERO_ADDRESS,
+    PublicWalletClient,
     PERMIT2,
+} from '@/utils';
+import { VAULT } from '@/utils/constantsV2';
+import {
     BALANCER_ROUTER,
     BALANCER_BATCH_ROUTER,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
-    PublicWalletClient,
     BALANCER_BUFFER_ROUTER,
-} from '@/utils';
+} from '@/utils/constantsV3';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;

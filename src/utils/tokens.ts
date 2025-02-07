@@ -1,6 +1,8 @@
 import { Address, Client, Hex, PublicClient, getContract } from 'viem';
 import { vaultV2Abi, vaultExtensionAbi_V3 } from '../abi';
-import { VAULT, VAULT_V3 } from './constants';
+import { ChainId } from './constants';
+import { VAULT } from './constantsV2';
+import { VAULT_V3 } from './constantsV3';
 
 export async function getTokenDecimals(
     tokenAddress: Address,

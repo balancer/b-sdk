@@ -12,6 +12,7 @@ import { AddLiquidityComposableStable } from './composableStable/addLiquidityCom
 import { AddLiquidityStable } from './stable/addLiquidityStable';
 import { AddLiquidityV2BuildCallInput } from './types';
 import { AddLiquidityWeighted } from './weighted/addLiquidityWeighted';
+import { VAULT } from '@/utils/constantsV2';
 
 export class AddLiquidityV2 implements AddLiquidityBase {
     private readonly addLiquidityTypes: Record<string, AddLiquidityBase> = {};

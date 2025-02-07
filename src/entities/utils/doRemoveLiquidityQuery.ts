@@ -1,8 +1,9 @@
 import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
-import { BALANCER_QUERIES, CHAINS } from '../../utils/constants';
+import { CHAINS } from '@/utils';
 import { balancerQueriesAbi } from '../../abi';
 import { ExitPoolRequest } from '../removeLiquidity/types';
+import { BALANCER_QUERIES } from '@/utils/constantsV2';
 
 export async function doRemoveLiquidityQuery(
     rpcUrl: string,

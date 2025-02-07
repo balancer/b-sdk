@@ -23,8 +23,8 @@ import {
     Permit2Helper,
     PERMIT2,
     PublicWalletClient,
-    BALANCER_BUFFER_ROUTER,
 } from '../../../src';
+import { BALANCER_BUFFER_ROUTER } from '@/utils/constantsV3';
 import {
     TOKENS,
     sendTransactionGetBalances,

@@ -2,16 +2,18 @@ import { TokenAmount } from '../../../tokenAmount';
 import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../../../../types';
 import {
     abs,
-    BALANCER_QUERIES,
     DEFAULT_USERDATA,
-    DEFAULT_FUND_MANAGMENT,
     ZERO_ADDRESS,
-    VAULT,
     NATIVE_ASSETS,
     ChainId,
     MAX_UINT256,
     CHAINS,
 } from '../../../../utils';
+import {
+    BALANCER_QUERIES,
+    DEFAULT_FUND_MANAGMENT,
+    VAULT,
+} from '../../../../utils/constantsV2';
 import {
     Address,
     createPublicClient,

@@ -11,12 +11,14 @@ import {
     TokenAmount,
 } from '@/entities';
 import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     ChainId,
     NATIVE_ASSETS,
     PERMIT2,
     PublicWalletClient,
 } from '@/utils';
+import {
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+} from '@/utils/constantsV3';
 import { Address, TestActions, TransactionReceipt, zeroAddress } from 'viem';
 import {
     approveSpenderOnPermit2,

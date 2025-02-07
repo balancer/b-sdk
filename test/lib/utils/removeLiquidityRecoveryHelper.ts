@@ -1,5 +1,4 @@
 import {
-    BALANCER_ROUTER,
     ChainId,
     NATIVE_ASSETS,
     PoolState,
@@ -10,8 +9,9 @@ import {
     Slippage,
     Token,
     TokenAmount,
-    VAULT,
 } from 'src';
+import { VAULT } from '@/utils/constantsV2';
+import { BALANCER_ROUTER } from '@/utils/constantsV3';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances } from './helper';
 import { RemoveLiquidityRecoveryTxInput } from './types';

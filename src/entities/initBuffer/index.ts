@@ -4,7 +4,7 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { Permit2 } from '@/entities/permit2Helper';
 
 import { doInitBufferQuery } from './doInitBufferQuery';
-import { BALANCER_BUFFER_ROUTER } from '@/utils';
+import { BALANCER_BUFFER_ROUTER } from '@/utils/constantsV3';
 import { balancerBufferRouterAbi, balancerRouterAbi } from '@/abi';
 
 import {

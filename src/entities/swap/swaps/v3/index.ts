@@ -11,12 +11,14 @@ import { TokenAmount } from '../../../tokenAmount';
 import { SwapKind, Hex } from '../../../../types';
 import {
     DEFAULT_USERDATA,
-    BALANCER_ROUTER,
     NATIVE_ASSETS,
-    BALANCER_BATCH_ROUTER,
     MAX_UINT256,
     CHAINS,
 } from '../../../../utils';
+import {
+    BALANCER_ROUTER,
+    BALANCER_BATCH_ROUTER,
+} from '../../../../utils/constantsV3';
 import {
     balancerRouterAbi,
     permit2Abi,

@@ -1,7 +1,6 @@
 import { Hex, zeroAddress } from 'viem';
 import {
     Address,
-    BALANCER_ROUTER,
     NATIVE_ASSETS,
     PoolState,
     RemoveLiquidityBuildCallInput,
@@ -17,10 +16,11 @@ import {
     Slippage,
     Token,
     TokenAmount,
-    VAULT,
     PermitHelper,
     ChainId,
 } from 'src';
+import { VAULT } from '@/utils/constantsV2';
+import { BALANCER_ROUTER } from '@/utils/constantsV3';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import { RemoveLiquidityTxInput } from './types';
