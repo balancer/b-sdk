@@ -8,7 +8,7 @@ import {
 import { PoolType } from '@/types';
 import { HumanAmount } from '@/data';
 import { CHAINS } from '@/utils';
-import { VAULT } from '@/utils/constantsV2';
+import { VAULT_2 } from '@/utils/constantsV2';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { getSortedTokens } from './getSortedTokens';
 import { vaultV2Abi } from '@/abi';

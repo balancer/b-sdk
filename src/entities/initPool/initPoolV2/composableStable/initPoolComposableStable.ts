@@ -13,7 +13,7 @@ import {
 } from '../../types';
 import { vaultV2Abi } from '../../../../abi';
 import { MAX_UINT256 } from '../../../../utils';
-import { VAULT } from '@/utils/constantsV2';
+import { VAULT_2 } from '@/utils/constantsV2';
 
 import { Token } from '@/entities/token';
 import { getValue } from '@/entities/utils/getValue';

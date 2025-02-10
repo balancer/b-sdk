@@ -117,6 +117,15 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.SONIC]: sonic,
 };
 
+export const PERMIT2: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.MAINNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.GNOSIS_CHAIN]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.SONIC]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.ARBITRUM_ONE]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.BASE]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+};
+
 export const NATIVE_ASSETS = {
     [ChainId.ARBITRUM_ONE]: new Token(
         ChainId.ARBITRUM_ONE,
@@ -234,14 +243,5 @@ export const NATIVE_ASSETS = {
 
 export const DEFAULT_USERDATA = '0x';
 
-export const API_ENDPOINT = 'https://api-v3.balancer.fi/graphql';
-export const TEST_API_ENDPOINT = 'https://api-v3-test.balancer.fi/graphql';
-
-export const PERMIT2: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.MAINNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.GNOSIS_CHAIN]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.SONIC]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.ARBITRUM_ONE]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.BASE]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-};
+export const API_ENDPOINT = 'https://api-v3.balancer.fi';
+export const TEST_API_ENDPOINT = 'https://test-api-v3.balancer.fi';

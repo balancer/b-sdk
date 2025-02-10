@@ -19,7 +19,7 @@ export const BALANCER_RELAYER: Record<number, Address> = {
     [ChainId.SONIC]: '0xb5F8f253d0A6D4A18014cecA4253A2cEC6C98763',
 };
 
-export const VAULT: Record<number, Address> = {
+export const VAULT_2: Record<number, Address> = {
     [ChainId.ARBITRUM_ONE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.AVALANCHE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     [ChainId.BASE]: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',

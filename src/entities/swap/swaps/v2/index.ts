@@ -12,7 +12,7 @@ import {
 import {
     BALANCER_QUERIES,
     DEFAULT_FUND_MANAGMENT,
-    VAULT,
+    VAULT_2,
 } from '../../../../utils/constantsV2';
 import {
     Address,

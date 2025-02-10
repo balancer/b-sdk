@@ -3,7 +3,7 @@ import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
 import { WeightedEncoder } from '../../../encoders/weighted';
 import { ZERO_ADDRESS } from '@/utils';
-import { VAULT } from '@/utils/constantsV2';
+import { VAULT_2 } from '@/utils/constantsV2';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
