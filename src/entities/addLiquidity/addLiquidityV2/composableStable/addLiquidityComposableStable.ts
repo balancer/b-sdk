@@ -5,7 +5,7 @@ import {
     buildCallWithPermit2ProtocolVersionError,
     ZERO_ADDRESS,
 } from '@/utils';
-import { VAULT_2 } from '@/utils/constantsV2';
+import { VAULT_V2 } from '@/utils/constantsV2';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
@@ -68,7 +68,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         );
 
         return {
-            to: VAULT[input.chainId],
+            to: VAULT_V2[input.chainId],
             poolType: poolState.type,
             addLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -108,7 +108,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
 
         return {
             callData,
-            to: VAULT[input.chainId],
+            to: VAULT_V2[input.chainId],
             value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,

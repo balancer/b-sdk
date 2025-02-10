@@ -8,7 +8,7 @@ import {
 import { PoolType } from '@/types';
 import { HumanAmount } from '@/data';
 import { CHAINS } from '@/utils';
-import { VAULT_2 } from '@/utils/constantsV2';
+import { VAULT_V2 } from '@/utils/constantsV2';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { getSortedTokens } from './getSortedTokens';
 import { vaultV2Abi } from '@/abi';
@@ -20,7 +20,7 @@ export const getPoolStateWithBalancesV2 = async (
 ): Promise<PoolStateWithBalances> => {
     const totalSupplyContract = getTotalSupplyContractV2(poolState);
     const getBalanceContracts = {
-        address: VAULT[chainId],
+        address: VAULT_V2[chainId],
         abi: vaultV2Abi,
         functionName: 'getPoolTokens' as const,
         args: [poolState.id] as const,

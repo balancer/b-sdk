@@ -19,7 +19,7 @@ import {
     PermitHelper,
     ChainId,
 } from 'src';
-import { VAULT } from '@/utils/constantsV2';
+import { VAULT_V2 } from '@/utils/constantsV2';
 import { BALANCER_ROUTER } from '@/utils/constantsV3';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
@@ -213,7 +213,7 @@ export function assertRemoveLiquidityUnbalanced(
         'bptIn' | 'bptIndex'
     > = {
         // Query should use same amountsOut as input
-        to: VAULT[chainId],
+        to: VAULT_V2[chainId],
         amountsOut: expectedAmountsOut,
         tokenOutIndex: undefined,
         // Should match inputs
@@ -286,7 +286,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
               userData: Hex;
           }) = {
         // Query should use same amountsOut as input
-        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
+        to: protocolVersion === 2 ? VAULT_V2[chainId] : BALANCER_ROUTER[chainId],
         amountsOut: expectedAmountsOut,
         tokenOutIndex: tokensWithoutBpt.findIndex(
             (t) => t.address === removeLiquidityInput.amountOut.address,
@@ -360,7 +360,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
               userData: Hex;
           }) = {
         // Query should use same bpt out as user sets
-        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
+        to: protocolVersion === 2 ? VAULT_V2[chainId] : BALANCER_ROUTER[chainId],
         bptIn: TokenAmount.fromRawAmount(
             bptToken,
             removeLiquidityInput.bptIn.rawAmount,
@@ -444,7 +444,7 @@ export function assertRemoveLiquidityProportional(
             to = poolState.address;
             break;
         case 2:
-            to = VAULT[chainId];
+            to = VAULT_V2[chainId];
             break;
         case 3:
             to = BALANCER_ROUTER[chainId];
@@ -582,7 +582,7 @@ export function assertRemoveLiquidityBuildCallOutput(
             to = removeLiquidityQueryOutput.poolId;
             break;
         case 2:
-            to = VAULT[removeLiquidityQueryOutput.chainId];
+            to = VAULT_V2[removeLiquidityQueryOutput.chainId];
             break;
         case 3:
             to = BALANCER_ROUTER[removeLiquidityQueryOutput.chainId];

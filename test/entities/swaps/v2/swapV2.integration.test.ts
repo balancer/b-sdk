@@ -21,7 +21,7 @@ import {
     Path,
     PublicWalletClient,
 } from '@/index';
-import { VAULT } from '@/utils/constantsV2';
+import { VAULT_V2 } from '@/utils/constantsV2';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup } from 'test/lib/utils/helper';
@@ -39,7 +39,7 @@ const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, blockNo);
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
-const vault = VAULT[chainId];
+const vault = VAULT_V2[chainId];
 
 describe('SwapV2', () => {
     let client: PublicWalletClient & TestActions;
