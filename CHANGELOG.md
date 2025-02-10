@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.1.1
+
+### Patch Changes
+
+- e4d2938: Update stableSurge to release version and addresses.
+
 ## 2.1.0
 
 ### Minor Changes
