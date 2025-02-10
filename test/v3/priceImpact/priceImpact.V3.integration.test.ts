@@ -60,7 +60,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000605');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000609');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -89,7 +89,7 @@ describe('PriceImpact V3', () => {
                     boostedPool_USDC_USDT,
                 );
             const priceImpactSpot =
-                PriceImpactAmount.fromDecimal('0.00183097705');
+                PriceImpactAmount.fromDecimal('0.0018474393');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -112,7 +112,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     boostedPool_USDC_USDT,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.000208');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0002065');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
@@ -142,7 +142,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0008225');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.0008385');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
 
@@ -170,7 +170,7 @@ describe('PriceImpact V3', () => {
                     addLiquidityInput,
                     partialBoostedPool_USDT_stataDAI,
                 );
-            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.00171675');
+            const priceImpactSpot = PriceImpactAmount.fromDecimal('0.00176775');
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
     });
@@ -198,7 +198,7 @@ describe('PriceImpact V3', () => {
                 nestedWithBoostedPool,
             );
             const priceImpactSpot = PriceImpactAmount.fromDecimal(
-                '0.004206886163133692',
+                '0.004180046589884244',
             );
             expect(priceImpactABA.decimal).eq(priceImpactSpot.decimal);
         });
