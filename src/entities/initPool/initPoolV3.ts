@@ -1,7 +1,7 @@
 import { balancerRouterAbi } from '@/abi';
 import { PoolState } from '../types';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInputV3 } from './types';
-import { BALANCER_ROUTER } from '@/utils';
+import { BALANCER_ROUTER } from '@/utils/constantsV3';
 import { encodeFunctionData, Address } from 'viem';
 import { getSortedTokens, parseInitializeArgs, getAmounts } from '../utils';
 import { Token } from '../token';

@@ -1,6 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../token';
-import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../../utils';
+import { ZERO_ADDRESS } from '../../../utils';
+import { BALANCER_RELAYER } from '../../../utils/constantsV2';
 import { Relayer } from '../../relayer';
 import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../../tokenAmount';

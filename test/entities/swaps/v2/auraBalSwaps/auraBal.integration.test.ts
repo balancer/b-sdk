@@ -15,13 +15,13 @@ import {
     Token,
     TokenAmount,
     AuraBalSwap,
-    BALANCER_RELAYER,
     CHAINS,
     NATIVE_ASSETS,
     SwapKind,
     ChainId,
     PublicWalletClient,
 } from '@/index';
+import { BALANCER_RELAYER } from '@/utils/constantsV2';
 
 import {
     auraBalToken,

@@ -28,8 +28,8 @@ import {
     RemoveLiquidityBoostedV3,
     RemoveLiquidityBoostedProportionalInput,
     PermitHelper,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
 } from 'src';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils/constantsV3';
 import {
     doAddLiquidity,
     setTokenBalances,

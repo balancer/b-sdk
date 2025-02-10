@@ -1,7 +1,9 @@
 import { Address } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 
-import { BALANCER_RELAYER, ChainId, ZERO_ADDRESS } from '@/utils';
+import { ChainId, ZERO_ADDRESS } from '@/utils';
+import { BALANCER_RELAYER } from '@/utils/constantsV2';
+
 import { Token } from '@/entities/token';
 import { NestedPool, PoolKind } from '@/entities/types';
 import {

@@ -23,8 +23,8 @@ import {
     AddLiquidityNestedInput,
     AddLiquidityNestedQueryOutputV3,
     Permit2Helper,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
 } from '@/index';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED } from '@/utils/constantsV3';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     approveSpenderOnToken,

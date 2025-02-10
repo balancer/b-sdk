@@ -7,7 +7,7 @@ import {
     CreatePoolV2ComposableStableInput,
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
-import { COMPOSABLE_STABLE_POOL_FACTORY } from '@/utils';
+import { COMPOSABLE_STABLE_POOL_FACTORY } from '@/utils/constantsV2';
 import { sortByAddress } from '@/utils/sortByAddress';
 
 export class CreatePoolComposableStableV2 implements CreatePoolBase {

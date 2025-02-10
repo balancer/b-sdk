@@ -2,16 +2,18 @@ import { TokenAmount } from '../../../tokenAmount';
 import { SingleSwap, SwapKind, BatchSwapStep, Hex } from '../../../../types';
 import {
     abs,
-    BALANCER_QUERIES,
     DEFAULT_USERDATA,
-    DEFAULT_FUND_MANAGMENT,
     ZERO_ADDRESS,
-    VAULT,
     NATIVE_ASSETS,
     ChainId,
     MAX_UINT256,
     CHAINS,
 } from '../../../../utils';
+import {
+    BALANCER_QUERIES,
+    DEFAULT_FUND_MANAGMENT,
+    VAULT_V2,
+} from '../../../../utils/constantsV2';
 import {
     Address,
     createPublicClient,
@@ -120,7 +122,7 @@ export class SwapV2 implements SwapBase {
 
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: VAULT[this.chainId],
+                to: VAULT_V2[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -130,7 +132,7 @@ export class SwapV2 implements SwapBase {
             };
         }
         return {
-            to: VAULT[this.chainId],
+            to: VAULT_V2[this.chainId],
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,
@@ -158,7 +160,7 @@ export class SwapV2 implements SwapBase {
 
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: VAULT[this.chainId],
+                to: VAULT_V2[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -172,7 +174,7 @@ export class SwapV2 implements SwapBase {
             };
         }
         return {
-            to: VAULT[this.chainId],
+            to: VAULT_V2[this.chainId],
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,
@@ -295,14 +297,14 @@ export class SwapV2 implements SwapBase {
         }
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: VAULT[this.chainId],
+                to: VAULT_V2[this.chainId],
                 callData,
                 value: this.value(limitAmount, !!input.wethIsEth),
                 minAmountOut: limitAmount,
             };
         }
         return {
-            to: VAULT[this.chainId],
+            to: VAULT_V2[this.chainId],
             callData,
             value: this.value(limitAmount, !!input.wethIsEth),
             maxAmountIn: limitAmount,

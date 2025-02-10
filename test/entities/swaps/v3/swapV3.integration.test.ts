@@ -16,11 +16,10 @@ import {
     ChainId,
     SwapKind,
     Swap,
-    BALANCER_ROUTER,
-    BALANCER_BATCH_ROUTER,
     PERMIT2,
     PublicWalletClient,
 } from '@/index';
+import { BALANCER_BATCH_ROUTER, BALANCER_ROUTER } from '@/utils/constantsV3';
 import { Path } from '@/entities/swap/paths/types';
 
 import {

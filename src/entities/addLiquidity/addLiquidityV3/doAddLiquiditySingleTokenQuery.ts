@@ -1,5 +1,6 @@
 import { createPublicClient, Hex, http } from 'viem';
-import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
+import { ChainId, CHAINS } from '@/utils';
+import { BALANCER_ROUTER } from '@/utils/constantsV3';
 import {
     balancerRouterAbi,
     permit2Abi,

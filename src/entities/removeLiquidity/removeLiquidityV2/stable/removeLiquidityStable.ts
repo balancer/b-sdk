@@ -2,7 +2,8 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
 import { StableEncoder } from '../../../encoders/stable';
-import { VAULT, ZERO_ADDRESS } from '../../../../utils/constants';
+import { ZERO_ADDRESS } from '../../../../utils/constants';
+import { VAULT_V2 } from '@/utils/constantsV2';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
@@ -64,7 +65,7 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
         );
 
         return {
-            to: VAULT[input.chainId],
+            to: VAULT_V2[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -105,7 +106,7 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
             ),
         );
         return {
-            to: VAULT[input.chainId],
+            to: VAULT_V2[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -147,7 +148,7 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
 
         return {
             callData,
-            to: VAULT[input.chainId],
+            to: VAULT_V2[input.chainId],
             value: 0n,
             maxBptIn: TokenAmount.fromRawAmount(
                 input.bptIn.token,

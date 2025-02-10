@@ -6,7 +6,8 @@ import {
     parseAbi,
 } from 'viem';
 import { PoolState } from '@/entities';
-import { CHAINS, VAULT_V3 } from '@/utils';
+import { CHAINS } from '@/utils';
+import { VAULT_V3 } from '@/utils/constantsV3';
 import { vaultExtensionAbi_V3 } from '@/abi';
 
 export class Pools {

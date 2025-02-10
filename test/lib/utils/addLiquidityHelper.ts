@@ -9,19 +9,19 @@ import {
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
     AddLiquidityUnbalancedInput,
     Address,
-    BALANCER_ROUTER,
     NATIVE_ASSETS,
     PoolState,
     Slippage,
     Token,
     TokenAmount,
-    VAULT,
     Permit2Helper,
     AddLiquidityKind,
     ChainId,
     isSameAddress,
     PublicWalletClient,
 } from 'src';
+import { VAULT_V2 } from '@/utils/constantsV2';
+import { BALANCER_ROUTER } from '@/utils/constantsV3';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
@@ -219,7 +219,7 @@ export function assertAddLiquidityUnbalanced(
           }) = {
         // | Omit<AddLiquidityV2BaseQueryOutput, 'amountsIn' | 'bptIndex'> = {
         // Query should use same amountsIn as input
-        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
+        to: protocolVersion === 2 ? VAULT_V2[chainId] : BALANCER_ROUTER[chainId],
         amountsIn: expectedAmountsIn,
         tokenInIndex: undefined,
         // Should match inputs
@@ -291,7 +291,7 @@ export function assertAddLiquiditySingleToken(
               userData: Hex;
           }) = {
         // Query should use same bpt out as user sets
-        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
+        to: protocolVersion === 2 ? VAULT_V2[chainId] : BALANCER_ROUTER[chainId],
         bptOut: TokenAmount.fromRawAmount(
             bptToken,
             addLiquidityInput.bptOut.rawAmount,
@@ -363,7 +363,7 @@ export function assertAddLiquidityProportional(
             to = poolState.address;
             break;
         case 2:
-            to = VAULT[chainId];
+            to = VAULT_V2[chainId];
             break;
         case 3:
             to = BALANCER_ROUTER[chainId];
@@ -527,7 +527,7 @@ function assertAddLiquidityBuildCallOutput(
             to = addLiquidityQueryOutput.poolId;
             break;
         case 2:
-            to = VAULT[addLiquidityInput.chainId];
+            to = VAULT_V2[addLiquidityInput.chainId];
             break;
         case 3:
             to = BALANCER_ROUTER[addLiquidityInput.chainId];
