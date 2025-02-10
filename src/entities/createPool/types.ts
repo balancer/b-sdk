@@ -62,7 +62,7 @@ export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
 
 export type CreatePoolStableSurgeInput = Omit<
     CreatePoolV3StableInput,
-    'poolHooksContract' | 'poolType'
+    'poolHooksContract' | 'poolType' | 'disableUnbalancedLiquidity'
 > & {
     poolType: PoolType.StableSurge;
 };
