@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.1.2
+
+### Patch Changes
+
+- e0e38b3: Update production Composite router addresses.
+
 ## 2.1.1
 
 ### Patch Changes
