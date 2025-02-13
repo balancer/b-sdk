@@ -24,6 +24,7 @@ type NetworksWithFork = Extract<
     | 'AVALANCHE'
     | 'ARBITRUM_ONE'
     | 'GNOSIS_CHAIN'
+    | 'SONIC'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -38,6 +39,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     AVALANCHE: 9345,
     ARBITRUM_ONE: 9445,
     GNOSIS_CHAIN: 9545,
+    SONIC: 9645,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -104,6 +106,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         port: ANVIL_PORTS.GNOSIS_CHAIN,
         forkBlockNumber: 38091627n,
     },
+    SONIC: {
+        rpcEnv: 'SONIC_RPC_URL',
+        fallBackRpc: 'https://sonic.drpc.org',
+        port: ANVIL_PORTS.SONIC,
+        forkBlockNumber: 7728765n,
+    },
 };
 
 function getAnvilOptions(
@@ -111,7 +119,7 @@ function getAnvilOptions(
     blockNumber?: bigint,
 ): CreateAnvilOptions {
     let forkUrl: string;
-    if (process.env[network.rpcEnv] !== 'undefined') {
+    if (process.env[network.rpcEnv] !== undefined) {
         forkUrl = process.env[network.rpcEnv] as string;
     } else {
         if (!network.fallBackRpc)
