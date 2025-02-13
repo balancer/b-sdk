@@ -43,7 +43,6 @@ export class CreatePoolStableSurge implements CreatePoolBase {
             roleAccounts,
             input.swapFeePercentage,
             input.enableDonation,
-            input.disableUnbalancedLiquidity,
             input.salt || getRandomBytes32(),
         ] as const;
 
