@@ -38,7 +38,7 @@ describe(
 describe(
     'BalancerApi Provider for boosted pools',
     () => {
-        test.only('boosted pool has underlying token data', async () => {
+        test('boosted pool has underlying token data', async () => {
             const chainId = ChainId.MAINNET;
             // wstEth/WETH Boosted Pool
             const poolId = '0xc4ce391d82d164c166df9c8336ddf84206b2f812';
