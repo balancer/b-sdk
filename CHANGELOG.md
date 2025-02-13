@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.1.3
+
+### Patch Changes
+
+- 48d4fd9: Fix price impact for add liquidity boosted on near proportional inputs
+
 ## 2.1.2
 
 ### Patch Changes
