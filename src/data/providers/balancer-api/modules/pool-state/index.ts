@@ -1,5 +1,8 @@
 import { BalancerApiClient } from '../../client';
-import { PoolState, PoolStateWithBalances } from '../../../../../entities';
+import {
+    PoolStateWithBalances,
+    PoolStateWithUnderlyings,
+} from '../../../../../entities';
 import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
@@ -16,6 +19,10 @@ export class Pools {
           index
           address
           decimals
+          underlyingToken {
+          address
+          decimals
+          }
         }
       }
     }`;
@@ -41,7 +48,7 @@ export class Pools {
 
     constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
-    async fetchPoolState(id: string): Promise<PoolState> {
+    async fetchPoolState(id: string): Promise<PoolStateWithUnderlyings> {
         const { data } = await this.balancerApiClient.fetch({
             query: this.poolStateQuery,
             variables: {
@@ -50,9 +57,15 @@ export class Pools {
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
-        const poolGetPool: PoolState = {
+        const poolGetPool: PoolStateWithUnderlyings = {
             ...data.poolGetPool,
-            tokens: data.poolGetPool.poolTokens,
+            tokens: data.poolGetPool.poolTokens.map((token) => ({
+                ...token,
+                underlyingToken: token.underlyingToken && {
+                    ...token.underlyingToken,
+                    index: token.index,
+                },
+            })),
             type: mapPoolType(data.poolGetPool.type),
         };
         return poolGetPool;
