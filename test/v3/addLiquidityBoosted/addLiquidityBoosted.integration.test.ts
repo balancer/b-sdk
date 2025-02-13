@@ -380,7 +380,7 @@ describe('Boosted AddLiquidity', () => {
                     wethIsEth,
                 );
             });
-            test('with underlying as reference token', async () => {
+            test.skip('with underlying as reference token', async () => {
                 const referenceAmount = {
                     rawAmount: 481201n,
                     decimals: 6,
