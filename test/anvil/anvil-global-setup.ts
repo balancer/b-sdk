@@ -110,7 +110,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'SONIC_RPC_URL',
         fallBackRpc: 'https://sonic.drpc.org',
         port: ANVIL_PORTS.SONIC,
-        forkBlockNumber: 6645458n,
+        forkBlockNumber: 7728765n,
     },
 };
 
