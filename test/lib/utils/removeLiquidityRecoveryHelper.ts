@@ -157,7 +157,10 @@ export function assertRemoveLiquidityRecovery(
         removeLiquidityKind: removeLiquidityRecoveryInput.kind,
         protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityRecoveryInput.chainId,
-        to: protocolVersion === 2 ? VAULT_V2[chainId] : BALANCER_ROUTER[chainId],
+        to:
+            protocolVersion === 2
+                ? VAULT_V2[chainId]
+                : BALANCER_ROUTER[chainId],
     };
 
     if (protocolVersion === 3)

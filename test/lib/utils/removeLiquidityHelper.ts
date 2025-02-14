@@ -286,7 +286,10 @@ export function assertRemoveLiquiditySingleTokenExactOut(
               userData: Hex;
           }) = {
         // Query should use same amountsOut as input
-        to: protocolVersion === 2 ? VAULT_V2[chainId] : BALANCER_ROUTER[chainId],
+        to:
+            protocolVersion === 2
+                ? VAULT_V2[chainId]
+                : BALANCER_ROUTER[chainId],
         amountsOut: expectedAmountsOut,
         tokenOutIndex: tokensWithoutBpt.findIndex(
             (t) => t.address === removeLiquidityInput.amountOut.address,
@@ -360,7 +363,10 @@ export function assertRemoveLiquiditySingleTokenExactIn(
               userData: Hex;
           }) = {
         // Query should use same bpt out as user sets
-        to: protocolVersion === 2 ? VAULT_V2[chainId] : BALANCER_ROUTER[chainId],
+        to:
+            protocolVersion === 2
+                ? VAULT_V2[chainId]
+                : BALANCER_ROUTER[chainId],
         bptIn: TokenAmount.fromRawAmount(
             bptToken,
             removeLiquidityInput.bptIn.rawAmount,
