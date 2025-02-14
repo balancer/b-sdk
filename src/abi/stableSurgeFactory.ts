@@ -117,11 +117,6 @@ export const stableSurgeFactoryAbi = [
                 type: 'uint256',
             },
             { internalType: 'bool', name: 'enableDonation', type: 'bool' },
-            {
-                internalType: 'bool',
-                name: 'disableUnbalancedLiquidity',
-                type: 'bool',
-            },
             { internalType: 'bytes32', name: 'salt', type: 'bytes32' },
         ],
         name: 'create',

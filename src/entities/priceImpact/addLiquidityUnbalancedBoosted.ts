@@ -96,19 +96,21 @@ export async function addLiquidityUnbalancedBoosted(
         }
     }
 
+    // (near) proportional amountsIn, so we can just round down price impact to zero
+    if (deltaBPTs.every((deltaBPT) => deltaBPT >= 0n)) {
+        return PriceImpactAmount.fromRawAmount(0n);
+    }
+
     // zero out deltas by swapping between tokens from proportionalAmounts
     // to exactAmountsIn, leaving the remaining delta within a single token
-    let remainingDeltaIndex = 0;
-    if (deltaBPTs.some((deltaBPT) => deltaBPT !== 0n)) {
-        remainingDeltaIndex = await zeroOutDeltas(
-            addLiquidity,
-            input,
-            poolState,
-            poolTokens,
-            deltas,
-            deltaBPTs,
-        );
-    }
+    const remainingDeltaIndex = await zeroOutDeltas(
+        addLiquidity,
+        input,
+        poolState,
+        poolTokens,
+        deltas,
+        deltaBPTs,
+    );
 
     // get relevant amount for price impact calculation
     const deltaAmount = TokenAmount.fromRawAmount(

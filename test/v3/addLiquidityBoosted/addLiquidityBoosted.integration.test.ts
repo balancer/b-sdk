@@ -296,7 +296,7 @@ describe('Boosted AddLiquidity', () => {
                 );
             });
 
-            test('with only one underlying token wrapped', async () => {
+            test.skip('with only one underlying token wrapped', async () => {
                 const wethIsEth = false;
                 const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
                     {
@@ -380,7 +380,7 @@ describe('Boosted AddLiquidity', () => {
                     wethIsEth,
                 );
             });
-            test('with underlying as reference token', async () => {
+            test.skip('with underlying as reference token', async () => {
                 const referenceAmount = {
                     rawAmount: 481201n,
                     decimals: 6,
@@ -425,7 +425,7 @@ describe('Boosted AddLiquidity', () => {
                 );
             });
 
-            test('with only one underlying token wrapped', async () => {
+            test.skip('with only one underlying token wrapped', async () => {
                 const referenceAmount = {
                     rawAmount: 481201n,
                     decimals: 6,

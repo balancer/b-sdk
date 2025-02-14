@@ -19,3 +19,4 @@ export * from './vaultAdmin.V3';
 export * from './stablePoolFactory.V3';
 export * from './balancerCompositeLiquidityRouterNested';
 export * from './balancerCompositeLiquidityRouterBoosted';
+export * from './stableSurgeFactory';
