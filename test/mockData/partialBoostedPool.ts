@@ -49,3 +49,38 @@ export const partialBoostedPool_WETH_stataUSDT: PoolStateWithUnderlyings = {
         },
     ],
 };
+
+export const partialBoostedPool_USDT_USDX_sUSDX: PoolStateWithUnderlyings = {
+    id: '0xc2b0d1a1b4cdda10185859b5a5c543024c2df869',
+    address: '0xc2b0d1a1b4cdda10185859b5a5c543024c2df869',
+    type: 'Stable',
+    protocolVersion: 3,
+    tokens: [
+        {
+            index: 0, //susdx
+            address: '0x7788a3538c5fc7f9c7c8a74eac4c898fc8d87d92',
+            decimals: 18,
+            underlyingToken: {
+                address: "0xf3527ef8de265eaa3716fb312c12847bfba66cef",
+                decimals: 18,
+                index: 0,
+          }
+        },
+        {
+            index: 1, //wa arbitrum usdt
+            address: '0xa6d12574efb239fc1d2099732bd8b5dc6306897f',
+            decimals: 6,
+            underlyingToken: {
+                address: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+                decimals: 6,
+                index: 1,
+            },
+        },
+        {
+            index: 2, //usdx
+            address: '0xf3527ef8de265eaa3716fb312c12847bfba66cef',
+            decimals: 18,
+            underlyingToken: null
+        }
+    ],
+};

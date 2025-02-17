@@ -98,7 +98,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         rpcEnv: 'ARBITRUM_ONE_RPC_URL',
         fallBackRpc: 'https://arbitrum.gateway.tenderly.co/',
         port: ANVIL_PORTS.ARBITRUM_ONE,
-        forkBlockNumber: 234936318n,
+        forkBlockNumber: 306976230n,
     },
     GNOSIS_CHAIN: {
         rpcEnv: 'GNOSIS_CHAIN_RPC_URL',
