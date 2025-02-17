@@ -84,7 +84,7 @@ export class TokenAmount {
         return new _Decimal(this.amount.toString())
             .div(new _Decimal(this.decimalScale.toString()))
             .toDecimalPlaces(significantDigits)
-            .toString();
+            .toFixed();
     }
 
     public toInputAmount(): InputAmount {
