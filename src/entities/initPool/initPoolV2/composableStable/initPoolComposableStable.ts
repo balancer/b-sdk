@@ -12,9 +12,7 @@ import {
     InitPoolInputV2,
 } from '../../types';
 import { vaultV2Abi } from '../../../../abi';
-import { MAX_UINT256 } from '../../../../utils';
-import { VAULT_V2 } from '@/utils/constantsV2';
-
+import { VAULT_V2, MAX_UINT256 } from '../../../../utils';
 import { Token } from '@/entities/token';
 import { getValue } from '@/entities/utils/getValue';
 import { TokenAmount } from '@/entities/tokenAmount';

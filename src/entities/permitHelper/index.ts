@@ -1,12 +1,14 @@
 import { Account, Address, Hex } from 'viem';
 
 import { weightedPoolAbi_V3 } from '@/abi';
-import { ChainId, MAX_UINT256, PublicWalletClient } from '@/utils';
 import {
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     BALANCER_ROUTER,
-} from '@/utils/constantsV3';
+    ChainId,
+    MAX_UINT256,
+    PublicWalletClient,
+} from '@/utils';
 import { getNonce } from './helper';
 import { RemoveLiquidityBaseBuildCallInput } from '../removeLiquidity/types';
 import { getAmountsCall } from '../removeLiquidity/helper';

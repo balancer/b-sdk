@@ -7,8 +7,7 @@ import {
     CreatePoolStableSurgeInput,
 } from '../../types';
 import { stableSurgeFactoryAbi } from '@/abi/stableSurgeFactory';
-import { sortByAddress } from '@/utils';
-import { STABLE_SURGE_FACTORY } from '@/utils/constantsV3';
+import { STABLE_SURGE_FACTORY, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 
 export class CreatePoolStableSurge implements CreatePoolBase {

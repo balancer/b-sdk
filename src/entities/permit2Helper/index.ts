@@ -5,14 +5,16 @@ import {
     Permit2Batch,
     PermitDetails,
 } from './allowanceTransfer';
-import { ChainId, PERMIT2, PublicWalletClient } from '@/utils';
 import {
     BALANCER_BATCH_ROUTER,
     BALANCER_BUFFER_ROUTER,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     BALANCER_ROUTER,
-} from '@/utils/constantsV3';
+    ChainId,
+    PERMIT2,
+    PublicWalletClient,
+} from '@/utils';
 import {
     MaxAllowanceExpiration,
     MaxAllowanceTransferAmount,

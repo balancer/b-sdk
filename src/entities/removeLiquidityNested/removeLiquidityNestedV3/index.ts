@@ -13,8 +13,7 @@ import {
     RemoveLiquidityNestedQueryOutputV3,
 } from './types';
 import { RemoveLiquidityNestedBuildCallOutput } from '../types';
-import { CHAINS } from '@/utils/constants';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED } from '@/utils/constantsV3';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
 import {
     balancerCompositeLiquidityRouterNestedAbi,
     permit2Abi,

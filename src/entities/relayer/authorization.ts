@@ -1,6 +1,5 @@
 import { concat, pad, parseSignature, toHex } from 'viem';
-import { MAX_UINT256, PublicWalletClient } from '../../utils';
-import { VAULT_V2 } from '@/utils/constantsV2';
+import { MAX_UINT256, VAULT_V2, PublicWalletClient } from '../../utils';
 import { Address, Hex } from '../../types';
 import { vaultV2Abi } from '../../abi';
 

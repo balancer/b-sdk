@@ -20,7 +20,7 @@ import {
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuery';
 import { Token } from '../token';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils/constantsV3';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
 import {
     balancerCompositeLiquidityRouterBoostedAbi,
     balancerRouterAbi,

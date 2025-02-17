@@ -14,6 +14,7 @@ import {
 
 import {
     Address,
+    BALANCER_RELAYER,
     ChainId,
     CHAINS,
     Hex,
@@ -29,8 +30,6 @@ import {
     RemoveLiquidityNestedCallInputV2,
     RemoveLiquidityNested,
 } from 'src';
-
-import { BALANCER_RELAYER } from 'src/utils/constantsV2';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';

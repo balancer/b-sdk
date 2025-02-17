@@ -7,8 +7,7 @@ import {
     Hex,
 } from 'viem';
 import { TokenAmount } from '../../../../tokenAmount';
-import { ChainId, EMPTY_SENDER } from '@/utils';
-import { BALANCER_RELAYER } from '@/utils/constantsV2';
+import { BALANCER_RELAYER, ChainId, EMPTY_SENDER } from '@/utils';
 import { balancerRelayerAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';

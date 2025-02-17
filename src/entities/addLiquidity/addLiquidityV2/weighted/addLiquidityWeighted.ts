@@ -4,9 +4,9 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { WeightedEncoder } from '@/entities/encoders/weighted';
 import {
     buildCallWithPermit2ProtocolVersionError,
+    VAULT_V2,
     ZERO_ADDRESS,
 } from '@/utils';
-import { VAULT_V2 } from '@/utils/constantsV2';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,

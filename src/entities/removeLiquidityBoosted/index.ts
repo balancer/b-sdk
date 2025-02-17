@@ -18,7 +18,7 @@ import { Token } from '@/entities/token';
 import { getAmountsCall } from '../removeLiquidity/helper';
 
 import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportionalQuery';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils/constantsV3';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
 import {
     RemoveLiquidityBoostedBuildCallInput,
     RemoveLiquidityBoostedProportionalInput,

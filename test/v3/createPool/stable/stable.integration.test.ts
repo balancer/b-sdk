@@ -21,12 +21,12 @@ import {
     Permit2Helper,
     PERMIT2,
     InitPool,
+    VAULT_V3,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../../lib/utils/createPoolHelper';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { PublicWalletClient } from '@/utils';
-import { VAULT_V3 } from '@/utils/constantsV3';
 import { vaultExtensionAbi_V3 } from 'src/abi/';
 import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import {

@@ -1,7 +1,6 @@
 import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
-import { CHAINS } from '@/utils';
-import { BALANCER_QUERIES } from '@/utils/constantsV2';
+import { BALANCER_QUERIES, CHAINS } from '../../utils';
 import { balancerQueriesAbi } from '../../abi';
 import { JoinPoolRequest } from '../addLiquidity/types';
 

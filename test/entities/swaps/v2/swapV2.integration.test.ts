@@ -18,10 +18,10 @@ import {
     Swap,
     ExactInQueryOutput,
     ExactOutQueryOutput,
+    VAULT_V2,
     Path,
     PublicWalletClient,
 } from '@/index';
-import { VAULT_V2 } from '@/utils/constantsV2';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup } from 'test/lib/utils/helper';

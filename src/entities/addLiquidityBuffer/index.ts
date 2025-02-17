@@ -7,8 +7,7 @@ import { BufferState } from '@/entities/types';
 
 import { doAddLiquidityQuery } from './doAddLiquidityQuery';
 import { Token } from '../token';
-import { BALANCER_BUFFER_ROUTER } from '@/utils/constantsV3';
-
+import { BALANCER_BUFFER_ROUTER } from '@/utils';
 import { balancerBufferRouterAbi, balancerRouterAbi } from '@/abi';
 
 import {

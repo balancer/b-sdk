@@ -14,6 +14,7 @@ import {
 } from 'viem';
 import {
     Address,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     CHAINS,
     ChainId,
     PERMIT2,
@@ -26,8 +27,6 @@ import {
     AddLiquidityNestedQueryOutputV3,
     AddLiquidityNestedCallInput,
 } from '@/index';
-
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED } from '@/utils/constantsV3';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     approveSpenderOnPermit2,

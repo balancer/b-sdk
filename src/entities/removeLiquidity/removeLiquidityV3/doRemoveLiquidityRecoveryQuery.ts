@@ -4,8 +4,7 @@ import {
     vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
-import { CHAINS } from '@/utils';
-import { BALANCER_ROUTER } from '@/utils/constantsV3';
+import { BALANCER_ROUTER, CHAINS } from '@/utils';
 import { createPublicClient, http } from 'viem';
 import { RemoveLiquidityRecoveryInput } from '../types';
 import { Address } from '@/types';

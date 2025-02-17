@@ -1,8 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
-import { ZERO_ADDRESS } from '@/utils';
-import { VAULT_V2 } from '@/utils/constantsV2';
+import { VAULT_V2, ZERO_ADDRESS } from '../../../../utils/';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {

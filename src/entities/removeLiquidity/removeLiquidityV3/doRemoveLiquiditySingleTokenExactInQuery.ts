@@ -4,8 +4,7 @@ import {
     vaultExtensionAbi_V3,
     vaultV3Abi,
 } from '@/abi';
-import { ChainId, CHAINS } from '@/utils';
-import { BALANCER_ROUTER } from '@/utils/constantsV3';
+import { BALANCER_ROUTER, ChainId, CHAINS } from '@/utils';
 import { createPublicClient, Hex, http } from 'viem';
 import { Address } from '@/types';
 

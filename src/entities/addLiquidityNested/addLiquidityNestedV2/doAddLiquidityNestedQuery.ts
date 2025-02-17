@@ -5,8 +5,12 @@ import {
     http,
 } from 'viem';
 import { Hex } from '../../../types';
-import { CHAINS, ChainId, EMPTY_SENDER } from '../../../utils';
-import { BALANCER_RELAYER } from '@/utils/constantsV2';
+import {
+    BALANCER_RELAYER,
+    CHAINS,
+    ChainId,
+    EMPTY_SENDER,
+} from '../../../utils';
 import {
     balancerRelayerAbi,
     permit2Abi,

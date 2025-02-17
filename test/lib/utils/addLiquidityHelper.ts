@@ -9,19 +9,19 @@ import {
     addLiquiditySingleTokenShouldHaveTokenInIndexError,
     AddLiquidityUnbalancedInput,
     Address,
+    BALANCER_ROUTER,
     NATIVE_ASSETS,
     PoolState,
     Slippage,
     Token,
     TokenAmount,
+    VAULT_V2,
     Permit2Helper,
     AddLiquidityKind,
     ChainId,
     isSameAddress,
     PublicWalletClient,
 } from 'src';
-import { VAULT_V2 } from '@/utils/constantsV2';
-import { BALANCER_ROUTER } from '@/utils/constantsV3';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';

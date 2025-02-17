@@ -8,8 +8,7 @@ import {
 } from 'viem';
 
 import { HumanAmount } from '@/data';
-import { CHAINS } from '@/utils';
-import { VAULT_V3 } from '@/utils/constantsV3';
+import { CHAINS, VAULT_V3 } from '@/utils';
 
 import { getSortedTokens } from './getSortedTokens';
 import {

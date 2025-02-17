@@ -7,8 +7,7 @@ import {
 } from 'viem';
 import { PoolType } from '@/types';
 import { HumanAmount } from '@/data';
-import { CHAINS } from '@/utils';
-import { VAULT_V2 } from '@/utils/constantsV2';
+import { CHAINS, VAULT_V2 } from '@/utils';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { getSortedTokens } from './getSortedTokens';
 import { vaultV2Abi } from '@/abi';

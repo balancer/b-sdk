@@ -6,12 +6,11 @@ import {
     Hex,
 } from 'viem';
 import { Token } from '@/entities/token';
-import { ChainId, NATIVE_ASSETS } from '@/utils';
+import { BALANCER_RELAYER, ChainId, NATIVE_ASSETS } from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { balWethAssets, balWethId } from './constants';
 import { replaceWrapped } from './replaceWrapped';
-import { BALANCER_RELAYER } from '@/utils/constantsV2';
 
 export function encodeJoinData(
     token: Token,

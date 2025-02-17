@@ -5,7 +5,7 @@ import {
     InitPoolBuildOutput,
     InitPoolInputV2,
 } from '../../types';
-import { VAULT_V2 } from '@/utils/constantsV2';
+import { VAULT_V2 } from '../../../../utils';
 import { vaultV2Abi } from '../../../../abi';
 import {
     getAmounts,

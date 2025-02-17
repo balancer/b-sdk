@@ -3,8 +3,10 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import { getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
-import { removeLiquidityUnbalancedNotSupportedOnV3 } from '@/utils';
-import { BALANCER_ROUTER } from '@/utils/constantsV3';
+import {
+    BALANCER_ROUTER,
+    removeLiquidityUnbalancedNotSupportedOnV3,
+} from '@/utils';
 
 import { getAmountsCall, getAmountsQuery } from '../helper';
 import {

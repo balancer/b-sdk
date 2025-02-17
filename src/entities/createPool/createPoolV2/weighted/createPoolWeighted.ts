@@ -7,7 +7,7 @@ import {
 } from '../../types';
 import { getRandomBytes32 } from '../../../utils/getRandomBytes32';
 import { weightedPoolFactoryV4Abi_V2 } from '../../../../abi/weightedPoolFactoryV4.V2';
-import { WEIGHTED_POOL_FACTORY_BALANCER_V2 } from '@/utils/constantsV2';
+import { WEIGHTED_POOL_FACTORY_BALANCER_V2 } from '@/utils';
 import { sortByAddress } from '@/utils/sortByAddress';
 
 export class CreatePoolWeightedV2 implements CreatePoolBase {

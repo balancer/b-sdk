@@ -14,8 +14,7 @@ import {
 import { Token } from '@/entities/token';
 import { getAmounts, getValue } from '@/entities/utils';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED } from '@/utils/constantsV3';
-import { CHAINS } from '@/utils';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
 import {
     balancerCompositeLiquidityRouterNestedAbi,
     permit2Abi,

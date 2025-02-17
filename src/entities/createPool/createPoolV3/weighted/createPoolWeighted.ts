@@ -8,8 +8,7 @@ import {
     PoolRoleAccounts,
 } from '../../types';
 import { weightedPoolFactoryAbi_V3 } from '@/abi/weightedPoolFactory.V3';
-import { WEIGHTED_POOL_FACTORY_BALANCER_V3 } from '@/utils/constantsV3';
-import { sortByAddress } from '@/utils';
+import { WEIGHTED_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 
 export class CreatePoolWeightedV3 implements CreatePoolBase {
