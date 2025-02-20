@@ -6,7 +6,7 @@ import {
     DEFAULT_USERDATA,
     DEFAULT_FUND_MANAGMENT,
     ZERO_ADDRESS,
-    VAULT,
+    VAULT_V2,
     NATIVE_ASSETS,
     ChainId,
     MAX_UINT256,
@@ -120,7 +120,7 @@ export class SwapV2 implements SwapBase {
 
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: VAULT[this.chainId],
+                to: VAULT_V2[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -130,7 +130,7 @@ export class SwapV2 implements SwapBase {
             };
         }
         return {
-            to: VAULT[this.chainId],
+            to: VAULT_V2[this.chainId],
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,
@@ -158,7 +158,7 @@ export class SwapV2 implements SwapBase {
 
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: VAULT[this.chainId],
+                to: VAULT_V2[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -172,7 +172,7 @@ export class SwapV2 implements SwapBase {
             };
         }
         return {
-            to: VAULT[this.chainId],
+            to: VAULT_V2[this.chainId],
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,
@@ -295,14 +295,14 @@ export class SwapV2 implements SwapBase {
         }
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: VAULT[this.chainId],
+                to: VAULT_V2[this.chainId],
                 callData,
                 value: this.value(limitAmount, !!input.wethIsEth),
                 minAmountOut: limitAmount,
             };
         }
         return {
-            to: VAULT[this.chainId],
+            to: VAULT_V2[this.chainId],
             callData,
             value: this.value(limitAmount, !!input.wethIsEth),
             maxAmountIn: limitAmount,

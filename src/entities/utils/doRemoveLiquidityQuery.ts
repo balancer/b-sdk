@@ -1,6 +1,6 @@
 import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
-import { BALANCER_QUERIES, CHAINS } from '../../utils/constants';
+import { BALANCER_QUERIES, CHAINS } from '../../utils';
 import { balancerQueriesAbi } from '../../abi';
 import { ExitPoolRequest } from '../removeLiquidity/types';
 

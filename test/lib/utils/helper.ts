@@ -19,7 +19,7 @@ import {
 
 import { erc20Abi, permit2Abi } from '@/abi';
 import {
-    VAULT,
+    VAULT_V2,
     MAX_UINT256,
     ZERO_ADDRESS,
     PERMIT2,
@@ -86,12 +86,12 @@ export const approveToken = async (
 
     let approved = false;
     if (protocolVersion === 2) {
-        // Approve Vault V2 to spend account tokens
+        // Approve VAULT_V2 V2 to spend account tokens
         approved = await approveSpenderOnToken(
             client,
             accountAddress,
             tokenAddress,
-            VAULT[chainId],
+            VAULT_V2[chainId],
             amount,
         );
     } else {
@@ -211,7 +211,7 @@ export const approveSpenderOnToken = async (
     );
 
     if (!approved) {
-        // approve token on the vault
+        // approve token on the VAULT_V2
         await client.writeContract({
             account,
             chain: client.chain,
@@ -334,8 +334,8 @@ export async function sendTransactionGetBalances(
     //         BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[client.chain?.id as number],
     //     abi: [
     //         ...balancerCompositeLiquidityRouterNestedAbi,
-    //         ...vaultV3Abi,
-    //         ...vaultExtensionAbi_V3,
+    //         ...VAULT_V2V3Abi,
+    //         ...VAULT_V2ExtensionAbi_V3,
     //         ...permit2Abi,
     //     ],
     //     functionName: 'addLiquidityUnbalancedNestedPool',
@@ -538,7 +538,7 @@ export async function findTokenBalanceSlot(
  * @param slots Slot that stores token balance in memory - use npm package `slot20` to identify which slot to provide
  * @param balances Balances in EVM amounts
  * @param isVyperMapping Whether the storage uses Vyper or Solidity mapping
- * @param protocolVersion Balancer vault version
+ * @param protocolVersion Balancer VAULT_V2 version
  * @param approveOnPermit2 Whether to approve spender on Permit2
  */
 export const forkSetup = async (

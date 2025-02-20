@@ -7,7 +7,7 @@ import {
 } from 'viem';
 import { PoolType } from '@/types';
 import { HumanAmount } from '@/data';
-import { CHAINS, VAULT } from '@/utils';
+import { CHAINS, VAULT_V2 } from '@/utils';
 import { PoolState, PoolStateWithBalances } from '../types';
 import { getSortedTokens } from './getSortedTokens';
 import { vaultV2Abi } from '@/abi';
@@ -19,7 +19,7 @@ export const getPoolStateWithBalancesV2 = async (
 ): Promise<PoolStateWithBalances> => {
     const totalSupplyContract = getTotalSupplyContractV2(poolState);
     const getBalanceContracts = {
-        address: VAULT[chainId],
+        address: VAULT_V2[chainId],
         abi: vaultV2Abi,
         functionName: 'getPoolTokens' as const,
         args: [poolState.id] as const,

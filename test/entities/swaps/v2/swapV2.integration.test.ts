@@ -18,7 +18,7 @@ import {
     Swap,
     ExactInQueryOutput,
     ExactOutQueryOutput,
-    VAULT,
+    VAULT_V2,
     Path,
     PublicWalletClient,
 } from '@/index';
@@ -39,7 +39,7 @@ const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, blockNo);
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
-const vault = VAULT[chainId];
+const vault = VAULT_V2[chainId];
 
 describe('SwapV2', () => {
     let client: PublicWalletClient & TestActions;
