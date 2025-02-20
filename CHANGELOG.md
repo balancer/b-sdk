@@ -1,5 +1,15 @@
 # @balancer/sdk
 
+## 2.2.0
+
+### Minor Changes
+
+- b9130c3: split constants into general and version specific files
+
+### Patch Changes
+
+- 14bb7ba: Fix TokenAmount.toSignificant with very small amounts
+
 ## 2.1.3
 
 ### Patch Changes
