@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.3.0
+
+### Minor Changes
+
+- 47b3caa: Add support for monad testnet'
+
 ## 2.2.0
 
 ### Minor Changes
