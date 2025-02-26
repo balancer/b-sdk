@@ -48,7 +48,11 @@ describe('create liquidityBootstrapping pool test', () => {
     let poolAddress: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS.SEPOLIA,
+            undefined,
+            7783363n,
+        ));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
