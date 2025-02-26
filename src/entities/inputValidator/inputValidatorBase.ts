@@ -12,6 +12,7 @@ import {
 import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { isSameAddress, NATIVE_ASSETS } from '@/utils';
+import { CreatePoolBaseInput } from '../createPool';
 
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
@@ -24,7 +25,7 @@ export class InputValidatorBase {
         }
     }
 
-    validateCreatePool() {}
+    validateCreatePool(_input: CreatePoolBaseInput) {}
 
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
