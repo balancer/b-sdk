@@ -17,7 +17,6 @@ import {
 import {
     AddLiquidityKind,
     Slippage,
-    Hex,
     CHAINS,
     ChainId,
     AddLiquidityBoostedV3,
@@ -33,18 +32,18 @@ import {
     TokenAmount,
 } from '../../../src';
 import {
-    setTokenBalances,
-    approveSpenderOnTokens,
-    approveSpenderOnPermit2,
-    areBigIntsWithinPercent,
-    TOKENS,
-    assertTokenMatch,
-    sendTransactionGetBalances,
-    doAddLiquidityBoosted,
-    assertAddLiquidityBoostedUnbalanced,
-    assertAddLiquidityBoostedProportional,
     AddLiquidityBoostedTxInput,
-} from '../../lib/utils';
+    approveSpenderOnPermit2,
+    approveSpenderOnTokens,
+    areBigIntsWithinPercent,
+    assertAddLiquidityBoostedProportional,
+    assertAddLiquidityBoostedUnbalanced,
+    assertTokenMatch,
+    doAddLiquidityBoosted,
+    sendTransactionGetBalances,
+    setTokenBalances,
+    TOKENS,
+} from 'test/lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 
@@ -65,7 +64,6 @@ const stataUsdtToken = new Token(
 describe('Boosted AddLiquidity', () => {
     let client: PublicWalletClient & TestActions;
     let rpcUrl: string;
-    let snapshot: Hex;
     let testAddress: Address;
     const addLiquidityBoosted = new AddLiquidityBoostedV3();
 
@@ -92,7 +90,12 @@ describe('Boosted AddLiquidity', () => {
     const tokensInForDoubleWrap = [USDC.address, USDT.address];
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS[ChainId[chainId]],
+            undefined,
+            undefined,
+            1,
+        ));
 
         client = createTestClient({
             mode: 'anvil',
@@ -122,13 +125,18 @@ describe('Boosted AddLiquidity', () => {
             [USDT.address],
             stataUSDT.address,
         );
-        await client.writeContract({
+        const hash = await client.writeContract({
             account: testAddress,
             chain: CHAINS[chainId],
             abi: erc4626Abi,
             address: stataUSDT.address,
             functionName: 'deposit',
             args: [parseUnits('500', USDT.decimals), testAddress],
+        });
+
+        // wait for deposit confirmation before starting tests
+        await client.waitForTransactionReceipt({
+            hash,
         });
 
         // approve Permit2 to spend users DAI/USDC, does not include the sub approvals
@@ -138,15 +146,6 @@ describe('Boosted AddLiquidity', () => {
             [USDT.address, USDC.address, stataUSDT.address],
             PERMIT2[chainId],
         );
-
-        snapshot = await client.snapshot();
-    });
-
-    beforeEach(async () => {
-        await client.revert({
-            id: snapshot,
-        });
-        snapshot = await client.snapshot();
     });
 
     describe('query', () => {
@@ -296,7 +295,7 @@ describe('Boosted AddLiquidity', () => {
                 );
             });
 
-            test.skip('with only one underlying token wrapped', async () => {
+            test('with only one underlying token wrapped', async () => {
                 const wethIsEth = false;
                 const addLiquidityBoostedInput: AddLiquidityBoostedUnbalancedInput =
                     {
@@ -380,7 +379,7 @@ describe('Boosted AddLiquidity', () => {
                     wethIsEth,
                 );
             });
-            test.skip('with underlying as reference token', async () => {
+            test('with underlying as reference token', async () => {
                 const referenceAmount = {
                     rawAmount: 481201n,
                     decimals: 6,
@@ -425,7 +424,7 @@ describe('Boosted AddLiquidity', () => {
                 );
             });
 
-            test.skip('with only one underlying token wrapped', async () => {
+            test('with only one underlying token wrapped', async () => {
                 const referenceAmount = {
                     rawAmount: 481201n,
                     decimals: 6,
