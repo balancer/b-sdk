@@ -50,6 +50,10 @@ export const STABLE_SURGE_FACTORY: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0xD516c344413B4282dF1E4082EAE6B1081F3b1932',
 };
 
+export const LIQUIDITY_BOOTSTRAPPING_FACTORY: Record<number, Address> = {
+    [ChainId.SEPOLIA]: '0x49060F33E225446f7E728373Cee6fc622E49F6ec',
+};
+
 // V3
 export const BALANCER_ROUTER: Record<number, Address> = {
     [ChainId.SEPOLIA]: '0x0BF61f706105EA44694f2e92986bD01C39930280',

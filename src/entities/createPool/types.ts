@@ -78,12 +78,42 @@ export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
     }[];
 };
 
+export type LBPParams = {
+    owner: Address;
+    projectToken: Address;
+    reserveToken: Address;
+    projectTokenStartWeight: bigint;
+    reserveTokenStartWeight: bigint;
+    projectTokenEndWeight: bigint;
+    reserveTokenEndWeight: bigint;
+    startTime: bigint;
+    endTime: bigint;
+    blockProjectTokenSwapsIn: boolean;
+};
+
+// The pool uses default liquidity management values (no setters available)
+// swapFeeManager replaced by LBPParams.owner
+// pauseManager is governance by default
+// the pool is the hook itself. No hooksetter available
+export type CreateLiquidityBoostrappingPoolInput = Omit<
+    CreatePoolV3BaseInput,
+    | 'pauseManager'
+    | 'swapFeeManager'
+    | 'poolHooksContract'
+    | 'enableDonation'
+    | 'disableUnbalancedLiquidity'
+> & {
+    lbpParams: LBPParams;
+    poolType: PoolType.LiquidityBootstrapping;
+};
+
 export type CreatePoolInput =
     | CreatePoolV2WeightedInput
     | CreatePoolV2ComposableStableInput
     | CreatePoolV3WeightedInput
     | CreatePoolV3StableInput
-    | CreatePoolStableSurgeInput;
+    | CreatePoolStableSurgeInput
+    | CreateLiquidityBoostrappingPoolInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;

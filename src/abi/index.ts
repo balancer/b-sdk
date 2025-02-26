@@ -20,3 +20,4 @@ export * from './stablePoolFactory.V3';
 export * from './balancerCompositeLiquidityRouterNested';
 export * from './balancerCompositeLiquidityRouterBoosted';
 export * from './stableSurgeFactory';
+export * from './liquidityBootstrappingFactory';

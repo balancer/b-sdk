@@ -14,6 +14,7 @@ import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
 import { InputValidatorBoosted } from './boosted/inputValidatorBoosted';
+import { InputValidatorLiquidityBootstrapping } from './liquidityBootstrapping/inputValidatorLiquidityBootstrapping';
 import { ChainId, buildCallWithPermit2ProtocolVersionError } from '@/utils';
 import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
 
@@ -32,6 +33,8 @@ export class InputValidator {
             [PoolType.Weighted]: new InputValidatorWeighted(),
             [PoolType.Boosted]: new InputValidatorBoosted(),
             [PoolType.StableSurge]: new InputValidatorStable(),
+            [PoolType.LiquidityBootstrapping]:
+                new InputValidatorLiquidityBootstrapping(),
         };
     }
 
