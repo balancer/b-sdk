@@ -181,6 +181,7 @@ export async function startFork(
     network: NetworkSetup,
     jobId = Number(process.env.VITEST_WORKER_ID) || 0,
     blockNumber?: bigint, // If not provided, the fork will start from the network's forkBlockNumber
+    blockTime?: number,
 ) {
     const anvilOptions = getAnvilOptions(network, blockNumber);
 
@@ -200,7 +201,7 @@ export async function startFork(
     if (runningForks[port]) return { rpcUrl };
 
     // https://www.npmjs.com/package/@viem/anvil
-    const anvil = createAnvil({ ...anvilOptions, port });
+    const anvil = createAnvil({ ...anvilOptions, port, blockTime });
     // Save reference to running fork
     runningForks[port] = anvil;
 
