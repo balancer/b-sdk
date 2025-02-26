@@ -38,7 +38,7 @@
         "@types/async-retry": "^1.4.8",
         "@types/lodash.clonedeep": "^4.5.9",
         "@types/node": "^18.19.7",
-        "@viem/anvil": "^0.0.6",
+        "@viem/anvil": "^0.0.10",
         "dotenv": "^16.3.1",
         "dpdm": "^3.14.0",
         "pino-pretty": "^10.3.1",
@@ -47,7 +47,7 @@
         "typescript": "^5.7.2",
         "vite": "^5.2.10",
         "vite-tsconfig-paths": "^4.2.3",
-        "vitest": "^1.2.0"
+        "vitest": "^3.0.7"
     },
     "packageManager": "pnpm@^8.6.0",
     "engines": {
