@@ -8,12 +8,16 @@ import { InputValidatorBase } from '../inputValidatorBase';
 import { validateTokensAddLiquidity } from '../utils/validateTokens';
 import { CreatePoolV3StableInput } from '@/entities/createPool';
 
+import { validateCreatePoolTokens } from '../utils/validateTokens';
+import { validateCreatePoolTokenConfig } from '../utils/validateCreatePoolTokenConfig';
+
 export const MAX_AMP = 5000n;
 export const MIN_AMP = 1n;
 export const MAX_TOKENS = 5;
 export class InputValidatorStable extends InputValidatorBase {
     validateCreatePool(input: CreatePoolV3StableInput) {
-        super.validateCreatePool(input);
+        validateCreatePoolTokens(input.tokens);
+        validateCreatePoolTokenConfig(input);
 
         if (input.tokens.length > MAX_TOKENS) {
             throw new Error(
