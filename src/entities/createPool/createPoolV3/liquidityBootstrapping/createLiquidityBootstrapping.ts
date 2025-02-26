@@ -1,9 +1,3 @@
-// The goal is to create a new class. This class will have two methods. One is called
-// buildCall and one is encodeCall.
-// The encodeCall function takes a type of CreateLiquidityBootstrappingInput and returns a Hex type.
-// The Hex value is basically the callData to create the pool from the factory
-// This class essentially uses the encodeFunction data from the viem library to create the callData
-
 import { getRandomBytes32 } from '@/entities/utils/getRandomBytes32';
 import { encodeFunctionData } from 'viem';
 
@@ -30,7 +24,6 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
     }
 
     private encodeCall(input: CreateLiquidityBoostrappingPoolInput): Hex {
-        // this function encodes the smart contract input arguments
         const args = [
             input.name,
             input.symbol,
