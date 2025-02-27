@@ -31,6 +31,7 @@ export class InputValidator {
             [PoolType.Stable]: new InputValidatorStable(),
             [PoolType.Weighted]: new InputValidatorWeighted(),
             [PoolType.Boosted]: new InputValidatorBoosted(),
+            [PoolType.StableSurge]: new InputValidatorStable(),
         };
     }
 

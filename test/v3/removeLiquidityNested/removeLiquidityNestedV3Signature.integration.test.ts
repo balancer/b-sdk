@@ -19,7 +19,7 @@ import {
     Token,
     RemoveLiquidityNestedInput,
     RemoveLiquidityNested,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     Slippage,
     PermitHelper,
     RemoveLiquidityNestedCallInputV3,
@@ -130,7 +130,7 @@ describe('V3 remove liquidity nested test, with Permit signature', () => {
             addLiquidityBuildCallOutput.minAmountsOut.map((a) => a.amount),
         );
         expect(addLiquidityBuildCallOutput.to).to.eq(
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
         );
 
         // send remove liquidity transaction and check balance changes

@@ -5,7 +5,7 @@ import {
     InitPoolBuildOutput,
     InitPoolInputV2,
 } from '../../types';
-import { VAULT } from '../../../../utils';
+import { VAULT_V2 } from '../../../../utils';
 import { vaultV2Abi } from '../../../../abi';
 import {
     getAmounts,
@@ -47,7 +47,7 @@ export class InitPoolWeighted implements InitPoolBase {
 
         return {
             callData,
-            to: VAULT[input.chainId] as Address,
+            to: VAULT_V2[input.chainId] as Address,
             value: getValue(amountsIn, !!input.wethIsEth),
         };
     }

@@ -1,7 +1,11 @@
-// pnpm test -- nestedPoolStateValidation.test.ts
+// pnpm test -- validateNestedPoolState.test.ts
 import { describe, expect, test } from 'vitest';
-import { NestedPoolState, NestedPoolV2, validateNestedPoolState } from '..';
+import { NestedPoolState, NestedPoolV2, validateNestedPoolState } from '../src';
 import { PoolType } from '@/types';
+import {
+    mapPoolToNestedPoolStateV2,
+    PoolGetPool,
+} from '@/data/providers/balancer-api/modules/nested-pool-state';
 
 describe('nested pool state validations', () => {
     describe('happy case', () => {
@@ -27,6 +31,18 @@ describe('nested pool state validations', () => {
             );
         });
     });
+
+    describe("A main token can't be token of > 1 pool", () => {
+        test('should not throw', () => {
+            // Test the exact error message
+            expect(() =>
+                validateNestedPoolState(
+                    mapPoolToNestedPoolStateV2(nestedOPoolState),
+                ),
+            ).not.toThrowError();
+        });
+    });
+
     describe('A main token only supported to a max of 1 level of nesting', () => {
         test('should throw', () => {
             // Test the exact error message
@@ -244,3 +260,66 @@ const deepPoolState: NestedPoolState = {
         },
     ],
 };
+
+const nestedOPoolState = {
+    id: '0x49cbd67651fbabce12d1df18499896ec87bef46f00000000000000000000064a',
+    protocolVersion: 2,
+    address: '0x49cbd67651fbabce12d1df18499896ec87bef46f',
+    type: 'COMPOSABLE_STABLE',
+    poolTokens: [
+        {
+            index: 0,
+            address: '0x49cbd67651fbabce12d1df18499896ec87bef46f',
+            decimals: 18,
+            nestedPool: null,
+            underlyingToken: null,
+        },
+        {
+            index: 1,
+            address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
+            decimals: 18,
+            nestedPool: {
+                id: '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
+                address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
+                type: 'COMPOSABLE_STABLE',
+                tokens: [
+                    {
+                        index: 0,
+                        address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+                        decimals: 18,
+                        underlyingToken: null,
+                    },
+                    {
+                        index: 1,
+                        address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
+                        decimals: 18,
+                        underlyingToken: null,
+                    },
+                    {
+                        index: 2,
+                        address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+                        decimals: 6,
+                        underlyingToken: null,
+                    },
+                    {
+                        index: 3,
+                        address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+                        decimals: 6,
+                        underlyingToken: null,
+                    },
+                ],
+            },
+            underlyingToken: null,
+        },
+        {
+            index: 2,
+            address: '0x83f20f44975d03b1b09e64809b757c47f942beea',
+            decimals: 18,
+            nestedPool: null,
+            underlyingToken: {
+                address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+                decimals: 18,
+            },
+        },
+    ],
+} as PoolGetPool;

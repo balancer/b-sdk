@@ -36,6 +36,7 @@ export class SorSwapPaths {
         inputAmountRaw
         outputAmountRaw
         pools
+        isBuffer
         protocolVersion
         tokens {
           address
@@ -67,6 +68,7 @@ export class SorSwapPaths {
         inputAmountRaw
         outputAmountRaw
         pools
+        isBuffer
         protocolVersion
         tokens {
           address

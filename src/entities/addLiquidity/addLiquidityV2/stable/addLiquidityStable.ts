@@ -4,7 +4,7 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { StableEncoder } from '@/entities/encoders/stable';
 import {
     buildCallWithPermit2ProtocolVersionError,
-    VAULT,
+    VAULT_V2,
     ZERO_ADDRESS,
 } from '@/utils';
 import { vaultV2Abi } from '@/abi';
@@ -61,7 +61,7 @@ export class AddLiquidityStable implements AddLiquidityBase {
         );
 
         return {
-            to: VAULT[input.chainId],
+            to: VAULT_V2[input.chainId],
             poolType: poolState.type,
             addLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -100,7 +100,7 @@ export class AddLiquidityStable implements AddLiquidityBase {
 
         return {
             callData,
-            to: VAULT[input.chainId],
+            to: VAULT_V2[input.chainId],
             value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,

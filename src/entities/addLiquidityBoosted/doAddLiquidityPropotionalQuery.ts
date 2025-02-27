@@ -1,8 +1,12 @@
 import { createPublicClient, Hex, http } from 'viem';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, ChainId, CHAINS } from '@/utils';
+import {
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+    ChainId,
+    CHAINS,
+} from '@/utils';
 import { Address } from '@/types';
 import {
-    balancerCompositeLiquidityRouterAbi,
+    balancerCompositeLiquidityRouterBoostedAbi,
     permit2Abi,
     vaultExtensionAbi_V3,
     vaultV3Abi,
@@ -15,24 +19,34 @@ export const doAddLiquidityProportionalQuery = async (
     userData: Hex,
     poolAddress: Address,
     exactBptAmountOut: bigint,
+    wrapUnderlying: boolean[],
     block?: bigint,
-): Promise<bigint[]> => {
+): Promise<[Address[], bigint[]]> => {
     const client = createPublicClient({
         transport: http(rpcUrl),
         chain: CHAINS[chainId],
     });
 
-    const { result: exactAmountsIn } = await client.simulateContract({
-        address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+    const {
+        result: [tokensIn, exactAmountsIn],
+    } = await client.simulateContract({
+        address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
         abi: [
-            ...balancerCompositeLiquidityRouterAbi,
+            ...balancerCompositeLiquidityRouterBoostedAbi,
             ...vaultV3Abi,
             ...vaultExtensionAbi_V3,
             ...permit2Abi,
         ],
         functionName: 'queryAddLiquidityProportionalToERC4626Pool',
-        args: [poolAddress, exactBptAmountOut, sender, userData],
+        args: [
+            poolAddress,
+            wrapUnderlying,
+            exactBptAmountOut,
+            sender,
+            userData,
+        ],
         blockNumber: block,
     });
-    return [...exactAmountsIn];
+
+    return [[...tokensIn], [...exactAmountsIn]];
 };

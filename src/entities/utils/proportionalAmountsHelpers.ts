@@ -3,7 +3,11 @@ import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
 import { isSameAddress, MathSol } from '@/utils';
 import { AddLiquidityProportionalInput } from '../addLiquidity/types';
-import { PoolState, PoolStateWithUnderlyings } from '../types';
+import {
+    PoolState,
+    PoolStateWithUnderlyingBalances,
+    PoolStateWithUnderlyings,
+} from '../types';
 import { getPoolStateWithBalancesV2 } from './getPoolStateWithBalancesV2';
 import {
     getBoostedPoolStateWithBalancesV3,
@@ -142,6 +146,7 @@ export const getBptAmountFromReferenceAmount = async (
 export const getBptAmountFromReferenceAmountBoosted = async (
     input: AddLiquidityBoostedProportionalInput,
     poolStateWithUnderlyings: PoolStateWithUnderlyings,
+    wrapUnderlying: boolean[],
 ): Promise<InputAmount> => {
     let bptAmount: InputAmount;
     if (
@@ -159,18 +164,34 @@ export const getBptAmountFromReferenceAmountBoosted = async (
                 input.rpcUrl,
             );
 
-        // use underlying tokens as tokens if they exist (in case of a partial boosted pool)
-        const poolStateWithBalances = {
-            ...poolStateWithUnderlyingBalances,
-            tokens: poolStateWithUnderlyingBalances.tokens.map(
-                (t) => t.underlyingToken ?? t,
-            ),
-        };
-
-        ({ bptAmount } = calculateProportionalAmounts(
-            poolStateWithBalances,
+        ({ bptAmount } = calculateProportionalAmountsBoosted(
+            poolStateWithUnderlyingBalances,
             input.referenceAmount,
+            wrapUnderlying,
         ));
     }
     return bptAmount;
+};
+
+export const calculateProportionalAmountsBoosted = (
+    poolStateWithUnderlyingBalances: PoolStateWithUnderlyingBalances,
+    referenceAmount: InputAmount,
+    wrapUnderlying: boolean[],
+): { tokenAmounts: InputAmount[]; bptAmount: InputAmount } => {
+    const poolStateWithBalances = {
+        ...poolStateWithUnderlyingBalances,
+        tokens: poolStateWithUnderlyingBalances.tokens.map((t, i) => {
+            if (wrapUnderlying[i]) {
+                if (!t.underlyingToken) {
+                    throw new Error(
+                        'Underlying token not found for wrapped token',
+                    );
+                }
+                return t.underlyingToken;
+            }
+            return t;
+        }),
+    };
+
+    return calculateProportionalAmounts(poolStateWithBalances, referenceAmount);
 };

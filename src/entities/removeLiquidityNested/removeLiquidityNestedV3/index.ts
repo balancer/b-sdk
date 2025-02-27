@@ -13,9 +13,9 @@ import {
     RemoveLiquidityNestedQueryOutputV3,
 } from './types';
 import { RemoveLiquidityNestedBuildCallOutput } from '../types';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER, CHAINS } from '@/utils';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
 import {
-    balancerCompositeLiquidityRouterAbi,
+    balancerCompositeLiquidityRouterNestedAbi,
     permit2Abi,
     vaultExtensionAbi_V3,
     vaultV3Abi,
@@ -53,7 +53,7 @@ export class RemoveLiquidityNestedV3 {
             );
 
         return {
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[input.chainId],
             protocolVersion: 3,
             bptAmountIn: TokenAmount.fromRawAmount(bptToken, input.bptAmountIn),
             chainId: input.chainId,
@@ -79,7 +79,7 @@ export class RemoveLiquidityNestedV3 {
         );
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbi,
             functionName: 'removeLiquidityProportionalNestedPool',
             args: [
                 input.parentPool,
@@ -92,7 +92,7 @@ export class RemoveLiquidityNestedV3 {
         });
         return {
             callData,
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[input.chainId],
+            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[input.chainId],
             minAmountsOut,
         } as RemoveLiquidityNestedBuildCallOutput;
     }
@@ -112,9 +112,9 @@ export class RemoveLiquidityNestedV3 {
         });
 
         const { result: amountsOut } = await client.simulateContract({
-            address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+            address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
             abi: [
-                ...balancerCompositeLiquidityRouterAbi,
+                ...balancerCompositeLiquidityRouterNestedAbi,
                 ...vaultV3Abi,
                 ...vaultExtensionAbi_V3,
                 ...permit2Abi,

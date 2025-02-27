@@ -1,4 +1,4 @@
-export const balancerCompositeLiquidityRouterAbi = [
+export const balancerCompositeLiquidityRouterNestedAbi = [
     {
         inputs: [
             { internalType: 'contract IVault', name: 'vault', type: 'address' },

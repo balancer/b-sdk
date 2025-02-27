@@ -13,7 +13,7 @@ import {
 } from 'viem';
 import {
     Address,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     CHAINS,
     ChainId,
     PERMIT2,
@@ -60,7 +60,7 @@ describe('V3 add liquidity partial boosted', () => {
 
     beforeAll(async () => {
         // setup chain and test client
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         client = createTestClient({
             mode: 'anvil',
@@ -94,7 +94,7 @@ describe('V3 add liquidity partial boosted', () => {
                 client,
                 testAddress,
                 token.underlyingToken?.address ?? token.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER[chainId],
+                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
             );
         }
 
@@ -124,7 +124,47 @@ describe('V3 add liquidity partial boosted', () => {
             };
         });
 
-        test('with tokens', async () => {
+        test('with only one token', async () => {
+            const wethIsEth = false;
+
+            const txInput: AddLiquidityBoostedTxInput = {
+                client,
+                addLiquidityBoosted,
+                addLiquidityBoostedInput: {
+                    ...addLiquidityBoostedInput,
+                    amountsIn: [
+                        {
+                            address: amountsIn[1].token.address,
+                            rawAmount: amountsIn[1].amount,
+                            decimals: amountsIn[1].token.decimals,
+                        },
+                    ],
+                },
+                testAddress,
+                poolStateWithUnderlyings: partialBoostedPool_WETH_stataUSDT,
+                slippage: Slippage.fromPercentage('1'),
+                wethIsEth,
+            };
+
+            const {
+                addLiquidityBoostedQueryOutput,
+                addLiquidityBuildCallOutput,
+                tokenAmountsForBalanceCheck,
+                txOutput,
+            } = await doAddLiquidityBoosted(txInput);
+
+            assertAddLiquidityBoostedUnbalanced(
+                {
+                    addLiquidityBoostedQueryOutput,
+                    addLiquidityBuildCallOutput,
+                    tokenAmountsForBalanceCheck,
+                    txOutput,
+                },
+                wethIsEth,
+            );
+        });
+
+        test('with two tokens', async () => {
             const wethIsEth = false;
 
             const txInput: AddLiquidityBoostedTxInput = {
@@ -201,12 +241,12 @@ describe('V3 add liquidity partial boosted', () => {
                 chainId,
                 rpcUrl,
                 kind: AddLiquidityKind.Proportional,
+                tokensIn: [USDT.address, WETH.address],
             };
         });
 
         test('with tokens', async () => {
             const wethIsEth = false;
-
             const txInput: AddLiquidityBoostedTxInput = {
                 client,
                 addLiquidityBoosted,

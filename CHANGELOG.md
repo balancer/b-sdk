@@ -1,5 +1,70 @@
 # @balancer/sdk
 
+## 2.3.0
+
+### Minor Changes
+
+- 47b3caa: Add support for monad testnet'
+
+## 2.2.0
+
+### Minor Changes
+
+- b9130c3: split constants into general and version specific files
+
+### Patch Changes
+
+- 14bb7ba: Fix TokenAmount.toSignificant with very small amounts
+
+## 2.1.3
+
+### Patch Changes
+
+- 48d4fd9: Fix price impact for add liquidity boosted on near proportional inputs
+
+## 2.1.2
+
+### Patch Changes
+
+- e0e38b3: Update production Composite router addresses.
+
+## 2.1.1
+
+### Patch Changes
+
+- e4d2938: Update stableSurge to release version and addresses.
+
+## 2.1.0
+
+### Minor Changes
+
+- 7a62a77: Add StableSurge create support.
+
+## 2.0.0
+
+### Major Changes
+
+- 187fac2: new composite router for boosted operations with ability to wrap/unwrap single token
+
+## 1.4.3
+
+### Patch Changes
+
+- ac22bc9: V2 nested mapping should not use underlying token.
+
+## 1.4.2
+
+### Patch Changes
+
+- dfdaa39: Add Missing isBuffer field for sorGetSwapPaths query.
+- da7dc97: Fix PermitHelper owner to support viem Account as input
+
+## 1.4.1
+
+### Patch Changes
+
+- cca357f: Export calculateProportionalAmountsBoosted helper
+
 ## 1.4.0
 
 ### Minor Changes

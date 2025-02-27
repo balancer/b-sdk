@@ -10,7 +10,7 @@ import {
     Slippage,
     Token,
     TokenAmount,
-    VAULT,
+    VAULT_V2,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances } from './helper';
@@ -157,7 +157,10 @@ export function assertRemoveLiquidityRecovery(
         removeLiquidityKind: removeLiquidityRecoveryInput.kind,
         protocolVersion: poolState.protocolVersion,
         chainId: removeLiquidityRecoveryInput.chainId,
-        to: protocolVersion === 2 ? VAULT[chainId] : BALANCER_ROUTER[chainId],
+        to:
+            protocolVersion === 2
+                ? VAULT_V2[chainId]
+                : BALANCER_ROUTER[chainId],
     };
 
     if (protocolVersion === 3)

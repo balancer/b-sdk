@@ -12,7 +12,7 @@ import {
     InitPoolInputV2,
 } from '../../types';
 import { vaultV2Abi } from '../../../../abi';
-import { VAULT, MAX_UINT256 } from '../../../../utils';
+import { VAULT_V2, MAX_UINT256 } from '../../../../utils';
 import { Token } from '@/entities/token';
 import { getValue } from '@/entities/utils/getValue';
 import { TokenAmount } from '@/entities/tokenAmount';
@@ -50,7 +50,7 @@ export class InitPoolComposableStable implements InitPoolBase {
 
         return {
             callData,
-            to: VAULT[input.chainId] as Address,
+            to: VAULT_V2[input.chainId] as Address,
             value: getValue(amountsIn, !!input.wethIsEth),
         };
     }

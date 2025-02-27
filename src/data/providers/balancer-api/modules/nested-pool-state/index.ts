@@ -208,10 +208,7 @@ export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
                     address: t.address,
                     decimals: t.decimals,
                     index: t.index,
-                    underlyingToken:
-                        t.underlyingToken === null
-                            ? null
-                            : { ...t.underlyingToken, index: t.index },
+                    underlyingToken: null,
                 };
                 return minimalToken;
             }),
@@ -238,10 +235,7 @@ export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
                     address: t.address,
                     decimals: t.decimals,
                     index: t.index,
-                    underlyingToken:
-                        t.underlyingToken === null
-                            ? null
-                            : { ...t.underlyingToken, index: t.index },
+                    underlyingToken: null,
                 };
                 return minimalToken;
             }),
