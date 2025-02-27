@@ -41,7 +41,6 @@ import {
 } from 'test/lib/utils/';
 
 const chainId = ChainId.OPTIMISM;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]);
 
 const FRAX = TOKENS[chainId].FRAX;
 const USDC = TOKENS[chainId].USDC;
@@ -50,12 +49,16 @@ const MAI = TOKENS[chainId].MAI;
 describe('remove liquidity stable test', () => {
     let txInput: RemoveLiquidityTxInput;
     let poolInput: PoolState;
+    let rpcUrl: string;
+
     beforeAll(async () => {
         // setup mock api
         const api = new MockApi();
 
         // get pool state from api
         poolInput = await api.getPool();
+
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         const client = createTestClient({
             mode: 'anvil',
