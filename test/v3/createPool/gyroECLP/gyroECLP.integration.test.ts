@@ -3,7 +3,6 @@ import {
     Address,
     createTestClient,
     http,
-    parseEther,
     publicActions,
     walletActions,
     zeroAddress,
@@ -22,6 +21,7 @@ import {
     VAULT_V3,
     vaultExtensionAbi_V3,
     PublicWalletClient,
+    InitPoolDataProvider,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import {
@@ -37,7 +37,7 @@ const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 const poolType = PoolType.GyroE;
 const BAL = TOKENS[chainId].BAL;
-const WETH = TOKENS[chainId].WETH;
+const DAI = TOKENS[chainId].DAI;
 
 describe('GyroECLP - create & init', () => {
     let rpcUrl: string;
@@ -47,11 +47,15 @@ describe('GyroECLP - create & init', () => {
     let poolAddress: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS.SEPOLIA,
+            undefined,
+            7747598n,
+        ));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl, { timeout: 120_000 }),
+            transport: http(rpcUrl),
         })
             .extend(publicActions)
             .extend(walletActions);
@@ -60,21 +64,21 @@ describe('GyroECLP - create & init', () => {
         await setTokenBalances(
             client,
             testAddress,
-            [WETH.address, BAL.address],
-            [WETH.slot!, BAL.slot!],
+            [DAI.address, BAL.address],
+            [DAI.slot!, BAL.slot!],
             [parseUnits('100', 18), parseUnits('100', 18)],
         );
 
         await approveSpenderOnTokens(
             client,
             testAddress,
-            [WETH.address, BAL.address],
+            [DAI.address, BAL.address],
             PERMIT2[chainId],
         );
 
         createPoolInput = {
             poolType,
-            symbol: '50BAL-50WETH',
+            symbol: '50BAL-50DAI',
             tokens: [
                 {
                     address: BAL.address,
@@ -83,13 +87,13 @@ describe('GyroECLP - create & init', () => {
                     paysYieldFees: false,
                 },
                 {
-                    address: WETH.address,
+                    address: DAI.address,
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                     paysYieldFees: false,
                 },
             ],
-            swapFeePercentage: parseEther('0.01'),
+            swapFeePercentage: 10000000000000000n,
             poolHooksContract: zeroAddress,
             pauseManager: testAddress,
             swapFeeManager: testAddress,
@@ -97,27 +101,28 @@ describe('GyroECLP - create & init', () => {
             chainId,
             protocolVersion,
             enableDonation: false,
+            // TODO: understand why revert if all values are 1n. my guess is logic within actual pool contract, not interface which is housed in v3 monorepo
             eclpParams: {
-                alpha: 1n,
-                beta: 1n,
-                c: 1n,
-                s: 1n,
-                lambda: 1n,
+                alpha: 998502246630054917n,
+                beta: 1000200040008001600n,
+                c: 707106781186547524n,
+                s: 707106781186547524n,
+                lambda: 4000000000000000000000n,
             },
             derivedEclpParams: {
                 tauAlpha: {
-                    x: 1n,
-                    y: 1n,
+                    x: -94861212813096057289512505574275160547n,
+                    y: 31644119574235279926451292677567331630n,
                 },
                 tauBeta: {
-                    x: 1n,
-                    y: 1n,
+                    x: 37142269533113549537591131345643981951n,
+                    y: 92846388265400743995957747409218517601n,
                 },
-                u: 1n,
-                v: 1n,
-                w: 1n,
-                z: 1n,
-                dSq: 1n,
+                u: 66001741173104803338721745994955553010n,
+                v: 62245253919818011890633399060291020887n,
+                w: 30601134345582732000058913853921008022n,
+                z: -28859471639991253843240999485797747790n,
+                dSq: 99999999999999999886624093342106115200n,
             },
         };
 
@@ -130,7 +135,7 @@ describe('GyroECLP - create & init', () => {
 
     test('pool should be created', async () => {
         expect(poolAddress).to.not.be.undefined;
-    }, 120_000);
+    });
 
     test('pool should be registered with Vault', async () => {
         const isPoolRegistered = await client.readContract({
@@ -140,55 +145,48 @@ describe('GyroECLP - create & init', () => {
             args: [poolAddress],
         });
         expect(isPoolRegistered).to.be.true;
-    }, 120_000);
+    });
 
     test('pool should init', async () => {
         const initPoolInput = {
             amountsIn: [
                 {
                     address: BAL.address,
-                    rawAmount: parseEther('100'),
+                    rawAmount: parseUnits('10', BAL.decimals),
                     decimals: BAL.decimals,
                 },
                 {
-                    address: WETH.address,
-                    rawAmount: parseEther('100'),
-                    decimals: WETH.decimals,
+                    address: DAI.address,
+                    rawAmount: parseUnits('17', DAI.decimals),
+                    decimals: DAI.decimals,
                 },
             ],
-            minBptAmountOut: parseEther('90'),
+            minBptAmountOut: 0n,
             chainId,
         };
 
-        const initPool = new InitPool();
+        const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
+        const poolState = await initPoolDataProvider.getInitPoolData(
+            poolAddress,
+            poolType,
+            protocolVersion,
+        );
+
         const permit2 = await Permit2Helper.signInitPoolApproval({
             ...initPoolInput,
             client,
             owner: testAddress,
         });
+
+        const initPool = new InitPool();
         const initPoolBuildOutput = initPool.buildCallWithPermit2(
             initPoolInput,
-            {
-                id: poolAddress,
-                address: poolAddress,
-                type: poolType,
-                protocolVersion: 3,
-                tokens: [
-                    {
-                        ...BAL,
-                        index: 0,
-                    },
-                    {
-                        ...WETH,
-                        index: 0,
-                    },
-                ],
-            },
+            poolState,
             permit2,
         );
 
         const txOutput = await sendTransactionGetBalances(
-            [BAL.address, WETH.address],
+            [BAL.address, DAI.address],
             client,
             testAddress,
             initPoolBuildOutput.to,
@@ -197,5 +195,5 @@ describe('GyroECLP - create & init', () => {
         );
 
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
-    }, 120_000);
+    });
 });
