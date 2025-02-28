@@ -18,7 +18,7 @@ const bal = new Token(
 
 describe('auraBalSwaps:parseInputs', () => {
     test('should throw when neither token is auraBal', async () => {
-        expect(async () => {
+        await expect(async () => {
             parseInputs({
                 tokenIn: usdc,
                 tokenOut: usdc,
@@ -30,7 +30,7 @@ describe('auraBalSwaps:parseInputs', () => {
         );
     });
     test('should throw for non-supported input token', async () => {
-        expect(async () => {
+        await expect(async () => {
             parseInputs({
                 tokenIn: usdc,
                 tokenOut: auraBalToken,
@@ -40,7 +40,7 @@ describe('auraBalSwaps:parseInputs', () => {
         }).rejects.toThrowError('auraBal Swap: Unsupported tokenIn');
     });
     test('should throw for non-supported output token', async () => {
-        expect(async () => {
+        await expect(async () => {
             parseInputs({
                 tokenIn: auraBalToken,
                 tokenOut: usdc,
@@ -50,7 +50,7 @@ describe('auraBalSwaps:parseInputs', () => {
         }).rejects.toThrowError('auraBal Swap: Unsupported tokenOut');
     });
     test('should throw for ExactOut', async () => {
-        expect(async () => {
+        await expect(async () => {
             parseInputs({
                 tokenIn: auraBalToken,
                 tokenOut: bal,
@@ -60,7 +60,7 @@ describe('auraBalSwaps:parseInputs', () => {
         }).rejects.toThrowError('auraBal Swap: Must be SwapKind GivenIn.');
     });
     test('should throw when tokenIn and swapAmount tokens dont match', async () => {
-        expect(async () => {
+        await expect(async () => {
             parseInputs({
                 tokenIn: auraBalToken,
                 tokenOut: bal,
