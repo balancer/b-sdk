@@ -95,7 +95,7 @@ export type LBPParams = {
 // swapFeeManager replaced by LBPParams.owner
 // pauseManager is governance by default
 // the pool is the hook itself. No hooksetter available
-export type CreateLiquidityBoostrappingPoolInput = Omit<
+export type CreatePoolLiquidityBootstrappingInput = Omit<
     CreatePoolV3BaseInput,
     | 'pauseManager'
     | 'swapFeeManager'
@@ -113,7 +113,7 @@ export type CreatePoolInput =
     | CreatePoolV3WeightedInput
     | CreatePoolV3StableInput
     | CreatePoolStableSurgeInput
-    | CreateLiquidityBoostrappingPoolInput;
+    | CreatePoolLiquidityBootstrappingInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;

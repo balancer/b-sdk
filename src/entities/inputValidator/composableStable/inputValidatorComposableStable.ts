@@ -38,8 +38,6 @@ export class InputValidatorComposableStable extends InputValidatorBase {
 
     validateCreatePool(input: CreatePoolV2ComposableStableInput): void {
         validateCreatePoolTokens(input.tokens);
-        validateCreatePoolTokenConfig(input);
-
         if (input.tokens.length > 5) {
             throw new Error(
                 'Composable stable pools can have a maximum of 5 tokens',

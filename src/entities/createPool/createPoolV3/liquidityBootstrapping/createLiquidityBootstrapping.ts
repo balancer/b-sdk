@@ -4,7 +4,7 @@ import { encodeFunctionData } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
-    CreateLiquidityBoostrappingPoolInput,
+    CreatePoolLiquidityBootstrappingInput,
 } from '../../types';
 
 import { liquidityBoostrappingFactoryAbi } from '@/abi/liquidityBootstrappingFactory';
@@ -14,7 +14,7 @@ import { Hex } from '@/types';
 
 export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
     public buildCall(
-        input: CreateLiquidityBoostrappingPoolInput,
+        input: CreatePoolLiquidityBootstrappingInput,
     ): CreatePoolBuildCallOutput {
         const callData = this.encodeCall(input);
         return {
@@ -23,7 +23,7 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
         };
     }
 
-    private encodeCall(input: CreateLiquidityBoostrappingPoolInput): Hex {
+    private encodeCall(input: CreatePoolLiquidityBootstrappingInput): Hex {
         const args = [
             input.name,
             input.symbol,

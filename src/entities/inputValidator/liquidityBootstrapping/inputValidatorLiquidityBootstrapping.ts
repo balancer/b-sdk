@@ -5,7 +5,9 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '../../removeLiquidity/types';
-import { CreateLiquidityBoostrappingPoolInput } from '../../createPool/types';
+import { CreatePoolLiquidityBootstrappingInput } from '../../createPool/types';
+
+import { isSameAddress } from '@/utils';
 
 export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
     // TODO
@@ -23,7 +25,7 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
         _removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
         _poolStateWithBalances: PoolStateWithBalances,
     ): void {}
-    validateCreatePool(input: CreateLiquidityBoostrappingPoolInput): void {
+    validateCreatePool(input: CreatePoolLiquidityBootstrappingInput): void {
         // start weights
         const startWeightsSum =
             input.lbpParams.projectTokenStartWeight +
@@ -48,7 +50,12 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
             throw new Error('Start time must be in the future');
         }
         // tokens cannot be the same
-        if (input.lbpParams.projectToken === input.lbpParams.reserveToken) {
+        if (
+            isSameAddress(
+                input.lbpParams.projectToken,
+                input.lbpParams.reserveToken,
+            )
+        ) {
             throw new Error('Tokens must be different');
         }
     }

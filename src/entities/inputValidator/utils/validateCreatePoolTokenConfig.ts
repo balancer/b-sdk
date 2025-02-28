@@ -11,8 +11,6 @@ import { zeroAddress } from 'viem';
 
 export const validateCreatePoolTokenConfig = (
     input:
-        | CreatePoolV2WeightedInput
-        | CreatePoolV2ComposableStableInput
         | CreatePoolV3WeightedInput
         | CreatePoolV3StableInput
         | CreatePoolStableSurgeInput,

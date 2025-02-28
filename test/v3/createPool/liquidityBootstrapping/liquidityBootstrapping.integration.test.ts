@@ -16,7 +16,7 @@ import {
     Permit2Helper,
     PERMIT2,
     InitPool,
-    CreateLiquidityBoostrappingPoolInput,
+    CreatePoolLiquidityBootstrappingInput,
     LBPParams,
     VAULT_V3,
     InitPoolInput,
@@ -43,7 +43,7 @@ describe('create liquidityBootstrapping pool test', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
-    let createPoolInput: CreateLiquidityBoostrappingPoolInput;
+    let createPoolInput: CreatePoolLiquidityBootstrappingInput;
     let lbpParams: LBPParams;
     let poolAddress: Address;
 

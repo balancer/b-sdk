@@ -66,8 +66,6 @@ export class InputValidatorBoosted extends InputValidatorBase {
     }
     validateCreatePool(
         input:
-            | CreatePoolV2WeightedInput
-            | CreatePoolV2ComposableStableInput
             | CreatePoolV3WeightedInput
             | CreatePoolV3StableInput
             | CreatePoolStableSurgeInput,
