@@ -53,12 +53,7 @@ export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
 export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Stable;
     amplificationParameter: bigint; // value between 1e3 and 5000e3
-    tokens: {
-        address: Address;
-        rateProvider: Address;
-        tokenType: TokenType;
-        paysYieldFees: boolean;
-    }[];
+    tokens: TokenConfig[];
 };
 
 export type CreatePoolStableSurgeInput = Omit<
@@ -70,13 +65,7 @@ export type CreatePoolStableSurgeInput = Omit<
 
 export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Weighted;
-    tokens: {
-        address: Address;
-        rateProvider: Address;
-        weight: bigint;
-        tokenType: TokenType;
-        paysYieldFees?: boolean;
-    }[];
+    tokens: (TokenConfig & { weight: bigint })[];
 };
 
 export type CreatePoolInput =

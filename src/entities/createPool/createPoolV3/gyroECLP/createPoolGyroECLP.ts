@@ -1,14 +1,15 @@
 import { getRandomBytes32 } from '@/entities/utils/getRandomBytes32';
-import { Address, encodeFunctionData, zeroAddress } from 'viem';
+import { encodeFunctionData, zeroAddress } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
     PoolRoleAccounts,
     CreatePoolV3BaseInput,
+    TokenConfig,
 } from '../../types';
 import { gyroECLPPoolFactoryAbi_V3 } from '@/abi/gyroECLPPoolFactory.V3';
 import { GYROECLP_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
-import { Hex, PoolType, TokenType } from '@/types';
+import { Hex, PoolType } from '@/types';
 
 export type EclpParams = {
     alpha: bigint;
@@ -35,12 +36,7 @@ export type DerivedEclpParams = {
 
 export type CreatePoolGyroECLPInput = CreatePoolV3BaseInput & {
     poolType: PoolType.GyroE;
-    tokens: {
-        address: Address;
-        rateProvider: Address;
-        tokenType: TokenType;
-        paysYieldFees: boolean;
-    }[];
+    tokens: TokenConfig[];
     eclpParams: EclpParams;
     derivedEclpParams: DerivedEclpParams;
 };
@@ -66,14 +62,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         const args = [
             input.name || input.symbol,
             input.symbol,
-            sortedTokenConfigs.map(
-                ({ address, rateProvider, tokenType, paysYieldFees }) => ({
-                    token: address,
-                    tokenType,
-                    rateProvider,
-                    paysYieldFees,
-                }),
-            ),
+            sortedTokenConfigs,
             input.eclpParams,
             input.derivedEclpParams,
             roleAccounts,

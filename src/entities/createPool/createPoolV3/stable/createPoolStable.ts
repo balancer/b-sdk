@@ -31,14 +31,7 @@ export class CreatePoolStableV3 implements CreatePoolBase {
         const args = [
             input.name || input.symbol,
             input.symbol,
-            sortedTokenConfigs.map(
-                ({ address, rateProvider, tokenType, paysYieldFees }) => ({
-                    token: address,
-                    tokenType,
-                    rateProvider,
-                    paysYieldFees,
-                }),
-            ),
+            sortedTokenConfigs,
             input.amplificationParameter,
             roleAccounts,
             input.swapFeePercentage,

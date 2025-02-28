@@ -4,7 +4,6 @@ import {
     CreatePoolBase,
     CreatePoolV3WeightedInput,
     CreatePoolBuildCallOutput,
-    TokenConfig,
     PoolRoleAccounts,
 } from '../../types';
 import { weightedPoolFactoryAbi_V3 } from '@/abi/weightedPoolFactory.V3';
@@ -21,30 +20,13 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
     }
 
     private encodeCall(input: CreatePoolV3WeightedInput): Hex {
-        const sortedTokenParams = sortByAddress(input.tokens);
+        const sortedTokenConfigs = sortByAddress(input.tokens);
 
-        const [tokenConfigs, normalizedWeights] = sortedTokenParams.reduce(
-            (
-                acc,
-                {
-                    address: tokenAddress,
-                    rateProvider,
-                    weight,
-                    tokenType,
-                    paysYieldFees,
-                },
-            ) => {
-                acc[0].push({
-                    token: tokenAddress,
-                    tokenType,
-                    rateProvider,
-                    paysYieldFees: paysYieldFees ?? false,
-                });
-                acc[1].push(weight);
-                return acc;
-            },
-            [[], []] as [TokenConfig[], bigint[]],
-        );
+        const normalizedWeights: bigint[] = [];
+        const tokenConfigs = sortedTokenConfigs.map(({ weight, ...rest }) => {
+            normalizedWeights.push(weight);
+            return rest;
+        });
 
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
