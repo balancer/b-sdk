@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.3.1
+
+### Patch Changes
+
+- c692d85: Fix test failing intermittently on CI
+
 ## 2.3.0
 
 ### Minor Changes
