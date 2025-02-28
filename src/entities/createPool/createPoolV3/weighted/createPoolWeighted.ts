@@ -23,9 +23,12 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
         const sortedTokenConfigs = sortByAddress(input.tokens);
 
         const normalizedWeights: bigint[] = [];
-        const tokenConfigs = sortedTokenConfigs.map(({ weight, ...rest }) => {
+        const tokens = sortedTokenConfigs.map(({ weight, ...rest }) => {
             normalizedWeights.push(weight);
-            return rest;
+            return {
+                token: rest.address,
+                ...rest,
+            };
         });
 
         const roleAccounts: PoolRoleAccounts = {
@@ -37,7 +40,7 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
         const args = [
             input.name || input.symbol,
             input.symbol,
-            tokenConfigs,
+            tokens,
             normalizedWeights,
             roleAccounts,
             input.swapFeePercentage,

@@ -53,6 +53,11 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
     private encodeCall(input: CreatePoolGyroECLPInput): Hex {
         const sortedTokenConfigs = sortByAddress(input.tokens);
 
+        const tokens = sortedTokenConfigs.map(({ address, ...rest }) => ({
+            token: address,
+            ...rest,
+        }));
+
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
             swapFeeManager: input.swapFeeManager,
@@ -62,7 +67,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         const args = [
             input.name || input.symbol,
             input.symbol,
-            sortedTokenConfigs,
+            tokens,
             input.eclpParams,
             input.derivedEclpParams,
             roleAccounts,

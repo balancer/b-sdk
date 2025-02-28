@@ -106,7 +106,7 @@ export type CreatePoolV2ComposableStableArgs = [
 ];
 
 export type TokenConfig = {
-    token: Address;
+    address: Address;
     tokenType: TokenType;
     rateProvider: Address;
     paysYieldFees: boolean;
