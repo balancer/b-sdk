@@ -92,10 +92,10 @@ describe('create stable pool test', () => {
             testAddress,
             createPoolInput,
         });
-    });
+    }, 120_000);
     test('Deployment', async () => {
         expect(poolAddress).to.not.be.undefined;
-    }, 120_000);
+    });
 
     test('Registration', async () => {
         const isPoolRegistered = await client.readContract({
@@ -105,7 +105,7 @@ describe('create stable pool test', () => {
             args: [poolAddress],
         });
         expect(isPoolRegistered).to.be.true;
-    }, 120_000);
+    });
 
     test('Initialization', async () => {
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
@@ -169,5 +169,5 @@ describe('create stable pool test', () => {
         );
 
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
-    }, 120_000);
+    });
 });

@@ -38,7 +38,6 @@ describe('PriceImpact Errors V3', () => {
                     address: USDC.address as Address,
                 },
             ],
-            wrapUnderlying: [true, true],
             kind: AddLiquidityKind.Unbalanced,
             userData: '0x',
         };
