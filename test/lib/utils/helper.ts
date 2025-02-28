@@ -378,7 +378,7 @@ export async function sendTransactionGetBalances(
         let _balanceAfter = balanceAfter;
         if (tokensForBalanceCheck[i] === ZERO_ADDRESS) {
             // ignore ETH delta from gas cost
-            _balanceAfter = balanceAfter + gasPrice;
+            _balanceAfter = balanceAfter + BigInt(gasPrice);
         }
         const delta = _balanceAfter - balanceBefore[i];
         return delta >= 0n ? delta : -delta;

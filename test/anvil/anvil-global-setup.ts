@@ -51,10 +51,8 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     },
     POLYGON: {
         rpcEnv: 'POLYGON_RPC_URL',
-        // Public Polygon RPCs are usually unreliable
-        fallBackRpc: undefined,
+        fallBackRpc: 'https://polygon.gateway.tenderly.co',
         port: ANVIL_PORTS.POLYGON,
-        // Note - this has to be >= highest blockNo used in tests
         forkBlockNumber: 44215395n,
     },
     FANTOM: {
@@ -72,7 +70,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     },
     OPTIMISM: {
         rpcEnv: 'OPTIMISM_RPC_URL',
-        fallBackRpc: 'https://optimism.llamarpc.com',
+        fallBackRpc: 'https://optimism.gateway.tenderly.co/',
         port: ANVIL_PORTS.OPTIMISM,
         forkBlockNumber: 117374265n,
     },
@@ -119,7 +117,10 @@ function getAnvilOptions(
     blockNumber?: bigint,
 ): CreateAnvilOptions {
     let forkUrl: string;
-    if (process.env[network.rpcEnv] !== undefined) {
+    if (
+        process.env[network.rpcEnv] &&
+        process.env[network.rpcEnv] !== 'undefined' // sometimes .env will return 'undefined' as string for undefined variables
+    ) {
         forkUrl = process.env[network.rpcEnv] as string;
     } else {
         if (!network.fallBackRpc)
@@ -181,6 +182,7 @@ export async function startFork(
     network: NetworkSetup,
     jobId = Number(process.env.VITEST_WORKER_ID) || 0,
     blockNumber?: bigint, // If not provided, the fork will start from the network's forkBlockNumber
+    blockTime?: number,
 ) {
     const anvilOptions = getAnvilOptions(network, blockNumber);
 
@@ -200,7 +202,7 @@ export async function startFork(
     if (runningForks[port]) return { rpcUrl };
 
     // https://www.npmjs.com/package/@viem/anvil
-    const anvil = createAnvil({ ...anvilOptions, port });
+    const anvil = createAnvil({ ...anvilOptions, port, blockTime });
     // Save reference to running fork
     runningForks[port] = anvil;
 

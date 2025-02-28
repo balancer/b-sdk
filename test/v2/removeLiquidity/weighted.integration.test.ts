@@ -43,7 +43,7 @@ import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.MAINNET;
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
+const { rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]);
 const poolId =
     '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014'; // 80BAL-20WETH
 
