@@ -101,7 +101,6 @@ describe('GyroECLP - create & init', () => {
             chainId,
             protocolVersion,
             enableDonation: false,
-            // TODO: understand why revert if all values are 1n. my guess is logic within actual pool contract, not interface which is housed in v3 monorepo
             eclpParams: {
                 alpha: 998502246630054917n,
                 beta: 1000200040008001600n,
