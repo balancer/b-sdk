@@ -22,11 +22,11 @@ jobs:
       matrix:
         node-version: [18]
     steps:
-      - name: Check Biome version
-        run: npx biome --version
       - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/actions/setup
+      - name: Check Biome version
+        run: npx biome --version
       - name: Lint & format code
         run: pnpm format & pnpm lint
   test:
