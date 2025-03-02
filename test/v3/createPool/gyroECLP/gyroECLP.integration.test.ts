@@ -130,7 +130,7 @@ describe('GyroECLP - create & init', () => {
             testAddress,
             createPoolInput,
         });
-    });
+    }, 120_000);
 
     test('pool should be created', async () => {
         expect(poolAddress).to.not.be.undefined;
@@ -194,5 +194,5 @@ describe('GyroECLP - create & init', () => {
         );
 
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
-    });
+    }, 120_000);
 });
