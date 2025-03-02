@@ -55,7 +55,7 @@ describe('GyroECLP - create & init', () => {
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl),
+            transport: http(rpcUrl, { timeout: 120_000 }),
         })
             .extend(publicActions)
             .extend(walletActions);
