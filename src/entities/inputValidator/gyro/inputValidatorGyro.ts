@@ -35,20 +35,30 @@ export class InputValidatorGyro extends InputValidatorBase {
         const { s, c, lambda } = eclpParams;
 
         // require(0 <= params.s && params.s <= _ONE, RotationVectorSWrong());
-        if (s < 0n) throw new Error('EclpParams.s must be >= 0');
-        if (s > _ONE) throw new Error('EclpParams.s must be <= 1e18');
+        if (s < 0n) throw new Error('RotationVectorSWrong: s must be >= 0');
+        if (s > _ONE)
+            throw new Error(`RotationVectorSWrong: s must be <= ${_ONE}`);
 
         // require(0 <= params.c && params.c <= _ONE, RotationVectorCWrong());
-        if (c < 0n) throw new Error('EclpParams.c must be >= 0');
-        if (c > _ONE) throw new Error('EclpParams.c must be <= 1e18');
+        if (c < 0n) throw new Error('RotationVectorCWrong: c must be >= 0');
+        if (c > _ONE)
+            throw new Error(`RotationVectorCWrong: c must be <= ${_ONE}`);
 
         // require(_ONE - _ROTATION_VECTOR_NORM_ACCURACY <= scnorm2 && scnorm2 <= _ONE + _ROTATION_VECTOR_NORM_ACCURACY,RotationVectorNotNormalized());
         const scnorm2 = GyroECLPMath.scalarProd({ x: s, y: c }, { x: s, y: c });
         if (scnorm2 < _ONE - _ROTATION_VECTOR_NORM_ACCURACY) {
-            throw new Error('RotationVectorNotNormalized: scnorm2 too low');
+            throw new Error(
+                `RotationVectorNotNormalized: scnorm2 must be >= ${
+                    _ONE - _ROTATION_VECTOR_NORM_ACCURACY
+                }`,
+            );
         }
         if (scnorm2 > _ONE + _ROTATION_VECTOR_NORM_ACCURACY) {
-            throw new Error('RotationVectorNotNormalized: scnorm2 too high');
+            throw new Error(
+                `RotationVectorNotNormalized: scnorm2 must be <= ${
+                    _ONE + _ROTATION_VECTOR_NORM_ACCURACY
+                }`,
+            );
         }
 
         // require(0 <= params.lambda && params.lambda <= _MAX_STRETCH_FACTOR, StretchingFactorWrong());
@@ -56,7 +66,9 @@ export class InputValidatorGyro extends InputValidatorBase {
             throw new Error('StretchingFactorWrong: lambda must be >= 0');
         }
         if (lambda > _MAX_STRETCH_FACTOR) {
-            throw new Error('StretchingFactorWrong: lambda must be <= 1e26');
+            throw new Error(
+                `StretchingFactorWrong: lambda must be <= ${_MAX_STRETCH_FACTOR}`,
+            );
         }
 
         // validateDerivedParamsLimits
@@ -69,7 +81,7 @@ export class InputValidatorGyro extends InputValidatorBase {
 
         // require(derived.tauBeta.y > 0, DerivedTauBetaYWrong());
         if (tauBeta.y <= 0n)
-            throw new Error('DerivedTauBetaYWrong: tauBeta.y  must be > 0');
+            throw new Error('DerivedTauBetaYWrong: tauBeta.y must be > 0');
 
         // require(derived.tauBeta.x > derived.tauAlpha.x, DerivedTauXWrong());
         if (tauBeta.x <= tauAlpha.x)

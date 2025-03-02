@@ -8,11 +8,18 @@ import {
     CreatePoolGyroECLPInput,
 } from 'src';
 import { TOKENS } from 'test/lib/utils/addresses';
-import {
-    _MAX_STRETCH_FACTOR,
+
+import { GyroECLPMath } from '@balancer-labs/balancer-maths';
+
+const {
     _ONE,
+    _ONE_XP,
+    _DERIVED_TAU_NORM_ACCURACY_XP,
+    _DERIVED_DSQ_NORM_ACCURACY_XP,
     _ROTATION_VECTOR_NORM_ACCURACY,
-} from 'src/entities/inputValidator/gyro/inputValidatorGyro';
+    _MAX_STRETCH_FACTOR,
+    _MAX_INV_INVARIANT_DENOMINATOR_XP,
+} = GyroECLPMath;
 
 const chainId = ChainId.SEPOLIA;
 const BAL = TOKENS[chainId].BAL;
@@ -21,7 +28,9 @@ const DAI = TOKENS[chainId].DAI;
 describe('create GyroECLP pool input validations', () => {
     const createPool = new CreatePool();
     let createPoolInput: CreatePoolGyroECLPInput;
+
     beforeAll(async () => {
+        // Start with a valid input and modify individual params to expect errors
         createPoolInput = {
             poolType: PoolType.GyroE,
             symbol: '50BAL-50DAI',
@@ -72,6 +81,45 @@ describe('create GyroECLP pool input validations', () => {
         };
     });
 
+    // Helper function to modify input parameters succinctly
+    const buildCallWithModifiedInput = (
+        updates: Partial<
+            Omit<CreatePoolGyroECLPInput, 'eclpParams' | 'derivedEclpParams'>
+        > & {
+            eclpParams?: Partial<CreatePoolGyroECLPInput['eclpParams']>;
+            derivedEclpParams?: Partial<
+                Omit<
+                    CreatePoolGyroECLPInput['derivedEclpParams'],
+                    'tauAlpha' | 'tauBeta'
+                >
+            > & {
+                tauAlpha?: Partial<{ x: bigint; y: bigint }>;
+                tauBeta?: Partial<{ x: bigint; y: bigint }>;
+            };
+        } = {},
+    ) => {
+        createPool.buildCall({
+            ...createPoolInput,
+            ...updates,
+            eclpParams: {
+                ...createPoolInput.eclpParams,
+                ...updates.eclpParams,
+            },
+            derivedEclpParams: {
+                ...createPoolInput.derivedEclpParams,
+                ...updates.derivedEclpParams,
+                tauAlpha: {
+                    ...createPoolInput.derivedEclpParams.tauAlpha,
+                    ...updates.derivedEclpParams?.tauAlpha,
+                },
+                tauBeta: {
+                    ...createPoolInput.derivedEclpParams.tauBeta,
+                    ...updates.derivedEclpParams?.tauBeta,
+                },
+            },
+        });
+    };
+
     test('Duplicate token addresses, expects error', async () => {
         const tokens: CreatePoolGyroECLPInput['tokens'] = [
             {
@@ -93,9 +141,9 @@ describe('create GyroECLP pool input validations', () => {
                 paysYieldFees: false,
             },
         ];
-        expect(() =>
-            createPool.buildCall({ ...createPoolInput, tokens }),
-        ).toThrowError('Duplicate token addresses');
+        expect(() => buildCallWithModifiedInput({ tokens })).toThrowError(
+            'Duplicate token addresses',
+        );
     });
     test('Allowing only TokenType.STANDARD to have address zero as rateProvider', async () => {
         const tokens: CreatePoolGyroECLPInput['tokens'] = [
@@ -112,92 +160,207 @@ describe('create GyroECLP pool input validations', () => {
                 paysYieldFees: false,
             },
         ];
-        expect(() =>
-            createPool.buildCall({ ...createPoolInput, tokens }),
-        ).toThrowError(
+        expect(() => buildCallWithModifiedInput({ tokens })).toThrowError(
             'Only TokenType.STANDARD is allowed to have zeroAddress rateProvider',
         );
     });
 
     describe('validateParams', () => {
-        test('s outside valid range', async () => {
+        test('RotationVectorSWrong()', async () => {
             expect(() =>
-                createPool.buildCall({
-                    ...createPoolInput,
-                    eclpParams: {
-                        ...createPoolInput.eclpParams,
-                        s: -1n,
-                    },
-                }),
-            ).toThrowError('EclpParams.s must be between 0 and 1e18');
+                buildCallWithModifiedInput({ eclpParams: { s: -1n } }),
+            ).toThrowError('RotationVectorSWrong: s must be >= 0');
 
             expect(() =>
-                createPool.buildCall({
-                    ...createPoolInput,
-                    eclpParams: {
-                        ...createPoolInput.eclpParams,
-                        s: parseUnits('1', 18) + 1n,
-                    },
+                buildCallWithModifiedInput({
+                    eclpParams: { s: _ONE + 1n },
                 }),
-            ).toThrowError('EclpParams.s must be between 0 and 1e18');
+            ).toThrowError(`RotationVectorSWrong: s must be <= ${_ONE}`);
         });
 
-        test('c outside valid range', async () => {
+        test('RotationVectorCWrong()', async () => {
             expect(() =>
-                createPool.buildCall({
-                    ...createPoolInput,
-                    eclpParams: {
-                        ...createPoolInput.eclpParams,
-                        c: -1n,
-                    },
-                }),
-            ).toThrowError('EclpParams.c must be between 0 and 1e18');
+                buildCallWithModifiedInput({ eclpParams: { c: -1n } }),
+            ).toThrowError('RotationVectorCWrong: c must be >= 0');
 
             expect(() =>
-                createPool.buildCall({
-                    ...createPoolInput,
-                    eclpParams: {
-                        ...createPoolInput.eclpParams,
-                        c: parseUnits('1', 18) + 1n,
-                    },
+                buildCallWithModifiedInput({
+                    eclpParams: { c: _ONE + 1n },
                 }),
-            ).toThrowError('EclpParams.c must be between 0 and 1e18');
+            ).toThrowError(`RotationVectorCWrong: c must be <= ${_ONE}`);
         });
 
         test('scnorm2 outside valid range', async () => {
             expect(() =>
-                createPool.buildCall({
-                    ...createPoolInput,
-                    eclpParams: {
-                        ...createPoolInput.eclpParams,
-                        s: 1n,
-                        c: 1n,
-                    },
+                buildCallWithModifiedInput({
+                    eclpParams: { s: 1n, c: 1n },
                 }),
-            ).toThrowError('Rotation Vector Not Normalized');
+            ).toThrowError(
+                `RotationVectorNotNormalized: scnorm2 must be >= ${
+                    _ONE - _ROTATION_VECTOR_NORM_ACCURACY
+                }`,
+            );
 
             expect(() =>
-                createPool.buildCall({
-                    ...createPoolInput,
+                buildCallWithModifiedInput({
                     eclpParams: {
-                        ...createPoolInput.eclpParams,
-                        s: parseUnits('1', 17),
-                        c: parseUnits('1', 17),
+                        s: parseUnits('1', 18),
+                        c: parseUnits('1', 18),
                     },
                 }),
-            ).toThrowError('Rotation Vector Not Normalized');
+            ).toThrowError(
+                `RotationVectorNotNormalized: scnorm2 must be <= ${
+                    _ONE + _ROTATION_VECTOR_NORM_ACCURACY
+                }`,
+            );
         });
 
         test('lambda outside valid range', async () => {
             expect(() =>
-                createPool.buildCall({
-                    ...createPoolInput,
-                    eclpParams: {
-                        ...createPoolInput.eclpParams,
-                        lambda: _MAX_STRETCH_FACTOR + 1n,
+                buildCallWithModifiedInput({
+                    eclpParams: { lambda: -1n },
+                }),
+            ).toThrowError('StretchingFactorWrong: lambda must be >= 0');
+
+            expect(() =>
+                buildCallWithModifiedInput({
+                    eclpParams: { lambda: _MAX_STRETCH_FACTOR + 1n },
+                }),
+            ).toThrowError(
+                `StretchingFactorWrong: lambda must be <= ${_MAX_STRETCH_FACTOR}`,
+            );
+        });
+    });
+
+    describe('validateDerivedParamsLimits', () => {
+        test('DerivedTauAlphaYWrong()', async () => {
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: { tauAlpha: { y: -1n } },
+                }),
+            ).toThrowError('DerivedTauAlphaYWrong: tuaAlpha.y must be > 0');
+        });
+
+        test('DerivedTauBetaYWrong()', async () => {
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: { tauBeta: { y: -1n } },
+                }),
+            ).toThrowError('DerivedTauBetaYWrong: tauBeta.y must be > 0');
+        });
+
+        test('DerivedTauXWrong()', async () => {
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: {
+                        tauBeta: {
+                            x: createPoolInput.derivedEclpParams.tauAlpha.x,
+                        },
                     },
                 }),
-            ).toThrowError('Stretching Factor Wrong');
+            ).toThrowError(
+                'DerivedTauXWrong: derived.tauBeta.x must be > derived.tauAlpha.x',
+            );
+        });
+
+        test('DerivedTauAlphaNotNormalized()', async () => {
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: {
+                        tauAlpha: {
+                            x: 0n,
+                            y: _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP - 1n,
+                        },
+                    },
+                }),
+            ).toThrowError(
+                `DerivedTauBetaNotNormalized: norm2 must be >= ${
+                    _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP
+                }`,
+            );
+
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: {
+                        tauAlpha: {
+                            x: 0n,
+                            y: _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP + 1n,
+                        },
+                    },
+                }),
+            ).toThrowError(
+                `DerivedTauBetaNotNormalized: norm2 must be <= ${
+                    _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP
+                }`,
+            );
+        });
+
+        test('Derived parameters u, v, w, z limits', async () => {
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: { u: _ONE_XP + 1n },
+                }),
+            ).toThrowError(`DerivedUWrong: u must be <= ${_ONE_XP}`);
+
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: { v: _ONE_XP + 1n },
+                }),
+            ).toThrowError(`DerivedVWrong: v must be <= ${_ONE_XP}`);
+
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: { w: _ONE_XP + 1n },
+                }),
+            ).toThrowError(`DerivedWWrong: w must be <= ${_ONE_XP}`);
+
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: { z: _ONE_XP + 1n },
+                }),
+            ).toThrowError(`DerivedZWrong: z must be <= ${_ONE_XP}`);
+        });
+
+        test('DerivedDsqWrong()', async () => {
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: {
+                        dSq: _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP - 1n,
+                    },
+                }),
+            ).toThrowError(
+                `DerivedDSqWrong: dSq must be >= ${
+                    _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP
+                }`,
+            );
+
+            expect(() =>
+                buildCallWithModifiedInput({
+                    derivedEclpParams: {
+                        dSq: _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP + 1n,
+                    },
+                }),
+            ).toThrowError(
+                `DerivedDSqWrong: dSq must be <= ${
+                    _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP
+                }`,
+            );
+        });
+
+        // TODO: grow bigger brain to figure out param values that trigger InvariantDenominatorWrong
+        test.skip('InvariantDenominatorWrong()', async () => {
+            expect(
+                buildCallWithModifiedInput({
+                    eclpParams: {
+                        s: _ONE,
+                    },
+                    derivedEclpParams: {
+                        u: _ONE_XP,
+                    },
+                }),
+            ).toThrowError(
+                `InvariantDenominatorWrong: mulDenominator must be <= ${_MAX_INV_INVARIANT_DENOMINATOR_XP}`,
+            );
         });
     });
 });
