@@ -26,6 +26,15 @@ const {
     _MAX_INV_INVARIANT_DENOMINATOR_XP,
 } = GyroECLPMath;
 
+const MIN_SCNORM2 = _ONE - _ROTATION_VECTOR_NORM_ACCURACY;
+const MAX_SCNORM2 = _ONE + _ROTATION_VECTOR_NORM_ACCURACY;
+
+const MIN_NORM2 = _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP;
+const MAX_NORM2 = _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP;
+
+const MIN_DSQ = _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP;
+const MAX_DSQ = _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP;
+
 export class InputValidatorGyro extends InputValidatorBase {
     validateCreatePool(input: CreatePoolGyroECLPInput) {
         super.validateCreatePool(input);
@@ -46,18 +55,14 @@ export class InputValidatorGyro extends InputValidatorBase {
 
         // require(_ONE - _ROTATION_VECTOR_NORM_ACCURACY <= scnorm2 && scnorm2 <= _ONE + _ROTATION_VECTOR_NORM_ACCURACY,RotationVectorNotNormalized());
         const scnorm2 = GyroECLPMath.scalarProd({ x: s, y: c }, { x: s, y: c });
-        if (scnorm2 < _ONE - _ROTATION_VECTOR_NORM_ACCURACY) {
+        if (scnorm2 < MIN_SCNORM2) {
             throw new Error(
-                `RotationVectorNotNormalized: scnorm2 must be >= ${
-                    _ONE - _ROTATION_VECTOR_NORM_ACCURACY
-                }`,
+                `RotationVectorNotNormalized: scnorm2 must be >= ${MIN_SCNORM2}`,
             );
         }
-        if (scnorm2 > _ONE + _ROTATION_VECTOR_NORM_ACCURACY) {
+        if (scnorm2 > MAX_SCNORM2) {
             throw new Error(
-                `RotationVectorNotNormalized: scnorm2 must be <= ${
-                    _ONE + _ROTATION_VECTOR_NORM_ACCURACY
-                }`,
+                `RotationVectorNotNormalized: scnorm2 must be <= ${MAX_SCNORM2}`,
             );
         }
 
@@ -91,17 +96,13 @@ export class InputValidatorGyro extends InputValidatorBase {
 
         // require(_ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP <= norm2 && norm2 <= _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP,DerivedTauAlphaNotNormalized());
         const norm2 = GyroECLPMath.scalarProdXp(tauAlpha, tauAlpha);
-        if (norm2 < _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP)
+        if (norm2 < MIN_NORM2)
             throw new Error(
-                `DerivedTauBetaNotNormalized: norm2 must be >= ${
-                    _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP
-                }`,
+                `DerivedTauBetaNotNormalized: norm2 must be >= ${MIN_NORM2}`,
             );
-        if (norm2 > _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP)
+        if (norm2 > MAX_NORM2)
             throw new Error(
-                `DerivedTauBetaNotNormalized: norm2 must be <= ${
-                    _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP
-                }`,
+                `DerivedTauBetaNotNormalized: norm2 must be <= ${MAX_NORM2}`,
             );
 
         // require(derived.u <= _ONE_XP, DerivedUWrong());
@@ -118,18 +119,10 @@ export class InputValidatorGyro extends InputValidatorBase {
             throw new Error(`DerivedZWrong: z must be <= ${_ONE_XP}`);
 
         // require(_ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP <= derived.dSq && derived.dSq <= _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP, DerivedDsqWrong());
-        if (dSq < _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP)
-            throw new Error(
-                `DerivedDSqWrong: dSq must be >= ${
-                    _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP
-                }`,
-            );
-        if (dSq > _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP)
-            throw new Error(
-                `DerivedDSqWrong: dSq must be <= ${
-                    _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP
-                }`,
-            );
+        if (dSq < MIN_DSQ)
+            throw new Error(`DerivedDSqWrong: dSq must be >= ${MIN_DSQ}`);
+        if (dSq > MAX_DSQ)
+            throw new Error(`DerivedDSqWrong: dSq must be <= ${MAX_DSQ}`);
 
         // require(mulDenominator <= _MAX_INV_INVARIANT_DENOMINATOR_XP, InvariantDenominatorWrong());
         const achiachi = GyroECLPMath.calcAChiAChiInXp(
