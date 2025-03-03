@@ -10,18 +10,12 @@ import {
 } from 'viem';
 
 import {
-    AddLiquidityUnbalancedInput,
-    AddLiquiditySingleTokenInput,
-    AddLiquidityProportionalInput,
     AddLiquidityKind,
     Slippage,
-    Hex,
     PoolState,
     CHAINS,
     ChainId,
-    AddLiquidity,
     AddLiquidityInput,
-    InputAmount,
     PoolType,
     Permit2Helper,
     PermitHelper,
@@ -31,9 +25,6 @@ import {
     CreatePoolLiquidityBootstrappingInput,
     InitPool,
     InitPoolInput,
-    InputToken,
-    RemoveLiquidityInput,
-    RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
     RemoveLiquidityProportionalInput,
 } from '@/index';
@@ -43,16 +34,9 @@ import { BALANCER_ROUTER } from '@/index';
 import { doCreatePool, getBalances } from '../../lib/utils/';
 
 import {
-    AddLiquidityTxInput,
-    assertAddLiquidityUnbalanced,
-    assertAddLiquiditySingleToken,
-    assertAddLiquidityProportional,
-    doAddLiquidity,
-    POOLS,
     TOKENS,
     setTokenBalances,
     approveSpenderOnTokens,
-    approveTokens,
     sendTransactionGetBalances,
     assertInitPool,
 } from '../../lib/utils';
@@ -70,11 +54,8 @@ const WETH = TOKENS[chainId].WETH;
 
 describe('add liquidity bootstrapping test', () => {
     let client: PublicWalletClient & TestActions;
-    let txInput: AddLiquidityTxInput;
-    let poolState: PoolState;
     let tokens: Address[];
     let rpcUrl: string;
-    let snapshot: Hex;
     let lbpParams: LBPParams;
     let createPoolInput: CreatePoolLiquidityBootstrappingInput;
     let poolAddress: Address;

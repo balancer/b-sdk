@@ -1,6 +1,4 @@
 import {
-    CreatePoolV2WeightedInput,
-    CreatePoolV2ComposableStableInput,
     CreatePoolV3WeightedInput,
     CreatePoolV3StableInput,
     CreatePoolStableSurgeInput,

@@ -6,8 +6,6 @@ import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
 import { isSameAddress } from '@/utils';
 import {
     CreatePoolStableSurgeInput,
-    CreatePoolV2ComposableStableInput,
-    CreatePoolV2WeightedInput,
     CreatePoolV3StableInput,
     CreatePoolV3WeightedInput,
 } from '@/entities/createPool';

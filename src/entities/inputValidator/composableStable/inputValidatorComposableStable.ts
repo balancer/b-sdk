@@ -9,7 +9,6 @@ import { InputValidatorBase } from '../inputValidatorBase';
 import { validatePoolHasBpt } from '../utils/validateTokens';
 
 import { validateCreatePoolTokens } from '../utils/validateTokens';
-import { validateCreatePoolTokenConfig } from '../utils/validateCreatePoolTokenConfig';
 
 export class InputValidatorComposableStable extends InputValidatorBase {
     validateAddLiquidity(
