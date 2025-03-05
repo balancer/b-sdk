@@ -169,25 +169,25 @@ describe('create GyroECLP pool input validations', () => {
         test('RotationVectorSWrong()', async () => {
             expect(() =>
                 buildCallWithModifiedInput({ eclpParams: { s: -1n } }),
-            ).toThrowError('RotationVectorSWrong: s must be >= 0');
+            ).toThrowError('s must be >= 0 and <= 1000000000000000000');
 
             expect(() =>
                 buildCallWithModifiedInput({
                     eclpParams: { s: _ONE + 1n },
                 }),
-            ).toThrowError(`RotationVectorSWrong: s must be <= ${_ONE}`);
+            ).toThrowError('s must be >= 0 and <= 1000000000000000000');
         });
 
         test('RotationVectorCWrong()', async () => {
             expect(() =>
                 buildCallWithModifiedInput({ eclpParams: { c: -1n } }),
-            ).toThrowError('RotationVectorCWrong: c must be >= 0');
+            ).toThrowError('c must be >= 0 and <= 1000000000000000000');
 
             expect(() =>
                 buildCallWithModifiedInput({
                     eclpParams: { c: _ONE + 1n },
                 }),
-            ).toThrowError(`RotationVectorCWrong: c must be <= ${_ONE}`);
+            ).toThrowError('c must be >= 0 and <= 1000000000000000000');
         });
 
         test('scnorm2 outside valid range', async () => {
@@ -195,11 +195,7 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({
                     eclpParams: { s: 1n, c: 1n },
                 }),
-            ).toThrowError(
-                `RotationVectorNotNormalized: scnorm2 must be >= ${
-                    _ONE - _ROTATION_VECTOR_NORM_ACCURACY
-                }`,
-            );
+            ).toThrowError('RotationVectorNotNormalized');
 
             expect(() =>
                 buildCallWithModifiedInput({
@@ -208,11 +204,7 @@ describe('create GyroECLP pool input validations', () => {
                         c: parseUnits('1', 18),
                     },
                 }),
-            ).toThrowError(
-                `RotationVectorNotNormalized: scnorm2 must be <= ${
-                    _ONE + _ROTATION_VECTOR_NORM_ACCURACY
-                }`,
-            );
+            ).toThrowError('RotationVectorNotNormalized');
         });
 
         test('lambda outside valid range', async () => {
@@ -220,14 +212,16 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({
                     eclpParams: { lambda: -1n },
                 }),
-            ).toThrowError('StretchingFactorWrong: lambda must be >= 0');
+            ).toThrowError(
+                'lambda must be >= 0 and <= 100000000000000000000000000',
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
                     eclpParams: { lambda: _MAX_STRETCH_FACTOR + 1n },
                 }),
             ).toThrowError(
-                `StretchingFactorWrong: lambda must be <= ${_MAX_STRETCH_FACTOR}`,
+                'lambda must be >= 0 and <= 100000000000000000000000000',
             );
         });
     });
@@ -238,7 +232,7 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({
                     derivedEclpParams: { tauAlpha: { y: -1n } },
                 }),
-            ).toThrowError('DerivedTauAlphaYWrong: tuaAlpha.y must be > 0');
+            ).toThrowError('tuaAlpha.y must be > 0');
         });
 
         test('DerivedTauBetaYWrong()', async () => {
@@ -246,7 +240,7 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({
                     derivedEclpParams: { tauBeta: { y: -1n } },
                 }),
-            ).toThrowError('DerivedTauBetaYWrong: tauBeta.y must be > 0');
+            ).toThrowError('tauBeta.y must be > 0');
         });
 
         test('DerivedTauXWrong()', async () => {
@@ -258,9 +252,7 @@ describe('create GyroECLP pool input validations', () => {
                         },
                     },
                 }),
-            ).toThrowError(
-                'DerivedTauXWrong: derived.tauBeta.x must be > derived.tauAlpha.x',
-            );
+            ).toThrowError('tauBeta.x must be > tauAlpha.x');
         });
 
         test('DerivedTauAlphaNotNormalized()', async () => {
@@ -273,11 +265,7 @@ describe('create GyroECLP pool input validations', () => {
                         },
                     },
                 }),
-            ).toThrowError(
-                `DerivedTauBetaNotNormalized: norm2 must be >= ${
-                    _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP
-                }`,
-            );
+            ).toThrowError('RotationVectorNotNormalized()');
 
             expect(() =>
                 buildCallWithModifiedInput({
@@ -288,11 +276,7 @@ describe('create GyroECLP pool input validations', () => {
                         },
                     },
                 }),
-            ).toThrowError(
-                `DerivedTauBetaNotNormalized: norm2 must be <= ${
-                    _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP
-                }`,
-            );
+            ).toThrowError('RotationVectorNotNormalized()');
         });
 
         test('Derived parameters u, v, w, z limits', async () => {
@@ -300,25 +284,25 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({
                     derivedEclpParams: { u: _ONE_XP + 1n },
                 }),
-            ).toThrowError(`DerivedUWrong: u must be <= ${_ONE_XP}`);
+            ).toThrowError(`u must be <= ${_ONE_XP}`);
 
             expect(() =>
                 buildCallWithModifiedInput({
                     derivedEclpParams: { v: _ONE_XP + 1n },
                 }),
-            ).toThrowError(`DerivedVWrong: v must be <= ${_ONE_XP}`);
+            ).toThrowError(`v must be <= ${_ONE_XP}`);
 
             expect(() =>
                 buildCallWithModifiedInput({
                     derivedEclpParams: { w: _ONE_XP + 1n },
                 }),
-            ).toThrowError(`DerivedWWrong: w must be <= ${_ONE_XP}`);
+            ).toThrowError(`w must be <= ${_ONE_XP}`);
 
             expect(() =>
                 buildCallWithModifiedInput({
                     derivedEclpParams: { z: _ONE_XP + 1n },
                 }),
-            ).toThrowError(`DerivedZWrong: z must be <= ${_ONE_XP}`);
+            ).toThrowError(`z must be <= ${_ONE_XP}`);
         });
 
         test('DerivedDsqWrong()', async () => {
@@ -328,11 +312,7 @@ describe('create GyroECLP pool input validations', () => {
                         dSq: _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP - 1n,
                     },
                 }),
-            ).toThrowError(
-                `DerivedDSqWrong: dSq must be >= ${
-                    _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP
-                }`,
-            );
+            ).toThrowError('DerivedDsqWrong()');
 
             expect(() =>
                 buildCallWithModifiedInput({
@@ -340,11 +320,7 @@ describe('create GyroECLP pool input validations', () => {
                         dSq: _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP + 1n,
                     },
                 }),
-            ).toThrowError(
-                `DerivedDSqWrong: dSq must be <= ${
-                    _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP
-                }`,
-            );
+            ).toThrowError('DerivedDsqWrong()');
         });
 
         // TODO: grow bigger brain to figure out param values that trigger InvariantDenominatorWrong
