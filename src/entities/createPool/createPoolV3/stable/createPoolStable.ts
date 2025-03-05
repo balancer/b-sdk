@@ -22,6 +22,11 @@ export class CreatePoolStableV3 implements CreatePoolBase {
     private encodeCall(input: CreatePoolV3StableInput): Hex {
         const sortedTokenConfigs = sortByAddress(input.tokens);
 
+        const tokens = sortedTokenConfigs.map(({ address, ...rest }) => ({
+            token: address,
+            ...rest,
+        }));
+
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
             swapFeeManager: input.swapFeeManager,
@@ -31,14 +36,7 @@ export class CreatePoolStableV3 implements CreatePoolBase {
         const args = [
             input.name || input.symbol,
             input.symbol,
-            sortedTokenConfigs.map(
-                ({ address, rateProvider, tokenType, paysYieldFees }) => ({
-                    token: address,
-                    tokenType,
-                    rateProvider,
-                    paysYieldFees,
-                }),
-            ),
+            tokens,
             input.amplificationParameter,
             roleAccounts,
             input.swapFeePercentage,

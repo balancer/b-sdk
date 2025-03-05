@@ -1,6 +1,4 @@
-import { InitPoolInput } from '@/entities/initPool';
 import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
-import { CreatePoolInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
@@ -15,11 +13,17 @@ import {
     addLiquidityProportionalOnlyError,
     removeLiquidityProportionalOnlyError,
 } from '@/utils';
+import { CreatePoolGyroECLPInput } from '@/entities/createPool';
+import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 
 export class InputValidatorGyro extends InputValidatorBase {
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
-        throw new Error('Method not implemented.');
+    validateCreatePool(input: CreatePoolGyroECLPInput) {
+        super.validateCreatePool(input);
+
+        const { eclpParams, derivedEclpParams } = input;
+
+        GyroECLPMath.validateParams(eclpParams);
+        GyroECLPMath.validateDerivedParams(eclpParams, derivedEclpParams);
     }
 
     validateAddLiquidity(
@@ -46,10 +50,5 @@ export class InputValidatorGyro extends InputValidatorBase {
             );
         }
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);
-    }
-
-    validateCreatePool(input: CreatePoolInput): void {
-        console.log(input);
-        throw new Error('Method not implemented.');
     }
 }
