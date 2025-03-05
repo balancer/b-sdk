@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@balancer-labs/balancer-maths':
-    specifier: ^0.0.23
-    version: 0.0.23
+    specifier: 0.0.24
+    version: 0.0.24
   decimal.js-light:
     specifier: ^2.5.1
     version: 2.5.1
@@ -100,8 +100,8 @@ packages:
       regenerator-runtime: 0.14.1
     dev: true
 
-  /@balancer-labs/balancer-maths@0.0.23:
-    resolution: {integrity: sha512-SlK8meUJxdF15OSFEeEJ6M7q04TY37D1TF/H7xrMoQ/Kw9pox/bLVXHqvt5bCyLyKjmwe6Y2duSoyHv0aZjEOg==}
+  /@balancer-labs/balancer-maths@0.0.24:
+    resolution: {integrity: sha512-M6iqcmLfR9CP1mw3R5w0FdtZkUk7M0vCJhloAfhE/xufbAZrCSoapFYlt/NMBKLDQoGNJ2FN5E4zpdLVsxhoow==}
     engines: {node: '>=18.x'}
     dev: false
 
