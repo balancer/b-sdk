@@ -21,6 +21,7 @@
         "build": "tsup",
         "format": "biome format --write .",
         "lint": "dpdm -T ./src && biome check .",
+        "check-types": "tsc --noEmit --incremental --skipLibCheck",
         "test": "vitest dev",
         "test:ci": "vitest run",
         "changeset": "changeset",

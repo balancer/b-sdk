@@ -26,7 +26,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Lint & format code
-        run: pnpm format & pnpm lint
+        run: pnpm format && pnpm lint && pnpm check-types
   test:
     name: Test
     needs: install
