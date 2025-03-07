@@ -20,6 +20,10 @@ export class InputValidatorGyro extends InputValidatorBase {
     validateCreatePool(input: CreatePoolGyroECLPInput) {
         super.validateCreatePool(input);
 
+        if (input.tokens.length !== 2) {
+            throw new Error('GyroECLP pools on v3 support only two tokens');
+        }
+
         const { eclpParams, derivedEclpParams } = input;
 
         GyroECLPMath.validateParams(eclpParams);

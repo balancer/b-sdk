@@ -16,14 +16,13 @@ const {
     _ONE_XP,
     _DERIVED_TAU_NORM_ACCURACY_XP,
     _DERIVED_DSQ_NORM_ACCURACY_XP,
-    _ROTATION_VECTOR_NORM_ACCURACY,
     _MAX_STRETCH_FACTOR,
-    _MAX_INV_INVARIANT_DENOMINATOR_XP,
 } = GyroECLPMath;
 
 const chainId = ChainId.SEPOLIA;
 const BAL = TOKENS[chainId].BAL;
 const DAI = TOKENS[chainId].DAI;
+const USDC = TOKENS[chainId].USDC;
 
 describe('create GyroECLP pool input validations', () => {
     const createPool = new CreatePool();
@@ -134,17 +133,12 @@ describe('create GyroECLP pool input validations', () => {
                 tokenType: TokenType.STANDARD,
                 paysYieldFees: false,
             },
-            {
-                address: DAI.address,
-                rateProvider: zeroAddress,
-                tokenType: TokenType.STANDARD,
-                paysYieldFees: false,
-            },
         ];
         expect(() => buildCallWithModifiedInput({ tokens })).toThrowError(
             'Duplicate token addresses',
         );
     });
+
     test('Allowing only TokenType.STANDARD to have address zero as rateProvider', async () => {
         const tokens: CreatePoolGyroECLPInput['tokens'] = [
             {
@@ -162,6 +156,32 @@ describe('create GyroECLP pool input validations', () => {
         ];
         expect(() => buildCallWithModifiedInput({ tokens })).toThrowError(
             'Only TokenType.STANDARD is allowed to have zeroAddress rateProvider',
+        );
+    });
+
+    test('Allows only two tokens', async () => {
+        const tokens: CreatePoolGyroECLPInput['tokens'] = [
+            {
+                address: BAL.address,
+                rateProvider: zeroAddress,
+                tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
+            },
+            {
+                address: DAI.address,
+                rateProvider: zeroAddress,
+                tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
+            },
+            {
+                address: USDC.address,
+                rateProvider: zeroAddress,
+                tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
+            },
+        ];
+        expect(() => buildCallWithModifiedInput({ tokens })).toThrowError(
+            'GyroECLP pools on v3 support only two tokens',
         );
     });
 
@@ -321,22 +341,6 @@ describe('create GyroECLP pool input validations', () => {
                     },
                 }),
             ).toThrowError('DerivedDsqWrong()');
-        });
-
-        // TODO: grow bigger brain to figure out param values that trigger InvariantDenominatorWrong
-        test.skip('InvariantDenominatorWrong()', async () => {
-            expect(
-                buildCallWithModifiedInput({
-                    eclpParams: {
-                        s: _ONE,
-                    },
-                    derivedEclpParams: {
-                        u: _ONE_XP,
-                    },
-                }),
-            ).toThrowError(
-                `InvariantDenominatorWrong: mulDenominator must be <= ${_MAX_INV_INVARIANT_DENOMINATOR_XP}`,
-            );
         });
     });
 });
