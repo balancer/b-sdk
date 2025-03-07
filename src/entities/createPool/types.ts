@@ -1,5 +1,6 @@
 import { PoolType, TokenType } from '@/types';
 import { Address, Hex } from 'viem';
+import { CreatePoolGyroECLPInput } from './createPoolV3/gyroECLP/createPoolGyroECLP';
 
 export interface CreatePoolBase {
     buildCall(input: CreatePoolInput): CreatePoolBuildCallOutput;
@@ -52,12 +53,7 @@ export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
 export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Stable;
     amplificationParameter: bigint; // value between 1e3 and 5000e3
-    tokens: {
-        address: Address;
-        rateProvider: Address;
-        tokenType: TokenType;
-        paysYieldFees: boolean;
-    }[];
+    tokens: TokenConfig[];
 };
 
 export type CreatePoolStableSurgeInput = Omit<
@@ -69,13 +65,7 @@ export type CreatePoolStableSurgeInput = Omit<
 
 export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Weighted;
-    tokens: {
-        address: Address;
-        rateProvider: Address;
-        weight: bigint;
-        tokenType: TokenType;
-        paysYieldFees?: boolean;
-    }[];
+    tokens: (TokenConfig & { weight: bigint })[];
 };
 
 export type CreatePoolInput =
@@ -83,7 +73,8 @@ export type CreatePoolInput =
     | CreatePoolV2ComposableStableInput
     | CreatePoolV3WeightedInput
     | CreatePoolV3StableInput
-    | CreatePoolStableSurgeInput;
+    | CreatePoolStableSurgeInput
+    | CreatePoolGyroECLPInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;
@@ -115,7 +106,7 @@ export type CreatePoolV2ComposableStableArgs = [
 ];
 
 export type TokenConfig = {
-    token: Address;
+    address: Address;
     tokenType: TokenType;
     rateProvider: Address;
     paysYieldFees: boolean;

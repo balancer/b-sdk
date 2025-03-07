@@ -1,10 +1,8 @@
-// pnpm test -- v3/createPool/weighted/weighted.integration.test.ts
-
+// pnpm test -- v3/createPool/gyroECLP/gyroECLP.integration.test.ts
 import {
     Address,
     createTestClient,
     http,
-    parseEther,
     publicActions,
     walletActions,
     zeroAddress,
@@ -16,69 +14,86 @@ import {
     ChainId,
     PoolType,
     TokenType,
-    CreatePoolV3WeightedInput,
-    InitPoolDataProvider,
+    CreatePoolGyroECLPInput,
     InitPool,
     Permit2Helper,
     PERMIT2,
     VAULT_V3,
+    vaultExtensionAbi_V3,
+    PublicWalletClient,
+    InitPoolDataProvider,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
-import { doCreatePool } from '../../../lib/utils/createPoolHelper';
-import { TOKENS } from 'test/lib/utils/addresses';
-import { assertInitPool } from 'test/lib/utils/initPoolHelper';
-import { PublicWalletClient } from '@/utils';
-import { vaultExtensionAbi_V3 } from 'src/abi/';
 import {
+    doCreatePool,
+    TOKENS,
+    assertInitPool,
     setTokenBalances,
     approveSpenderOnTokens,
     sendTransactionGetBalances,
-} from 'test/lib/utils/helper';
+} from '../../../lib/utils';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
-const poolType = PoolType.Weighted;
+const poolType = PoolType.GyroE;
 const BAL = TOKENS[chainId].BAL;
-const WETH = TOKENS[chainId].WETH;
+const DAI = TOKENS[chainId].DAI;
 
-describe('create weighted pool test', () => {
+describe('GyroECLP - create & init', () => {
+    let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
-    let createPoolInput: CreatePoolV3WeightedInput;
+    let createPoolInput: CreatePoolGyroECLPInput;
     let poolAddress: Address;
 
-    // Deploy (and register) a pool before the tests run
     beforeAll(async () => {
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS.SEPOLIA,
+            undefined,
+            7747598n,
+        ));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
-            transport: http(rpcUrl, { timeout: 120_000 }), // FIXME: createPool step takes a long time, so we increase the timeout as a temporary solution
+            transport: http(rpcUrl, { timeout: 120_000 }),
         })
             .extend(publicActions)
             .extend(walletActions);
         testAddress = (await client.getAddresses())[0];
 
+        await setTokenBalances(
+            client,
+            testAddress,
+            [DAI.address, BAL.address],
+            [DAI.slot!, BAL.slot!],
+            [parseUnits('100', 18), parseUnits('100', 18)],
+        );
+
+        await approveSpenderOnTokens(
+            client,
+            testAddress,
+            [DAI.address, BAL.address],
+            PERMIT2[chainId],
+        );
+
         createPoolInput = {
             poolType,
-            symbol: '50BAL-50WETH',
+            symbol: '50BAL-50DAI',
             tokens: [
                 {
                     address: BAL.address,
-                    weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                     paysYieldFees: false,
                 },
                 {
-                    address: WETH.address,
-                    weight: parseEther(`${1 / 2}`),
+                    address: DAI.address,
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                     paysYieldFees: false,
                 },
             ],
-            swapFeePercentage: parseEther('0.01'),
+            swapFeePercentage: 10000000000000000n,
             poolHooksContract: zeroAddress,
             pauseManager: testAddress,
             swapFeeManager: testAddress,
@@ -86,6 +101,28 @@ describe('create weighted pool test', () => {
             chainId,
             protocolVersion,
             enableDonation: false,
+            eclpParams: {
+                alpha: 998502246630054917n,
+                beta: 1000200040008001600n,
+                c: 707106781186547524n,
+                s: 707106781186547524n,
+                lambda: 4000000000000000000000n,
+            },
+            derivedEclpParams: {
+                tauAlpha: {
+                    x: -94861212813096057289512505574275160547n,
+                    y: 31644119574235279926451292677567331630n,
+                },
+                tauBeta: {
+                    x: 37142269533113549537591131345643981951n,
+                    y: 92846388265400743995957747409218517601n,
+                },
+                u: 66001741173104803338721745994955553010n,
+                v: 62245253919818011890633399060291020887n,
+                w: 30601134345582732000058913853921008022n,
+                z: -28859471639991253843240999485797747790n,
+                dSq: 99999999999999999886624093342106115200n,
+            },
         };
 
         poolAddress = await doCreatePool({
@@ -95,11 +132,11 @@ describe('create weighted pool test', () => {
         });
     }, 120_000);
 
-    test('Deployment', async () => {
+    test('pool should be created', async () => {
         expect(poolAddress).to.not.be.undefined;
     });
 
-    test('Registration', async () => {
+    test('pool should be registered with Vault', async () => {
         const isPoolRegistered = await client.readContract({
             address: VAULT_V3[chainId],
             abi: vaultExtensionAbi_V3,
@@ -109,7 +146,24 @@ describe('create weighted pool test', () => {
         expect(isPoolRegistered).to.be.true;
     });
 
-    test('Initialization', async () => {
+    test('pool should init', async () => {
+        const initPoolInput = {
+            amountsIn: [
+                {
+                    address: BAL.address,
+                    rawAmount: parseUnits('10', BAL.decimals),
+                    decimals: BAL.decimals,
+                },
+                {
+                    address: DAI.address,
+                    rawAmount: parseUnits('17', DAI.decimals),
+                    decimals: DAI.decimals,
+                },
+            ],
+            minBptAmountOut: 0n,
+            chainId,
+        };
+
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
         const poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
@@ -117,44 +171,13 @@ describe('create weighted pool test', () => {
             protocolVersion,
         );
 
-        await setTokenBalances(
-            client,
-            testAddress,
-            poolState.tokens.map((t) => t.address),
-            [WETH.slot!, BAL.slot!],
-            poolState.tokens.map((t) => parseUnits('100', t.decimals)),
-        );
-
-        await approveSpenderOnTokens(
-            client,
-            testAddress,
-            poolState.tokens.map((t) => t.address),
-            PERMIT2[chainId],
-        );
-
-        const initPoolInput = {
-            amountsIn: [
-                {
-                    address: createPoolInput.tokens[0].address,
-                    rawAmount: parseEther('100'),
-                    decimals: BAL.decimals,
-                },
-                {
-                    address: createPoolInput.tokens[1].address,
-                    rawAmount: parseEther('100'),
-                    decimals: WETH.decimals,
-                },
-            ],
-            minBptAmountOut: parseEther('90'),
-            chainId,
-        };
-
-        const initPool = new InitPool();
         const permit2 = await Permit2Helper.signInitPoolApproval({
             ...initPoolInput,
             client,
             owner: testAddress,
         });
+
+        const initPool = new InitPool();
         const initPoolBuildOutput = initPool.buildCallWithPermit2(
             initPoolInput,
             poolState,
@@ -162,7 +185,7 @@ describe('create weighted pool test', () => {
         );
 
         const txOutput = await sendTransactionGetBalances(
-            [BAL.address, WETH.address],
+            [BAL.address, DAI.address],
             client,
             testAddress,
             initPoolBuildOutput.to,
@@ -171,5 +194,5 @@ describe('create weighted pool test', () => {
         );
 
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
-    });
+    }, 120_000);
 });
