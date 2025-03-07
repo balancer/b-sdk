@@ -12,7 +12,7 @@ import {
     Token,
     TokenAmount,
     SwapBuildCallInput,
-    VAULT,
+    VAULT_V2,
     erc20Abi,
 } from '../../src';
 import { querySmartPath } from './querySmartPath';
@@ -73,7 +73,7 @@ const swapV2 = async () => {
         client,
         sender,
         tokenIn.address,
-        VAULT[chainId],
+        VAULT_V2[chainId],
     );
 
     // Build call to make swap transaction

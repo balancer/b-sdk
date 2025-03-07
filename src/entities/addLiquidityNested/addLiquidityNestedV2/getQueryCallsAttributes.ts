@@ -10,12 +10,12 @@ import {
     AddLiquidityNestedCallAttributes,
     AddLiquidityNestedInputV2,
 } from './types';
-import { NestedPool, PoolKind } from '@/entities/types';
+import { NestedPoolV2, PoolKind } from '@/entities/types';
 import { Relayer } from '@/entities/relayer';
 
 export const getQueryCallsAttributes = (
     { amountsIn, chainId, fromInternalBalance }: AddLiquidityNestedInputV2,
-    pools: NestedPool[],
+    pools: NestedPoolV2[],
 ): AddLiquidityNestedCallAttributes[] => {
     /**
      * Overall logic to build sequence of add liquidity calls:
