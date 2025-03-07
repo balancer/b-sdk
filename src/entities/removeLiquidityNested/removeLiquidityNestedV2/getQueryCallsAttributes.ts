@@ -3,7 +3,7 @@ import { TokenAmount } from '@/entities/tokenAmount';
 
 import { BALANCER_RELAYER, ChainId, ZERO_ADDRESS } from '@/utils';
 import { Token } from '@/entities/token';
-import { NestedPool, PoolKind } from '@/entities/types';
+import { NestedPoolV2, PoolKind } from '@/entities/types';
 import {
     RemoveLiquidityNestedCallAttributesV2,
     RemoveLiquidityNestedProportionalInputV2,
@@ -16,7 +16,7 @@ export const getQueryCallsAttributes = (
     input:
         | RemoveLiquidityNestedProportionalInputV2
         | RemoveLiquidityNestedSingleTokenInputV2,
-    pools: NestedPool[],
+    pools: NestedPoolV2[],
     isProportional: boolean,
 ): {
     bptAmountIn: TokenAmount;
@@ -57,7 +57,7 @@ export const getQueryCallsAttributes = (
 };
 
 const getProportionalCallsAttributes = (
-    poolsSortedByLevel: NestedPool[],
+    poolsSortedByLevel: NestedPoolV2[],
     chainId: ChainId,
     accountAddress: Address,
     bptAmountIn: bigint,
@@ -114,7 +114,7 @@ const getProportionalCallsAttributes = (
 };
 
 const getSingleTokenCallsAttributes = (
-    poolsTopDown: NestedPool[],
+    poolsTopDown: NestedPoolV2[],
     chainId: ChainId,
     accountAddress: Address,
     bptAmountIn: bigint,
@@ -129,7 +129,7 @@ const getSingleTokenCallsAttributes = (
      * 4. Output at bottom level is the amountOut
      */
 
-    const removeLiquidityPath: NestedPool[] = getRemoveLiquidityPath(
+    const removeLiquidityPath: NestedPoolV2[] = getRemoveLiquidityPath(
         tokenOut,
         poolsTopDown,
     );
@@ -179,10 +179,10 @@ const getSingleTokenCallsAttributes = (
 
 const getRemoveLiquidityPath = (
     tokenOut: string,
-    poolsTopDown: NestedPool[],
+    poolsTopDown: NestedPoolV2[],
 ) => {
     const topPool = poolsTopDown[0];
-    const removeLiquidityPath: NestedPool[] = [];
+    const removeLiquidityPath: NestedPoolV2[] = [];
     let tokenOutByLevel = tokenOut;
     while (tokenOutByLevel !== topPool.address) {
         const currentPool = poolsTopDown.find(
@@ -199,7 +199,7 @@ const getRemoveLiquidityPath = (
                  */
                 p.address !== tokenOutByLevel &&
                 p.tokens.some((t) => t.address === tokenOutByLevel),
-        ) as NestedPool;
+        ) as NestedPoolV2;
         removeLiquidityPath.unshift(currentPool);
         tokenOutByLevel = currentPool.address;
     }
@@ -207,7 +207,7 @@ const getRemoveLiquidityPath = (
 };
 
 const getBptAmountIn = (
-    pool: NestedPool,
+    pool: NestedPoolV2,
     bptAmountIn: bigint,
     calls: RemoveLiquidityNestedCallAttributesV2[],
     isProportional: boolean,
@@ -262,7 +262,7 @@ const getSenderProportional = (
 // whole multicall, then the recipient is the user, otherwise it's the relayer.
 const getRecipientProportional = (
     sortedTokensWithoutBpt: Token[],
-    poolsSortedByLevel: NestedPool[],
+    poolsSortedByLevel: NestedPoolV2[],
     accountAddress: Address,
     chainId: ChainId,
 ): Address => {

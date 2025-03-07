@@ -14,14 +14,12 @@
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
     "typings": "dist/index.d.ts",
-    "files": [
-        "dist/"
-    ],
+    "files": ["dist/"],
     "scripts": {
         "build": "tsup",
         "format": "biome format --write .",
         "lint": "dpdm -T ./src && biome check .",
-        "check-types": "tsc --noEmit --incremental --skipLibCheck",
+        "check-types": "tsc --noEmit --skipLibCheck",
         "test": "vitest dev",
         "test:ci": "vitest run",
         "changeset": "changeset",

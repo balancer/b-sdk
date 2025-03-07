@@ -82,7 +82,7 @@ export const getAmountsCall = (
                 minAmountsOut: input.amountsOut.map((a) =>
                     input.slippage.applyTo(a.amount, -1),
                 ),
-                tokenOutIndex: input.tokenOutIndex,
+                tokenOutIndex: input?.tokenOutIndex,
                 maxBptAmountIn: input.bptIn.amount,
             };
     }
