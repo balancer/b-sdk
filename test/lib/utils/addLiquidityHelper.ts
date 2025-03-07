@@ -21,7 +21,6 @@ import {
     ChainId,
     isSameAddress,
     PublicWalletClient,
-    AddLiquidityBoostedV3,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';

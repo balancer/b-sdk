@@ -77,13 +77,15 @@ export const getAmountsCall = (
                 maxBptAmountIn: input.bptIn.amount,
             };
         case RemoveLiquidityKind.Proportional:
-        case RemoveLiquidityKind.Recovery:
+        case RemoveLiquidityKind.Recovery: {
             return {
                 minAmountsOut: input.amountsOut.map((a) =>
                     input.slippage.applyTo(a.amount, -1),
                 ),
-                tokenOutIndex: input?.tokenOutIndex,
+                tokenOutIndex:
+                    'tokenOutIndex' in input ? input.tokenOutIndex : undefined,
                 maxBptAmountIn: input.bptIn.amount,
             };
+        }
     }
 };
