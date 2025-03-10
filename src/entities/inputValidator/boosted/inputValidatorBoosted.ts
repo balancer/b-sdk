@@ -4,7 +4,13 @@ import { InputValidatorBase } from '../inputValidatorBase';
 import { AddLiquidityKind } from '@/entities/addLiquidity/types';
 import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
 import { isSameAddress } from '@/utils';
-
+import {
+    CreatePoolStableSurgeInput,
+    CreatePoolV3StableInput,
+    CreatePoolV3WeightedInput,
+} from '@/entities/createPool';
+import { validateCreatePoolTokenConfig } from '../utils/validateCreatePoolTokenConfig';
+import { validateCreatePoolTokens } from '../utils/validateTokens';
 export class InputValidatorBoosted extends InputValidatorBase {
     validateAddLiquidityBoosted(
         addLiquidityInput: AddLiquidityBoostedInput,
@@ -55,5 +61,14 @@ export class InputValidatorBoosted extends InputValidatorBase {
                 }
             }
         }
+    }
+    validateCreatePool(
+        input:
+            | CreatePoolV3WeightedInput
+            | CreatePoolV3StableInput
+            | CreatePoolStableSurgeInput,
+    ): void {
+        validateCreatePoolTokens(input.tokens);
+        validateCreatePoolTokenConfig(input);
     }
 }
