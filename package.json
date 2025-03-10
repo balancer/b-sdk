@@ -27,6 +27,7 @@
         "example": "npx tsx ./examples/lib/executeExample.ts"
     },
     "dependencies": {
+        "@balancer-labs/balancer-maths": "0.0.24",
         "decimal.js-light": "^2.5.1",
         "lodash.clonedeep": "^4.5.0",
         "viem": "^2.22.3"

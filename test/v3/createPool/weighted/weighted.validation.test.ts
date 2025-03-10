@@ -24,12 +24,14 @@ describe('create weighted pool input validations', () => {
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
+                    paysYieldFees: false,
                 },
                 {
                     address: TOKENS[chainId].WETH.address, // WETH
                     weight: parseEther(`${1 / 2}`),
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
+                    paysYieldFees: false,
                 },
             ],
             swapFeePercentage: parseEther('0.01'),
@@ -50,12 +52,14 @@ describe('create weighted pool input validations', () => {
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
             },
             {
                 address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther(`${1 / 4}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
             },
         ];
         expect(() =>
@@ -70,12 +74,14 @@ describe('create weighted pool input validations', () => {
                 weight: parseEther('0'),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
             },
             {
                 address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther('1'),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
             },
         ];
         expect(() =>
@@ -89,18 +95,21 @@ describe('create weighted pool input validations', () => {
                 weight: parseEther(`${1 / 4}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
             },
             {
                 address: TOKENS[chainId].BAL.address, // BAL
                 weight: parseEther(`${1 / 4}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
             },
             {
                 address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
             },
         ];
         expect(() =>
@@ -114,12 +123,14 @@ describe('create weighted pool input validations', () => {
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.STANDARD,
+                paysYieldFees: false,
             },
             {
                 address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
                 tokenType: TokenType.ERC4626_TOKEN,
+                paysYieldFees: false,
             },
         ];
         expect(() =>

@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@balancer-labs/balancer-maths':
+    specifier: 0.0.24
+    version: 0.0.24
   decimal.js-light:
     specifier: ^2.5.1
     version: 2.5.1
@@ -96,6 +99,11 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.1
     dev: true
+
+  /@balancer-labs/balancer-maths@0.0.24:
+    resolution: {integrity: sha512-M6iqcmLfR9CP1mw3R5w0FdtZkUk7M0vCJhloAfhE/xufbAZrCSoapFYlt/NMBKLDQoGNJ2FN5E4zpdLVsxhoow==}
+    engines: {node: '>=18.x'}
+    dev: false
 
   /@biomejs/biome@1.5.2:
     resolution: {integrity: sha512-LhycxGQBQLmfv6M3e4tMfn/XKcUWyduDYOlCEBrHXJ2mMth2qzYt1JWypkWp+XmU/7Hl2dKvrP4mZ5W44+nWZw==}
