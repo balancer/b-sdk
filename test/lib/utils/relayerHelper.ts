@@ -1,7 +1,7 @@
 import { Client, TestActions, WalletActions } from 'viem';
 import { authorizerAbi, vaultV2Abi } from '../../../src/abi';
 import { Address } from '../../../src/types';
-import { BALANCER_RELAYER, VAULT } from '../../../src/utils';
+import { BALANCER_RELAYER, VAULT_V2 } from '../../../src/utils';
 
 export const grantRoles = async (
     client: Client & TestActions & WalletActions,
@@ -55,7 +55,7 @@ export const approveRelayer = async (
     const chainId = await client.getChainId();
     await client.writeContract({
         account,
-        address: VAULT[chainId],
+        address: VAULT_V2[chainId],
         chain: client.chain,
         abi: vaultV2Abi,
         functionName: 'setRelayerApproval',

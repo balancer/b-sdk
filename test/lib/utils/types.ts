@@ -13,12 +13,11 @@ import {
     RemoveLiquidity,
     Slippage,
     RemoveLiquidityRecoveryInput,
-    AddLiquidityBoostedV3,
 } from '@/.';
 
 export type AddLiquidityTxInput = {
     client: PublicWalletClient & TestActions;
-    addLiquidity: AddLiquidity | AddLiquidityBoostedV3;
+    addLiquidity: AddLiquidity;
     addLiquidityInput: AddLiquidityInput;
     slippage: Slippage;
     poolState: PoolState;
