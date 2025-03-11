@@ -22,6 +22,7 @@ import {
     vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
+    calcDerivedParams,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import {
@@ -132,11 +133,19 @@ describe('GyroECLP - create & init', () => {
         });
     }, 120_000);
 
-    test('pool should be created', async () => {
+    test.only('calculate derived params', async () => {
+        const derivedEclpParams = calcDerivedParams(createPoolInput.eclpParams);
+
+        expect(derivedEclpParams).to.deep.equal(
+            createPoolInput.derivedEclpParams,
+        );
+    });
+
+    test('creation', async () => {
         expect(poolAddress).to.not.be.undefined;
     });
 
-    test('pool should be registered with Vault', async () => {
+    test('registration', async () => {
         const isPoolRegistered = await client.readContract({
             address: VAULT_V3[chainId],
             abi: vaultExtensionAbi_V3,
@@ -146,7 +155,7 @@ describe('GyroECLP - create & init', () => {
         expect(isPoolRegistered).to.be.true;
     });
 
-    test('pool should init', async () => {
+    test('initialization', async () => {
         const initPoolInput = {
             amountsIn: [
                 {
