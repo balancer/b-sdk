@@ -21,3 +21,4 @@ export * from './balancerCompositeLiquidityRouterNested';
 export * from './balancerCompositeLiquidityRouterBoosted';
 export * from './stableSurgeFactory';
 export * from './gyroECLPPoolFactory.V3';
+export * from './liquidityBootstrappingFactory';
