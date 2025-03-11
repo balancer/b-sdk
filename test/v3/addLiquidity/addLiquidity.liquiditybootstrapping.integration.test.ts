@@ -1,3 +1,4 @@
+// pnpm test -- test/v3/addLiquidity/addLiquidity.liquiditybootstrapping.integration.test.ts
 import {
     Address,
     createTestClient,
@@ -61,7 +62,7 @@ describe('add liquidity bootstrapping test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS[ChainId[chainId]],
             undefined,
-            7783363n,
+            7831624n,
         ));
 
         client = createTestClient({
