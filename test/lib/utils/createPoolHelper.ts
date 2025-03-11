@@ -1,16 +1,17 @@
 import { CreatePoolTxInput } from './types';
 import {
+    CreatePool,
     Address,
     PoolType,
     weightedPoolFactoryV4Abi_V2,
     composableStableFactoryV6Abi_V2,
     weightedPoolFactoryAbi_V3,
     stablePoolFactoryAbi_V3,
+    gyroECLPPoolFactoryAbi_V3,
+    stableSurgeFactoryAbi,
     liquidityBoostrappingFactoryAbi,
 } from 'src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
-import { CreatePool } from 'src';
-import { stableSurgeFactoryAbi } from '@/abi/stableSurgeFactory';
 
 export async function doCreatePool(
     txInput: CreatePoolTxInput,
@@ -29,6 +30,7 @@ export async function doCreatePool(
             [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
             [PoolType.Stable]: stablePoolFactoryAbi_V3,
             [PoolType.StableSurge]: stableSurgeFactoryAbi,
+            [PoolType.GyroE]: gyroECLPPoolFactoryAbi_V3,
             [PoolType.LiquidityBootstrapping]: liquidityBoostrappingFactoryAbi,
         },
     };

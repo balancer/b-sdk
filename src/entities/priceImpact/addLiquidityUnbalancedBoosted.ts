@@ -165,7 +165,7 @@ async function queryAddLiquidityForTokenDelta(
             }
         }
         throw new Error(
-            `Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Delta add step:\n${err}`,
+            'Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Delta add step',
         );
     }
 }
@@ -247,9 +247,9 @@ async function zeroOutDeltas(
                 resultTokenIndex,
                 deltas[resultTokenIndex],
             );
-        } catch (err) {
+        } catch {
             throw new Error(
-                `Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Swap step:\n${err}`,
+                'Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Swap step',
             );
         }
     }

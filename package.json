@@ -9,7 +9,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "2.3.0",
+    "version": "2.4.0",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
@@ -21,6 +21,7 @@
         "build": "tsup",
         "format": "biome format --write .",
         "lint": "dpdm -T ./src && biome check .",
+        "check-types": "tsc --noEmit --skipLibCheck",
         "test": "vitest dev",
         "test:ci": "vitest run",
         "changeset": "changeset",
@@ -28,6 +29,7 @@
         "example": "npx tsx ./examples/lib/executeExample.ts"
     },
     "dependencies": {
+        "@balancer-labs/balancer-maths": "0.0.24",
         "decimal.js-light": "^2.5.1",
         "lodash.clonedeep": "^4.5.0",
         "viem": "^2.22.3"

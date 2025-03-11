@@ -31,7 +31,7 @@ import {
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
 } from 'src';
 import {
-    doAddLiquidity,
+    doAddLiquidityBoosted,
     setTokenBalances,
     approveSpenderOnTokens,
     approveSpenderOnPermit2,
@@ -39,6 +39,7 @@ import {
     assertTokenMatch,
     TOKENS,
     areBigIntsWithinPercent,
+    AddLiquidityBoostedTxInput,
 } from '../../lib/utils';
 
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
@@ -107,7 +108,7 @@ describe('remove liquidity boosted proportional', () => {
             );
         }
 
-        const addLiquidityInput: AddLiquidityBoostedInput = {
+        const addLiquidityBoostedInput: AddLiquidityBoostedInput = {
             chainId: chainId,
             rpcUrl: rpcUrl,
             referenceAmount: {
@@ -119,14 +120,17 @@ describe('remove liquidity boosted proportional', () => {
             tokensIn: [USDC.address, USDT.address],
         };
 
-        await doAddLiquidity({
+        const txInput: AddLiquidityBoostedTxInput = {
             client,
-            addLiquidity: new AddLiquidityBoostedV3(),
-            addLiquidityInput,
-            slippage: Slippage.fromPercentage('1'),
-            poolState: boostedPool_USDC_USDT,
+            addLiquidityBoosted: new AddLiquidityBoostedV3(),
+            addLiquidityBoostedInput,
             testAddress,
-        });
+            poolStateWithUnderlyings: boostedPool_USDC_USDT,
+            slippage: Slippage.fromPercentage('1'),
+            wethIsEth: false,
+        };
+
+        await doAddLiquidityBoosted(txInput);
     });
 
     test('query returns correct token addresses', async () => {

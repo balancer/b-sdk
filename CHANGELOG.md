@@ -1,5 +1,22 @@
 # @balancer/sdk
 
+## 2.4.0
+
+### Minor Changes
+
+- 7fc01a9: create gyro E-CLP on v3
+
+### Patch Changes
+
+- 05f8937: Fix type checking for CI
+
+## 2.3.1
+
+### Patch Changes
+
+- c692d85: Fix test failing intermittently on CI
+- 7025ec9: Fix PI error message
+
 ## 2.3.0
 
 ### Minor Changes
