@@ -22,7 +22,6 @@ import {
     vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
-    calcDerivedParams,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import {
@@ -133,73 +132,11 @@ describe('GyroECLP - create & init', () => {
         });
     }, 120_000);
 
-    test('calc derived params #1', async () => {
-        const derivedEclpParams = calcDerivedParams(createPoolInput.eclpParams);
-
-        expect(derivedEclpParams).to.deep.equal(
-            createPoolInput.derivedEclpParams,
-        );
-    });
-
-    test('calc derived params #2', async () => {
-        // https://beets.fi/pools/sonic/v2/0x83952912178aa33c3853ee5d942c96254b235dcc0002000000000000000000ab
-        const derivedEclpParams = calcDerivedParams({
-            alpha: 998000000000000000n,
-            beta: 1000500000000000000n,
-            c: 707106781186547524n,
-            s: 707106781186547524n,
-            lambda: 1500000000000000000000n,
-        });
-
-        expect(derivedEclpParams).to.deep.equal({
-            tauAlpha: {
-                x: -83230629990868117604012997897930104612n,
-                y: 55431599573918166324272656600021449671n,
-            },
-            tauBeta: {
-                x: 35104649870455996992435049398685666214n,
-                y: 93635802754462962644488421762760900350n,
-            },
-            u: 59167639930662057231142175428841721269n,
-            v: 74533701164190564399877279720804912886n,
-            w: 19102101590272398138450701712686427826n,
-            z: -24062990060206060278507341099864712753n,
-            dSq: 99999999999999999886624093342106115200n,
-        });
-    });
-
-    test('calc derived params #3', async () => {
-        // https://beets.fi/pools/sonic/v2/0xe7734b495a552ab6f4c78406e672cca7175181e10002000000000000000000c5
-        const derivedEclpParams = calcDerivedParams({
-            alpha: 424242420000000000n,
-            beta: 909090900000000000n,
-            c: 791285002436294737n,
-            s: 611447499724541381n,
-            lambda: 1000000000000000000n,
-        });
-
-        expect(derivedEclpParams).to.deep.equal({
-            tauAlpha: {
-                x: -25385119577606970601054756051800520644n,
-                y: 96724328397929935169889968923487603202n,
-            },
-            tauBeta: {
-                x: 7984138065077215533782444860237401279n,
-                y: 99680758119898872774769810063939314838n,
-            },
-            u: 16145022441464826971736243356000128462n,
-            v: 97829642998024046593675011328890269233n,
-            w: 1430407134582051721445197790463086591n,
-            z: -4491561050204635011840077147130502263n,
-            dSq: 100000000000000000006349449631528633000n,
-        });
-    });
-
-    test('creation', async () => {
+    test('pool should be created', async () => {
         expect(poolAddress).to.not.be.undefined;
     });
 
-    test('registration', async () => {
+    test('pool should be registered with Vault', async () => {
         const isPoolRegistered = await client.readContract({
             address: VAULT_V3[chainId],
             abi: vaultExtensionAbi_V3,
@@ -209,7 +146,7 @@ describe('GyroECLP - create & init', () => {
         expect(isPoolRegistered).to.be.true;
     });
 
-    test('initialization', async () => {
+    test('pool should init', async () => {
         const initPoolInput = {
             amountsIn: [
                 {

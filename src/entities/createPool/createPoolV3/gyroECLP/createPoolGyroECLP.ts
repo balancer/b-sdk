@@ -102,8 +102,6 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
     beta = (beta * D100) / D18;
 
     const dSq = (c * c + s * s) / D100; // divide by D100 to keep at 100 decimal precision
-
-    // const d = GyroPoolMath.sqrt(dSq, 5n); // sir isaac style throws error _sqrt FAILED
     const d = bigIntSqrt(dSq) * 10n ** 50n; // square root reduces precision to 50 decimal places?
 
     // dAlpha and dBeta result in 53 decimal precision?
