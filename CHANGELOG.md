@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.5.0
+
+### Minor Changes
+
+- c9b73ec: calculate derived params for gyro eclp pools
+
 ## 2.4.0
 
 ### Minor Changes
