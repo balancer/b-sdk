@@ -1,6 +1,6 @@
 import { encodeFunctionData, Hex } from 'viem';
 import { RemoveLiquidityBaseBuildCallInput } from '../types';
-import { balancerRouterAbi } from '@/abi';
+import { balancerRouterAbiExtended } from '@/abi';
 
 export const encodeRemoveLiquiditySingleTokenExactIn = (
     input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
@@ -13,7 +13,7 @@ export const encodeRemoveLiquiditySingleTokenExactIn = (
         );
     }
     return encodeFunctionData({
-        abi: balancerRouterAbi,
+        abi: balancerRouterAbiExtended,
         functionName: 'removeLiquiditySingleTokenExactIn',
         args: [
             input.poolId,

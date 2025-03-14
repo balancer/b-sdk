@@ -8,7 +8,7 @@ import {
 
 import { Permit } from '@/entities/permitHelper';
 
-import { balancerCompositeLiquidityRouterBoostedAbi } from '@/abi';
+import { balancerCompositeLiquidityRouterBoostedAbiExtended } from '@/abi';
 
 import { PoolStateWithUnderlyings } from '@/entities/types';
 
@@ -101,7 +101,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const amounts = getAmountsCall(input);
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterBoostedAbi,
+            abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
             functionName: 'removeLiquidityProportionalFromERC4626Pool',
             args: [
                 input.poolId,
@@ -142,7 +142,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterBoostedAbi,
+            abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

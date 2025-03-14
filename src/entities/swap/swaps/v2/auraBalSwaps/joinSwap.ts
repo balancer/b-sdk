@@ -8,7 +8,7 @@ import {
 } from 'viem';
 import { TokenAmount } from '../../../../tokenAmount';
 import { BALANCER_RELAYER, ChainId, EMPTY_SENDER } from '@/utils';
-import { balancerRelayerAbi } from '@/abi';
+import { balancerRelayerAbiExtended } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
 import { encodeJoinData } from './joinPool';
@@ -49,7 +49,7 @@ export async function queryJoinSwap(
 
     // vaultActionsQueryMulticall allows us to query even if user has no balance/allowance
     const encodedMulticall = encodeFunctionData({
-        abi: balancerRelayerAbi,
+        abi: balancerRelayerAbiExtended,
         functionName: 'vaultActionsQueryMulticall',
         args: [[joinPoolData, swapData, peekData]],
     });
@@ -61,7 +61,7 @@ export async function queryJoinSwap(
     });
 
     const result = decodeFunctionResult({
-        abi: balancerRelayerAbi,
+        abi: balancerRelayerAbiExtended,
         functionName: 'vaultActionsQueryMulticall',
         data: data as Hex,
     });
@@ -124,7 +124,7 @@ export function buildJoinSwapCall(
     }
 
     const encodedMulticall = encodeFunctionData({
-        abi: balancerRelayerAbi,
+        abi: balancerRelayerAbiExtended,
         functionName: 'multicall',
         args: [encodedCalls],
     });

@@ -18,12 +18,6 @@ import {
     CHAINS,
 } from '../../../../utils';
 import {
-    balancerRouterAbi,
-    permit2Abi,
-    vaultExtensionAbi_V3,
-    vaultV3Abi,
-} from '../../../../abi';
-import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
     SwapBuildCallInput,
@@ -45,7 +39,10 @@ import {
     SwapPathExactAmountOut,
     SwapPathExactAmountOutWithLimit,
 } from './types';
-import { balancerBatchRouterAbi } from '@/abi/balancerBatchRouter';
+import {
+    balancerBatchRouterAbiExtended,
+    balancerRouterAbiExtended,
+} from '@/abi';
 import { SwapBase } from '../types';
 import { getLimitAmount, getPathLimits } from '../../limits';
 import { Permit2 } from '@/entities/permit2Helper';
@@ -130,12 +127,7 @@ export class SwapV3 implements SwapBase {
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
             address: BALANCER_ROUTER[this.chainId],
-            abi: [
-                ...balancerRouterAbi,
-                ...vaultV3Abi,
-                ...vaultExtensionAbi_V3,
-                ...permit2Abi,
-            ],
+            abi: balancerRouterAbiExtended,
             client,
         });
         if ('exactAmountIn' in this.swaps) {
@@ -228,12 +220,7 @@ export class SwapV3 implements SwapBase {
         // Note - batchSwaps are made via the Batch Router
         const batchRouterContract = getContract({
             address: BALANCER_BATCH_ROUTER[this.chainId],
-            abi: [
-                ...balancerBatchRouterAbi,
-                ...vaultV3Abi,
-                ...vaultExtensionAbi_V3,
-                ...permit2Abi,
-            ],
+            abi: balancerBatchRouterAbiExtended,
             client,
         });
         /*
@@ -303,7 +290,7 @@ export class SwapV3 implements SwapBase {
 
             if (this.swapKind === SwapKind.GivenIn) {
                 callData = encodeFunctionData({
-                    abi: balancerBatchRouterAbi,
+                    abi: balancerBatchRouterAbiExtended,
                     functionName: 'querySwapExactIn',
                     args: [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
@@ -313,7 +300,7 @@ export class SwapV3 implements SwapBase {
                 });
             } else {
                 callData = encodeFunctionData({
-                    abi: balancerBatchRouterAbi,
+                    abi: balancerBatchRouterAbiExtended,
                     functionName: 'querySwapExactOut',
                     args: [
                         swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],
@@ -325,7 +312,7 @@ export class SwapV3 implements SwapBase {
         } else {
             if ('exactAmountIn' in this.swaps) {
                 callData = encodeFunctionData({
-                    abi: balancerRouterAbi,
+                    abi: balancerRouterAbiExtended,
                     functionName: 'querySwapSingleTokenExactIn',
                     args: [
                         this.swaps.pool,
@@ -338,7 +325,7 @@ export class SwapV3 implements SwapBase {
                 });
             } else if ('exactAmountOut' in this.swaps) {
                 callData = encodeFunctionData({
-                    abi: balancerRouterAbi,
+                    abi: balancerRouterAbiExtended,
                     functionName: 'querySwapSingleTokenExactOut',
                     args: [
                         this.swaps.pool,
@@ -437,7 +424,7 @@ export class SwapV3 implements SwapBase {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerBatchRouterAbi,
+            abi: balancerBatchRouterAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });
@@ -464,7 +451,7 @@ export class SwapV3 implements SwapBase {
 
         if ('exactAmountIn' in this.swaps) {
             callData = encodeFunctionData({
-                abi: balancerRouterAbi,
+                abi: balancerRouterAbiExtended,
                 functionName: 'swapSingleTokenExactIn',
                 args: [
                     this.swaps.pool,
@@ -479,7 +466,7 @@ export class SwapV3 implements SwapBase {
             });
         } else if ('exactAmountOut' in this.swaps) {
             callData = encodeFunctionData({
-                abi: balancerRouterAbi,
+                abi: balancerRouterAbiExtended,
                 functionName: 'swapSingleTokenExactOut',
                 args: [
                     this.swaps.pool,
@@ -527,7 +514,7 @@ export class SwapV3 implements SwapBase {
                 );
 
             callData = encodeFunctionData({
-                abi: balancerBatchRouterAbi,
+                abi: balancerBatchRouterAbiExtended,
                 functionName: 'swapExactIn',
                 args: [
                     swapsWithLimits.swapsWithLimits as SwapPathExactAmountInWithLimit[],
@@ -548,7 +535,7 @@ export class SwapV3 implements SwapBase {
                     `maxAmountIn mismatch, ${limitAmount} ${swapsWithLimits.totalPathLimits}`,
                 );
             callData = encodeFunctionData({
-                abi: balancerBatchRouterAbi,
+                abi: balancerBatchRouterAbiExtended,
                 functionName: 'swapExactOut',
                 args: [
                     swapsWithLimits.swapsWithLimits as SwapPathExactAmountOutWithLimit[],

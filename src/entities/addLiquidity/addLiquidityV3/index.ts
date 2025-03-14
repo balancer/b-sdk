@@ -1,5 +1,5 @@
 import { encodeFunctionData, zeroAddress } from 'viem';
-import { balancerRouterAbi } from '@/abi';
+import { balancerRouterAbiExtended } from '@/abi';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
@@ -143,7 +143,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             case AddLiquidityKind.Proportional:
                 {
                     callData = encodeFunctionData({
-                        abi: balancerRouterAbi,
+                        abi: balancerRouterAbiExtended,
                         functionName: 'addLiquidityProportional',
                         args: [
                             input.poolId,
@@ -158,7 +158,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             case AddLiquidityKind.Unbalanced:
                 {
                     callData = encodeFunctionData({
-                        abi: balancerRouterAbi,
+                        abi: balancerRouterAbiExtended,
                         functionName: 'addLiquidityUnbalanced',
                         args: [
                             input.poolId,
@@ -177,7 +177,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                         throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
                     }
                     callData = encodeFunctionData({
-                        abi: balancerRouterAbi,
+                        abi: balancerRouterAbiExtended,
                         functionName: 'addLiquiditySingleTokenExactOut',
                         args: [
                             input.poolId,
@@ -221,7 +221,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerRouterAbi,
+            abi: balancerRouterAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

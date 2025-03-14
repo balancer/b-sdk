@@ -1,7 +1,7 @@
 import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
 import { BALANCER_QUERIES, CHAINS } from '../../utils';
-import { balancerQueriesAbi } from '../../abi';
+import { balancerQueriesAbiExtended } from '../../abi';
 import { JoinPoolRequest } from '../addLiquidity/types';
 
 export async function doAddLiquidityQuery(
@@ -21,7 +21,7 @@ export async function doAddLiquidityQuery(
         result: [bptOut, amountsIn],
     } = await client.simulateContract({
         address: BALANCER_QUERIES[chainId],
-        abi: balancerQueriesAbi,
+        abi: balancerQueriesAbiExtended,
         functionName: 'queryJoin',
         args,
     });

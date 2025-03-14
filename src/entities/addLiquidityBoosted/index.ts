@@ -22,8 +22,8 @@ import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuer
 import { Token } from '../token';
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
 import {
-    balancerCompositeLiquidityRouterBoostedAbi,
-    balancerRouterAbi,
+    balancerCompositeLiquidityRouterBoostedAbiExtended,
+    balancerRouterAbiExtended,
 } from '@/abi';
 import { Hex } from '@/types';
 import {
@@ -208,7 +208,7 @@ export class AddLiquidityBoostedV3 {
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Unbalanced: {
                 callData = encodeFunctionData({
-                    abi: balancerCompositeLiquidityRouterBoostedAbi,
+                    abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
                     functionName: 'addLiquidityUnbalancedToERC4626Pool',
                     args,
                 });
@@ -216,7 +216,7 @@ export class AddLiquidityBoostedV3 {
             }
             case AddLiquidityKind.Proportional: {
                 callData = encodeFunctionData({
-                    abi: balancerCompositeLiquidityRouterBoostedAbi,
+                    abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
                     functionName: 'addLiquidityProportionalToERC4626Pool',
                     args,
                 });
@@ -259,7 +259,7 @@ export class AddLiquidityBoostedV3 {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerRouterAbi,
+            abi: balancerRouterAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

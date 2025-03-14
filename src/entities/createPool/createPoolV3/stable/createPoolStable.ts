@@ -6,7 +6,7 @@ import {
     CreatePoolBuildCallOutput,
     PoolRoleAccounts,
 } from '../../types';
-import { stablePoolFactoryAbi_V3 } from '@/abi';
+import { stablePoolFactoryAbiExtended } from '@/abi';
 import { STABLE_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 
@@ -47,7 +47,7 @@ export class CreatePoolStableV3 implements CreatePoolBase {
         ] as const;
 
         return encodeFunctionData({
-            abi: stablePoolFactoryAbi_V3,
+            abi: stablePoolFactoryAbiExtended,
             functionName: 'create',
             args,
         });

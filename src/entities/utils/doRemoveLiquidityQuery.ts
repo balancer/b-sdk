@@ -1,7 +1,7 @@
 import { createPublicClient, http } from 'viem';
 import { Address } from '../../types';
 import { BALANCER_QUERIES, CHAINS } from '../../utils';
-import { balancerQueriesAbi } from '../../abi';
+import { balancerQueriesAbiExtended } from '../../abi';
 import { ExitPoolRequest } from '../removeLiquidity/types';
 
 export async function doRemoveLiquidityQuery(
@@ -21,7 +21,7 @@ export async function doRemoveLiquidityQuery(
         result: [bptIn, amountsOut],
     } = await client.simulateContract({
         address: BALANCER_QUERIES[chainId],
-        abi: balancerQueriesAbi,
+        abi: balancerQueriesAbiExtended,
         functionName: 'queryExit',
         args,
     });
