@@ -6,10 +6,11 @@ import { balancerCompositeLiquidityRouterBoostedAbi } from './balancerCompositeL
 import { balancerCompositeLiquidityRouterNestedAbi } from './balancerCompositeLiquidityRouterNested';
 import { balancerBufferRouterAbi } from './balancerBufferRouter';
 import { balancerBatchRouterAbi } from './balancerBatchRouter';
+import { vaultV2Abi } from './vault.V2';
+import { balancerQueriesAbi } from './balancerQueries';
+import { balancerRelayerAbi } from './balancerRelayer';
 
 export * from './authorizer';
-export * from './balancerQueries';
-export * from './balancerRelayer';
 export * from './batchRelayerLibrary';
 export * from './composableStableFactoryV6.V2';
 export * from './erc20';
@@ -25,6 +26,8 @@ export * from './vaultAdmin.V3';
 export * from './stablePoolFactory.V3';
 export * from './stableSurgeFactory';
 export * from './gyroECLPPoolFactory.V3';
+
+// V3 ABIs Extended
 
 export const commonABIsV3 = [
     ...vaultV3Abi,
@@ -55,4 +58,18 @@ export const balancerBufferRouterAbiExtended = [
 export const balancerBatchRouterAbiExtended = [
     ...balancerBatchRouterAbi,
     ...commonABIsV3,
+];
+
+// V2 ABIs Extended
+
+export const commonABIsV2 = [...vaultV2Abi];
+
+export const balancerQueriesAbiExtended = [
+    ...balancerQueriesAbi,
+    ...commonABIsV2,
+];
+
+export const balancerRelayerAbiExtended = [
+    ...balancerRelayerAbi,
+    ...commonABIsV2,
 ];

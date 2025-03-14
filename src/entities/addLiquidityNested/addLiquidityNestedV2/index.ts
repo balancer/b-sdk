@@ -4,7 +4,7 @@ import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../../utils';
 import { Relayer } from '../../relayer';
 import { encodeCalls } from './encodeCalls';
 import { TokenAmount } from '../../tokenAmount';
-import { balancerRelayerAbi } from '../../../abi';
+import { balancerRelayerAbiExtended } from '../../../abi';
 import { doAddLiquidityNestedQuery } from './doAddLiquidityNestedQuery';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { validateBuildCallInput, validateQueryInput } from './validateInputs';
@@ -39,7 +39,7 @@ export class AddLiquidityNestedV2 {
         encodedCalls.push(peekCall);
 
         const encodedMulticall = encodeFunctionData({
-            abi: balancerRelayerAbi,
+            abi: balancerRelayerAbiExtended,
             functionName: 'vaultActionsQueryMulticall',
             args: [encodedCalls],
         });
@@ -109,7 +109,7 @@ export class AddLiquidityNestedV2 {
         }
 
         const callData = encodeFunctionData({
-            abi: balancerRelayerAbi,
+            abi: balancerRelayerAbiExtended,
             functionName: 'multicall',
             args: [encodedCalls],
         });
