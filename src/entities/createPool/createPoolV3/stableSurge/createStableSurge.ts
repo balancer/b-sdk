@@ -6,7 +6,7 @@ import {
     PoolRoleAccounts,
     CreatePoolStableSurgeInput,
 } from '../../types';
-import { stableSurgeFactoryAbi } from '@/abi/stableSurgeFactory';
+import { stableSurgeFactoryAbiExtended } from '@/abi';
 import { STABLE_SURGE_FACTORY, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 
@@ -45,7 +45,7 @@ export class CreatePoolStableSurge implements CreatePoolBase {
         ] as const;
 
         return encodeFunctionData({
-            abi: stableSurgeFactoryAbi,
+            abi: stableSurgeFactoryAbiExtended,
             functionName: 'create',
             args,
         });

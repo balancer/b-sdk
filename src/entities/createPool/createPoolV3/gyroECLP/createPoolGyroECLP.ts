@@ -7,7 +7,7 @@ import {
     CreatePoolV3BaseInput,
     TokenConfig,
 } from '../../types';
-import { gyroECLPPoolFactoryAbi_V3 } from '@/abi/gyroECLPPoolFactory.V3';
+import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
 import { GYROECLP_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
 import { Hex, PoolType } from '@/types';
 
@@ -79,7 +79,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         ] as const;
 
         return encodeFunctionData({
-            abi: gyroECLPPoolFactoryAbi_V3,
+            abi: gyroECLPPoolFactoryAbiExtended,
             functionName: 'create',
             args,
         });
