@@ -3,7 +3,11 @@ import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import { buildCallWithPermit2ProtocolVersionError } from '@/utils';
+import {
+    addLiquidityProportionalOnlyError,
+    addLiquidityNativeAssetError,
+    buildCallWithPermit2ProtocolVersionError,
+} from '@/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
@@ -77,14 +81,13 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
         input: AddLiquidityBaseBuildCallInput,
     ): AddLiquidityBuildCallOutput {
         if (input.addLiquidityKind !== AddLiquidityKind.Proportional) {
-            throw new Error(
-                `Error: Add Liquidity ${input.addLiquidityKind} is not supported. Cow AMM pools support Add Liquidity Proportional only.`,
+            throw addLiquidityProportionalOnlyError(
+                input.addLiquidityKind,
+                'Cow AMM',
             );
         }
         if (input.wethIsEth) {
-            throw new Error(
-                'Cow AMM pools do not support adding liquidity with ETH.',
-            );
+            throw addLiquidityNativeAssetError('Cow AMM');
         }
 
         const amounts = getAmountsCall(input);
