@@ -18,7 +18,6 @@ import { composableStableFactoryV6Abi_V2 } from './composableStableFactoryV6.V2'
 
 export * from './authorizer';
 export * from './batchRelayerLibrary';
-export * from './erc20';
 export * from './permit2';
 export * from './vault.V2';
 export * from './vault.V3';

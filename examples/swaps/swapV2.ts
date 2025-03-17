@@ -5,6 +5,7 @@
  * pnpm example ./examples/swaps/swapV2.ts
  */
 
+import { erc20Abi, parseEventLogs } from 'viem';
 import {
     ChainId,
     Slippage,
@@ -13,12 +14,10 @@ import {
     TokenAmount,
     SwapBuildCallInput,
     VAULT_V2,
-    erc20Abi,
 } from '../../src';
 import { querySmartPath } from './querySmartPath';
 import { setupExampleFork } from '../lib/setupExampleFork';
 import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
-import { parseEventLogs } from 'viem';
 const swapV2 = async () => {
     // Choose chain id to start fork
     const chainId = ChainId.MAINNET;

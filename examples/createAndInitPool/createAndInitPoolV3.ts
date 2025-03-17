@@ -22,6 +22,7 @@ import {
     Address,
     parseEther,
     Account,
+    erc20Abi,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
@@ -35,7 +36,6 @@ import {
     InitPoolInputV3,
     TokenType,
     PERMIT2,
-    erc20Abi,
     Permit2Helper,
     PublicWalletClient,
     stablePoolFactoryAbiExtended,
