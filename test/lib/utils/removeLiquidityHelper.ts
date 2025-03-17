@@ -11,7 +11,7 @@ import {
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
     RemoveLiquiditySingleTokenExactInInput,
-    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+    removeLiquidityMissingTokenOutIndexError,
     RemoveLiquiditySingleTokenExactOutInput,
     RemoveLiquidityUnbalancedInput,
     Slippage,
@@ -345,7 +345,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     } = removeLiquidityOutput;
 
     if (removeLiquidityQueryOutput.tokenOutIndex === undefined)
-        throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+        throw removeLiquidityMissingTokenOutIndexError();
 
     const bptToken = new Token(
         removeLiquidityInput.chainId,

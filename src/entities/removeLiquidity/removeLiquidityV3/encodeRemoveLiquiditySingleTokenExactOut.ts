@@ -1,4 +1,4 @@
-import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
+import { removeLiquidityMissingTokenOutIndexError } from '@/utils';
 import { RemoveLiquidityBaseBuildCallInput } from '../types';
 import { encodeFunctionData } from 'viem';
 import { balancerRouterAbiExtended } from '@/abi';
@@ -10,7 +10,7 @@ export const encodeRemoveLiquiditySingleTokenExactOut = (
 ): Hex => {
     // just a sanity check as this is already checked in InputValidator
     if (input.tokenOutIndex === undefined) {
-        throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+        throw removeLiquidityMissingTokenOutIndexError();
     }
     return encodeFunctionData({
         abi: balancerRouterAbiExtended,

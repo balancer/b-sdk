@@ -114,7 +114,7 @@ export class InputValidator {
         protocolVersion: number;
     }): void {
         if (input.protocolVersion !== 3) {
-            throw buildCallWithPermit2ProtocolVersionError;
+            throw buildCallWithPermit2ProtocolVersionError();
         }
     }
 }

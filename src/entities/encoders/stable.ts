@@ -8,8 +8,8 @@ import {
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import {
-    addLiquiditySingleTokenShouldHaveTokenInIndexError,
-    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+    addLiquidityMissingTokenInIndexError,
+    removeLiquidityMissingTokenOutIndexError,
 } from '@/utils/errors';
 import { encodeRemoveLiquidityRecovery } from './base';
 
@@ -61,7 +61,7 @@ export class StableEncoder {
             case AddLiquidityKind.SingleToken: {
                 // just a sanity check as this is already checked in InputValidator
                 if (amounts.tokenInIndex === undefined) {
-                    throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                    throw addLiquidityMissingTokenInIndexError();
                 }
                 return StableEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
@@ -92,7 +92,7 @@ export class StableEncoder {
                 );
             case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
-                    throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+                    throw removeLiquidityMissingTokenOutIndexError();
 
                 return StableEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,

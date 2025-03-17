@@ -6,7 +6,7 @@ import {
     AddLiquidityProportionalInput,
     AddLiquidityQueryOutput,
     AddLiquiditySingleTokenInput,
-    addLiquiditySingleTokenShouldHaveTokenInIndexError,
+    addLiquidityMissingTokenInIndexError,
     AddLiquidityUnbalancedInput,
     Address,
     BALANCER_ROUTER,
@@ -276,7 +276,7 @@ export function assertAddLiquiditySingleToken(
         addLiquidityOutput;
 
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
-        throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+        throw addLiquidityMissingTokenInIndexError();
 
     const bptToken = new Token(
         addLiquidityInput.chainId,

@@ -28,7 +28,7 @@ import {
     AddLiquidityInput,
     InputAmount,
     PoolType,
-    addLiquidityProportionalNotSupportedOnPoolTypeError,
+    addLiquidityPoolTypeError,
 } from 'src';
 import {
     AddLiquidityTxInput,
@@ -225,7 +225,8 @@ describe('add liquidity stable test', () => {
                     addLiquidityInput,
                 }),
             ).rejects.toThrowError(
-                addLiquidityProportionalNotSupportedOnPoolTypeError(
+                addLiquidityPoolTypeError(
+                    addLiquidityInput.kind,
                     poolState.type,
                 ),
             );

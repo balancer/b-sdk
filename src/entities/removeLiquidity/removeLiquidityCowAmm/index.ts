@@ -95,6 +95,6 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
     }
 
     buildCallWithPermit(): RemoveLiquidityBuildCallOutput {
-        throw buildCallWithPermit2ProtocolVersionError;
+        throw buildCallWithPermit2ProtocolVersionError();
     }
 }

@@ -113,6 +113,6 @@ export class AddLiquidityStable implements AddLiquidityBase {
     }
 
     public buildCallWithPermit2(): AddLiquidityBuildCallOutput {
-        throw buildCallWithPermit2ProtocolVersionError;
+        throw buildCallWithPermit2ProtocolVersionError();
     }
 }

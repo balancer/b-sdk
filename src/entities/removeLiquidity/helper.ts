@@ -1,7 +1,4 @@
-import {
-    MAX_UINT256,
-    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
-} from '@/utils';
+import { MAX_UINT256, removeLiquidityMissingTokenOutIndexError } from '@/utils';
 import { Token } from '../token';
 import { RemoveLiquidityAmounts } from '../types';
 import { getAmounts } from '../utils';
@@ -67,7 +64,7 @@ export const getAmountsCall = (
             };
         case RemoveLiquidityKind.SingleTokenExactIn:
             if (input.tokenOutIndex === undefined) {
-                throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+                throw removeLiquidityMissingTokenOutIndexError();
             }
             return {
                 minAmountsOut: input.amountsOut.map((a) =>

@@ -1,5 +1,6 @@
 import { encodeFunctionData, zeroAddress } from 'viem';
 import { balancerRouterAbiExtended } from '@/abi';
+import { Permit2 } from '@/entities/permit2Helper';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
@@ -7,12 +8,10 @@ import {
     getAmounts,
     getBptAmountFromReferenceAmount,
     getSortedTokens,
+    getValue,
 } from '@/entities/utils';
 import { Hex } from '@/types';
-import {
-    BALANCER_ROUTER,
-    addLiquiditySingleTokenShouldHaveTokenInIndexError,
-} from '@/utils';
+import { BALANCER_ROUTER, addLiquidityMissingTokenInIndexError } from '@/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
@@ -26,8 +25,6 @@ import {
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
-import { getValue } from '@/entities/utils/getValue';
-import { Permit2 } from '@/entities/permit2Helper';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -174,7 +171,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                 {
                     // just a sanity check as this is already checked in InputValidator
                     if (input.tokenInIndex === undefined) {
-                        throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                        throw addLiquidityMissingTokenInIndexError();
                     }
                     callData = encodeFunctionData({
                         abi: balancerRouterAbiExtended,

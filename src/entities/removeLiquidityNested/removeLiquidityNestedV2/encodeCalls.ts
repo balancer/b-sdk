@@ -1,5 +1,5 @@
 import { encodeFunctionData, Hex } from 'viem';
-import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
+import { removeLiquidityMissingTokenOutIndexError } from '@/utils';
 import { RemoveLiquidityNestedCallAttributesV2 } from './types';
 import { replaceWrapped } from '@/entities/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
@@ -40,7 +40,7 @@ export const encodeCalls = (
             userData = getUserDataProportional(poolType, bptAmountIn.amount);
         } else {
             if (tokenOutIndex === undefined) {
-                throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+                throw removeLiquidityMissingTokenOutIndexError();
             }
 
             // skip bpt index for ComposableStable pools
@@ -104,7 +104,7 @@ const getUserDataSingleTokenExactIn = (
     bptAmountIn: bigint,
 ) => {
     if (tokenOutIndex === undefined) {
-        throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+        throw removeLiquidityMissingTokenOutIndexError();
     }
     switch (poolType) {
         case PoolType.Weighted:
