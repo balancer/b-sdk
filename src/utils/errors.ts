@@ -58,6 +58,35 @@ export const buildCallWithPermit2ProtocolVersionError = () =>
         'buildCall with Permit2 signatures is available for Balancer v3 only',
     );
 
+export const missingParameterError = (
+    action: string,
+    param: string,
+    protocolVersion: number,
+) =>
+    new SDKError(
+        'Input Validation',
+        action,
+        `${action} missing parameter: ${param} for Balancer v${protocolVersion}`,
+    );
+
+export const exceedingParameterError = (
+    action: string,
+    param: string,
+    protocolVersion: number,
+) =>
+    new SDKError(
+        'Input Validation',
+        action,
+        `${action} exceeding parameter: ${param} for Balancer v${protocolVersion}`,
+    );
+
+export const addLiquidityNativeAssetError = (poolType: string) =>
+    new SDKError(
+        'Input Validation',
+        'Add Liquidity With Native Asset',
+        `Add Liquidity With Native Asset not supported for ${poolType}`,
+    );
+
 export class SDKError extends Error {
     constructor(
         public name: string,
