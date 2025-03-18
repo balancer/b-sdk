@@ -3,7 +3,7 @@ import { PoolStateWithUnderlyings } from '@/entities/types';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { AddLiquidityKind } from '@/entities/addLiquidity/types';
 import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
-import { isSameAddress } from '@/utils';
+import { isSameAddress, protocolVersionError } from '@/utils';
 
 export class InputValidatorBoosted extends InputValidatorBase {
     validateAddLiquidityBoosted(
@@ -12,7 +12,10 @@ export class InputValidatorBoosted extends InputValidatorBase {
     ): void {
         //check if poolState.protocolVersion is 3
         if (poolState.protocolVersion !== 3) {
-            throw new Error('protocol version must be 3');
+            throw protocolVersionError(
+                'Add Liquidity Boosted',
+                poolState.protocolVersion,
+            );
         }
 
         if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {

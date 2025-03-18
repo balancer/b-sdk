@@ -87,6 +87,13 @@ export const addLiquidityNativeAssetError = (poolType: string) =>
         `Add Liquidity With Native Asset not supported for ${poolType}`,
     );
 
+export const protocolVersionError = (action: string, protocolVersion: number) =>
+    new SDKError(
+        'Input Validation',
+        action,
+        `${action} not supported for Balancer v${protocolVersion}`,
+    );
+
 export class SDKError extends Error {
     constructor(
         public name: string,
