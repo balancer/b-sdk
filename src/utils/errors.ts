@@ -112,6 +112,9 @@ export const poolTypeProtocolVersionError = (
         `${action} not supported for pool type ${poolType} on Balancer v${protocolVersion}`,
     );
 
+export const inputValidationError = (action: string, message: string) =>
+    new SDKError('Input Validation', action, message);
+
 export class SDKError extends Error {
     constructor(
         public name: string,

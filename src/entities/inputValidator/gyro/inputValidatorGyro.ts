@@ -11,6 +11,7 @@ import {
 } from '../utils/validateTokens';
 import {
     addLiquidityProportionalOnlyError,
+    inputValidationError,
     removeLiquidityProportionalOnlyError,
 } from '@/utils';
 import { CreatePoolGyroECLPInput } from '@/entities/createPool';
@@ -21,7 +22,10 @@ export class InputValidatorGyro extends InputValidatorBase {
         super.validateCreatePool(input);
 
         if (input.tokens.length !== 2) {
-            throw new Error('GyroECLP pools on v3 support only two tokens');
+            throw inputValidationError(
+                'Create Pool',
+                'GyroECLP pools support only two tokens on Balancer v3',
+            );
         }
 
         const { eclpParams, derivedEclpParams } = input;

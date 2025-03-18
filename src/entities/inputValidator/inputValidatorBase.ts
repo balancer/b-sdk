@@ -15,7 +15,7 @@ import { TokenType } from '@/types';
 import { zeroAddress } from 'viem';
 import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
-import { isSameAddress, NATIVE_ASSETS } from '@/utils';
+import { isSameAddress, NATIVE_ASSETS, inputValidationError } from '@/utils';
 
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
@@ -36,7 +36,8 @@ export class InputValidatorBase {
                     tokenType !== TokenType.STANDARD &&
                     rateProvider === zeroAddress
                 ) {
-                    throw new Error(
+                    throw inputValidationError(
+                        'Create Pool',
                         'Only TokenType.STANDARD is allowed to have zeroAddress rateProvider',
                     );
                 }
@@ -75,7 +76,8 @@ export class InputValidatorBase {
                     ),
                 );
             if (!inputContainsWrappedNativeAsset) {
-                throw new Error(
+                throw inputValidationError(
+                    'Init Pool',
                     'wethIsEth requires wrapped native asset as input',
                 );
             }
