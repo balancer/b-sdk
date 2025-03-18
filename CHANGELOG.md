@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.5.1
+
+### Patch Changes
+
+- 3763ca1: Update GyroECLP factory addresses and ABI
+
 ## 2.5.0
 
 ### Minor Changes
