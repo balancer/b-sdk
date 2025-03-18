@@ -9,6 +9,7 @@ import {
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import {
     addLiquidityMissingTokenInIndexError,
+    poolTypeProtocolVersionError,
     removeLiquidityMissingTokenOutIndexError,
 } from '@/utils/errors';
 import { encodeRemoveLiquidityRecovery } from './base';
@@ -69,7 +70,11 @@ export class StableEncoder {
                 );
             }
             default:
-                throw new Error(`AddLiquidityKind not supported: ${kind}`);
+                throw poolTypeProtocolVersionError(
+                    `Add Liquidity ${kind}`,
+                    'Stable',
+                    2,
+                );
         }
     };
 

@@ -1,6 +1,4 @@
-import { InitPoolInput } from '@/entities/initPool';
 import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
-import { CreatePoolInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
@@ -13,13 +11,13 @@ import {
 } from '../utils/validateTokens';
 import {
     addLiquidityProportionalOnlyError,
+    protocolVersionError,
     removeLiquidityProportionalOnlyError,
 } from '@/utils';
 
 export class InputValidatorCowAmm extends InputValidatorBase {
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
-        throw new Error('Method not implemented.');
+    validateInitPool(): void {
+        throw protocolVersionError('Init Pool', 1);
     }
 
     validateAddLiquidity(
@@ -48,8 +46,7 @@ export class InputValidatorCowAmm extends InputValidatorBase {
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);
     }
 
-    validateCreatePool(input: CreatePoolInput): void {
-        console.log(input);
-        throw new Error('Method not implemented.');
+    validateCreatePool(): void {
+        throw protocolVersionError('Create Pool', 1);
     }
 }
