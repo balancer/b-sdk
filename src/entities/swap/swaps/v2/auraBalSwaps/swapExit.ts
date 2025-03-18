@@ -8,7 +8,7 @@ import {
 } from 'viem';
 import { TokenAmount } from '../../../../tokenAmount';
 import { BALANCER_RELAYER, ChainId, EMPTY_SENDER } from '@/utils';
-import { balancerRelayerAbi } from '@/abi';
+import { balancerRelayerAbiExtended } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
 import { encodeSwapData } from './swap';
@@ -50,7 +50,7 @@ export async function querySwapExit(
 
     // vaultActionsQueryMulticall allows us to query even if user has no balance/allowance
     const encodedMulticall = encodeFunctionData({
-        abi: balancerRelayerAbi,
+        abi: balancerRelayerAbiExtended,
         functionName: 'vaultActionsQueryMulticall',
         args: [[swapData, exitPoolData, peekData]],
     });
@@ -62,7 +62,7 @@ export async function querySwapExit(
     });
 
     const result = decodeFunctionResult({
-        abi: balancerRelayerAbi,
+        abi: balancerRelayerAbiExtended,
         functionName: 'vaultActionsQueryMulticall',
         data: data as Hex,
     });
@@ -134,7 +134,7 @@ export function buildSwapExitCall(
     }
 
     const encodedMulticall = encodeFunctionData({
-        abi: balancerRelayerAbi,
+        abi: balancerRelayerAbiExtended,
         functionName: 'multicall',
         args: [encodedCalls],
     });

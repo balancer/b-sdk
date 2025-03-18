@@ -7,6 +7,7 @@ import {
     TransactionReceipt,
     concat,
     encodeAbiParameters,
+    erc20Abi,
     hexToBigInt,
     keccak256,
     maxUint160,
@@ -17,7 +18,7 @@ import {
     trim,
 } from 'viem';
 
-import { erc20Abi, permit2Abi } from '@/abi';
+import { permit2Abi } from '@/abi';
 import {
     VAULT_V2,
     MAX_UINT256,

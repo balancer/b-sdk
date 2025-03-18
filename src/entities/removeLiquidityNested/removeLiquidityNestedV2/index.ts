@@ -1,6 +1,6 @@
 import { encodeFunctionData } from 'viem';
 
-import { balancerRelayerAbi } from '../../../abi';
+import { balancerRelayerAbiExtended } from '../../../abi';
 import { Address, Hex } from '../../../types';
 import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../../utils';
 
@@ -59,7 +59,7 @@ export class RemoveLiquidityNestedV2 {
         });
 
         const encodedMulticall = encodeFunctionData({
-            abi: balancerRelayerAbi,
+            abi: balancerRelayerAbiExtended,
             functionName: 'vaultActionsQueryMulticall',
             args: [encodedCalls],
         });
@@ -142,7 +142,7 @@ export class RemoveLiquidityNestedV2 {
         }
 
         const callData = encodeFunctionData({
-            abi: balancerRelayerAbi,
+            abi: balancerRelayerAbiExtended,
             functionName: 'multicall',
             args: [encodedCalls],
         });

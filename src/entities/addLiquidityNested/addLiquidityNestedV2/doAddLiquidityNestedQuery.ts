@@ -11,12 +11,7 @@ import {
     ChainId,
     EMPTY_SENDER,
 } from '../../../utils';
-import {
-    balancerRelayerAbi,
-    permit2Abi,
-    vaultExtensionAbi_V3,
-    vaultV3Abi,
-} from '../../../abi';
+import { balancerRelayerAbiExtended } from '../../../abi';
 
 export const doAddLiquidityNestedQuery = async (
     chainId: ChainId,
@@ -35,12 +30,7 @@ export const doAddLiquidityNestedQuery = async (
     });
 
     const result = decodeFunctionResult({
-        abi: [
-            ...balancerRelayerAbi,
-            ...vaultV3Abi,
-            ...vaultExtensionAbi_V3,
-            ...permit2Abi,
-        ],
+        abi: balancerRelayerAbiExtended,
         functionName: 'vaultActionsQueryMulticall',
         data: data as Hex,
     });

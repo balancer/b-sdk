@@ -6,6 +6,7 @@
  * pnpm example ./examples/swaps/swapV3.ts
  */
 
+import { parseUnits, parseEventLogs, erc20Abi } from 'viem';
 import {
     Slippage,
     SwapKind,
@@ -14,12 +15,10 @@ import {
     ChainId,
     Permit2Helper,
     SwapBuildCallInput,
-    erc20Abi,
 } from '../../src';
 import { TOKENS, POOLS, approveSpenderOnToken } from 'test/lib/utils';
 import { setupExampleFork } from '../lib/setupExampleFork';
 import { queryCustomPath } from './queryCustomPath';
-import { parseUnits, parseEventLogs } from 'viem';
 
 const swapV3 = async () => {
     // Choose chain id to start fork

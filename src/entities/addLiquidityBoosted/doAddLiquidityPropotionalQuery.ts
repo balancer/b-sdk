@@ -5,12 +5,7 @@ import {
     CHAINS,
 } from '@/utils';
 import { Address } from '@/types';
-import {
-    balancerCompositeLiquidityRouterBoostedAbi,
-    permit2Abi,
-    vaultExtensionAbi_V3,
-    vaultV3Abi,
-} from '@/abi';
+import { balancerCompositeLiquidityRouterBoostedAbiExtended } from '@/abi';
 
 export const doAddLiquidityProportionalQuery = async (
     rpcUrl: string,
@@ -31,12 +26,7 @@ export const doAddLiquidityProportionalQuery = async (
         result: [tokensIn, exactAmountsIn],
     } = await client.simulateContract({
         address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
-        abi: [
-            ...balancerCompositeLiquidityRouterBoostedAbi,
-            ...vaultV3Abi,
-            ...vaultExtensionAbi_V3,
-            ...permit2Abi,
-        ],
+        abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
         functionName: 'queryAddLiquidityProportionalToERC4626Pool',
         args: [
             poolAddress,

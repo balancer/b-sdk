@@ -14,12 +14,7 @@ import {
 } from './types';
 import { RemoveLiquidityNestedBuildCallOutput } from '../types';
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
-import {
-    balancerCompositeLiquidityRouterNestedAbi,
-    permit2Abi,
-    vaultExtensionAbi_V3,
-    vaultV3Abi,
-} from '@/abi';
+import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 
@@ -79,7 +74,7 @@ export class RemoveLiquidityNestedV3 {
         );
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterNestedAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'removeLiquidityProportionalNestedPool',
             args: [
                 input.parentPool,
@@ -113,12 +108,7 @@ export class RemoveLiquidityNestedV3 {
 
         const { result: amountsOut } = await client.simulateContract({
             address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
-            abi: [
-                ...balancerCompositeLiquidityRouterNestedAbi,
-                ...vaultV3Abi,
-                ...vaultExtensionAbi_V3,
-                ...permit2Abi,
-            ],
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'queryRemoveLiquidityProportionalNestedPool',
             args: [parentPool, exactBptAmountIn, tokensOut, sender, userData],
             blockNumber: block,

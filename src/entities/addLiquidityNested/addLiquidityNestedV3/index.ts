@@ -15,12 +15,7 @@ import { Token } from '@/entities/token';
 import { getAmounts, getValue } from '@/entities/utils';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
-import {
-    balancerCompositeLiquidityRouterNestedAbi,
-    permit2Abi,
-    vaultExtensionAbi_V3,
-    vaultV3Abi,
-} from '@/abi';
+import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
 import {
     AddLiquidityNestedCallInputV3,
     AddLiquidityNestedInputV3,
@@ -90,7 +85,7 @@ export class AddLiquidityNestedV3 {
         const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
         const wethIsEth = input.wethIsEth ?? false;
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterNestedAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'addLiquidityUnbalancedNestedPool',
             args: [
                 input.parentPool,
@@ -124,7 +119,7 @@ export class AddLiquidityNestedV3 {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterNestedAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });
@@ -151,12 +146,7 @@ export class AddLiquidityNestedV3 {
 
         const { result: bptAmountOut } = await client.simulateContract({
             address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
-            abi: [
-                ...balancerCompositeLiquidityRouterNestedAbi,
-                ...vaultV3Abi,
-                ...vaultExtensionAbi_V3,
-                ...permit2Abi,
-            ],
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'queryAddLiquidityUnbalancedNestedPool',
             args: [parentPool, tokensIn, maxAmountsIn, sender, userData],
             blockNumber: block,

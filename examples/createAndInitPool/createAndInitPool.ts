@@ -17,7 +17,7 @@ import {
     parseEther,
 } from 'viem';
 import {
-    composableStableFactoryV6Abi_V2,
+    composableStableFactoryAbiExtended,
     CreatePool,
     CreatePoolV2ComposableStableInput,
     PoolType,
@@ -156,7 +156,7 @@ async function createPool({ client, call, userAccount }) {
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: composableStableFactoryV6Abi_V2,
+        abi: composableStableFactoryAbiExtended,
         to: call.to,
     });
 
