@@ -3,10 +3,11 @@ import {
     ChainId,
     NATIVE_ASSETS,
     PoolState,
-    RemoveLiquidityBuildCallInput,
+    RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
+    RemoveLiquidityV3BuildCallInput,
     Slippage,
     Token,
     TokenAmount,
@@ -15,7 +16,10 @@ import {
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances } from './helper';
 import { RemoveLiquidityRecoveryTxInput } from './types';
-import { RemoveLiquidityV2BaseBuildCallInput } from '@/entities/removeLiquidity/removeLiquidityV2/types';
+import {
+    RemoveLiquidityV2BaseBuildCallInput,
+    RemoveLiquidityV2BuildCallInput,
+} from '@/entities/removeLiquidity/removeLiquidityV2/types';
 import {
     RemoveLiquidityOutput,
     assertRemoveLiquidityBuildCallOutput,
@@ -41,7 +45,7 @@ export const sdkRemoveLiquidityRecovery = async ({
         poolState,
     );
 
-    let removeLiquidityBuildInput: RemoveLiquidityBuildCallInput = {
+    let removeLiquidityBuildInput: RemoveLiquidityBaseBuildCallInput = {
         ...removeLiquidityQueryOutput,
         slippage,
         wethIsEth: !!wethIsEth,
@@ -54,9 +58,17 @@ export const sdkRemoveLiquidityRecovery = async ({
             toInternalBalance: !!toInternalBalance,
         };
     }
+    if (poolState.protocolVersion === 3) {
+        (removeLiquidityBuildInput as RemoveLiquidityV3BuildCallInput) = {
+            ...removeLiquidityBuildInput,
+            userData: removeLiquidityRecoveryInput.userData ?? '0x',
+        };
+    }
 
     const removeLiquidityBuildCallOutput = removeLiquidity.buildCall(
-        removeLiquidityBuildInput,
+        removeLiquidityBuildInput as
+            | RemoveLiquidityV2BuildCallInput
+            | RemoveLiquidityV3BuildCallInput,
     );
 
     return {

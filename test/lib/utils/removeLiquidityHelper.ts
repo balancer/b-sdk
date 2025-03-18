@@ -4,7 +4,6 @@ import {
     BALANCER_ROUTER,
     NATIVE_ASSETS,
     PoolState,
-    RemoveLiquidityBuildCallInput,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
@@ -20,11 +19,16 @@ import {
     VAULT_V2,
     PermitHelper,
     ChainId,
+    RemoveLiquidityBaseBuildCallInput,
+    RemoveLiquidityV3BuildCallInput,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import { RemoveLiquidityTxInput } from './types';
-import { RemoveLiquidityV2BaseBuildCallInput } from '@/entities/removeLiquidity/removeLiquidityV2/types';
+import {
+    RemoveLiquidityV2BaseBuildCallInput,
+    RemoveLiquidityV2BuildCallInput,
+} from '@/entities/removeLiquidity/removeLiquidityV2/types';
 import { RemoveLiquidityV2ComposableStableQueryOutput } from '@/entities/removeLiquidity/removeLiquidityV2/composableStable/types';
 
 export type RemoveLiquidityOutput = {
@@ -52,7 +56,7 @@ export const sdkRemoveLiquidity = async ({
         poolState,
     );
 
-    let removeLiquidityBuildInput: RemoveLiquidityBuildCallInput = {
+    let removeLiquidityBuildInput: RemoveLiquidityBaseBuildCallInput = {
         ...removeLiquidityQueryOutput,
         slippage,
         wethIsEth: !!wethIsEth,
@@ -65,6 +69,12 @@ export const sdkRemoveLiquidity = async ({
             toInternalBalance: !!toInternalBalance,
         };
     }
+    if (poolState.protocolVersion === 3) {
+        (removeLiquidityBuildInput as RemoveLiquidityV3BuildCallInput) = {
+            ...removeLiquidityBuildInput,
+            userData: removeLiquidityInput.userData ?? '0x',
+        };
+    }
 
     let removeLiquidityBuildCallOutput: RemoveLiquidityBuildCallOutput;
     if (usePermitSignatures) {
@@ -75,12 +85,16 @@ export const sdkRemoveLiquidity = async ({
         });
 
         removeLiquidityBuildCallOutput = removeLiquidity.buildCallWithPermit(
-            removeLiquidityBuildInput,
+            removeLiquidityBuildInput as
+                | RemoveLiquidityV2BuildCallInput
+                | RemoveLiquidityV3BuildCallInput,
             permit,
         );
     } else {
         removeLiquidityBuildCallOutput = removeLiquidity.buildCall(
-            removeLiquidityBuildInput,
+            removeLiquidityBuildInput as
+                | RemoveLiquidityV2BuildCallInput
+                | RemoveLiquidityV3BuildCallInput,
         );
     }
 
