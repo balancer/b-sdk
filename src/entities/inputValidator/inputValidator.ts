@@ -14,11 +14,7 @@ import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
 import { InputValidatorBoosted } from './boosted/inputValidatorBoosted';
-import {
-    ChainId,
-    SDKError,
-    buildCallWithPermit2ProtocolVersionError,
-} from '@/utils';
+import { ChainId, protocolVersionError, SDKError } from '@/utils';
 import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
 
 export class InputValidator {
@@ -118,7 +114,11 @@ export class InputValidator {
         protocolVersion: number;
     }): void {
         if (input.protocolVersion !== 3) {
-            throw buildCallWithPermit2ProtocolVersionError();
+            throw protocolVersionError(
+                'buildCallWithPermit2',
+                input.protocolVersion,
+                'buildCallWithPermit2 is supported on Balancer v3 only.',
+            );
         }
     }
 }

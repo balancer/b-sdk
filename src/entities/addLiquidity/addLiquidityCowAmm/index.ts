@@ -3,11 +3,7 @@ import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
-import {
-    addLiquidityProportionalOnlyError,
-    addLiquidityNativeAssetError,
-    buildCallWithPermit2ProtocolVersionError,
-} from '@/utils';
+import { poolTypeError, protocolVersionError } from '@/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
@@ -81,13 +77,18 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
         input: AddLiquidityBaseBuildCallInput,
     ): AddLiquidityBuildCallOutput {
         if (input.addLiquidityKind !== AddLiquidityKind.Proportional) {
-            throw addLiquidityProportionalOnlyError(
-                input.addLiquidityKind,
-                'Cow AMM',
+            throw poolTypeError(
+                'Add Liquidity',
+                input.poolType,
+                'Use Add Liquidity Proportional instead.',
             );
         }
         if (input.wethIsEth) {
-            throw addLiquidityNativeAssetError('Cow AMM');
+            throw poolTypeError(
+                'Add Liquidity with native asset (e.g. ETH)',
+                input.poolType,
+                'Use wrapped native asset instead (e.g. WETH).',
+            );
         }
 
         const amounts = getAmountsCall(input);
@@ -111,7 +112,13 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
         };
     }
 
-    public buildCallWithPermit2(): AddLiquidityBuildCallOutput {
-        throw buildCallWithPermit2ProtocolVersionError();
+    public buildCallWithPermit2(
+        input: AddLiquidityBaseBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
+        throw protocolVersionError(
+            'buildCallWithPermit2',
+            input.protocolVersion,
+            'buildCallWithPermit2 is supported on Balancer v3 only.',
+        );
     }
 }

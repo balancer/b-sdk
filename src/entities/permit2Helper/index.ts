@@ -14,6 +14,7 @@ import {
     ChainId,
     PERMIT2,
     PublicWalletClient,
+    inputValidationError,
 } from '@/utils';
 import {
     MaxAllowanceExpiration,
@@ -373,9 +374,15 @@ const validateNoncesAndExpirations = (
     expectedLength: number,
 ) => {
     if (nonces && nonces.length !== expectedLength) {
-        throw new Error("Nonces length doesn't match expected length");
+        throw inputValidationError(
+            'Permit2 Signature',
+            "Nonces length doesn't match amountsIn length",
+        );
     }
     if (expirations && expirations.length !== expectedLength) {
-        throw new Error("Expirations length doesn't match expected length");
+        throw inputValidationError(
+            'Permit2 Signature',
+            "Expirations length doesn't match amountsIn length",
+        );
     }
 };

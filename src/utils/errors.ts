@@ -51,13 +51,6 @@ export const removeLiquidityProportionalOnlyError = (
         `Remove Liquidity ${kind} not supported for pool type ${poolType}. Use Remove Liquidity Proportional`,
     );
 
-export const buildCallWithPermit2ProtocolVersionError = () =>
-    new SDKError(
-        'Input Validation',
-        'buildCallWithPermit2',
-        'buildCall with Permit2 signatures is available for Balancer v3 only',
-    );
-
 export const missingParameterError = (
     action: string,
     param: string,
@@ -80,25 +73,28 @@ export const exceedingParameterError = (
         `${action} exceeding parameter: ${param} for Balancer v${protocolVersion}`,
     );
 
-export const addLiquidityNativeAssetError = (poolType: string) =>
-    new SDKError(
-        'Input Validation',
-        'Add Liquidity With Native Asset',
-        `Add Liquidity With Native Asset not supported for ${poolType}`,
-    );
-
-export const protocolVersionError = (action: string, protocolVersion: number) =>
+export const protocolVersionError = (
+    action: string,
+    protocolVersion: number,
+    suggestion?: string,
+) =>
     new SDKError(
         'Input Validation',
         action,
-        `${action} not supported for Balancer v${protocolVersion}`,
+        `${action} not supported for Balancer v${protocolVersion}.`,
+        suggestion,
     );
 
-export const poolTypeError = (action: string, poolType: string) =>
+export const poolTypeError = (
+    action: string,
+    poolType: string,
+    suggestion?: string,
+) =>
     new SDKError(
         'Input Validation',
         action,
-        `${action} not supported for pool type ${poolType}`,
+        `${action} not supported for pool type ${poolType}.`,
+        suggestion,
     );
 
 export const poolTypeProtocolVersionError = (
@@ -109,7 +105,7 @@ export const poolTypeProtocolVersionError = (
     new SDKError(
         'Input Validation',
         action,
-        `${action} not supported for pool type ${poolType} on Balancer v${protocolVersion}`,
+        `${action} not supported for pool type ${poolType} on Balancer v${protocolVersion}.`,
     );
 
 export const inputValidationError = (action: string, message: string) =>
@@ -119,9 +115,11 @@ export class SDKError extends Error {
     constructor(
         public name: string,
         public action: string,
-        message: string,
+        public message: string,
+        public suggestion?: string,
     ) {
-        super(message);
+        const _message = suggestion ? `${message} ${suggestion}` : message;
+        super(_message);
         this.name = name;
         this.action = action;
 
