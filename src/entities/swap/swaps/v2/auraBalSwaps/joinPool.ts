@@ -6,7 +6,12 @@ import {
     Hex,
 } from 'viem';
 import { Token } from '@/entities/token';
-import { BALANCER_RELAYER, ChainId, NATIVE_ASSETS } from '@/utils';
+import {
+    BALANCER_RELAYER,
+    ChainId,
+    inputValidationError,
+    NATIVE_ASSETS,
+} from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { balWethAssets, balWethId } from './constants';
@@ -20,7 +25,10 @@ export function encodeJoinData(
 ): { joinPoolData: Hex; joinPoolOpRef: bigint; value: bigint } {
     const tokenInIndex = balWethAssets.findIndex((t) => token.isSameAddress(t));
     if (tokenInIndex === -1)
-        throw new Error(`Join token not in BAL-WETH pool ${token.address}`);
+        throw inputValidationError(
+            'AuraBal Swap',
+            `Add Liquidity token ${token.address} not in BAL-WETH pool`,
+        );
 
     const useNativeAsset =
         wethIsEth && token.isUnderlyingEqual(NATIVE_ASSETS[ChainId.MAINNET]);

@@ -15,6 +15,11 @@ import {
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { Address } from 'viem';
+import {
+    exceedingParameterError,
+    missingParameterError,
+    protocolVersionError,
+} from '@/utils';
 
 export * from './types';
 export * from './paths';
@@ -36,9 +41,7 @@ export class Swap {
                 this.swap = new SwapV3(swapInput);
                 break;
             default:
-                throw Error(
-                    `SDK does not support swap for vault version: ${_protocolVersion}`,
-                );
+                throw protocolVersionError('Swap', _protocolVersion);
         }
         this.protocolVersion = _protocolVersion;
     }
@@ -85,10 +88,10 @@ export class Swap {
     ): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
         const isV2Input = 'sender' in input;
         if (this.protocolVersion === 3 && isV2Input)
-            throw Error('Cannot define sender/recipient in V3');
+            throw exceedingParameterError('Swap', 'sender/recipient', 3);
 
         if (this.protocolVersion === 2 && !isV2Input)
-            throw Error('Sender/recipient must be defined in V2');
+            throw missingParameterError('Swap', 'sender/recipient', 2);
 
         return this.swap.buildCall(input);
     }

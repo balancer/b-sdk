@@ -59,7 +59,7 @@ export const missingParameterError = (
     new SDKError(
         'Input Validation',
         action,
-        `${action} missing parameter ${param} for Balancer v${protocolVersion}`,
+        `${action} input missing parameter ${param} for Balancer v${protocolVersion}`,
     );
 
 export const exceedingParameterError = (
@@ -70,7 +70,7 @@ export const exceedingParameterError = (
     new SDKError(
         'Input Validation',
         action,
-        `${action} exceeding parameter ${param} for Balancer v${protocolVersion}`,
+        `${action} input exceeding parameter ${param} for Balancer v${protocolVersion}`,
     );
 
 export const protocolVersionError = (
