@@ -26,7 +26,7 @@ export function encodeJoinData(
     const tokenInIndex = balWethAssets.findIndex((t) => token.isSameAddress(t));
     if (tokenInIndex === -1)
         throw inputValidationError(
-            'AuraBal Swap',
+            'auraBal Swap',
             `Add Liquidity token ${token.address} not in BAL-WETH pool`,
         );
 

@@ -6,6 +6,7 @@ import {
     TokenType,
     CreatePool,
     CreatePoolGyroECLPInput,
+    inputValidationError,
 } from 'src';
 import { TOKENS } from 'test/lib/utils/addresses';
 
@@ -181,7 +182,10 @@ describe('create GyroECLP pool input validations', () => {
             },
         ];
         expect(() => buildCallWithModifiedInput({ tokens })).toThrowError(
-            'GyroECLP pools on v3 support only two tokens',
+            inputValidationError(
+                'Create Pool',
+                'GyroECLP pools support only two tokens on Balancer v3',
+            ),
         );
     });
 

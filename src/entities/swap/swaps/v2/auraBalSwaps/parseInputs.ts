@@ -32,14 +32,14 @@ function isMainnet(
             swapAmount.token.chainId === ChainId.MAINNET
         )
     )
-        throw inputValidationError('AuraBal Swap', 'Must be mainnet.');
+        throw inputValidationError('auraBal Swap', 'Must be mainnet.');
     return true;
 }
 
 function isAddressEqual(token: Token, amount: TokenAmount): boolean {
     if (!token.isSameAddress(amount.token.address))
         throw inputValidationError(
-            'AuraBal Swap',
+            'auraBal Swap',
             'tokenIn and swapAmount address must match.',
         );
     return true;
@@ -47,7 +47,7 @@ function isAddressEqual(token: Token, amount: TokenAmount): boolean {
 
 function isGivenIn(kind: SwapKind): boolean {
     if (kind !== SwapKind.GivenIn)
-        throw inputValidationError('AuraBal Swap', 'Must be SwapKind GivenIn.');
+        throw inputValidationError('auraBal Swap', 'Must be SwapKind GivenIn.');
     return true;
 }
 
@@ -55,24 +55,24 @@ function hasSupportedTokens(tokenIn: Token, tokenOut: Token): boolean {
     const tokenInIsAuraBal = auraBalToken.isSameAddress(tokenIn.address);
     const tokenOutIsAuraBal = auraBalToken.isSameAddress(tokenOut.address);
     if (tokenInIsAuraBal && tokenOutIsAuraBal)
-        throw inputValidationError('AuraBal Swap', 'Both tokens are auraBal');
+        throw inputValidationError('auraBal Swap', 'Both tokens are auraBal');
     if (!tokenInIsAuraBal && !tokenOutIsAuraBal)
         throw inputValidationError(
-            'AuraBal Swap',
+            'auraBal Swap',
             'Must have tokenIn or tokenOut as auraBal.',
         );
 
     if (tokenInIsAuraBal) {
         if (!isSupportedToken(tokenOut))
             throw inputValidationError(
-                'AuraBal Swap',
-                `Unsupported tokenOut address ${tokenOut.address}`,
+                'auraBal Swap',
+                `Unsupported tokenOut ${tokenOut.address}`,
             );
     } else if (tokenOutIsAuraBal) {
         if (!isSupportedToken(tokenIn))
             throw inputValidationError(
-                'AuraBal Swap',
-                `Unsupported tokenIn address ${tokenIn.address}`,
+                'auraBal Swap',
+                `Unsupported tokenIn ${tokenIn.address}`,
             );
     }
     return true;
@@ -81,7 +81,7 @@ function hasSupportedTokens(tokenIn: Token, tokenOut: Token): boolean {
 export function parseInputs(input: SwapQueryInput): AuraBalSwapQueryInput {
     const { tokenIn, tokenOut, swapAmount } = input;
     if (!isAuraBalSwap(input))
-        throw inputValidationError('AuraBal Swap', 'Not A Valid AuraBal Swap');
+        throw inputValidationError('auraBal Swap', 'Not A Valid AuraBal Swap');
 
     const auraBalIn = auraBalToken.isSameAddress(tokenIn.address);
     return {

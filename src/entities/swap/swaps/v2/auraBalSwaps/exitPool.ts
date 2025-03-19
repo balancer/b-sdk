@@ -24,7 +24,7 @@ export function encodeExitData(
     );
     if (tokenOutIndex === -1)
         throw inputValidationError(
-            'AuraBal Swap',
+            'auraBal Swap',
             `Remove Liquidity tokenOut ${token.address} not in BAL-WETH pool`,
         );
     const minAmountsOut = Array(balWethAssets.length).fill(0n);
