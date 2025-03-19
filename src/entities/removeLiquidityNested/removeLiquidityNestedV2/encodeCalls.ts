@@ -1,5 +1,8 @@
 import { encodeFunctionData, Hex } from 'viem';
-import { removeLiquidityMissingTokenOutIndexError } from '@/utils';
+import {
+    poolTypeProtocolVersionError,
+    removeLiquidityMissingTokenOutIndexError,
+} from '@/utils';
 import { RemoveLiquidityNestedCallAttributesV2 } from './types';
 import { replaceWrapped } from '@/entities/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
@@ -94,7 +97,11 @@ const getUserDataProportional = (poolType: PoolType, bptAmountIn: bigint) => {
                 bptAmountIn,
             );
         default:
-            throw new Error(`Unsupported pool type ${poolType}`);
+            throw poolTypeProtocolVersionError(
+                'RemoveLiquidityNested',
+                poolType,
+                2,
+            );
     }
 };
 
@@ -118,6 +125,10 @@ const getUserDataSingleTokenExactIn = (
                 tokenOutIndex,
             );
         default:
-            throw new Error(`Unsupported pool type ${poolType}`);
+            throw poolTypeProtocolVersionError(
+                'RemoveLiquidityNested',
+                poolType,
+                2,
+            );
     }
 };
