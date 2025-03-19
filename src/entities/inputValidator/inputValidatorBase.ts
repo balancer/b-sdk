@@ -20,6 +20,7 @@ import { isSameAddress, NATIVE_ASSETS, inputValidationError } from '@/utils';
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
         areTokensInArray(
+            'Init Pool',
             initPoolInput.amountsIn.map((a) => a.address),
             poolState.tokens.map((t) => t.address),
         );
