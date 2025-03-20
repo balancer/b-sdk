@@ -201,7 +201,7 @@ describe('Gyro3 remove liquidity test', () => {
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput: input }),
             ).rejects.toThrowError(
                 poolTypeError(
-                    `Remove Liquidity ${removeLiquidityInput.kind}`,
+                    `Remove Liquidity ${input.kind}`,
                     poolState.type,
                     'Use Remove Liquidity Proportional',
                 ),

@@ -16,13 +16,13 @@ import {
     AddLiquidityInput,
     AddLiquidityKind,
     AddLiquidityProportionalInput,
-    addLiquidityProportionalOnlyError,
     AddLiquidityUnbalancedInput,
     ChainId,
     CHAINS,
     Hex,
     PoolState,
     PoolType,
+    poolTypeError,
     Slippage,
 } from 'src';
 
@@ -142,9 +142,10 @@ describe('add liquidity test', () => {
             await expect(() =>
                 doAddLiquidity({ ...txInput, addLiquidityInput }),
             ).rejects.toThrowError(
-                addLiquidityProportionalOnlyError(
-                    addLiquidityInput.kind,
-                    txInput.poolState.type,
+                poolTypeError(
+                    `Add Liquidity ${addLiquidityInput.kind}`,
+                    poolState.type,
+                    'Use Add Liquidity Proportional',
                 ),
             );
         });

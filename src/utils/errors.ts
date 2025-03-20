@@ -31,16 +31,6 @@ export const addLiquidityPoolTypeError = (
         `Add Liquidity ${kind} not supported for pool type ${poolType}`,
     );
 
-export const addLiquidityProportionalOnlyError = (
-    kind: AddLiquidityKind,
-    poolType: string,
-) =>
-    new SDKError(
-        'Input Validation',
-        `Add Liquidity ${kind}`,
-        `Add Liquidity ${kind} not supported for pool type ${poolType}. Use Add Liquidity Proportional`,
-    );
-
 export const missingParameterError = (
     action: string,
     param: string,

@@ -9,11 +9,7 @@ import {
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
 } from '../utils/validateTokens';
-import {
-    addLiquidityProportionalOnlyError,
-    poolTypeError,
-    protocolVersionError,
-} from '@/utils';
+import { poolTypeError, protocolVersionError } from '@/utils';
 
 export class InputValidatorCowAmm extends InputValidatorBase {
     validateInitPool(): void {
@@ -25,9 +21,10 @@ export class InputValidatorCowAmm extends InputValidatorBase {
         poolState: PoolState,
     ): void {
         if (addLiquidityInput.kind !== AddLiquidityKind.Proportional) {
-            throw addLiquidityProportionalOnlyError(
-                addLiquidityInput.kind,
+            throw poolTypeError(
+                `Add Liquidity ${addLiquidityInput.kind}`,
                 poolState.type,
+                'Use Add Liquidity Proportional',
             );
         }
         validateTokensAddLiquidity(addLiquidityInput, poolState);
