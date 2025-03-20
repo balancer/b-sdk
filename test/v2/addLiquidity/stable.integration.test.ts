@@ -28,7 +28,7 @@ import {
     AddLiquidityInput,
     InputAmount,
     PoolType,
-    addLiquidityPoolTypeError,
+    poolTypeError,
 } from 'src';
 import {
     AddLiquidityTxInput,
@@ -225,8 +225,8 @@ describe('add liquidity stable test', () => {
                     addLiquidityInput,
                 }),
             ).rejects.toThrowError(
-                addLiquidityPoolTypeError(
-                    addLiquidityInput.kind,
+                poolTypeError(
+                    `Add Liquidity ${addLiquidityInput.kind}`,
                     poolState.type,
                 ),
             );

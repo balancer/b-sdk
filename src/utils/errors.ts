@@ -1,5 +1,3 @@
-import { AddLiquidityKind } from '..';
-
 export const removeLiquidityMissingTokenOutIndexError = () =>
     new SDKError(
         'Input Validation',
@@ -19,16 +17,6 @@ export const removeLiquidityUnbalancedProtocolVersionError = () =>
         'Input Validation',
         'Remove Liquidity Unbalanced',
         'Remove Liquidity Unbalanced not supported on Balancer v3',
-    );
-
-export const addLiquidityPoolTypeError = (
-    kind: AddLiquidityKind,
-    poolType: string,
-) =>
-    new SDKError(
-        'Input Validation',
-        `Add Liquidity ${kind}`,
-        `Add Liquidity ${kind} not supported for pool type ${poolType}`,
     );
 
 export const missingParameterError = (

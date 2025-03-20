@@ -3,7 +3,7 @@ import {
     AddLiquidityKind,
 } from '@/entities/addLiquidity/types';
 import { PoolState } from '@/entities/types';
-import { addLiquidityPoolTypeError, inputValidationError } from '@/utils';
+import { inputValidationError, poolTypeError } from '@/utils';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { validateTokensAddLiquidity } from '../utils/validateTokens';
 import { CreatePoolV3StableInput } from '@/entities/createPool';
@@ -43,8 +43,8 @@ export class InputValidatorStable extends InputValidatorBase {
             poolState.protocolVersion === 2 &&
             addLiquidityInput.kind === AddLiquidityKind.Proportional
         ) {
-            throw addLiquidityPoolTypeError(
-                addLiquidityInput.kind,
+            throw poolTypeError(
+                `Add Liquidity ${addLiquidityInput.kind}`,
                 poolState.type,
             );
         }
