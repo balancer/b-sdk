@@ -1,3 +1,4 @@
+import { inputValidationError } from '..';
 import { Token } from '../entities/token';
 import { TokenAmount, BigintIsh } from '../entities/tokenAmount';
 import { Address, SwapKind } from '../types';
@@ -23,14 +24,26 @@ export function checkInputs(
         tokenIn.chainId !== tokenOut.chainId ||
         tokenIn.chainId !== amount.token.chainId
     ) {
-        throw new Error('ChainId mismatch for inputs');
+        throw inputValidationError(
+            'Swap',
+            'tokenIn, tokenOut and amount should have the same chainId',
+        );
     }
 
     if (
         (swapKind === SwapKind.GivenIn && !tokenIn.isEqual(amount.token)) ||
         (swapKind === SwapKind.GivenOut && !tokenOut.isEqual(amount.token))
     ) {
-        throw new Error('Swap amount token does not match input token');
+        throw inputValidationError(
+            'Swap',
+            `Swap amount token ${
+                amount.token.address
+            } does not match input token ${
+                swapKind === SwapKind.GivenIn
+                    ? tokenIn.address
+                    : tokenOut.address
+            }`,
+        );
     }
 
     return amount;

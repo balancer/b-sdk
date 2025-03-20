@@ -469,8 +469,6 @@ export function assertRemoveLiquidityProportional(
         case 3:
             to = BALANCER_ROUTER[chainId];
             break;
-        default:
-            throw new Error(`Unsupported protocolVersion: ${protocolVersion}`);
     }
 
     let expectedQueryOutput:
