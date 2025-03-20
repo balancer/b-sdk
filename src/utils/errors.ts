@@ -5,13 +5,6 @@ export const removeLiquidityMissingTokenOutIndexError = () =>
         'Remove Liquidity SingleTokenExactIn should have tokenOutIndex',
     );
 
-export const addLiquidityMissingTokenInIndexError = () =>
-    new SDKError(
-        'Input Validation',
-        'Add Liquidity SingleToken',
-        'Add Liquidity SingleToken should have tokenInIndex',
-    );
-
 export const missingParameterError = (
     action: string,
     param: string,

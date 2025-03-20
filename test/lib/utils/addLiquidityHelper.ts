@@ -9,7 +9,6 @@ import {
     AddLiquidityProportionalInput,
     AddLiquidityQueryOutput,
     AddLiquiditySingleTokenInput,
-    addLiquidityMissingTokenInIndexError,
     AddLiquidityUnbalancedInput,
     AddLiquidityV3BuildCallInput,
     Address,
@@ -24,6 +23,7 @@ import {
     ChainId,
     isSameAddress,
     PublicWalletClient,
+    missingParameterError,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
@@ -284,7 +284,11 @@ export function assertAddLiquiditySingleToken(
         addLiquidityOutput;
 
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
-        throw addLiquidityMissingTokenInIndexError();
+        throw missingParameterError(
+            'Add Liquidity SingleToken',
+            'tokenInIndex',
+            protocolVersion,
+        );
 
     const bptToken = new Token(
         addLiquidityInput.chainId,

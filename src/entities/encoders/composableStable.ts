@@ -8,7 +8,7 @@ import {
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import {
-    addLiquidityMissingTokenInIndexError,
+    missingParameterError,
     removeLiquidityMissingTokenOutIndexError,
 } from '@/utils/errors';
 import { encodeRemoveLiquidityRecovery } from './base';
@@ -62,7 +62,11 @@ export class ComposableStableEncoder {
             case AddLiquidityKind.SingleToken: {
                 // just a sanity check as this is already checked in InputValidator
                 if (amounts.tokenInIndex === undefined) {
-                    throw addLiquidityMissingTokenInIndexError();
+                    throw missingParameterError(
+                        'Add Liquidity SingleToken',
+                        'tokenInIndex',
+                        2,
+                    );
                 }
                 return ComposableStableEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,

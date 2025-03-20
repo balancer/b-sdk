@@ -11,7 +11,7 @@ import {
     getValue,
 } from '@/entities/utils';
 import { Hex } from '@/types';
-import { BALANCER_ROUTER, addLiquidityMissingTokenInIndexError } from '@/utils';
+import { BALANCER_ROUTER, missingParameterError } from '@/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
@@ -171,7 +171,11 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                 {
                     // just a sanity check as this is already checked in InputValidator
                     if (input.tokenInIndex === undefined) {
-                        throw addLiquidityMissingTokenInIndexError();
+                        throw missingParameterError(
+                            'Add Liquidity SingleToken',
+                            'tokenInIndex',
+                            input.protocolVersion,
+                        );
                     }
                     callData = encodeFunctionData({
                         abi: balancerRouterAbiExtended,
