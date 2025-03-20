@@ -12,7 +12,7 @@ import {
 import {
     addLiquidityProportionalOnlyError,
     inputValidationError,
-    removeLiquidityProportionalOnlyError,
+    poolTypeError,
 } from '@/utils';
 import { CreatePoolGyroECLPInput } from '@/entities/createPool';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
@@ -52,9 +52,10 @@ export class InputValidatorGyro extends InputValidatorBase {
         poolState: PoolState,
     ): void {
         if (removeLiquidityInput.kind !== RemoveLiquidityKind.Proportional) {
-            throw removeLiquidityProportionalOnlyError(
-                removeLiquidityInput.kind,
+            throw poolTypeError(
+                `Remove Liquidity ${removeLiquidityInput.kind}`,
                 poolState.type,
+                'Use Remove Liquidity Proportional',
             );
         }
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);

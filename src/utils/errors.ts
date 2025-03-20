@@ -1,4 +1,4 @@
-import { AddLiquidityKind, RemoveLiquidityKind } from '..';
+import { AddLiquidityKind } from '..';
 
 export const removeLiquidityMissingTokenOutIndexError = () =>
     new SDKError(
@@ -39,16 +39,6 @@ export const addLiquidityProportionalOnlyError = (
         'Input Validation',
         `Add Liquidity ${kind}`,
         `Add Liquidity ${kind} not supported for pool type ${poolType}. Use Add Liquidity Proportional`,
-    );
-
-export const removeLiquidityProportionalOnlyError = (
-    kind: RemoveLiquidityKind,
-    poolType: string,
-) =>
-    new SDKError(
-        'Input Validation',
-        `Remove Liquidity ${kind}`,
-        `Remove Liquidity ${kind} not supported for pool type ${poolType}. Use Remove Liquidity Proportional`,
     );
 
 export const missingParameterError = (
