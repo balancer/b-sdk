@@ -2,22 +2,24 @@ export const missingParameterError = (
     action: string,
     param: string,
     protocolVersion: number,
+    suggestion?: string,
 ) =>
-    new SDKError(
-        'Input Validation',
+    inputValidationError(
         action,
         `${action} input missing parameter ${param} for Balancer v${protocolVersion}`,
+        suggestion,
     );
 
 export const exceedingParameterError = (
     action: string,
     param: string,
     protocolVersion: number,
+    suggestion?: string,
 ) =>
-    new SDKError(
-        'Input Validation',
+    inputValidationError(
         action,
         `${action} input exceeding parameter ${param} for Balancer v${protocolVersion}`,
+        suggestion,
     );
 
 export const protocolVersionError = (
@@ -25,8 +27,7 @@ export const protocolVersionError = (
     protocolVersion: number,
     suggestion?: string,
 ) =>
-    new SDKError(
-        'Input Validation',
+    inputValidationError(
         action,
         `${action} not supported for Balancer v${protocolVersion}.`,
         suggestion,
@@ -37,8 +38,7 @@ export const poolTypeError = (
     poolType: string,
     suggestion?: string,
 ) =>
-    new SDKError(
-        'Input Validation',
+    inputValidationError(
         action,
         `${action} not supported for pool type ${poolType}.`,
         suggestion,
@@ -48,15 +48,19 @@ export const poolTypeProtocolVersionError = (
     action: string,
     poolType: string,
     protocolVersion: number,
+    suggestion?: string,
 ) =>
-    new SDKError(
-        'Input Validation',
+    inputValidationError(
         action,
         `${action} not supported for pool type ${poolType} on Balancer v${protocolVersion}.`,
+        suggestion,
     );
 
-export const inputValidationError = (action: string, message: string) =>
-    new SDKError('Input Validation', action, message);
+export const inputValidationError = (
+    action: string,
+    message: string,
+    suggestion?: string,
+) => new SDKError('Input Validation', action, message, suggestion);
 
 export class SDKError extends Error {
     constructor(
