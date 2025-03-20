@@ -39,7 +39,7 @@ import {
     RemoveLiquiditySingleTokenExactOutInput,
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityRecoveryInput,
-    removeLiquidityUnbalancedProtocolVersionError,
+    protocolVersionError,
     vaultAdminAbi_V3,
     PublicWalletClient,
 } from 'src';
@@ -189,7 +189,10 @@ describe('remove liquidity test', () => {
                 await expect(() =>
                     doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
                 ).rejects.toThrowError(
-                    removeLiquidityUnbalancedProtocolVersionError(),
+                    protocolVersionError(
+                        'Remove Liquidity Unbalanced',
+                        poolState.protocolVersion,
+                    ),
                 );
             });
         });

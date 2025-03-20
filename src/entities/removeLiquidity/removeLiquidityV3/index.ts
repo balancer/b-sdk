@@ -3,10 +3,7 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import { getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
-import {
-    BALANCER_ROUTER,
-    removeLiquidityUnbalancedProtocolVersionError,
-} from '@/utils';
+import { BALANCER_ROUTER, protocolVersionError } from '@/utils';
 
 import { getAmountsCall, getAmountsQuery } from '../helper';
 import {
@@ -43,7 +40,10 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
 
         switch (input.kind) {
             case RemoveLiquidityKind.Unbalanced:
-                throw removeLiquidityUnbalancedProtocolVersionError();
+                throw protocolVersionError(
+                    'Remove Liquidity Unbalanced',
+                    poolState.protocolVersion,
+                );
             case RemoveLiquidityKind.SingleTokenExactOut:
                 {
                     maxBptAmountIn =
@@ -134,7 +134,10 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         let callData: Hex;
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:
-                throw removeLiquidityUnbalancedProtocolVersionError();
+                throw protocolVersionError(
+                    'Remove Liquidity Unbalanced',
+                    input.protocolVersion,
+                );
             case RemoveLiquidityKind.SingleTokenExactOut:
                 {
                     callData = encodeRemoveLiquiditySingleTokenExactOut(

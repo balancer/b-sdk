@@ -12,13 +12,6 @@ export const addLiquidityMissingTokenInIndexError = () =>
         'Add Liquidity SingleToken should have tokenInIndex',
     );
 
-export const removeLiquidityUnbalancedProtocolVersionError = () =>
-    new SDKError(
-        'Input Validation',
-        'Remove Liquidity Unbalanced',
-        'Remove Liquidity Unbalanced not supported on Balancer v3',
-    );
-
 export const missingParameterError = (
     action: string,
     param: string,
