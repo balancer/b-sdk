@@ -10,7 +10,6 @@ import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import {
     missingParameterError,
     poolTypeProtocolVersionError,
-    removeLiquidityMissingTokenOutIndexError,
 } from '@/utils/errors';
 import { encodeRemoveLiquidityRecovery } from './base';
 
@@ -101,7 +100,11 @@ export class StableEncoder {
                 );
             case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
-                    throw removeLiquidityMissingTokenOutIndexError();
+                    throw missingParameterError(
+                        'Remove Liquidity SingleTokenExactIn',
+                        'tokenOutIndex',
+                        2,
+                    );
 
                 return StableEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,

@@ -2,25 +2,25 @@ import { Hex, zeroAddress } from 'viem';
 import {
     Address,
     BALANCER_ROUTER,
+    ChainId,
+    missingParameterError,
     NATIVE_ASSETS,
+    PermitHelper,
     PoolState,
+    RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityRecoveryInput,
     RemoveLiquiditySingleTokenExactInInput,
-    removeLiquidityMissingTokenOutIndexError,
     RemoveLiquiditySingleTokenExactOutInput,
     RemoveLiquidityUnbalancedInput,
+    RemoveLiquidityV3BuildCallInput,
     Slippage,
     Token,
     TokenAmount,
     VAULT_V2,
-    PermitHelper,
-    ChainId,
-    RemoveLiquidityBaseBuildCallInput,
-    RemoveLiquidityV3BuildCallInput,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
@@ -359,7 +359,11 @@ export function assertRemoveLiquiditySingleTokenExactIn(
     } = removeLiquidityOutput;
 
     if (removeLiquidityQueryOutput.tokenOutIndex === undefined)
-        throw removeLiquidityMissingTokenOutIndexError();
+        throw missingParameterError(
+            'Remove Liquidity SingleTokenExactIn',
+            'tokenOutIndex',
+            protocolVersion,
+        );
 
     const bptToken = new Token(
         removeLiquidityInput.chainId,

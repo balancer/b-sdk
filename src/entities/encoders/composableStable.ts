@@ -7,10 +7,7 @@ import {
     RemoveLiquidityAmounts,
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
-import {
-    missingParameterError,
-    removeLiquidityMissingTokenOutIndexError,
-} from '@/utils/errors';
+import { missingParameterError } from '@/utils/errors';
 import { encodeRemoveLiquidityRecovery } from './base';
 
 export enum ComposableStablePoolJoinKind {
@@ -100,7 +97,11 @@ export class ComposableStableEncoder {
                 );
             case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
-                    throw removeLiquidityMissingTokenOutIndexError();
+                    throw missingParameterError(
+                        'Remove Liquidity SingleTokenExactIn',
+                        'tokenOutIndex',
+                        2,
+                    );
 
                 return ComposableStableEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,
