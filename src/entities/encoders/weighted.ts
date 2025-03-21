@@ -7,10 +7,7 @@ import {
     RemoveLiquidityAmounts,
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
-import {
-    addLiquiditySingleTokenShouldHaveTokenInIndexError,
-    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
-} from '@/utils/errors';
+import { missingParameterError } from '@/utils/errors';
 import { encodeRemoveLiquidityRecovery } from './base';
 
 export enum WeightedPoolJoinKind {
@@ -63,7 +60,11 @@ export class WeightedEncoder {
             case AddLiquidityKind.SingleToken: {
                 // just a sanity check as this is already checked in InputValidator
                 if (amounts.tokenInIndex === undefined) {
-                    throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                    throw missingParameterError(
+                        'Add Liquidity SingleToken',
+                        'tokenInIndex',
+                        2,
+                    );
                 }
                 return WeightedEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
@@ -97,7 +98,11 @@ export class WeightedEncoder {
                 );
             case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
-                    throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+                    throw missingParameterError(
+                        'Remove Liquidity SingleTokenExactIn',
+                        'tokenOutIndex',
+                        2,
+                    );
 
                 return WeightedEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,

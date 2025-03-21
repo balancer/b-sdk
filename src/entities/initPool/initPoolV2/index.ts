@@ -1,5 +1,6 @@
 import { PoolState } from '@/entities/types';
 import { PoolType } from '@/types';
+import { poolTypeProtocolVersionError } from '@/utils';
 
 import { InitPoolComposableStable } from './composableStable/initPoolComposableStable';
 import {
@@ -24,7 +25,7 @@ export class InitPoolV2 implements InitPoolBase {
 
     getInitPool(poolType: string): InitPoolBase {
         if (!this.initPoolTypes[poolType]) {
-            throw new Error('Unsupported pool type: ${poolType}');
+            throw poolTypeProtocolVersionError('Init Pool', poolType, 2);
         }
         return this.initPoolTypes[poolType];
     }

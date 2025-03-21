@@ -13,7 +13,7 @@ import { AddLiquidityV3 } from './addLiquidityV3';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { AddLiquidityCowAmm } from './addLiquidityCowAmm';
 import { Permit2 } from '../permit2Helper';
-import { Hex } from 'viem';
+import { missingParameterError, exceedingParameterError } from '@/utils';
 
 export class AddLiquidity implements AddLiquidityBase {
     constructor(public config?: AddLiquidityConfig) {}
@@ -45,48 +45,55 @@ export class AddLiquidity implements AddLiquidityBase {
         }
     }
 
-    buildCall(
-        input:
-            | AddLiquidityBuildCallInput
-            | (AddLiquidityBuildCallInput & { userData: Hex }),
-    ): AddLiquidityBuildCallOutput {
+    buildCall(input: AddLiquidityBuildCallInput): AddLiquidityBuildCallOutput {
         switch (input.protocolVersion) {
             case 1: {
                 const addLiquidity = new AddLiquidityCowAmm();
                 return addLiquidity.buildCall(input);
             }
             case 2: {
-                if ('sender' in input) {
-                    const addLiquidity = new AddLiquidityV2(this.config);
-                    return addLiquidity.buildCall(input);
+                if (!('sender' in input) || !('recipient' in input)) {
+                    throw missingParameterError(
+                        'Add Liquidity Build Call',
+                        'sender or recipient',
+                        input.protocolVersion,
+                    );
                 }
-                break;
+                const addLiquidity = new AddLiquidityV2(this.config);
+                return addLiquidity.buildCall(input);
             }
             case 3: {
-                if (!('sender' in input)) {
-                    if (!('userData' in input))
-                        throw new Error(
-                            'UserData must be provided in buildCall input',
-                        );
-                    const addLiquidity = new AddLiquidityV3();
-                    return addLiquidity.buildCall(input);
+                if (!('userData' in input)) {
+                    throw missingParameterError(
+                        'Add Liquidity Build Call',
+                        'userData',
+                        input.protocolVersion,
+                    );
                 }
-                break;
+                if ('sender' in input || 'recipient' in input) {
+                    throw exceedingParameterError(
+                        'Add Liquidity Build Call',
+                        'sender or recipient',
+                        input.protocolVersion,
+                    );
+                }
+                const addLiquidity = new AddLiquidityV3();
+                return addLiquidity.buildCall(input);
             }
         }
-
-        throw Error('buildCall input/version mis-match');
     }
 
     buildCallWithPermit2(
-        input:
-            | AddLiquidityBuildCallInput
-            | (AddLiquidityBuildCallInput & { userData: Hex }),
+        input: AddLiquidityBuildCallInput,
         permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
         InputValidator.validateBuildCallWithPermit2(input);
         if (!('userData' in input))
-            throw new Error('UserData must be provided in buildCall input');
+            throw missingParameterError(
+                'Add Liquidity Build Call',
+                'userData',
+                input.protocolVersion,
+            );
 
         const addLiquidity = new AddLiquidityV3();
         return addLiquidity.buildCallWithPermit2(input, permit2);

@@ -11,6 +11,7 @@ import {
     ChainId,
     MAX_UINT256,
     CHAINS,
+    protocolVersionError,
 } from '../../../../utils';
 import {
     Address,
@@ -39,9 +40,6 @@ export * from './types';
 // A Swap can be a single or multiple paths
 export class SwapV2 implements SwapBase {
     public constructor({ chainId, paths, swapKind }: SwapInput) {
-        if (paths.length === 0)
-            throw new Error('Invalid swap: must contain at least 1 path.');
-
         this.paths = paths.map(
             (p) =>
                 new PathWithAmount(
@@ -310,7 +308,11 @@ export class SwapV2 implements SwapBase {
     }
 
     buildCallWithPermit2(): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
-        throw new Error('buildCallWithPermit2 is not supported on v2');
+        throw protocolVersionError(
+            'buildCallWithPermit2',
+            2,
+            'buildCallWithPermit2 is supported on Balancer v3 only.',
+        );
     }
 
     /**

@@ -1,5 +1,5 @@
 import { encodeFunctionData, Hex } from 'viem';
-import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
+import { missingParameterError, poolTypeProtocolVersionError } from '@/utils';
 import { RemoveLiquidityNestedCallAttributesV2 } from './types';
 import { replaceWrapped } from '@/entities/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
@@ -40,7 +40,11 @@ export const encodeCalls = (
             userData = getUserDataProportional(poolType, bptAmountIn.amount);
         } else {
             if (tokenOutIndex === undefined) {
-                throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+                throw missingParameterError(
+                    'Remove Liquidity Nested SingleTokenExactIn',
+                    'tokenOutIndex',
+                    2,
+                );
             }
 
             // skip bpt index for ComposableStable pools
@@ -94,7 +98,11 @@ const getUserDataProportional = (poolType: PoolType, bptAmountIn: bigint) => {
                 bptAmountIn,
             );
         default:
-            throw new Error(`Unsupported pool type ${poolType}`);
+            throw poolTypeProtocolVersionError(
+                'RemoveLiquidityNested',
+                poolType,
+                2,
+            );
     }
 };
 
@@ -104,7 +112,11 @@ const getUserDataSingleTokenExactIn = (
     bptAmountIn: bigint,
 ) => {
     if (tokenOutIndex === undefined) {
-        throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+        throw missingParameterError(
+            'Remove Liquidity Nested SingleTokenExactIn',
+            'tokenOutIndex',
+            2,
+        );
     }
     switch (poolType) {
         case PoolType.Weighted:
@@ -118,6 +130,10 @@ const getUserDataSingleTokenExactIn = (
                 tokenOutIndex,
             );
         default:
-            throw new Error(`Unsupported pool type ${poolType}`);
+            throw poolTypeProtocolVersionError(
+                'RemoveLiquidityNested',
+                poolType,
+                2,
+            );
     }
 };

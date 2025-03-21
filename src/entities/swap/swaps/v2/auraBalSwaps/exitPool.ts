@@ -6,7 +6,7 @@ import {
     Hex,
 } from 'viem';
 import { Token } from '@/entities/token';
-import { BALANCER_RELAYER, ChainId } from '@/utils';
+import { BALANCER_RELAYER, ChainId, inputValidationError } from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
 import { balWethAssets, balWethId } from './constants';
@@ -23,7 +23,10 @@ export function encodeExitData(
         token.isSameAddress(t),
     );
     if (tokenOutIndex === -1)
-        throw new Error(`exit token not in BAL-WETH pool ${token.address}`);
+        throw inputValidationError(
+            'auraBal Swap',
+            `Remove Liquidity tokenOut ${token.address} not in BAL-WETH pool`,
+        );
     const minAmountsOut = Array(balWethAssets.length).fill(0n);
     minAmountsOut[tokenOutIndex] = limit;
     // stable pool (no need to worry about phantomBpt)

@@ -3,19 +3,16 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import { getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
-import {
-    BALANCER_ROUTER,
-    removeLiquidityUnbalancedNotSupportedOnV3,
-} from '@/utils';
+import { BALANCER_ROUTER, protocolVersionError } from '@/utils';
 
 import { getAmountsCall, getAmountsQuery } from '../helper';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityBaseQueryOutput,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
+    RemoveLiquidityV3BuildCallInput,
 } from '../types';
 import { doRemoveLiquiditySingleTokenExactOutQuery } from './doRemoveLiquiditySingleTokenExactOutQuery';
 import { doRemoveLiquiditySingleTokenExactInQuery } from './doRemoveLiquiditySingleTokenExactInQuery';
@@ -43,7 +40,10 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
 
         switch (input.kind) {
             case RemoveLiquidityKind.Unbalanced:
-                throw removeLiquidityUnbalancedNotSupportedOnV3;
+                throw protocolVersionError(
+                    'Remove Liquidity Unbalanced',
+                    poolState.protocolVersion,
+                );
             case RemoveLiquidityKind.SingleTokenExactOut:
                 {
                     maxBptAmountIn =
@@ -127,14 +127,17 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
+        input: RemoveLiquidityV3BuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
         let callData: Hex;
         switch (input.removeLiquidityKind) {
             case RemoveLiquidityKind.Unbalanced:
-                throw removeLiquidityUnbalancedNotSupportedOnV3;
+                throw protocolVersionError(
+                    'Remove Liquidity Unbalanced',
+                    input.protocolVersion,
+                );
             case RemoveLiquidityKind.SingleTokenExactOut:
                 {
                     callData = encodeRemoveLiquiditySingleTokenExactOut(
@@ -184,7 +187,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     }
 
     public buildCallWithPermit(
-        input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
+        input: RemoveLiquidityV3BuildCallInput,
         permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);

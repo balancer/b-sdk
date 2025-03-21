@@ -1,4 +1,6 @@
 import { PoolType } from '@/types';
+import { poolTypeProtocolVersionError } from '@/utils';
+
 import { CreatePoolComposableStableV2 } from './composableStable/createPoolComposableStable';
 import {
     CreatePoolBase,
@@ -19,7 +21,7 @@ export class CreatePoolV2 implements CreatePoolBase {
 
     private getCreatePool(poolType: string): CreatePoolBase {
         if (!this.createPoolTypes[poolType]) {
-            throw new Error('Unsupported pool type: ${poolType}');
+            throw poolTypeProtocolVersionError('Create Pool', poolType, 2);
         }
         return this.createPoolTypes[poolType];
     }

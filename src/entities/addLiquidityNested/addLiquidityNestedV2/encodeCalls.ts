@@ -7,6 +7,7 @@ import { replaceWrapped } from '@/entities/utils';
 import { AddLiquidityNestedCallAttributes } from './types';
 import { WeightedEncoder } from '@/entities/encoders';
 import { PoolType } from '@/types';
+import { poolTypeError } from '@/utils';
 
 export const encodeCalls = (
     callsAttributes: AddLiquidityNestedCallAttributes[],
@@ -90,6 +91,6 @@ const getUserData = (
                 minBptOut,
             );
         default:
-            throw new Error(`Unsupported pool type: ${poolType}`);
+            throw poolTypeError('Add Liquidity Nested', poolType);
     }
 };

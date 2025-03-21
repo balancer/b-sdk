@@ -18,17 +18,6 @@ export class PathWithAmount {
         outputAmountRaw: bigint,
         isBuffer: boolean[] | undefined,
     ) {
-        if (pools.length === 0 || tokens.length < 2) {
-            throw new Error(
-                'Invalid path: must contain at least 1 pool and 2 tokens.',
-            );
-        }
-        if (tokens.length !== pools.length + 1) {
-            throw new Error(
-                'Invalid path: tokens length must equal pools length + 1',
-            );
-        }
-
         const tokenIn = new Token(
             chainId,
             tokens[0].address,

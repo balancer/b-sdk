@@ -2,7 +2,7 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
 import { WeightedEncoder } from '../../../encoders/weighted';
-import { VAULT_V2, ZERO_ADDRESS } from '@/utils';
+import { protocolVersionError, VAULT_V2, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
@@ -158,7 +158,13 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
         };
     }
 
-    buildCallWithPermit(): RemoveLiquidityBuildCallOutput {
-        throw new Error('buildCallWithPermit is not supported on v2');
+    buildCallWithPermit(
+        input: RemoveLiquidityV2BaseBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
+        throw protocolVersionError(
+            'buildCallWithPermit',
+            input.protocolVersion,
+            'buildCallWithPermit is supported on Balancer v3 only.',
+        );
     }
 }

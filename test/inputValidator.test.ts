@@ -13,6 +13,6 @@ describe('inputValidator', () => {
 
         expect(() => {
             inputValidator.validateAddLiquidity(addLiqInput, poolState);
-        }).toThrowError(/^Unsupported ChainId: 777777777$/);
+        }).toThrowError(/^Unsupported chainId: 777777777$/);
     });
 });

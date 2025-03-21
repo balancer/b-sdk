@@ -1,4 +1,5 @@
-import { NATIVE_ASSETS } from '../../../utils';
+import { inputValidationError, NATIVE_ASSETS } from '@/utils';
+
 import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
 import { NestedPoolState } from '../../types';
@@ -17,8 +18,9 @@ export const validateQueryInput = (
             t.isSameAddress(amountIn.address),
         );
         if (tokenIn === undefined) {
-            throw new Error(
-                `Adding liquidity with ${amountIn.address} requires it to exist within mainTokens`,
+            throw inputValidationError(
+                'Add Liquidity Nested',
+                `Adding liquidity with amountIn address ${amountIn.address} requires it to exist within mainTokens`,
             );
         }
         return TokenAmount.fromRawAmount(tokenIn, amountIn.rawAmount);
@@ -36,7 +38,8 @@ export const validateBuildCallInput = (
                 a.token.isUnderlyingEqual(NATIVE_ASSETS[chainId]),
             )
         ) {
-            throw new Error(
+            throw inputValidationError(
+                'Add Liquidity Nested',
                 'Adding liquidity with native asset requires wrapped native asset to exist within amountsIn',
             );
         }

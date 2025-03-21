@@ -28,7 +28,7 @@ import {
     AddLiquidityUnbalancedInput,
     AddLiquiditySingleTokenInput,
     PoolType,
-    addLiquidityProportionalOnlyError,
+    poolTypeError,
 } from '../../../src';
 import {
     AddLiquidityTxInput,
@@ -173,9 +173,10 @@ describe('Gyro2 add liquidity test', () => {
                     addLiquidityInput,
                 }),
             ).rejects.toThrowError(
-                addLiquidityProportionalOnlyError(
-                    addLiquidityInput.kind,
+                poolTypeError(
+                    `Add Liquidity ${addLiquidityInput.kind}`,
                     poolState.type,
+                    'Use Add Liquidity Proportional',
                 ),
             );
         });
@@ -206,9 +207,10 @@ describe('Gyro2 add liquidity test', () => {
                     addLiquidityInput,
                 }),
             ).rejects.toThrowError(
-                addLiquidityProportionalOnlyError(
-                    addLiquidityInput.kind,
+                poolTypeError(
+                    `Add Liquidity ${addLiquidityInput.kind}`,
                     poolState.type,
+                    'Use Add Liquidity Proportional',
                 ),
             );
         });

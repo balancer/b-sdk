@@ -26,8 +26,8 @@ import {
     RemoveLiquidityKind,
     RemoveLiquidityInput,
     RemoveLiquidityProportionalInput,
-    removeLiquidityProportionalOnlyError,
     RemoveLiquidityUnbalancedInput,
+    poolTypeError,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -174,9 +174,10 @@ describe('remove liquidity test', () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
             ).rejects.toThrowError(
-                removeLiquidityProportionalOnlyError(
-                    removeLiquidityInput.kind,
-                    txInput.poolState.type,
+                poolTypeError(
+                    `Remove Liquidity ${removeLiquidityInput.kind}`,
+                    poolState.type,
+                    'Use Remove Liquidity Proportional',
                 ),
             );
         });

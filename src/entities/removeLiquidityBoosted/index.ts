@@ -46,9 +46,6 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const unwrapWrapped = input.tokensOut
             .map((t) => {
                 const tokenOut = poolStateTokenMap[t.toLowerCase() as Address];
-                if (!tokenOut) {
-                    throw new Error(`Invalid token address: ${t}`);
-                }
                 return tokenOut;
             })
             .sort((a, b) => a.index - b.index) // sort by index to match the order of the pool tokens

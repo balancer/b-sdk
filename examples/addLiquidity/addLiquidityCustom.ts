@@ -108,6 +108,7 @@ const addLiquidity = async ({
         slippage,
         chainId,
         wethIsEth: false,
+        userData: '0x',
     });
 
     console.log('\nWith slippage applied:');

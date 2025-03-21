@@ -1,4 +1,4 @@
-import { NATIVE_ASSETS } from '../../../utils';
+import { inputValidationError, NATIVE_ASSETS } from '../../../utils';
 import { Token } from '../../token';
 import { NestedPoolState } from '../../types';
 import {
@@ -35,8 +35,9 @@ const validateInputsSingleToken = (
     const tokenOut = mainTokens.find((t) => t.isSameAddress(input.tokenOut));
 
     if (tokenOut === undefined) {
-        throw new Error(
-            `Removing liquidity to ${input.tokenOut} requires it to exist within main tokens`,
+        throw inputValidationError(
+            'Remove Liquidity Nested',
+            `Removing liquidity to ${input.tokenOut} requires it to exist within mainTokens`,
         );
     }
 };
@@ -50,8 +51,9 @@ export const validateBuildCallInput = (
             a.token.isSameAddress(NATIVE_ASSETS[input.chainId].wrapped),
         )
     ) {
-        throw new Error(
-            'Removing liquidity to native asset requires wrapped native asset to exist within amounts out',
+        throw inputValidationError(
+            'Remove Liquidity Nested',
+            'Removing liquidity to native asset requires wrapped native asset to exist within amountsOut',
         );
     }
 };

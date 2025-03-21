@@ -27,7 +27,7 @@ import {
     InputAmount,
     PoolType,
     RemoveLiquiditySingleTokenExactOutInput,
-    removeLiquidityProportionalOnlyError,
+    poolTypeError,
 } from '../../../src';
 import {
     assertRemoveLiquidityProportional,
@@ -157,9 +157,10 @@ describe('GyroE V2 remove liquidity test', () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
             ).rejects.toThrowError(
-                removeLiquidityProportionalOnlyError(
-                    removeLiquidityInput.kind,
+                poolTypeError(
+                    `Remove Liquidity ${removeLiquidityInput.kind}`,
                     poolState.type,
+                    'Use Remove Liquidity Proportional',
                 ),
             );
         });
@@ -188,9 +189,10 @@ describe('GyroE V2 remove liquidity test', () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput }),
             ).rejects.toThrowError(
-                removeLiquidityProportionalOnlyError(
-                    removeLiquidityInput.kind,
+                poolTypeError(
+                    `Remove Liquidity ${removeLiquidityInput.kind}`,
                     poolState.type,
+                    'Use Remove Liquidity Proportional',
                 ),
             );
         });
@@ -217,9 +219,10 @@ describe('GyroE V2 remove liquidity test', () => {
             await expect(() =>
                 doRemoveLiquidity({ ...txInput, removeLiquidityInput: input }),
             ).rejects.toThrowError(
-                removeLiquidityProportionalOnlyError(
-                    input.kind,
+                poolTypeError(
+                    `Remove Liquidity ${input.kind}`,
                     poolState.type,
+                    'Use Remove Liquidity Proportional',
                 ),
             );
         });

@@ -26,6 +26,7 @@ import {
     RemoveLiquidity,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
+    RemoveLiquidityV3BuildCallInput,
     Slippage,
     TEST_API_ENDPOINT,
 } from '../../src';
@@ -149,10 +150,11 @@ const removeLiquidityWithPermitSignature = async ({
     });
 
     // Remove liquidity build call input with slippage applied to amountOut from query output
-    const removeLiquidityBuildCallInput = {
+    const removeLiquidityBuildCallInput: RemoveLiquidityV3BuildCallInput = {
         ...queryOutput,
         slippage,
         chainId,
+        userData: '0x',
     };
 
     // Sign permit approvals

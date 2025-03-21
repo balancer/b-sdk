@@ -16,6 +16,7 @@ import {
     BALANCER_BATCH_ROUTER,
     MAX_UINT256,
     CHAINS,
+    missingParameterError,
 } from '../../../../utils';
 import {
     ExactInQueryOutput,
@@ -57,9 +58,6 @@ export class SwapV3 implements SwapBase {
         swapKind,
         userData = DEFAULT_USERDATA,
     }: SwapInput) {
-        if (paths.length === 0)
-            throw new Error('Invalid swap: must contain at least 1 path.');
-
         this.paths = paths.map(
             (p) =>
                 new PathWithAmount(
@@ -176,7 +174,11 @@ export class SwapV3 implements SwapBase {
                 amountOut: this.outputAmount,
             };
         }
-        throw Error('Unsupported V3 Query');
+        throw missingParameterError(
+            'Swap query',
+            'exactAmountIn or exactAmountOut',
+            3,
+        );
     }
 
     private getSwapsWithLimits(pathLimits?: bigint[]): {
@@ -240,11 +242,6 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
 
-            if (result[1].length !== 1)
-                throw Error(
-                    'Swaps only support paths with matching tokenIn>tokenOut',
-                );
-
             return {
                 to: BALANCER_BATCH_ROUTER[this.chainId],
                 swapKind: SwapKind.GivenIn,
@@ -265,11 +262,6 @@ export class SwapV3 implements SwapBase {
             ],
             { blockNumber: block },
         );
-
-        if (result[1].length !== 1)
-            throw Error(
-                'Swaps only support paths with matching tokenIn>tokenOut',
-            );
 
         return {
             to: BALANCER_BATCH_ROUTER[this.chainId],

@@ -1,7 +1,7 @@
 import { Address, parseUnits } from 'viem';
 import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
-import { isSameAddress, MathSol } from '@/utils';
+import { inputValidationError, isSameAddress, MathSol } from '@/utils';
 import { AddLiquidityProportionalInput } from '../addLiquidity/types';
 import {
     PoolState,
@@ -52,8 +52,9 @@ export function calculateProportionalAmounts(
             t.address.toLowerCase() === referenceAmount.address.toLowerCase(),
     );
     if (referenceTokenIndex === -1) {
-        throw new Error(
-            'Reference amount must be relative to a token in the pool or its BPT',
+        throw inputValidationError(
+            'Calculate Proportional Amounts',
+            `Reference amount token ${referenceAmount.address} must be relative to a token in the pool or its BPT`,
         );
     }
 

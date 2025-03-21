@@ -1,11 +1,11 @@
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBuildCallOutput,
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
     RemoveLiquidityProportionalInput,
-    RemoveLiquidityBaseBuildCallInput,
+    RemoveLiquidityBuildCallOutput,
+    RemoveLiquidityV3BuildCallInput,
 } from './types';
 import { PoolState } from '../types';
 import { InputValidator } from '../inputValidator/inputValidator';
@@ -14,7 +14,11 @@ import { RemoveLiquidityV3 } from './removeLiquidityV3';
 import { RemoveLiquidityCowAmm } from './removeLiquidityCowAmm';
 import { Permit } from '../permitHelper';
 import { RemoveLiquidityV2BuildCallInput } from './removeLiquidityV2/types';
-import { Hex } from 'viem';
+import {
+    exceedingParameterError,
+    missingParameterError,
+    protocolVersionError,
+} from '@/utils';
 
 export class RemoveLiquidity implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -49,55 +53,69 @@ export class RemoveLiquidity implements RemoveLiquidityBase {
 
     public buildCall(
         input:
-            | RemoveLiquidityBaseBuildCallInput
             | RemoveLiquidityV2BuildCallInput
-            | (RemoveLiquidityBaseBuildCallInput & { userData: Hex }),
+            | RemoveLiquidityV3BuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
-        const isV2Input = 'sender' in input;
+        const isV2Input = 'sender' in input || 'recipient' in input;
         switch (input.protocolVersion) {
             case 1: {
                 const removeLiquidity = new RemoveLiquidityCowAmm();
                 return removeLiquidity.buildCall(input);
             }
             case 2: {
-                if (isV2Input) {
-                    const removeLiquidity = new RemoveLiquidityV2(this.config);
-                    return removeLiquidity.buildCall(input);
+                if (!isV2Input) {
+                    throw missingParameterError(
+                        'Remove LiquiditybuildCall',
+                        'sender or recipient',
+                        input.protocolVersion,
+                    );
                 }
-                break;
+                const removeLiquidity = new RemoveLiquidityV2(this.config);
+                return removeLiquidity.buildCall(input);
             }
             case 3: {
-                if (!isV2Input) {
-                    if (!('userData' in input))
-                        throw new Error(
-                            'UserData must be provided in buildCall input',
-                        );
-                    const removeLiquidity = new RemoveLiquidityV3();
-                    return removeLiquidity.buildCall(input);
+                if (!('userData' in input)) {
+                    throw missingParameterError(
+                        'Remove Liquidity buildCall',
+                        'userData',
+                        input.protocolVersion,
+                    );
                 }
-                break;
+                if (isV2Input) {
+                    throw exceedingParameterError(
+                        'Remove Liquidity buildCall',
+                        'sender or recipient',
+                        input.protocolVersion,
+                    );
+                }
+                const removeLiquidity = new RemoveLiquidityV3();
+                return removeLiquidity.buildCall(input);
             }
         }
-
-        throw Error('buildCall input/version mis-match');
     }
 
     public buildCallWithPermit(
         input:
-            | RemoveLiquidityBaseBuildCallInput
             | RemoveLiquidityV2BuildCallInput
-            | (RemoveLiquidityBaseBuildCallInput & { userData: Hex }),
+            | RemoveLiquidityV3BuildCallInput,
         permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
-        if (input.protocolVersion === 3) {
-            if (!('userData' in input))
-                throw new Error('UserData must be provided in buildCall input');
-            const removeLiquidity = new RemoveLiquidityV3();
-            return removeLiquidity.buildCallWithPermit(input, permit);
+        if (input.protocolVersion !== 3) {
+            throw protocolVersionError(
+                'Remove Liquidity buildCallWithPermit',
+                input.protocolVersion,
+            );
         }
 
-        throw Error(
-            'buildCall with Permit signatures is only available for v3',
-        );
+        if (!('userData' in input)) {
+            throw missingParameterError(
+                'Remove Liquidity buildCallWithPermit',
+                'userData',
+                input.protocolVersion,
+            );
+        }
+
+        const removeLiquidity = new RemoveLiquidityV3();
+        return removeLiquidity.buildCallWithPermit(input, permit);
     }
 }

@@ -1,6 +1,6 @@
 import { PathWithAmount } from './pathWithAmount';
 import { TokenAmount } from '../../tokenAmount';
-import { isSameAddress } from '@/utils';
+import { inputValidationError, isSameAddress } from '@/utils';
 import { Path } from './types';
 import { Address } from 'viem';
 
@@ -10,8 +10,9 @@ export function getInputAmount(paths: PathWithAmount[]): TokenAmount {
             p.inputAmount.token.isEqual(paths[0].inputAmount.token),
         )
     ) {
-        throw new Error(
-            'Input amount can only be calculated if all paths have the same input token',
+        throw inputValidationError(
+            'Swap',
+            'Input amount can only be calculated if all paths have the same input token.',
         );
     }
     const amounts = paths.map((path) => path.inputAmount);
@@ -24,8 +25,9 @@ export function getOutputAmount(paths: PathWithAmount[]): TokenAmount {
             p.outputAmount.token.isEqual(paths[0].outputAmount.token),
         )
     ) {
-        throw new Error(
-            'Output amount can only be calculated if all paths have the same output token',
+        throw inputValidationError(
+            'Swap',
+            'Output amount can only be calculated if all paths have the same output token.',
         );
     }
     const amounts = paths.map((path) => path.outputAmount);
@@ -34,32 +36,56 @@ export function getOutputAmount(paths: PathWithAmount[]): TokenAmount {
 
 export function validatePaths(paths: Path[]) {
     if (paths.length === 0)
-        throw new Error('Invalid swap: must contain at least 1 path.');
+        throw inputValidationError('Swap', 'Must contain at least 1 path.');
+
+    if (paths.some((p) => p.pools.length === 0))
+        throw inputValidationError(
+            'Swap',
+            'All paths must contain at least 1 pool.',
+        );
+
+    if (paths.some((p) => p.tokens.length < 2))
+        throw inputValidationError(
+            'Swap',
+            'All paths must contain at least 2 tokens.',
+        );
+
+    if (paths.some((p) => p.tokens.length !== p.pools.length + 1))
+        throw inputValidationError(
+            'Swap',
+            'All paths must contain tokens length equal pools length + 1',
+        );
 
     validateBufferVersion(paths);
     validateBufferLength(paths);
 
     const protocolVersion = paths[0].protocolVersion;
     if (!paths.every((p) => p.protocolVersion === protocolVersion))
-        throw new Error(
-            'Unsupported swap: all paths must use same Balancer version.',
+        throw inputValidationError(
+            'Swap',
+            'All paths must use same Balancer version.',
         );
 
     const tokenIn = paths[0].tokens[0].address.toLowerCase();
+    if (paths.some((p) => p.tokens[0].address.toLowerCase() !== tokenIn))
+        throw inputValidationError(
+            'Swap',
+            'All paths must start with same token.',
+        );
+
     const tokenOut =
         paths[0].tokens[paths[0].tokens.length - 1].address.toLowerCase();
     if (
-        !paths.every(
+        paths.some(
             (p) =>
-                p.tokens[0].address.toLowerCase() === tokenIn &&
-                p.tokens[p.tokens.length - 1].address.toLowerCase() ===
-                    tokenOut,
+                p.tokens[p.tokens.length - 1].address.toLowerCase() !==
+                tokenOut,
         )
-    ) {
-        throw new Error(
-            'Unsupported swap: all paths must start/end with same token.',
+    )
+        throw inputValidationError(
+            'Swap',
+            'All paths must end with same token.',
         );
-    }
 }
 
 function validateBufferVersion(paths: Path[]) {
@@ -70,7 +96,10 @@ function validateBufferVersion(paths: Path[]) {
                 : true;
         })
     ) {
-        throw new Error('Unsupported swap: buffers not supported in V2.');
+        throw inputValidationError(
+            'Swap',
+            'Swap with buffers not supported in Balancer v2.',
+        );
     }
 }
 
@@ -80,8 +109,9 @@ function validateBufferLength(paths: Path[]) {
             return p.isBuffer ? p.isBuffer.length === p.pools.length : true;
         })
     ) {
-        throw new Error(
-            'Unsupported swap: buffers and pools must have same length.',
+        throw inputValidationError(
+            'Swap',
+            'buffers and pools must have same length.',
         );
     }
 }

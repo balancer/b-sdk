@@ -1,5 +1,5 @@
 // pnpm test -- swap.test.ts
-import { ChainId, Slippage } from '@/index';
+import { ChainId, inputValidationError, Slippage } from '@/index';
 import { SwapKind } from '@/types';
 import {
     Swap,
@@ -76,7 +76,10 @@ describe('Swap', () => {
                     swapKind: SwapKind.GivenIn,
                 });
             }).toThrowError(
-                'Unsupported swap: all paths must use same Balancer version.',
+                inputValidationError(
+                    'Swap',
+                    'All paths must use same Balancer version.',
+                ),
             );
         });
         describe('path inputs show all start/end with same token', () => {
@@ -92,7 +95,10 @@ describe('Swap', () => {
                         swapKind: SwapKind.GivenIn,
                     });
                 }).toThrowError(
-                    'Unsupported swap: all paths must start/end with same token.',
+                    inputValidationError(
+                        'Swap',
+                        'All paths must start with same token.',
+                    ),
                 );
             });
             test('should throw if paths end with different token', () => {
@@ -107,7 +113,10 @@ describe('Swap', () => {
                         swapKind: SwapKind.GivenIn,
                     });
                 }).toThrowError(
-                    'Unsupported swap: all paths must start/end with same token.',
+                    inputValidationError(
+                        'Swap',
+                        'All paths must end with same token.',
+                    ),
                 );
             });
             describe('buffers', () => {
@@ -157,7 +166,10 @@ describe('Swap', () => {
                             swapKind: SwapKind.GivenIn,
                         });
                     }).toThrowError(
-                        'Unsupported swap: buffers not supported in V2.',
+                        inputValidationError(
+                            'Swap',
+                            'Swap with buffers not supported in Balancer v2.',
+                        ),
                     );
                 });
                 test('should throw if buffers not same length as pools', () => {
@@ -173,7 +185,10 @@ describe('Swap', () => {
                             swapKind: SwapKind.GivenIn,
                         });
                     }).toThrowError(
-                        'Unsupported swap: buffers and pools must have same length.',
+                        inputValidationError(
+                            'Swap',
+                            'buffers and pools must have same length.',
+                        ),
                     );
                 });
             });

@@ -9,7 +9,7 @@ import {
 import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
 import { HumanAmount } from '@/data';
 import { Address, InputAmount } from '@/types';
-import { CHAINS, WAD } from '@/utils';
+import { CHAINS, inputValidationError, WAD } from '@/utils';
 
 import { getSortedTokens } from './getSortedTokens';
 import { PoolState, PoolStateWithBalances } from '../types';
@@ -112,8 +112,9 @@ export function calculateProportionalAmountsCowAmm(
             t.address.toLowerCase() === referenceAmount.address.toLowerCase(),
     );
     if (referenceTokenIndex === -1) {
-        throw new Error(
-            'Reference amount must be relative to a token in the pool or its BPT',
+        throw inputValidationError(
+            'Calculate Proportional Amounts',
+            `Reference amount token ${referenceAmount.address} must be relative to a token in the pool or its BPT`,
         );
     }
 

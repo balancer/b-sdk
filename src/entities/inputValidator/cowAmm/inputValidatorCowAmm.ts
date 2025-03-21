@@ -1,6 +1,4 @@
-import { InitPoolInput } from '@/entities/initPool';
 import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
-import { CreatePoolInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
@@ -11,15 +9,11 @@ import {
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
 } from '../utils/validateTokens';
-import {
-    addLiquidityProportionalOnlyError,
-    removeLiquidityProportionalOnlyError,
-} from '@/utils';
+import { poolTypeError, protocolVersionError } from '@/utils';
 
 export class InputValidatorCowAmm extends InputValidatorBase {
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
-    validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
-        throw new Error('Method not implemented.');
+    validateInitPool(): void {
+        throw protocolVersionError('Init Pool', 1);
     }
 
     validateAddLiquidity(
@@ -27,9 +21,10 @@ export class InputValidatorCowAmm extends InputValidatorBase {
         poolState: PoolState,
     ): void {
         if (addLiquidityInput.kind !== AddLiquidityKind.Proportional) {
-            throw addLiquidityProportionalOnlyError(
-                addLiquidityInput.kind,
+            throw poolTypeError(
+                `Add Liquidity ${addLiquidityInput.kind}`,
                 poolState.type,
+                'Use Add Liquidity Proportional',
             );
         }
         validateTokensAddLiquidity(addLiquidityInput, poolState);
@@ -40,16 +35,16 @@ export class InputValidatorCowAmm extends InputValidatorBase {
         poolState: PoolState,
     ): void {
         if (removeLiquidityInput.kind !== RemoveLiquidityKind.Proportional) {
-            throw removeLiquidityProportionalOnlyError(
-                removeLiquidityInput.kind,
+            throw poolTypeError(
+                `Remove Liquidity ${removeLiquidityInput.kind}`,
                 poolState.type,
+                'Use Remove Liquidity Proportional',
             );
         }
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);
     }
 
-    validateCreatePool(input: CreatePoolInput): void {
-        console.log(input);
-        throw new Error('Method not implemented.');
+    validateCreatePool(): void {
+        throw protocolVersionError('Create Pool', 1);
     }
 }

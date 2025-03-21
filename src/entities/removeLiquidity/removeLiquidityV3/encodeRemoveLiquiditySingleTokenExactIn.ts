@@ -1,15 +1,18 @@
-import { encodeFunctionData, Hex } from 'viem';
-import { RemoveLiquidityBaseBuildCallInput } from '../types';
+import { encodeFunctionData } from 'viem';
+import { RemoveLiquidityV3BuildCallInput } from '../types';
 import { balancerRouterAbiExtended } from '@/abi';
+import { missingParameterError } from '@/utils';
 
 export const encodeRemoveLiquiditySingleTokenExactIn = (
-    input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
+    input: RemoveLiquidityV3BuildCallInput,
     minAmountsOut: bigint[],
 ) => {
-    // just a sanity check as this is already checked in InputValidator
+    // TODO: move this check to an input validator
     if (input.tokenOutIndex === undefined) {
-        throw new Error(
-            'RemoveLiquidityKind.SingleTokenExactOut should have tokenOutIndex',
+        throw missingParameterError(
+            'RemoveLiquidity SingleTokenExactIn',
+            'tokenOutIndex',
+            input.protocolVersion,
         );
     }
     return encodeFunctionData({

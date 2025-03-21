@@ -28,7 +28,7 @@ import {
     AddLiquidityUnbalancedInput,
     AddLiquiditySingleTokenInput,
     PoolType,
-    addLiquidityProportionalOnlyError,
+    poolTypeError,
 } from '../../../src';
 import { forkSetup } from '../../lib/utils/helper';
 import {
@@ -191,9 +191,10 @@ describe('GyroE V2 add liquidity test', () => {
                     addLiquidityInput,
                 }),
             ).rejects.toThrowError(
-                addLiquidityProportionalOnlyError(
-                    addLiquidityInput.kind,
+                poolTypeError(
+                    `Add Liquidity ${addLiquidityInput.kind}`,
                     poolState.type,
+                    'Use Add Liquidity Proportional',
                 ),
             );
         });
@@ -224,9 +225,10 @@ describe('GyroE V2 add liquidity test', () => {
                     addLiquidityInput,
                 }),
             ).rejects.toThrowError(
-                addLiquidityProportionalOnlyError(
-                    addLiquidityInput.kind,
+                poolTypeError(
+                    `Add Liquidity ${addLiquidityInput.kind}`,
                     poolState.type,
+                    'Use Add Liquidity Proportional',
                 ),
             );
         });

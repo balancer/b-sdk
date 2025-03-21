@@ -84,9 +84,15 @@ export type RemoveLiquidityBaseBuildCallInput = {
     wethIsEth?: boolean;
 } & RemoveLiquidityBaseQueryOutput;
 
+export type RemoveLiquidityV3BuildCallInput =
+    RemoveLiquidityBaseBuildCallInput & {
+        userData: Hex;
+    };
+
 export type RemoveLiquidityBuildCallInput =
     | RemoveLiquidityBaseBuildCallInput
     | RemoveLiquidityV2BuildCallInput
+    | RemoveLiquidityV3BuildCallInput
     | RemoveLiquidityBoostedBuildCallInput;
 
 export type RemoveLiquidityBuildCallOutput = {

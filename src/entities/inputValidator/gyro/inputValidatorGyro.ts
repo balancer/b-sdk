@@ -9,10 +9,7 @@ import {
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
 } from '../utils/validateTokens';
-import {
-    addLiquidityProportionalOnlyError,
-    removeLiquidityProportionalOnlyError,
-} from '@/utils';
+import { inputValidationError, poolTypeError } from '@/utils';
 import { CreatePoolGyroECLPInput } from '@/entities/createPool';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 
@@ -21,7 +18,10 @@ export class InputValidatorGyro extends InputValidatorBase {
         super.validateCreatePool(input);
 
         if (input.tokens.length !== 2) {
-            throw new Error('GyroECLP pools on v3 support only two tokens');
+            throw inputValidationError(
+                'Create Pool',
+                'GyroECLP pools support only two tokens on Balancer v3',
+            );
         }
 
         const { eclpParams, derivedEclpParams } = input;
@@ -35,9 +35,10 @@ export class InputValidatorGyro extends InputValidatorBase {
         poolState: PoolState,
     ): void {
         if (addLiquidityInput.kind !== AddLiquidityKind.Proportional) {
-            throw addLiquidityProportionalOnlyError(
-                addLiquidityInput.kind,
+            throw poolTypeError(
+                `Add Liquidity ${addLiquidityInput.kind}`,
                 poolState.type,
+                'Use Add Liquidity Proportional',
             );
         }
         validateTokensAddLiquidity(addLiquidityInput, poolState);
@@ -48,9 +49,10 @@ export class InputValidatorGyro extends InputValidatorBase {
         poolState: PoolState,
     ): void {
         if (removeLiquidityInput.kind !== RemoveLiquidityKind.Proportional) {
-            throw removeLiquidityProportionalOnlyError(
-                removeLiquidityInput.kind,
+            throw poolTypeError(
+                `Remove Liquidity ${removeLiquidityInput.kind}`,
                 poolState.type,
+                'Use Remove Liquidity Proportional',
             );
         }
         validateTokensRemoveLiquidity(removeLiquidityInput, poolState);
