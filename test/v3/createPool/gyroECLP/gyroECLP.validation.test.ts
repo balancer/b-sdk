@@ -183,35 +183,59 @@ describe('create GyroECLP pool input validations', () => {
         ];
         expect(() => buildCallWithModifiedInput({ tokens })).toThrowError(
             inputValidationError(
-                'Create Pool',
-                'GyroECLP pools support only two tokens on Balancer v3',
+                'Create Gyro ECLP',
+                'This pool supports only two tokens on Balancer v3',
             ),
         );
     });
 
-    describe('validateParams', () => {
+    describe('Validate Base Params', () => {
         test('RotationVectorSWrong()', async () => {
             expect(() =>
                 buildCallWithModifiedInput({ eclpParams: { s: -1n } }),
-            ).toThrowError('s must be >= 0 and <= 1000000000000000000');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid base parameters',
+                    's must be >= 0 and <= 1000000000000000000',
+                ),
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
                     eclpParams: { s: _ONE + 1n },
                 }),
-            ).toThrowError('s must be >= 0 and <= 1000000000000000000');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid base parameters',
+                    's must be >= 0 and <= 1000000000000000000',
+                ),
+            );
         });
 
         test('RotationVectorCWrong()', async () => {
             expect(() =>
                 buildCallWithModifiedInput({ eclpParams: { c: -1n } }),
-            ).toThrowError('c must be >= 0 and <= 1000000000000000000');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid base parameters',
+                    'c must be >= 0 and <= 1000000000000000000',
+                ),
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
                     eclpParams: { c: _ONE + 1n },
                 }),
-            ).toThrowError('c must be >= 0 and <= 1000000000000000000');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid base parameters',
+                    'c must be >= 0 and <= 1000000000000000000',
+                ),
+            );
         });
 
         test('scnorm2 outside valid range', async () => {
@@ -219,7 +243,13 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({
                     eclpParams: { s: 1n, c: 1n },
                 }),
-            ).toThrowError('RotationVectorNotNormalized');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid base parameters',
+                    'RotationVectorNotNormalized()',
+                ),
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
@@ -228,7 +258,13 @@ describe('create GyroECLP pool input validations', () => {
                         c: parseUnits('1', 18),
                     },
                 }),
-            ).toThrowError('RotationVectorNotNormalized');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid base parameters',
+                    'RotationVectorNotNormalized()',
+                ),
+            );
         });
 
         test('lambda outside valid range', async () => {
@@ -237,7 +273,11 @@ describe('create GyroECLP pool input validations', () => {
                     eclpParams: { lambda: -1n },
                 }),
             ).toThrowError(
-                'lambda must be >= 0 and <= 100000000000000000000000000',
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid base parameters',
+                    'lambda must be >= 0 and <= 100000000000000000000000000',
+                ),
             );
 
             expect(() =>
@@ -245,18 +285,28 @@ describe('create GyroECLP pool input validations', () => {
                     eclpParams: { lambda: _MAX_STRETCH_FACTOR + 1n },
                 }),
             ).toThrowError(
-                'lambda must be >= 0 and <= 100000000000000000000000000',
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid base parameters',
+                    'lambda must be >= 0 and <= 100000000000000000000000000',
+                ),
             );
         });
     });
 
-    describe('validateDerivedParamsLimits', () => {
+    describe('Validate Derived Params', () => {
         test('DerivedTauAlphaYWrong()', async () => {
             expect(() =>
                 buildCallWithModifiedInput({
                     derivedEclpParams: { tauAlpha: { y: -1n } },
                 }),
-            ).toThrowError('tuaAlpha.y must be > 0');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    'tuaAlpha.y must be > 0',
+                ),
+            );
         });
 
         test('DerivedTauBetaYWrong()', async () => {
@@ -264,7 +314,13 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({
                     derivedEclpParams: { tauBeta: { y: -1n } },
                 }),
-            ).toThrowError('tauBeta.y must be > 0');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    'tauBeta.y must be > 0',
+                ),
+            );
         });
 
         test('DerivedTauXWrong()', async () => {
@@ -276,7 +332,13 @@ describe('create GyroECLP pool input validations', () => {
                         },
                     },
                 }),
-            ).toThrowError('tauBeta.x must be > tauAlpha.x');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    'tauBeta.x must be > tauAlpha.x',
+                ),
+            );
         });
 
         test('DerivedTauAlphaNotNormalized()', async () => {
@@ -289,7 +351,13 @@ describe('create GyroECLP pool input validations', () => {
                         },
                     },
                 }),
-            ).toThrowError('RotationVectorNotNormalized()');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    'RotationVectorNotNormalized()',
+                ),
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
@@ -300,7 +368,13 @@ describe('create GyroECLP pool input validations', () => {
                         },
                     },
                 }),
-            ).toThrowError('RotationVectorNotNormalized()');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    'RotationVectorNotNormalized()',
+                ),
+            );
         });
 
         test('Derived parameters u, v, w, z limits', async () => {
@@ -308,25 +382,49 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({
                     derivedEclpParams: { u: _ONE_XP + 1n },
                 }),
-            ).toThrowError(`u must be <= ${_ONE_XP}`);
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    `u must be <= ${_ONE_XP}`,
+                ),
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
                     derivedEclpParams: { v: _ONE_XP + 1n },
                 }),
-            ).toThrowError(`v must be <= ${_ONE_XP}`);
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    `v must be <= ${_ONE_XP}`,
+                ),
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
                     derivedEclpParams: { w: _ONE_XP + 1n },
                 }),
-            ).toThrowError(`w must be <= ${_ONE_XP}`);
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    `w must be <= ${_ONE_XP}`,
+                ),
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
                     derivedEclpParams: { z: _ONE_XP + 1n },
                 }),
-            ).toThrowError(`z must be <= ${_ONE_XP}`);
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    `z must be <= ${_ONE_XP}`,
+                ),
+            );
         });
 
         test('DerivedDsqWrong()', async () => {
@@ -336,7 +434,13 @@ describe('create GyroECLP pool input validations', () => {
                         dSq: _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP - 1n,
                     },
                 }),
-            ).toThrowError('DerivedDsqWrong()');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    'DerivedDsqWrong()',
+                ),
+            );
 
             expect(() =>
                 buildCallWithModifiedInput({
@@ -344,7 +448,13 @@ describe('create GyroECLP pool input validations', () => {
                         dSq: _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP + 1n,
                     },
                 }),
-            ).toThrowError('DerivedDsqWrong()');
+            ).toThrowError(
+                inputValidationError(
+                    'Create Gyro ECLP',
+                    'Invalid derived parameters',
+                    'DerivedDsqWrong()',
+                ),
+            );
         });
     });
 });

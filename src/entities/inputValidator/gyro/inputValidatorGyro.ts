@@ -12,24 +12,39 @@ import {
 import { inputValidationError, poolTypeError } from '@/utils';
 import { CreatePoolGyroECLPInput } from '@/entities/createPool';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
-
 export class InputValidatorGyro extends InputValidatorBase {
     validateCreatePool(input: CreatePoolGyroECLPInput) {
         super.validateCreatePool(input);
 
         if (input.tokens.length !== 2) {
             throw inputValidationError(
-                'Create Pool',
-                'GyroECLP pools support only two tokens on Balancer v3',
+                'Create Gyro ECLP',
+                'This pool supports only two tokens on Balancer v3',
             );
         }
 
         const { eclpParams, derivedEclpParams } = input;
 
-        GyroECLPMath.validateParams(eclpParams);
-        GyroECLPMath.validateDerivedParams(eclpParams, derivedEclpParams);
-    }
+        try {
+            GyroECLPMath.validateParams(eclpParams);
+        } catch (err) {
+            throw inputValidationError(
+                'Create Gyro ECLP',
+                'Invalid base parameters',
+                (err as Error).message,
+            );
+        }
 
+        try {
+            GyroECLPMath.validateDerivedParams(eclpParams, derivedEclpParams);
+        } catch (err) {
+            throw inputValidationError(
+                'Create Gyro ECLP',
+                'Invalid derived parameters',
+                (err as Error).message,
+            );
+        }
+    }
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
