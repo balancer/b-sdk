@@ -8,11 +8,11 @@ import { BALANCER_ROUTER, protocolVersionError } from '@/utils';
 import { getAmountsCall, getAmountsQuery } from '../helper';
 import {
     RemoveLiquidityBase,
-    RemoveLiquidityBaseBuildCallInput,
     RemoveLiquidityBaseQueryOutput,
     RemoveLiquidityBuildCallOutput,
     RemoveLiquidityInput,
     RemoveLiquidityKind,
+    RemoveLiquidityV3BuildCallInput,
 } from '../types';
 import { doRemoveLiquiditySingleTokenExactOutQuery } from './doRemoveLiquiditySingleTokenExactOutQuery';
 import { doRemoveLiquiditySingleTokenExactInQuery } from './doRemoveLiquiditySingleTokenExactInQuery';
@@ -127,7 +127,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     }
 
     public buildCall(
-        input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
+        input: RemoveLiquidityV3BuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
 
@@ -187,7 +187,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     }
 
     public buildCallWithPermit(
-        input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
+        input: RemoveLiquidityV3BuildCallInput,
         permit: Permit,
     ): RemoveLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);

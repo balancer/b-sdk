@@ -2,10 +2,10 @@ import { encodeFunctionData } from 'viem';
 import { balancerRouterAbiExtended } from '@/abi';
 import { Hex } from '@/types';
 import { missingParameterError } from '@/utils';
-import { RemoveLiquidityBaseBuildCallInput } from '../types';
+import { RemoveLiquidityV3BuildCallInput } from '../types';
 
 export const encodeRemoveLiquiditySingleTokenExactOut = (
-    input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
+    input: RemoveLiquidityV3BuildCallInput,
     maxBptAmountIn: bigint,
 ): Hex => {
     // just a sanity check as this is already checked in InputValidator

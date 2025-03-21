@@ -16,11 +16,11 @@ import { BALANCER_ROUTER, missingParameterError } from '@/utils';
 import { getAmountsCall } from '../helpers';
 import {
     AddLiquidityBase,
-    AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
     AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
+    AddLiquidityV3BuildCallInput,
 } from '../types';
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
@@ -132,7 +132,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
     }
 
     buildCall(
-        input: AddLiquidityBaseBuildCallInput & { userData: Hex },
+        input: AddLiquidityV3BuildCallInput,
     ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
         let callData: Hex;
@@ -208,7 +208,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
     }
 
     public buildCallWithPermit2(
-        input: AddLiquidityBaseBuildCallInput & { userData: Hex },
+        input: AddLiquidityV3BuildCallInput,
         permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);
