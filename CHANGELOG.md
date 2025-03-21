@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 2.5.2
+
+### Patch Changes
+
+- 061f490: Remove test no longer necessary on gnosis-chain
+- 9240e75: Error Handling - Propagate SC Errors
+
 ## 2.5.1
 
 ### Patch Changes
