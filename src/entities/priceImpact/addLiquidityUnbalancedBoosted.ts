@@ -1,4 +1,4 @@
-import { abs, ChainId, isSameAddress, max, min } from '../../utils';
+import { abs, ChainId, isSameAddress, max, min, SDKError } from '../../utils';
 import { InputToken, SwapKind } from '../../types';
 import { PriceImpactAmount } from '../priceImpactAmount';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
@@ -54,7 +54,9 @@ export async function addLiquidityUnbalancedBoosted(
         amountsIn = queryResult.amountsIn;
         bptOut = queryResult.bptOut;
     } catch (err) {
-        throw new Error(
+        throw new SDKError(
+            'Price Impact',
+            'Add Liquidity Boosted Unbalanced',
             `addLiquidity operation will fail at SC level with user defined input.\n${err}`,
         );
     }
@@ -164,8 +166,10 @@ async function queryAddLiquidityForTokenDelta(
                 }
             }
         }
-        throw new Error(
-            'Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Delta add step',
+        throw new SDKError(
+            'Price Impact',
+            'Add Liquidity Boosted Unbalanced',
+            `Unexpected error while calculating addLiquidityBoostedUnbalanced PI at Delta add step:\n${err}`,
         );
     }
 }
@@ -248,8 +252,10 @@ async function zeroOutDeltas(
                 deltas[resultTokenIndex],
             );
         } catch {
-            throw new Error(
-                'Unexpected error while calculating addLiquidityUnbalancedBoosted PI at Swap step',
+            throw new SDKError(
+                'Price Impact',
+                'Add Liquidity Boosted Unbalanced',
+                'Unexpected error while calculating addLiquidityBoostedUnbalanced PI at Swap step',
             );
         }
     }
@@ -280,7 +286,12 @@ function getTokenWrapInfo(
         .filter((t) => t.underlyingToken !== null)
         .find((t) => isSameAddress(t.underlyingToken!.address, token.address));
 
-    if (!wrapped) throw Error(`Cannot map token to wrapped: ${token.address}`);
+    if (!wrapped)
+        throw new SDKError(
+            'Price Impact',
+            'Add Liquidity Boosted Unbalanced',
+            `Cannot map underlying token to wrapped: ${token.address}`,
+        );
     return {
         token: token,
         shouldWrap: true,
