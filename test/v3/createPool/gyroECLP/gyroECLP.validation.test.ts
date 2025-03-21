@@ -183,8 +183,8 @@ describe('create GyroECLP pool input validations', () => {
         ];
         expect(() => buildCallWithModifiedInput({ tokens })).toThrowError(
             inputValidationError(
-                'Create Gyro ECLP',
-                'This pool supports only two tokens on Balancer v3',
+                'Create Pool',
+                'GyroECLP pools support only two tokens on Balancer v3',
             ),
         );
     });
@@ -195,8 +195,8 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({ eclpParams: { s: -1n } }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid base parameters',
+                    'Create Pool',
+                    'Invalid base ECLP parameters',
                     's must be >= 0 and <= 1000000000000000000',
                 ),
             );
@@ -207,8 +207,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid base parameters',
+                    'Create Pool',
+                    'Invalid base ECLP parameters',
                     's must be >= 0 and <= 1000000000000000000',
                 ),
             );
@@ -219,8 +219,8 @@ describe('create GyroECLP pool input validations', () => {
                 buildCallWithModifiedInput({ eclpParams: { c: -1n } }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid base parameters',
+                    'Create Pool',
+                    'Invalid base ECLP parameters',
                     'c must be >= 0 and <= 1000000000000000000',
                 ),
             );
@@ -231,8 +231,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid base parameters',
+                    'Create Pool',
+                    'Invalid base ECLP parameters',
                     'c must be >= 0 and <= 1000000000000000000',
                 ),
             );
@@ -245,8 +245,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid base parameters',
+                    'Create Pool',
+                    'Invalid base ECLP parameters',
                     'RotationVectorNotNormalized()',
                 ),
             );
@@ -260,8 +260,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid base parameters',
+                    'Create Pool',
+                    'Invalid base ECLP parameters',
                     'RotationVectorNotNormalized()',
                 ),
             );
@@ -274,8 +274,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid base parameters',
+                    'Create Pool',
+                    'Invalid base ECLP parameters',
                     'lambda must be >= 0 and <= 100000000000000000000000000',
                 ),
             );
@@ -286,8 +286,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid base parameters',
+                    'Create Pool',
+                    'Invalid base ECLP parameters',
                     'lambda must be >= 0 and <= 100000000000000000000000000',
                 ),
             );
@@ -302,8 +302,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     'tuaAlpha.y must be > 0',
                 ),
             );
@@ -316,8 +316,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     'tauBeta.y must be > 0',
                 ),
             );
@@ -334,8 +334,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     'tauBeta.x must be > tauAlpha.x',
                 ),
             );
@@ -353,8 +353,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     'RotationVectorNotNormalized()',
                 ),
             );
@@ -370,8 +370,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     'RotationVectorNotNormalized()',
                 ),
             );
@@ -384,8 +384,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     `u must be <= ${_ONE_XP}`,
                 ),
             );
@@ -396,8 +396,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     `v must be <= ${_ONE_XP}`,
                 ),
             );
@@ -408,8 +408,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     `w must be <= ${_ONE_XP}`,
                 ),
             );
@@ -420,8 +420,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     `z must be <= ${_ONE_XP}`,
                 ),
             );
@@ -436,8 +436,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     'DerivedDsqWrong()',
                 ),
             );
@@ -450,8 +450,8 @@ describe('create GyroECLP pool input validations', () => {
                 }),
             ).toThrowError(
                 inputValidationError(
-                    'Create Gyro ECLP',
-                    'Invalid derived parameters',
+                    'Create Pool',
+                    'Invalid derived ECLP parameters',
                     'DerivedDsqWrong()',
                 ),
             );

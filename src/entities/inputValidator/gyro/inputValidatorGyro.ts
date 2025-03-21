@@ -18,8 +18,8 @@ export class InputValidatorGyro extends InputValidatorBase {
 
         if (input.tokens.length !== 2) {
             throw inputValidationError(
-                'Create Gyro ECLP',
-                'This pool supports only two tokens on Balancer v3',
+                'Create Pool',
+                'GyroECLP pools support only two tokens on Balancer v3',
             );
         }
 
@@ -29,8 +29,8 @@ export class InputValidatorGyro extends InputValidatorBase {
             GyroECLPMath.validateParams(eclpParams);
         } catch (err) {
             throw inputValidationError(
-                'Create Gyro ECLP',
-                'Invalid base parameters',
+                'Create Pool',
+                'Invalid base ECLP parameters',
                 (err as Error).message,
             );
         }
@@ -39,8 +39,8 @@ export class InputValidatorGyro extends InputValidatorBase {
             GyroECLPMath.validateDerivedParams(eclpParams, derivedEclpParams);
         } catch (err) {
             throw inputValidationError(
-                'Create Gyro ECLP',
-                'Invalid derived parameters',
+                'Create Pool',
+                'Invalid derived ECLP parameters',
                 (err as Error).message,
             );
         }
