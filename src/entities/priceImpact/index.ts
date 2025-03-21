@@ -24,6 +24,7 @@ import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
 import { addLiquidityNested } from './addLiquidityNested';
 import { priceImpactABA } from './helper';
 import { addLiquidityUnbalanced } from './addLiquidityUnbalanced';
+import { SDKError } from '@/utils/errors';
 
 export * from './helper';
 
@@ -47,7 +48,9 @@ export class PriceImpact {
             const queryResult = await addLiquidity.query(input, poolState);
             amountsIn = queryResult.amountsIn;
         } catch (err) {
-            throw new Error(
+            throw new SDKError(
+                'Price Impact',
+                'Add Liquidity Single Token',
                 `addLiquiditySingleToken operation will fail at SC level with user defined input.\n${err}`,
             );
         }
@@ -156,7 +159,9 @@ export class PriceImpact {
             amountsOut = queryResult.amountsOut;
             bptIn = queryResult.bptIn;
         } catch (err) {
-            throw new Error(
+            throw new SDKError(
+                'Price Impact',
+                'Remove Liquidity',
                 `removeLiquidity operation will fail at SC level with user defined input.\n${err}`,
             );
         }
@@ -206,8 +211,10 @@ export class PriceImpact {
             amountsOut = queryResult.amountsOut;
             bptAmountIn = queryResult.bptAmountIn;
         } catch (err) {
-            throw new Error(
-                `removeLiquidity operation will fail at SC level with user defined input.\n${err}`,
+            throw new SDKError(
+                'Price Impact',
+                'Remove Liquidity Nested',
+                `removeLiquidityNested operation will fail at SC level with user defined input.\n${err}`,
             );
         }
 
