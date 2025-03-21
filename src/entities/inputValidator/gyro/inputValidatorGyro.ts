@@ -12,7 +12,6 @@ import {
 import { inputValidationError, poolTypeError } from '@/utils';
 import { CreatePoolGyroECLPInput } from '@/entities/createPool';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
-
 export class InputValidatorGyro extends InputValidatorBase {
     validateCreatePool(input: CreatePoolGyroECLPInput) {
         super.validateCreatePool(input);
@@ -26,10 +25,26 @@ export class InputValidatorGyro extends InputValidatorBase {
 
         const { eclpParams, derivedEclpParams } = input;
 
-        GyroECLPMath.validateParams(eclpParams);
-        GyroECLPMath.validateDerivedParams(eclpParams, derivedEclpParams);
-    }
+        try {
+            GyroECLPMath.validateParams(eclpParams);
+        } catch (err) {
+            throw inputValidationError(
+                'Create Pool',
+                'Invalid base ECLP parameters',
+                (err as Error).message,
+            );
+        }
 
+        try {
+            GyroECLPMath.validateDerivedParams(eclpParams, derivedEclpParams);
+        } catch (err) {
+            throw inputValidationError(
+                'Create Pool',
+                'Invalid derived ECLP parameters',
+                (err as Error).message,
+            );
+        }
+    }
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
         poolState: PoolState,
