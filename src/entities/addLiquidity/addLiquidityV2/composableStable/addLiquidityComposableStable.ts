@@ -1,11 +1,7 @@
 import { encodeFunctionData } from 'viem';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
-import {
-    buildCallWithPermit2ProtocolVersionError,
-    VAULT_V2,
-    ZERO_ADDRESS,
-} from '@/utils';
+import { protocolVersionError, VAULT_V2, ZERO_ADDRESS } from '@/utils';
 import { vaultV2Abi } from '@/abi';
 import {
     AddLiquidityBase,
@@ -120,7 +116,13 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         };
     }
 
-    public buildCallWithPermit2(): AddLiquidityBuildCallOutput {
-        throw buildCallWithPermit2ProtocolVersionError;
+    public buildCallWithPermit2(
+        input: AddLiquidityV2ComposableStableBuildCallInput,
+    ): AddLiquidityBuildCallOutput {
+        throw protocolVersionError(
+            'buildCallWithPermit2',
+            input.protocolVersion,
+            'buildCallWithPermit2 is supported on Balancer v3 only.',
+        );
     }
 }

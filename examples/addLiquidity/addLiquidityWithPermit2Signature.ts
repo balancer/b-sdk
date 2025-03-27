@@ -14,9 +14,10 @@ import {
     walletActions,
 } from 'viem';
 import {
+    AddLiquidity,
     AddLiquidityInput,
     AddLiquidityKind,
-    AddLiquidity,
+    AddLiquidityV3BuildCallInput,
     BalancerApi,
     ChainId,
     PriceImpact,
@@ -136,11 +137,12 @@ const addLiquidityWithPermit2Signature = async ({
     console.log(`BPT Out: ${queryOutput.bptOut.amount.toString()}`);
 
     // Add liquidity build call input with slippage applied to BPT amount from query output
-    const addLiquidityBuildCallInput = {
+    const addLiquidityBuildCallInput: AddLiquidityV3BuildCallInput = {
         ...queryOutput,
         slippage,
         chainId,
         wethIsEth: false,
+        userData: '0x',
     };
 
     // Sign permit2 approvals

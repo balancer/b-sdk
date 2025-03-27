@@ -8,8 +8,8 @@ import {
 } from '../types';
 import { RemoveLiquidityKind } from '../removeLiquidity/types';
 import {
-    addLiquiditySingleTokenShouldHaveTokenInIndexError,
-    removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError,
+    missingParameterError,
+    poolTypeProtocolVersionError,
 } from '@/utils/errors';
 import { encodeRemoveLiquidityRecovery } from './base';
 
@@ -61,7 +61,11 @@ export class StableEncoder {
             case AddLiquidityKind.SingleToken: {
                 // just a sanity check as this is already checked in InputValidator
                 if (amounts.tokenInIndex === undefined) {
-                    throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                    throw missingParameterError(
+                        'Add Liquidity SingleToken',
+                        'tokenInIndex',
+                        2,
+                    );
                 }
                 return StableEncoder.addLiquiditySingleToken(
                     amounts.minimumBpt,
@@ -69,7 +73,11 @@ export class StableEncoder {
                 );
             }
             default:
-                throw new Error(`AddLiquidityKind not supported: ${kind}`);
+                throw poolTypeProtocolVersionError(
+                    `Add Liquidity ${kind}`,
+                    'Stable',
+                    2,
+                );
         }
     };
 
@@ -92,7 +100,11 @@ export class StableEncoder {
                 );
             case RemoveLiquidityKind.SingleTokenExactIn:
                 if (amounts.tokenOutIndex === undefined)
-                    throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+                    throw missingParameterError(
+                        'Remove Liquidity SingleTokenExactIn',
+                        'tokenOutIndex',
+                        2,
+                    );
 
                 return StableEncoder.removeLiquiditySingleTokenExactIn(
                     amounts.maxBptAmountIn,

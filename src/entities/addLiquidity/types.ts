@@ -64,8 +64,12 @@ export type AddLiquidityBaseBuildCallInput = {
     wethIsEth?: boolean;
 } & AddLiquidityBaseQueryOutput;
 
+export type AddLiquidityV3BuildCallInput = AddLiquidityBaseBuildCallInput & {
+    userData: Hex;
+};
+
 export type AddLiquidityBuildCallInput =
-    | AddLiquidityBaseBuildCallInput
+    | AddLiquidityV3BuildCallInput
     | AddLiquidityV2BuildCallInput;
 
 export interface AddLiquidityBase {

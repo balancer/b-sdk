@@ -6,6 +6,7 @@ import {
 } from '../../removeLiquidity/types';
 import { PoolState } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
+import { inputValidationError } from '@/utils';
 
 export const validateTokensAddLiquidity = (
     addLiquidityInput: AddLiquidityInput,
@@ -14,18 +15,21 @@ export const validateTokensAddLiquidity = (
     switch (addLiquidityInput.kind) {
         case AddLiquidityKind.Unbalanced:
             areTokensInArray(
+                'Add Liquidity Unbalanced',
                 addLiquidityInput.amountsIn.map((a) => a.address),
                 poolState.tokens.map((t) => t.address),
             );
             break;
         case AddLiquidityKind.SingleToken:
             areTokensInArray(
+                'Add Liquidity Single Token',
                 [addLiquidityInput.tokenIn],
                 poolState.tokens.map((t) => t.address),
             );
             break;
         case AddLiquidityKind.Proportional:
             areTokensInArray(
+                'Add Liquidity Proportional',
                 [addLiquidityInput.referenceAmount.address],
                 [poolState.address, ...poolState.tokens.map((t) => t.address)], // reference amount can be any pool token or pool BPT
             );
@@ -42,24 +46,28 @@ export const validateTokensRemoveLiquidity = (
     switch (removeLiquidityInput.kind) {
         case RemoveLiquidityKind.Unbalanced:
             areTokensInArray(
+                'Remove Liquidity Unbalanced',
                 removeLiquidityInput.amountsOut.map((a) => a.address),
                 poolState.tokens.map((t) => t.address),
             );
             break;
         case RemoveLiquidityKind.SingleTokenExactOut:
             areTokensInArray(
+                'Remove Liquidity Single Token Exact Out',
                 [removeLiquidityInput.amountOut.address],
                 poolState.tokens.map((t) => t.address),
             );
             break;
         case RemoveLiquidityKind.SingleTokenExactIn:
             areTokensInArray(
+                'Remove Liquidity Single Token Exact In',
                 [removeLiquidityInput.tokenOut],
                 poolState.tokens.map((t) => t.address),
             );
             break;
         case RemoveLiquidityKind.Proportional:
             areTokensInArray(
+                'Remove Liquidity Proportional',
                 [removeLiquidityInput.bptIn.address],
                 [poolState.address],
             );
@@ -72,17 +80,19 @@ export const validateTokensRemoveLiquidityRecovery = (
     poolState: PoolState,
 ) => {
     areTokensInArray(
+        'Remove Liquidity Recovery',
         [removeLiquidityRecoveryInput.bptIn.address],
         [poolState.address],
     );
 };
 
-export const validatePoolHasBpt = (poolState: PoolState) => {
+export const validatePoolHasBpt = (action: string, poolState: PoolState) => {
     const { tokens, address } = poolState;
     const bptIndex = tokens.findIndex((t) => t.address === address);
     if (bptIndex < 0) {
-        throw new Error(
-            'INPUT_ERROR: Pool State should have BPT token included',
+        throw inputValidationError(
+            action,
+            'poolState should have BPT token included for Composable Stable pools',
         );
     }
 };
@@ -90,9 +100,12 @@ export const validatePoolHasBpt = (poolState: PoolState) => {
 export const validateCreatePoolTokens = (tokens: { address: string }[]) => {
     const tokenAddresses = tokens.map((t) => t.address);
     if (tokenAddresses.length !== new Set(tokenAddresses).size) {
-        throw new Error('Duplicate token addresses');
+        throw inputValidationError('Create Pool', 'Duplicate token addresses');
     }
     if (tokens.length < 2) {
-        throw new Error('Minimum of 2 tokens required');
+        throw inputValidationError(
+            'Create Pool',
+            'Minimum of 2 tokens required',
+        );
     }
 };

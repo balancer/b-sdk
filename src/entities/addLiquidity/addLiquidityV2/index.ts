@@ -1,4 +1,4 @@
-import { buildCallWithPermit2ProtocolVersionError } from '@/utils';
+import { protocolVersionError, SDKError } from '@/utils';
 import {
     AddLiquidityBase,
     AddLiquidityBuildCallOutput,
@@ -34,7 +34,11 @@ export class AddLiquidityV2 implements AddLiquidityBase {
 
     public getAddLiquidity(poolType: string): AddLiquidityBase {
         if (!this.addLiquidityTypes[poolType]) {
-            throw new Error(`Unsupported pool type ${poolType}`);
+            throw new SDKError(
+                'Input Validation',
+                'Add Liquidity',
+                `Unsupported pool type ${poolType}`,
+            );
         }
         return this.addLiquidityTypes[poolType];
     }
@@ -52,7 +56,13 @@ export class AddLiquidityV2 implements AddLiquidityBase {
         return this.getAddLiquidity(input.poolType).buildCall(input);
     }
 
-    public buildCallWithPermit2(): AddLiquidityBuildCallOutput {
-        throw buildCallWithPermit2ProtocolVersionError;
+    public buildCallWithPermit2(
+        input: AddLiquidityV2BuildCallInput,
+    ): AddLiquidityBuildCallOutput {
+        throw protocolVersionError(
+            'buildCallWithPermit2',
+            input.protocolVersion,
+            'buildCallWithPermit2 is supported on Balancer v3 only.',
+        );
     }
 }

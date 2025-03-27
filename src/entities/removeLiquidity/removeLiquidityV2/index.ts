@@ -6,11 +6,13 @@ import {
     RemoveLiquidityConfig,
     RemoveLiquidityInput,
     RemoveLiquidityQueryOutput,
+    RemoveLiquidityBaseBuildCallInput,
 } from '@/entities';
 import { RemoveLiquidityWeighted } from './weighted/removeLiquidityWeighted';
 import { RemoveLiquidityComposableStable } from './composableStable/removeLiquidityComposableStable';
 import { PoolType } from '@/types';
 import { RemoveLiquidityStable } from './stable/removeLiquidityStable';
+import { poolTypeError, protocolVersionError } from '@/utils';
 
 export class RemoveLiquidityV2 implements RemoveLiquidityBase {
     private readonly removeLiquidityTypes: Record<string, RemoveLiquidityBase> =
@@ -34,7 +36,7 @@ export class RemoveLiquidityV2 implements RemoveLiquidityBase {
 
     public getRemoveLiquidity(poolType: string): RemoveLiquidityBase {
         if (!this.removeLiquidityTypes[poolType]) {
-            throw new Error(`Unsupported pool type ${poolType}`);
+            throw poolTypeError('Remove Liquidity', poolType);
         }
 
         return this.removeLiquidityTypes[poolType];
@@ -53,7 +55,13 @@ export class RemoveLiquidityV2 implements RemoveLiquidityBase {
         return this.getRemoveLiquidity(input.poolType).buildCall(input);
     }
 
-    buildCallWithPermit(): RemoveLiquidityBuildCallOutput {
-        throw new Error('buildCallWithPermit is not supported on v2');
+    buildCallWithPermit(
+        input: RemoveLiquidityBaseBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
+        throw protocolVersionError(
+            'buildCallWithPermit',
+            input.protocolVersion,
+            'buildCallWithPermit is supported on Balancer v3 only.',
+        );
     }
 }

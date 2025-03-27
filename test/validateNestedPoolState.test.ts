@@ -17,7 +17,7 @@ describe('nested pool state validations', () => {
         test('should throw', () => {
             // Test the exact error message
             expect(() => validateNestedPoolState(missingMain)).toThrowError(
-                /^NestedPoolState, main token must exist as a token of a pool$/,
+                /^Main token 0x.* must exist as a token of a pool$/,
             );
         });
     });
@@ -27,7 +27,7 @@ describe('nested pool state validations', () => {
             expect(() =>
                 validateNestedPoolState(multiTokenPoolState),
             ).toThrowError(
-                /^NestedPoolState, main token can't be token of more than 1 pool$/,
+                /^Main token 0x.* can't be token of more than 1 pool$/,
             );
         });
     });
@@ -47,7 +47,7 @@ describe('nested pool state validations', () => {
         test('should throw', () => {
             // Test the exact error message
             expect(() => validateNestedPoolState(deepPoolState)).toThrowError(
-                /^NestedPoolState, main token only supported to a max of 1 level of nesting$/,
+                /^Main token 0x.* only supported to a max of 1 level of nesting$/,
             );
         });
     });

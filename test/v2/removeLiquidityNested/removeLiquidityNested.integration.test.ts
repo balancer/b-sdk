@@ -29,6 +29,7 @@ import {
     PublicWalletClient,
     RemoveLiquidityNestedCallInputV2,
     RemoveLiquidityNested,
+    inputValidationError,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -222,7 +223,10 @@ describe('remove liquidity nested test', () => {
                 wethIsEth,
             }),
         ).rejects.toThrow(
-            'Removing liquidity to native asset requires wrapped native asset to exist within amounts out',
+            inputValidationError(
+                'Remove Liquidity Nested',
+                'Removing liquidity to native asset requires wrapped native asset to exist within amountsOut',
+            ),
         );
     });
 });

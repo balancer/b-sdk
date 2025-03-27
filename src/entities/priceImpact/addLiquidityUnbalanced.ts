@@ -1,4 +1,6 @@
-import { abs, max, min } from '@/utils';
+import { abs, max, min, SDKError } from '@/utils';
+import { SwapKind } from '@/types';
+
 import { AddLiquidity } from '../addLiquidity';
 import { AddLiquidityUnbalancedInput } from '../addLiquidity/types';
 import { PriceImpactAmount } from '../priceImpactAmount';
@@ -11,7 +13,6 @@ import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { PoolState } from '../types';
 import { priceImpactABA } from './helper';
-import { SwapKind } from '@/types';
 import { Swap, SwapInput } from '../swap';
 
 export const addLiquidityUnbalanced = async (
@@ -31,7 +32,9 @@ export const addLiquidityUnbalanced = async (
         bptOut = queryResult.bptOut;
         poolTokens = amountsIn.map((a) => a.token);
     } catch (err) {
-        throw new Error(
+        throw new SDKError(
+            'Price Impact',
+            'Add Liquidity Unbalanced',
             `addLiquidityUnbalanced operation will fail at SC level with user defined input.\n${err}`,
         );
     }
@@ -58,13 +61,7 @@ export const addLiquidityUnbalanced = async (
         if (deltas[i] === 0n) {
             deltaBPTs.push(0n);
         } else {
-            try {
-                deltaBPTs.push(await queryAddLiquidityForTokenDelta(i));
-            } catch (err) {
-                throw new Error(
-                    `Unexpected error while calculating addLiquidityUnbalanced PI at Delta add step:\n${err}`,
-                );
-            }
+            deltaBPTs.push(await queryAddLiquidityForTokenDelta(i));
         }
     }
 
@@ -155,9 +152,11 @@ export const addLiquidityUnbalanced = async (
                     deltas[resultTokenIndex] + resultAmount.amount;
                 deltaBPTs[resultTokenIndex] =
                     await queryAddLiquidityForTokenDelta(resultTokenIndex);
-            } catch (err) {
-                throw new Error(
-                    `Unexpected error while calculating addLiquidityUnbalanced PI at Swap step:\n${err}`,
+            } catch {
+                throw new SDKError(
+                    'Price Impact',
+                    'Add Liquidity Unbalanced',
+                    'Unexpected error while calculating addLiquidityUnbalanced PI at Swap step',
                 );
             }
         }
@@ -171,14 +170,22 @@ export const addLiquidityUnbalanced = async (
             poolTokens[tokenIndex],
             abs(deltas[tokenIndex]),
         );
-        const { bptOut: deltaBPT } = await addLiquidity.query(
-            {
-                ...input,
-                amountsIn: [absDelta.toInputAmount()],
-            },
-            poolState,
-        );
-        const signal = deltas[tokenIndex] >= 0n ? 1n : -1n;
-        return deltaBPT.amount * signal;
+        try {
+            const { bptOut: deltaBPT } = await addLiquidity.query(
+                {
+                    ...input,
+                    amountsIn: [absDelta.toInputAmount()],
+                },
+                poolState,
+            );
+            const signal = deltas[tokenIndex] >= 0n ? 1n : -1n;
+            return deltaBPT.amount * signal;
+        } catch {
+            throw new SDKError(
+                'Price Impact',
+                'Add Liquidity Unbalanced',
+                'Unexpected error while calculating addLiquidityUnbalanced PI at Delta add step',
+            );
+        }
     }
 };

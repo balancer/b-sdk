@@ -1,41 +1,79 @@
-import { AddLiquidityKind, RemoveLiquidityKind } from '..';
-
-export const addLiquiditySingleTokenShouldHaveTokenInIndexError = Error(
-    'AddLiquidityKind.SingleToken should have tokenInIndex',
-);
-
-export const addLiquidityProportionalUnavailableError = new Error(
-    'AddLiquidityKind.Proportional is not available for V3. Please use ProportionalAmountsHelper to calculate proportional amountsIn and use AddLiquidityKind.Unbalanced instead.',
-);
-
-export const removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError =
-    Error('RemoveLiquidityKind.SingleTokenExactIn should have tokenOutIndex');
-
-export const removeLiquidityUnbalancedNotSupportedOnV3 = Error(
-    'Unbalanced remove liquidity not supported on V3',
-);
-
-export const addLiquidityProportionalNotSupportedOnPoolTypeError = (
-    poolType: string,
+export const missingParameterError = (
+    action: string,
+    param: string,
+    protocolVersion: number,
+    suggestion?: string,
 ) =>
-    Error(`Add Liquidity Proportional not supported on pool type: ${poolType}`);
-
-export const addLiquidityProportionalOnlyError = (
-    kind: AddLiquidityKind,
-    poolType: string,
-) =>
-    Error(
-        `Add Liquidity ${kind} not supported for pool ${poolType}. Use Add Liquidity Proportional`,
+    inputValidationError(
+        action,
+        `${action} input missing parameter ${param} for Balancer v${protocolVersion}`,
+        suggestion,
     );
 
-export const removeLiquidityProportionalOnlyError = (
-    kind: RemoveLiquidityKind,
-    poolType: string,
+export const exceedingParameterError = (
+    action: string,
+    param: string,
+    protocolVersion: number,
+    suggestion?: string,
 ) =>
-    Error(
-        `Remove Liquidity ${kind} not supported for pool ${poolType}. Use Remove Liquidity Proportional`,
+    inputValidationError(
+        action,
+        `${action} input exceeding parameter ${param} for Balancer v${protocolVersion}`,
+        suggestion,
     );
 
-export const buildCallWithPermit2ProtocolVersionError = Error(
-    'buildCall with Permit2 signatures is only available for v3',
-);
+export const protocolVersionError = (
+    action: string,
+    protocolVersion: number,
+    suggestion?: string,
+) =>
+    inputValidationError(
+        action,
+        `${action} not supported for Balancer v${protocolVersion}.`,
+        suggestion,
+    );
+
+export const poolTypeError = (
+    action: string,
+    poolType: string,
+    suggestion?: string,
+) =>
+    inputValidationError(
+        action,
+        `${action} not supported for pool type ${poolType}.`,
+        suggestion,
+    );
+
+export const poolTypeProtocolVersionError = (
+    action: string,
+    poolType: string,
+    protocolVersion: number,
+    suggestion?: string,
+) =>
+    inputValidationError(
+        action,
+        `${action} not supported for pool type ${poolType} on Balancer v${protocolVersion}.`,
+        suggestion,
+    );
+
+export const inputValidationError = (
+    action: string,
+    message: string,
+    suggestion?: string,
+) => new SDKError('Input Validation', action, message, suggestion);
+
+export class SDKError extends Error {
+    constructor(
+        public name: string,
+        public action: string,
+        public message: string,
+        public suggestion?: string,
+    ) {
+        const _message = suggestion ? `${message} ${suggestion}` : message;
+        super(_message);
+        this.name = name;
+        this.action = action;
+
+        Object.setPrototypeOf(this, SDKError.prototype);
+    }
+}
