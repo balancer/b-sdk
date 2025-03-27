@@ -1,5 +1,17 @@
 # @balancer/sdk
 
+## 2.6.0
+
+### Minor Changes
+
+- fee401c: Refactor input validation errors as SDKError
+
+### Patch Changes
+
+- 061f490: Remove test no longer necessary on gnosis-chain
+- 72a0ded: Refactor price impact errors as SDKError
+- 9240e75: Error Handling - Propagate SC Errors
+
 ## 2.5.1
 
 ### Patch Changes
