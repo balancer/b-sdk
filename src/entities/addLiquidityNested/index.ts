@@ -33,6 +33,9 @@ export class AddLiquidityNested {
                 return addLiquidity.query(input, nestedPoolState);
             }
             case 3: {
+                if (input.chainId === 43114) {
+                    throw new Error('Avax not supported for nested operations');
+                }
                 const addLiquidity = new AddLiquidityNestedV3();
                 return addLiquidity.query(input, nestedPoolState, block);
             }
@@ -48,6 +51,9 @@ export class AddLiquidityNested {
                 return addLiquidity.buildCall(input);
             }
             case 3: {
+                if (input.chainId === 43114) {
+                    throw new Error('Avax not supported for nested operations');
+                }
                 const addLiquidity = new AddLiquidityNestedV3();
                 return addLiquidity.buildCall(input);
             }

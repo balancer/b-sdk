@@ -32,6 +32,9 @@ export class RemoveLiquidityNested {
                 return removeLiquidity.query(input, nestedPoolState);
             }
             case 3: {
+                if (input.chainId === 43114) {
+                    throw new Error('Avax not supported for nested operations');
+                }
                 const removeLiquidity = new RemoveLiquidityNestedV3();
                 return removeLiquidity.query(input, nestedPoolState, block);
             }
@@ -48,6 +51,9 @@ export class RemoveLiquidityNested {
                 return removeLiquidity.buildCall(input);
             }
             case 3: {
+                if (input.chainId === 43114) {
+                    throw new Error('Avax not supported for nested operations');
+                }
                 const removeLiquidity = new RemoveLiquidityNestedV3();
                 return removeLiquidity.buildCall(input);
             }

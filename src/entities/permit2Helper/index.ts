@@ -115,10 +115,6 @@ export class Permit2Helper {
         nonces?: number[];
         expirations?: number[];
     }): Promise<Permit2> {
-        if (input.chainId === 43114) {
-            throw new Error('Avax not supported for nested operations');
-        }
-
         validateNoncesAndExpirations(
             input.nonces,
             input.expirations,
