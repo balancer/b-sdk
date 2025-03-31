@@ -140,16 +140,13 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
             ),
         ).rejects.toThrow('Avax not supported for nested operations');
 
-        const addLiquidityNestedBuildCallInput =
-            {} as AddLiquidityNestedCallInput;
-        const avaxAddLiquidityNestedBuildCallInput = {
-            ...addLiquidityNestedBuildCallInput,
-            protocolVersion: 3,
+        const addLiquidityNestedBuildCallInput = {
+            protocolVersion: 3 as const,
             chainId: ChainId.AVALANCHE,
-        };
+        } as AddLiquidityNestedCallInput;
 
         expect(() => {
-            addLiquidityNested.buildCall(avaxAddLiquidityNestedBuildCallInput);
+            addLiquidityNested.buildCall(addLiquidityNestedBuildCallInput);
         }).toThrow('Avax not supported for nested operations');
     });
 

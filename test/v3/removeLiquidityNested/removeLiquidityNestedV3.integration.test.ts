@@ -19,6 +19,7 @@ import {
     PublicWalletClient,
     Token,
     RemoveLiquidityNestedInput,
+    RemoveLiquidityNestedCallInput,
     RemoveLiquidityNested,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     Slippage,
@@ -153,17 +154,14 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
             ),
         ).rejects.toThrow('Avax not supported for nested operations');
 
-        const removeLiquidityNestedBuildCallInput =
-            {} as RemoveLiquidityNestedCallInput;
-        const avaxAddLiquidityNestedBuildCallInput = {
-            ...removeLiquidityNestedBuildCallInput,
-            protocolVersion: 3,
+        const removeLiquidityNestedBuildCallInput = {
+            protocolVersion: 3 as const,
             chainId: ChainId.AVALANCHE,
-        };
+        } as RemoveLiquidityNestedCallInput;
 
         expect(() => {
             removeLiquidityNested.buildCall(
-                avaxAddLiquidityNestedBuildCallInput,
+                removeLiquidityNestedBuildCallInput,
             );
         }).toThrow('Avax not supported for nested operations');
     });
