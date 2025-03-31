@@ -139,6 +139,35 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
         validateTokenAmounts(queryOutput.amountsOut, mainTokens);
     });
 
+    test('nested operations not supported on avalanche', async () => {
+        const addLiquidityInput = {} as RemoveLiquidityNestedInput;
+        const avaxAddLiquidityInput = {
+            ...addLiquidityInput,
+            protocolVersion: 3,
+            chainId: ChainId.AVALANCHE,
+        };
+        await expect(
+            removeLiquidityNested.query(
+                avaxAddLiquidityInput,
+                nestedWithBoostedPool,
+            ),
+        ).rejects.toThrow('Avax not supported for nested operations');
+
+        const removeLiquidityNestedBuildCallInput =
+            {} as RemoveLiquidityNestedCallInput;
+        const avaxAddLiquidityNestedBuildCallInput = {
+            ...removeLiquidityNestedBuildCallInput,
+            protocolVersion: 3,
+            chainId: ChainId.AVALANCHE,
+        };
+
+        expect(() => {
+            removeLiquidityNested.buildCall(
+                avaxAddLiquidityNestedBuildCallInput,
+            );
+        }).toThrow('Avax not supported for nested operations');
+    });
+
     describe('remove liquidity transaction, direct approval on router', async () => {
         test('with tokens', async () => {
             const removeLiquidityNestedInput: RemoveLiquidityNestedInput = {

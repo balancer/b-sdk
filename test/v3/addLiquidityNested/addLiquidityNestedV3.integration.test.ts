@@ -126,6 +126,33 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
         expect(queryOutput.amountsIn).to.deep.eq(expectedAmountsIn);
     });
 
+    test('nested operations not supported on avalanche', async () => {
+        const addLiquidityInput = {} as AddLiquidityNestedInput;
+        const avaxAddLiquidityInput = {
+            ...addLiquidityInput,
+            protocolVersion: 3,
+            chainId: ChainId.AVALANCHE,
+        };
+        await expect(
+            addLiquidityNested.query(
+                avaxAddLiquidityInput,
+                nestedWithBoostedPool,
+            ),
+        ).rejects.toThrow('Avax not supported for nested operations');
+
+        const addLiquidityNestedBuildCallInput =
+            {} as AddLiquidityNestedCallInput;
+        const avaxAddLiquidityNestedBuildCallInput = {
+            ...addLiquidityNestedBuildCallInput,
+            protocolVersion: 3,
+            chainId: ChainId.AVALANCHE,
+        };
+
+        expect(() => {
+            addLiquidityNested.buildCall(avaxAddLiquidityNestedBuildCallInput);
+        }).toThrow('Avax not supported for nested operations');
+    });
+
     describe('add liquidity transaction', async () => {
         test('with tokens', async () => {
             const addLiquidityInput: AddLiquidityNestedInput = {
