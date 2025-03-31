@@ -69,6 +69,10 @@ export class PermitHelper {
         nonce?: bigint;
         deadline?: bigint;
     }): Promise<Permit> => {
+        if (input.chainId === 43114) {
+            throw new Error('Avax not supported for nested operations');
+        }
+
         const _owner =
             typeof input.owner === 'string' ? input.owner : input.owner.address;
         const nonce =

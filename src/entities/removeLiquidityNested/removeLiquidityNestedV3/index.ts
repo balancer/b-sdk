@@ -24,6 +24,9 @@ export class RemoveLiquidityNestedV3 {
         nestedPoolState: NestedPoolState,
         block?: bigint,
     ): Promise<RemoveLiquidityNestedQueryOutputV3> {
+        if (input.chainId === 43114) {
+            throw new Error('Avax not supported for nested operations');
+        }
         // Address of the highest level pool (which contains BPTs of other pools), i.e. the pool we wish to join
         const parentPool = nestedPoolState.pools.reduce((max, curr) =>
             curr.level > max.level ? curr : max,
@@ -63,6 +66,9 @@ export class RemoveLiquidityNestedV3 {
     buildCall(
         input: RemoveLiquidityNestedCallInputV3,
     ): RemoveLiquidityNestedBuildCallOutput {
+        if (input.chainId === 43114) {
+            throw new Error('Avax not supported for nested operations');
+        }
         // validateBuildCallInput(input); TODO - Add this like V2 once weth/native is allowed
 
         // apply slippage to amountsOut
