@@ -60,15 +60,16 @@ export type RemoveLiquidityAmounts = {
 type NestedPoolBase = {
     id: Hex;
     address: Address;
-    type: PoolType;
     level: number; // 0 is the bottom and the highest level is the top
 };
 
 export type NestedPoolV2 = NestedPoolBase & {
+    type: PoolType;
     tokens: MinimalToken[]; // each token should have at least one
 };
 
 export type NestedPoolV3 = NestedPoolBase & {
+    type: string;
     tokens: PoolTokenWithUnderlying[]; // each token should have at least one
 };
 

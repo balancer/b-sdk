@@ -40,7 +40,10 @@ export class BoostedPools {
         const poolGetPool: PoolStateWithUnderlyings = {
             ...data.poolGetPool,
             tokens: data.poolGetPool.poolTokens,
-            type: mapPoolType(data.poolGetPool.type),
+            type:
+                data.poolGetPool.protocolVersion === 2
+                    ? mapPoolType(data.poolGetPool.type)
+                    : data.poolGetPool.type,
         };
         return poolGetPool;
     }

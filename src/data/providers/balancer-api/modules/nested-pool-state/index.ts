@@ -99,11 +99,15 @@ export class NestedPools {
 }
 
 export function mapPoolToNestedPoolStateV3(pool: PoolGetPool): NestedPoolState {
+    if (pool.protocolVersion !== 3) {
+        throw new Error('Pool protocol version is not 3');
+    }
+
     const pools: NestedPoolV3[] = [
         {
             id: pool.id,
             address: pool.address,
-            type: mapPoolType(pool.type),
+            type: pool.type,
             level: 1,
             tokens: pool.poolTokens.map((t) => {
                 const minimalToken: PoolTokenWithUnderlying = {
