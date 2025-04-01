@@ -1,4 +1,4 @@
-import { inputValidationError } from '..';
+import { inputValidationError } from './errors';
 import { Token } from '../entities/token';
 import { TokenAmount, BigintIsh } from '../entities/tokenAmount';
 import { Address, SwapKind } from '../types';
