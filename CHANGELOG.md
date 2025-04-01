@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.7.0
+
+### Minor Changes
+
+- a3e92ad: add avalanche support
+
 ## 2.6.0
 
 ### Minor Changes
