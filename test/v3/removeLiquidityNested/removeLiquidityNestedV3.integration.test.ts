@@ -156,8 +156,8 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
         ).rejects.toThrow(
             new SDKError(
                 'Input Validation',
-                'Add Liquidity Nested',
-                'Balancer V3 does not support this operation on Avalanche',
+                'Remove Liquidity Nested',
+                'Balancer V3 does not support remove liquidity nested on Avalanche',
             ),
         );
 
