@@ -143,7 +143,7 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
             new SDKError(
                 'Input Validation',
                 'Add Liquidity Nested',
-                'Balancer V3 does not support this operation on Avalanche',
+                'Balancer V3 does not support add liquidity nested on Avalanche',
             ),
         );
 
