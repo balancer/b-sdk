@@ -12,7 +12,8 @@ import { Permit2 } from '../permit2Helper';
 import { AddLiquidityNestedCallInputV3 } from './addLiquidityNestedV3/types';
 import { Slippage } from '../slippage';
 import { Address, Hex } from 'viem';
-import { protocolVersionError } from '@/utils/errors';
+import { protocolVersionError, SDKError } from '@/utils/errors';
+import { ChainId } from '@/utils';
 
 export class AddLiquidityNested {
     async query(
@@ -33,8 +34,12 @@ export class AddLiquidityNested {
                 return addLiquidity.query(input, nestedPoolState);
             }
             case 3: {
-                if (input.chainId === 43114) {
-                    throw new Error('Avax not supported for nested operations');
+                if (input.chainId === ChainId.AVALANCHE) {
+                    throw new SDKError(
+                        'Input Validation',
+                        'Add Liquidity Nested',
+                        'Balancer V3 does not support this operation on Avalanche',
+                    );
                 }
                 const addLiquidity = new AddLiquidityNestedV3();
                 return addLiquidity.query(input, nestedPoolState, block);
@@ -51,8 +56,12 @@ export class AddLiquidityNested {
                 return addLiquidity.buildCall(input);
             }
             case 3: {
-                if (input.chainId === 43114) {
-                    throw new Error('Avax not supported for nested operations');
+                if (input.chainId === ChainId.AVALANCHE) {
+                    throw new SDKError(
+                        'Input Validation',
+                        'Add Liquidity Nested',
+                        'Balancer V3 does not support this operation on Avalanche',
+                    );
                 }
                 const addLiquidity = new AddLiquidityNestedV3();
                 return addLiquidity.buildCall(input);

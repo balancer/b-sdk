@@ -11,7 +11,7 @@ import { RemoveLiquidityNestedV3 } from './removeLiquidityNestedV3';
 import { validateBuildCallInput } from './removeLiquidityNestedV2/validateInputs';
 import { Address, encodeFunctionData, Hex, zeroAddress } from 'viem';
 import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
-import { protocolVersionError } from '@/utils';
+import { ChainId, protocolVersionError, SDKError } from '@/utils';
 
 export class RemoveLiquidityNested {
     async query(
@@ -32,8 +32,12 @@ export class RemoveLiquidityNested {
                 return removeLiquidity.query(input, nestedPoolState);
             }
             case 3: {
-                if (input.chainId === 43114) {
-                    throw new Error('Avax not supported for nested operations');
+                if (input.chainId === ChainId.AVALANCHE) {
+                    throw new SDKError(
+                        'Input Validation',
+                        'Add Liquidity Nested',
+                        'Balancer V3 does not support this operation on Avalanche',
+                    );
                 }
                 const removeLiquidity = new RemoveLiquidityNestedV3();
                 return removeLiquidity.query(input, nestedPoolState, block);
@@ -51,8 +55,12 @@ export class RemoveLiquidityNested {
                 return removeLiquidity.buildCall(input);
             }
             case 3: {
-                if (input.chainId === 43114) {
-                    throw new Error('Avax not supported for nested operations');
+                if (input.chainId === ChainId.AVALANCHE) {
+                    throw new SDKError(
+                        'Input Validation',
+                        'Add Liquidity Nested',
+                        'Balancer V3 does not support this operation on Avalanche',
+                    );
                 }
                 const removeLiquidity = new RemoveLiquidityNestedV3();
                 return removeLiquidity.buildCall(input);
