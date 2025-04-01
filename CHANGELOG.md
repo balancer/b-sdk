@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 2.7.1
+
+### Patch Changes
+
+- 57d2532: Fix Install check in our CI pipeline
+
 ## 2.7.0
 
 ### Minor Changes
