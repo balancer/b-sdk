@@ -12,8 +12,7 @@ import { Permit2 } from '../permit2Helper';
 import { AddLiquidityNestedCallInputV3 } from './addLiquidityNestedV3/types';
 import { Slippage } from '../slippage';
 import { Address, Hex } from 'viem';
-import { protocolVersionError, SDKError } from '@/utils/errors';
-import { ChainId } from '@/utils';
+import { protocolVersionError } from '@/utils/errors';
 
 export class AddLiquidityNested {
     async query(

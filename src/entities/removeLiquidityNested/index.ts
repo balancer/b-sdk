@@ -11,7 +11,7 @@ import { RemoveLiquidityNestedV3 } from './removeLiquidityNestedV3';
 import { validateBuildCallInput } from './removeLiquidityNestedV2/validateInputs';
 import { Address, encodeFunctionData, Hex, zeroAddress } from 'viem';
 import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
-import { ChainId, protocolVersionError, SDKError } from '@/utils';
+import { protocolVersionError } from '@/utils';
 
 export class RemoveLiquidityNested {
     async query(
