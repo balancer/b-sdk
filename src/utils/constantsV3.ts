@@ -56,6 +56,7 @@ export const STABLE_SURGE_FACTORY: Record<number, Address> = {
     [ChainId.GNOSIS_CHAIN]: '0x268E2EE1413D768b6e2dc3F5a4ddc9Ae03d9AF42',
     [ChainId.MAINNET]: '0xD53F5d8d926fb2a0f7Be614B16e649B8aC102D83',
     [ChainId.SEPOLIA]: '0xD516c344413B4282dF1E4082EAE6B1081F3b1932',
+    // TODO once deployed [ChainId.AVALANCHE]: '0x0..',
 };
 
 export const GYROECLP_POOL_FACTORY_BALANCER_V3: Record<number, Address> = {
