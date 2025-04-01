@@ -34,13 +34,6 @@ export class AddLiquidityNested {
                 return addLiquidity.query(input, nestedPoolState);
             }
             case 3: {
-                if (input.chainId === ChainId.AVALANCHE) {
-                    throw new SDKError(
-                        'Input Validation',
-                        'Add Liquidity Nested',
-                        'Balancer V3 does not support add liquidity nested on Avalanche',
-                    );
-                }
                 const addLiquidity = new AddLiquidityNestedV3();
                 return addLiquidity.query(input, nestedPoolState, block);
             }
@@ -56,13 +49,6 @@ export class AddLiquidityNested {
                 return addLiquidity.buildCall(input);
             }
             case 3: {
-                if (input.chainId === ChainId.AVALANCHE) {
-                    throw new SDKError(
-                        'Input Validation',
-                        'Add Liquidity Nested',
-                        'Balancer V3 does not support this operation on Avalanche',
-                    );
-                }
                 const addLiquidity = new AddLiquidityNestedV3();
                 return addLiquidity.buildCall(input);
             }

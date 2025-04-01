@@ -14,7 +14,12 @@ import {
 import { Token } from '@/entities/token';
 import { getAmounts, getValue } from '@/entities/utils';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
+import {
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
+    CHAINS,
+    ChainId,
+    SDKError,
+} from '@/utils';
 import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
 import {
     AddLiquidityNestedCallInputV3,
@@ -36,6 +41,13 @@ export class AddLiquidityNestedV3 {
         nestedPoolState: NestedPoolState,
         block?: bigint,
     ): Promise<AddLiquidityNestedQueryOutputV3> {
+        if (input.chainId === ChainId.AVALANCHE) {
+            throw new SDKError(
+                'Input Validation',
+                'Add Liquidity Nested',
+                'Balancer V3 does not support add liquidity nested on Avalanche',
+            );
+        }
         validateQueryInput(input, nestedPoolState);
 
         // Address of the highest level pool (which contains BPTs of other pools), i.e. the pool we wish to join
@@ -80,6 +92,13 @@ export class AddLiquidityNestedV3 {
     buildCall(
         input: AddLiquidityNestedCallInputV3,
     ): AddLiquidityNestedBuildCallOutput {
+        if (input.chainId === ChainId.AVALANCHE) {
+            throw new SDKError(
+                'Input Validation',
+                'Add Liquidity Nested',
+                'Balancer V3 does not support add liquidity nested on Avalanche',
+            );
+        }
         // validateBuildCallInput(input); TODO - Add this like V2 once weth/native is allowed
         // apply slippage to bptOut
         const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);

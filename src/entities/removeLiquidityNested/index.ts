@@ -32,13 +32,6 @@ export class RemoveLiquidityNested {
                 return removeLiquidity.query(input, nestedPoolState);
             }
             case 3: {
-                if (input.chainId === ChainId.AVALANCHE) {
-                    throw new SDKError(
-                        'Input Validation',
-                        'Add Liquidity Nested',
-                        'Balancer V3 does not support this operation on Avalanche',
-                    );
-                }
                 const removeLiquidity = new RemoveLiquidityNestedV3();
                 return removeLiquidity.query(input, nestedPoolState, block);
             }
@@ -55,13 +48,6 @@ export class RemoveLiquidityNested {
                 return removeLiquidity.buildCall(input);
             }
             case 3: {
-                if (input.chainId === ChainId.AVALANCHE) {
-                    throw new SDKError(
-                        'Input Validation',
-                        'Remove Liquidity Nested',
-                        'Balancer V3 does not support remove liquidity nested on Avalanche',
-                    );
-                }
                 const removeLiquidity = new RemoveLiquidityNestedV3();
                 return removeLiquidity.buildCall(input);
             }
