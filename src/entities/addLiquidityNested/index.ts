@@ -38,7 +38,7 @@ export class AddLiquidityNested {
                     throw new SDKError(
                         'Input Validation',
                         'Add Liquidity Nested',
-                        'Balancer V3 does not support this operation on Avalanche',
+                        'Balancer V3 does not support add liquidity nested on Avalanche',
                     );
                 }
                 const addLiquidity = new AddLiquidityNestedV3();

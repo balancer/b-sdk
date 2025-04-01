@@ -58,8 +58,8 @@ export class RemoveLiquidityNested {
                 if (input.chainId === ChainId.AVALANCHE) {
                     throw new SDKError(
                         'Input Validation',
-                        'Add Liquidity Nested',
-                        'Balancer V3 does not support this operation on Avalanche',
+                        'Remove Liquidity Nested',
+                        'Balancer V3 does not support remove liquidity nested on Avalanche',
                     );
                 }
                 const removeLiquidity = new RemoveLiquidityNestedV3();
