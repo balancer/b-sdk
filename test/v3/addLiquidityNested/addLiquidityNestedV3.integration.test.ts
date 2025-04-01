@@ -26,6 +26,7 @@ import {
     AddLiquidityNestedInput,
     AddLiquidityNestedQueryOutputV3,
     AddLiquidityNestedCallInput,
+    SDKError,
 } from '@/index';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
@@ -138,7 +139,13 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
                 avaxAddLiquidityInput,
                 nestedWithBoostedPool,
             ),
-        ).rejects.toThrow('Avax not supported for nested operations');
+        ).rejects.toThrow(
+            new SDKError(
+                'Input Validation',
+                'Add Liquidity Nested',
+                'Balancer V3 does not support this operation on Avalanche',
+            ),
+        );
 
         const addLiquidityNestedBuildCallInput = {
             protocolVersion: 3 as const,
@@ -147,7 +154,13 @@ describe('V3 add liquidity nested test, with Permit2 direct approval', () => {
 
         expect(() => {
             addLiquidityNested.buildCall(addLiquidityNestedBuildCallInput);
-        }).toThrow('Avax not supported for nested operations');
+        }).toThrow(
+            new SDKError(
+                'Input Validation',
+                'Add Liquidity Nested',
+                'Balancer V3 does not support this operation on Avalanche',
+            ),
+        );
     });
 
     describe('add liquidity transaction', async () => {

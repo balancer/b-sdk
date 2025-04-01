@@ -23,6 +23,7 @@ import {
     RemoveLiquidityNested,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     Slippage,
+    SDKError,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -152,7 +153,13 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
                 avaxAddLiquidityInput,
                 nestedWithBoostedPool,
             ),
-        ).rejects.toThrow('Avax not supported for nested operations');
+        ).rejects.toThrow(
+            new SDKError(
+                'Input Validation',
+                'Add Liquidity Nested',
+                'Balancer V3 does not support this operation on Avalanche',
+            ),
+        );
 
         const removeLiquidityNestedBuildCallInput = {
             protocolVersion: 3 as const,
@@ -163,7 +170,13 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
             removeLiquidityNested.buildCall(
                 removeLiquidityNestedBuildCallInput,
             );
-        }).toThrow('Avax not supported for nested operations');
+        }).toThrow(
+            new SDKError(
+                'Input Validation',
+                'Add Liquidity Nested',
+                'Balancer V3 does not support this operation on Avalanche',
+            ),
+        );
     });
 
     describe('remove liquidity transaction, direct approval on router', async () => {
