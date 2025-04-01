@@ -7,11 +7,23 @@ import {
     CreatePoolStableSurgeInput,
 } from '../../types';
 import { stableSurgeFactoryAbiExtended } from '@/abi';
-import { STABLE_SURGE_FACTORY, sortByAddress } from '@/utils';
+import {
+    STABLE_SURGE_FACTORY,
+    sortByAddress,
+    ChainId,
+    SDKError,
+} from '@/utils';
 import { Hex } from '@/types';
 
 export class CreatePoolStableSurge implements CreatePoolBase {
     buildCall(input: CreatePoolStableSurgeInput): CreatePoolBuildCallOutput {
+        if (input.chainId === ChainId.AVALANCHE) {
+            throw new SDKError(
+                'Input Validation',
+                'Create Pool Stable Surge',
+                'Balancer V3 does not support create pool stable surge on Avalanche',
+            );
+        }
         const callData = this.encodeCall(input);
         return {
             callData,

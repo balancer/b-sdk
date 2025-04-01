@@ -19,9 +19,11 @@ import {
     PublicWalletClient,
     Token,
     RemoveLiquidityNestedInput,
+    RemoveLiquidityNestedCallInput,
     RemoveLiquidityNested,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     Slippage,
+    SDKError,
 } from 'src';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
@@ -137,6 +139,44 @@ describe('V3 remove liquidity nested test, with Permit direct approval', () => {
             nestedWithBoostedPool.mainTokens.length,
         );
         validateTokenAmounts(queryOutput.amountsOut, mainTokens);
+    });
+
+    test('nested operations not supported on avalanche', async () => {
+        const addLiquidityInput = {} as RemoveLiquidityNestedInput;
+        const avaxAddLiquidityInput = {
+            ...addLiquidityInput,
+            protocolVersion: 3,
+            chainId: ChainId.AVALANCHE,
+        };
+        await expect(
+            removeLiquidityNested.query(
+                avaxAddLiquidityInput,
+                nestedWithBoostedPool,
+            ),
+        ).rejects.toThrow(
+            new SDKError(
+                'Input Validation',
+                'Remove Liquidity Nested',
+                'Balancer V3 does not support remove liquidity nested on Avalanche',
+            ),
+        );
+
+        const removeLiquidityNestedBuildCallInput = {
+            protocolVersion: 3 as const,
+            chainId: ChainId.AVALANCHE,
+        } as RemoveLiquidityNestedCallInput;
+
+        expect(() => {
+            removeLiquidityNested.buildCall(
+                removeLiquidityNestedBuildCallInput,
+            );
+        }).toThrow(
+            new SDKError(
+                'Input Validation',
+                'Remove Liquidity Nested',
+                'Balancer V3 does not support remove liquidity nested on Avalanche',
+            ),
+        );
     });
 
     describe('remove liquidity transaction, direct approval on router', async () => {
