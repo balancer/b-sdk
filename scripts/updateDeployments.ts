@@ -7,7 +7,7 @@ type SupportedNetworkResponse = {
     blockExplorer: string;
 };
 
-type NetworkRegistry = {
+type NetworkRegistryResponse = {
     [key: string]: {
         contracts: { name: string; address: Address }[];
         status: 'ACTIVE' | 'DEPRECATED' | 'SCRIPT';
@@ -15,8 +15,12 @@ type NetworkRegistry = {
     };
 };
 
+type AbiResponse = {
+    abi: any[];
+};
+
 // {v2: {contractName: {chainId: address, ...}, v3: {contractName: {chainId: address, ...}}}
-export type ContractRegistry = {
+type ContractRegistry = {
     [key: string]: {
         [key: string]: {
             [key: string]: Address;
@@ -24,11 +28,12 @@ export type ContractRegistry = {
     };
 };
 
+const targetContractsV3 = ['Vault', 'VaultAdmin', 'Router'];
+
 export async function updateDeployments() {
     const res = await fetch(
         'https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/.supported-networks.json',
     );
-
     const data: Record<string, SupportedNetworkResponse> = await res.json();
 
     const supportedNetworks = Object.entries(data).map(
@@ -38,40 +43,60 @@ export async function updateDeployments() {
     const contractRegistry: ContractRegistry = {};
 
     await Promise.all(
-        supportedNetworks.map(async ({ name, chainId }) => {
-            const res = await fetch(
-                `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/${name}.json`,
-            );
-
-            const data: NetworkRegistry = await res.json();
+        supportedNetworks.map(async ({ name: networkName, chainId }) => {
+            const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/${networkName}.json`;
+            const res = await fetch(url);
+            const data: NetworkRegistryResponse = await res.json();
 
             Object.entries(data)
                 .filter(([_, value]) => value.status === 'ACTIVE')
-                .forEach(([_, value]) => {
-                    value.contracts.forEach((contract) => {
-                        // Initialize version object if it doesn't exist
-                        if (!contractRegistry[value.version]) {
-                            contractRegistry[value.version] = {};
+                .forEach(([taskId, value]) => {
+                    const { version } = value;
+
+                    value.contracts.map(async (contract) => {
+                        // update the contract registry
+                        if (!contractRegistry[version]) {
+                            contractRegistry[version] = {};
                         }
-                        // Initialize contract object if it doesn't exist under this version
-                        if (!contractRegistry[value.version][contract.name]) {
-                            contractRegistry[value.version][contract.name] = {};
+                        if (!contractRegistry[version][contract.name]) {
+                            contractRegistry[version][contract.name] = {};
                         }
-                        // Add the address
                         contractRegistry[value.version][contract.name][
                             chainId
                         ] = contract.address;
+
+                        // grab contract abis
+                        if (
+                            version === 'v3' &&
+                            networkName === 'mainnet' &&
+                            targetContractsV3.includes(contract.name)
+                        ) {
+                            const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/v3/tasks/${taskId}/artifact/${contract.name}.json`;
+                            const res = await fetch(url);
+                            const data: AbiResponse = await res.json();
+
+                            const content = `export const ${
+                                contract.name
+                            }Abi = ${JSON.stringify(
+                                data.abi,
+                                undefined,
+                                4,
+                            )} as const;`;
+
+                            const path = `./src/abi/${value.version}/${contract.name}.ts`;
+                            writeFileSync(path, content);
+                        }
                     });
                 });
         }),
     );
 
+    // save contract registry to balancerContracts.ts
     const content = `export const balancerContracts = ${JSON.stringify(
         contractRegistry,
         undefined,
         4,
     )} as const;`;
-
     writeFileSync('./src/utils/balancerContracts.ts', content);
 }
 
