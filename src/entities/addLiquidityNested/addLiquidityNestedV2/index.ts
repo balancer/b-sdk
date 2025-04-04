@@ -8,7 +8,7 @@ import { balancerRelayerAbiExtended } from '../../../abi';
 import { doAddLiquidityNestedQuery } from './doAddLiquidityNestedQuery';
 import { getQueryCallsAttributes } from './getQueryCallsAttributes';
 import { validateBuildCallInput, validateQueryInput } from './validateInputs';
-import { NestedPoolState } from '../../types';
+import { NestedPoolStateV2 } from '../../types';
 import {
     AddLiquidityNestedBuildCallOutput,
     AddLiquidityNestedInput,
@@ -21,7 +21,7 @@ import {
 export class AddLiquidityNestedV2 {
     async query(
         input: AddLiquidityNestedInput,
-        nestedPoolState: NestedPoolState,
+        nestedPoolState: NestedPoolStateV2,
     ): Promise<AddLiquidityNestedQueryOutputV2> {
         const amountsIn = validateQueryInput(input, nestedPoolState);
 
