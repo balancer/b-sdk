@@ -35,7 +35,7 @@ export async function updateDeployments() {
         ([name, { chainId }]) => ({ name, chainId }),
     );
 
-    const contractRegistry: ContractRegistry = { v2: {}, v3: {} };
+    const contractRegistry: ContractRegistry = {};
 
     await Promise.all(
         supportedNetworks.map(async ({ name, chainId }) => {
@@ -48,7 +48,6 @@ export async function updateDeployments() {
             Object.entries(data)
                 .filter(([_, value]) => value.status === 'ACTIVE')
                 .forEach(([_, value]) => {
-                    // Process all contracts under this version
                     value.contracts.forEach((contract) => {
                         // Initialize version object if it doesn't exist
                         if (!contractRegistry[value.version]) {

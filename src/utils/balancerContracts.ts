@@ -578,18 +578,6 @@ export const balancerContracts = {
         OptimisticRootGauge: {
             '1': '0x37302B98918382c43a176e5f3Bc7B11448cC6498',
         },
-        L2LayerZeroBridgeForwarder: {
-            '10': '0xbef13D1e54D0c79DA8B0AD704883E1Cea7EB2100',
-            '56': '0x20AabBC59F3cE58e0ef931380d8Bf2A6fE681019',
-            '100': '0xeb151668006CD04DAdD098AFd0a82e78F77076c3',
-            '137': '0xB98F54A74590a6e681fF664b2Fa22EBfFe1a929E',
-            '252': '0xa523f47A933D5020b23629dDf689695AA94612Dc',
-            '1101': '0xDEd7Fef7D8eCdcB74F22f0169e1A9EC696e6695d',
-            '8453': '0x8eA89804145c007e7D226001A96955ad53836087',
-            '42161': '0x12Ca9De662A7Bf5Dc89e034a5083eF751B08EDe7',
-            '43114': '0x4638ab64022927C9bD5947607459D13f57f1551C',
-            '11155111': '0xc7E5ED1054A24Ef31D827E6F86caA58B3Bc168d7',
-        },
         MockLiquidityBootstrappingPool: {
             '252': '0xaeace3B34BcA1BFe585e4B0Bb303e60e0771F139',
             '1101': '0x3c87FF3e9307dbEbfAe720E04C6439e49f79BF9B',
@@ -644,6 +632,18 @@ export const balancerContracts = {
             '42161': '0x9dA18982a33FD0c7051B19F0d7C76F2d5E7e017c',
             '43114': '0x6B1Da720Be2D11d95177ccFc40A917c2688f396c',
             '11155111': '0x475D18169BE8a89357A9ee3Ab00ca386d20fA229',
+        },
+        L2LayerZeroBridgeForwarder: {
+            '10': '0xbef13D1e54D0c79DA8B0AD704883E1Cea7EB2100',
+            '56': '0x20AabBC59F3cE58e0ef931380d8Bf2A6fE681019',
+            '100': '0xeb151668006CD04DAdD098AFd0a82e78F77076c3',
+            '137': '0xB98F54A74590a6e681fF664b2Fa22EBfFe1a929E',
+            '252': '0xa523f47A933D5020b23629dDf689695AA94612Dc',
+            '1101': '0xDEd7Fef7D8eCdcB74F22f0169e1A9EC696e6695d',
+            '8453': '0x8eA89804145c007e7D226001A96955ad53836087',
+            '42161': '0x12Ca9De662A7Bf5Dc89e034a5083eF751B08EDe7',
+            '43114': '0x4638ab64022927C9bD5947607459D13f57f1551C',
+            '11155111': '0xc7E5ED1054A24Ef31D827E6F86caA58B3Bc168d7',
         },
         OmniVotingEscrowChild: {
             '10': '0xE241C6e48CA045C7f631600a0f1403b2bFea05ad',
