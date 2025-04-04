@@ -1,13 +1,13 @@
 import { Address } from 'viem';
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 
-type NetworkInfo = {
+type SupportedNetworkResponse = {
     name: string;
     chainId: number;
     blockExplorer: string;
 };
 
-type AddressRegistryData = {
+type NetworkRegistry = {
     [key: string]: {
         contracts: { name: string; address: Address }[];
         status: 'ACTIVE' | 'DEPRECATED' | 'SCRIPT';
@@ -15,10 +15,12 @@ type AddressRegistryData = {
     };
 };
 
-// contractName: {chainId: address}
-type ContractRegistry = {
+// {v2: {contractName: {chainId: address, ...}, v3: {contractName: {chainId: address, ...}}}
+export type ContractRegistry = {
     [key: string]: {
-        [key: string]: Address;
+        [key: string]: {
+            [key: string]: Address;
+        };
     };
 };
 
@@ -27,13 +29,13 @@ export async function updateDeployments() {
         'https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/.supported-networks.json',
     );
 
-    const data: Record<string, NetworkInfo> = await res.json();
+    const data: Record<string, SupportedNetworkResponse> = await res.json();
 
     const supportedNetworks = Object.entries(data).map(
         ([name, { chainId }]) => ({ name, chainId }),
     );
 
-    const contractRegistry: ContractRegistry = {};
+    const contractRegistry: ContractRegistry = { v2: {}, v3: {} };
 
     await Promise.all(
         supportedNetworks.map(async ({ name, chainId }) => {
@@ -41,67 +43,37 @@ export async function updateDeployments() {
                 `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/${name}.json`,
             );
 
-            const data: AddressRegistryData = await res.json();
+            const data: NetworkRegistry = await res.json();
 
             Object.entries(data)
-                .filter(
-                    ([_, value]) =>
-                        value.status === 'ACTIVE' && value.version === 'v3',
-                )
-                .flatMap(([_, value]) => value.contracts)
-                .forEach((contract) => {
-                    if (!contractRegistry[contract.name]) {
-                        contractRegistry[contract.name] = {};
-                    }
-                    contractRegistry[contract.name][chainId] = contract.address;
+                .filter(([_, value]) => value.status === 'ACTIVE')
+                .forEach(([_, value]) => {
+                    // Process all contracts under this version
+                    value.contracts.forEach((contract) => {
+                        // Initialize version object if it doesn't exist
+                        if (!contractRegistry[value.version]) {
+                            contractRegistry[value.version] = {};
+                        }
+                        // Initialize contract object if it doesn't exist under this version
+                        if (!contractRegistry[value.version][contract.name]) {
+                            contractRegistry[value.version][contract.name] = {};
+                        }
+                        // Add the address
+                        contractRegistry[value.version][contract.name][
+                            chainId
+                        ] = contract.address;
+                    });
                 });
         }),
     );
 
-    const constantsV3 = './src/utils/constantsV3.ts';
-    let content = readFileSync(constantsV3, 'utf8');
+    const content = `export const balancerContracts = ${JSON.stringify(
+        contractRegistry,
+        undefined,
+        4,
+    )} as const;`;
 
-    const deploymentToSdkName = {
-        Vault: 'VAULT_V3',
-        VaultAdmin: 'VAULT_ADMIN',
-        // Routers
-        Router: 'BALANCER_ROUTER',
-        BatchRouter: 'BALANCER_BATCH_ROUTER',
-        CompositeLiquidityRouter: 'BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED', // boosted is only one 'ACTIVE' ?
-        BufferRouter: 'BALANCER_BUFFER_ROUTER',
-        // Factories
-        WeightedPoolFactory: 'WEIGHTED_POOL_FACTORY_BALANCER_V3',
-        StablePoolFactory: 'STABLE_POOL_FACTORY_BALANCER_V3',
-        StableSurgePoolFactory: 'STABLE_SURGE_FACTORY',
-        GyroECLPPoolFactory: 'GYROECLP_POOL_FACTORY_BALANCER_V3',
-        Gyro2CLPPoolFactory: 'GYRO2CLP_POOL_FACTORY_BALANCER_V3',
-        // Add more as needed...
-    };
-
-    Object.entries(deploymentToSdkName).forEach(([deploymentName, sdkName]) => {
-        const contractExists = content.includes(`export const ${sdkName}`);
-
-        if (contractExists) {
-            // Update existing contract
-            content = content.replace(
-                new RegExp(`export const ${sdkName}[\\s\\S]*?= {[\\s\\S]*?}`),
-                `export const ${sdkName}: Record<number, Address> = ${JSON.stringify(
-                    contractRegistry[deploymentName],
-                    undefined,
-                    4,
-                )}`,
-            );
-        } else {
-            // Add new contract
-            content = `${content}\n\nexport const ${sdkName}: Record<number, Address> = ${JSON.stringify(
-                contractRegistry[deploymentName],
-                undefined,
-                4,
-            )};`;
-        }
-    });
-
-    writeFileSync(constantsV3, content);
+    writeFileSync('./src/utils/balancerContracts.ts', content);
 }
 
 updateDeployments();
