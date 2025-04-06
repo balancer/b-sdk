@@ -1,11 +1,13 @@
 import { Address } from 'viem';
 import { ChainId } from './constants';
+import { balancerV3Contracts } from './balancerV3Contracts';
 
+const { Vault } = balancerV3Contracts;
 // V3
 export const VAULT_V3: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
-    [ChainId.MAINNET]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
-    [ChainId.GNOSIS_CHAIN]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
+    [ChainId.SEPOLIA]: Vault[ChainId.SEPOLIA],
+    [ChainId.MAINNET]: Vault[ChainId.MAINNET],
+    [ChainId.GNOSIS_CHAIN]: Vault[ChainId.GNOSIS_CHAIN],
     [ChainId.SONIC]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
     [ChainId.ARBITRUM_ONE]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
     [ChainId.BASE]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
