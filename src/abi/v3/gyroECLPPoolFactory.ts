@@ -1,4 +1,4 @@
-export const StablePoolFactoryAbi = [
+export const gyroECLPPoolFactoryAbi = [
     {
         inputs: [
             {
@@ -68,11 +68,6 @@ export const StablePoolFactoryAbi = [
     },
     {
         inputs: [],
-        name: 'MaxTokens',
-        type: 'error',
-    },
-    {
-        inputs: [],
         name: 'PoolPauseWindowDurationOverflow',
         type: 'error',
     },
@@ -84,6 +79,11 @@ export const StablePoolFactoryAbi = [
     {
         inputs: [],
         name: 'StandardPoolWithCreator',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'SupportsOnlyTwoTokens',
         type: 'error',
     },
     {
@@ -145,9 +145,102 @@ export const StablePoolFactoryAbi = [
                 type: 'tuple[]',
             },
             {
-                internalType: 'uint256',
-                name: 'amplificationParameter',
-                type: 'uint256',
+                components: [
+                    {
+                        internalType: 'int256',
+                        name: 'alpha',
+                        type: 'int256',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 'beta',
+                        type: 'int256',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 'c',
+                        type: 'int256',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 's',
+                        type: 'int256',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 'lambda',
+                        type: 'int256',
+                    },
+                ],
+                internalType: 'struct IGyroECLPPool.EclpParams',
+                name: 'eclpParams',
+                type: 'tuple',
+            },
+            {
+                components: [
+                    {
+                        components: [
+                            {
+                                internalType: 'int256',
+                                name: 'x',
+                                type: 'int256',
+                            },
+                            {
+                                internalType: 'int256',
+                                name: 'y',
+                                type: 'int256',
+                            },
+                        ],
+                        internalType: 'struct IGyroECLPPool.Vector2',
+                        name: 'tauAlpha',
+                        type: 'tuple',
+                    },
+                    {
+                        components: [
+                            {
+                                internalType: 'int256',
+                                name: 'x',
+                                type: 'int256',
+                            },
+                            {
+                                internalType: 'int256',
+                                name: 'y',
+                                type: 'int256',
+                            },
+                        ],
+                        internalType: 'struct IGyroECLPPool.Vector2',
+                        name: 'tauBeta',
+                        type: 'tuple',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 'u',
+                        type: 'int256',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 'v',
+                        type: 'int256',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 'w',
+                        type: 'int256',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 'z',
+                        type: 'int256',
+                    },
+                    {
+                        internalType: 'int256',
+                        name: 'dSq',
+                        type: 'int256',
+                    },
+                ],
+                internalType: 'struct IGyroECLPPool.DerivedEclpParams',
+                name: 'derivedEclpParams',
+                type: 'tuple',
             },
             {
                 components: [

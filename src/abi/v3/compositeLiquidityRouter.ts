@@ -1,4 +1,4 @@
-export const CompositeLiquidityRouterAbi = [
+export const compositeLiquidityRouterAbi = [
     {
         inputs: [
             {

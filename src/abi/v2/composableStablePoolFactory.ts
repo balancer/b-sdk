@@ -1,4 +1,4 @@
-export const ComposableStablePoolFactoryAbi = [
+export const composableStablePoolFactoryAbi = [
     {
         inputs: [
             {

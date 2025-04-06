@@ -100,15 +100,17 @@ export async function updateDeployments() {
                             const res = await fetch(url);
                             const data: AbiResponse = await res.json();
 
-                            const content = `export const ${
-                                contract.name
-                            }Abi = ${JSON.stringify(
+                            const contractName =
+                                contract.name.charAt(0).toLowerCase() +
+                                contract.name.slice(1);
+
+                            const content = `export const ${contractName}Abi = ${JSON.stringify(
                                 data.abi,
                                 undefined,
                                 4,
                             )} as const;`;
 
-                            const path = `./src/abi/${version}/${contract.name}.ts`;
+                            const path = `./src/abi/${version}/${contractName}.ts`;
                             writeFileSync(path, content);
                         }
                     });

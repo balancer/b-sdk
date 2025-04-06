@@ -1,4 +1,4 @@
-export const GyroECLPPoolFactoryAbi = [
+export const lBPoolFactoryAbi = [
     {
         inputs: [
             {
@@ -20,6 +20,11 @@ export const GyroECLPPoolFactoryAbi = [
                 internalType: 'string',
                 name: 'poolVersion',
                 type: 'string',
+            },
+            {
+                internalType: 'address',
+                name: 'trustedRouter',
+                type: 'address',
             },
         ],
         stateMutability: 'nonpayable',
@@ -62,13 +67,54 @@ export const GyroECLPPoolFactoryAbi = [
         type: 'error',
     },
     {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'resolvedStartTime',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'endTime',
+                type: 'uint256',
+            },
+        ],
+        name: 'GradualUpdateTimeTravel',
+        type: 'error',
+    },
+    {
         inputs: [],
         name: 'IndexOutOfBounds',
         type: 'error',
     },
     {
         inputs: [],
+        name: 'InvalidOwner',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidTrustedRouter',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'MinWeight',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'NormalizedWeightInvariant',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'PoolPauseWindowDurationOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ReentrancyGuardReentrantCall',
         type: 'error',
     },
     {
@@ -82,14 +128,34 @@ export const GyroECLPPoolFactoryAbi = [
         type: 'error',
     },
     {
-        inputs: [],
-        name: 'SupportsOnlyTwoTokens',
-        type: 'error',
-    },
-    {
         anonymous: false,
         inputs: [],
         name: 'FactoryDisabled',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'projectToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'reserveToken',
+                type: 'address',
+            },
+        ],
+        name: 'LBPoolCreated',
         type: 'event',
     },
     {
@@ -120,169 +186,64 @@ export const GyroECLPPoolFactoryAbi = [
             {
                 components: [
                     {
+                        internalType: 'address',
+                        name: 'owner',
+                        type: 'address',
+                    },
+                    {
                         internalType: 'contract IERC20',
-                        name: 'token',
+                        name: 'projectToken',
                         type: 'address',
                     },
                     {
-                        internalType: 'enum TokenType',
-                        name: 'tokenType',
-                        type: 'uint8',
+                        internalType: 'contract IERC20',
+                        name: 'reserveToken',
+                        type: 'address',
                     },
                     {
-                        internalType: 'contract IRateProvider',
-                        name: 'rateProvider',
-                        type: 'address',
+                        internalType: 'uint256',
+                        name: 'projectTokenStartWeight',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'reserveTokenStartWeight',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'projectTokenEndWeight',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'reserveTokenEndWeight',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'startTime',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'endTime',
+                        type: 'uint256',
                     },
                     {
                         internalType: 'bool',
-                        name: 'paysYieldFees',
+                        name: 'blockProjectTokenSwapsIn',
                         type: 'bool',
                     },
                 ],
-                internalType: 'struct TokenConfig[]',
-                name: 'tokens',
-                type: 'tuple[]',
-            },
-            {
-                components: [
-                    {
-                        internalType: 'int256',
-                        name: 'alpha',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'beta',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'c',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 's',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'lambda',
-                        type: 'int256',
-                    },
-                ],
-                internalType: 'struct IGyroECLPPool.EclpParams',
-                name: 'eclpParams',
-                type: 'tuple',
-            },
-            {
-                components: [
-                    {
-                        components: [
-                            {
-                                internalType: 'int256',
-                                name: 'x',
-                                type: 'int256',
-                            },
-                            {
-                                internalType: 'int256',
-                                name: 'y',
-                                type: 'int256',
-                            },
-                        ],
-                        internalType: 'struct IGyroECLPPool.Vector2',
-                        name: 'tauAlpha',
-                        type: 'tuple',
-                    },
-                    {
-                        components: [
-                            {
-                                internalType: 'int256',
-                                name: 'x',
-                                type: 'int256',
-                            },
-                            {
-                                internalType: 'int256',
-                                name: 'y',
-                                type: 'int256',
-                            },
-                        ],
-                        internalType: 'struct IGyroECLPPool.Vector2',
-                        name: 'tauBeta',
-                        type: 'tuple',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'u',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'v',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'w',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'z',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'dSq',
-                        type: 'int256',
-                    },
-                ],
-                internalType: 'struct IGyroECLPPool.DerivedEclpParams',
-                name: 'derivedEclpParams',
-                type: 'tuple',
-            },
-            {
-                components: [
-                    {
-                        internalType: 'address',
-                        name: 'pauseManager',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'swapFeeManager',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'poolCreator',
-                        type: 'address',
-                    },
-                ],
-                internalType: 'struct PoolRoleAccounts',
-                name: 'roleAccounts',
+                internalType: 'struct LBPParams',
+                name: 'lbpParams',
                 type: 'tuple',
             },
             {
                 internalType: 'uint256',
                 name: 'swapFeePercentage',
                 type: 'uint256',
-            },
-            {
-                internalType: 'address',
-                name: 'poolHooksContract',
-                type: 'address',
-            },
-            {
-                internalType: 'bool',
-                name: 'enableDonation',
-                type: 'bool',
-            },
-            {
-                internalType: 'bool',
-                name: 'disableUnbalancedLiquidity',
-                type: 'bool',
             },
             {
                 internalType: 'bytes32',
@@ -540,6 +501,19 @@ export const GyroECLPPoolFactoryAbi = [
                 internalType: 'address[]',
                 name: 'pools',
                 type: 'address[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getTrustedRouter',
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
             },
         ],
         stateMutability: 'view',

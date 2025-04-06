@@ -1,4 +1,4 @@
-export const LBPoolFactoryAbi = [
+export const stablePoolFactoryAbi = [
     {
         inputs: [
             {
@@ -20,11 +20,6 @@ export const LBPoolFactoryAbi = [
                 internalType: 'string',
                 name: 'poolVersion',
                 type: 'string',
-            },
-            {
-                internalType: 'address',
-                name: 'trustedRouter',
-                type: 'address',
             },
         ],
         stateMutability: 'nonpayable',
@@ -67,54 +62,18 @@ export const LBPoolFactoryAbi = [
         type: 'error',
     },
     {
-        inputs: [
-            {
-                internalType: 'uint256',
-                name: 'resolvedStartTime',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'endTime',
-                type: 'uint256',
-            },
-        ],
-        name: 'GradualUpdateTimeTravel',
-        type: 'error',
-    },
-    {
         inputs: [],
         name: 'IndexOutOfBounds',
         type: 'error',
     },
     {
         inputs: [],
-        name: 'InvalidOwner',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'InvalidTrustedRouter',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'MinWeight',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'NormalizedWeightInvariant',
+        name: 'MaxTokens',
         type: 'error',
     },
     {
         inputs: [],
         name: 'PoolPauseWindowDurationOverflow',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'ReentrancyGuardReentrantCall',
         type: 'error',
     },
     {
@@ -131,31 +90,6 @@ export const LBPoolFactoryAbi = [
         anonymous: false,
         inputs: [],
         name: 'FactoryDisabled',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-            {
-                indexed: true,
-                internalType: 'contract IERC20',
-                name: 'projectToken',
-                type: 'address',
-            },
-            {
-                indexed: true,
-                internalType: 'contract IERC20',
-                name: 'reserveToken',
-                type: 'address',
-            },
-        ],
-        name: 'LBPoolCreated',
         type: 'event',
     },
     {
@@ -186,64 +120,76 @@ export const LBPoolFactoryAbi = [
             {
                 components: [
                     {
-                        internalType: 'address',
-                        name: 'owner',
-                        type: 'address',
-                    },
-                    {
                         internalType: 'contract IERC20',
-                        name: 'projectToken',
+                        name: 'token',
                         type: 'address',
                     },
                     {
-                        internalType: 'contract IERC20',
-                        name: 'reserveToken',
+                        internalType: 'enum TokenType',
+                        name: 'tokenType',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'contract IRateProvider',
+                        name: 'rateProvider',
                         type: 'address',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'projectTokenStartWeight',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'reserveTokenStartWeight',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'projectTokenEndWeight',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'reserveTokenEndWeight',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'startTime',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'endTime',
-                        type: 'uint256',
                     },
                     {
                         internalType: 'bool',
-                        name: 'blockProjectTokenSwapsIn',
+                        name: 'paysYieldFees',
                         type: 'bool',
                     },
                 ],
-                internalType: 'struct LBPParams',
-                name: 'lbpParams',
+                internalType: 'struct TokenConfig[]',
+                name: 'tokens',
+                type: 'tuple[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amplificationParameter',
+                type: 'uint256',
+            },
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'pauseManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'swapFeeManager',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'poolCreator',
+                        type: 'address',
+                    },
+                ],
+                internalType: 'struct PoolRoleAccounts',
+                name: 'roleAccounts',
                 type: 'tuple',
             },
             {
                 internalType: 'uint256',
                 name: 'swapFeePercentage',
                 type: 'uint256',
+            },
+            {
+                internalType: 'address',
+                name: 'poolHooksContract',
+                type: 'address',
+            },
+            {
+                internalType: 'bool',
+                name: 'enableDonation',
+                type: 'bool',
+            },
+            {
+                internalType: 'bool',
+                name: 'disableUnbalancedLiquidity',
+                type: 'bool',
             },
             {
                 internalType: 'bytes32',
@@ -501,19 +447,6 @@ export const LBPoolFactoryAbi = [
                 internalType: 'address[]',
                 name: 'pools',
                 type: 'address[]',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getTrustedRouter',
-        outputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
             },
         ],
         stateMutability: 'view',

@@ -1,4 +1,4 @@
-export const VaultAbi = [
+export const vaultAbi = [
     {
         inputs: [
             {

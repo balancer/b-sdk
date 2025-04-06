@@ -1,4 +1,4 @@
-export const BalancerQueriesAbi = [
+export const balancerQueriesAbi = [
     {
         inputs: [
             {
