@@ -8,6 +8,7 @@ import {
     walletActions,
     parseUnits,
     parseEther,
+    Hex,
 } from 'viem';
 
 import {
@@ -228,6 +229,7 @@ describe('add liquidity bootstrapping test', () => {
             ...addLiquidityQueryOutput,
             slippage: Slippage.fromPercentage('1'),
             wethIsEth: false,
+            userData: '0x' as Hex,
         };
 
         const permit2 = await Permit2Helper.signAddLiquidityApproval({
