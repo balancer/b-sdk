@@ -19,7 +19,7 @@ import {
     PERMIT2,
     InitPool,
     CreatePoolStableSurgeInput,
-    VAULT_V3,
+    balancerV3Contracts,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../../lib/utils/createPoolHelper';
@@ -97,7 +97,7 @@ describe('create stableSurge pool test', () => {
 
     test('Registration', async () => {
         const isPoolRegistered = await client.readContract({
-            address: VAULT_V3[chainId],
+            address: balancerV3Contracts.Vault[chainId],
             abi: vaultExtensionAbi_V3,
             functionName: 'isPoolRegistered',
             args: [poolAddress],

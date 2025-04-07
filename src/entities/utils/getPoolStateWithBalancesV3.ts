@@ -8,7 +8,7 @@ import {
 } from 'viem';
 
 import { HumanAmount } from '@/data';
-import { CHAINS, VAULT_V3 } from '@/utils';
+import { CHAINS, balancerV3Contracts } from '@/utils';
 
 import { getSortedTokens } from './getSortedTokens';
 import {
@@ -155,13 +155,13 @@ const getTokenAmountsAndTotalShares = async (
 ) => {
     // create contract calls to get total supply and balances for each pool token
     const totalSupplyContract = {
-        address: VAULT_V3[chainId],
+        address: balancerV3Contracts.Vault[chainId],
         abi: vaultExtensionAbi_V3,
         functionName: 'totalSupply' as const,
         args: [poolState.address] as const,
     };
     const getBalanceContracts = {
-        address: VAULT_V3[chainId],
+        address: balancerV3Contracts.Vault[chainId],
         abi: vaultExtensionAbi_V3,
         functionName: 'getPoolTokenInfo' as const,
         args: [poolState.address] as const,

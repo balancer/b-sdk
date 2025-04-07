@@ -20,7 +20,7 @@ import {
     AddLiquidityUnbalancedInput,
     BALANCER_ROUTER,
     CHAINS,
-    VAULT_V3,
+    balancerV3Contracts,
     VAULT_ADMIN,
     ADMIN_OF_AUTHORIZER,
     AUTHORIZER,
@@ -512,7 +512,7 @@ async function putPoolIntoRecoveryMode(
     // Test accounts enabled recovery mode. account is the testAddress
     const { request: enableRecoveryModeRequest } =
         await client.simulateContract({
-            address: VAULT_V3[chainId],
+            address: balancerV3Contracts.Vault[chainId],
             abi: [...authorizerAbi, ...vaultAdminAbi_V3],
             functionName: 'enableRecoveryMode',
             args: [poolState.address],
