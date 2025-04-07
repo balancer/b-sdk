@@ -21,7 +21,6 @@ import {
     BALANCER_ROUTER,
     CHAINS,
     balancerV3Contracts,
-    VAULT_ADMIN,
     ADMIN_OF_AUTHORIZER,
     AUTHORIZER,
     authorizerAbi,
@@ -40,7 +39,7 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityRecoveryInput,
     protocolVersionError,
-    vaultAdminAbi_V3,
+    vaultAdminAbi,
     PublicWalletClient,
 } from 'src';
 
@@ -486,8 +485,8 @@ async function putPoolIntoRecoveryMode(
 ) {
     // get the actionId for the enableRecoveryMode function
     const actionId = await client.readContract({
-        address: VAULT_ADMIN[chainId],
-        abi: vaultAdminAbi_V3,
+        address: balancerV3Contracts.VaultAdmin[chainId],
+        abi: vaultAdminAbi,
         functionName: 'getActionId',
         args: [toFunctionSelector('function enableRecoveryMode(address)')],
     });
