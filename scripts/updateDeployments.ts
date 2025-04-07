@@ -1,5 +1,6 @@
 import { Address } from 'viem';
 import { writeFileSync } from 'fs';
+import { sonic } from 'viem/chains';
 
 type SupportedNetworkResponse = {
     name: string;
@@ -65,79 +66,92 @@ export async function updateBalancerDeployments() {
     const data: Record<string, SupportedNetworkResponse> = await res.json();
 
     const supportedNetworks = Object.entries(data).map(
-        ([name, { chainId }]) => ({ name, chainId }),
+        ([name, { chainId }]) => ({
+            name,
+            chainId,
+            deploymentsUrl: `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/${name}.json`,
+        }),
     );
+
+    // Manually add sonic since it live in seperate beets org repo
+    supportedNetworks.push({
+        name: 'sonic',
+        chainId: sonic.id,
+        deploymentsUrl:
+            'https://raw.githubusercontent.com/beethovenxfi/balancer-deployments/refs/heads/master/addresses/sonic.json',
+    });
 
     // Fetch all the addresses for each network we support
     await Promise.all(
-        supportedNetworks.map(async ({ name: networkName, chainId }) => {
-            const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/${networkName}.json`;
-            const res = await fetch(url);
-            if (!res.ok)
-                throw new Error(
-                    `Failed to fetch network data for ${networkName}`,
-                );
+        supportedNetworks.map(
+            async ({ name: networkName, chainId, deploymentsUrl }) => {
+                const res = await fetch(deploymentsUrl);
+                if (!res.ok)
+                    throw new Error(
+                        `Failed to fetch network data for ${networkName}`,
+                    );
 
-            const data: NetworkRegistryResponse = await res.json();
+                const data: NetworkRegistryResponse = await res.json();
 
-            await Promise.all(
-                Object.entries(data)
-                    .filter(([_, value]) => value.status === 'ACTIVE')
-                    .map(async ([taskId, value]) => {
-                        const { version } = value;
+                await Promise.all(
+                    Object.entries(data)
+                        .filter(([_, value]) => value.status === 'ACTIVE')
+                        .map(async ([taskId, value]) => {
+                            const { version } = value;
 
-                        // Filter to only grab the contracts SDK uses
-                        await Promise.all(
-                            value.contracts
-                                .filter((contract) =>
-                                    targetContracts.includes(contract.name),
-                                )
-                                .map(async (contract) => {
-                                    const { name } = contract;
+                            // Filter to only grab the contracts SDK uses
+                            await Promise.all(
+                                value.contracts
+                                    .filter((contract) =>
+                                        targetContracts.includes(contract.name),
+                                    )
+                                    .map(async (contract) => {
+                                        const { name } = contract;
 
-                                    if (version === 'v2') {
-                                        if (!balancerV2Contracts[name])
-                                            balancerV2Contracts[name] = {};
-                                        balancerV2Contracts[name][chainId] =
-                                            contract.address;
-                                    }
-                                    if (version === 'v3') {
-                                        if (!balancerV3Contracts[name])
-                                            balancerV3Contracts[name] = {};
-                                        balancerV3Contracts[name][chainId] =
-                                            contract.address;
-                                    }
-
-                                    // grab contract abis using only mainnet to avoid redundant requests
-                                    if (networkName === 'mainnet') {
-                                        const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
-                                        const res = await fetch(url);
-                                        if (!res.ok) {
-                                            throw new Error(
-                                                `Failed to fetch ABI for ${contract.name}: ${res.status} ${res.statusText}`,
-                                            );
+                                        if (version === 'v2') {
+                                            if (!balancerV2Contracts[name])
+                                                balancerV2Contracts[name] = {};
+                                            balancerV2Contracts[name][chainId] =
+                                                contract.address;
                                         }
-                                        const data: AbiResponse =
-                                            await res.json();
+                                        if (version === 'v3') {
+                                            if (!balancerV3Contracts[name])
+                                                balancerV3Contracts[name] = {};
+                                            balancerV3Contracts[name][chainId] =
+                                                contract.address;
+                                        }
 
-                                        const contractName =
-                                            contract.name
-                                                .charAt(0)
-                                                .toLowerCase() +
-                                            contract.name.slice(1);
-                                        const content = `export const ${contractName}Abi = ${JSON.stringify(
-                                            data.abi,
-                                            undefined,
-                                            4,
-                                        )} as const;`;
-                                        const path = `./src/abi/${version}/${contractName}.ts`;
-                                        writeFileSync(path, content);
-                                    }
-                                }),
-                        );
-                    }),
-            );
-        }),
+                                        // grab contract abis using only mainnet to avoid redundant requests
+                                        if (networkName === 'mainnet') {
+                                            const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
+                                            const res = await fetch(url);
+                                            if (!res.ok) {
+                                                throw new Error(
+                                                    `Failed to fetch ABI for ${contract.name}: ${res.status} ${res.statusText}`,
+                                                );
+                                            }
+                                            const data: AbiResponse =
+                                                await res.json();
+
+                                            const contractName =
+                                                contract.name
+                                                    .charAt(0)
+                                                    .toLowerCase() +
+                                                contract.name.slice(1);
+                                            const content = `export const ${contractName}Abi = ${JSON.stringify(
+                                                data.abi,
+                                                undefined,
+                                                4,
+                                            )} as const;`;
+                                            const path = `./src/abi/${version}/${contractName}.ts`;
+                                            writeFileSync(path, content);
+                                        }
+                                    }),
+                            );
+                        }),
+                );
+            },
+        ),
     );
 
     // Write the contract addresses to the utils files
@@ -172,42 +186,4 @@ export async function updateBalancerDeployments() {
     writeFileSync('./src/abi/v3/index.ts', exportAbisV3.join('\n'));
 }
 
-// Sonic deployment addresses come from a different repo
-export async function updateBeetsDeployments() {
-    const SONIC_CHAIN_ID = 146;
-
-    const res = await fetch(
-        'https://raw.githubusercontent.com/beethovenxfi/balancer-deployments/refs/heads/master/addresses/sonic.json',
-    );
-    const data: NetworkRegistryResponse = await res.json();
-
-    Object.entries(data)
-        .filter(([_, value]) => value.status === 'ACTIVE')
-        .forEach(([_, value]) => {
-            const { version } = value;
-            // Filter to only grab the contracts SDK uses
-            value.contracts
-                .filter((contract) => targetContracts.includes(contract.name))
-                .map(async (contract) => {
-                    const { name } = contract;
-
-                    if (version === 'v2') {
-                        if (!balancerV2Contracts[name])
-                            balancerV2Contracts[name] = {};
-                        balancerV2Contracts[name][SONIC_CHAIN_ID] =
-                            contract.address;
-                    }
-                    if (version === 'v3') {
-                        if (!balancerV3Contracts[name])
-                            balancerV3Contracts[name] = {};
-                        balancerV3Contracts[name][SONIC_CHAIN_ID] =
-                            contract.address;
-                    }
-                });
-        });
-}
-
-(async () => {
-    await updateBalancerDeployments();
-    await updateBeetsDeployments();
-})();
+updateBalancerDeployments();
