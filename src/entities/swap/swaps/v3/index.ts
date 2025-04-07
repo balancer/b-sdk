@@ -13,7 +13,6 @@ import {
     DEFAULT_USERDATA,
     balancerV3Contracts,
     NATIVE_ASSETS,
-    balancerV3Contracts,
     MAX_UINT256,
     CHAINS,
     missingParameterError,
