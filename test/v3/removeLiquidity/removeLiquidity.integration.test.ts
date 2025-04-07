@@ -512,7 +512,7 @@ async function putPoolIntoRecoveryMode(
     const { request: enableRecoveryModeRequest } =
         await client.simulateContract({
             address: balancerV3Contracts.Vault[chainId],
-            abi: [...authorizerAbi, ...vaultAdminAbi_V3],
+            abi: [...authorizerAbi, ...vaultAdminAbi],
             functionName: 'enableRecoveryMode',
             args: [poolState.address],
             account: authorizedAddress,

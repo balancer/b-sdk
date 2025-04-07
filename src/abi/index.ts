@@ -11,10 +11,12 @@ import { stablePoolFactoryAbi_V3 } from './stablePoolFactory.V3';
 import { stableSurgeFactoryAbi } from './stableSurgeFactory';
 import { permit2Abi } from './permit2';
 import { vaultAbi as vaultV2Abi } from './v2';
-import { vaultAbi as vaultV3Abi } from './v3';
+import {
+    vaultAbi as vaultV3Abi,
+    weightedPoolFactoryAbi as weightedPoolFactoryAbi_V3,
+} from './v3';
 import { vaultExtensionAbi_V3 } from './vaultExtension.V3';
 import { weightedPoolFactoryV4Abi_V2 } from './weightedPoolFactoryV4.V2';
-import { weightedPoolFactoryAbi_V3 } from './weightedPoolFactory.V3';
 
 export * from './authorizer';
 export * from './batchRelayerLibrary';
