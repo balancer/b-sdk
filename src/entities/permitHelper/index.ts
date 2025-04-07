@@ -1,6 +1,5 @@
-import { Account, Address, Hex } from 'viem';
+import { Account, Address, Hex, parseAbi } from 'viem';
 
-import { weightedPoolAbi_V3 } from '@/abi';
 import {
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     balancerV3Contracts,
@@ -176,7 +175,9 @@ const signPermit = async (
 const getDomain = async (client: PublicWalletClient, token: Hex) => {
     const [, name, version, chainId, verifyingContract, , ,] =
         await client.readContract({
-            abi: weightedPoolAbi_V3,
+            abi: parseAbi([
+                'function eip712Domain() view returns (bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)',
+            ]),
             address: token,
             functionName: 'eip712Domain',
             args: [],

@@ -25,7 +25,6 @@ export * from './vault.V2';
 export * from './v3';
 export * from './vaultExtension.V3';
 export * from './weightedPoolV4.V2';
-export * from './weightedPool.V3';
 
 // V3 Common ABIs
 
