@@ -28,7 +28,6 @@ import {
     balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     PublicWalletClient,
-    balancerV3Contracts,
 } from '@/utils';
 
 export type TxOutput = {

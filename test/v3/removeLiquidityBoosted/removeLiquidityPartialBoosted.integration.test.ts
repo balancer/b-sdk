@@ -19,7 +19,7 @@ import {
     CHAINS,
     PublicWalletClient,
     Token,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+    balancerV3Contracts,
     Slippage,
     RemoveLiquidityBoostedV3,
     RemoveLiquidityBoostedProportionalInput,
@@ -153,7 +153,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 client,
                 testAddress,
                 parentBptToken.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                balancerV3Contracts.CompositeLiquidityRouter[chainId],
             );
 
             const queryOutput = await removeLiquidityBoosted.query(
@@ -183,7 +183,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 ),
             );
             expect(removeLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                balancerV3Contracts.CompositeLiquidityRouter[chainId],
             );
 
             // send remove liquidity transaction and check balance changes
@@ -217,7 +217,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 client,
                 testAddress,
                 parentBptToken.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                balancerV3Contracts.CompositeLiquidityRouter[chainId],
             );
 
             const queryOutput = await removeLiquidityBoosted.query(
@@ -248,7 +248,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 ),
             );
             expect(removeLiquidityBuildCallOutput.to).to.eq(
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                balancerV3Contracts.CompositeLiquidityRouter[chainId],
             );
 
             const tokenAmountsForBalanceCheck = [

@@ -13,7 +13,7 @@ import {
 } from 'viem';
 import {
     Address,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+    balancerV3Contracts,
     CHAINS,
     ChainId,
     PERMIT2,
@@ -94,7 +94,7 @@ describe('V3 add liquidity partial boosted', () => {
                 client,
                 testAddress,
                 token.underlyingToken?.address ?? token.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                balancerV3Contracts.CompositeLiquidityRouter[chainId],
             );
         }
 

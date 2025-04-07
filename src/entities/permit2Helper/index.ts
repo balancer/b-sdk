@@ -7,9 +7,7 @@ import {
 } from './allowanceTransfer';
 import {
     balancerV3Contracts,
-    balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     BALANCER_ROUTER,
     ChainId,
     PERMIT2,
@@ -155,7 +153,7 @@ export class Permit2Helper {
         );
         const amounts = getAmountsCall(input);
         const spender =
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId];
+            balancerV3Contracts.CompositeLiquidityRouter[input.chainId];
         const details: PermitDetails[] = [];
 
         for (let i = 0; i < input.amountsIn.length; i++) {

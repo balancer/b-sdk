@@ -26,7 +26,7 @@ import {
     PublicWalletClient,
     AddLiquidityBoostedBuildCallInput,
     AddLiquidityBoostedInput,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+    balancerV3Contracts,
     AddLiquidityBoostedUnbalancedInput,
     AddLiquidityBoostedProportionalInput,
     TokenAmount,
@@ -205,7 +205,7 @@ describe('Boosted AddLiquidity', () => {
                     client,
                     testAddress,
                     token.address,
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                    balancerV3Contracts.CompositeLiquidityRouter[chainId],
                 );
 
                 if (token.underlyingToken) {
@@ -213,7 +213,7 @@ describe('Boosted AddLiquidity', () => {
                         client,
                         testAddress,
                         token.underlyingToken.address,
-                        BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                        balancerV3Contracts.CompositeLiquidityRouter[chainId],
                     );
                 }
             }

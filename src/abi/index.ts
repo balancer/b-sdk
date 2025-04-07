@@ -1,4 +1,3 @@
-import { balancerCompositeLiquidityRouterBoostedAbi } from './balancerCompositeLiquidityRouterBoosted';
 import { balancerCompositeLiquidityRouterNestedAbi } from './balancerCompositeLiquidityRouterNested';
 import { balancerQueriesAbi } from './balancerQueries';
 import { balancerRelayerAbi } from './balancerRelayer';
@@ -11,6 +10,7 @@ import { vaultAbi as vaultAbi_V2 } from './v2';
 import {
     vaultAbi as vaultAbi_V3,
     batchRouterAbi,
+    compositeLiquidityRouterAbi,
     bufferRouterAbi,
     weightedPoolFactoryAbi as weightedPoolFactoryAbi_V3,
     gyroECLPPoolFactoryAbi,
@@ -43,7 +43,7 @@ export const balancerRouterAbiExtended = [
 ];
 
 export const balancerCompositeLiquidityRouterBoostedAbiExtended = [
-    ...balancerCompositeLiquidityRouterBoostedAbi,
+    ...compositeLiquidityRouterAbi,
     ...commonABIsV3,
 ];
 
