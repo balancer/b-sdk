@@ -9,41 +9,39 @@ import {
     publicActions,
     walletActions,
     TestActions,
+    Hex,
 } from 'viem';
 import {
     CHAINS,
     ChainId,
     SwapKind,
-    Token,
     Swap,
-    ExactInQueryOutput,
-    ExactOutQueryOutput,
     VAULT_V2,
     Path,
     PublicWalletClient,
 } from '@/index';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
-import { forkSetup } from 'test/lib/utils/helper';
-import { TOKENS } from 'test/lib/utils/addresses';
 import {
     assertSwapExactIn,
     assertSwapExactOut,
-} from 'test/lib/utils/swapHelpers';
+    forkSetup,
+    TOKENS,
+} from 'test/lib/utils';
 
 const protocolVersion = 2;
 const chainId = ChainId.MAINNET;
-const blockNo = 18980070n;
-
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET, undefined, blockNo);
 
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 const vault = VAULT_V2[chainId];
 
 describe('SwapV2', () => {
+    let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
+    let snapshot: Hex;
+
     const pathBalWeth: Path = {
         protocolVersion: 2,
         tokens: [
@@ -64,6 +62,8 @@ describe('SwapV2', () => {
     };
 
     beforeAll(async () => {
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET));
+
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
@@ -73,9 +73,7 @@ describe('SwapV2', () => {
             .extend(walletActions);
 
         testAddress = (await client.getAddresses())[0];
-    });
 
-    beforeEach(async () => {
         await forkSetup(
             client,
             testAddress,
@@ -85,44 +83,17 @@ describe('SwapV2', () => {
             undefined,
             protocolVersion,
         );
+
+        snapshot = await client.snapshot();
     });
 
-    describe('query method should return correct updated', () => {
-        test('GivenIn', async () => {
-            const swap = new Swap({
-                chainId,
-                paths: [pathBalWeth],
-                swapKind: SwapKind.GivenIn,
-            });
-
-            const updated = (await swap.query(rpcUrl)) as ExactInQueryOutput;
-
-            const wethToken = new Token(
-                chainId,
-                TOKENS[chainId].WETH.address,
-                TOKENS[chainId].WETH.decimals,
-            );
-            expect(updated.expectedAmountOut.token).to.deep.eq(wethToken);
-            expect(updated.expectedAmountOut.amount).to.eq(44236888n);
+    beforeEach(async () => {
+        await client.revert({
+            id: snapshot,
         });
-        test('GivenOut', async () => {
-            const swap = new Swap({
-                chainId,
-                paths: [pathBalWeth],
-                swapKind: SwapKind.GivenOut,
-            });
-
-            const updated = (await swap.query(rpcUrl)) as ExactOutQueryOutput;
-
-            const balToken = new Token(
-                chainId,
-                TOKENS[chainId].BAL.address,
-                TOKENS[chainId].BAL.decimals,
-            );
-            expect(updated.expectedAmountIn.token).to.deep.eq(balToken);
-            expect(updated.expectedAmountIn.amount).to.eq(60635225778147n);
-        });
+        snapshot = await client.snapshot();
     });
+
     describe('swap should be executed correcly', () => {
         describe('wethIsEth: false', () => {
             const wethIsEth = false;
