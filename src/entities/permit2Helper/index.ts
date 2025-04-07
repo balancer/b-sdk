@@ -7,7 +7,7 @@ import {
 } from './allowanceTransfer';
 import {
     balancerV3Contracts,
-    BALANCER_BUFFER_ROUTER,
+    balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
     BALANCER_ROUTER,
@@ -183,7 +183,7 @@ export class Permit2Helper {
         },
     ): Promise<Permit2> {
         validateNoncesAndExpirations(input.nonces, input.expirations, 2);
-        const spender = BALANCER_BUFFER_ROUTER[input.chainId];
+        const spender = balancerV3Contracts.BufferRouter[input.chainId];
         const details: PermitDetails[] = [
             await getDetails(
                 input.client,
@@ -216,7 +216,7 @@ export class Permit2Helper {
         },
     ): Promise<Permit2> {
         validateNoncesAndExpirations(input.nonces, input.expirations, 2);
-        const spender = BALANCER_BUFFER_ROUTER[input.chainId];
+        const spender = balancerV3Contracts.BufferRouter[input.chainId];
         const details: PermitDetails[] = [
             await getDetails(
                 input.client,

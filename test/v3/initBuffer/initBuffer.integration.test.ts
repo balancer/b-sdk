@@ -23,7 +23,7 @@ import {
     Permit2Helper,
     PERMIT2,
     PublicWalletClient,
-    BALANCER_BUFFER_ROUTER,
+    balancerV3Contracts,
 } from '../../../src';
 import {
     TOKENS,
@@ -94,7 +94,7 @@ describe('Buffer Init', () => {
                 client,
                 testAddress,
                 USDC.address,
-                BALANCER_BUFFER_ROUTER[chainId],
+                balancerV3Contracts.BufferRouter[chainId],
             );
         });
 

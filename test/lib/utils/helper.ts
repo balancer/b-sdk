@@ -28,7 +28,7 @@ import {
     balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     PublicWalletClient,
-    BALANCER_BUFFER_ROUTER,
+    balancerV3Contracts,
 } from '@/utils';
 
 export type TxOutput = {
@@ -139,7 +139,7 @@ export const approveToken = async (
                 client,
                 accountAddress,
                 tokenAddress,
-                BALANCER_BUFFER_ROUTER[chainId],
+                balancerV3Contracts.BufferRouter[chainId],
                 amount,
                 deadline,
             );

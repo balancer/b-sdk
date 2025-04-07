@@ -1,5 +1,5 @@
 import { createPublicClient, http } from 'viem';
-import { BALANCER_BUFFER_ROUTER, ChainId, CHAINS } from '@/utils';
+import { balancerV3Contracts, ChainId, CHAINS } from '@/utils';
 import { Address } from '@/types';
 import { balancerBufferRouterAbiExtended } from '@/abi';
 
@@ -18,7 +18,7 @@ export const doAddLiquidityQuery = async (
     const {
         result: [amountUnderlyingIn, amountWrappedIn],
     } = await client.simulateContract({
-        address: BALANCER_BUFFER_ROUTER[chainId],
+        address: balancerV3Contracts.BufferRouter[chainId],
         abi: balancerBufferRouterAbiExtended,
         functionName: 'queryAddLiquidityToBuffer',
         args: [wrappedToken, exactSharesToIssue],
