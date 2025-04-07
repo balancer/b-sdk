@@ -7,30 +7,29 @@ import { stablePoolFactoryAbi_V3 } from './stablePoolFactory.V3';
 import { stableSurgeFactoryAbi } from './stableSurgeFactory';
 import { permit2Abi } from './permit2';
 import { vaultAbi as vaultAbi_V2 } from './v2';
+import { weightedPoolFactoryV4Abi_V2 } from './weightedPoolFactoryV4.V2';
 import {
     vaultAbi as vaultAbi_V3,
+    vaultExtensionAbi,
     batchRouterAbi,
     compositeLiquidityRouterAbi,
     bufferRouterAbi,
     weightedPoolFactoryAbi as weightedPoolFactoryAbi_V3,
     gyroECLPPoolFactoryAbi,
 } from './v3';
-import { vaultExtensionAbi_V3 } from './vaultExtension.V3';
-import { weightedPoolFactoryV4Abi_V2 } from './weightedPoolFactoryV4.V2';
 
 export * from './authorizer';
 export * from './batchRelayerLibrary';
 export * from './permit2';
 export * from './vault.V2';
 export * from './v3';
-export * from './vaultExtension.V3';
 export * from './weightedPoolV4.V2';
 
 // V3 Common ABIs
 
 export const commonABIsV3 = [
     ...vaultAbi_V3,
-    ...vaultExtensionAbi_V3,
+    ...vaultExtensionAbi,
     ...permit2Abi,
 ];
 

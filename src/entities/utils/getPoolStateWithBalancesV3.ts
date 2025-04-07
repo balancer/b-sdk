@@ -18,7 +18,7 @@ import {
     PoolStateWithUnderlyings,
     PoolTokenWithUnderlying,
 } from '../types';
-import { vaultExtensionAbi_V3 } from '@/abi';
+import { vaultExtensionAbi } from '@/abi';
 import { TokenAmount } from '../tokenAmount';
 
 export const getPoolStateWithBalancesV3 = async (
@@ -156,13 +156,13 @@ const getTokenAmountsAndTotalShares = async (
     // create contract calls to get total supply and balances for each pool token
     const totalSupplyContract = {
         address: balancerV3Contracts.Vault[chainId],
-        abi: vaultExtensionAbi_V3,
+        abi: vaultExtensionAbi,
         functionName: 'totalSupply' as const,
         args: [poolState.address] as const,
     };
     const getBalanceContracts = {
         address: balancerV3Contracts.Vault[chainId],
-        abi: vaultExtensionAbi_V3,
+        abi: vaultExtensionAbi,
         functionName: 'getPoolTokenInfo' as const,
         args: [poolState.address] as const,
     };
