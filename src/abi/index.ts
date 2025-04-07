@@ -3,7 +3,6 @@ import { balancerQueriesAbi } from './balancerQueries';
 import { balancerRelayerAbi } from './balancerRelayer';
 import { balancerRouterAbi } from './balancerRouter';
 import { composableStableFactoryV6Abi_V2 } from './composableStableFactoryV6.V2';
-import { stablePoolFactoryAbi_V3 } from './stablePoolFactory.V3';
 import { stableSurgeFactoryAbi } from './stableSurgeFactory';
 import { permit2Abi } from './permit2';
 import { vaultAbi as vaultAbi_V2 } from './v2';
@@ -15,6 +14,7 @@ import {
     compositeLiquidityRouterAbi,
     bufferRouterAbi,
     weightedPoolFactoryAbi as weightedPoolFactoryAbi_V3,
+    stablePoolFactoryAbi,
     gyroECLPPoolFactoryAbi,
 } from './v3';
 
@@ -68,7 +68,7 @@ export const weightedPoolFactoryAbiExtended_V3 = [
 ];
 
 export const stablePoolFactoryAbiExtended = [
-    ...stablePoolFactoryAbi_V3,
+    ...stablePoolFactoryAbi,
     ...commonABIsV3,
 ];
 
