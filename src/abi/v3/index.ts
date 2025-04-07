@@ -7,5 +7,6 @@ export * from './compositeLiquidityRouter';
 export * from './bufferRouter';
 export * from './weightedPoolFactory';
 export * from './stablePoolFactory';
+export * from './stableSurgePoolFactory';
 export * from './gyroECLPPoolFactory';
 export * from './lBPoolFactory';

@@ -1,9 +1,9 @@
-export const gyroECLPPoolFactoryAbi_V3 = [
+export const stableSurgePoolFactoryAbi = [
     {
         inputs: [
             {
-                internalType: 'contract IVault',
-                name: 'vault',
+                internalType: 'contract StableSurgeHook',
+                name: 'stableSurgeHook',
                 type: 'address',
             },
             {
@@ -68,6 +68,11 @@ export const gyroECLPPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'MaxTokens',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'PoolPauseWindowDurationOverflow',
         type: 'error',
     },
@@ -83,7 +88,7 @@ export const gyroECLPPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'SupportsOnlyTwoTokens',
+        name: 'VaultNotSet',
         type: 'error',
     },
     {
@@ -145,102 +150,9 @@ export const gyroECLPPoolFactoryAbi_V3 = [
                 type: 'tuple[]',
             },
             {
-                components: [
-                    {
-                        internalType: 'int256',
-                        name: 'alpha',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'beta',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'c',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 's',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'lambda',
-                        type: 'int256',
-                    },
-                ],
-                internalType: 'struct IGyroECLPPool.EclpParams',
-                name: 'eclpParams',
-                type: 'tuple',
-            },
-            {
-                components: [
-                    {
-                        components: [
-                            {
-                                internalType: 'int256',
-                                name: 'x',
-                                type: 'int256',
-                            },
-                            {
-                                internalType: 'int256',
-                                name: 'y',
-                                type: 'int256',
-                            },
-                        ],
-                        internalType: 'struct IGyroECLPPool.Vector2',
-                        name: 'tauAlpha',
-                        type: 'tuple',
-                    },
-                    {
-                        components: [
-                            {
-                                internalType: 'int256',
-                                name: 'x',
-                                type: 'int256',
-                            },
-                            {
-                                internalType: 'int256',
-                                name: 'y',
-                                type: 'int256',
-                            },
-                        ],
-                        internalType: 'struct IGyroECLPPool.Vector2',
-                        name: 'tauBeta',
-                        type: 'tuple',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'u',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'v',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'w',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'z',
-                        type: 'int256',
-                    },
-                    {
-                        internalType: 'int256',
-                        name: 'dSq',
-                        type: 'int256',
-                    },
-                ],
-                internalType: 'struct IGyroECLPPool.DerivedEclpParams',
-                name: 'derivedEclpParams',
-                type: 'tuple',
+                internalType: 'uint256',
+                name: 'amplificationParameter',
+                type: 'uint256',
             },
             {
                 components: [
@@ -270,18 +182,8 @@ export const gyroECLPPoolFactoryAbi_V3 = [
                 type: 'uint256',
             },
             {
-                internalType: 'address',
-                name: 'poolHooksContract',
-                type: 'address',
-            },
-            {
                 internalType: 'bool',
                 name: 'enableDonation',
-                type: 'bool',
-            },
-            {
-                internalType: 'bool',
-                name: 'disableUnbalancedLiquidity',
                 type: 'bool',
             },
             {
@@ -540,6 +442,19 @@ export const gyroECLPPoolFactoryAbi_V3 = [
                 internalType: 'address[]',
                 name: 'pools',
                 type: 'address[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getStableSurgeHook',
+        outputs: [
+            {
+                internalType: 'contract IStableSurgeHook',
+                name: '',
+                type: 'address',
             },
         ],
         stateMutability: 'view',

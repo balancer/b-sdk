@@ -45,6 +45,7 @@ const targetContractsV3 = [
     'BufferRouter',
     'WeightedPoolFactory',
     'StablePoolFactory',
+    'StableSurgePoolFactory',
     'GyroECLPPoolFactory',
     'LBPoolFactory',
 ];
