@@ -1,9 +1,5 @@
 import { createPublicClient, Hex, http } from 'viem';
-import {
-    balancerV3Contracts.CompositeLiquidityRouter,
-    ChainId,
-    CHAINS,
-} from '@/utils';
+import { balancerV3Contracts, ChainId, CHAINS } from '@/utils';
 import { Address } from '@/types';
 import { balancerCompositeLiquidityRouterBoostedAbiExtended } from '@/abi';
 
