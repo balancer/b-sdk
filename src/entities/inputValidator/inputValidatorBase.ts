@@ -3,6 +3,7 @@ import {
     RemoveLiquidityRecoveryInput,
 } from '@/entities/removeLiquidity/types';
 import { InitPoolInput, InitPoolInputV3 } from '../initPool/types';
+import { CreatePoolInput } from '../createPool/types';
 import { PoolState } from '../types';
 import {
     validateTokensAddLiquidity,
@@ -12,7 +13,6 @@ import {
 import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { isSameAddress, NATIVE_ASSETS, inputValidationError } from '@/utils';
-import { CreatePoolBaseInput } from '../createPool';
 
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
@@ -26,22 +26,7 @@ export class InputValidatorBase {
         }
     }
 
-    validateCreatePool(input: CreatePoolInput) {
-        validateCreatePoolTokens(input.tokens);
-        if (input.protocolVersion === 3) {
-            input.tokens.forEach(({ tokenType, rateProvider }) => {
-                if (
-                    tokenType !== TokenType.STANDARD &&
-                    rateProvider === zeroAddress
-                ) {
-                    throw inputValidationError(
-                        'Create Pool',
-                        'Only TokenType.STANDARD is allowed to have zeroAddress rateProvider',
-                    );
-                }
-            });
-        }
-    }
+    validateCreatePool(_input: CreatePoolInput) {}
 
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
