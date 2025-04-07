@@ -6,7 +6,7 @@ import {
     PermitDetails,
 } from './allowanceTransfer';
 import {
-    BALANCER_BATCH_ROUTER,
+    balancerV3Contracts,
     BALANCER_BUFFER_ROUTER,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
@@ -264,7 +264,7 @@ export class Permit2Helper {
 
         const chainId = await input.client.getChainId();
         const spender = input.queryOutput.pathAmounts
-            ? BALANCER_BATCH_ROUTER[chainId]
+            ? balancerV3Contracts.BatchRouter[chainId]
             : BALANCER_ROUTER[chainId];
 
         // build permit details
