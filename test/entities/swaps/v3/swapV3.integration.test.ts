@@ -16,7 +16,6 @@ import {
     ChainId,
     SwapKind,
     Swap,
-    BALANCER_ROUTER,
     balancerV3Contracts,
     PERMIT2,
     PublicWalletClient,
@@ -207,7 +206,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenIn,
                         });
                         await assertSwapExactIn({
-                            contractToCall: BALANCER_ROUTER[chainId],
+                            contractToCall: balancerV3Contracts.Router[chainId],
                             client,
                             rpcUrl,
                             chainId,
@@ -222,7 +221,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenOut,
                         });
                         await assertSwapExactOut({
-                            contractToCall: BALANCER_ROUTER[chainId],
+                            contractToCall: balancerV3Contracts.Router[chainId],
                             client,
                             rpcUrl,
                             chainId,
@@ -240,7 +239,8 @@ describe('SwapV3', () => {
                                 swapKind: SwapKind.GivenIn,
                             });
                             await assertSwapExactIn({
-                                contractToCall: BALANCER_ROUTER[chainId],
+                                contractToCall:
+                                    balancerV3Contracts.Router[chainId],
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -255,7 +255,8 @@ describe('SwapV3', () => {
                                 swapKind: SwapKind.GivenOut,
                             });
                             await assertSwapExactOut({
-                                contractToCall: BALANCER_ROUTER[chainId],
+                                contractToCall:
+                                    balancerV3Contracts.Router[chainId],
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -276,7 +277,8 @@ describe('SwapV3', () => {
                                 swapKind: SwapKind.GivenIn,
                             });
                             await assertSwapExactIn({
-                                contractToCall: BALANCER_ROUTER[chainId],
+                                contractToCall:
+                                    balancerV3Contracts.Router[chainId],
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -295,7 +297,8 @@ describe('SwapV3', () => {
                                 swapKind: SwapKind.GivenOut,
                             });
                             await assertSwapExactOut({
-                                contractToCall: BALANCER_ROUTER[chainId],
+                                contractToCall:
+                                    balancerV3Contracts.Router[chainId],
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -558,7 +561,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenIn,
                         });
                         await assertSwapExactIn({
-                            contractToCall: BALANCER_ROUTER[chainId],
+                            contractToCall: balancerV3Contracts.Router[chainId],
                             client,
                             rpcUrl,
                             chainId,
@@ -574,7 +577,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenOut,
                         });
                         await assertSwapExactOut({
-                            contractToCall: BALANCER_ROUTER[chainId],
+                            contractToCall: balancerV3Contracts.Router[chainId],
                             client,
                             rpcUrl,
                             chainId,
@@ -592,7 +595,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenIn,
                         });
                         await assertSwapExactIn({
-                            contractToCall: BALANCER_ROUTER[chainId],
+                            contractToCall: balancerV3Contracts.Router[chainId],
                             client,
                             rpcUrl,
                             chainId,
@@ -608,7 +611,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenOut,
                         });
                         await assertSwapExactOut({
-                            contractToCall: BALANCER_ROUTER[chainId],
+                            contractToCall: balancerV3Contracts.Router[chainId],
                             client,
                             rpcUrl,
                             chainId,

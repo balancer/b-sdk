@@ -1,7 +1,7 @@
 import { balancerRouterAbiExtended } from '@/abi';
 import { PoolState } from '../types';
 import { InitPoolBase, InitPoolBuildOutput, InitPoolInputV3 } from './types';
-import { BALANCER_ROUTER } from '@/utils';
+import { balancerV3Contracts } from '@/utils';
 import { encodeFunctionData, Address } from 'viem';
 import { getSortedTokens, parseInitializeArgs, getAmounts } from '../utils';
 import { Token } from '../token';
@@ -36,7 +36,7 @@ export class InitPoolV3 implements InitPoolBase {
 
         return {
             callData,
-            to: BALANCER_ROUTER[input.chainId] as Address,
+            to: balancerV3Contracts.Router[input.chainId] as Address,
             value: getValue(amountsIn, !!input.wethIsEth),
         };
     }

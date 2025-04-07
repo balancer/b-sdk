@@ -11,7 +11,7 @@ import { TokenAmount } from '../../../tokenAmount';
 import { SwapKind, Hex } from '../../../../types';
 import {
     DEFAULT_USERDATA,
-    BALANCER_ROUTER,
+    balancerV3Contracts,
     NATIVE_ASSETS,
     balancerV3Contracts,
     MAX_UINT256,
@@ -124,7 +124,7 @@ export class SwapV3 implements SwapBase {
         sender?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
-            address: BALANCER_ROUTER[this.chainId],
+            address: balancerV3Contracts.Router[this.chainId],
             abi: balancerRouterAbiExtended,
             client,
         });
@@ -142,7 +142,7 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
             return {
-                to: BALANCER_ROUTER[this.chainId],
+                to: balancerV3Contracts.Router[this.chainId],
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -165,7 +165,7 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
             return {
-                to: BALANCER_ROUTER[this.chainId],
+                to: balancerV3Contracts.Router[this.chainId],
                 swapKind: SwapKind.GivenOut,
                 expectedAmountIn: TokenAmount.fromRawAmount(
                     this.inputAmount.token,
@@ -361,7 +361,7 @@ export class SwapV3 implements SwapBase {
         }
         if (!this.isBatchSwap) {
             call = {
-                to: BALANCER_ROUTER[this.chainId],
+                to: balancerV3Contracts.Router[this.chainId],
                 callData: this.callDataSingleSwap(
                     limitAmount,
                     input.deadline ?? MAX_UINT256,

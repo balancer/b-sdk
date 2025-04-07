@@ -18,7 +18,6 @@ import {
     AddLiquidity,
     AddLiquidityKind,
     AddLiquidityUnbalancedInput,
-    BALANCER_ROUTER,
     CHAINS,
     balancerV3Contracts,
     ADMIN_OF_AUTHORIZER,
@@ -161,7 +160,7 @@ describe('remove liquidity test', () => {
                 txInput.client,
                 txInput.testAddress,
                 txInput.poolState.address,
-                BALANCER_ROUTER[chainId],
+                balancerV3Contracts.Router[chainId],
             );
         });
 

@@ -11,7 +11,7 @@ import {
     getValue,
 } from '@/entities/utils';
 import { Hex } from '@/types';
-import { BALANCER_ROUTER, missingParameterError } from '@/utils';
+import { balancerV3Contracts, missingParameterError } from '@/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
@@ -116,7 +116,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         }
 
         const output: AddLiquidityBaseQueryOutput & { userData: Hex } = {
-            to: BALANCER_ROUTER[input.chainId],
+            to: balancerV3Contracts.Router[input.chainId],
             poolType: poolState.type,
             poolId: poolState.id,
             addLiquidityKind: input.kind,
@@ -195,7 +195,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
         return {
             callData,
-            to: BALANCER_ROUTER[input.chainId],
+            to: balancerV3Contracts.Router[input.chainId],
             value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
