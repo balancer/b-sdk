@@ -17,7 +17,7 @@ import {
 } from '../types';
 import { encodeFunctionData } from 'viem';
 import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
-import { buildCallWithPermit2ProtocolVersionError } from '@/utils';
+import { poolTypeError, protocolVersionError } from '@/utils';
 
 export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
     public async query(
@@ -67,8 +67,10 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         input: RemoveLiquidityBaseBuildCallInput,
     ): RemoveLiquidityBuildCallOutput {
         if (input.removeLiquidityKind !== RemoveLiquidityKind.Proportional) {
-            throw new Error(
-                `Error: Remove Liquidity ${input.removeLiquidityKind} is not supported. Cow AMM pools support Remove Liquidity Proportional only.`,
+            throw poolTypeError(
+                'Remove Liquidity',
+                input.poolType,
+                'Use Remove Liquidity Proportional instead.',
             );
         }
 
@@ -94,7 +96,13 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         };
     }
 
-    buildCallWithPermit(): RemoveLiquidityBuildCallOutput {
-        throw buildCallWithPermit2ProtocolVersionError;
+    buildCallWithPermit(
+        input: RemoveLiquidityBaseBuildCallInput,
+    ): RemoveLiquidityBuildCallOutput {
+        throw protocolVersionError(
+            'buildCallWithPermit',
+            input.protocolVersion,
+            'buildCallWithPermit is supported on Balancer v3 only.',
+        );
     }
 }

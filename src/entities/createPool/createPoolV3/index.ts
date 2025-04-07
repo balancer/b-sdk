@@ -1,4 +1,6 @@
 import { PoolType } from '@/types';
+import { poolTypeProtocolVersionError } from '@/utils';
+
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
@@ -8,6 +10,7 @@ import { CreatePoolWeightedV3 } from './weighted/createPoolWeighted';
 import { CreatePoolStableV3 } from './stable/createPoolStable';
 import { CreatePoolStableSurge } from './stableSurge/createStableSurge';
 import { CreatePoolGyroECLP } from './gyroECLP/createPoolGyroECLP';
+
 import { CreatePoolLiquidityBootstrapping } from './liquidityBootstrapping/createLiquidityBootstrapping';
 
 export class CreatePoolV3 implements CreatePoolBase {
@@ -26,7 +29,7 @@ export class CreatePoolV3 implements CreatePoolBase {
 
     private getCreatePool(poolType: string): CreatePoolBase {
         if (!this.createPoolTypes[poolType]) {
-            throw new Error('Unsupported pool type: ${poolType}');
+            throw poolTypeProtocolVersionError('Create Pool', poolType, 3);
         }
         return this.createPoolTypes[poolType];
     }

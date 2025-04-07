@@ -12,6 +12,7 @@ import { Permit2 } from '../permit2Helper';
 import { AddLiquidityNestedCallInputV3 } from './addLiquidityNestedV3/types';
 import { Slippage } from '../slippage';
 import { Address, Hex } from 'viem';
+import { protocolVersionError } from '@/utils/errors';
 
 export class AddLiquidityNested {
     async query(
@@ -22,8 +23,9 @@ export class AddLiquidityNested {
         validateNestedPoolState(nestedPoolState);
         switch (nestedPoolState.protocolVersion) {
             case 1: {
-                throw new Error(
-                    'AddLiquidityNested not supported for ProtocolVersion 1.',
+                throw protocolVersionError(
+                    'AddLiquidityNested',
+                    nestedPoolState.protocolVersion,
                 );
             }
             case 2: {

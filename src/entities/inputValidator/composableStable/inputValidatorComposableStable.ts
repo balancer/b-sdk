@@ -1,3 +1,4 @@
+import { inputValidationError } from '@/utils';
 import { AddLiquidityInput } from '../../addLiquidity/types';
 import { CreatePoolV2ComposableStableInput } from '../../createPool/types';
 import {
@@ -16,7 +17,7 @@ export class InputValidatorComposableStable extends InputValidatorBase {
         poolState: PoolState,
     ): void {
         super.validateAddLiquidity(addLiquidityInput, poolState);
-        validatePoolHasBpt(poolState);
+        validatePoolHasBpt('Add Liquidity', poolState);
     }
 
     validateRemoveLiquidity(
@@ -24,7 +25,7 @@ export class InputValidatorComposableStable extends InputValidatorBase {
         poolState: PoolState,
     ): void {
         super.validateRemoveLiquidity(input, poolState);
-        validatePoolHasBpt(poolState);
+        validatePoolHasBpt('Remove Liquidity', poolState);
     }
 
     validateRemoveLiquidityRecovery(
@@ -32,22 +33,27 @@ export class InputValidatorComposableStable extends InputValidatorBase {
         poolStateWithBalances: PoolStateWithBalances,
     ): void {
         super.validateRemoveLiquidityRecovery(input, poolStateWithBalances);
-        validatePoolHasBpt(poolStateWithBalances);
+        validatePoolHasBpt('Remove Liquidity Recovery', poolStateWithBalances);
     }
 
     validateCreatePool(input: CreatePoolV2ComposableStableInput): void {
         validateCreatePoolTokens(input.tokens);
         if (input.tokens.length > 5) {
-            throw new Error(
-                'Composable stable pools can have a maximum of 5 tokens',
+            throw inputValidationError(
+                'Create Pool',
+                'Composable stable pools can have a maximum of 5 tokens on Balancer v2',
             );
         }
         if (input.amplificationParameter <= BigInt(0)) {
-            throw new Error('Amplification parameter must be greater than 0');
+            throw inputValidationError(
+                'Create Pool',
+                'Amplification parameter must be greater than 0 on Balancer v2',
+            );
         }
         if (input.amplificationParameter > BigInt(5000)) {
-            throw new Error(
-                'Amplification parameter must be equal or lower than 5000',
+            throw inputValidationError(
+                'Create Pool',
+                'Amplification parameter must be equal or lower than 5000 on Balancer v2',
             );
         }
         return;

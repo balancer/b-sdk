@@ -11,12 +11,13 @@ import {
 } from './utils/validateTokens';
 import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
-import { isSameAddress, NATIVE_ASSETS } from '@/utils';
+import { isSameAddress, NATIVE_ASSETS, inputValidationError } from '@/utils';
 import { CreatePoolBaseInput } from '../createPool';
 
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
         areTokensInArray(
+            'Init Pool',
             initPoolInput.amountsIn.map((a) => a.address),
             poolState.tokens.map((t) => t.address),
         );
@@ -25,7 +26,22 @@ export class InputValidatorBase {
         }
     }
 
-    validateCreatePool(_input: CreatePoolBaseInput) {}
+    validateCreatePool(input: CreatePoolInput) {
+        validateCreatePoolTokens(input.tokens);
+        if (input.protocolVersion === 3) {
+            input.tokens.forEach(({ tokenType, rateProvider }) => {
+                if (
+                    tokenType !== TokenType.STANDARD &&
+                    rateProvider === zeroAddress
+                ) {
+                    throw inputValidationError(
+                        'Create Pool',
+                        'Only TokenType.STANDARD is allowed to have zeroAddress rateProvider',
+                    );
+                }
+            });
+        }
+    }
 
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
@@ -58,7 +74,8 @@ export class InputValidatorBase {
                     ),
                 );
             if (!inputContainsWrappedNativeAsset) {
-                throw new Error(
+                throw inputValidationError(
+                    'Init Pool',
                     'wethIsEth requires wrapped native asset as input',
                 );
             }

@@ -53,7 +53,10 @@ export class Pools {
         const poolGetPool: PoolState = {
             ...data.poolGetPool,
             tokens: data.poolGetPool.poolTokens,
-            type: mapPoolType(data.poolGetPool.type),
+            type:
+                data.poolGetPool.protocolVersion === 2
+                    ? mapPoolType(data.poolGetPool.type)
+                    : data.poolGetPool.type,
         };
         return poolGetPool;
     }
@@ -71,7 +74,10 @@ export class Pools {
         const poolStateWithBalances: PoolStateWithBalances = {
             ...data.poolGetPool,
             tokens: data.poolGetPool.poolTokens,
-            type: mapPoolType(data.poolGetPool.type),
+            type:
+                data.poolGetPool.protocolVersion === 2
+                    ? mapPoolType(data.poolGetPool.type)
+                    : data.poolGetPool.type,
             totalShares: data.poolGetPool.dynamicData.totalShares,
         };
         return poolStateWithBalances;

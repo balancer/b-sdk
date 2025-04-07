@@ -3,7 +3,7 @@ import {
     AddLiquidityKind,
 } from '@/entities/addLiquidity/types';
 import { PoolState } from '@/entities/types';
-import { addLiquidityProportionalNotSupportedOnPoolTypeError } from '@/utils';
+import { inputValidationError, poolTypeError } from '@/utils';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { validateTokensAddLiquidity } from '../utils/validateTokens';
 import { CreatePoolV3StableInput } from '@/entities/createPool';
@@ -20,19 +20,21 @@ export class InputValidatorStable extends InputValidatorBase {
         validateCreatePoolTokenConfig(input);
 
         if (input.tokens.length > MAX_TOKENS) {
-            throw new Error(
-                `Stable pools can only have a maximum of ${MAX_TOKENS} tokens`,
+            throw inputValidationError(
+                'Create Pool',
+                `Stable pools can only have a maximum of ${MAX_TOKENS} tokens on Balancer v3`,
             );
         }
-
         if (input.amplificationParameter < MIN_AMP) {
-            throw new Error(
-                `Amplification parameter below minimum of ${MIN_AMP}`,
+            throw inputValidationError(
+                'Create Pool',
+                `Amplification parameter below minimum of ${MIN_AMP} on Balancer v3`,
             );
         }
         if (input.amplificationParameter > MAX_AMP) {
-            throw new Error(
-                `Amplification parameter above maximum of ${MAX_AMP}`,
+            throw inputValidationError(
+                'Create Pool',
+                `Amplification parameter above maximum of ${MAX_AMP} on Balancer v3`,
             );
         }
     }
@@ -45,7 +47,8 @@ export class InputValidatorStable extends InputValidatorBase {
             poolState.protocolVersion === 2 &&
             addLiquidityInput.kind === AddLiquidityKind.Proportional
         ) {
-            throw addLiquidityProportionalNotSupportedOnPoolTypeError(
+            throw poolTypeError(
+                `Add Liquidity ${addLiquidityInput.kind}`,
                 poolState.type,
             );
         }

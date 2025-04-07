@@ -15,7 +15,7 @@ import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
 import { InputValidatorBoosted } from './boosted/inputValidatorBoosted';
 import { InputValidatorLiquidityBootstrapping } from './liquidityBootstrapping/inputValidatorLiquidityBootstrapping';
-import { ChainId, buildCallWithPermit2ProtocolVersionError } from '@/utils';
+import { ChainId, protocolVersionError, SDKError } from '@/utils';
 import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
 
 export class InputValidator {
@@ -98,10 +98,6 @@ export class InputValidator {
         addLiquidityInput: AddLiquidityBoostedInput,
         poolState: PoolStateWithUnderlyings,
     ): void {
-        if (poolState.type !== PoolType.Boosted)
-            throw new Error(
-                `validateAddLiquidityBoosted on non boosted pool: ${poolState.address}:${poolState.type}`,
-            );
         this.validateChain(addLiquidityInput.chainId);
         (
             this.validators[PoolType.Boosted] as InputValidatorBoosted
@@ -110,14 +106,22 @@ export class InputValidator {
 
     private validateChain(chainId: number): void {
         if (chainId in ChainId) return;
-        throw new Error(`Unsupported ChainId: ${chainId}`);
+        throw new SDKError(
+            'Input Validation',
+            'Any',
+            `Unsupported chainId: ${chainId}`,
+        );
     }
 
     static validateBuildCallWithPermit2(input: {
         protocolVersion: number;
     }): void {
         if (input.protocolVersion !== 3) {
-            throw buildCallWithPermit2ProtocolVersionError;
+            throw protocolVersionError(
+                'buildCallWithPermit2',
+                input.protocolVersion,
+                'buildCallWithPermit2 is supported on Balancer v3 only.',
+            );
         }
     }
 }

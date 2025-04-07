@@ -11,6 +11,7 @@ import {
     ChainId,
     MAX_UINT256,
     CHAINS,
+    protocolVersionError,
 } from '../../../../utils';
 import {
     Address,
@@ -19,7 +20,7 @@ import {
     getContract,
     http,
 } from 'viem';
-import { balancerQueriesAbi, vaultV2Abi } from '../../../../abi';
+import { balancerQueriesAbiExtended, vaultV2Abi } from '../../../../abi';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
@@ -39,9 +40,6 @@ export * from './types';
 // A Swap can be a single or multiple paths
 export class SwapV2 implements SwapBase {
     public constructor({ chainId, paths, swapKind }: SwapInput) {
-        if (paths.length === 0)
-            throw new Error('Invalid swap: must contain at least 1 path.');
-
         this.paths = paths.map(
             (p) =>
                 new PathWithAmount(
@@ -101,7 +99,7 @@ export class SwapV2 implements SwapBase {
 
         const queriesContract = getContract({
             address: BALANCER_QUERIES[this.chainId],
-            abi: balancerQueriesAbi,
+            abi: balancerQueriesAbiExtended,
             client,
         });
         return this.isBatchSwap
@@ -195,7 +193,7 @@ export class SwapV2 implements SwapBase {
         let callData: string;
         if (this.isBatchSwap) {
             callData = encodeFunctionData({
-                abi: balancerQueriesAbi,
+                abi: balancerQueriesAbiExtended,
                 functionName: 'queryBatchSwap',
                 args: [
                     this.swapKind,
@@ -206,7 +204,7 @@ export class SwapV2 implements SwapBase {
             });
         } else {
             callData = encodeFunctionData({
-                abi: balancerQueriesAbi,
+                abi: balancerQueriesAbiExtended,
                 functionName: 'querySwap',
                 args: [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
             });
@@ -310,7 +308,11 @@ export class SwapV2 implements SwapBase {
     }
 
     buildCallWithPermit2(): SwapBuildOutputExactIn | SwapBuildOutputExactOut {
-        throw new Error('buildCallWithPermit2 is not supported on v2');
+        throw protocolVersionError(
+            'buildCallWithPermit2',
+            2,
+            'buildCallWithPermit2 is supported on Balancer v3 only.',
+        );
     }
 
     /**

@@ -8,7 +8,7 @@ import {
 
 import { Permit } from '@/entities/permitHelper';
 
-import { balancerCompositeLiquidityRouterBoostedAbi } from '@/abi';
+import { balancerCompositeLiquidityRouterBoostedAbiExtended } from '@/abi';
 
 import { PoolStateWithUnderlyings } from '@/entities/types';
 
@@ -46,9 +46,6 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const unwrapWrapped = input.tokensOut
             .map((t) => {
                 const tokenOut = poolStateTokenMap[t.toLowerCase() as Address];
-                if (!tokenOut) {
-                    throw new Error(`Invalid token address: ${t}`);
-                }
                 return tokenOut;
             })
             .sort((a, b) => a.index - b.index) // sort by index to match the order of the pool tokens
@@ -101,7 +98,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const amounts = getAmountsCall(input);
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterBoostedAbi,
+            abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
             functionName: 'removeLiquidityProportionalFromERC4626Pool',
             args: [
                 input.poolId,
@@ -142,7 +139,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterBoostedAbi,
+            abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

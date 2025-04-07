@@ -20,10 +20,13 @@ import {
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuery';
 import { Token } from '../token';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
 import {
-    balancerCompositeLiquidityRouterBoostedAbi,
-    balancerRouterAbi,
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+    protocolVersionError,
+} from '@/utils';
+import {
+    balancerCompositeLiquidityRouterBoostedAbiExtended,
+    balancerRouterAbiExtended,
 } from '@/abi';
 import { Hex } from '@/types';
 import {
@@ -65,13 +68,10 @@ export class AddLiquidityBoostedV3 {
                 // Use amountsIn provided by use to infer if token should be wrapped
                 const tokensIn: MinimalTokenWithIsUnderlyingFlag[] =
                     input.amountsIn.map((amountIn) => {
-                        const amountInAddress = amountIn.address.toLowerCase();
+                        const amountInAddress =
+                            amountIn.address.toLowerCase() as Address;
+                        // input validation already verifies that token is in poolState
                         const token = poolStateTokenMap[amountInAddress];
-                        if (!token) {
-                            throw new Error(
-                                `Token not found in poolState: ${amountInAddress}`,
-                            );
-                        }
                         return token;
                     });
 
@@ -128,9 +128,6 @@ export class AddLiquidityBoostedV3 {
                 input.tokensIn.forEach((t) => {
                     const tokenIn =
                         poolStateTokenMap[t.toLowerCase() as Address];
-                    if (!tokenIn) {
-                        throw new Error(`Invalid token address: ${t}`);
-                    }
                     wrapUnderlying[tokenIn.index] = tokenIn.isUnderlyingToken;
                 });
 
@@ -208,7 +205,7 @@ export class AddLiquidityBoostedV3 {
         switch (input.addLiquidityKind) {
             case AddLiquidityKind.Unbalanced: {
                 callData = encodeFunctionData({
-                    abi: balancerCompositeLiquidityRouterBoostedAbi,
+                    abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
                     functionName: 'addLiquidityUnbalancedToERC4626Pool',
                     args,
                 });
@@ -216,14 +213,17 @@ export class AddLiquidityBoostedV3 {
             }
             case AddLiquidityKind.Proportional: {
                 callData = encodeFunctionData({
-                    abi: balancerCompositeLiquidityRouterBoostedAbi,
+                    abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
                     functionName: 'addLiquidityProportionalToERC4626Pool',
                     args,
                 });
                 break;
             }
             case AddLiquidityKind.SingleToken: {
-                throw new Error('SingleToken not supported');
+                throw protocolVersionError(
+                    'Add Liquidity Boosted Single Token',
+                    input.protocolVersion,
+                );
             }
         }
 
@@ -259,7 +259,7 @@ export class AddLiquidityBoostedV3 {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerRouterAbi,
+            abi: balancerRouterAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

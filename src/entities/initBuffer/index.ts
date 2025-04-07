@@ -5,7 +5,10 @@ import { Permit2 } from '@/entities/permit2Helper';
 
 import { doInitBufferQuery } from './doInitBufferQuery';
 import { BALANCER_BUFFER_ROUTER } from '@/utils';
-import { balancerBufferRouterAbi, balancerRouterAbi } from '@/abi';
+import {
+    balancerBufferRouterAbiExtended,
+    balancerRouterAbiExtended,
+} from '@/abi';
 
 import {
     InitBufferBuildCallInput,
@@ -48,7 +51,7 @@ export class InitBufferV3 {
         const minIssuedShares = input.slippage.applyTo(input.issuedShares, -1);
 
         const callData = encodeFunctionData({
-            abi: balancerBufferRouterAbi,
+            abi: balancerBufferRouterAbiExtended,
             functionName: 'initializeBuffer',
             args: [
                 input.wrappedAmountIn.token.address,
@@ -81,7 +84,7 @@ export class InitBufferV3 {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerRouterAbi,
+            abi: balancerRouterAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

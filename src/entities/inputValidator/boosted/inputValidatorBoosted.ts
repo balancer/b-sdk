@@ -3,7 +3,11 @@ import { PoolStateWithUnderlyings } from '@/entities/types';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { AddLiquidityKind } from '@/entities/addLiquidity/types';
 import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
-import { isSameAddress } from '@/utils';
+import {
+    inputValidationError,
+    isSameAddress,
+    protocolVersionError,
+} from '@/utils';
 import {
     CreatePoolStableSurgeInput,
     CreatePoolV3StableInput,
@@ -18,7 +22,10 @@ export class InputValidatorBoosted extends InputValidatorBase {
     ): void {
         //check if poolState.protocolVersion is 3
         if (poolState.protocolVersion !== 3) {
-            throw new Error('protocol version must be 3');
+            throw protocolVersionError(
+                'Add Liquidity Boosted',
+                poolState.protocolVersion,
+            );
         }
 
         if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {
@@ -32,8 +39,9 @@ export class InputValidatorBoosted extends InputValidatorBase {
 
             addLiquidityInput.amountsIn.forEach((a) => {
                 if (!poolTokens.includes(a.address.toLowerCase() as Address)) {
-                    throw new Error(
-                        `Address ${a.address} is not contained in the pool's parent or child tokens.`,
+                    throw inputValidationError(
+                        'Add Liquidity Boosted',
+                        `amountIn address ${a.address} should exist in poolState tokens`,
                     );
                 }
             });
@@ -55,8 +63,9 @@ export class InputValidatorBoosted extends InputValidatorBase {
                         ),
                     ) === -1
                 ) {
-                    throw new Error(
-                        'tokensIn must contain referenceAmount token address',
+                    throw inputValidationError(
+                        'Add Liquidity Boosted',
+                        `referenceAmount address ${addLiquidityInput.referenceAmount.address} should exist in tokensIn`,
                     );
                 }
             }

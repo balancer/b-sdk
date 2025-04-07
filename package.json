@@ -9,7 +9,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "2.4.0",
+    "version": "2.7.1",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
@@ -30,6 +30,8 @@
     },
     "dependencies": {
         "@balancer-labs/balancer-maths": "0.0.24",
+        "@types/big.js": "^6.2.2",
+        "big.js": "^6.2.2",
         "decimal.js-light": "^2.5.1",
         "lodash.clonedeep": "^4.5.0",
         "viem": "^2.22.3"

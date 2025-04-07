@@ -3,7 +3,7 @@ import { AuraBalSwapKind, Token, TokenAmount } from '@/entities';
 import { auraBalToken } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
 import { parseInputs } from '@/entities/swap/swaps/v2/auraBalSwaps/parseInputs';
 import { SwapKind } from '@/types';
-import { ChainId } from '@/utils';
+import { ChainId, inputValidationError } from '@/utils';
 
 const usdc = new Token(
     ChainId.MAINNET,
@@ -26,7 +26,10 @@ describe('auraBalSwaps:parseInputs', () => {
                 swapAmount: TokenAmount.fromHumanAmount(usdc, '1'),
             });
         }).rejects.toThrowError(
-            'auraBal Swap: Must have tokenIn or tokenOut as auraBal.',
+            inputValidationError(
+                'auraBal Swap',
+                'Must have tokenIn or tokenOut as auraBal.',
+            ),
         );
     });
     test('should throw for non-supported input token', async () => {
@@ -37,7 +40,12 @@ describe('auraBalSwaps:parseInputs', () => {
                 kind: SwapKind.GivenIn,
                 swapAmount: TokenAmount.fromHumanAmount(usdc, '1'),
             });
-        }).rejects.toThrowError('auraBal Swap: Unsupported tokenIn');
+        }).rejects.toThrowError(
+            inputValidationError(
+                'auraBal Swap',
+                `Unsupported tokenIn ${usdc.address}`,
+            ),
+        );
     });
     test('should throw for non-supported output token', async () => {
         await expect(async () => {
@@ -47,7 +55,12 @@ describe('auraBalSwaps:parseInputs', () => {
                 kind: SwapKind.GivenIn,
                 swapAmount: TokenAmount.fromHumanAmount(auraBalToken, '1'),
             });
-        }).rejects.toThrowError('auraBal Swap: Unsupported tokenOut');
+        }).rejects.toThrowError(
+            inputValidationError(
+                'auraBal Swap',
+                `Unsupported tokenOut ${usdc.address}`,
+            ),
+        );
     });
     test('should throw for ExactOut', async () => {
         await expect(async () => {
@@ -57,7 +70,9 @@ describe('auraBalSwaps:parseInputs', () => {
                 kind: SwapKind.GivenOut,
                 swapAmount: TokenAmount.fromHumanAmount(auraBalToken, '1'),
             });
-        }).rejects.toThrowError('auraBal Swap: Must be SwapKind GivenIn.');
+        }).rejects.toThrowError(
+            inputValidationError('auraBal Swap', 'Must be SwapKind GivenIn.'),
+        );
     });
     test('should throw when tokenIn and swapAmount tokens dont match', async () => {
         await expect(async () => {
@@ -68,7 +83,10 @@ describe('auraBalSwaps:parseInputs', () => {
                 swapAmount: TokenAmount.fromHumanAmount(usdc, '1'),
             });
         }).rejects.toThrowError(
-            'auraBal Swap: tokenIn and swapAmount address must match.',
+            inputValidationError(
+                'auraBal Swap',
+                'tokenIn and swapAmount address must match.',
+            ),
         );
     });
     test('valid fromAuraBal', async () => {

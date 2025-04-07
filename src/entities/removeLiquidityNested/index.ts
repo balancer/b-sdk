@@ -10,7 +10,8 @@ import {
 import { RemoveLiquidityNestedV3 } from './removeLiquidityNestedV3';
 import { validateBuildCallInput } from './removeLiquidityNestedV2/validateInputs';
 import { Address, encodeFunctionData, Hex, zeroAddress } from 'viem';
-import { balancerCompositeLiquidityRouterNestedAbi } from '@/abi';
+import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
+import { protocolVersionError } from '@/utils';
 
 export class RemoveLiquidityNested {
     async query(
@@ -21,8 +22,9 @@ export class RemoveLiquidityNested {
         validateNestedPoolState(nestedPoolState);
         switch (nestedPoolState.protocolVersion) {
             case 1: {
-                throw new Error(
-                    'RemoveLiquidityNested not supported for ProtocolVersion 1.',
+                throw protocolVersionError(
+                    'RemoveLiquidityNested',
+                    nestedPoolState.protocolVersion,
                 );
             }
             case 2: {
@@ -66,7 +68,7 @@ export class RemoveLiquidityNested {
             [buildCallOutput.callData],
         ] as const;
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterNestedAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

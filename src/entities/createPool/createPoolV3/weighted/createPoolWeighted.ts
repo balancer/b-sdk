@@ -6,7 +6,7 @@ import {
     CreatePoolBuildCallOutput,
     PoolRoleAccounts,
 } from '../../types';
-import { weightedPoolFactoryAbi_V3 } from '@/abi/weightedPoolFactory.V3';
+import { weightedPoolFactoryAbiExtended_V3 } from '@/abi';
 import { WEIGHTED_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 
@@ -51,7 +51,7 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
         ] as const;
 
         return encodeFunctionData({
-            abi: weightedPoolFactoryAbi_V3,
+            abi: weightedPoolFactoryAbiExtended_V3,
             functionName: 'create',
             args,
         });

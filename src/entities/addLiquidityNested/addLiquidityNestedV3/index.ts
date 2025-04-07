@@ -14,13 +14,13 @@ import {
 import { Token } from '@/entities/token';
 import { getAmounts, getValue } from '@/entities/utils';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
 import {
-    balancerCompositeLiquidityRouterNestedAbi,
-    permit2Abi,
-    vaultExtensionAbi_V3,
-    vaultV3Abi,
-} from '@/abi';
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
+    CHAINS,
+    ChainId,
+    SDKError,
+} from '@/utils';
+import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
 import {
     AddLiquidityNestedCallInputV3,
     AddLiquidityNestedInputV3,
@@ -41,6 +41,13 @@ export class AddLiquidityNestedV3 {
         nestedPoolState: NestedPoolState,
         block?: bigint,
     ): Promise<AddLiquidityNestedQueryOutputV3> {
+        if (input.chainId === ChainId.AVALANCHE) {
+            throw new SDKError(
+                'Input Validation',
+                'Add Liquidity Nested',
+                'Balancer V3 does not support add liquidity nested on Avalanche',
+            );
+        }
         validateQueryInput(input, nestedPoolState);
 
         // Address of the highest level pool (which contains BPTs of other pools), i.e. the pool we wish to join
@@ -85,12 +92,19 @@ export class AddLiquidityNestedV3 {
     buildCall(
         input: AddLiquidityNestedCallInputV3,
     ): AddLiquidityNestedBuildCallOutput {
+        if (input.chainId === ChainId.AVALANCHE) {
+            throw new SDKError(
+                'Input Validation',
+                'Add Liquidity Nested',
+                'Balancer V3 does not support add liquidity nested on Avalanche',
+            );
+        }
         // validateBuildCallInput(input); TODO - Add this like V2 once weth/native is allowed
         // apply slippage to bptOut
         const minBptOut = input.slippage.applyTo(input.bptOut.amount, -1);
         const wethIsEth = input.wethIsEth ?? false;
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterNestedAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'addLiquidityUnbalancedNestedPool',
             args: [
                 input.parentPool,
@@ -124,7 +138,7 @@ export class AddLiquidityNestedV3 {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterNestedAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });
@@ -151,12 +165,7 @@ export class AddLiquidityNestedV3 {
 
         const { result: bptAmountOut } = await client.simulateContract({
             address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
-            abi: [
-                ...balancerCompositeLiquidityRouterNestedAbi,
-                ...vaultV3Abi,
-                ...vaultExtensionAbi_V3,
-                ...permit2Abi,
-            ],
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'queryAddLiquidityUnbalancedNestedPool',
             args: [parentPool, tokensIn, maxAmountsIn, sender, userData],
             blockNumber: block,

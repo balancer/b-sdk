@@ -3,12 +3,12 @@ import {
     CreatePool,
     Address,
     PoolType,
-    weightedPoolFactoryV4Abi_V2,
-    composableStableFactoryV6Abi_V2,
-    weightedPoolFactoryAbi_V3,
-    stablePoolFactoryAbi_V3,
-    gyroECLPPoolFactoryAbi_V3,
-    stableSurgeFactoryAbi,
+    weightedPoolFactoryAbiExtended_V2,
+    composableStableFactoryAbiExtended,
+    weightedPoolFactoryAbiExtended_V3,
+    stablePoolFactoryAbiExtended,
+    gyroECLPPoolFactoryAbiExtended,
+    stableSurgeFactoryAbiExtended,
     liquidityBoostrappingFactoryAbi,
 } from 'src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
@@ -23,14 +23,14 @@ export async function doCreatePool(
 
     const abis = {
         2: {
-            [PoolType.Weighted]: weightedPoolFactoryV4Abi_V2,
-            [PoolType.ComposableStable]: composableStableFactoryV6Abi_V2,
+            [PoolType.Weighted]: weightedPoolFactoryAbiExtended_V2,
+            [PoolType.ComposableStable]: composableStableFactoryAbiExtended,
         },
         3: {
-            [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
-            [PoolType.Stable]: stablePoolFactoryAbi_V3,
-            [PoolType.StableSurge]: stableSurgeFactoryAbi,
-            [PoolType.GyroE]: gyroECLPPoolFactoryAbi_V3,
+            [PoolType.Weighted]: weightedPoolFactoryAbiExtended_V3,
+            [PoolType.Stable]: stablePoolFactoryAbiExtended,
+            [PoolType.StableSurge]: stableSurgeFactoryAbiExtended,
+            [PoolType.GyroE]: gyroECLPPoolFactoryAbiExtended,
             [PoolType.LiquidityBootstrapping]: liquidityBoostrappingFactoryAbi,
         },
     };

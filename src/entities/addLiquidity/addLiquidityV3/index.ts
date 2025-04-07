@@ -1,5 +1,6 @@
 import { encodeFunctionData, zeroAddress } from 'viem';
-import { balancerRouterAbi } from '@/abi';
+import { balancerRouterAbiExtended } from '@/abi';
+import { Permit2 } from '@/entities/permit2Helper';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
@@ -7,27 +8,23 @@ import {
     getAmounts,
     getBptAmountFromReferenceAmount,
     getSortedTokens,
+    getValue,
 } from '@/entities/utils';
 import { Hex } from '@/types';
-import {
-    BALANCER_ROUTER,
-    addLiquiditySingleTokenShouldHaveTokenInIndexError,
-} from '@/utils';
+import { BALANCER_ROUTER, missingParameterError } from '@/utils';
 
 import { getAmountsCall } from '../helpers';
 import {
     AddLiquidityBase,
-    AddLiquidityBaseBuildCallInput,
     AddLiquidityBaseQueryOutput,
     AddLiquidityBuildCallOutput,
     AddLiquidityInput,
     AddLiquidityKind,
+    AddLiquidityV3BuildCallInput,
 } from '../types';
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
-import { getValue } from '@/entities/utils/getValue';
-import { Permit2 } from '@/entities/permit2Helper';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -135,7 +132,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
     }
 
     buildCall(
-        input: AddLiquidityBaseBuildCallInput & { userData: Hex },
+        input: AddLiquidityV3BuildCallInput,
     ): AddLiquidityBuildCallOutput {
         const amounts = getAmountsCall(input);
         let callData: Hex;
@@ -143,7 +140,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             case AddLiquidityKind.Proportional:
                 {
                     callData = encodeFunctionData({
-                        abi: balancerRouterAbi,
+                        abi: balancerRouterAbiExtended,
                         functionName: 'addLiquidityProportional',
                         args: [
                             input.poolId,
@@ -158,7 +155,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
             case AddLiquidityKind.Unbalanced:
                 {
                     callData = encodeFunctionData({
-                        abi: balancerRouterAbi,
+                        abi: balancerRouterAbiExtended,
                         functionName: 'addLiquidityUnbalanced',
                         args: [
                             input.poolId,
@@ -174,10 +171,14 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                 {
                     // just a sanity check as this is already checked in InputValidator
                     if (input.tokenInIndex === undefined) {
-                        throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+                        throw missingParameterError(
+                            'Add Liquidity SingleToken',
+                            'tokenInIndex',
+                            input.protocolVersion,
+                        );
                     }
                     callData = encodeFunctionData({
-                        abi: balancerRouterAbi,
+                        abi: balancerRouterAbiExtended,
                         functionName: 'addLiquiditySingleTokenExactOut',
                         args: [
                             input.poolId,
@@ -207,7 +208,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
     }
 
     public buildCallWithPermit2(
-        input: AddLiquidityBaseBuildCallInput & { userData: Hex },
+        input: AddLiquidityV3BuildCallInput,
         permit2: Permit2,
     ): AddLiquidityBuildCallOutput {
         const buildCallOutput = this.buildCall(input);
@@ -221,7 +222,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerRouterAbi,
+            abi: balancerRouterAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

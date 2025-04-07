@@ -7,7 +7,7 @@ import {
 } from '../../../../../entities';
 import { Address, Hex } from '../../../../../types';
 import { mapPoolType } from '@/utils/poolTypeMapper';
-import { API_CHAIN_NAMES, isSameAddress } from '@/utils';
+import { API_CHAIN_NAMES, isSameAddress, SDKError } from '@/utils';
 
 export type PoolGetPool = {
     id: Hex;
@@ -99,11 +99,19 @@ export class NestedPools {
 }
 
 export function mapPoolToNestedPoolStateV3(pool: PoolGetPool): NestedPoolState {
+    if (pool.protocolVersion !== 3) {
+        throw new SDKError(
+            'BalancerApi',
+            'mapPoolToNestedPoolStateV3',
+            'Pool protocol version is not 3',
+        );
+    }
+
     const pools: NestedPoolV3[] = [
         {
             id: pool.id,
             address: pool.address,
-            type: mapPoolType(pool.type),
+            type: pool.type,
             level: 1,
             tokens: pool.poolTokens.map((t) => {
                 const minimalToken: PoolTokenWithUnderlying = {

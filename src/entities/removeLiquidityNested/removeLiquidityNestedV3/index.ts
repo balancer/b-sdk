@@ -13,13 +13,13 @@ import {
     RemoveLiquidityNestedQueryOutputV3,
 } from './types';
 import { RemoveLiquidityNestedBuildCallOutput } from '../types';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED, CHAINS } from '@/utils';
 import {
-    balancerCompositeLiquidityRouterNestedAbi,
-    permit2Abi,
-    vaultExtensionAbi_V3,
-    vaultV3Abi,
-} from '@/abi';
+    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
+    CHAINS,
+    ChainId,
+    SDKError,
+} from '@/utils';
+import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 
@@ -29,6 +29,13 @@ export class RemoveLiquidityNestedV3 {
         nestedPoolState: NestedPoolState,
         block?: bigint,
     ): Promise<RemoveLiquidityNestedQueryOutputV3> {
+        if (input.chainId === ChainId.AVALANCHE) {
+            throw new SDKError(
+                'Input Validation',
+                'Remove Liquidity Nested',
+                'Balancer V3 does not support remove liquidity nested on Avalanche',
+            );
+        }
         // Address of the highest level pool (which contains BPTs of other pools), i.e. the pool we wish to join
         const parentPool = nestedPoolState.pools.reduce((max, curr) =>
             curr.level > max.level ? curr : max,
@@ -68,6 +75,13 @@ export class RemoveLiquidityNestedV3 {
     buildCall(
         input: RemoveLiquidityNestedCallInputV3,
     ): RemoveLiquidityNestedBuildCallOutput {
+        if (input.chainId === ChainId.AVALANCHE) {
+            throw new SDKError(
+                'Input Validation',
+                'Remove Liquidity Nested',
+                'Balancer V3 does not support remove liquidity nested on Avalanche',
+            );
+        }
         // validateBuildCallInput(input); TODO - Add this like V2 once weth/native is allowed
 
         // apply slippage to amountsOut
@@ -79,7 +93,7 @@ export class RemoveLiquidityNestedV3 {
         );
 
         const callData = encodeFunctionData({
-            abi: balancerCompositeLiquidityRouterNestedAbi,
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'removeLiquidityProportionalNestedPool',
             args: [
                 input.parentPool,
@@ -113,12 +127,7 @@ export class RemoveLiquidityNestedV3 {
 
         const { result: amountsOut } = await client.simulateContract({
             address: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
-            abi: [
-                ...balancerCompositeLiquidityRouterNestedAbi,
-                ...vaultV3Abi,
-                ...vaultExtensionAbi_V3,
-                ...permit2Abi,
-            ],
+            abi: balancerCompositeLiquidityRouterNestedAbiExtended,
             functionName: 'queryRemoveLiquidityProportionalNestedPool',
             args: [parentPool, exactBptAmountIn, tokensOut, sender, userData],
             blockNumber: block,

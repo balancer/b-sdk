@@ -1,5 +1,41 @@
 # @balancer/sdk
 
+## 2.7.1
+
+### Patch Changes
+
+- 57d2532: Fix Install check in our CI pipeline
+
+## 2.7.0
+
+### Minor Changes
+
+- a3e92ad: add avalanche support
+
+## 2.6.0
+
+### Minor Changes
+
+- fee401c: Refactor input validation errors as SDKError
+
+### Patch Changes
+
+- 061f490: Remove test no longer necessary on gnosis-chain
+- 72a0ded: Refactor price impact errors as SDKError
+- 9240e75: Error Handling - Propagate SC Errors
+
+## 2.5.1
+
+### Patch Changes
+
+- 3763ca1: Update GyroECLP factory addresses and ABI
+
+## 2.5.0
+
+### Minor Changes
+
+- c9b73ec: calculate derived params for gyro eclp pools
+
 ## 2.4.0
 
 ### Minor Changes

@@ -2,6 +2,7 @@ import { BalancerApiClient } from '../../client';
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
 import { BufferState } from '@/entities';
 import { Address } from 'viem';
+import { inputValidationError } from '@/utils';
 
 export class Buffers {
     readonly bufferStateQuery = `
@@ -36,8 +37,9 @@ export class Buffers {
             underlyingTokenAddress: Address;
         };
         if (!wrappedToken.isErc4626) {
-            throw new Error(
-                `Wrapped token address provided is not an ERC4626: ${wrappedTokenAddress}`,
+            throw inputValidationError(
+                'Fetch Buffer State',
+                `wrappedTokenAddress ${wrappedTokenAddress} provided is not an ERC4626`,
             );
         }
         const bufferState: BufferState = {

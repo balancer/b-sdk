@@ -8,7 +8,10 @@ import { BufferState } from '@/entities/types';
 import { doAddLiquidityQuery } from './doAddLiquidityQuery';
 import { Token } from '../token';
 import { BALANCER_BUFFER_ROUTER } from '@/utils';
-import { balancerBufferRouterAbi, balancerRouterAbi } from '@/abi';
+import {
+    balancerBufferRouterAbiExtended,
+    balancerRouterAbiExtended,
+} from '@/abi';
 
 import {
     AddLiquidityBufferBuildCallInput,
@@ -75,7 +78,7 @@ export class AddLiquidityBufferV3 {
         );
 
         const callData = encodeFunctionData({
-            abi: balancerBufferRouterAbi,
+            abi: balancerBufferRouterAbiExtended,
             functionName: 'addLiquidityToBuffer',
             args: [
                 input.wrappedAmountIn.token.address,
@@ -110,7 +113,7 @@ export class AddLiquidityBufferV3 {
         ] as const;
 
         const callData = encodeFunctionData({
-            abi: balancerRouterAbi,
+            abi: balancerRouterAbiExtended,
             functionName: 'permitBatchAndCall',
             args,
         });

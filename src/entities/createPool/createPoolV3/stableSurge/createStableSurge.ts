@@ -6,12 +6,24 @@ import {
     PoolRoleAccounts,
     CreatePoolStableSurgeInput,
 } from '../../types';
-import { stableSurgeFactoryAbi } from '@/abi/stableSurgeFactory';
-import { STABLE_SURGE_FACTORY, sortByAddress } from '@/utils';
+import { stableSurgeFactoryAbiExtended } from '@/abi';
+import {
+    STABLE_SURGE_FACTORY,
+    sortByAddress,
+    ChainId,
+    SDKError,
+} from '@/utils';
 import { Hex } from '@/types';
 
 export class CreatePoolStableSurge implements CreatePoolBase {
     buildCall(input: CreatePoolStableSurgeInput): CreatePoolBuildCallOutput {
+        if (input.chainId === ChainId.AVALANCHE) {
+            throw new SDKError(
+                'Input Validation',
+                'Create Pool Stable Surge',
+                'Balancer V3 does not support create pool stable surge on Avalanche',
+            );
+        }
         const callData = this.encodeCall(input);
         return {
             callData,
@@ -45,7 +57,7 @@ export class CreatePoolStableSurge implements CreatePoolBase {
         ] as const;
 
         return encodeFunctionData({
-            abi: stableSurgeFactoryAbi,
+            abi: stableSurgeFactoryAbiExtended,
             functionName: 'create',
             args,
         });

@@ -22,10 +22,10 @@ import {
     Address,
     parseEther,
     Account,
+    erc20Abi,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
-    stablePoolFactoryAbi_V3,
     CreatePoolV3StableInput,
     CreatePool,
     PoolType,
@@ -36,9 +36,9 @@ import {
     InitPoolInputV3,
     TokenType,
     PERMIT2,
-    erc20Abi,
     Permit2Helper,
     PublicWalletClient,
+    stablePoolFactoryAbiExtended,
 } from 'src';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
@@ -214,7 +214,7 @@ async function createPool({ client, account }): Promise<Address> {
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: stablePoolFactoryAbi_V3,
+        abi: stablePoolFactoryAbiExtended,
         to: call.to,
     });
 

@@ -1,19 +1,23 @@
-import { removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError } from '@/utils';
-import { RemoveLiquidityBaseBuildCallInput } from '../types';
 import { encodeFunctionData } from 'viem';
-import { balancerRouterAbi } from '@/abi';
+import { balancerRouterAbiExtended } from '@/abi';
 import { Hex } from '@/types';
+import { missingParameterError } from '@/utils';
+import { RemoveLiquidityV3BuildCallInput } from '../types';
 
 export const encodeRemoveLiquiditySingleTokenExactOut = (
-    input: RemoveLiquidityBaseBuildCallInput & { userData: Hex },
+    input: RemoveLiquidityV3BuildCallInput,
     maxBptAmountIn: bigint,
 ): Hex => {
     // just a sanity check as this is already checked in InputValidator
     if (input.tokenOutIndex === undefined) {
-        throw removeLiquiditySingleTokenExactInShouldHaveTokenOutIndexError;
+        throw missingParameterError(
+            'Remove Liquidity SingleTokenExactOut',
+            'tokenOutIndex',
+            input.protocolVersion,
+        );
     }
     return encodeFunctionData({
-        abi: balancerRouterAbi,
+        abi: balancerRouterAbiExtended,
         functionName: 'removeLiquiditySingleTokenExactOut',
         args: [
             input.poolId,

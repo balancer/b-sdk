@@ -1,13 +1,16 @@
+import { Hex, TestActions } from 'viem';
 import {
     AddLiquidity,
+    AddLiquidityBaseBuildCallInput,
     AddLiquidityBuildCallOutput,
     AddLiquidityBuildCallInput,
     AddLiquidityInput,
+    AddLiquidityKind,
     AddLiquidityProportionalInput,
     AddLiquidityQueryOutput,
     AddLiquiditySingleTokenInput,
-    addLiquiditySingleTokenShouldHaveTokenInIndexError,
     AddLiquidityUnbalancedInput,
+    AddLiquidityV3BuildCallInput,
     Address,
     BALANCER_ROUTER,
     NATIVE_ASSETS,
@@ -17,17 +20,16 @@ import {
     TokenAmount,
     VAULT_V2,
     Permit2Helper,
-    AddLiquidityKind,
     ChainId,
     isSameAddress,
     PublicWalletClient,
+    missingParameterError,
 } from 'src';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
-import { Hex, TestActions } from 'viem';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -64,7 +66,7 @@ async function sdkAddLiquidity({
         poolState,
     );
 
-    let addLiquidityBuildInput: AddLiquidityBuildCallInput = {
+    let addLiquidityBuildInput: AddLiquidityBaseBuildCallInput = {
         ...addLiquidityQueryOutput,
         slippage,
         wethIsEth: !!wethIsEth,
@@ -75,6 +77,12 @@ async function sdkAddLiquidity({
             sender: testAddress,
             recipient: testAddress,
             fromInternalBalance: !!fromInternalBalance,
+        };
+    }
+    if (poolState.protocolVersion === 3) {
+        (addLiquidityBuildInput as AddLiquidityV3BuildCallInput) = {
+            ...addLiquidityBuildInput,
+            userData: addLiquidityInput.userData ?? '0x',
         };
     }
 
@@ -88,12 +96,12 @@ async function sdkAddLiquidity({
         });
 
         addLiquidityBuildCallOutput = addLiquidity.buildCallWithPermit2(
-            addLiquidityBuildInput,
+            addLiquidityBuildInput as AddLiquidityBuildCallInput,
             permit2,
         );
     } else {
         addLiquidityBuildCallOutput = addLiquidity.buildCall(
-            addLiquidityBuildInput,
+            addLiquidityBuildInput as AddLiquidityBuildCallInput,
         );
     }
 
@@ -276,7 +284,11 @@ export function assertAddLiquiditySingleToken(
         addLiquidityOutput;
 
     if (addLiquidityQueryOutput.tokenInIndex === undefined)
-        throw addLiquiditySingleTokenShouldHaveTokenInIndexError;
+        throw missingParameterError(
+            'Add Liquidity SingleToken',
+            'tokenInIndex',
+            protocolVersion,
+        );
 
     const bptToken = new Token(
         addLiquidityInput.chainId,
@@ -374,8 +386,6 @@ export function assertAddLiquidityProportional(
         case 3:
             to = BALANCER_ROUTER[chainId];
             break;
-        default:
-            throw new Error(`Unsupported protocolVersion: ${protocolVersion}`);
     }
 
     let expectedQueryOutput: Omit<

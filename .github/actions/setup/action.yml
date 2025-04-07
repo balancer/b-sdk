@@ -1,4 +1,5 @@
 name: 'Setup'
+description: 'Sets up the Node.js environment with pnpm, configures caching for dependencies, and installs project packages.'
 runs:
   using: "composite"
   steps:
@@ -22,6 +23,6 @@ runs:
         path: node_modules
         key: ${{ matrix.node-version }}-modules-${{ hashFiles('pnpm-lock.yaml') }}
     - name: Install Dependencies
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: pnpm i
       shell: bash
+
