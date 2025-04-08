@@ -28,7 +28,7 @@ import { doCreatePool } from '../../../lib/utils/createPoolHelper';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import { PublicWalletClient } from '@/utils';
-import { vaultExtensionAbi } from 'src/abi/';
+import { vaultExtensionAbi_V3 } from 'src/abi/';
 import {
     setTokenBalances,
     approveSpenderOnTokens,
@@ -102,7 +102,7 @@ describe('create weighted pool test', () => {
     test('Registration', async () => {
         const isPoolRegistered = await client.readContract({
             address: balancerV3Contracts.Vault[chainId],
-            abi: vaultExtensionAbi,
+            abi: vaultExtensionAbi_V3,
             functionName: 'isPoolRegistered',
             args: [poolAddress],
         });

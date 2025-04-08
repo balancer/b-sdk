@@ -19,7 +19,7 @@ import {
     Permit2Helper,
     PERMIT2,
     balancerV3Contracts,
-    vaultExtensionAbi,
+    vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
 } from 'src';
@@ -139,7 +139,7 @@ describe('GyroECLP - create & init', () => {
     test('pool should be registered with Vault', async () => {
         const isPoolRegistered = await client.readContract({
             address: balancerV3Contracts.Vault[chainId],
-            abi: vaultExtensionAbi,
+            abi: vaultExtensionAbi_V3,
             functionName: 'isPoolRegistered',
             args: [poolAddress],
         });

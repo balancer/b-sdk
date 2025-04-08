@@ -8,7 +8,7 @@ import {
 import { PoolState } from '@/entities';
 import { CHAINS } from '@/utils';
 import { balancerV3Contracts } from '@/utils';
-import { vaultExtensionAbi } from '@/abi';
+import { vaultExtensionAbi_V3 } from '@/abi';
 
 export class Pools {
     client: PublicClient;
@@ -26,7 +26,7 @@ export class Pools {
         // First call fetches pool tokens from vault
         const poolTokens = await this.client.readContract({
             address: balancerV3Contracts.Vault[this.chainId],
-            abi: vaultExtensionAbi,
+            abi: vaultExtensionAbi_V3,
             functionName: 'getPoolTokens',
             args: [id],
         });
