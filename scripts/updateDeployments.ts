@@ -1,6 +1,7 @@
 import { Address } from 'viem';
 import { writeFileSync } from 'fs';
 import { sonic } from 'viem/chains';
+import { ChainId } from '../src/utils/constants';
 
 type SupportedNetworkResponse = {
     name: string;
@@ -26,6 +27,13 @@ type ContractRegistry = {
         [key: string]: Address;
     };
 };
+
+// Create a map that looks like ['1': '[ChainId.MAINNET]', '10': '[ChainId.OPTIMISM]', ...]
+const chainIdToHumanKey = Object.fromEntries(
+    Object.entries(ChainId)
+        .filter(([key]) => Number.isNaN(Number(key))) // Filter out numeric keys (enum values)
+        .map(([key, value]) => [value, `[ChainId.${key}]`]),
+);
 
 const targetContractsV2 = [
     'Vault',
@@ -111,14 +119,16 @@ export async function updateBalancerDeployments() {
                                         if (version === 'v2') {
                                             if (!balancerV2Contracts[name])
                                                 balancerV2Contracts[name] = {};
-                                            balancerV2Contracts[name][chainId] =
-                                                contract.address;
+                                            balancerV2Contracts[name][
+                                                chainIdToHumanKey[chainId]
+                                            ] = contract.address;
                                         }
                                         if (version === 'v3') {
                                             if (!balancerV3Contracts[name])
                                                 balancerV3Contracts[name] = {};
-                                            balancerV3Contracts[name][chainId] =
-                                                contract.address;
+                                            balancerV3Contracts[name][
+                                                chainIdToHumanKey[chainId]
+                                            ] = contract.address;
                                         }
 
                                         // grab contract abis using only mainnet to avoid redundant requests
@@ -154,19 +164,23 @@ export async function updateBalancerDeployments() {
         ),
     );
 
+    const chainIdImport = `import {ChainId} from "@/utils/constants";\n\n`;
+
     // Write the contract addresses to the utils files
-    const balancerV2Content = `export const balancerV2Contracts = ${JSON.stringify(
-        balancerV2Contracts,
-        undefined,
-        4,
-    )} as const;`;
+    const balancerV2Content =
+        `${chainIdImport} export const balancerV2Contracts = ${JSON.stringify(
+            balancerV2Contracts,
+            undefined,
+            4,
+        )} as const;`.replace(/"(\[ChainId\.[A-Z_]+\])"/g, '$1');
     writeFileSync('./src/utils/balancerV2Contracts.ts', balancerV2Content);
 
-    const balancerV3Content = `export const balancerV3Contracts = ${JSON.stringify(
-        balancerV3Contracts,
-        undefined,
-        4,
-    )} as const;`;
+    const balancerV3Content =
+        `${chainIdImport} export const balancerV3Contracts = ${JSON.stringify(
+            balancerV3Contracts,
+            undefined,
+            4,
+        )} as const;`.replace(/"(\[ChainId\.[A-Z_]+\])"/g, '$1');
     writeFileSync('./src/utils/balancerV3Contracts.ts', balancerV3Content);
 
     // Export all the abis
