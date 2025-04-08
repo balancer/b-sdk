@@ -32,9 +32,11 @@ const routerAddress = BALANCER_ROUTER[chainId]
 Now you should import and use addresses like this:
 
 ```typescript
+import { balancerV2Contracts } from '@balancer/sdk'
 import { balancerV3Contracts } from '@balancer/sdk'
 
-const routerAddress = balancerV3Contracts.Router[chainId]
+const routerAddressV2 = balancerV2Contracts.Router[chainId]
+const routerAddressV3 = balancerV3Contracts.Router[chainId]
 ```
 
 
