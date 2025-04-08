@@ -24,7 +24,6 @@ import {
     MAX_UINT256,
     ZERO_ADDRESS,
     PERMIT2,
-    BALANCER_ROUTER,
     balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     PublicWalletClient,
@@ -110,7 +109,7 @@ export const approveToken = async (
                 client,
                 accountAddress,
                 tokenAddress,
-                BALANCER_ROUTER[chainId],
+                balancerV3Contracts.Router[chainId],
                 amount,
                 deadline,
             );

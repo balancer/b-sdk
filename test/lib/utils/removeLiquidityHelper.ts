@@ -1,7 +1,7 @@
 import { Hex, zeroAddress } from 'viem';
 import {
     Address,
-    BALANCER_ROUTER,
+    balancerV3Contracts,
     ChainId,
     missingParameterError,
     NATIVE_ASSETS,
@@ -303,7 +303,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : BALANCER_ROUTER[chainId],
+                : balancerV3Contracts.Router[chainId],
         amountsOut: expectedAmountsOut,
         tokenOutIndex: tokensWithoutBpt.findIndex(
             (t) => t.address === removeLiquidityInput.amountOut.address,
@@ -384,7 +384,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : BALANCER_ROUTER[chainId],
+                : balancerV3Contracts.Router[chainId],
         bptIn: TokenAmount.fromRawAmount(
             bptToken,
             removeLiquidityInput.bptIn.rawAmount,
@@ -471,7 +471,7 @@ export function assertRemoveLiquidityProportional(
             to = VAULT_V2[chainId];
             break;
         case 3:
-            to = BALANCER_ROUTER[chainId];
+            to = balancerV3Contracts.Router[chainId];
             break;
     }
 
@@ -607,7 +607,7 @@ export function assertRemoveLiquidityBuildCallOutput(
             to = VAULT_V2[removeLiquidityQueryOutput.chainId];
             break;
         case 3:
-            to = BALANCER_ROUTER[removeLiquidityQueryOutput.chainId];
+            to = balancerV3Contracts.Router[removeLiquidityQueryOutput.chainId];
             break;
     }
 

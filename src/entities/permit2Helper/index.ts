@@ -8,7 +8,6 @@ import {
 import {
     balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
-    BALANCER_ROUTER,
     ChainId,
     PERMIT2,
     PublicWalletClient,
@@ -55,7 +54,7 @@ export class Permit2Helper {
             input.expirations,
             input.amountsIn.length,
         );
-        const spender = BALANCER_ROUTER[input.chainId];
+        const spender = balancerV3Contracts.Router[input.chainId];
         const details: PermitDetails[] = [];
         for (let i = 0; i < input.amountsIn.length; i++) {
             details.push(
@@ -87,7 +86,7 @@ export class Permit2Helper {
             input.amountsIn.length,
         );
         const amounts = getAmountsCall(input);
-        const spender = BALANCER_ROUTER[input.chainId];
+        const spender = balancerV3Contracts.Router[input.chainId];
         const details: PermitDetails[] = [];
         for (let i = 0; i < input.amountsIn.length; i++) {
             details.push(
@@ -263,7 +262,7 @@ export class Permit2Helper {
         const chainId = await input.client.getChainId();
         const spender = input.queryOutput.pathAmounts
             ? balancerV3Contracts.BatchRouter[chainId]
-            : BALANCER_ROUTER[chainId];
+            : balancerV3Contracts.Router[chainId];
 
         // build permit details
         const details: PermitDetails[] = [

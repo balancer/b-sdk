@@ -9,11 +9,9 @@ import {
     CreatePoolV3StableInput,
 } from 'src';
 import { TOKENS } from 'test/lib/utils/addresses';
-import {
-    MAX_AMP,
-    MIN_AMP,
-    MAX_TOKENS,
-} from 'src/entities/inputValidator/stable/inputValidatorStable';
+import { STABLE_POOL_CONSTRAINTS } from 'src/utils/constantsV3';
+
+const { MAX_TOKENS, MIN_AMP, MAX_AMP } = STABLE_POOL_CONSTRAINTS;
 
 describe('create stable pool input validations', () => {
     const chainId = ChainId.SEPOLIA;

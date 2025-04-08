@@ -3,7 +3,6 @@ import { Account, Address, Hex, parseAbi } from 'viem';
 import {
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     balancerV3Contracts,
-    BALANCER_ROUTER,
     ChainId,
     MAX_UINT256,
     PublicWalletClient,
@@ -52,7 +51,7 @@ export class PermitHelper {
             input.client,
             input.bptIn.token.address,
             input.owner,
-            BALANCER_ROUTER[input.chainId],
+            balancerV3Contracts.Router[input.chainId],
             nonce,
             amounts.maxBptAmountIn,
             input.deadline,
