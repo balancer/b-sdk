@@ -7,10 +7,10 @@ import { inputValidationError, poolTypeError } from '@/utils';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { validateTokensAddLiquidity } from '../utils/validateTokens';
 import { CreatePoolV3StableInput } from '@/entities/createPool';
+import { STABLE_POOL_CONSTRAINTS } from '@/utils/constantsV3';
 
-export const MAX_AMP = 5000n;
-export const MIN_AMP = 1n;
-export const MAX_TOKENS = 5;
+const { MAX_TOKENS, MIN_AMP, MAX_AMP } = STABLE_POOL_CONSTRAINTS;
+
 export class InputValidatorStable extends InputValidatorBase {
     validateCreatePool(input: CreatePoolV3StableInput) {
         super.validateCreatePool(input);

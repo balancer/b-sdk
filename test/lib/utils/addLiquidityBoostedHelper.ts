@@ -11,7 +11,7 @@ import {
     TokenAmount,
 } from '@/entities';
 import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+    balancerV3Contracts,
     ChainId,
     NATIVE_ASSETS,
     PERMIT2,
@@ -69,7 +69,7 @@ export async function GetBoostedBpt(
             client,
             testAddress,
             amount.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+            balancerV3Contracts.CompositeLiquidityRouter[chainId],
         );
     }
 
@@ -114,7 +114,7 @@ export async function GetBoostedBpt(
             client,
             testAddress,
             amount.address,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+            balancerV3Contracts.CompositeLiquidityRouter[chainId],
             0n,
         );
     }
@@ -232,7 +232,7 @@ export const assertAddLiquidityBoostedUnbalanced = (
 
     expect(protocolVersion).toEqual(3);
     expect(bptOut.amount > 0n).to.be.true;
-    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId]);
+    expect(to).to.eq(balancerV3Contracts.CompositeLiquidityRouter[chainId]);
     expect(transactionReceipt.status).to.eq('success');
 
     // add one extra index for native token balance
@@ -279,7 +279,7 @@ export const assertAddLiquidityBoostedProportional = (
 
     expect(protocolVersion).toEqual(3);
     expect(bptOut.amount > 0n).to.be.true;
-    expect(to).to.eq(BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId]);
+    expect(to).to.eq(balancerV3Contracts.CompositeLiquidityRouter[chainId]);
     expect(transactionReceipt.status).to.eq('success');
 
     // add one extra index for native token balance

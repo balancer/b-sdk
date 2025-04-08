@@ -1,53 +1,125 @@
-export const balancerBufferRouterAbi = [
+export const bufferRouterAbi_V3 = [
     {
         inputs: [
-            { internalType: 'contract IVault', name: 'vault', type: 'address' },
-            { internalType: 'contract IWETH', name: 'weth', type: 'address' },
+            {
+                internalType: 'contract IVault',
+                name: 'vault',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IWETH',
+                name: 'weth',
+                type: 'address',
+            },
             {
                 internalType: 'contract IPermit2',
                 name: 'permit2',
                 type: 'address',
             },
-            { internalType: 'string', name: 'routerVersion', type: 'string' },
+            {
+                internalType: 'string',
+                name: 'routerVersion',
+                type: 'string',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
     {
-        inputs: [{ internalType: 'address', name: 'target', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'target',
+                type: 'address',
+            },
+        ],
         name: 'AddressEmptyCode',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'account',
+                type: 'address',
+            },
+        ],
         name: 'AddressInsufficientBalance',
         type: 'error',
     },
-    { inputs: [], name: 'ErrorSelectorNotFound', type: 'error' },
-    { inputs: [], name: 'EthTransfer', type: 'error' },
-    { inputs: [], name: 'FailedInnerCall', type: 'error' },
-    { inputs: [], name: 'InputLengthMismatch', type: 'error' },
-    { inputs: [], name: 'InsufficientEth', type: 'error' },
-    { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
+    {
+        inputs: [],
+        name: 'ErrorSelectorNotFound',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'EthTransfer',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'FailedInnerCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InputLengthMismatch',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InsufficientEth',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ReentrancyGuardReentrantCall',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'uint8', name: 'bits', type: 'uint8' },
-            { internalType: 'uint256', name: 'value', type: 'uint256' },
+            {
+                internalType: 'uint8',
+                name: 'bits',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
         ],
         name: 'SafeCastOverflowedUintDowncast',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+        ],
         name: 'SafeERC20FailedOperation',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+        ],
         name: 'SenderIsNotVault',
         type: 'error',
     },
-    { inputs: [], name: 'SwapDeadline', type: 'error' },
+    {
+        inputs: [],
+        name: 'SwapDeadline',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -109,7 +181,11 @@ export const balancerBufferRouterAbi = [
                 name: 'exactSharesToIssue',
                 type: 'uint256',
             },
-            { internalType: 'address', name: 'sharesOwner', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'sharesOwner',
+                type: 'address',
+            },
         ],
         name: 'addLiquidityToBufferHook',
         outputs: [
@@ -130,7 +206,13 @@ export const balancerBufferRouterAbi = [
     {
         inputs: [],
         name: 'getSender',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -159,7 +241,11 @@ export const balancerBufferRouterAbi = [
         ],
         name: 'initializeBuffer',
         outputs: [
-            { internalType: 'uint256', name: 'issuedShares', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -186,20 +272,38 @@ export const balancerBufferRouterAbi = [
                 name: 'minIssuedShares',
                 type: 'uint256',
             },
-            { internalType: 'address', name: 'sharesOwner', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'sharesOwner',
+                type: 'address',
+            },
         ],
         name: 'initializeBufferHook',
         outputs: [
-            { internalType: 'uint256', name: 'issuedShares', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'bytes[]', name: 'data', type: 'bytes[]' }],
+        inputs: [
+            {
+                internalType: 'bytes[]',
+                name: 'data',
+                type: 'bytes[]',
+            },
+        ],
         name: 'multicall',
         outputs: [
-            { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
+            {
+                internalType: 'bytes[]',
+                name: 'results',
+                type: 'bytes[]',
+            },
         ],
         stateMutability: 'payable',
         type: 'function',
@@ -208,8 +312,16 @@ export const balancerBufferRouterAbi = [
         inputs: [
             {
                 components: [
-                    { internalType: 'address', name: 'token', type: 'address' },
-                    { internalType: 'address', name: 'owner', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'token',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'owner',
+                        type: 'address',
+                    },
                     {
                         internalType: 'address',
                         name: 'spender',
@@ -220,7 +332,11 @@ export const balancerBufferRouterAbi = [
                         name: 'amount',
                         type: 'uint256',
                     },
-                    { internalType: 'uint256', name: 'nonce', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'nonce',
+                        type: 'uint256',
+                    },
                     {
                         internalType: 'uint256',
                         name: 'deadline',
@@ -281,12 +397,24 @@ export const balancerBufferRouterAbi = [
                 name: 'permit2Batch',
                 type: 'tuple',
             },
-            { internalType: 'bytes', name: 'permit2Signature', type: 'bytes' },
-            { internalType: 'bytes[]', name: 'multicallData', type: 'bytes[]' },
+            {
+                internalType: 'bytes',
+                name: 'permit2Signature',
+                type: 'bytes',
+            },
+            {
+                internalType: 'bytes[]',
+                name: 'multicallData',
+                type: 'bytes[]',
+            },
         ],
         name: 'permitBatchAndCall',
         outputs: [
-            { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
+            {
+                internalType: 'bytes[]',
+                name: 'results',
+                type: 'bytes[]',
+            },
         ],
         stateMutability: 'payable',
         type: 'function',
@@ -369,7 +497,11 @@ export const balancerBufferRouterAbi = [
         ],
         name: 'queryInitializeBuffer',
         outputs: [
-            { internalType: 'uint256', name: 'issuedShares', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -394,7 +526,11 @@ export const balancerBufferRouterAbi = [
         ],
         name: 'queryInitializeBufferHook',
         outputs: [
-            { internalType: 'uint256', name: 'issuedShares', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -460,9 +596,18 @@ export const balancerBufferRouterAbi = [
     {
         inputs: [],
         name: 'version',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
-    { stateMutability: 'payable', type: 'receive' },
+    {
+        stateMutability: 'payable',
+        type: 'receive',
+    },
 ] as const;

@@ -18,7 +18,7 @@ import { Token } from '@/entities/token';
 import { getAmountsCall } from '../removeLiquidity/helper';
 
 import { doRemoveLiquidityProportionalQuery } from './doRemoveLiquidityProportionalQuery';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED } from '@/utils';
+import { balancerV3Contracts } from '@/utils';
 import {
     RemoveLiquidityBoostedBuildCallInput,
     RemoveLiquidityBoostedProportionalInput,
@@ -75,7 +75,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBoostedQueryOutput = {
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
+            to: balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
             poolType: poolState.type,
             poolId: poolState.address,
             unwrapWrapped,
@@ -112,7 +112,7 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
 
         return {
             callData: callData,
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
+            to: balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
             value: 0n, // always has 0 value
             maxBptIn: input.bptIn,
             minAmountsOut: amounts.minAmountsOut.map((amount, i) => {

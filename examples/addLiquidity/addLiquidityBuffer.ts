@@ -27,7 +27,7 @@ import {
     AddLiquidityBufferInput,
     AddLiquidityBufferV3,
     PERMIT2,
-    BALANCER_BUFFER_ROUTER,
+    balancerV3Contracts,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import {
@@ -93,13 +93,13 @@ async function runAgainstFork() {
         client,
         userAccount,
         wrappedTokenAddress,
-        BALANCER_BUFFER_ROUTER[chainId],
+        balancerV3Contracts.BufferRouter[chainId],
     );
     await approveSpenderOnPermit2(
         client,
         userAccount,
         underlyingTokenAddress,
-        BALANCER_BUFFER_ROUTER[chainId],
+        balancerV3Contracts.BufferRouter[chainId],
     );
 
     // send the transaction

@@ -1,4 +1,4 @@
-export const vaultV3Abi = [
+export const vaultAbi_V3 = [
     {
         inputs: [
             {
@@ -21,21 +21,57 @@ export const vaultV3Abi = [
         type: 'constructor',
     },
     {
-        inputs: [{ internalType: 'address', name: 'target', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'target',
+                type: 'address',
+            },
+        ],
         name: 'AddressEmptyCode',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'account',
+                type: 'address',
+            },
+        ],
         name: 'AddressInsufficientBalance',
         type: 'error',
     },
-    { inputs: [], name: 'AfterAddLiquidityHookFailed', type: 'error' },
-    { inputs: [], name: 'AfterInitializeHookFailed', type: 'error' },
-    { inputs: [], name: 'AfterRemoveLiquidityHookFailed', type: 'error' },
-    { inputs: [], name: 'AfterSwapHookFailed', type: 'error' },
-    { inputs: [], name: 'AllZeroInputs', type: 'error' },
-    { inputs: [], name: 'AmountGivenZero', type: 'error' },
+    {
+        inputs: [],
+        name: 'AfterAddLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterInitializeHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterRemoveLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AfterSwapHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AllZeroInputs',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'AmountGivenZero',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -43,8 +79,16 @@ export const vaultV3Abi = [
                 name: 'tokenIn',
                 type: 'address',
             },
-            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-            { internalType: 'uint256', name: 'maxAmountIn', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxAmountIn',
+                type: 'uint256',
+            },
         ],
         name: 'AmountInAboveMax',
         type: 'error',
@@ -56,30 +100,78 @@ export const vaultV3Abi = [
                 name: 'tokenOut',
                 type: 'address',
             },
-            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-            { internalType: 'uint256', name: 'minAmountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minAmountOut',
+                type: 'uint256',
+            },
         ],
         name: 'AmountOutBelowMin',
         type: 'error',
     },
-    { inputs: [], name: 'BalanceNotSettled', type: 'error' },
-    { inputs: [], name: 'BalanceOverflow', type: 'error' },
-    { inputs: [], name: 'BeforeAddLiquidityHookFailed', type: 'error' },
-    { inputs: [], name: 'BeforeInitializeHookFailed', type: 'error' },
-    { inputs: [], name: 'BeforeRemoveLiquidityHookFailed', type: 'error' },
-    { inputs: [], name: 'BeforeSwapHookFailed', type: 'error' },
+    {
+        inputs: [],
+        name: 'BalanceNotSettled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BalanceOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeAddLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeInitializeHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeRemoveLiquidityHookFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BeforeSwapHookFailed',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-            { internalType: 'uint256', name: 'maxAmountIn', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxAmountIn',
+                type: 'uint256',
+            },
         ],
         name: 'BptAmountInAboveMax',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-            { internalType: 'uint256', name: 'minAmountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minAmountOut',
+                type: 'uint256',
+            },
         ],
         name: 'BptAmountOutBelowMin',
         type: 'error',
@@ -106,66 +198,158 @@ export const vaultV3Abi = [
         name: 'BufferNotInitialized',
         type: 'error',
     },
-    { inputs: [], name: 'BufferSharesInvalidOwner', type: 'error' },
-    { inputs: [], name: 'BufferSharesInvalidReceiver', type: 'error' },
+    {
+        inputs: [],
+        name: 'BufferSharesInvalidOwner',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BufferSharesInvalidReceiver',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'uint256', name: 'totalSupply', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'totalSupply',
+                type: 'uint256',
+            },
         ],
         name: 'BufferTotalSupplyTooLow',
         type: 'error',
     },
-    { inputs: [], name: 'CannotReceiveEth', type: 'error' },
-    { inputs: [], name: 'CannotSwapSameToken', type: 'error' },
-    { inputs: [], name: 'DoesNotSupportAddLiquidityCustom', type: 'error' },
-    { inputs: [], name: 'DoesNotSupportDonation', type: 'error' },
-    { inputs: [], name: 'DoesNotSupportRemoveLiquidityCustom', type: 'error' },
-    { inputs: [], name: 'DoesNotSupportUnbalancedLiquidity', type: 'error' },
-    { inputs: [], name: 'DynamicSwapFeeHookFailed', type: 'error' },
+    {
+        inputs: [],
+        name: 'CannotReceiveEth',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'CannotSwapSameToken',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportAddLiquidityCustom',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportDonation',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportRemoveLiquidityCustom',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DoesNotSupportUnbalancedLiquidity',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DynamicSwapFeeHookFailed',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'address', name: 'spender', type: 'address' },
-            { internalType: 'uint256', name: 'allowance', type: 'uint256' },
-            { internalType: 'uint256', name: 'needed', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'spender',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'allowance',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'needed',
+                type: 'uint256',
+            },
         ],
         name: 'ERC20InsufficientAllowance',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'sender', type: 'address' },
-            { internalType: 'uint256', name: 'balance', type: 'uint256' },
-            { internalType: 'uint256', name: 'needed', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'balance',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'needed',
+                type: 'uint256',
+            },
         ],
         name: 'ERC20InsufficientBalance',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'approver', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'approver',
+                type: 'address',
+            },
         ],
         name: 'ERC20InvalidApprover',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'receiver', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'receiver',
+                type: 'address',
+            },
         ],
         name: 'ERC20InvalidReceiver',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+        ],
         name: 'ERC20InvalidSender',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'spender', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'spender',
+                type: 'address',
+            },
+        ],
         name: 'ERC20InvalidSpender',
         type: 'error',
     },
-    { inputs: [], name: 'FailedInnerCall', type: 'error' },
-    { inputs: [], name: 'FeePrecisionTooHigh', type: 'error' },
+    {
+        inputs: [],
+        name: 'FailedInnerCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'FeePrecisionTooHigh',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -173,8 +357,16 @@ export const vaultV3Abi = [
                 name: 'tokenIn',
                 type: 'address',
             },
-            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-            { internalType: 'uint256', name: 'maxAmountIn', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxAmountIn',
+                type: 'uint256',
+            },
         ],
         name: 'HookAdjustedAmountInAboveMax',
         type: 'error',
@@ -186,16 +378,32 @@ export const vaultV3Abi = [
                 name: 'tokenOut',
                 type: 'address',
             },
-            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-            { internalType: 'uint256', name: 'minAmountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'minAmountOut',
+                type: 'uint256',
+            },
         ],
         name: 'HookAdjustedAmountOutBelowMin',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'limit',
+                type: 'uint256',
+            },
         ],
         name: 'HookAdjustedSwapLimit',
         type: 'error',
@@ -207,19 +415,55 @@ export const vaultV3Abi = [
                 name: 'poolHooksContract',
                 type: 'address',
             },
-            { internalType: 'address', name: 'pool', type: 'address' },
-            { internalType: 'address', name: 'poolFactory', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'poolFactory',
+                type: 'address',
+            },
         ],
         name: 'HookRegistrationFailed',
         type: 'error',
     },
-    { inputs: [], name: 'InputLengthMismatch', type: 'error' },
-    { inputs: [], name: 'InvalidAddLiquidityKind', type: 'error' },
-    { inputs: [], name: 'InvalidRemoveLiquidityKind', type: 'error' },
-    { inputs: [], name: 'InvalidToken', type: 'error' },
-    { inputs: [], name: 'InvalidTokenConfiguration', type: 'error' },
-    { inputs: [], name: 'InvalidTokenDecimals', type: 'error' },
-    { inputs: [], name: 'InvalidTokenType', type: 'error' },
+    {
+        inputs: [],
+        name: 'InputLengthMismatch',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidAddLiquidityKind',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidRemoveLiquidityKind',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidToken',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidTokenConfiguration',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidTokenDecimals',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidTokenType',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -265,7 +509,11 @@ export const vaultV3Abi = [
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'issuedShares', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'issuedShares',
+                type: 'uint256',
+            },
             {
                 internalType: 'uint256',
                 name: 'minIssuedShares',
@@ -275,10 +523,26 @@ export const vaultV3Abi = [
         name: 'IssuedSharesBelowMin',
         type: 'error',
     },
-    { inputs: [], name: 'MaxTokens', type: 'error' },
-    { inputs: [], name: 'MinTokens', type: 'error' },
-    { inputs: [], name: 'MultipleNonZeroInputs', type: 'error' },
-    { inputs: [], name: 'NotEnoughBufferShares', type: 'error' },
+    {
+        inputs: [],
+        name: 'MaxTokens',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'MinTokens',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'MultipleNonZeroInputs',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'NotEnoughBufferShares',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -321,128 +585,314 @@ export const vaultV3Abi = [
         name: 'NotEnoughWrapped',
         type: 'error',
     },
-    { inputs: [], name: 'NotStaticCall', type: 'error' },
-    { inputs: [], name: 'NotVaultDelegateCall', type: 'error' },
-    { inputs: [], name: 'PauseBufferPeriodDurationTooLarge', type: 'error' },
-    { inputs: [], name: 'PercentageAboveMax', type: 'error' },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [],
+        name: 'NotStaticCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'NotVaultDelegateCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'PauseBufferPeriodDurationTooLarge',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'PercentageAboveMax',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolAlreadyInitialized',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolAlreadyRegistered',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolInRecoveryMode',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolNotInRecoveryMode',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolNotInitialized',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolNotPaused',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolNotRegistered',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolPauseWindowExpired',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
         name: 'PoolPaused',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'totalSupply', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'totalSupply',
+                type: 'uint256',
+            },
         ],
         name: 'PoolTotalSupplyTooLow',
         type: 'error',
     },
-    { inputs: [], name: 'ProtocolFeesExceedTotalCollected', type: 'error' },
-    { inputs: [], name: 'QueriesDisabled', type: 'error' },
-    { inputs: [], name: 'QueriesDisabledPermanently', type: 'error' },
-    { inputs: [], name: 'QuoteResultSpoofed', type: 'error' },
-    { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
-    { inputs: [], name: 'RouterNotTrusted', type: 'error' },
     {
-        inputs: [{ internalType: 'int256', name: 'value', type: 'int256' }],
+        inputs: [],
+        name: 'ProtocolFeesExceedTotalCollected',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'QueriesDisabled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'QueriesDisabledPermanently',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'QuoteResultSpoofed',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ReentrancyGuardReentrantCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'RouterNotTrusted',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'int256',
+                name: 'value',
+                type: 'int256',
+            },
+        ],
         name: 'SafeCastOverflowedIntToUint',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'uint256', name: 'value', type: 'uint256' }],
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
+        ],
         name: 'SafeCastOverflowedUintToInt',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+        ],
         name: 'SafeERC20FailedOperation',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+        ],
         name: 'SenderIsNotVault',
         type: 'error',
     },
-    { inputs: [], name: 'SwapFeePercentageTooHigh', type: 'error' },
-    { inputs: [], name: 'SwapFeePercentageTooLow', type: 'error' },
+    {
+        inputs: [],
+        name: 'SwapFeePercentageTooHigh',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'SwapFeePercentageTooLow',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'limit', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'limit',
+                type: 'uint256',
+            },
         ],
         name: 'SwapLimit',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
         ],
         name: 'TokenAlreadyRegistered',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
         ],
         name: 'TokenNotRegistered',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
-            { internalType: 'address', name: 'expectedToken', type: 'address' },
-            { internalType: 'address', name: 'actualToken', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'expectedToken',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'actualToken',
+                type: 'address',
+            },
         ],
         name: 'TokensMismatch',
         type: 'error',
     },
-    { inputs: [], name: 'TradeAmountTooSmall', type: 'error' },
-    { inputs: [], name: 'VaultBuffersArePaused', type: 'error' },
-    { inputs: [], name: 'VaultIsNotUnlocked', type: 'error' },
-    { inputs: [], name: 'VaultNotPaused', type: 'error' },
-    { inputs: [], name: 'VaultPauseWindowDurationTooLarge', type: 'error' },
-    { inputs: [], name: 'VaultPauseWindowExpired', type: 'error' },
-    { inputs: [], name: 'VaultPaused', type: 'error' },
+    {
+        inputs: [],
+        name: 'TradeAmountTooSmall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultBuffersArePaused',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultIsNotUnlocked',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultNotPaused',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultPauseWindowDurationTooLarge',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultPauseWindowExpired',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultPaused',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -454,7 +904,11 @@ export const vaultV3Abi = [
         name: 'WrapAmountTooSmall',
         type: 'error',
     },
-    { inputs: [], name: 'WrongProtocolFeeControllerDeployment', type: 'error' },
+    {
+        inputs: [],
+        name: 'WrongProtocolFeeControllerDeployment',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -471,9 +925,21 @@ export const vaultV3Abi = [
         name: 'WrongUnderlyingToken',
         type: 'error',
     },
-    { inputs: [], name: 'WrongVaultAdminDeployment', type: 'error' },
-    { inputs: [], name: 'WrongVaultExtensionDeployment', type: 'error' },
-    { inputs: [], name: 'ZeroDivision', type: 'error' },
+    {
+        inputs: [],
+        name: 'WrongVaultAdminDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'WrongVaultExtensionDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ZeroDivision',
+        type: 'error',
+    },
     {
         anonymous: false,
         inputs: [
@@ -1215,13 +1681,24 @@ export const vaultV3Abi = [
         name: 'Wrap',
         type: 'event',
     },
-    { stateMutability: 'payable', type: 'fallback' },
+    {
+        stateMutability: 'payable',
+        type: 'fallback',
+    },
     {
         inputs: [
             {
                 components: [
-                    { internalType: 'address', name: 'pool', type: 'address' },
-                    { internalType: 'address', name: 'to', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'to',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'maxAmountsIn',
@@ -1237,7 +1714,11 @@ export const vaultV3Abi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct AddLiquidityParams',
                 name: 'params',
@@ -1246,9 +1727,21 @@ export const vaultV3Abi = [
         ],
         name: 'addLiquidity',
         outputs: [
-            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
-            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
-            { internalType: 'bytes', name: 'returnData', type: 'bytes' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bytes',
+                name: 'returnData',
+                type: 'bytes',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -1295,21 +1788,45 @@ export const vaultV3Abi = [
                 name: 'amountCalculatedRaw',
                 type: 'uint256',
             },
-            { internalType: 'uint256', name: 'amountInRaw', type: 'uint256' },
-            { internalType: 'uint256', name: 'amountOutRaw', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountInRaw',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountOutRaw',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
         ],
         name: 'getPoolTokenCountAndIndexOfToken',
         outputs: [
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -1317,14 +1834,26 @@ export const vaultV3Abi = [
     {
         inputs: [],
         name: 'getVaultExtension',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'reentrancyGuardEntered',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -1332,8 +1861,16 @@ export const vaultV3Abi = [
         inputs: [
             {
                 components: [
-                    { internalType: 'address', name: 'pool', type: 'address' },
-                    { internalType: 'address', name: 'from', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'from',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256',
                         name: 'maxBptAmountIn',
@@ -1349,7 +1886,11 @@ export const vaultV3Abi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct RemoveLiquidityParams',
                 name: 'params',
@@ -1358,22 +1899,42 @@ export const vaultV3Abi = [
         ],
         name: 'removeLiquidity',
         outputs: [
-            { internalType: 'uint256', name: 'bptAmountIn', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountIn',
+                type: 'uint256',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'amountsOut',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: 'returnData', type: 'bytes' },
+            {
+                internalType: 'bytes',
+                name: 'returnData',
+                type: 'bytes',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
-            { internalType: 'address', name: 'to', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'to',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'sendTo',
         outputs: [],
@@ -1382,11 +1943,25 @@ export const vaultV3Abi = [
     },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
-            { internalType: 'uint256', name: 'amountHint', type: 'uint256' },
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountHint',
+                type: 'uint256',
+            },
         ],
         name: 'settle',
-        outputs: [{ internalType: 'uint256', name: 'credit', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: 'credit',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -1399,7 +1974,11 @@ export const vaultV3Abi = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'contract IERC20',
                         name: 'tokenIn',
@@ -1420,7 +1999,11 @@ export const vaultV3Abi = [
                         name: 'limitRaw',
                         type: 'uint256',
                     },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct VaultSwapParams',
                 name: 'vaultSwapParams',
@@ -1434,41 +2017,104 @@ export const vaultV3Abi = [
                 name: 'amountCalculated',
                 type: 'uint256',
             },
-            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-            { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amountOut',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'owner', type: 'address' },
-            { internalType: 'address', name: 'to', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'to',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'transfer',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'spender', type: 'address' },
-            { internalType: 'address', name: 'from', type: 'address' },
-            { internalType: 'address', name: 'to', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'spender',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'from',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'to',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'transferFrom',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
+        inputs: [
+            {
+                internalType: 'bytes',
+                name: 'data',
+                type: 'bytes',
+            },
+        ],
         name: 'unlock',
-        outputs: [{ internalType: 'bytes', name: 'result', type: 'bytes' }],
+        outputs: [
+            {
+                internalType: 'bytes',
+                name: 'result',
+                type: 'bytes',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
-    { stateMutability: 'payable', type: 'receive' },
+    {
+        stateMutability: 'payable',
+        type: 'receive',
+    },
 ] as const;

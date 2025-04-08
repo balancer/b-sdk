@@ -6,11 +6,8 @@ import {
     PermitDetails,
 } from './allowanceTransfer';
 import {
-    BALANCER_BATCH_ROUTER,
-    BALANCER_BUFFER_ROUTER,
+    balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
-    BALANCER_ROUTER,
     ChainId,
     PERMIT2,
     PublicWalletClient,
@@ -57,7 +54,7 @@ export class Permit2Helper {
             input.expirations,
             input.amountsIn.length,
         );
-        const spender = BALANCER_ROUTER[input.chainId];
+        const spender = balancerV3Contracts.Router[input.chainId];
         const details: PermitDetails[] = [];
         for (let i = 0; i < input.amountsIn.length; i++) {
             details.push(
@@ -89,7 +86,7 @@ export class Permit2Helper {
             input.amountsIn.length,
         );
         const amounts = getAmountsCall(input);
-        const spender = BALANCER_ROUTER[input.chainId];
+        const spender = balancerV3Contracts.Router[input.chainId];
         const details: PermitDetails[] = [];
         for (let i = 0; i < input.amountsIn.length; i++) {
             details.push(
@@ -155,7 +152,7 @@ export class Permit2Helper {
         );
         const amounts = getAmountsCall(input);
         const spender =
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId];
+            balancerV3Contracts.CompositeLiquidityRouter[input.chainId];
         const details: PermitDetails[] = [];
 
         for (let i = 0; i < input.amountsIn.length; i++) {
@@ -183,7 +180,7 @@ export class Permit2Helper {
         },
     ): Promise<Permit2> {
         validateNoncesAndExpirations(input.nonces, input.expirations, 2);
-        const spender = BALANCER_BUFFER_ROUTER[input.chainId];
+        const spender = balancerV3Contracts.BufferRouter[input.chainId];
         const details: PermitDetails[] = [
             await getDetails(
                 input.client,
@@ -216,7 +213,7 @@ export class Permit2Helper {
         },
     ): Promise<Permit2> {
         validateNoncesAndExpirations(input.nonces, input.expirations, 2);
-        const spender = BALANCER_BUFFER_ROUTER[input.chainId];
+        const spender = balancerV3Contracts.BufferRouter[input.chainId];
         const details: PermitDetails[] = [
             await getDetails(
                 input.client,
@@ -264,8 +261,8 @@ export class Permit2Helper {
 
         const chainId = await input.client.getChainId();
         const spender = input.queryOutput.pathAmounts
-            ? BALANCER_BATCH_ROUTER[chainId]
-            : BALANCER_ROUTER[chainId];
+            ? balancerV3Contracts.BatchRouter[chainId]
+            : balancerV3Contracts.Router[chainId];
 
         // build permit details
         const details: PermitDetails[] = [

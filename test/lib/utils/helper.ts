@@ -24,11 +24,9 @@ import {
     MAX_UINT256,
     ZERO_ADDRESS,
     PERMIT2,
-    BALANCER_ROUTER,
-    BALANCER_BATCH_ROUTER,
+    balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     PublicWalletClient,
-    BALANCER_BUFFER_ROUTER,
 } from '@/utils';
 
 export type TxOutput = {
@@ -111,7 +109,7 @@ export const approveToken = async (
                 client,
                 accountAddress,
                 tokenAddress,
-                BALANCER_ROUTER[chainId],
+                balancerV3Contracts.Router[chainId],
                 amount,
                 deadline,
             );
@@ -120,7 +118,7 @@ export const approveToken = async (
                 client,
                 accountAddress,
                 tokenAddress,
-                BALANCER_BATCH_ROUTER[chainId],
+                balancerV3Contracts.BatchRouter[chainId],
                 amount,
                 deadline,
             );
@@ -139,7 +137,7 @@ export const approveToken = async (
                 client,
                 accountAddress,
                 tokenAddress,
-                BALANCER_BUFFER_ROUTER[chainId],
+                balancerV3Contracts.BufferRouter[chainId],
                 amount,
                 deadline,
             );

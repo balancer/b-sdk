@@ -1,10 +1,8 @@
-import { Account, Address, Hex } from 'viem';
+import { Account, Address, Hex, parseAbi } from 'viem';
 
-import { weightedPoolAbi_V3 } from '@/abi';
 import {
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
-    BALANCER_ROUTER,
+    balancerV3Contracts,
     ChainId,
     MAX_UINT256,
     PublicWalletClient,
@@ -53,7 +51,7 @@ export class PermitHelper {
             input.client,
             input.bptIn.token.address,
             input.owner,
-            BALANCER_ROUTER[input.chainId],
+            balancerV3Contracts.Router[input.chainId],
             nonce,
             amounts.maxBptAmountIn,
             input.deadline,
@@ -108,7 +106,7 @@ export class PermitHelper {
             input.client,
             input.bptIn.token.address,
             input.owner,
-            BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
+            balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
             nonce,
             amounts.maxBptAmountIn,
             input.deadline,
@@ -176,7 +174,9 @@ const signPermit = async (
 const getDomain = async (client: PublicWalletClient, token: Hex) => {
     const [, name, version, chainId, verifyingContract, , ,] =
         await client.readContract({
-            abi: weightedPoolAbi_V3,
+            abi: parseAbi([
+                'function eip712Domain() view returns (bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)',
+            ]),
             address: token,
             functionName: 'eip712Domain',
             args: [],

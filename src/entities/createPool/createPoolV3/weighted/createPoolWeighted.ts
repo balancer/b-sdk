@@ -7,7 +7,7 @@ import {
     PoolRoleAccounts,
 } from '../../types';
 import { weightedPoolFactoryAbiExtended_V3 } from '@/abi';
-import { WEIGHTED_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
+import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 
 export class CreatePoolWeightedV3 implements CreatePoolBase {
@@ -15,7 +15,7 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: WEIGHTED_POOL_FACTORY_BALANCER_V3[input.chainId],
+            to: balancerV3Contracts.WeightedPoolFactory[input.chainId],
         };
     }
 

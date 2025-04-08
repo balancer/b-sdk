@@ -8,7 +8,7 @@ import {
     TokenConfig,
 } from '../../types';
 import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
-import { GYROECLP_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
+import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex, PoolType } from '@/types';
 import { Big } from 'big.js';
 
@@ -47,7 +47,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: GYROECLP_POOL_FACTORY_BALANCER_V3[input.chainId],
+            to: balancerV3Contracts.GyroECLPPoolFactory[input.chainId],
         };
     }
 
