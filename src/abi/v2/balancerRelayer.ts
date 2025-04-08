@@ -1,4 +1,4 @@
-export const balancerRelayerAbi = [
+export const balancerRelayerAbi_V2 = [
     {
         inputs: [
             {

@@ -1,4 +1,4 @@
-export const routerAbi = [
+export const routerAbi_V3 = [
     {
         inputs: [
             {

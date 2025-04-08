@@ -1,4 +1,4 @@
-export const authorizerAbi = [
+export const authorizerAbi_V2 = [
     {
         inputs: [
             {

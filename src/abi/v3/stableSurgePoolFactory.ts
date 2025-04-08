@@ -1,4 +1,4 @@
-export const stableSurgePoolFactoryAbi = [
+export const stableSurgePoolFactoryAbi_V3 = [
     {
         inputs: [
             {

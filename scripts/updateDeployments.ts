@@ -148,7 +148,7 @@ export async function updateBalancerDeployments() {
                                                     .charAt(0)
                                                     .toLowerCase() +
                                                 contract.name.slice(1);
-                                            const content = `export const ${contractName}Abi = ${JSON.stringify(
+                                            const content = `export const ${contractName}Abi_${version.toUpperCase()} = ${JSON.stringify(
                                                 data.abi,
                                                 undefined,
                                                 4,

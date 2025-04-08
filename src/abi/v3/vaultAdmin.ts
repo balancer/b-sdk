@@ -1,4 +1,4 @@
-export const vaultAdminAbi = [
+export const vaultAdminAbi_V3 = [
     {
         inputs: [
             {

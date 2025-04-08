@@ -1,4 +1,4 @@
-export const weightedPoolFactoryAbi = [
+export const weightedPoolFactoryAbi_V2 = [
     {
         inputs: [
             {

@@ -1,4 +1,4 @@
-export const batchRouterAbi = [
+export const batchRouterAbi_V3 = [
     {
         inputs: [
             {

@@ -1,4 +1,4 @@
-export const stablePoolFactoryAbi = [
+export const stablePoolFactoryAbi_V3 = [
     {
         inputs: [
             {

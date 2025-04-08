@@ -1,4 +1,4 @@
-export const lBPoolFactoryAbi = [
+export const lBPoolFactoryAbi_V3 = [
     {
         inputs: [
             {

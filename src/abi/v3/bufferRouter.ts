@@ -1,4 +1,4 @@
-export const bufferRouterAbi = [
+export const bufferRouterAbi_V3 = [
     {
         inputs: [
             {
