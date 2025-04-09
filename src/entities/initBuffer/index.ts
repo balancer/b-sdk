@@ -4,7 +4,7 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { Permit2 } from '@/entities/permit2Helper';
 
 import { doInitBufferQuery } from './doInitBufferQuery';
-import { BALANCER_BUFFER_ROUTER } from '@/utils';
+import { balancerV3Contracts } from '@/utils';
 import {
     balancerBufferRouterAbiExtended,
     balancerRouterAbiExtended,
@@ -41,7 +41,7 @@ export class InitBufferV3 {
             wrappedAmountIn,
             chainId: input.chainId,
             protocolVersion: 3,
-            to: BALANCER_BUFFER_ROUTER[input.chainId],
+            to: balancerV3Contracts.BufferRouter[input.chainId],
         };
 
         return output;
@@ -62,7 +62,7 @@ export class InitBufferV3 {
         });
         return {
             callData,
-            to: BALANCER_BUFFER_ROUTER[input.chainId],
+            to: balancerV3Contracts.BufferRouter[input.chainId],
             value: 0n, // Default to 0 as native not supported
             minIssuedShares,
         };

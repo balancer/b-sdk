@@ -3,7 +3,7 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import { getSortedTokens } from '@/entities/utils';
 import { Hex } from '@/types';
-import { BALANCER_ROUTER, protocolVersionError } from '@/utils';
+import { balancerV3Contracts, protocolVersionError } from '@/utils';
 
 import { getAmountsCall, getAmountsQuery } from '../helper';
 import {
@@ -109,7 +109,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBaseQueryOutput & { userData: Hex } = {
-            to: BALANCER_ROUTER[input.chainId],
+            to: balancerV3Contracts.Router[input.chainId],
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -174,7 +174,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
 
         return {
             callData,
-            to: BALANCER_ROUTER[input.chainId],
+            to: balancerV3Contracts.Router[input.chainId],
             value: 0n, // remove liquidity always has value = 0
             maxBptIn: TokenAmount.fromRawAmount(
                 input.bptIn.token,

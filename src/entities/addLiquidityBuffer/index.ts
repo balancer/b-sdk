@@ -7,7 +7,7 @@ import { BufferState } from '@/entities/types';
 
 import { doAddLiquidityQuery } from './doAddLiquidityQuery';
 import { Token } from '../token';
-import { BALANCER_BUFFER_ROUTER } from '@/utils';
+import { balancerV3Contracts } from '@/utils';
 import {
     balancerBufferRouterAbiExtended,
     balancerRouterAbiExtended,
@@ -59,7 +59,7 @@ export class AddLiquidityBufferV3 {
             wrappedAmountIn,
             chainId: input.chainId,
             protocolVersion: 3,
-            to: BALANCER_BUFFER_ROUTER[input.chainId],
+            to: balancerV3Contracts.BufferRouter[input.chainId],
         };
 
         return output;
@@ -89,7 +89,7 @@ export class AddLiquidityBufferV3 {
         });
         return {
             callData,
-            to: BALANCER_BUFFER_ROUTER[input.chainId],
+            to: balancerV3Contracts.BufferRouter[input.chainId],
             value: 0n, // Default to 0 as native not supported
             maxUnderlyingAmountIn,
             maxWrappedAmountIn,

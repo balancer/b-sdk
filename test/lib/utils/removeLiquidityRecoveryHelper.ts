@@ -1,5 +1,5 @@
 import {
-    BALANCER_ROUTER,
+    balancerV3Contracts,
     ChainId,
     NATIVE_ASSETS,
     PoolState,
@@ -172,7 +172,7 @@ export function assertRemoveLiquidityRecovery(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : BALANCER_ROUTER[chainId],
+                : balancerV3Contracts.Router[chainId],
     };
 
     if (protocolVersion === 3)

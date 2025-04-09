@@ -20,10 +20,7 @@ import {
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuery';
 import { Token } from '../token';
-import {
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
-    protocolVersionError,
-} from '@/utils';
+import { balancerV3Contracts, protocolVersionError } from '@/utils';
 import {
     balancerCompositeLiquidityRouterBoostedAbiExtended,
     balancerRouterAbiExtended,
@@ -182,7 +179,7 @@ export class AddLiquidityBoostedV3 {
             chainId: input.chainId,
             protocolVersion: 3,
             userData: input.userData ?? '0x',
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
+            to: balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
         };
 
         return output;
@@ -231,7 +228,7 @@ export class AddLiquidityBoostedV3 {
 
         return {
             callData,
-            to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[input.chainId],
+            to: balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
             value,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,

@@ -28,7 +28,7 @@ import {
     RemoveLiquidityBoostedV3,
     RemoveLiquidityBoostedProportionalInput,
     PermitHelper,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED,
+    balancerV3Contracts,
 } from 'src';
 import {
     doAddLiquidityBoosted,
@@ -104,7 +104,7 @@ describe('remove liquidity boosted proportional', () => {
                 client,
                 testAddress,
                 token.underlyingToken?.address ?? token.address,
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                balancerV3Contracts.CompositeLiquidityRouter[chainId],
             );
         }
 
@@ -168,7 +168,7 @@ describe('remove liquidity boosted proportional', () => {
                 client,
                 testAddress,
                 [boostedPool_USDC_USDT.address] as Address[],
-                BALANCER_COMPOSITE_LIQUIDITY_ROUTER_BOOSTED[chainId],
+                balancerV3Contracts.CompositeLiquidityRouter[chainId],
             );
         });
         test('unwrap both tokens', async () => {

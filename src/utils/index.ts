@@ -8,3 +8,5 @@ export * from './pool';
 export * from './poolTypeMapper';
 export * from './sortByAddress';
 export * from './types';
+export * from './balancerV2Contracts';
+export * from './balancerV3Contracts';

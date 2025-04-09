@@ -12,7 +12,7 @@ import {
     AddLiquidityUnbalancedInput,
     AddLiquidityV3BuildCallInput,
     Address,
-    BALANCER_ROUTER,
+    balancerV3Contracts,
     NATIVE_ASSETS,
     PoolState,
     Slippage,
@@ -230,7 +230,7 @@ export function assertAddLiquidityUnbalanced(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : BALANCER_ROUTER[chainId],
+                : balancerV3Contracts.Router[chainId],
         amountsIn: expectedAmountsIn,
         tokenInIndex: undefined,
         // Should match inputs
@@ -309,7 +309,7 @@ export function assertAddLiquiditySingleToken(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : BALANCER_ROUTER[chainId],
+                : balancerV3Contracts.Router[chainId],
         bptOut: TokenAmount.fromRawAmount(
             bptToken,
             addLiquidityInput.bptOut.rawAmount,
@@ -384,7 +384,7 @@ export function assertAddLiquidityProportional(
             to = VAULT_V2[chainId];
             break;
         case 3:
-            to = BALANCER_ROUTER[chainId];
+            to = balancerV3Contracts.Router[chainId];
             break;
     }
 
@@ -546,7 +546,7 @@ function assertAddLiquidityBuildCallOutput(
             to = VAULT_V2[addLiquidityInput.chainId];
             break;
         case 3:
-            to = BALANCER_ROUTER[addLiquidityInput.chainId];
+            to = balancerV3Contracts.Router[addLiquidityInput.chainId];
             break;
     }
 

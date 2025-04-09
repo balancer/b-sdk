@@ -7,7 +7,7 @@ import {
     PoolRoleAccounts,
 } from '../../types';
 import { stablePoolFactoryAbiExtended } from '@/abi';
-import { STABLE_POOL_FACTORY_BALANCER_V3, sortByAddress } from '@/utils';
+import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 
 export class CreatePoolStableV3 implements CreatePoolBase {
@@ -15,7 +15,7 @@ export class CreatePoolStableV3 implements CreatePoolBase {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: STABLE_POOL_FACTORY_BALANCER_V3[input.chainId],
+            to: balancerV3Contracts.StablePoolFactory[input.chainId],
         };
     }
 

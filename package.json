@@ -9,7 +9,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "2.7.1",
+    "version": "3.0.0",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
@@ -26,7 +26,8 @@
         "test:ci": "vitest run",
         "changeset": "changeset",
         "changeset:release": "pnpm build && changeset publish",
-        "example": "npx tsx ./examples/lib/executeExample.ts"
+        "example": "npx tsx ./examples/lib/executeExample.ts",
+        "update:deployments": "npx tsx ./scripts/updateDeployments.ts && pnpm format"
     },
     "dependencies": {
         "@balancer-labs/balancer-maths": "0.0.24",
@@ -53,7 +54,7 @@
         "vite-tsconfig-paths": "^4.2.3",
         "vitest": "^3.0.7"
     },
-    "packageManager": "pnpm@^8.6.0",
+    "packageManager": "pnpm@8.6.0",
     "engines": {
         "node": ">=18.x"
     }
