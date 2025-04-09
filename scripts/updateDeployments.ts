@@ -66,10 +66,12 @@ const targetContracts = [...targetContractsV2, ...targetContractsV3];
 const balancerV2Contracts: ContractRegistry = {};
 const balancerV3Contracts: ContractRegistry = {};
 
+const branch = 'master'; // option to point this at a balancer-deployments PR branch
+
 export async function updateBalancerDeployments() {
     // Fetch all the networks we support
     const res = await fetch(
-        'https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/deployment-avax-redo/addresses/.supported-networks.json',
+        `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/${branch}/addresses/.supported-networks.json`,
     );
     const data: Record<string, SupportedNetworkResponse> = await res.json();
 
@@ -77,7 +79,7 @@ export async function updateBalancerDeployments() {
         ([name, { chainId }]) => ({
             networkName: name,
             chainId,
-            deploymentsUrl: `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/deployment-avax-redo/addresses/${name}.json`,
+            deploymentsUrl: `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/${branch}/addresses/${name}.json`,
         }),
     );
 
@@ -128,7 +130,7 @@ export async function updateBalancerDeployments() {
 
                 // Grab contract ABIs using only mainnet
                 if (networkName === 'mainnet') {
-                    const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/deployment-avax-redo/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
+                    const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/${branch}/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
                     const res = await fetch(url);
                     if (!res.ok) {
                         throw new Error(
