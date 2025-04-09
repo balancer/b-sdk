@@ -154,10 +154,22 @@ export async function updateBalancerDeployments() {
 
     const chainIdImport = `import {ChainId} from "@/utils/constants";\n\n`;
 
+    // Sort the contracts by name for easier PR reviews
+    const sortedV2Contracts = Object.fromEntries(
+        Object.entries(balancerV2Contracts).sort(([a], [b]) =>
+            a.localeCompare(b),
+        ),
+    );
+    const sortedV3Contracts = Object.fromEntries(
+        Object.entries(balancerV3Contracts).sort(([a], [b]) =>
+            a.localeCompare(b),
+        ),
+    );
+
     // Write the contract addresses to the utils files
     const balancerV2Content =
         `${chainIdImport} export const balancerV2Contracts = ${JSON.stringify(
-            balancerV2Contracts,
+            sortedV2Contracts,
             undefined,
             4,
         )} as const;`.replace(/"(\[ChainId\.[A-Z_]+\])"/g, '$1');
@@ -165,7 +177,7 @@ export async function updateBalancerDeployments() {
 
     const balancerV3Content =
         `${chainIdImport} export const balancerV3Contracts = ${JSON.stringify(
-            balancerV3Contracts,
+            sortedV3Contracts,
             undefined,
             4,
         )} as const;`.replace(/"(\[ChainId\.[A-Z_]+\])"/g, '$1');
