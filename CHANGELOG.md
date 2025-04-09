@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 3.1.0
+
+### Minor Changes
+
+- df0b8b2: update to latest avalanche deployments of balancer V3 contracts
+
 ## 3.0.0
 
 ### Major Changes
