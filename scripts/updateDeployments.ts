@@ -69,100 +69,88 @@ const balancerV3Contracts: ContractRegistry = {};
 export async function updateBalancerDeployments() {
     // Fetch all the networks we support
     const res = await fetch(
-        'https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/.supported-networks.json',
+        'https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/deployment-avax-redo/addresses/.supported-networks.json',
     );
     const data: Record<string, SupportedNetworkResponse> = await res.json();
 
     const supportedNetworks = Object.entries(data).map(
         ([name, { chainId }]) => ({
-            name,
+            networkName: name,
             chainId,
-            deploymentsUrl: `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/addresses/${name}.json`,
+            deploymentsUrl: `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/deployment-avax-redo/addresses/${name}.json`,
         }),
     );
 
     // Manually add sonic since it live in seperate beets org repo
     supportedNetworks.push({
-        name: 'sonic',
+        networkName: 'sonic',
         chainId: sonic.id,
         deploymentsUrl:
             'https://raw.githubusercontent.com/beethovenxfi/balancer-deployments/refs/heads/master/addresses/sonic.json',
     });
 
-    // Fetch all the addresses for each network we support
-    await Promise.all(
-        supportedNetworks.map(
-            async ({ name: networkName, chainId, deploymentsUrl }) => {
-                const res = await fetch(deploymentsUrl);
-                if (!res.ok)
-                    throw new Error(
-                        `Failed to fetch network data for ${networkName}`,
-                    );
-
-                const data: NetworkRegistryResponse = await res.json();
-
-                await Promise.all(
-                    Object.entries(data)
-                        .filter(([_, value]) => value.status === 'ACTIVE')
-                        .map(async ([taskId, value]) => {
-                            const { version } = value;
-
-                            // Filter to only grab the contracts SDK uses
-                            await Promise.all(
-                                value.contracts
-                                    .filter((contract) =>
-                                        targetContracts.includes(contract.name),
-                                    )
-                                    .map(async (contract) => {
-                                        const { name } = contract;
-
-                                        if (version === 'v2') {
-                                            if (!balancerV2Contracts[name])
-                                                balancerV2Contracts[name] = {};
-                                            balancerV2Contracts[name][
-                                                chainIdToHumanKey[chainId]
-                                            ] = contract.address;
-                                        }
-                                        if (version === 'v3') {
-                                            if (!balancerV3Contracts[name])
-                                                balancerV3Contracts[name] = {};
-                                            balancerV3Contracts[name][
-                                                chainIdToHumanKey[chainId]
-                                            ] = contract.address;
-                                        }
-
-                                        // grab contract abis using only mainnet to avoid redundant requests
-                                        if (networkName === 'mainnet') {
-                                            const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
-                                            const res = await fetch(url);
-                                            if (!res.ok) {
-                                                throw new Error(
-                                                    `Failed to fetch ABI for ${contract.name}: ${res.status} ${res.statusText}`,
-                                                );
-                                            }
-                                            const data: AbiResponse =
-                                                await res.json();
-
-                                            const contractName =
-                                                contract.name
-                                                    .charAt(0)
-                                                    .toLowerCase() +
-                                                contract.name.slice(1);
-                                            const content = `export const ${contractName}Abi_${version.toUpperCase()} = ${JSON.stringify(
-                                                data.abi,
-                                                undefined,
-                                                4,
-                                            )} as const;`;
-                                            const path = `./src/abi/${version}/${contractName}.ts`;
-                                            writeFileSync(path, content);
-                                        }
-                                    }),
-                            );
-                        }),
-                );
-            },
-        ),
+    supportedNetworks.sort((a, b) =>
+        a.networkName.localeCompare(b.networkName),
     );
+
+    // Process each network sequentially
+    for (const { networkName, chainId, deploymentsUrl } of supportedNetworks) {
+        const res = await fetch(deploymentsUrl);
+        if (!res.ok) {
+            throw new Error(`Failed to fetch network data for ${networkName}`);
+        }
+
+        const data: NetworkRegistryResponse = await res.json();
+
+        // Process each task sequentially
+        for (const [taskId, value] of Object.entries(data)) {
+            if (value.status !== 'ACTIVE') continue;
+            const { version } = value;
+
+            // Process each contract sequentially
+            for (const contract of value.contracts) {
+                if (!targetContracts.includes(contract.name)) continue;
+
+                const { name } = contract;
+
+                if (version === 'v2') {
+                    if (!balancerV2Contracts[name])
+                        balancerV2Contracts[name] = {};
+                    balancerV2Contracts[name][chainIdToHumanKey[chainId]] =
+                        contract.address;
+                }
+                if (version === 'v3') {
+                    if (!balancerV3Contracts[name])
+                        balancerV3Contracts[name] = {};
+                    balancerV3Contracts[name][chainIdToHumanKey[chainId]] =
+                        contract.address;
+                }
+
+                // Grab contract ABIs using only mainnet
+                if (networkName === 'mainnet') {
+                    const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/deployment-avax-redo/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
+                    const res = await fetch(url);
+                    if (!res.ok) {
+                        throw new Error(
+                            `Failed to fetch ABI for ${contract.name}: ${res.status} ${res.statusText}`,
+                        );
+                    }
+                    const data: AbiResponse = await res.json();
+
+                    const contractName =
+                        contract.name.charAt(0).toLowerCase() +
+                        contract.name.slice(1);
+                    const content = `export const ${contractName}Abi_${version.toUpperCase()} = ${JSON.stringify(
+                        data.abi,
+                        undefined,
+                        4,
+                    )} as const;`;
+                    const path = `./src/abi/${version}/${contractName}.ts`;
+                    writeFileSync(path, content);
+                }
+            }
+        }
+    }
 
     const chainIdImport = `import {ChainId} from "@/utils/constants";\n\n`;
 
