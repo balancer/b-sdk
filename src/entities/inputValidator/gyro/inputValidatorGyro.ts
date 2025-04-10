@@ -6,15 +6,19 @@ import {
 import { PoolState } from '../../types';
 import { InputValidatorBase } from '../inputValidatorBase';
 import {
+    validateCreatePoolTokens,
     validateTokensAddLiquidity,
     validateTokensRemoveLiquidity,
 } from '../utils/validateTokens';
+import { validateCreatePoolTokenConfig } from '../utils/validateCreatePoolTokenConfig';
+
 import { inputValidationError, poolTypeError } from '@/utils';
 import { CreatePoolGyroECLPInput } from '@/entities/createPool';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 export class InputValidatorGyro extends InputValidatorBase {
     validateCreatePool(input: CreatePoolGyroECLPInput) {
-        super.validateCreatePool(input);
+        validateCreatePoolTokenConfig(input);
+        validateCreatePoolTokens(input.tokens);
 
         if (input.tokens.length !== 2) {
             throw inputValidationError(

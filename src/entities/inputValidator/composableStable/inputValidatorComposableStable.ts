@@ -9,6 +9,8 @@ import { PoolState, PoolStateWithBalances } from '../../types';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { validatePoolHasBpt } from '../utils/validateTokens';
 
+import { validateCreatePoolTokens } from '../utils/validateTokens';
+
 export class InputValidatorComposableStable extends InputValidatorBase {
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
@@ -35,7 +37,7 @@ export class InputValidatorComposableStable extends InputValidatorBase {
     }
 
     validateCreatePool(input: CreatePoolV2ComposableStableInput): void {
-        super.validateCreatePool(input);
+        validateCreatePoolTokens(input.tokens);
         if (input.tokens.length > 5) {
             throw inputValidationError(
                 'Create Pool',

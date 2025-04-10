@@ -11,9 +11,13 @@ import { STABLE_POOL_CONSTRAINTS } from '@/utils/constantsV3';
 
 const { MAX_TOKENS, MIN_AMP, MAX_AMP } = STABLE_POOL_CONSTRAINTS;
 
+import { validateCreatePoolTokens } from '../utils/validateTokens';
+import { validateCreatePoolTokenConfig } from '../utils/validateCreatePoolTokenConfig';
+
 export class InputValidatorStable extends InputValidatorBase {
     validateCreatePool(input: CreatePoolV3StableInput) {
-        super.validateCreatePool(input);
+        validateCreatePoolTokens(input.tokens);
+        validateCreatePoolTokenConfig(input);
 
         if (input.tokens.length > MAX_TOKENS) {
             throw inputValidationError(
