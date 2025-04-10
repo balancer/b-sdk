@@ -29,9 +29,8 @@ import {
     InitPoolInput,
     RemoveLiquidityKind,
     RemoveLiquidityProportionalInput,
+    balancerV3Contracts,
 } from '@/index';
-
-import { BALANCER_ROUTER } from '@/index';
 
 import { doCreatePool, getBalances } from '../../lib/utils/';
 
@@ -266,7 +265,7 @@ describe('add liquidity bootstrapping test', () => {
         const hash = await client.sendTransaction({
             data: addLiquidityBuildCallOutput.callData,
             account: testAddress,
-            to: BALANCER_ROUTER[chainId],
+            to: balancerV3Contracts.Router[chainId],
             value: 0n,
             chain: client.chain,
         });
@@ -375,7 +374,7 @@ describe('add liquidity bootstrapping test', () => {
         const hash = await client.sendTransaction({
             data: removeLiquidityBuildCallOutput.callData,
             account: testAddress,
-            to: BALANCER_ROUTER[chainId],
+            to: balancerV3Contracts.Router[chainId],
             value: 0n,
             chain: client.chain,
         });
