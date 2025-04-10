@@ -15,13 +15,10 @@ import {
     http,
     publicActions,
     walletActions,
-    zeroAddress,
     parseUnits,
     createWalletClient,
     getContract,
     Address,
-    parseEther,
-    Hex,
     Account,
     erc20Abi,
 } from 'viem';
