@@ -8,7 +8,7 @@ import {
 } from '../../types';
 
 import { liquidityBoostrappingFactoryAbi } from '@/abi/liquidityBootstrappingFactory';
-import { LIQUIDITY_BOOTSTRAPPING_FACTORY } from '@/utils';
+import { balancerV3Contracts } from '@/utils/balancerV3Contracts';
 
 import { Hex } from '@/types';
 
@@ -19,7 +19,7 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: LIQUIDITY_BOOTSTRAPPING_FACTORY[input.chainId],
+            to: balancerV3Contracts.LBPoolFactory[input.chainId],
         };
     }
 
