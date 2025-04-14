@@ -14,6 +14,7 @@ export enum PoolType {
     StableSurge = 'StableSurge',
     Weighted = 'Weighted',
     Boosted = 'Boosted',
+    ReClamm = 'ReClamm',
 }
 
 export enum SwapKind {
