@@ -4,12 +4,11 @@ import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
     PoolRoleAccounts,
-    CreatePoolV3BaseInput,
-    TokenConfig,
+    CreatePoolGyroECLPInput,
 } from '../../types';
 import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
 import { balancerV3Contracts, sortByAddress } from '@/utils';
-import { Hex, PoolType } from '@/types';
+import { Hex } from '@/types';
 import { Big } from 'big.js';
 
 export type EclpParams = {
@@ -33,13 +32,6 @@ export type DerivedEclpParams = {
     w: bigint;
     z: bigint;
     dSq: bigint;
-};
-
-export type CreatePoolGyroECLPInput = CreatePoolV3BaseInput & {
-    poolType: PoolType.GyroE;
-    tokens: TokenConfig[];
-    eclpParams: EclpParams;
-    derivedEclpParams: DerivedEclpParams;
 };
 
 export class CreatePoolGyroECLP implements CreatePoolBase {

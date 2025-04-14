@@ -1,7 +1,9 @@
 import { PoolType, TokenType } from '@/types';
 import { Address, Hex } from 'viem';
-import { CreatePoolGyroECLPInput } from './createPoolV3/gyroECLP/createPoolGyroECLP';
-import { CreatePoolReClammInput } from './createPoolV3/reClamm/createPoolReClamm';
+import {
+    EclpParams,
+    DerivedEclpParams,
+} from './createPoolV3/gyroECLP/createPoolGyroECLP';
 
 ///// Shared types for v2 and v3 /////
 export interface CreatePoolBase {
@@ -82,7 +84,7 @@ export type CreatePoolV2ComposableStableArgs = [
 ];
 
 ///// Balancer v3 /////
-export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
+export type CreatePoolV3BaseInput<T = TokenConfig> = CreatePoolBaseInput & {
     protocolVersion: 3;
     pauseManager: Address;
     swapFeeManager: Address;
@@ -90,24 +92,13 @@ export type CreatePoolV3BaseInput = CreatePoolBaseInput & {
     poolHooksContract: Address;
     enableDonation: boolean;
     disableUnbalancedLiquidity: boolean;
+    tokens: T[];
 };
 
-export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
-    poolType: PoolType.Stable;
-    amplificationParameter: bigint;
-    tokens: TokenConfig[];
-};
-
-export type CreatePoolStableSurgeInput = Omit<
-    CreatePoolV3StableInput,
-    'poolHooksContract' | 'poolType' | 'disableUnbalancedLiquidity'
-> & {
-    poolType: PoolType.StableSurge;
-};
-
-export type CreatePoolV3WeightedInput = CreatePoolV3BaseInput & {
-    poolType: PoolType.Weighted;
-    tokens: (TokenConfig & { weight: bigint })[];
+export type PoolRoleAccounts = {
+    pauseManager: Address;
+    swapFeeManager: Address;
+    poolCreator: Address;
 };
 
 export type TokenConfig = {
@@ -117,8 +108,41 @@ export type TokenConfig = {
     paysYieldFees: boolean;
 };
 
-export type PoolRoleAccounts = {
-    pauseManager: Address;
-    swapFeeManager: Address;
-    poolCreator: Address;
+export type TokenConfigWithWeight = TokenConfig & {
+    weight: bigint;
+};
+
+export type CreatePoolV3WeightedInput =
+    CreatePoolV3BaseInput<TokenConfigWithWeight> & {
+        poolType: PoolType.Weighted;
+    };
+
+export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
+    poolType: PoolType.Stable;
+    amplificationParameter: bigint;
+};
+
+export type CreatePoolStableSurgeInput = Omit<
+    CreatePoolV3StableInput,
+    'poolHooksContract' | 'poolType' | 'disableUnbalancedLiquidity'
+> & {
+    poolType: PoolType.StableSurge;
+};
+
+export type CreatePoolGyroECLPInput = CreatePoolV3BaseInput & {
+    poolType: PoolType.GyroE;
+    eclpParams: EclpParams;
+    derivedEclpParams: DerivedEclpParams;
+};
+
+export type CreatePoolReClammInput = Omit<
+    CreatePoolV3BaseInput,
+    'poolHooksContract' | 'disableUnbalancedLiquidity' | 'enableDonation'
+> & {
+    poolType: PoolType.ReClamm;
+    initialMinPrice: bigint;
+    initialMaxPrice: bigint;
+    initialTargetPrice: bigint;
+    priceShiftDailyRate: bigint;
+    centerednessMargin: bigint;
 };

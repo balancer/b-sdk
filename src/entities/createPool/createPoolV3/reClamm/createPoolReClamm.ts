@@ -4,24 +4,13 @@ import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
     PoolRoleAccounts,
-    CreatePoolV3BaseInput,
-    TokenConfig,
+    CreatePoolReClammInput,
 } from '../../types';
 import { reClammPoolFactoryAbiExtended } from '@/abi';
 import { balancerV3Contracts, sortByAddress } from '@/utils';
-import { Hex, PoolType } from '@/types';
+import { Hex } from '@/types';
 
-export type CreatePoolReClammInput = CreatePoolV3BaseInput & {
-    poolType: PoolType.ReClamm;
-    tokens: TokenConfig[];
-    initialMinPrice: bigint;
-    initialMaxPrice: bigint;
-    initialTargetPrice: bigint;
-    priceShiftDailyRate: bigint;
-    centerednessMargin: bigint;
-};
-
-export class CreatePoolGyroECLP implements CreatePoolBase {
+export class CreatePoolReClamm implements CreatePoolBase {
     buildCall(input: CreatePoolReClammInput): CreatePoolBuildCallOutput {
         const callData = this.encodeCall(input);
         return {
