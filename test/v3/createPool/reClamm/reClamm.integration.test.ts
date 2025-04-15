@@ -50,7 +50,7 @@ describe('ReClamm - create & init', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8078999n,
+            8123669n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -116,11 +116,11 @@ describe('ReClamm - create & init', () => {
     }, 120_000);
 
     // TODO: Debug pool creation revert. Maybe will work with new deployment?
-    test.skip('pool should be created', async () => {
+    test('pool should be created', async () => {
         expect(poolAddress).to.not.be.undefined;
     });
 
-    test.skip('pool should be registered with Vault', async () => {
+    test('pool should be registered with Vault', async () => {
         const isPoolRegistered = await client.readContract({
             address: balancerV3Contracts.Vault[chainId],
             abi: vaultExtensionAbi_V3,
