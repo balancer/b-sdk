@@ -8,6 +8,7 @@ import {
     zeroAddress,
     parseUnits,
     TestActions,
+    parseAbi,
 } from 'viem';
 import {
     CHAINS,
@@ -22,6 +23,10 @@ import {
     vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
+    type InputAmount,
+    type PoolState,
+    fpMulDown,
+    fpDivDown,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import {
@@ -66,7 +71,7 @@ describe('ReClamm - create & init', () => {
             testAddress,
             [DAI.address, BAL.address],
             [DAI.slot!, BAL.slot!],
-            [parseUnits('100', 18), parseUnits('100', 18)],
+            [parseUnits('1000', 18), parseUnits('1000', 18)],
         );
 
         await approveSpenderOnTokens(
@@ -75,8 +80,6 @@ describe('ReClamm - create & init', () => {
             [DAI.address, BAL.address],
             PERMIT2[chainId],
         );
-
-        console.log('block number', await client.getBlockNumber());
 
         createPoolInput = {
             poolType,
@@ -115,7 +118,6 @@ describe('ReClamm - create & init', () => {
         });
     }, 120_000);
 
-    // TODO: Debug pool creation revert. Maybe will work with new deployment?
     test('pool should be created', async () => {
         expect(poolAddress).to.not.be.undefined;
     });
@@ -130,31 +132,82 @@ describe('ReClamm - create & init', () => {
         expect(isPoolRegistered).to.be.true;
     });
 
-    // TODO: figure out the special init situation for ReClamm
-    test.skip('pool should init', async () => {
-        const initPoolInput = {
-            amountsIn: [
-                {
-                    address: BAL.address,
-                    rawAmount: parseUnits('10', BAL.decimals),
-                    decimals: BAL.decimals,
-                },
-                {
-                    address: DAI.address,
-                    rawAmount: parseUnits('17', DAI.decimals),
-                    decimals: DAI.decimals,
-                },
-            ],
-            minBptAmountOut: 0n,
-            chainId,
-        };
-
+    test('pool should init', async () => {
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
         const poolState = await initPoolDataProvider.getInitPoolData(
             poolAddress,
             poolType,
             protocolVersion,
         );
+
+        ///// start of special reclamm init logic /////
+
+        // User chooses an amount for one of the tokens
+        const givenAmountIn = {
+            address: BAL.address,
+            rawAmount: parseUnits('100', BAL.decimals),
+            decimals: BAL.decimals,
+        };
+
+        // SDK calculates the amount for the other token
+        const amountsIn = await calculateInitReClammAmountsIn(
+            poolState,
+            givenAmountIn,
+        );
+
+        async function calculateInitReClammAmountsIn(
+            poolState: PoolState,
+            givenAmountIn: InputAmount,
+        ): Promise<InputAmount[]> {
+            // fetch proportion value from pool contract
+            const proportion = await client.readContract({
+                address: poolState.address,
+                abi: parseAbi([
+                    'function computeInitialBalanceRatio() external view returns (uint256 balanceRatio)',
+                ]),
+                functionName: 'computeInitialBalanceRatio',
+                args: [],
+            });
+
+            // poolState reads on chain so always has tokens in vault sorted order right?
+            const { tokens } = poolState;
+            const givenTokenIndex = tokens.findIndex(
+                (t) =>
+                    t.address.toLowerCase() ===
+                    givenAmountIn.address.toLowerCase(),
+            );
+
+            let calculatedAmountIn: InputAmount;
+
+            // https://github.com/balancer/reclamm/blob/8207b33c1ab76de3c42b015bab5210a8436376de/test/reClammPool.test.ts#L120-L128
+            if (givenTokenIndex === 0) {
+                // if chosen token is first in sort order, we multiply
+                calculatedAmountIn = {
+                    address: tokens[1].address,
+                    rawAmount: fpMulDown(givenAmountIn.rawAmount, proportion),
+                    decimals: tokens[1].decimals,
+                };
+            } else {
+                // if chosen token is second in sort order, we divide
+                calculatedAmountIn = {
+                    address: tokens[0].address,
+                    rawAmount: fpDivDown(givenAmountIn.rawAmount, proportion),
+                    decimals: tokens[0].decimals,
+                };
+            }
+
+            // Return amounts in consistent order based on token addresses
+            return [givenAmountIn, calculatedAmountIn].sort((a, b) =>
+                a.address.localeCompare(b.address),
+            );
+        }
+        ///// end of special reclamm init logic /////
+
+        const initPoolInput = {
+            amountsIn,
+            minBptAmountOut: 0n,
+            chainId,
+        };
 
         const permit2 = await Permit2Helper.signInitPoolApproval({
             ...initPoolInput,
