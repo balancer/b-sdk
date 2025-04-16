@@ -14,9 +14,7 @@
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
     "typings": "dist/index.d.ts",
-    "files": [
-        "dist/"
-    ],
+    "files": ["dist/"],
     "scripts": {
         "build": "tsup",
         "format": "biome format --write .",
@@ -54,7 +52,7 @@
         "vite-tsconfig-paths": "^4.2.3",
         "vitest": "^3.0.7"
     },
-    "packageManager": "pnpm@8.6.0",
+    "packageManager": "pnpm@10.8.1",
     "engines": {
         "node": ">=18.x"
     }
