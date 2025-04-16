@@ -118,8 +118,6 @@ describe('SwapV3', () => {
     describe('LBP', () => {
         test('can query swap', async () => {
             const queryOutput = await swap.query(rpcUrl);
-
-            console.log('Query Output:', queryOutput);
             expect(queryOutput).toBeDefined();
         });
         describe('can swap', async () => {
