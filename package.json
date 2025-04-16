@@ -32,14 +32,12 @@
         "@types/big.js": "6.2.2",
         "big.js": "6.2.2",
         "decimal.js-light": "2.5.1",
-        "lodash.clonedeep": "4.5.0",
         "viem": "2.27.0"
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@changesets/cli": "2.29.1",
         "@types/async-retry": "1.4.9",
-        "@types/lodash.clonedeep": "4.5.9",
         "@types/node": "22.14.1",
         "@viem/anvil": "0.0.10",
         "dotenv": "16.5.0",
