@@ -7,7 +7,7 @@ import {
     CreatePoolLiquidityBootstrappingInput,
 } from '../../types';
 
-import { liquidityBoostrappingFactoryAbi } from '@/abi/liquidityBootstrappingFactory';
+import { lBPoolFactoryAbi_V3 } from '@/abi';
 import { balancerV3Contracts } from '@/utils/balancerV3Contracts';
 
 import { Hex } from '@/types';
@@ -25,14 +25,14 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
 
     private encodeCall(input: CreatePoolLiquidityBootstrappingInput): Hex {
         const args = [
-            input.name,
+            input.name || input.symbol, // name can be optional
             input.symbol,
             input.lbpParams,
             input.swapFeePercentage,
             input.salt || getRandomBytes32(),
-        ];
+        ] as const;
         return encodeFunctionData({
-            abi: liquidityBoostrappingFactoryAbi,
+            abi: lBPoolFactoryAbi_V3,
             functionName: 'create',
             args,
         });
