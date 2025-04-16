@@ -28,7 +28,7 @@ import {
     ChainId,
     PoolType,
     CreatePoolLiquidityBootstrappingInput,
-    liquidityBoostrappingFactoryAbi,
+    lBPoolFactoryAbi_V3,
     LBPParams,
     InitPoolInputV3,
     InitPoolDataProvider,
@@ -223,7 +223,7 @@ async function createPool({ client, account }): Promise<Address> {
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: liquidityBoostrappingFactoryAbi,
+        abi: lBPoolFactoryAbi_V3,
         to: call.to,
     });
 

@@ -25,7 +25,6 @@ export * from './vault.V2';
 export * from './v2';
 export * from './v3';
 export * from './weightedPoolV4.V2';
-export * from './liquidityBootstrappingFactory';
 
 // V3 Common ABIs
 
