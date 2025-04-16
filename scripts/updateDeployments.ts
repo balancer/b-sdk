@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { writeFileSync } from 'fs';
+import { writeFileSync } from 'node:fs';
 import { sonic } from 'viem/chains';
 import { ChainId } from '../src/utils/constants';
 

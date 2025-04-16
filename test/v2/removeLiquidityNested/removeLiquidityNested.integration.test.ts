@@ -231,7 +231,7 @@ describe('remove liquidity nested test', () => {
     });
 });
 
-export const doTransaction = async ({
+const doTransaction = async ({
     poolId,
     amountIn,
     chainId,

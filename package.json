@@ -36,7 +36,7 @@
         "viem": "^2.27.0"
     },
     "devDependencies": {
-        "@biomejs/biome": "1.5.2",
+        "@biomejs/biome": "1.9.4",
         "@changesets/cli": "^2.29.1",
         "@types/async-retry": "^1.4.9",
         "@types/lodash.clonedeep": "^4.5.9",

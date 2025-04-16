@@ -120,22 +120,18 @@ export function getCheck(
     if (isRemoveLiquidityV2ComposableStableQueryOutput(output)) {
         if (isExactIn) {
             // Using this destructuring to return only the fields of interest
-            // biome-ignore lint/correctness/noUnusedVariables: <explanation>
             const { amountsOut, bptIndex, ...check } =
                 output as RemoveLiquidityV2ComposableStableQueryOutput;
             return check;
         }
-        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { bptIn, bptIndex, ...check } =
             output as RemoveLiquidityV2ComposableStableQueryOutput;
         return check;
     }
     if (isExactIn) {
-        // biome-ignore lint/correctness/noUnusedVariables: <explanation>
         const { amountsOut, ...check } = output;
         return check;
     }
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { bptIn, ...check } = output;
     return check;
 }
@@ -621,7 +617,6 @@ export function assertRemoveLiquidityBuildCallOutput(
         value: 0n, // Value should always be 0 when removing liquidity
     };
 
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { callData, ...buildCheck } = RemoveLiquidityBuildCallOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }
