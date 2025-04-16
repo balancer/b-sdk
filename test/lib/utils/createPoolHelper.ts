@@ -54,5 +54,5 @@ export async function doCreatePool(
         args: { pool: poolAddress },
     } = poolCreatedEvent;
 
-    return poolAddress;
+    return poolAddress as Address;
 }

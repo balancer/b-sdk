@@ -33,8 +33,7 @@
                 "useImportType": "off"
             },
             "suspicious": {
-                "noArrayIndexKey": "off",
-                "noExplicitAny": "off"
+                "noArrayIndexKey": "off"
             }
         }
     },
