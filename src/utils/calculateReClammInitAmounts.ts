@@ -29,6 +29,7 @@ export async function calculateReClammInitAmounts({
     const givenTokenIndex = sortedTokens.findIndex((t) =>
         isSameAddress(t.address, givenAmountIn.address),
     );
+    const calculatedTokenIndex = givenTokenIndex === 0 ? 1 : 0;
 
     const proportion = computeInitialBalanceRatio(
         initialMinPrice,
@@ -43,11 +44,16 @@ export async function calculateReClammInitAmounts({
         givenAmountIn.address,
         givenAmountIn.decimals,
     );
-    const givenTokenAmount = TokenAmount.fromRawAmount(
+    const givenTokenAmountScaled18 = TokenAmount.fromRawAmount(
         givenToken,
         givenAmountIn.rawAmount,
+    ).scale18;
+
+    const calculatedToken = new Token(
+        chainId,
+        sortedTokens[calculatedTokenIndex].address,
+        sortedTokens[calculatedTokenIndex].decimals,
     );
-    const givenTokenAmountScaled18 = givenTokenAmount.scale18;
 
     // https://github.com/balancer/reclamm/blob/8207b33c1ab76de3c42b015bab5210a8436376de/test/reClammPool.test.ts#L120-L128
     if (givenTokenIndex === 0) {
@@ -58,7 +64,7 @@ export async function calculateReClammInitAmounts({
         );
         // then convert back to token decimals raw amount (rounding down)
         const rawAmountScaledNative = TokenAmount.fromScale18Amount(
-            givenToken,
+            calculatedToken,
             rawAmountScaled18,
         );
         calculatedAmountIn = {
@@ -74,7 +80,7 @@ export async function calculateReClammInitAmounts({
         );
         // then convert back to token decimals raw amount (rounding down)
         const rawAmountScaledNative = TokenAmount.fromScale18Amount(
-            givenToken,
+            calculatedToken,
             rawAmountScaled18,
         );
         calculatedAmountIn = {
