@@ -116,7 +116,6 @@ export async function updateBalancerDeployments() {
 
                 const { name } = contract;
 
-                // TODO: do we need v2 or should never change?
                 if (version === 'v2') {
                     if (!balancerV2Contracts[name])
                         balancerV2Contracts[name] = {};

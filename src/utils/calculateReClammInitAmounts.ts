@@ -2,9 +2,8 @@ import {
     type InputAmount,
     type PoolState,
     type PublicWalletClient,
-    fpMulDown,
-    fpDivDown,
     isSameAddress,
+    MathSol,
 } from 'src';
 import { parseAbi } from 'viem';
 
@@ -40,14 +39,20 @@ export async function calculateReClammInitAmounts({
         // if chosen token is first in sort order, we multiply
         calculatedAmountIn = {
             address: tokens[1].address,
-            rawAmount: fpMulDown(givenAmountIn.rawAmount, proportion),
+            rawAmount: MathSol.mulDownFixed(
+                givenAmountIn.rawAmount,
+                proportion,
+            ),
             decimals: tokens[1].decimals,
         };
     } else {
         // if chosen token is second in sort order, we divide
         calculatedAmountIn = {
             address: tokens[0].address,
-            rawAmount: fpDivDown(givenAmountIn.rawAmount, proportion),
+            rawAmount: MathSol.divDownFixed(
+                givenAmountIn.rawAmount,
+                proportion,
+            ),
             decimals: tokens[0].decimals,
         };
     }

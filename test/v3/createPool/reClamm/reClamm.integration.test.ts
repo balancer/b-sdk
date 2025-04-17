@@ -8,12 +8,14 @@ import {
     zeroAddress,
     parseUnits,
     TestActions,
+    Hex,
 } from 'viem';
 import {
     CHAINS,
     ChainId,
     PoolType,
     TokenType,
+    PoolState,
     CreatePoolReClammInput,
     InitPool,
     Permit2Helper,
@@ -46,6 +48,8 @@ describe('ReClamm - create & init', () => {
     let testAddress: Address;
     let createPoolInput: CreatePoolReClammInput;
     let poolAddress: Address;
+    let snapshot: Hex;
+    let poolState: PoolState;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(
@@ -112,7 +116,27 @@ describe('ReClamm - create & init', () => {
             testAddress,
             createPoolInput,
         });
+
+        // Get pool state
+        const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
+        poolState = await initPoolDataProvider.getInitPoolData(
+            poolAddress,
+            poolType,
+            protocolVersion,
+        );
+
+        // Take a snapshot after pool creation
+        snapshot = await client.snapshot();
     }, 120_000);
+
+    beforeEach(async () => {
+        // Revert to the snapshot before each test
+        await client.revert({
+            id: snapshot,
+        });
+        // Take a new snapshot for the next test
+        snapshot = await client.snapshot();
+    });
 
     test('pool should be created', async () => {
         expect(poolAddress).to.not.be.undefined;
@@ -128,29 +152,66 @@ describe('ReClamm - create & init', () => {
         expect(isPoolRegistered).to.be.true;
     });
 
-    test('pool should init', async () => {
-        const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-        const poolState = await initPoolDataProvider.getInitPoolData(
-            poolAddress,
-            poolType,
-            protocolVersion,
-        );
-
-        ///// START RECLAMM INIT LOGIC /////
-        // User chooses an amount for one of the tokens
+    test('pool should init with BAL as given token', async () => {
+        // user chooses an amount for one of the tokens
         const givenAmountIn = {
-            address: BAL.address, // TODO: Also test DAI as given token (can't init same pool twice)
-            rawAmount: parseUnits('100', BAL.decimals),
+            address: BAL.address,
+            rawAmount: parseUnits('69', BAL.decimals),
             decimals: BAL.decimals,
         };
 
-        // SDK calculates the amount for the other token
+        // helper calculates the amount for the other token
         const amountsIn = await calculateReClammInitAmounts({
             client,
             poolState,
             givenAmountIn,
         });
-        ///// END RECLAMM INIT LOGIC /////
+
+        const initPoolInput = {
+            amountsIn,
+            minBptAmountOut: 0n,
+            chainId,
+        };
+
+        const permit2 = await Permit2Helper.signInitPoolApproval({
+            ...initPoolInput,
+            client,
+            owner: testAddress,
+        });
+
+        const initPool = new InitPool();
+        const initPoolBuildOutput = initPool.buildCallWithPermit2(
+            initPoolInput,
+            poolState,
+            permit2,
+        );
+
+        const txOutput = await sendTransactionGetBalances(
+            [BAL.address, DAI.address],
+            client,
+            testAddress,
+            initPoolBuildOutput.to,
+            initPoolBuildOutput.callData,
+            initPoolBuildOutput.value,
+        );
+
+        assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
+    }, 120_000);
+
+    test('pool should init with DAI as given token', async () => {
+        // user chooses an amount for one of the tokens
+        const givenAmountIn = {
+            address: DAI.address,
+            rawAmount: parseUnits('420', DAI.decimals),
+            decimals: DAI.decimals,
+        };
+
+        // helper calculates the amount for the other token
+        const amountsIn = await calculateReClammInitAmounts({
+            client,
+            poolState,
+            givenAmountIn,
+        });
 
         const initPoolInput = {
             amountsIn,
