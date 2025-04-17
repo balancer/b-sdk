@@ -9,6 +9,7 @@ import {
     parseUnits,
     TestActions,
     Hex,
+    // erc20Abi,
 } from 'viem';
 import {
     CHAINS,
@@ -71,8 +72,30 @@ describe('ReClamm - create & init', () => {
             testAddress,
             [DAI.address, BAL.address],
             [DAI.slot!, BAL.slot!],
-            [parseUnits('1000', 18), parseUnits('1000', 18)],
+            [
+                parseUnits('1000', DAI.decimals),
+                parseUnits('1000', BAL.decimals),
+            ],
         );
+
+        // make sure testAddress has enough tokens
+        // const T1Balance = await client.readContract({
+        //     address: BAL.address,
+        //     abi: erc20Abi,
+        //     functionName: 'balanceOf',
+        //     args: [testAddress],
+        // });
+        // console.log('T1B: ', T1Balance);
+        // console.log('T1A: ', parseUnits('1', BAL.decimals));
+
+        // const T2Balance = await client.readContract({
+        //     address: DAI.address,
+        //     abi: erc20Abi,
+        //     functionName: 'balanceOf',
+        //     args: [testAddress],
+        // });
+        // console.log('T2B: ', T2Balance);
+        // console.log('T2A: ', parseUnits('1', DAI.decimals));
 
         await approveSpenderOnTokens(
             client,
@@ -156,13 +179,13 @@ describe('ReClamm - create & init', () => {
         // user chooses an amount for one of the tokens
         const givenAmountIn = {
             address: BAL.address,
-            rawAmount: parseUnits('69', BAL.decimals),
+            rawAmount: parseUnits('1', BAL.decimals),
             decimals: BAL.decimals,
         };
 
         // helper calculates the amount for the other token
         const amountsIn = await calculateReClammInitAmounts({
-            createPoolInput,
+            ...createPoolInput,
             tokens: poolState.tokens,
             givenAmountIn,
         });
@@ -202,13 +225,13 @@ describe('ReClamm - create & init', () => {
         // user chooses an amount for one of the tokens
         const givenAmountIn = {
             address: DAI.address,
-            rawAmount: parseUnits('420', DAI.decimals),
+            rawAmount: parseUnits('1', DAI.decimals),
             decimals: DAI.decimals,
         };
 
         // helper calculates the amount for the other token
         const amountsIn = await calculateReClammInitAmounts({
-            createPoolInput,
+            ...createPoolInput,
             tokens: poolState.tokens,
             givenAmountIn,
         });
