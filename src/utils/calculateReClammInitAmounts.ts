@@ -1,35 +1,37 @@
 import {
     type InputAmount,
-    type PoolState,
-    type PublicWalletClient,
+    type MinimalToken,
+    type CreatePoolReClammInput,
     isSameAddress,
     MathSol,
 } from 'src';
-import { parseAbi } from 'viem';
+import { computeInitialBalanceRatio } from '@balancer-labs/balancer-maths';
 
 export async function calculateReClammInitAmounts({
-    client,
-    poolState,
+    tokens,
     givenAmountIn,
+    createPoolInput,
 }: {
-    client: PublicWalletClient;
-    poolState: PoolState;
+    tokens: MinimalToken[];
     givenAmountIn: InputAmount;
+    createPoolInput: CreatePoolReClammInput;
 }): Promise<InputAmount[]> {
-    // fetch proportion value from pool contract
-    const proportion = await client.readContract({
-        address: poolState.address,
-        abi: parseAbi([
-            'function computeInitialBalanceRatio() external view returns (uint256 balanceRatio)',
-        ]),
-        functionName: 'computeInitialBalanceRatio',
-        args: [],
-    });
+    // sort the user provided tokens
+    const sortedTokens = tokens.sort((a, b) =>
+        a.address.localeCompare(b.address),
+    );
 
-    // poolState reads on chain so always has tokens in vault sorted order right?
-    const { tokens } = poolState;
-    const givenTokenIndex = tokens.findIndex((t) =>
+    const { initialMinPrice, initialMaxPrice, initialTargetPrice } =
+        createPoolInput;
+
+    const givenTokenIndex = sortedTokens.findIndex((t) =>
         isSameAddress(t.address, givenAmountIn.address),
+    );
+
+    const proportion = computeInitialBalanceRatio(
+        initialMinPrice,
+        initialMaxPrice,
+        initialTargetPrice,
     );
 
     let calculatedAmountIn: InputAmount;
@@ -38,7 +40,7 @@ export async function calculateReClammInitAmounts({
     if (givenTokenIndex === 0) {
         // if chosen token is first in sort order, we multiply
         calculatedAmountIn = {
-            address: tokens[1].address,
+            address: sortedTokens[1].address,
             rawAmount: MathSol.mulDownFixed(
                 givenAmountIn.rawAmount,
                 proportion,
@@ -48,12 +50,12 @@ export async function calculateReClammInitAmounts({
     } else {
         // if chosen token is second in sort order, we divide
         calculatedAmountIn = {
-            address: tokens[0].address,
+            address: sortedTokens[0].address,
             rawAmount: MathSol.divDownFixed(
                 givenAmountIn.rawAmount,
                 proportion,
             ),
-            decimals: tokens[0].decimals,
+            decimals: sortedTokens[0].decimals,
         };
     }
 

@@ -162,8 +162,8 @@ describe('ReClamm - create & init', () => {
 
         // helper calculates the amount for the other token
         const amountsIn = await calculateReClammInitAmounts({
-            client,
-            poolState,
+            createPoolInput,
+            tokens: poolState.tokens,
             givenAmountIn,
         });
 
@@ -208,8 +208,8 @@ describe('ReClamm - create & init', () => {
 
         // helper calculates the amount for the other token
         const amountsIn = await calculateReClammInitAmounts({
-            client,
-            poolState,
+            createPoolInput,
+            tokens: poolState.tokens,
             givenAmountIn,
         });
 
