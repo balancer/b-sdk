@@ -16,7 +16,7 @@ import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
 import { InputValidatorBoosted } from './boosted/inputValidatorBoosted';
 import { ChainId, protocolVersionError, SDKError } from '@/utils';
 import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
-
+import { InputValidatorReClamm } from './reClamm/inputValidatorReClamm';
 export class InputValidator {
     validators: Record<string, InputValidatorBase> = {};
 
@@ -32,6 +32,7 @@ export class InputValidator {
             [PoolType.Weighted]: new InputValidatorWeighted(),
             [PoolType.Boosted]: new InputValidatorBoosted(),
             [PoolType.StableSurge]: new InputValidatorStable(),
+            [PoolType.ReClamm]: new InputValidatorReClamm(),
         };
     }
 

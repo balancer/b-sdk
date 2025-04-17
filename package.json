@@ -14,9 +14,7 @@
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
     "typings": "dist/index.d.ts",
-    "files": [
-        "dist/"
-    ],
+    "files": ["dist/"],
     "scripts": {
         "build": "tsup",
         "format": "biome format --write .",
@@ -30,7 +28,7 @@
         "update:deployments": "npx tsx ./scripts/updateDeployments.ts && pnpm format"
     },
     "dependencies": {
-        "@balancer-labs/balancer-maths": "0.0.24",
+        "@balancer-labs/balancer-maths": "0.0.27",
         "@types/big.js": "^6.2.2",
         "big.js": "^6.2.2",
         "decimal.js-light": "^2.5.1",

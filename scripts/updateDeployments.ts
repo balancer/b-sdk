@@ -59,6 +59,7 @@ const targetContractsV3 = [
     'StableSurgePoolFactory',
     'GyroECLPPoolFactory',
     'LBPoolFactory',
+    'ReClammPoolFactory',
 ];
 
 const targetContracts = [...targetContractsV2, ...targetContractsV3];
@@ -66,7 +67,7 @@ const targetContracts = [...targetContractsV2, ...targetContractsV3];
 const balancerV2Contracts: ContractRegistry = {};
 const balancerV3Contracts: ContractRegistry = {};
 
-const branch = 'master'; // option to point this at a balancer-deployments PR branch
+const branch = 'deployment/reclamm-test'; // option to point this at a balancer-deployments PR branch
 
 export async function updateBalancerDeployments() {
     // Fetch all the networks we support
@@ -128,8 +129,8 @@ export async function updateBalancerDeployments() {
                         contract.address;
                 }
 
-                // Grab contract ABIs using only mainnet
-                if (networkName === 'mainnet') {
+                // Grab contract ABIs using only sepolia, which should include all contracts right? we wouldnt deploy to prod w/o sepolia test right?
+                if (networkName === 'sepolia' && version === 'v3') {
                     const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/${branch}/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
                     const res = await fetch(url);
                     if (!res.ok) {

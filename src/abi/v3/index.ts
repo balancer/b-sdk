@@ -10,3 +10,4 @@ export * from './stablePoolFactory';
 export * from './stableSurgePoolFactory';
 export * from './gyroECLPPoolFactory';
 export * from './lBPoolFactory';
+export * from './reClammPoolFactory';
