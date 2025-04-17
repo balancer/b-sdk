@@ -24,7 +24,7 @@ export async function calculateReClammInitAmounts({
     initialMaxPrice: bigint;
     initialTargetPrice: bigint;
 }): Promise<InputAmount[]> {
-    // sort the user provided tokens
+    // sort the user provided tokens just in case
     const sortedTokens = getSortedTokens(tokens, chainId);
     const givenTokenIndex = sortedTokens.findIndex((t) =>
         isSameAddress(t.address, givenAmountIn.address),
@@ -37,58 +37,41 @@ export async function calculateReClammInitAmounts({
         initialTargetPrice,
     );
 
-    let calculatedAmountIn: InputAmount;
-
+    // Create token instances for decimal scaling helpers
     const givenToken = new Token(
         chainId,
         givenAmountIn.address,
         givenAmountIn.decimals,
     );
-    const givenTokenAmountScaled18 = TokenAmount.fromRawAmount(
-        givenToken,
-        givenAmountIn.rawAmount,
-    ).scale18;
-
     const calculatedToken = new Token(
         chainId,
         sortedTokens[calculatedTokenIndex].address,
         sortedTokens[calculatedTokenIndex].decimals,
     );
 
-    // https://github.com/balancer/reclamm/blob/8207b33c1ab76de3c42b015bab5210a8436376de/test/reClammPool.test.ts#L120-L128
-    if (givenTokenIndex === 0) {
-        // if given token is first in sort order, we multiply (math must be done in scaled 18)
-        const rawAmountScaled18 = MathSol.mulDownFixed(
-            givenTokenAmountScaled18,
-            proportion,
-        );
-        // then convert back to token decimals raw amount (rounding down)
-        const rawAmountScaledNative = TokenAmount.fromScale18Amount(
-            calculatedToken,
-            rawAmountScaled18,
-        );
-        calculatedAmountIn = {
-            address: sortedTokens[1].address,
-            rawAmount: rawAmountScaledNative.amount,
-            decimals: tokens[1].decimals,
-        };
-    } else {
-        // if given token is second in sort order, we divide (math must be done in scaled 18)
-        const rawAmountScaled18 = MathSol.divDownFixed(
-            givenTokenAmountScaled18,
-            proportion,
-        );
-        // then convert back to token decimals raw amount (rounding down)
-        const rawAmountScaledNative = TokenAmount.fromScale18Amount(
-            calculatedToken,
-            rawAmountScaled18,
-        );
-        calculatedAmountIn = {
-            address: sortedTokens[0].address,
-            rawAmount: rawAmountScaledNative.amount,
-            decimals: sortedTokens[0].decimals,
-        };
-    }
+    // Scale given amount to 18 decimals before doing math
+    const givenTokenAmountScaled18 = TokenAmount.fromRawAmount(
+        givenToken,
+        givenAmountIn.rawAmount,
+    ).scale18;
+
+    // Do math based on token order: https://github.com/balancer/reclamm/blob/8207b33c1ab76de3c42b015bab5210a8436376de/test/reClammPool.test.ts#L120-L128
+    const rawAmountScaled18 =
+        givenTokenIndex === 0
+            ? MathSol.mulDownFixed(givenTokenAmountScaled18, proportion) // if given token is first in sort order, we multiply
+            : MathSol.divDownFixed(givenTokenAmountScaled18, proportion); // if given token is second in sort order, we divide
+
+    // Convert back to native token decimals of the calculated token (rounding down)
+    const rawAmountScaledNative = TokenAmount.fromScale18Amount(
+        calculatedToken,
+        rawAmountScaled18,
+    );
+
+    const calculatedAmountIn: InputAmount = {
+        address: sortedTokens[calculatedTokenIndex].address,
+        rawAmount: rawAmountScaledNative.amount,
+        decimals: sortedTokens[calculatedTokenIndex].decimals,
+    };
 
     // Return amounts in consistent order based on token addresses
     return [givenAmountIn, calculatedAmountIn].sort((a, b) =>

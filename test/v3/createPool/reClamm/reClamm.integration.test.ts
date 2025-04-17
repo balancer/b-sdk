@@ -9,7 +9,6 @@ import {
     parseUnits,
     TestActions,
     Hex,
-    // erc20Abi,
 } from 'viem';
 import {
     CHAINS,
