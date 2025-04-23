@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 3.2.0
+
+### Minor Changes
+
+- 56e594d: Create and initialize Readjusting Concentrated Liquidity AMMs
+
 ## 3.1.0
 
 ### Minor Changes
