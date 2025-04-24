@@ -3,6 +3,7 @@ import {
     CreatePoolV3StableInput,
     CreatePoolStableSurgeInput,
     CreatePoolGyroECLPInput,
+    CreatePoolV2WeightedInput,
 } from '@/entities/createPool';
 
 import { TokenType } from '@/types';
@@ -13,7 +14,8 @@ export const validateCreatePoolTokenConfig = (
         | CreatePoolV3WeightedInput
         | CreatePoolV3StableInput
         | CreatePoolStableSurgeInput
-        | CreatePoolGyroECLPInput,
+        | CreatePoolGyroECLPInput
+        | CreatePoolV2WeightedInput,
 ) => {
     if (input.protocolVersion === 3) {
         input.tokens.forEach(({ tokenType, rateProvider }) => {
