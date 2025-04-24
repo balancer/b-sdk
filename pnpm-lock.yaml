@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@balancer-labs/balancer-maths':
-        specifier: 0.0.26
-        version: 0.0.26
+        specifier: 0.0.27
+        version: 0.0.27
       '@types/big.js':
         specifier: 6.2.2
         version: 6.2.2
@@ -76,8 +76,8 @@ packages:
     resolution: {integrity: sha512-VtPOkrdPHZsKc/clNqyi9WUA8TINkZ4cGk63UUE3u4pmB2k+ZMQRDuIOagv8UVd6j7k0T3+RRIb7beKTebNbcw==}
     engines: {node: '>=6.9.0'}
 
-  '@balancer-labs/balancer-maths@0.0.26':
-    resolution: {integrity: sha512-1a2z7H0brzD3YW2yIqd4YiDY0p8L6P3TNSSizVqfM7Dgh/r2Ya+5xHvsavECh8u509+ZySInh/0ymausIidKxw==}
+  '@balancer-labs/balancer-maths@0.0.27':
+    resolution: {integrity: sha512-aXujyHYENIWTzN2aRoUVBKhmmLxvWBhGcO8I6wsRR6kkSw8SfnXvihFdf48RvfE8YnEfL7Bso+JCyqKPzRcBHQ==}
     engines: {node: '>=18.x'}
 
   '@biomejs/biome@1.9.4':
@@ -1673,7 +1673,7 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@balancer-labs/balancer-maths@0.0.26': {}
+  '@balancer-labs/balancer-maths@0.0.27': {}
 
   '@biomejs/biome@1.9.4':
     optionalDependencies:

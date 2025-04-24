@@ -50,6 +50,10 @@ export const balancerV3Contracts = {
         [ChainId.OPTIMISM]: '0xC1A64500E035D9159C8826E982dFb802003227f0',
         [ChainId.SEPOLIA]: '0xA714753434481DbaBf7921963f18190636eCde69',
     },
+    ReClammPoolFactory: {
+        [ChainId.BASE]: '0x0f08eEf2C785AA5e7539684aF04755dEC1347b7c',
+        [ChainId.SEPOLIA]: '0xC34978818FE7B25dcbea848660D4821645e3dA5b',
+    },
     Router: {
         [ChainId.ARBITRUM_ONE]: '0xEAedc32a51c510d35ebC11088fD5fF2b47aACF2E',
         [ChainId.AVALANCHE]: '0xF39CA6ede9BF7820a952b52f3c94af526bAB9015',

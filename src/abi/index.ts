@@ -16,6 +16,7 @@ import {
     stablePoolFactoryAbi_V3,
     gyroECLPPoolFactoryAbi_V3,
     stableSurgePoolFactoryAbi_V3,
+    reClammPoolFactoryAbi_V3,
 } from './v3';
 
 export * from './authorizer';
@@ -77,6 +78,11 @@ export const stableSurgeFactoryAbiExtended = [
 
 export const gyroECLPPoolFactoryAbiExtended = [
     ...gyroECLPPoolFactoryAbi_V3,
+    ...commonABIsV3,
+];
+
+export const reClammPoolFactoryAbiExtended = [
+    ...reClammPoolFactoryAbi_V3,
     ...commonABIsV3,
 ];
 
