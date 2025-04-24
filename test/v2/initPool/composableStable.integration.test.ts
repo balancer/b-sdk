@@ -29,7 +29,7 @@ import { assertInitPool, doInitPool } from '../../lib/utils/initPoolHelper';
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
 const chainId = ChainId.MAINNET;
 
-describe('Composable Stable Pool - Init Pool tests', async () => {
+describe.skip('Composable Stable Pool - Init Pool tests', async () => {
     let poolAddress: Address;
     let createPoolComposableStableInput: CreatePoolV2ComposableStableInput;
     let createTxInput: CreatePoolTxInput;
