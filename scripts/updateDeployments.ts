@@ -9,6 +9,12 @@ type SupportedNetworkResponse = {
     blockExplorer: string;
 };
 
+type SupportedNetwork = {
+    networkName: string;
+    chainId: number;
+    deploymentsUrl: string;
+};
+
 type NetworkRegistryResponse = {
     [key: string]: {
         contracts: { name: string; address: Address }[];
@@ -67,9 +73,16 @@ const targetContracts = [...targetContractsV2, ...targetContractsV3];
 const balancerV2Contracts: ContractRegistry = {};
 const balancerV3Contracts: ContractRegistry = {};
 
-const branch = 'deployment/reclamm-test'; // option to point this at a balancer-deployments PR branch
+const branch = 'deployment/reclamm-test-2'; // option to point this at a balancer-deployments PR branch
 
-export async function updateBalancerDeployments() {
+async function updateBalancerDeployments() {
+    const supportedNetworks = await fetchSupportedNetworks();
+    await processContractData(supportedNetworks);
+    updateContractAddresses();
+    exportAbis();
+}
+
+async function fetchSupportedNetworks(): Promise<SupportedNetwork[]> {
     // Fetch all the networks we support
     const res = await fetch(
         `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/${branch}/addresses/.supported-networks.json`,
@@ -96,7 +109,11 @@ export async function updateBalancerDeployments() {
         a.networkName.localeCompare(b.networkName),
     );
 
-    // Process each network sequentially
+    return supportedNetworks;
+}
+
+async function processContractData(supportedNetworks: SupportedNetwork[]) {
+    // Process each network sequentially to maintain consistent order
     for (const { networkName, chainId, deploymentsUrl } of supportedNetworks) {
         const res = await fetch(deploymentsUrl);
         if (!res.ok) {
@@ -105,12 +122,11 @@ export async function updateBalancerDeployments() {
 
         const data: NetworkRegistryResponse = await res.json();
 
-        // Process each task sequentially
+        // Process each task sequentially to maintain consistent order
         for (const [taskId, value] of Object.entries(data)) {
             if (value.status !== 'ACTIVE') continue;
             const { version } = value;
 
-            // Process each contract sequentially
             for (const contract of value.contracts) {
                 if (!targetContracts.includes(contract.name)) continue;
 
@@ -154,9 +170,9 @@ export async function updateBalancerDeployments() {
             }
         }
     }
+}
 
-    const chainIdImport = `import {ChainId} from "@/utils/constants";\n\n`;
-
+function updateContractAddresses() {
     // Sort the contracts by name for easier PR reviews
     const sortedV2Contracts = Object.fromEntries(
         Object.entries(balancerV2Contracts).sort(([a], [b]) =>
@@ -168,6 +184,9 @@ export async function updateBalancerDeployments() {
             a.localeCompare(b),
         ),
     );
+
+    // Import ChainId to make the keys human readable
+    const chainIdImport = `import {ChainId} from "@/utils/constants";\n\n`;
 
     // Write the contract addresses to the utils files
     const balancerV2Content =
@@ -185,8 +204,9 @@ export async function updateBalancerDeployments() {
             4,
         )} as const;`.replace(/"(\[ChainId\.[A-Z_]+\])"/g, '$1');
     writeFileSync('./src/utils/balancerV3Contracts.ts', balancerV3Content);
+}
 
-    // Export all the abis
+function exportAbis() {
     const exportAbisV2 = targetContractsV2.map(
         (contract) =>
             `export * from './${

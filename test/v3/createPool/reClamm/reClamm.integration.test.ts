@@ -40,7 +40,7 @@ const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 const poolType = PoolType.ReClamm;
 const WETH = TOKENS[chainId].WETH;
-const USDC = TOKENS[chainId].USDC;
+const stataUSDC = TOKENS[chainId].stataUSDC;
 const BAL = TOKENS[chainId].BAL;
 const DAI = TOKENS[chainId].DAI;
 
@@ -48,9 +48,9 @@ describe('ReClamm - create & init', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
-    let createWethUsdcPoolInput: CreatePoolReClammInput;
+    let createWethStataUsdcPoolInput: CreatePoolReClammInput;
     let createBalDaiPoolInput: CreatePoolReClammInput;
-    let wethUsdcPoolAddress: Address;
+    let wethStataUsdcPoolAddress: Address;
     let balDaiPoolAddress: Address;
     let wethUsdcPoolState: PoolState;
     let balDaiPoolState: PoolState;
@@ -60,7 +60,7 @@ describe('ReClamm - create & init', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8123669n,
+            8193333n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -74,10 +74,10 @@ describe('ReClamm - create & init', () => {
         await setTokenBalances(
             client,
             testAddress,
-            [USDC.address, WETH.address, DAI.address, BAL.address],
-            [USDC.slot!, WETH.slot!, DAI.slot!, BAL.slot!],
+            [stataUSDC.address, WETH.address, DAI.address, BAL.address],
+            [stataUSDC.slot!, WETH.slot!, DAI.slot!, BAL.slot!],
             [
-                parseUnits('1000', USDC.decimals),
+                parseUnits('1000', stataUSDC.decimals),
                 parseUnits('1000', WETH.decimals),
                 parseUnits('1000', DAI.decimals),
                 parseUnits('1000', BAL.decimals),
@@ -87,13 +87,13 @@ describe('ReClamm - create & init', () => {
         await approveSpenderOnTokens(
             client,
             testAddress,
-            [USDC.address, WETH.address, DAI.address, BAL.address],
+            [stataUSDC.address, WETH.address, DAI.address, BAL.address],
             PERMIT2[chainId],
         );
 
-        createWethUsdcPoolInput = {
+        createWethStataUsdcPoolInput = {
             poolType,
-            symbol: 'WETH-USDC',
+            symbol: 'WETH-stataUSDC',
             tokens: [
                 {
                     address: WETH.address,
@@ -102,10 +102,10 @@ describe('ReClamm - create & init', () => {
                     paysYieldFees: false,
                 },
                 {
-                    address: USDC.address,
-                    rateProvider: zeroAddress,
-                    tokenType: TokenType.STANDARD,
-                    paysYieldFees: false,
+                    address: stataUSDC.address,
+                    rateProvider: '0x34101091673238545de8a846621823d9993c3085',
+                    tokenType: TokenType.TOKEN_WITH_RATE,
+                    paysYieldFees: true,
                 },
             ],
             swapFeePercentage: parseUnits('0.01', 18),
@@ -121,7 +121,7 @@ describe('ReClamm - create & init', () => {
         };
 
         createBalDaiPoolInput = {
-            ...createWethUsdcPoolInput,
+            ...createWethStataUsdcPoolInput,
             symbol: 'BAL-DAI',
             tokens: [
                 {
@@ -139,10 +139,10 @@ describe('ReClamm - create & init', () => {
             ],
         };
 
-        wethUsdcPoolAddress = await doCreatePool({
+        wethStataUsdcPoolAddress = await doCreatePool({
             client,
             testAddress,
-            createPoolInput: createWethUsdcPoolInput,
+            createPoolInput: createWethStataUsdcPoolInput,
         });
 
         balDaiPoolAddress = await doCreatePool({
@@ -154,7 +154,7 @@ describe('ReClamm - create & init', () => {
         // Get pool state
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
         wethUsdcPoolState = await initPoolDataProvider.getInitPoolData(
-            wethUsdcPoolAddress,
+            wethStataUsdcPoolAddress,
             poolType,
             protocolVersion,
         );
@@ -179,7 +179,7 @@ describe('ReClamm - create & init', () => {
     });
 
     test('pool should be created', async () => {
-        expect(wethUsdcPoolAddress).to.not.be.undefined;
+        expect(wethStataUsdcPoolAddress).to.not.be.undefined;
     });
 
     test('pool should be registered with Vault', async () => {
@@ -187,7 +187,7 @@ describe('ReClamm - create & init', () => {
             address: balancerV3Contracts.Vault[chainId],
             abi: vaultExtensionAbi_V3,
             functionName: 'isPoolRegistered',
-            args: [wethUsdcPoolAddress],
+            args: [wethStataUsdcPoolAddress],
         });
         expect(isPoolRegistered).to.be.true;
     });
@@ -202,7 +202,7 @@ describe('ReClamm - create & init', () => {
 
         // helper calculates the amount for the other token
         const amountsIn = await calculateReClammInitAmounts({
-            ...createWethUsdcPoolInput,
+            ...createWethStataUsdcPoolInput,
             tokens: wethUsdcPoolState.tokens,
             givenAmountIn,
         });
@@ -227,7 +227,7 @@ describe('ReClamm - create & init', () => {
         );
 
         const txOutput = await sendTransactionGetBalances(
-            [WETH.address, USDC.address],
+            [WETH.address, stataUSDC.address],
             client,
             testAddress,
             initPoolBuildOutput.to,
@@ -238,17 +238,17 @@ describe('ReClamm - create & init', () => {
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
     }, 120_000);
 
-    test('wethUsdcPool should init with USDC as given token', async () => {
+    test('wethUsdcPool should init with stataUSDC as given token', async () => {
         // user chooses an amount for one of the tokens
         const givenAmountIn = {
-            address: USDC.address,
-            rawAmount: parseUnits('1', USDC.decimals),
-            decimals: USDC.decimals,
+            address: stataUSDC.address,
+            rawAmount: parseUnits('1', stataUSDC.decimals),
+            decimals: stataUSDC.decimals,
         };
 
         // helper calculates the amount for the other token
         const amountsIn = await calculateReClammInitAmounts({
-            ...createWethUsdcPoolInput,
+            ...createWethStataUsdcPoolInput,
             tokens: wethUsdcPoolState.tokens,
             givenAmountIn,
         });
@@ -273,7 +273,7 @@ describe('ReClamm - create & init', () => {
         );
 
         const txOutput = await sendTransactionGetBalances(
-            [WETH.address, USDC.address],
+            [WETH.address, stataUSDC.address],
             client,
             testAddress,
             initPoolBuildOutput.to,
