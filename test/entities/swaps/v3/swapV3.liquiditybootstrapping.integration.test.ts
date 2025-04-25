@@ -34,7 +34,7 @@ const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 const DAI = TOKENS[chainId].DAI;
 
-describe('SwapV3', () => {
+describe('SwapV3LiquidityBootstrapping', () => {
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
     let rpcUrl: string;
