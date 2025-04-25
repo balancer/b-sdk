@@ -10,7 +10,7 @@ import {
     gyroECLPPoolFactoryAbiExtended,
     stableSurgeFactoryAbiExtended,
     reClammPoolFactoryAbiExtended,
-    lBPoolFactoryAbi_V3,
+    lBPoolFactoryAbi_V3Extended,
 } from 'src';
 import { findEventInReceiptLogs } from './findEventInReceiptLogs';
 
@@ -33,7 +33,7 @@ export async function doCreatePool(
             [PoolType.StableSurge]: stableSurgeFactoryAbiExtended,
             [PoolType.GyroE]: gyroECLPPoolFactoryAbiExtended,
             [PoolType.ReClamm]: reClammPoolFactoryAbiExtended,
-            [PoolType.LiquidityBootstrapping]: lBPoolFactoryAbi_V3,
+            [PoolType.LiquidityBootstrapping]: lBPoolFactoryAbi_V3Extended,
         },
     };
 
