@@ -37,6 +37,8 @@ export async function calculateReClammInitAmounts({
         initialTargetPrice,
     );
 
+    console.log('proportion from balancer maths', proportion);
+
     // Create token instances for decimal scaling helpers
     const givenToken = new Token(
         chainId,

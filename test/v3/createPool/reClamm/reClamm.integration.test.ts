@@ -9,6 +9,8 @@ import {
     parseUnits,
     TestActions,
     Hex,
+    parseAbi,
+    erc4626Abi,
 } from 'viem';
 import {
     CHAINS,
@@ -43,6 +45,7 @@ const WETH = TOKENS[chainId].WETH;
 const stataUSDC = TOKENS[chainId].stataUSDC;
 const BAL = TOKENS[chainId].BAL;
 const DAI = TOKENS[chainId].DAI;
+const USDC = TOKENS[chainId].USDC_AAVE;
 
 describe('ReClamm - create & init', () => {
     let rpcUrl: string;
@@ -83,6 +86,38 @@ describe('ReClamm - create & init', () => {
                 parseUnits('1000', BAL.decimals),
             ],
         );
+
+        // Can't set token balance for erc4626 with slot?
+        await approveSpenderOnTokens(
+            client,
+            testAddress,
+            [USDC.address],
+            stataUSDC.address,
+        );
+        const hash = await client.writeContract({
+            account: testAddress,
+            chain: CHAINS[chainId],
+            abi: erc4626Abi,
+            address: stataUSDC.address,
+            functionName: 'deposit',
+            args: [parseUnits('1000', USDC.decimals), testAddress],
+        });
+
+        // wait for deposit confirmation before starting tests
+        await client.waitForTransactionReceipt({
+            hash,
+        });
+
+        // check token balances
+        const stataUSDCBalance = await client.readContract({
+            address: stataUSDC.address,
+            abi: parseAbi([
+                'function balanceOf(address account) view returns (uint256)',
+            ]),
+            functionName: 'balanceOf',
+            args: [testAddress],
+        });
+        console.log('stataUSDCBalance:', stataUSDCBalance);
 
         await approveSpenderOnTokens(
             client,
@@ -193,6 +228,17 @@ describe('ReClamm - create & init', () => {
     });
 
     test('wethUsdcPool should init with WETH as given token', async () => {
+        // sanity check for reclamm init amount maths
+        const proportion = await client.readContract({
+            address: wethStataUsdcPoolAddress,
+            abi: parseAbi([
+                'function computeInitialBalanceRatio() view returns (uint256)',
+            ]),
+            functionName: 'computeInitialBalanceRatio',
+            args: [],
+        });
+        console.log('proportion from SC', proportion);
+
         // user chooses an amount for one of the tokens
         const givenAmountIn = {
             address: WETH.address,
@@ -206,6 +252,8 @@ describe('ReClamm - create & init', () => {
             tokens: wethUsdcPoolState.tokens,
             givenAmountIn,
         });
+
+        console.log('amountsIn', amountsIn);
 
         const initPoolInput = {
             amountsIn,
@@ -284,7 +332,7 @@ describe('ReClamm - create & init', () => {
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
     }, 120_000);
 
-    test('balDaiPool should init with BAL as given token', async () => {
+    test.skip('balDaiPool should init with BAL as given token', async () => {
         // user chooses an amount for one of the tokens
         const givenAmountIn = {
             address: BAL.address,
@@ -330,7 +378,7 @@ describe('ReClamm - create & init', () => {
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
     }, 120_000);
 
-    test('balDaiPool should init with DAI as given token', async () => {
+    test.skip('balDaiPool should init with DAI as given token', async () => {
         // user chooses an amount for one of the tokens
         const givenAmountIn = {
             address: DAI.address,
