@@ -8,6 +8,10 @@ export interface MinimalToken {
     index: number;
 }
 
+export interface MinimalTokenWithRate extends MinimalToken {
+    rate?: bigint;
+}
+
 export interface PoolTokenWithBalance extends MinimalToken {
     balance: HumanAmount;
 }
