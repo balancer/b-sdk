@@ -1,4 +1,5 @@
 import {
+    Abi,
     createPublicClient,
     formatEther,
     formatUnits,
@@ -16,9 +17,9 @@ import { PoolState, PoolStateWithBalances } from '../types';
 
 type MulticallContract = {
     address: Address;
-    abi: any;
+    abi: Abi;
     functionName: string;
-    args?: any;
+    args?: Address[];
 };
 
 export const getPoolStateWithBalancesCowAmm = async (

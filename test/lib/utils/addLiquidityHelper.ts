@@ -567,7 +567,6 @@ function assertAddLiquidityBuildCallOutput(
         value,
     };
 
-    // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     const { callData, ...buildCheck } = addLiquidityBuildCallOutput;
     expect(buildCheck).to.deep.eq(expectedBuildOutput);
 }

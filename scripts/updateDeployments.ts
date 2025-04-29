@@ -1,5 +1,5 @@
-import { Address } from 'viem';
-import { writeFileSync } from 'fs';
+import { Abi, Address } from 'viem';
+import { writeFileSync } from 'node:fs';
 import { sonic } from 'viem/chains';
 import { ChainId } from '../src/utils/constants';
 
@@ -24,7 +24,7 @@ type NetworkRegistryResponse = {
 };
 
 type AbiResponse = {
-    abi: any[];
+    abi: Abi[];
 };
 
 // {contractName: {chainId: address}, ...}
