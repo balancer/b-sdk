@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.0.1
+
+### Patch Changes
+
+- b2a4be7: Fix ReClamm init lint issues
+
 ## 4.0.0
 
 ### Major Changes
