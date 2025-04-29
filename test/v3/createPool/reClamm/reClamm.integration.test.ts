@@ -253,8 +253,6 @@ describe('ReClamm', () => {
                     },
                 ];
 
-                console.log('tokens:', tokens);
-
                 // helper calculates the amount for the other token
                 const amountsIn = await calculateReClammInitAmounts({
                     ...createWethStataUsdcPoolInput,
@@ -325,8 +323,6 @@ describe('ReClamm', () => {
                     tokens,
                     givenAmountIn,
                 });
-
-                console.log('amountsIn:', amountsIn);
 
                 const initPoolInput = {
                     amountsIn,
