@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.0.0
+
+### Major Changes
+
+- bc21824: Update dependencies to latest version
+
 ## 3.2.0
 
 ### Minor Changes
