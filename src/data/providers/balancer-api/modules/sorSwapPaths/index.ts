@@ -101,7 +101,8 @@ export class SorSwapPaths {
             variables: sorInput.useProtocolVersion
                 ? {
                       ...variables,
-                      useProtocolVersion: sorInput.useProtocolVersion,
+                      useProtocolVersion:
+                          sorInput.useProtocolVersion.toString(),
                   }
                 : variables,
         });

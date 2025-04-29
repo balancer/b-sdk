@@ -1,5 +1,5 @@
 {
-    "$schema": "https://biomejs.dev/schemas/1.5.2/schema.json",
+    "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
     "files": {
         "ignore": ["./node_modules", "dist", "pnpm-lock.yaml", "./local"]
     },
@@ -21,28 +21,26 @@
             },
             "complexity": {
                 "noForEach": "off",
-                "noStaticOnlyClass": "off"
+                "noStaticOnlyClass": "off",
+                "noExcessiveNestedTestSuites": "off"
             },
             "performance": {
                 "noDelete": "off"
             },
             "style": {
                 "noNonNullAssertion": "off",
-                "useShorthandArrayType": "error"
+                "useShorthandArrayType": "error",
+                "useImportType": "off"
             },
             "suspicious": {
-                "noArrayIndexKey": "off",
-                "noExplicitAny": "off"
-            },
-            "nursery": {
-                "useImportType": "off"
+                "noArrayIndexKey": "off"
             }
         }
     },
     "javascript": {
         "formatter": {
             "quoteStyle": "single",
-            "trailingComma": "all",
+            "trailingCommas": "all",
             "semicolons": "always"
         }
     }
