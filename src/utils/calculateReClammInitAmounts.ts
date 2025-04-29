@@ -9,6 +9,15 @@ import { TokenAmountWithRate } from "@/entities/tokenAmountWithRate";
 import { isSameAddress } from "./helpers";
 import { MathSol } from "./math";
 
+export type CalculateReClammInitAmountsInput = {
+	chainId: number;
+	tokens: MinimalTokenWithRate[];
+	givenAmountIn: InputAmount;
+	initialMinPrice: bigint;
+	initialMaxPrice: bigint;
+	initialTargetPrice: bigint;
+};
+
 export async function calculateReClammInitAmounts({
 	chainId,
 	tokens,
@@ -16,14 +25,7 @@ export async function calculateReClammInitAmounts({
 	initialMinPrice,
 	initialMaxPrice,
 	initialTargetPrice,
-}: {
-	chainId: number;
-	tokens: MinimalTokenWithRate[];
-	givenAmountIn: InputAmount;
-	initialMinPrice: bigint;
-	initialMaxPrice: bigint;
-	initialTargetPrice: bigint;
-}): Promise<InputAmount[]> {
+}: CalculateReClammInitAmountsInput): Promise<InputAmount[]> {
 	// sort the user provided tokens just in case
 	const sortedTokens = getSortedTokens(tokens, chainId);
 	const givenTokenIndex = sortedTokens.findIndex((t) =>
