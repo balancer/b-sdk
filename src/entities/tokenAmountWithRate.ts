@@ -63,7 +63,7 @@ export class TokenAmountWithRate extends TokenAmount {
     protected constructor(token: Token, amount: BigintIsh, rate: bigint) {
         super(token, amount);
         this.rate = rate;
-        this.scale18 = this.amount * this.scalar * this.rate;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
     }
 
     public add(other: TokenAmount): TokenAmount {
