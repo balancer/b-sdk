@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.0.2
+
+### Patch Changes
+
+- 2ddcb83: Prevent biome from incorrectly formatting package.json
+
 ## 4.0.1
 
 ### Patch Changes
