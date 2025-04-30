@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/reClamm/reClamm.integration.test.ts
+// pnpm test v3/createPool/reClamm/reClamm.integration.test.ts
 import {
     Address,
     createTestClient,
@@ -41,25 +41,38 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 const poolType = PoolType.ReClamm;
+// erc20
 const WETH = TOKENS[chainId].WETH;
+const BAL = TOKENS[chainId].BAL;
+const DAI = TOKENS[chainId].DAI_AAVE;
+const USDC = TOKENS[chainId].USDC_AAVE;
+// erc4626
 const stataUSDC = TOKENS[chainId].stataUSDC;
 const stataUSDCRateProvider = '0x34101091673238545de8a846621823d9993c3085';
-const BAL = TOKENS[chainId].BAL;
-const DAI = TOKENS[chainId].DAI;
-const USDC = TOKENS[chainId].USDC_AAVE;
+const stataDAI = TOKENS[chainId].stataDAI;
+const stataDAIRateProvider = '0x22db61f3a8d81d3d427a157fdae8c7eb5b5fd373';
 
 describe('ReClamm', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
-    let createWethStataUsdcPoolInput: CreatePoolReClammInput;
-    let createBalDaiPoolInput: CreatePoolReClammInput;
-    let wethStataUsdcPoolAddress: Address;
-    let balDaiPoolAddress: Address;
-    let wethUsdcPoolState: PoolState;
-    let balDaiPoolState: PoolState;
     let snapshot: Hex;
-    let stataUSDCRate: bigint;
+
+    // BAL-DAI pool
+    let createBalDaiPoolInput: CreatePoolReClammInput;
+    let balDaiPoolAddress: Address;
+    let balDaiPoolState: PoolState;
+    // WETH-stataUSDC pool
+    let createWethStataUsdcPoolInput: CreatePoolReClammInput;
+    let wethStataUsdcPoolAddress: Address;
+    let wethStataUsdcPoolState: PoolState;
+    // stataUSDC-stataDAI pool
+    let createStataDaiStataUsdcPoolInput: CreatePoolReClammInput;
+    let stataDaiStataUsdcPoolAddress: Address;
+    let stataDaiStataUsdcPoolState: PoolState;
+    // rates
+    let stataUsdcRate: bigint;
+    let stataDaiRate: bigint;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(
@@ -77,8 +90,13 @@ describe('ReClamm', () => {
         testAddress = (await client.getAddresses())[0];
 
         // fetch token rates
-        stataUSDCRate = await client.readContract({
+        stataUsdcRate = await client.readContract({
             address: stataUSDCRateProvider,
+            abi: parseAbi(['function getRate() view returns (uint256)']),
+            functionName: 'getRate',
+        });
+        stataDaiRate = await client.readContract({
+            address: stataDAIRateProvider,
             abi: parseAbi(['function getRate() view returns (uint256)']),
             functionName: 'getRate',
         });
@@ -87,13 +105,13 @@ describe('ReClamm', () => {
         await setTokenBalances(
             client,
             testAddress,
-            [stataUSDC.address, WETH.address, DAI.address, BAL.address],
-            [stataUSDC.slot!, WETH.slot!, DAI.slot!, BAL.slot!],
+            [USDC.address, WETH.address, DAI.address, BAL.address],
+            [USDC.slot!, WETH.slot!, DAI.slot!, BAL.slot!],
             [
-                parseUnits('1000', stataUSDC.decimals),
-                parseUnits('1000', WETH.decimals),
-                parseUnits('1000', DAI.decimals),
-                parseUnits('1000', BAL.decimals),
+                parseUnits('10000', USDC.decimals),
+                parseUnits('10000', WETH.decimals),
+                parseUnits('10000', DAI.decimals),
+                parseUnits('10000', BAL.decimals),
             ],
         );
 
@@ -101,10 +119,27 @@ describe('ReClamm', () => {
         await approveSpenderOnTokens(
             client,
             testAddress,
+            [DAI.address],
+            stataDAI.address,
+        );
+        const depositDaiHash = await client.writeContract({
+            account: testAddress,
+            chain: CHAINS[chainId],
+            abi: erc4626Abi,
+            address: stataDAI.address,
+            functionName: 'deposit',
+            args: [parseUnits('10', DAI.decimals), testAddress],
+        });
+        await client.waitForTransactionReceipt({
+            hash: depositDaiHash,
+        }); // wait for deposit confirmation before starting tests
+        await approveSpenderOnTokens(
+            client,
+            testAddress,
             [USDC.address],
             stataUSDC.address,
         );
-        const hash = await client.writeContract({
+        const depositUsdcHash = await client.writeContract({
             account: testAddress,
             chain: CHAINS[chainId],
             abi: erc4626Abi,
@@ -112,36 +147,26 @@ describe('ReClamm', () => {
             functionName: 'deposit',
             args: [parseUnits('1000', USDC.decimals), testAddress],
         });
-
-        // wait for deposit confirmation before starting tests
         await client.waitForTransactionReceipt({
-            hash,
-        });
+            hash: depositUsdcHash,
+        }); // wait for deposit confirmation before starting tests
 
         await approveSpenderOnTokens(
             client,
             testAddress,
-            [stataUSDC.address, WETH.address, DAI.address, BAL.address],
+            [
+                WETH.address,
+                USDC.address,
+                DAI.address,
+                BAL.address,
+                stataUSDC.address,
+                stataDAI.address,
+            ],
             PERMIT2[chainId],
         );
 
-        createWethStataUsdcPoolInput = {
-            poolType,
-            symbol: 'WETH-stataUSDC',
-            tokens: [
-                {
-                    address: WETH.address,
-                    rateProvider: zeroAddress,
-                    tokenType: TokenType.STANDARD,
-                    paysYieldFees: false,
-                },
-                {
-                    address: stataUSDC.address,
-                    rateProvider: stataUSDCRateProvider,
-                    tokenType: TokenType.TOKEN_WITH_RATE,
-                    paysYieldFees: true,
-                },
-            ],
+        const baseReClammInput = {
+            poolType: PoolType.ReClamm as const,
             swapFeePercentage: parseUnits('0.01', 18),
             pauseManager: zeroAddress,
             swapFeeManager: zeroAddress,
@@ -151,11 +176,11 @@ describe('ReClamm', () => {
             priceShiftDailyRate: parseUnits('1', 18),
             centerednessMargin: parseUnits('0.2', 18),
             chainId,
-            protocolVersion,
+            protocolVersion: 3 as const,
         };
 
         createBalDaiPoolInput = {
-            ...createWethStataUsdcPoolInput,
+            ...baseReClammInput,
             symbol: 'BAL-DAI',
             tokens: [
                 {
@@ -173,11 +198,43 @@ describe('ReClamm', () => {
             ],
         };
 
-        wethStataUsdcPoolAddress = await doCreatePool({
-            client,
-            testAddress,
-            createPoolInput: createWethStataUsdcPoolInput,
-        });
+        createWethStataUsdcPoolInput = {
+            ...baseReClammInput,
+            symbol: 'WETH-stataUSDC',
+            tokens: [
+                {
+                    address: WETH.address,
+                    rateProvider: zeroAddress,
+                    tokenType: TokenType.STANDARD,
+                    paysYieldFees: false,
+                },
+                {
+                    address: stataUSDC.address,
+                    rateProvider: stataUSDCRateProvider,
+                    tokenType: TokenType.TOKEN_WITH_RATE,
+                    paysYieldFees: true,
+                },
+            ],
+        };
+
+        createStataDaiStataUsdcPoolInput = {
+            ...baseReClammInput,
+            symbol: 'stataUSDC-stataDAI',
+            tokens: [
+                {
+                    address: stataDAI.address,
+                    rateProvider: stataDAIRateProvider,
+                    tokenType: TokenType.TOKEN_WITH_RATE,
+                    paysYieldFees: true,
+                },
+                {
+                    address: stataUSDC.address,
+                    rateProvider: stataUSDCRateProvider,
+                    tokenType: TokenType.TOKEN_WITH_RATE,
+                    paysYieldFees: true,
+                },
+            ],
+        };
 
         balDaiPoolAddress = await doCreatePool({
             client,
@@ -185,9 +242,21 @@ describe('ReClamm', () => {
             createPoolInput: createBalDaiPoolInput,
         });
 
+        wethStataUsdcPoolAddress = await doCreatePool({
+            client,
+            testAddress,
+            createPoolInput: createWethStataUsdcPoolInput,
+        });
+
+        stataDaiStataUsdcPoolAddress = await doCreatePool({
+            client,
+            testAddress,
+            createPoolInput: createStataDaiStataUsdcPoolInput,
+        });
+
         // Get pool state
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-        wethUsdcPoolState = await initPoolDataProvider.getInitPoolData(
+        wethStataUsdcPoolState = await initPoolDataProvider.getInitPoolData(
             wethStataUsdcPoolAddress,
             poolType,
             protocolVersion,
@@ -195,6 +264,12 @@ describe('ReClamm', () => {
 
         balDaiPoolState = await initPoolDataProvider.getInitPoolData(
             balDaiPoolAddress,
+            poolType,
+            protocolVersion,
+        );
+
+        stataDaiStataUsdcPoolState = await initPoolDataProvider.getInitPoolData(
+            stataDaiStataUsdcPoolAddress,
             poolType,
             protocolVersion,
         );
@@ -214,7 +289,7 @@ describe('ReClamm', () => {
 
     describe('pool create', () => {
         test('pool should be created', async () => {
-            expect(wethStataUsdcPoolAddress).to.not.be.undefined;
+            expect(stataDaiStataUsdcPoolAddress).to.not.be.undefined;
         });
 
         test('pool should be registered with Vault', async () => {
@@ -222,149 +297,19 @@ describe('ReClamm', () => {
                 address: balancerV3Contracts.Vault[chainId],
                 abi: vaultExtensionAbi_V3,
                 functionName: 'isPoolRegistered',
-                args: [wethStataUsdcPoolAddress],
+                args: [stataDaiStataUsdcPoolAddress],
             });
             expect(isPoolRegistered).to.be.true;
         });
     });
 
     describe('pool init', () => {
-        describe('with diff decimals and rates', async () => {
-            test('18 decimal token given in', async () => {
-                // user chooses an amount for one of the tokens
-                const givenAmountIn = {
-                    address: WETH.address,
-                    rawAmount: parseUnits('0.1', WETH.decimals),
-                    decimals: WETH.decimals,
-                };
-
-                // moving tokens to describe block for DRY causes stataUSDCRate undefined
-                const tokens = [
-                    {
-                        address: WETH.address,
-                        index: 0,
-                        decimals: WETH.decimals,
-                    },
-                    {
-                        address: stataUSDC.address,
-                        index: 1,
-                        decimals: stataUSDC.decimals,
-                        rate: stataUSDCRate,
-                    },
-                ];
-
-                // helper calculates the amount for the other token
-                const amountsIn = await calculateReClammInitAmounts({
-                    ...createWethStataUsdcPoolInput,
-                    tokens,
-                    givenAmountIn,
-                });
-
-                const initPoolInput = {
-                    amountsIn,
-                    minBptAmountOut: 0n,
-                    chainId,
-                };
-
-                const permit2 = await Permit2Helper.signInitPoolApproval({
-                    ...initPoolInput,
-                    client,
-                    owner: testAddress,
-                });
-
-                const initPool = new InitPool();
-                const initPoolBuildOutput = initPool.buildCallWithPermit2(
-                    initPoolInput,
-                    wethUsdcPoolState,
-                    permit2,
-                );
-
-                const txOutput = await sendTransactionGetBalances(
-                    [WETH.address, stataUSDC.address],
-                    client,
-                    testAddress,
-                    initPoolBuildOutput.to,
-                    initPoolBuildOutput.callData,
-                    initPoolBuildOutput.value,
-                );
-
-                assertInitPool(initPoolInput, {
-                    txOutput,
-                    initPoolBuildOutput,
-                });
-            }, 120_000);
-
-            test('6 decimal token with rate given in', async () => {
-                // user chooses an amount for one of the tokens
-                const givenAmountIn = {
-                    address: stataUSDC.address,
-                    rawAmount: parseUnits('10', stataUSDC.decimals),
-                    decimals: stataUSDC.decimals,
-                };
-
-                // moving tokens to describe block for DRY causes stataUSDCRate undefined
-                const tokens = [
-                    {
-                        address: WETH.address,
-                        index: 0,
-                        decimals: WETH.decimals,
-                    },
-                    {
-                        address: stataUSDC.address,
-                        index: 1,
-                        decimals: stataUSDC.decimals,
-                        rate: stataUSDCRate,
-                    },
-                ];
-
-                // helper calculates the amount for the other token
-                const amountsIn = await calculateReClammInitAmounts({
-                    ...createWethStataUsdcPoolInput,
-                    tokens,
-                    givenAmountIn,
-                });
-
-                const initPoolInput = {
-                    amountsIn,
-                    minBptAmountOut: 0n,
-                    chainId,
-                };
-
-                const permit2 = await Permit2Helper.signInitPoolApproval({
-                    ...initPoolInput,
-                    client,
-                    owner: testAddress,
-                });
-
-                const initPool = new InitPool();
-                const initPoolBuildOutput = initPool.buildCallWithPermit2(
-                    initPoolInput,
-                    wethUsdcPoolState,
-                    permit2,
-                );
-
-                const txOutput = await sendTransactionGetBalances(
-                    [WETH.address, stataUSDC.address],
-                    client,
-                    testAddress,
-                    initPoolBuildOutput.to,
-                    initPoolBuildOutput.callData,
-                    initPoolBuildOutput.value,
-                );
-
-                assertInitPool(initPoolInput, {
-                    txOutput,
-                    initPoolBuildOutput,
-                });
-            }, 120_000);
-        });
-
-        describe('with two 18 decimal tokens no rates', () => {
-            test('token A given in', async () => {
+        describe('with zero tokens having a rate', () => {
+            test('given in: 18 decimal token A', async () => {
                 // user chooses an amount for one of the tokens
                 const givenAmountIn = {
                     address: BAL.address,
-                    rawAmount: parseUnits('1', BAL.decimals),
+                    rawAmount: parseUnits('10', BAL.decimals),
                     decimals: BAL.decimals,
                 };
 
@@ -409,11 +354,11 @@ describe('ReClamm', () => {
                 });
             }, 120_000);
 
-            test('token B given in', async () => {
+            test('given in: 18 decimal token B', async () => {
                 // user chooses an amount for one of the tokens
                 const givenAmountIn = {
                     address: DAI.address,
-                    rawAmount: parseUnits('1', DAI.decimals),
+                    rawAmount: parseUnits('10', DAI.decimals),
                     decimals: DAI.decimals,
                 };
 
@@ -459,6 +404,259 @@ describe('ReClamm', () => {
             }, 120_000);
         }, 120_000);
 
-        // TODO: init pool where both tokens have rates?
+        describe('with one token having a rate', async () => {
+            test('given in: 18 decimal token with no rate', async () => {
+                // user chooses an amount for one of the tokens
+                const givenAmountIn = {
+                    address: WETH.address,
+                    rawAmount: parseUnits('0.1', WETH.decimals),
+                    decimals: WETH.decimals,
+                };
+
+                const tokens = [
+                    {
+                        address: WETH.address,
+                        index: 0,
+                        decimals: WETH.decimals,
+                    },
+                    {
+                        address: stataUSDC.address,
+                        index: 1,
+                        decimals: stataUSDC.decimals,
+                        rate: stataUsdcRate,
+                    },
+                ]; // moving tokens to describe block causes stataUsdcRate undefined
+
+                // helper calculates the amount for the other token
+                const amountsIn = await calculateReClammInitAmounts({
+                    ...createWethStataUsdcPoolInput,
+                    tokens,
+                    givenAmountIn,
+                });
+
+                const initPoolInput = {
+                    amountsIn,
+                    minBptAmountOut: 0n,
+                    chainId,
+                };
+
+                const permit2 = await Permit2Helper.signInitPoolApproval({
+                    ...initPoolInput,
+                    client,
+                    owner: testAddress,
+                });
+
+                const initPool = new InitPool();
+                const initPoolBuildOutput = initPool.buildCallWithPermit2(
+                    initPoolInput,
+                    wethStataUsdcPoolState,
+                    permit2,
+                );
+
+                const txOutput = await sendTransactionGetBalances(
+                    [WETH.address, stataUSDC.address],
+                    client,
+                    testAddress,
+                    initPoolBuildOutput.to,
+                    initPoolBuildOutput.callData,
+                    initPoolBuildOutput.value,
+                );
+
+                assertInitPool(initPoolInput, {
+                    txOutput,
+                    initPoolBuildOutput,
+                });
+            }, 120_000);
+
+            test('given in: 6 decimal token with rate', async () => {
+                // user chooses an amount for one of the tokens
+                const givenAmountIn = {
+                    address: stataUSDC.address,
+                    rawAmount: parseUnits('10', stataUSDC.decimals),
+                    decimals: stataUSDC.decimals,
+                };
+
+                const tokens = [
+                    {
+                        address: WETH.address,
+                        index: 0,
+                        decimals: WETH.decimals,
+                    },
+                    {
+                        address: stataUSDC.address,
+                        index: 1,
+                        decimals: stataUSDC.decimals,
+                        rate: stataUsdcRate,
+                    },
+                ]; // moving tokens to describe block causes stataUsdcRate undefined
+
+                // helper calculates the amount for the other token
+                const amountsIn = await calculateReClammInitAmounts({
+                    ...createWethStataUsdcPoolInput,
+                    tokens,
+                    givenAmountIn,
+                });
+
+                const initPoolInput = {
+                    amountsIn,
+                    minBptAmountOut: 0n,
+                    chainId,
+                };
+
+                const permit2 = await Permit2Helper.signInitPoolApproval({
+                    ...initPoolInput,
+                    client,
+                    owner: testAddress,
+                });
+
+                const initPool = new InitPool();
+                const initPoolBuildOutput = initPool.buildCallWithPermit2(
+                    initPoolInput,
+                    wethStataUsdcPoolState,
+                    permit2,
+                );
+
+                const txOutput = await sendTransactionGetBalances(
+                    [WETH.address, stataUSDC.address],
+                    client,
+                    testAddress,
+                    initPoolBuildOutput.to,
+                    initPoolBuildOutput.callData,
+                    initPoolBuildOutput.value,
+                );
+
+                assertInitPool(initPoolInput, {
+                    txOutput,
+                    initPoolBuildOutput,
+                });
+            }, 120_000);
+        });
+
+        describe('with both tokens having rates', () => {
+            test('given in: 18 decimal token with rate', async () => {
+                const tokens = [
+                    {
+                        address: stataUSDC.address,
+                        index: 0,
+                        decimals: stataUSDC.decimals,
+                        rate: stataUsdcRate,
+                    },
+                    {
+                        address: stataDAI.address,
+                        index: 1,
+                        decimals: stataDAI.decimals,
+                        rate: stataDaiRate,
+                    },
+                ];
+
+                const givenAmountIn = {
+                    address: stataDAI.address,
+                    rawAmount: parseUnits('1', stataDAI.decimals),
+                    decimals: stataDAI.decimals,
+                };
+
+                // helper calculates the amount for the other token
+                const amountsIn = await calculateReClammInitAmounts({
+                    ...createStataDaiStataUsdcPoolInput,
+                    tokens,
+                    givenAmountIn,
+                });
+
+                const initPoolInput = {
+                    amountsIn,
+                    minBptAmountOut: 0n,
+                    chainId,
+                };
+
+                const permit2 = await Permit2Helper.signInitPoolApproval({
+                    ...initPoolInput,
+                    client,
+                    owner: testAddress,
+                });
+
+                const initPool = new InitPool();
+                const initPoolBuildOutput = initPool.buildCallWithPermit2(
+                    initPoolInput,
+                    stataDaiStataUsdcPoolState,
+                    permit2,
+                );
+
+                const txOutput = await sendTransactionGetBalances(
+                    [stataUSDC.address, stataDAI.address],
+                    client,
+                    testAddress,
+                    initPoolBuildOutput.to,
+                    initPoolBuildOutput.callData,
+                    initPoolBuildOutput.value,
+                );
+
+                assertInitPool(initPoolInput, {
+                    txOutput,
+                    initPoolBuildOutput,
+                });
+            });
+
+            test('given in: 6 decimal token with rate', async () => {
+                const tokens = [
+                    {
+                        address: stataUSDC.address,
+                        index: 0,
+                        decimals: stataUSDC.decimals,
+                        rate: stataUsdcRate,
+                    },
+                    {
+                        address: stataDAI.address,
+                        index: 1,
+                        decimals: stataDAI.decimals,
+                        rate: stataDaiRate,
+                    },
+                ];
+
+                const givenAmountIn = {
+                    address: stataUSDC.address,
+                    rawAmount: parseUnits('10', stataUSDC.decimals),
+                    decimals: stataUSDC.decimals,
+                };
+                // helper calculates the amount for the other token
+                const amountsIn = await calculateReClammInitAmounts({
+                    ...createStataDaiStataUsdcPoolInput,
+                    tokens,
+                    givenAmountIn,
+                });
+
+                const initPoolInput = {
+                    amountsIn,
+                    minBptAmountOut: 0n,
+                    chainId,
+                };
+
+                const permit2 = await Permit2Helper.signInitPoolApproval({
+                    ...initPoolInput,
+                    client,
+                    owner: testAddress,
+                });
+
+                const initPool = new InitPool();
+                const initPoolBuildOutput = initPool.buildCallWithPermit2(
+                    initPoolInput,
+                    stataDaiStataUsdcPoolState,
+                    permit2,
+                );
+
+                const txOutput = await sendTransactionGetBalances(
+                    [stataUSDC.address, stataDAI.address],
+                    client,
+                    testAddress,
+                    initPoolBuildOutput.to,
+                    initPoolBuildOutput.callData,
+                    initPoolBuildOutput.value,
+                );
+
+                assertInitPool(initPoolInput, {
+                    txOutput,
+                    initPoolBuildOutput,
+                });
+            });
+        });
     });
 });
