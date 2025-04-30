@@ -78,8 +78,7 @@ export async function computeReClammInitAmounts({
 
     // Convert back to native token decimals of the calculated token (rounding down)
     const computedAmountScaledRaw = computedToken.rate
-        ? // TODO: this is broken, how to fix so tokens scaled 18 are scaled down by rate?
-          TokenAmountWithRate.fromScale18AmountWithRate(
+        ? TokenAmountWithRate.fromScale18AmountWithRate(
               computedToken,
               computedAmountScaled18,
               computedToken.rate,
@@ -92,18 +91,5 @@ export async function computeReClammInitAmounts({
         decimals: sortedTokens[calculatedTokenIndex].decimals,
     };
 
-    // // on chain sanity check for computedAmountScaled18
-    // const initialBalances = await client.readContract({
-    //     address: poolAddress,
-    //     abi: parseAbi([
-    //         'function computeInitialBalances(address referenceToken, uint256 referenceAmountIn) view returns (uint256[])',
-    //     ]),
-    //     functionName: 'computeInitialBalances',
-    //     args: [referenceToken.address, referenceTokenAmount.scale18],
-    // });
-    // console.log('on chain initialBalances:', initialBalances);
-
-    // TODO: sort token amounts within InitPool.buildCallWithPermit2 so this not needed
-    // Return amounts in consistent order based on token addresses
     return [referenceAmountIn, computedAmountIn];
 }
