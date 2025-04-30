@@ -1,5 +1,6 @@
 export type Address = `0x${string}`;
 export type Hex = `0x${string}`;
+export type BigintIsh = bigint | string | number;
 
 export enum PoolType {
     AaveLinear = 'AaveLinear',
@@ -53,5 +54,3 @@ export enum TokenType {
     TOKEN_WITH_RATE = 1,
     ERC4626_TOKEN = 2,
 }
-
-export type BigintIsh = bigint | string | number;
