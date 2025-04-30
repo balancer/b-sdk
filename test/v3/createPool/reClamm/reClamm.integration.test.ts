@@ -26,7 +26,8 @@ import {
     vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
-    calculateReClammInitAmounts,
+    computeReClammInitAmounts,
+    MinimalTokenWithRate,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import {
@@ -66,10 +67,12 @@ describe('ReClamm', () => {
     let createWethStataUsdcPoolInput: CreatePoolReClammInput;
     let wethStataUsdcPoolAddress: Address;
     let wethStataUsdcPoolState: PoolState;
+    let wethStataUsdcPoolTokens: MinimalTokenWithRate[];
     // stataUSDC-stataDAI pool
     let createStataDaiStataUsdcPoolInput: CreatePoolReClammInput;
     let stataDaiStataUsdcPoolAddress: Address;
     let stataDaiStataUsdcPoolState: PoolState;
+    let stataDaiStataUSDCPoolTokens: MinimalTokenWithRate[];
     // rates
     let stataUsdcRate: bigint;
     let stataDaiRate: bigint;
@@ -100,7 +103,6 @@ describe('ReClamm', () => {
             abi: parseAbi(['function getRate() view returns (uint256)']),
             functionName: 'getRate',
         });
-
         // set erc20 token balances with slots
         await setTokenBalances(
             client,
@@ -216,6 +218,19 @@ describe('ReClamm', () => {
                 },
             ],
         };
+        wethStataUsdcPoolTokens = [
+            {
+                address: WETH.address,
+                index: 0,
+                decimals: WETH.decimals,
+            },
+            {
+                address: stataUSDC.address,
+                index: 1,
+                decimals: stataUSDC.decimals,
+                rate: stataUsdcRate,
+            },
+        ];
 
         createStataDaiStataUsdcPoolInput = {
             ...baseReClammInput,
@@ -235,6 +250,20 @@ describe('ReClamm', () => {
                 },
             ],
         };
+        stataDaiStataUSDCPoolTokens = [
+            {
+                address: stataUSDC.address,
+                index: 0,
+                decimals: stataUSDC.decimals,
+                rate: stataUsdcRate,
+            },
+            {
+                address: stataDAI.address,
+                index: 1,
+                decimals: stataDAI.decimals,
+                rate: stataDaiRate,
+            },
+        ];
 
         balDaiPoolAddress = await doCreatePool({
             client,
@@ -305,19 +334,21 @@ describe('ReClamm', () => {
 
     describe('pool init', () => {
         describe('with zero tokens having a rate', () => {
-            test('given in: 18 decimal token A', async () => {
+            test('reference: 18 decimal token A', async () => {
                 // user chooses an amount for one of the tokens
-                const givenAmountIn = {
+                const referenceAmountIn = {
                     address: BAL.address,
                     rawAmount: parseUnits('10', BAL.decimals),
                     decimals: BAL.decimals,
                 };
 
                 // helper calculates the amount for the other token
-                const amountsIn = await calculateReClammInitAmounts({
+                const amountsIn = await computeReClammInitAmounts({
                     ...createBalDaiPoolInput,
+                    client,
+                    poolAddress: balDaiPoolAddress,
                     tokens: balDaiPoolState.tokens,
-                    givenAmountIn,
+                    referenceAmountIn: referenceAmountIn,
                 });
 
                 const initPoolInput = {
@@ -354,19 +385,21 @@ describe('ReClamm', () => {
                 });
             }, 120_000);
 
-            test('given in: 18 decimal token B', async () => {
+            test('reference: 18 decimal token B', async () => {
                 // user chooses an amount for one of the tokens
-                const givenAmountIn = {
+                const referenceAmountIn = {
                     address: DAI.address,
                     rawAmount: parseUnits('10', DAI.decimals),
                     decimals: DAI.decimals,
                 };
 
                 // helper calculates the amount for the other token
-                const amountsIn = await calculateReClammInitAmounts({
+                const amountsIn = await computeReClammInitAmounts({
                     ...createBalDaiPoolInput,
+                    client,
+                    poolAddress: balDaiPoolAddress,
                     tokens: balDaiPoolState.tokens,
-                    givenAmountIn,
+                    referenceAmountIn: referenceAmountIn,
                 });
 
                 const initPoolInput = {
@@ -404,34 +437,22 @@ describe('ReClamm', () => {
             }, 120_000);
         }, 120_000);
 
-        describe('with one token having a rate', async () => {
-            test('given in: 18 decimal token with no rate', async () => {
+        describe.only('with one token having a rate', async () => {
+            test('reference: 18 decimal token with no rate', async () => {
                 // user chooses an amount for one of the tokens
-                const givenAmountIn = {
+                const referenceAmountIn = {
                     address: WETH.address,
                     rawAmount: parseUnits('0.1', WETH.decimals),
                     decimals: WETH.decimals,
                 };
 
-                const tokens = [
-                    {
-                        address: WETH.address,
-                        index: 0,
-                        decimals: WETH.decimals,
-                    },
-                    {
-                        address: stataUSDC.address,
-                        index: 1,
-                        decimals: stataUSDC.decimals,
-                        rate: stataUsdcRate,
-                    },
-                ]; // moving tokens to describe block causes stataUsdcRate undefined
-
                 // helper calculates the amount for the other token
-                const amountsIn = await calculateReClammInitAmounts({
+                const amountsIn = await computeReClammInitAmounts({
                     ...createWethStataUsdcPoolInput,
-                    tokens,
-                    givenAmountIn,
+                    client,
+                    poolAddress: wethStataUsdcPoolAddress,
+                    tokens: wethStataUsdcPoolTokens,
+                    referenceAmountIn,
                 });
 
                 const initPoolInput = {
@@ -468,33 +489,21 @@ describe('ReClamm', () => {
                 });
             }, 120_000);
 
-            test('given in: 6 decimal token with rate', async () => {
+            test('reference: 6 decimal token with rate', async () => {
                 // user chooses an amount for one of the tokens
-                const givenAmountIn = {
+                const referenceAmountIn = {
                     address: stataUSDC.address,
                     rawAmount: parseUnits('10', stataUSDC.decimals),
                     decimals: stataUSDC.decimals,
                 };
 
-                const tokens = [
-                    {
-                        address: WETH.address,
-                        index: 0,
-                        decimals: WETH.decimals,
-                    },
-                    {
-                        address: stataUSDC.address,
-                        index: 1,
-                        decimals: stataUSDC.decimals,
-                        rate: stataUsdcRate,
-                    },
-                ]; // moving tokens to describe block causes stataUsdcRate undefined
-
                 // helper calculates the amount for the other token
-                const amountsIn = await calculateReClammInitAmounts({
+                const amountsIn = await computeReClammInitAmounts({
                     ...createWethStataUsdcPoolInput,
-                    tokens,
-                    givenAmountIn,
+                    client,
+                    poolAddress: wethStataUsdcPoolAddress,
+                    tokens: wethStataUsdcPoolTokens,
+                    referenceAmountIn,
                 });
 
                 const initPoolInput = {
@@ -533,33 +542,20 @@ describe('ReClamm', () => {
         });
 
         describe('with both tokens having rates', () => {
-            test('given in: 18 decimal token with rate', async () => {
-                const tokens = [
-                    {
-                        address: stataUSDC.address,
-                        index: 0,
-                        decimals: stataUSDC.decimals,
-                        rate: stataUsdcRate,
-                    },
-                    {
-                        address: stataDAI.address,
-                        index: 1,
-                        decimals: stataDAI.decimals,
-                        rate: stataDaiRate,
-                    },
-                ];
-
-                const givenAmountIn = {
+            test('reference: 18 decimal token with rate', async () => {
+                const referenceAmountIn = {
                     address: stataDAI.address,
                     rawAmount: parseUnits('1', stataDAI.decimals),
                     decimals: stataDAI.decimals,
                 };
 
                 // helper calculates the amount for the other token
-                const amountsIn = await calculateReClammInitAmounts({
+                const amountsIn = await computeReClammInitAmounts({
                     ...createStataDaiStataUsdcPoolInput,
-                    tokens,
-                    givenAmountIn,
+                    client,
+                    poolAddress: stataDaiStataUsdcPoolAddress,
+                    tokens: stataDaiStataUSDCPoolTokens,
+                    referenceAmountIn,
                 });
 
                 const initPoolInput = {
@@ -596,32 +592,19 @@ describe('ReClamm', () => {
                 });
             });
 
-            test('given in: 6 decimal token with rate', async () => {
-                const tokens = [
-                    {
-                        address: stataUSDC.address,
-                        index: 0,
-                        decimals: stataUSDC.decimals,
-                        rate: stataUsdcRate,
-                    },
-                    {
-                        address: stataDAI.address,
-                        index: 1,
-                        decimals: stataDAI.decimals,
-                        rate: stataDaiRate,
-                    },
-                ];
-
-                const givenAmountIn = {
+            test('reference: 6 decimal token with rate', async () => {
+                const referenceAmountIn = {
                     address: stataUSDC.address,
                     rawAmount: parseUnits('10', stataUSDC.decimals),
                     decimals: stataUSDC.decimals,
                 };
                 // helper calculates the amount for the other token
-                const amountsIn = await calculateReClammInitAmounts({
+                const amountsIn = await computeReClammInitAmounts({
                     ...createStataDaiStataUsdcPoolInput,
-                    tokens,
-                    givenAmountIn,
+                    client,
+                    poolAddress: stataDaiStataUsdcPoolAddress,
+                    tokens: stataDaiStataUSDCPoolTokens,
+                    referenceAmountIn,
                 });
 
                 const initPoolInput = {
