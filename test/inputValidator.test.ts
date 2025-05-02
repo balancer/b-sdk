@@ -20,7 +20,7 @@ describe('inputValidator', () => {
             inputValidator.validateAddLiquidity(addLiqInput, poolState);
         }).toThrowError(/^Unsupported chainId: 777777777$/);
     });
-    test.only('should throw when target address not available', () => {
+    test('should throw when target address not available', () => {
         const chainId = ChainId.SEPOLIA;
         const invalidChainId = ChainId.OPTIMISM;
 
