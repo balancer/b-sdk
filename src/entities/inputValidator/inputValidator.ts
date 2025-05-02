@@ -111,6 +111,16 @@ export class InputValidator {
         );
     }
 
+    private validateConfig(
+        config:
+            | CreatePoolInput
+            | InitPoolInput
+            | AddLiquidityInput
+            | RemoveLiquidityInput
+            | RemoveLiquidityRecoveryInput
+            | AddLiquidityBoostedInput,
+    ): void {}
+
     static validateBuildCallWithPermit2(input: {
         protocolVersion: number;
     }): void {
