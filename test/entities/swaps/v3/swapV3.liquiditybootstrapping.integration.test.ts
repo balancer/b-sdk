@@ -117,7 +117,7 @@ describe('SwapV3LiquidityBootstrapping', () => {
 
     describe('LBP', () => {
         test('can query swap', async () => {
-            const queryOutput = await swap.query(rpcUrl);π
+            const queryOutput = await swap.query(rpcUrl);
             expect(queryOutput).toBeDefined();
         });
         describe('can swap', async () => {
