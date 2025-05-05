@@ -1,5 +1,23 @@
 # @balancer/sdk
 
+## 4.0.2
+
+### Patch Changes
+
+- 2ddcb83: Prevent biome from incorrectly formatting package.json
+
+## 4.0.1
+
+### Patch Changes
+
+- b2a4be7: Fix ReClamm init lint issues
+
+## 4.0.0
+
+### Major Changes
+
+- bc21824: Update dependencies to latest version
+
 ## 3.2.0
 
 ### Minor Changes

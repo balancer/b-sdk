@@ -11,7 +11,7 @@ export class BalancerApiClient {
     async fetch(requestQuery: {
         operationName?: string;
         query: string;
-        variables?: any;
+        variables?: Record<string, string>;
     }) {
         const response = await fetch(this.apiUrl, {
             method: 'post',

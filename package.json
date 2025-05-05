@@ -9,7 +9,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "3.2.0",
+    "version": "4.0.2",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
@@ -31,30 +31,28 @@
     },
     "dependencies": {
         "@balancer-labs/balancer-maths": "0.0.27",
-        "@types/big.js": "^6.2.2",
-        "big.js": "^6.2.2",
-        "decimal.js-light": "^2.5.1",
-        "lodash.clonedeep": "^4.5.0",
-        "viem": "^2.22.3"
+        "@types/big.js": "6.2.2",
+        "big.js": "6.2.2",
+        "decimal.js-light": "2.5.1",
+        "viem": "2.27.0"
     },
     "devDependencies": {
-        "@biomejs/biome": "^1.5.2",
-        "@changesets/cli": "^2.27.1",
-        "@types/async-retry": "^1.4.8",
-        "@types/lodash.clonedeep": "^4.5.9",
-        "@types/node": "^18.19.7",
-        "@viem/anvil": "^0.0.10",
-        "dotenv": "^16.3.1",
-        "dpdm": "^3.14.0",
-        "pino-pretty": "^10.3.1",
-        "ts-node": "^10.9.2",
-        "tsup": "^8.0.1",
-        "typescript": "^5.7.2",
-        "vite": "^5.2.10",
-        "vite-tsconfig-paths": "^4.2.3",
-        "vitest": "^3.0.7"
+        "@biomejs/biome": "1.9.4",
+        "@changesets/cli": "2.29.1",
+        "@types/async-retry": "1.4.9",
+        "@types/node": "22.14.1",
+        "@viem/anvil": "0.0.10",
+        "dotenv": "16.5.0",
+        "dpdm": "3.14.0",
+        "pino-pretty": "13.0.0",
+        "ts-node": "10.9.2",
+        "tsup": "8.4.0",
+        "typescript": "5.8.3",
+        "vite": "6.3.0",
+        "vite-tsconfig-paths": "5.1.4",
+        "vitest": "3.1.1"
     },
-    "packageManager": "pnpm@8.6.0",
+    "packageManager": "pnpm@10.8.1",
     "engines": {
         "node": ">=18.x"
     }

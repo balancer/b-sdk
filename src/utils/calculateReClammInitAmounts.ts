@@ -1,13 +1,13 @@
-import {
-    type InputAmount,
-    type MinimalToken,
-    isSameAddress,
-    MathSol,
-    getSortedTokens,
-    Token,
-    TokenAmount,
-} from 'src';
 import { computeInitialBalanceRatio } from '@balancer-labs/balancer-maths';
+
+import { InputAmount } from '@/types';
+import { MinimalToken } from '@/data/types';
+import { getSortedTokens } from '@/entities/utils/getSortedTokens';
+import { Token } from '@/entities/token';
+import { TokenAmount } from '@/entities/tokenAmount';
+
+import { isSameAddress } from './helpers';
+import { MathSol } from './math';
 
 export async function calculateReClammInitAmounts({
     chainId,

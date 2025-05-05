@@ -35,7 +35,7 @@ export class Slippage {
     protected constructor(amount: BigintIsh) {
         this.amount =
             BigInt(amount) > 0n ? BigInt(amount) : -1n * BigInt(amount);
-        this.decimal = parseFloat(formatEther(this.amount));
+        this.decimal = Number.parseFloat(formatEther(this.amount));
         this.percentage = this.decimal * 100;
         this.bps = this.decimal * 10000;
     }

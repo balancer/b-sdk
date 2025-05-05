@@ -10,6 +10,7 @@ export const findEventInReceiptLogs = ({
     to: Address;
     abi: readonly unknown[];
     eventName: string;
+    // biome-ignore lint/suspicious/noExplicitAny: <args can be of multiple type>
 }): { eventName: string; args: any } => {
     const event = receipt.logs
         .filter((log: Log) => {

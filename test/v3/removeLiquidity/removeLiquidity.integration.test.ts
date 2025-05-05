@@ -478,7 +478,7 @@ class MockApi {
 
 /*********************** Helper functions for this test ***********************/
 async function putPoolIntoRecoveryMode(
-    client: any,
+    client: PublicWalletClient & TestActions,
     poolState: PoolState,
     authorizedAddress: Address,
 ) {
