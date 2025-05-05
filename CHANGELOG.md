@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.0.3
+
+### Patch Changes
+
+- 0a91173: Add permit2 address for optimism network
+
 ## 4.0.2
 
 ### Patch Changes
