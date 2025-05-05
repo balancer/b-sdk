@@ -26,10 +26,7 @@ import {
     CreatePoolLiquidityBootstrappingInput,
     InitPool,
     InitPoolInput,
-    balancerV3Contracts,
 } from '@/index';
-
-import { doCreatePool, getBalances } from '../../lib/utils/';
 
 import {
     TOKENS,
@@ -37,6 +34,7 @@ import {
     approveSpenderOnTokens,
     sendTransactionGetBalances,
     assertInitPool,
+    doCreatePool,
 } from '../../lib/utils';
 
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
@@ -59,9 +57,7 @@ describe('add liquidity bootstrapping test', () => {
     let testAddress: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS[ChainId[chainId]],
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         client = createTestClient({
             mode: 'anvil',
@@ -240,40 +236,18 @@ describe('add liquidity bootstrapping test', () => {
             permit2,
         );
 
-        const balancesBefore = await getBalances(
-            [BAL.address, WETH.address],
+        const txOutput = await sendTransactionGetBalances(
+            [WETH.address, BAL.address, poolAddress],
             client,
             testAddress,
+            addLiquidityBuildCallOutput.to,
+            addLiquidityBuildCallOutput.callData,
+            addLiquidityBuildCallOutput.value,
         );
 
-        const hash = await client.sendTransaction({
-            data: addLiquidityBuildCallOutput.callData,
-            account: testAddress,
-            to: balancerV3Contracts.Router[chainId],
-            value: 0n,
-            chain: client.chain,
+        // tokens leaver wallet, bpt enter wallet (all deltas are positive)
+        txOutput.balanceDeltas.forEach((balance) => {
+            expect(balance).toBeGreaterThan(0n);
         });
-
-        const transactionReceipt = await client.waitForTransactionReceipt({
-            hash,
-        });
-        expect(transactionReceipt.status).toBe('success');
-
-        const balancesAfter = await getBalances(
-            [BAL.address, WETH.address],
-            client,
-            testAddress,
-        );
-
-        balancesAfter.forEach((balance, i) => {
-            expect(balance).toBeLessThan(balancesBefore[i]);
-        });
-
-        const bptBalance = await getBalances(
-            [poolAddress],
-            client,
-            testAddress,
-        );
-        expect(bptBalance[0]).toBeGreaterThan(0);
     });
 });

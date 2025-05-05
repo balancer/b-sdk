@@ -32,7 +32,7 @@ import {
     balancerV3Contracts,
 } from '@/index';
 
-import { doCreatePool, getBalances } from '../../lib/utils/';
+import { getBalances } from '../../lib/utils/';
 
 import {
     TOKENS,
@@ -40,6 +40,7 @@ import {
     approveSpenderOnTokens,
     sendTransactionGetBalances,
     assertInitPool,
+    doCreatePool,
 } from '../../lib/utils';
 
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
@@ -65,9 +66,7 @@ describe('add liquidity bootstrapping test', () => {
     let endTime: bigint;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS[ChainId[chainId]],
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
 
         client = createTestClient({
             mode: 'anvil',
@@ -279,7 +278,7 @@ describe('add liquidity bootstrapping test', () => {
             testAddress,
         );
 
-        balancesAfter.forEach((balance, i) => {
+        balancesAfter.forEach((balance) => {
             expect(balance).toBeLessThan(balancesBefore[i]);
         });
 
