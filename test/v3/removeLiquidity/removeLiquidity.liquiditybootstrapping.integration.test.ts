@@ -67,8 +67,6 @@ describe('add liquidity bootstrapping test', () => {
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS[ChainId[chainId]],
-            undefined,
-            7831624n,
         ));
 
         client = createTestClient({
