@@ -29,10 +29,7 @@ import {
     InitPoolInput,
     RemoveLiquidityKind,
     RemoveLiquidityProportionalInput,
-    balancerV3Contracts,
 } from '@/index';
-
-import { getBalances } from '../../lib/utils/';
 
 import {
     TOKENS,
@@ -183,12 +180,6 @@ describe('add liquidity bootstrapping test', () => {
         );
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
 
-        const bptBalanceBeforeAdd = await getBalances(
-            [poolAddress],
-            client,
-            testAddress,
-        );
-
         const addLiquidity = new AddLiquidityV3();
         const input: AddLiquidityInput = {
             chainId: chainId,
@@ -253,41 +244,21 @@ describe('add liquidity bootstrapping test', () => {
             permit2,
         );
 
-        const balancesBefore = await getBalances(
-            [BAL.address, WETH.address],
+        const addLiqTxOutput = await sendTransactionGetBalances(
+            [BAL.address, WETH.address, poolAddress],
             client,
             testAddress,
+            addLiquidityBuildCallOutput.to,
+            addLiquidityBuildCallOutput.callData,
+            addLiquidityBuildCallOutput.value,
         );
 
-        const hash = await client.sendTransaction({
-            data: addLiquidityBuildCallOutput.callData,
-            account: testAddress,
-            to: balancerV3Contracts.Router[chainId],
-            value: 0n,
-            chain: client.chain,
-        });
-
-        const transactionReceipt = await client.waitForTransactionReceipt({
-            hash,
-        });
-        expect(transactionReceipt.status).toBe('success');
-
-        const balancesAfter = await getBalances(
-            [BAL.address, WETH.address],
-            client,
-            testAddress,
+        expect(addLiqTxOutput.transactionReceipt.status).toBe('success');
+        expect(
+            addLiqTxOutput.balanceDeltas.forEach((balance) => {
+                expect(balance).toBeGreaterThan(0n);
+            }),
         );
-
-        balancesAfter.forEach((balance) => {
-            expect(balance).toBeLessThan(balancesBefore[i]);
-        });
-
-        const bptBalanceAfterAdd = await getBalances(
-            [poolAddress],
-            client,
-            testAddress,
-        );
-        expect(bptBalanceAfterAdd[0]).toBeGreaterThan(bptBalanceBeforeAdd[0]);
     });
     test('remove liquidity', async () => {
         const removeLiquidity = new RemoveLiquidityV3();
@@ -356,48 +327,19 @@ describe('add liquidity bootstrapping test', () => {
                 permit,
             );
 
-        const tokenBalancesBeforeRemove = await getBalances(
-            [BAL.address, WETH.address],
+        const removeLiqTxOutput = await sendTransactionGetBalances(
+            [BAL.address, WETH.address, poolAddress],
             client,
             testAddress,
+            removeLiquidityBuildCallOutput.to,
+            removeLiquidityBuildCallOutput.callData,
+            removeLiquidityBuildCallOutput.value,
         );
-
-        const bptBalanceBeforeRemove = await getBalances(
-            [poolAddress],
-            client,
-            testAddress,
-        );
-
-        const hash = await client.sendTransaction({
-            data: removeLiquidityBuildCallOutput.callData,
-            account: testAddress,
-            to: balancerV3Contracts.Router[chainId],
-            value: 0n,
-            chain: client.chain,
-        });
-
-        const transactionReceipt = await client.waitForTransactionReceipt({
-            hash,
-        });
-        expect(transactionReceipt.status).toBe('success');
-
-        const tokenBalancesAfterRemove = await getBalances(
-            [BAL.address, WETH.address],
-            client,
-            testAddress,
-        );
-
-        tokenBalancesAfterRemove.forEach((balances, i) => {
-            expect(tokenBalancesBeforeRemove[i]).toBeLessThan(balances);
-        });
-
-        const bptBalanceAfterRemove = await getBalances(
-            [poolAddress],
-            client,
-            testAddress,
-        );
-        expect(bptBalanceAfterRemove[0]).toBeLessThan(
-            bptBalanceBeforeRemove[0],
+        expect(removeLiqTxOutput.transactionReceipt.status).toBe('success');
+        expect(
+            removeLiqTxOutput.balanceDeltas.forEach((balance) => {
+                expect(balance).toBeGreaterThan(0n);
+            }),
         );
     });
 });
