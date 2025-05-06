@@ -5,11 +5,14 @@ import {
 import { InputValidatorBase } from '../inputValidatorBase';
 import { inputValidationError } from '@/utils';
 
+import { validateCreatePoolTokens } from '../utils/validateTokens';
+import { validateCreatePoolTokenConfig } from '../utils/validateCreatePoolTokenConfig';
 export class InputValidatorWeighted extends InputValidatorBase {
     validateCreatePool(
         input: CreatePoolV2WeightedInput | CreatePoolV3WeightedInput,
     ) {
-        super.validateCreatePool(input);
+        validateCreatePoolTokens(input.tokens);
+        validateCreatePoolTokenConfig(input);
         if (input.tokens.length > 8) {
             throw inputValidationError(
                 'Create Pool',
