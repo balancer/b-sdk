@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.1.0
+
+### Minor Changes
+
+- 0c94547: adds lbp creation functionality
+
 ## 4.0.3
 
 ### Patch Changes
