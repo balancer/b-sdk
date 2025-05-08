@@ -55,9 +55,8 @@ describe('inputValidator', () => {
             protocolVersion: 3,
         };
 
-        /* expect(() => {
-            inputValidator.validateCreatePool(createPoolInput);
-        }).toNotThr() */
-        inputValidator.validateCreatePool(createReClammPoolInput);
+        expect(() => {
+            inputValidator.validateCreatePool(createReClammPoolInput);
+        }).toThrowError('Target address not available');
     });
 });
