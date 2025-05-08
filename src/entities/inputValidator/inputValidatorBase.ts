@@ -13,6 +13,8 @@ import {
 import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { isSameAddress, NATIVE_ASSETS, inputValidationError } from '@/utils';
+import { CreatePoolV2 } from '../createPool/createPoolV2';
+import { CreatePoolV3 } from '../createPool/createPoolV3';
 
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
