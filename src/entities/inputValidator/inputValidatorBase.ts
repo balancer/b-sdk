@@ -14,6 +14,9 @@ import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { isSameAddress, NATIVE_ASSETS, inputValidationError } from '@/utils';
 
+import { CreatePoolV2 } from '../createPool/createPoolV2';
+import { CreatePoolV3 } from '../createPool/createPoolV3';
+
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
         areTokensInArray(
@@ -26,7 +29,30 @@ export class InputValidatorBase {
         }
     }
 
-    validateCreatePool(_input: CreatePoolInput) {}
+    validateCreatePool(input: CreatePoolInput) {
+        switch (input.protocolVersion) {
+            case 2: {
+                const buildResult = new CreatePoolV2().buildCall(input);
+                if (!buildResult.to) {
+                    throw inputValidationError(
+                        'Create Pool',
+                        'Target address not available',
+                    );
+                }
+                break;
+            }
+            case 3: {
+                const buildResult = new CreatePoolV3().buildCall(input);
+                if (!buildResult.to) {
+                    throw inputValidationError(
+                        'Create Pool',
+                        'Target address not available',
+                    );
+                }
+                break;
+            }
+        }
+    }
 
     validateAddLiquidity(
         addLiquidityInput: AddLiquidityInput,
