@@ -9,6 +9,8 @@ import { CreatePoolLiquidityBootstrappingInput } from '../../createPool/types';
 
 import { isSameAddress, SDKError } from '@/utils';
 
+import { isOperationSupported } from '@/utils/chainCapabilities';
+
 export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
     // TODO
     validateAddLiquidity(
@@ -26,6 +28,13 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
         _poolStateWithBalances: PoolStateWithBalances,
     ): void {}
     validateCreatePool(input: CreatePoolLiquidityBootstrappingInput): void {
+        if (!isOperationSupported(input.chainId, 'createLBP')) {
+            throw new SDKError(
+                'Input Validation',
+                'Create Pool',
+                'Chain does not support LBP',
+            );
+        }
         // start weights
         const startWeightsSum =
             input.lbpParams.projectTokenStartWeight +
