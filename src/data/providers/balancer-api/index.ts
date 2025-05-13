@@ -1,5 +1,5 @@
 import { Pools } from './modules/pool-state';
-import { BalancerApiClient } from './client';
+import { BalancerApiClient, BalancerApiClientOptions } from './client';
 import { ChainId } from '../../../utils';
 import { NestedPools } from './modules/nested-pool-state';
 import { SorSwapPaths } from './modules/sorSwapPaths';
@@ -21,8 +21,23 @@ export class BalancerApi {
     sorSwapPaths: SorSwapPaths;
     buffers: Buffers;
 
-    constructor(balancerApiUrl: string, chainId: ChainId) {
-        this.balancerApiClient = new BalancerApiClient(balancerApiUrl, chainId);
+    /**
+     * Create a new instance of the Balancer API client
+     * 
+     * @param balancerApiUrl The URL of the Balancer API endpoint
+     * @param chainId The blockchain chain ID
+     * @param options Optional client configuration for name and version
+     */
+    constructor(
+        balancerApiUrl: string,
+        chainId: ChainId,
+        options?: BalancerApiClientOptions,
+    ) {
+        this.balancerApiClient = new BalancerApiClient(
+            balancerApiUrl,
+            chainId,
+            options,
+        );
         this.pools = new Pools(this.balancerApiClient);
         this.boostedPools = new BoostedPools(this.balancerApiClient);
         this.nestedPools = new NestedPools(this.balancerApiClient);
