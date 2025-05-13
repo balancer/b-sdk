@@ -39,7 +39,7 @@ export class BalancerApiClient {
 
     /**
      * Create a new Balancer API client
-     * 
+     *
      * @param apiUrl The URL of the Balancer API endpoint
      * @param chainId The chain ID
      * @param options Optional client configuration
@@ -59,14 +59,15 @@ export class BalancerApiClient {
             typeof process !== 'undefined' &&
             process?.env?.BALANCER_SDK_CLIENT_NAME
         ) {
-            this.clientName = process.env.BALANCER_SDK_CLIENT_NAME || 'balancer-sdk';
+            this.clientName =
+                process.env.BALANCER_SDK_CLIENT_NAME || 'balancer-sdk';
         } else if (
             typeof window !== 'undefined' &&
             (window as WindowWithConfig).BALANCER_SDK_CLIENT_NAME
         ) {
-            this.clientName = (
-                window as WindowWithConfig
-            ).BALANCER_SDK_CLIENT_NAME || 'balancer-sdk';
+            this.clientName =
+                (window as WindowWithConfig).BALANCER_SDK_CLIENT_NAME ||
+                'balancer-sdk';
         } else {
             this.clientName = 'balancer-sdk';
         }
@@ -78,17 +79,21 @@ export class BalancerApiClient {
             typeof process !== 'undefined' &&
             process?.env?.BALANCER_SDK_CLIENT_VERSION
         ) {
-            this.clientVersion = process.env.BALANCER_SDK_CLIENT_VERSION || '0.0.0';
+            this.clientVersion =
+                process.env.BALANCER_SDK_CLIENT_VERSION || '0.0.0';
         } else if (
             typeof window !== 'undefined' &&
             (window as WindowWithConfig).BALANCER_SDK_CLIENT_VERSION
         ) {
-            this.clientVersion = (
-                window as WindowWithConfig
-            ).BALANCER_SDK_CLIENT_VERSION || '0.0.0';
+            this.clientVersion =
+                (window as WindowWithConfig).BALANCER_SDK_CLIENT_VERSION ||
+                '0.0.0';
         } else {
             // Handle the case when __PACKAGE_VERSION__ is not defined (e.g., in tests)
-            this.clientVersion = typeof __PACKAGE_VERSION__ !== 'undefined' ? __PACKAGE_VERSION__ : '0.0.0';
+            this.clientVersion =
+                typeof __PACKAGE_VERSION__ !== 'undefined'
+                    ? __PACKAGE_VERSION__
+                    : '0.0.0';
         }
     }
 

@@ -23,7 +23,7 @@ export class BalancerApi {
 
     /**
      * Create a new instance of the Balancer API client
-     * 
+     *
      * @param balancerApiUrl The URL of the Balancer API endpoint
      * @param chainId The blockchain chain ID
      * @param options Optional client configuration for name and version
