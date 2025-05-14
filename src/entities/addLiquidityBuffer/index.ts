@@ -20,6 +20,8 @@ import {
     AddLiquidityBufferQueryOutput,
 } from './types';
 
+import { validateAddressExists } from '../inputValidator/utils/validateAddressExists';
+
 export class AddLiquidityBufferV3 {
     async query(
         input: AddLiquidityBufferInput,
@@ -59,7 +61,7 @@ export class AddLiquidityBufferV3 {
             wrappedAmountIn,
             chainId: input.chainId,
             protocolVersion: 3,
-            to: balancerV3Contracts.BufferRouter[input.chainId],
+            to: validateAddressExists('BufferRouter', input.chainId, 3),
         };
 
         return output;
@@ -89,7 +91,7 @@ export class AddLiquidityBufferV3 {
         });
         return {
             callData,
-            to: balancerV3Contracts.BufferRouter[input.chainId],
+            to: validateAddressExists('BufferRouter', input.chainId, 3),
             value: 0n, // Default to 0 as native not supported
             maxUnderlyingAmountIn,
             maxWrappedAmountIn,
