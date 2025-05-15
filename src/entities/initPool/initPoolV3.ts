@@ -8,6 +8,7 @@ import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { getValue } from '../utils/getValue';
 import { Permit2 } from '@/entities/permit2Helper';
+import { validateAddressExists } from '../inputValidator/utils/validateAddressExists';
 
 export class InitPoolV3 implements InitPoolBase {
     buildCall(
@@ -36,7 +37,7 @@ export class InitPoolV3 implements InitPoolBase {
 
         return {
             callData,
-            to: balancerV3Contracts.Router[input.chainId] as Address,
+            to: validateAddressExists('Router', input.chainId, 3) as Address,
             value: getValue(amountsIn, !!input.wethIsEth),
         };
     }

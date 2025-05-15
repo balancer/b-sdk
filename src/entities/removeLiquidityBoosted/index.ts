@@ -26,6 +26,7 @@ import {
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { buildPoolStateTokenMap } from '@/entities/utils';
+import { validateAddressExists } from '../inputValidator/utils/validateAddressExists';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -75,7 +76,11 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBoostedQueryOutput = {
-            to: balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
+            to: validateAddressExists(
+                'CompositeLiquidityRouter',
+                input.chainId,
+                3,
+            ),
             poolType: poolState.type,
             poolId: poolState.address,
             unwrapWrapped,
@@ -112,7 +117,11 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
 
         return {
             callData: callData,
-            to: balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
+            to: validateAddressExists(
+                'CompositeLiquidityRouter',
+                input.chainId,
+                3,
+            ),
             value: 0n, // always has 0 value
             maxBptIn: input.bptIn,
             minAmountsOut: amounts.minAmountsOut.map((amount, i) => {

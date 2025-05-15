@@ -9,13 +9,14 @@ import {
 import { reClammPoolFactoryAbiExtended } from '@/abi';
 import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
+import { validateAddressExists } from '@/entities/inputValidator/utils/validateAddressExists';
 
 export class CreatePoolReClamm implements CreatePoolBase {
     buildCall(input: CreatePoolReClammInput): CreatePoolBuildCallOutput {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: balancerV3Contracts.ReClammPoolFactory[input.chainId],
+            to: validateAddressExists('ReClammPoolFactory', input.chainId, 3),
         };
     }
 

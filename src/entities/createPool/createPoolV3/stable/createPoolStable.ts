@@ -9,13 +9,14 @@ import {
 import { stablePoolFactoryAbiExtended } from '@/abi';
 import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
+import { validateAddressExists } from '@/entities/inputValidator/utils/validateAddressExists';
 
 export class CreatePoolStableV3 implements CreatePoolBase {
     buildCall(input: CreatePoolV3StableInput): CreatePoolBuildCallOutput {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: balancerV3Contracts.StablePoolFactory[input.chainId],
+            to: validateAddressExists('StablePoolFactory', input.chainId, 3),
         };
     }
 

@@ -47,6 +47,8 @@ import { SwapBase } from '../types';
 import { getLimitAmount, getPathLimits } from '../../limits';
 import { Permit2 } from '@/entities/permit2Helper';
 
+import { validateAddressExists } from '@/entities/inputValidator/utils/validateAddressExists';
+
 export * from './types';
 
 // A Swap can be a single or multiple paths
@@ -141,7 +143,7 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
             return {
-                to: balancerV3Contracts.Router[this.chainId],
+                to: validateAddressExists('Router', this.chainId, 3),
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -164,7 +166,7 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
             return {
-                to: balancerV3Contracts.Router[this.chainId],
+                to: validateAddressExists('Router', this.chainId, 3),
                 swapKind: SwapKind.GivenOut,
                 expectedAmountIn: TokenAmount.fromRawAmount(
                     this.inputAmount.token,
@@ -242,7 +244,7 @@ export class SwapV3 implements SwapBase {
                 );
 
             return {
-                to: balancerV3Contracts.BatchRouter[this.chainId],
+                to: validateAddressExists('BatchRouter', this.chainId, 3),
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -263,7 +265,7 @@ export class SwapV3 implements SwapBase {
         );
 
         return {
-            to: balancerV3Contracts.BatchRouter[this.chainId],
+            to: validateAddressExists('BatchRouter', this.chainId, 3),
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,
@@ -360,7 +362,7 @@ export class SwapV3 implements SwapBase {
         }
         if (!this.isBatchSwap) {
             call = {
-                to: balancerV3Contracts.Router[this.chainId],
+                to: validateAddressExists('Router', this.chainId, 3),
                 callData: this.callDataSingleSwap(
                     limitAmount,
                     input.deadline ?? MAX_UINT256,
@@ -379,7 +381,7 @@ export class SwapV3 implements SwapBase {
                     'V3 BatchSwaps need path limits for call construction',
                 );
             call = {
-                to: balancerV3Contracts.BatchRouter[this.chainId],
+                to: validateAddressExists('BatchRouter', this.chainId, 3),
                 callData: this.callDataBatchSwap(
                     limitAmount.amount,
                     pathLimits,
