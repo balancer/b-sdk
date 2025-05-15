@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 4.1.1
+
+### Patch Changes
+
+- d0d958c: fix pnpm-workspace.yaml
+- 6879394: API client headers
+
 ## 4.1.0
 
 ### Minor Changes
