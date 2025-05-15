@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.1.2
+
+### Patch Changes
+
+- 112b340: fix failing test
+
 ## 4.1.1
 
 ### Patch Changes
