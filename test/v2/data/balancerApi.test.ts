@@ -68,7 +68,7 @@ describe('BalancerApi Provider', () => {
         // Version should be either package version or fallback in tests
         // Check for semver format (x.y.z)
         expect(balancerApi.balancerApiClient.clientVersion).toMatch(
-            /^\d+\.\d+\.\d+$/
+            /^\d+\.\d+\.\d+$/,
         );
     });
 
