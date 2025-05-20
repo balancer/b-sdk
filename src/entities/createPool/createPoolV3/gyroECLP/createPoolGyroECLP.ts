@@ -10,7 +10,7 @@ import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
 import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 import { Big } from 'big.js';
-import { validateAddressExists } from '@/entities/inputValidator/utils/validateAddressExists';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export type EclpParams = {
     alpha: bigint;
@@ -40,7 +40,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: validateAddressExists('GyroECLPPoolFactory', input.chainId, 3),
+            to: AddressProvider.GyroECLPPoolFactory(input.chainId),
         };
     }
 

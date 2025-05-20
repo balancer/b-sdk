@@ -26,7 +26,7 @@ import { encodeFunctionData, zeroAddress } from 'viem';
 import { balancerRouterAbiExtended } from '@/abi';
 import { Permit } from '@/entities/permitHelper';
 
-import { validateAddressExists } from '@/entities/inputValidator/utils/validateAddressExists';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export class RemoveLiquidityV3 implements RemoveLiquidityBase {
     public async query(
@@ -111,7 +111,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
         const bptToken = new Token(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBaseQueryOutput & { userData: Hex } = {
-            to: validateAddressExists('Router', input.chainId, 3),
+            to: AddressProvider.Router(input.chainId),
             poolType: poolState.type,
             removeLiquidityKind: input.kind,
             poolId: poolState.id,
@@ -176,7 +176,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
 
         return {
             callData,
-            to: validateAddressExists('Router', input.chainId, 3),
+            to: AddressProvider.Router(input.chainId),
             value: 0n, // remove liquidity always has value = 0
             maxBptIn: TokenAmount.fromRawAmount(
                 input.bptIn.token,

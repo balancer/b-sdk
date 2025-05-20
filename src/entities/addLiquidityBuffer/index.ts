@@ -7,7 +7,6 @@ import { BufferState } from '@/entities/types';
 
 import { doAddLiquidityQuery } from './doAddLiquidityQuery';
 import { Token } from '../token';
-import { balancerV3Contracts } from '@/utils';
 import {
     balancerBufferRouterAbiExtended,
     balancerRouterAbiExtended,
@@ -20,7 +19,7 @@ import {
     AddLiquidityBufferQueryOutput,
 } from './types';
 
-import { validateAddressExists } from '../inputValidator/utils/validateAddressExists';
+import { AddressProvider } from '../inputValidator/utils/addressProvider';
 
 export class AddLiquidityBufferV3 {
     async query(
@@ -61,7 +60,7 @@ export class AddLiquidityBufferV3 {
             wrappedAmountIn,
             chainId: input.chainId,
             protocolVersion: 3,
-            to: validateAddressExists('BufferRouter', input.chainId, 3),
+            to: AddressProvider.BufferRouter(input.chainId),
         };
 
         return output;
@@ -91,7 +90,7 @@ export class AddLiquidityBufferV3 {
         });
         return {
             callData,
-            to: validateAddressExists('BufferRouter', input.chainId, 3),
+            to: AddressProvider.BufferRouter(input.chainId),
             value: 0n, // Default to 0 as native not supported
             maxUnderlyingAmountIn,
             maxWrappedAmountIn,

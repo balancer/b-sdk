@@ -4,8 +4,7 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { Permit2 } from '@/entities/permit2Helper';
 
 import { doInitBufferQuery } from './doInitBufferQuery';
-import { balancerV3Contracts } from '@/utils';
-import { validateAddressExists } from '../inputValidator/utils/validateAddressExists';
+import { AddressProvider } from '../inputValidator/utils/addressProvider';
 import {
     balancerBufferRouterAbiExtended,
     balancerRouterAbiExtended,
@@ -42,7 +41,7 @@ export class InitBufferV3 {
             wrappedAmountIn,
             chainId: input.chainId,
             protocolVersion: 3,
-            to: validateAddressExists('BufferRouter', input.chainId, 3),
+            to: AddressProvider.BufferRouter(input.chainId),
         };
 
         return output;
@@ -63,7 +62,7 @@ export class InitBufferV3 {
         });
         return {
             callData,
-            to: validateAddressExists('BufferRouter', input.chainId, 3),
+            to: AddressProvider.BufferRouter(input.chainId),
             value: 0n, // Default to 0 as native not supported
             minIssuedShares,
         };

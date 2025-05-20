@@ -11,7 +11,7 @@ import { lBPoolFactoryAbi_V3Extended } from '@/abi';
 import { balancerV3Contracts } from '@/utils/balancerV3Contracts';
 
 import { Hex } from '@/types';
-import { validateAddressExists } from '@/entities/inputValidator/utils/validateAddressExists';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
     public buildCall(
@@ -20,7 +20,7 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: validateAddressExists('LBPoolFactory', input.chainId, 3),
+            to: AddressProvider.LBPoolFactory(input.chainId),
         };
     }
 

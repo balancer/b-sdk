@@ -25,7 +25,7 @@ import {
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquiditySingleTokenQuery } from './doAddLiquiditySingleTokenQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityProportionalQuery';
-import { validateAddressExists } from '@/entities/inputValidator/utils/validateAddressExists';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export class AddLiquidityV3 implements AddLiquidityBase {
     async query(
@@ -117,7 +117,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         }
 
         const output: AddLiquidityBaseQueryOutput & { userData: Hex } = {
-            to: validateAddressExists('Router', input.chainId, 3),
+            to: AddressProvider.Router(input.chainId),
             poolType: poolState.type,
             poolId: poolState.id,
             addLiquidityKind: input.kind,
@@ -196,7 +196,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
 
         return {
             callData,
-            to: validateAddressExists('Router', input.chainId, 3),
+            to: AddressProvider.Router(input.chainId),
             value: getValue(input.amountsIn, !!input.wethIsEth),
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
