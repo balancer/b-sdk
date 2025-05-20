@@ -25,7 +25,7 @@ import {
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
 import { buildPoolStateTokenMap } from '@/entities/utils';
-import { AddressProvider } from '../inputValidator/utils/addressProvider';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
