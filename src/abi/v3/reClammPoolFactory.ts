@@ -193,7 +193,7 @@ export const reClammPoolFactoryAbi_V3 = [
             },
             {
                 internalType: 'uint256',
-                name: 'priceShiftDailyRate',
+                name: 'dailyPriceShiftExponent',
                 type: 'uint256',
             },
             {

@@ -1,5 +1,5 @@
 import { formatEther, parseEther } from 'viem';
-import { BigintIsh } from './tokenAmount';
+import { BigintIsh } from '@/types';
 
 export class PriceImpactAmount {
     public amount: bigint; // raw amount in wei (i.e. 18 decimals)

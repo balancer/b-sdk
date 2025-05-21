@@ -7,6 +7,7 @@ export class Token {
     public readonly symbol?: string;
     public readonly name?: string;
     public readonly wrapped: Address;
+    public readonly rate?: bigint;
 
     public constructor(
         chainId: number,
@@ -15,6 +16,7 @@ export class Token {
         symbol?: string,
         name?: string,
         wrapped?: Address,
+        rate?: bigint,
     ) {
         this.chainId = chainId;
         // Addresses are always lowercased for speed
@@ -22,6 +24,7 @@ export class Token {
         this.decimals = decimals;
         this.symbol = symbol;
         this.name = name;
+        this.rate = rate;
         this.wrapped = (
             wrapped ? wrapped.toLowerCase() : address.toLowerCase()
         ) as Address;
