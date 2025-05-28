@@ -9,13 +9,14 @@ import {
 import { stableSurgeFactoryAbiExtended } from '@/abi';
 import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export class CreatePoolStableSurge implements CreatePoolBase {
     buildCall(input: CreatePoolStableSurgeInput): CreatePoolBuildCallOutput {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: balancerV3Contracts.StableSurgePoolFactory[input.chainId],
+            to: AddressProvider.StableSurgePoolFactory(input.chainId),
         };
     }
 

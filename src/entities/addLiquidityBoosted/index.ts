@@ -37,6 +37,8 @@ import {
     MinimalTokenWithIsUnderlyingFlag,
 } from '@/entities/utils';
 
+import { AddressProvider } from '../inputValidator/utils/addressProvider';
+
 export class AddLiquidityBoostedV3 {
     private readonly inputValidator: InputValidator = new InputValidator();
 
@@ -179,7 +181,7 @@ export class AddLiquidityBoostedV3 {
             chainId: input.chainId,
             protocolVersion: 3,
             userData: input.userData ?? '0x',
-            to: balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
+            to: AddressProvider.CompositeLiquidityRouter(input.chainId),
         };
 
         return output;
@@ -228,7 +230,7 @@ export class AddLiquidityBoostedV3 {
 
         return {
             callData,
-            to: balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
+            to: AddressProvider.CompositeLiquidityRouter(input.chainId),
             value,
             minBptOut: TokenAmount.fromRawAmount(
                 input.bptOut.token,
