@@ -3,10 +3,24 @@ import { SDKError } from '@/utils';
 import { ChainId } from '@/utils/constants';
 import { Hex } from '@/types';
 
-// Some contracts can be missing on some chains
+/**
+ * Represents a mapping from ChainId to contract address.
+ * Not all contracts are deployed on every chain, so this is a partial record.
+ */
 type ContractAddresses = Partial<Record<ChainId, string>>;
 
+/**
+ * Utility class for retrieving Balancer V3 contract addresses for a given chain.
+ * Provides static methods for each contract type, with validation and error handling.
+ */
 export class AddressProvider {
+    /**
+     * Looks up the contract name in balancerV3Contracts by reference.
+     * Used internally for error reporting.
+     * @param contract - The contract address mapping to look up.
+     * @returns The contract name as a string, or 'UnknownContract' if not found.
+     * @private
+     */
     private static lookupContractName(contract: ContractAddresses): string {
         return (
             Object.entries(balancerV3Contracts).find(
