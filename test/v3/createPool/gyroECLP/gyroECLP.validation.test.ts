@@ -102,11 +102,13 @@ describe('create GyroECLP pool input validations', () => {
             tauBeta: {
                 ...derivedEclpParams.tauBeta,
                 ...updates?.tauBeta,
-            }
+            },
         };
-        GyroECLPMath.validateDerivedParams(createPoolInput.eclpParams, derivedEclpParams1);
-    }
-
+        GyroECLPMath.validateDerivedParams(
+            createPoolInput.eclpParams,
+            derivedEclpParams1,
+        );
+    };
 
     test('Duplicate token addresses, expects error', async () => {
         const tokens: CreatePoolGyroECLPInput['tokens'] = [
@@ -286,116 +288,94 @@ describe('create GyroECLP pool input validations', () => {
     describe('Validate Derived Params', () => {
         test('DerivedTauAlphaYWrong()', async () => {
             expect(() =>
-                validateModifiedDerivedParams({ tauAlpha: { y: -1n } })
-            ).toThrowError(
-                'tuaAlpha.y must be > 0',
-            );
+                validateModifiedDerivedParams({ tauAlpha: { y: -1n } }),
+            ).toThrowError('tuaAlpha.y must be > 0');
         });
 
         test('DerivedTauBetaYWrong()', async () => {
             expect(() =>
-                validateModifiedDerivedParams({ tauBeta: { y: -1n } })
-            ).toThrowError(
-                'tauBeta.y must be > 0',
-            );
+                validateModifiedDerivedParams({ tauBeta: { y: -1n } }),
+            ).toThrowError('tauBeta.y must be > 0');
         });
 
         test('DerivedTauXWrong()', async () => {
             expect(() =>
                 validateModifiedDerivedParams({
-                        tauBeta: {
-                            x: derivedEclpParams.tauAlpha.x,
-                        },
-                    })
-            ).toThrowError(
-                'tauBeta.x must be > tauAlpha.x',
-            );
+                    tauBeta: {
+                        x: derivedEclpParams.tauAlpha.x,
+                    },
+                }),
+            ).toThrowError('tauBeta.x must be > tauAlpha.x');
         });
 
         test('DerivedTauAlphaNotNormalized()', async () => {
             expect(() =>
                 validateModifiedDerivedParams({
-                        tauAlpha: {
-                            x: 0n,
-                            y: _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP - 1n,
-                        },
-                    })
-            ).toThrowError(
-                'RotationVectorNotNormalized()',
-            );
+                    tauAlpha: {
+                        x: 0n,
+                        y: _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP - 1n,
+                    },
+                }),
+            ).toThrowError('RotationVectorNotNormalized()');
 
             expect(() =>
                 validateModifiedDerivedParams({
-                        tauAlpha: {
-                            x: 0n,
-                            y: _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP + 1n,
-                        },
+                    tauAlpha: {
+                        x: 0n,
+                        y: _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP + 1n,
+                    },
                 }),
-            ).toThrowError(
-                'RotationVectorNotNormalized()',
-            );
+            ).toThrowError('RotationVectorNotNormalized()');
         });
 
         test('Derived parameters u, v, w, z limits', async () => {
             expect(() =>
-                validateModifiedDerivedParams({ u: _ONE_XP + 1n })
-            ).toThrowError(
-                `u must be <= ${_ONE_XP}`,
-            );
+                validateModifiedDerivedParams({ u: _ONE_XP + 1n }),
+            ).toThrowError(`u must be <= ${_ONE_XP}`);
 
             expect(() =>
-                validateModifiedDerivedParams({ v: _ONE_XP + 1n })
-            ).toThrowError(
-                `v must be <= ${_ONE_XP}`,
-            );
+                validateModifiedDerivedParams({ v: _ONE_XP + 1n }),
+            ).toThrowError(`v must be <= ${_ONE_XP}`);
 
             expect(() =>
-                validateModifiedDerivedParams({ w: _ONE_XP + 1n })
-            ).toThrowError(
-                `w must be <= ${_ONE_XP}`,
-            );
+                validateModifiedDerivedParams({ w: _ONE_XP + 1n }),
+            ).toThrowError(`w must be <= ${_ONE_XP}`);
 
             expect(() =>
-                validateModifiedDerivedParams({ z: _ONE_XP + 1n })
-            ).toThrowError(
-                `z must be <= ${_ONE_XP}`,
-            );
+                validateModifiedDerivedParams({ z: _ONE_XP + 1n }),
+            ).toThrowError(`z must be <= ${_ONE_XP}`);
         });
 
         test('DerivedDsqWrong()', async () => {
             expect(() =>
                 validateModifiedDerivedParams({
-                        dSq: _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP - 1n,
-                    })
-            ).toThrowError(
-                'DerivedDsqWrong()',
-            );
+                    dSq: _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP - 1n,
+                }),
+            ).toThrowError('DerivedDsqWrong()');
 
             expect(() =>
                 validateModifiedDerivedParams({
-                        dSq: _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP + 1n,
-                    })
-            ).toThrowError(
-                'DerivedDsqWrong()',
-            );
+                    dSq: _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP + 1n,
+                }),
+            ).toThrowError('DerivedDsqWrong()');
         });
     });
 
     test('Derived params match expectation', async () => {
         expect(derivedEclpParams).to.deep.equal({
-                tauAlpha: {
-                    x: -94861212813096057289512505574275160547n,
-                    y: 31644119574235279926451292677567331630n,
-                },
-                tauBeta: {
-                    x: 37142269533113549537591131345643981951n,
-                    y: 92846388265400743995957747409218517601n,
-                },
-                u: 66001741173104803338721745994955553010n,
-                v: 62245253919818011890633399060291020887n,
-                w: 30601134345582732000058913853921008022n,
-                z: -28859471639991253843240999485797747790n,
-                dSq: 99999999999999999886624093342106115200n,
-            });
+            tauAlpha: {
+                x: -94861212813096057289512505574275160547n,
+                y: 31644119574235279926451292677567331630n,
+            },
+            tauBeta: {
+                x: 37142269533113549537591131345643981951n,
+                y: 92846388265400743995957747409218517601n,
+            },
+            u: 66001741173104803338721745994955553010n,
+            v: 62245253919818011890633399060291020887n,
+            w: 30601134345582732000058913853921008022n,
+            z: -28859471639991253843240999485797747790n,
+            dSq: 99999999999999999886624093342106115200n,
+        });
     });
 });

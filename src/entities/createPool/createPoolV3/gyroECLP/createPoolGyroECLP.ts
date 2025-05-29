@@ -81,8 +81,13 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
 }
 
 // We cannot just sort the tokens, but we have to update the ECLP params, too, to preserve their meaning!
-export function sortECLPInputByTokenAddress(input: CreatePoolGyroECLPInput): CreatePoolGyroECLPInput {
-    if (input.tokens[0].address.toLowerCase() < input.tokens[1].address.toLowerCase()) {
+export function sortECLPInputByTokenAddress(
+    input: CreatePoolGyroECLPInput,
+): CreatePoolGyroECLPInput {
+    if (
+        input.tokens[0].address.toLowerCase() <
+        input.tokens[1].address.toLowerCase()
+    ) {
         return input;
     } else {
         const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
@@ -90,13 +95,13 @@ export function sortECLPInputByTokenAddress(input: CreatePoolGyroECLPInput): Cre
             ...input,
             tokens: [input.tokens[1], input.tokens[0]],
             eclpParams: {
-                alpha: D18 * D18 / input.eclpParams.beta,
-                beta: D18 * D18 / input.eclpParams.alpha,
+                alpha: (D18 * D18) / input.eclpParams.beta,
+                beta: (D18 * D18) / input.eclpParams.alpha,
                 c: input.eclpParams.s,
                 s: input.eclpParams.c,
                 lambda: input.eclpParams.lambda,
-            }
-        }
+            },
+        };
     }
 }
 
@@ -168,7 +173,7 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
     // Sanity check
     GyroECLPMath.validateDerivedParams(params, ret);
 
-    return ret
+    return ret;
 }
 
 function bigIntSqrt(val: bigint): bigint {
