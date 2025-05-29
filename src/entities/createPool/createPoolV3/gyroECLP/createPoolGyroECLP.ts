@@ -10,6 +10,7 @@ import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
 import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 import { Big } from 'big.js';
+import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 
 export type EclpParams = {
     alpha: bigint;
@@ -44,9 +45,9 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
     }
 
     private encodeCall(input: CreatePoolGyroECLPInput): Hex {
-        const sortedTokenConfigs = sortByAddress(input.tokens);
+        input = sortECLPInputByTokenAddress(input);
 
-        const tokens = sortedTokenConfigs.map(({ address, ...rest }) => ({
+        const tokens = input.tokens.map(({ address, ...rest }) => ({
             token: address,
             ...rest,
         }));
@@ -62,7 +63,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
             input.symbol,
             tokens,
             input.eclpParams,
-            input.derivedEclpParams,
+            calcDerivedParams(input.eclpParams),
             roleAccounts,
             input.swapFeePercentage,
             input.poolHooksContract,
@@ -76,6 +77,26 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
             functionName: 'create',
             args,
         });
+    }
+}
+
+// We cannot just sort the tokens, but we have to update the ECLP params, too, to preserve their meaning!
+export function sortECLPInputByTokenAddress(input: CreatePoolGyroECLPInput): CreatePoolGyroECLPInput {
+    if (input.tokens[0].address.toLowerCase() < input.tokens[1].address.toLowerCase()) {
+        return input;
+    } else {
+        const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
+        return {
+            ...input,
+            tokens: [input.tokens[1], input.tokens[0]],
+            eclpParams: {
+                alpha: D18 * D18 / input.eclpParams.beta,
+                beta: D18 * D18 / input.eclpParams.alpha,
+                c: input.eclpParams.s,
+                s: input.eclpParams.c,
+                lambda: input.eclpParams.lambda,
+            }
+        }
     }
 }
 
@@ -128,7 +149,7 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
     const v = (s * s * tauBeta.y + c * c * tauAlpha.y) / (D100 * D100);
 
     // all return values scaled to 38 decimal places
-    return {
+    const ret = {
         tauAlpha: {
             x: (tauAlpha.x * D38) / D100,
             y: (tauAlpha.y * D38) / D100,
@@ -143,6 +164,11 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
         z: (z * D38) / D100,
         dSq: (dSq * D38) / D100,
     };
+
+    // Sanity check
+    GyroECLPMath.validateDerivedParams(params, ret);
+
+    return ret
 }
 
 function bigIntSqrt(val: bigint): bigint {

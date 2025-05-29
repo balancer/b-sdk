@@ -7,7 +7,10 @@ import {
     CreatePool,
     CreatePoolGyroECLPInput,
     inputValidationError,
+    DerivedEclpParams,
+    CreatePoolGyroECLP,
 } from 'src';
+import { calcDerivedParams } from 'src/entities/createPool/createPoolV3/gyroECLP/createPoolGyroECLP';
 import { TOKENS } from 'test/lib/utils/addresses';
 
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
@@ -28,6 +31,7 @@ const USDC = TOKENS[chainId].USDC;
 describe('create GyroECLP pool input validations', () => {
     const createPool = new CreatePool();
     let createPoolInput: CreatePoolGyroECLPInput;
+    let derivedEclpParams: DerivedEclpParams;
 
     beforeAll(async () => {
         // Start with a valid input and modify individual params to expect errors
@@ -63,22 +67,9 @@ describe('create GyroECLP pool input validations', () => {
                 s: 707106781186547524n,
                 lambda: 4000000000000000000000n,
             },
-            derivedEclpParams: {
-                tauAlpha: {
-                    x: -94861212813096057289512505574275160547n,
-                    y: 31644119574235279926451292677567331630n,
-                },
-                tauBeta: {
-                    x: 37142269533113549537591131345643981951n,
-                    y: 92846388265400743995957747409218517601n,
-                },
-                u: 66001741173104803338721745994955553010n,
-                v: 62245253919818011890633399060291020887n,
-                w: 30601134345582732000058913853921008022n,
-                z: -28859471639991253843240999485797747790n,
-                dSq: 99999999999999999886624093342106115200n,
-            },
         };
+
+        derivedEclpParams = calcDerivedParams(createPoolInput.eclpParams);
     });
 
     // Helper function to modify input parameters succinctly
@@ -87,15 +78,6 @@ describe('create GyroECLP pool input validations', () => {
             Omit<CreatePoolGyroECLPInput, 'eclpParams' | 'derivedEclpParams'>
         > & {
             eclpParams?: Partial<CreatePoolGyroECLPInput['eclpParams']>;
-            derivedEclpParams?: Partial<
-                Omit<
-                    CreatePoolGyroECLPInput['derivedEclpParams'],
-                    'tauAlpha' | 'tauBeta'
-                >
-            > & {
-                tauAlpha?: Partial<{ x: bigint; y: bigint }>;
-                tauBeta?: Partial<{ x: bigint; y: bigint }>;
-            };
         } = {},
     ) => {
         createPool.buildCall({
@@ -105,20 +87,26 @@ describe('create GyroECLP pool input validations', () => {
                 ...createPoolInput.eclpParams,
                 ...updates.eclpParams,
             },
-            derivedEclpParams: {
-                ...createPoolInput.derivedEclpParams,
-                ...updates.derivedEclpParams,
-                tauAlpha: {
-                    ...createPoolInput.derivedEclpParams.tauAlpha,
-                    ...updates.derivedEclpParams?.tauAlpha,
-                },
-                tauBeta: {
-                    ...createPoolInput.derivedEclpParams.tauBeta,
-                    ...updates.derivedEclpParams?.tauBeta,
-                },
-            },
         });
     };
+
+    // Helper function to validate modified derived ECLP params (which should error out)
+    const validateModifiedDerivedParams = (updates: any) => {
+        const derivedEclpParams1 = {
+            ...derivedEclpParams,
+            ...updates,
+            tauAlpha: {
+                ...derivedEclpParams.tauAlpha,
+                ...updates?.tauAlpha,
+            },
+            tauBeta: {
+                ...derivedEclpParams.tauBeta,
+                ...updates?.tauBeta,
+            }
+        };
+        GyroECLPMath.validateDerivedParams(createPoolInput.eclpParams, derivedEclpParams1);
+    }
+
 
     test('Duplicate token addresses, expects error', async () => {
         const tokens: CreatePoolGyroECLPInput['tokens'] = [
@@ -294,167 +282,120 @@ describe('create GyroECLP pool input validations', () => {
         });
     });
 
+    // NB We have moved derived params calculation inside buildCall(), so this checks if GyroECLPMath.validateDerivedParams() actually validates anything right.
     describe('Validate Derived Params', () => {
         test('DerivedTauAlphaYWrong()', async () => {
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: { tauAlpha: { y: -1n } },
-                }),
+                validateModifiedDerivedParams({ tauAlpha: { y: -1n } })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    'tuaAlpha.y must be > 0',
-                ),
+                'tuaAlpha.y must be > 0',
             );
         });
 
         test('DerivedTauBetaYWrong()', async () => {
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: { tauBeta: { y: -1n } },
-                }),
+                validateModifiedDerivedParams({ tauBeta: { y: -1n } })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    'tauBeta.y must be > 0',
-                ),
+                'tauBeta.y must be > 0',
             );
         });
 
         test('DerivedTauXWrong()', async () => {
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: {
+                validateModifiedDerivedParams({
                         tauBeta: {
-                            x: createPoolInput.derivedEclpParams.tauAlpha.x,
+                            x: derivedEclpParams.tauAlpha.x,
                         },
-                    },
-                }),
+                    })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    'tauBeta.x must be > tauAlpha.x',
-                ),
+                'tauBeta.x must be > tauAlpha.x',
             );
         });
 
         test('DerivedTauAlphaNotNormalized()', async () => {
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: {
+                validateModifiedDerivedParams({
                         tauAlpha: {
                             x: 0n,
                             y: _ONE_XP - _DERIVED_TAU_NORM_ACCURACY_XP - 1n,
                         },
-                    },
-                }),
+                    })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    'RotationVectorNotNormalized()',
-                ),
+                'RotationVectorNotNormalized()',
             );
 
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: {
+                validateModifiedDerivedParams({
                         tauAlpha: {
                             x: 0n,
                             y: _ONE_XP + _DERIVED_TAU_NORM_ACCURACY_XP + 1n,
                         },
-                    },
                 }),
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    'RotationVectorNotNormalized()',
-                ),
+                'RotationVectorNotNormalized()',
             );
         });
 
         test('Derived parameters u, v, w, z limits', async () => {
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: { u: _ONE_XP + 1n },
-                }),
+                validateModifiedDerivedParams({ u: _ONE_XP + 1n })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    `u must be <= ${_ONE_XP}`,
-                ),
+                `u must be <= ${_ONE_XP}`,
             );
 
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: { v: _ONE_XP + 1n },
-                }),
+                validateModifiedDerivedParams({ v: _ONE_XP + 1n })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    `v must be <= ${_ONE_XP}`,
-                ),
+                `v must be <= ${_ONE_XP}`,
             );
 
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: { w: _ONE_XP + 1n },
-                }),
+                validateModifiedDerivedParams({ w: _ONE_XP + 1n })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    `w must be <= ${_ONE_XP}`,
-                ),
+                `w must be <= ${_ONE_XP}`,
             );
 
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: { z: _ONE_XP + 1n },
-                }),
+                validateModifiedDerivedParams({ z: _ONE_XP + 1n })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    `z must be <= ${_ONE_XP}`,
-                ),
+                `z must be <= ${_ONE_XP}`,
             );
         });
 
         test('DerivedDsqWrong()', async () => {
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: {
+                validateModifiedDerivedParams({
                         dSq: _ONE_XP - _DERIVED_DSQ_NORM_ACCURACY_XP - 1n,
-                    },
-                }),
+                    })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    'DerivedDsqWrong()',
-                ),
+                'DerivedDsqWrong()',
             );
 
             expect(() =>
-                buildCallWithModifiedInput({
-                    derivedEclpParams: {
+                validateModifiedDerivedParams({
                         dSq: _ONE_XP + _DERIVED_DSQ_NORM_ACCURACY_XP + 1n,
-                    },
-                }),
+                    })
             ).toThrowError(
-                inputValidationError(
-                    'Create Pool',
-                    'Invalid derived ECLP parameters',
-                    'DerivedDsqWrong()',
-                ),
+                'DerivedDsqWrong()',
             );
         });
+    });
+
+    test('Derived params match expectation', async () => {
+        expect(derivedEclpParams).to.deep.equal({
+                tauAlpha: {
+                    x: -94861212813096057289512505574275160547n,
+                    y: 31644119574235279926451292677567331630n,
+                },
+                tauBeta: {
+                    x: 37142269533113549537591131345643981951n,
+                    y: 92846388265400743995957747409218517601n,
+                },
+                u: 66001741173104803338721745994955553010n,
+                v: 62245253919818011890633399060291020887n,
+                w: 30601134345582732000058913853921008022n,
+                z: -28859471639991253843240999485797747790n,
+                dSq: 99999999999999999886624093342106115200n,
+            });
     });
 });
