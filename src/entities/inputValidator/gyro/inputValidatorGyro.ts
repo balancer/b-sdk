@@ -27,7 +27,7 @@ export class InputValidatorGyro extends InputValidatorBase {
             );
         }
 
-        const { eclpParams, derivedEclpParams } = input;
+        const { eclpParams } = input;
 
         try {
             GyroECLPMath.validateParams(eclpParams);
@@ -35,16 +35,6 @@ export class InputValidatorGyro extends InputValidatorBase {
             throw inputValidationError(
                 'Create Pool',
                 'Invalid base ECLP parameters',
-                (err as Error).message,
-            );
-        }
-
-        try {
-            GyroECLPMath.validateDerivedParams(eclpParams, derivedEclpParams);
-        } catch (err) {
-            throw inputValidationError(
-                'Create Pool',
-                'Invalid derived ECLP parameters',
                 (err as Error).message,
             );
         }

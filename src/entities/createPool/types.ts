@@ -133,7 +133,6 @@ export type CreatePoolStableSurgeInput = Omit<
 export type CreatePoolGyroECLPInput = CreatePoolV3BaseInput & {
     poolType: PoolType.GyroE;
     eclpParams: EclpParams;
-    derivedEclpParams: DerivedEclpParams;
 };
 
 export type CreatePoolReClammInput = Omit<
