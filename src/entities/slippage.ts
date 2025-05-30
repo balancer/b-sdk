@@ -1,6 +1,6 @@
 import { formatEther, parseEther } from 'viem';
-import { BigintIsh } from './tokenAmount';
-import { MathSol, WAD } from '../utils';
+import { BigintIsh } from '@/types';
+import { MathSol, WAD } from '@/utils';
 
 export class Slippage {
     public amount: bigint;
