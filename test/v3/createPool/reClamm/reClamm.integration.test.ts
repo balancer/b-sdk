@@ -26,9 +26,8 @@ import {
     vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
-    computeReClammInitAmounts,
-    MinimalTokenWithRate,
 } from 'src';
+
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import {
     doCreatePool,
@@ -53,6 +52,10 @@ const stataUSDCRateProvider = '0x34101091673238545de8a846621823d9993c3085';
 const stataDAI = TOKENS[chainId].stataDAI;
 const stataDAIRateProvider = '0x22db61f3a8d81d3d427a157fdae8c7eb5b5fd373';
 
+const reclammPoolAbi = parseAbi([
+    'function computeInitialBalancesRaw(address, uint256) view returns (uint256[])',
+]);
+
 describe('ReClamm', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
@@ -60,28 +63,23 @@ describe('ReClamm', () => {
     let snapshot: Hex;
 
     // BAL-DAI pool
-    let createBalDaiPoolInput: CreatePoolReClammInput;
-    let balDaiPoolAddress: Address;
-    let balDaiPoolState: PoolState;
+    let standardPoolInput: CreatePoolReClammInput;
+    let standardPoolAddress: Address;
+    let standardPoolState: PoolState;
     // WETH-stataUSDC pool
-    let createWethStataUsdcPoolInput: CreatePoolReClammInput;
-    let wethStataUsdcPoolAddress: Address;
-    let wethStataUsdcPoolState: PoolState;
-    let wethStataUsdcPoolTokens: MinimalTokenWithRate[];
+    let semiBoostedPoolInput: CreatePoolReClammInput;
+    let semiBoostedPoolAddress: Address;
+    let semiBoostedPoolState: PoolState;
     // stataUSDC-stataDAI pool
-    let createStataDaiStataUsdcPoolInput: CreatePoolReClammInput;
-    let stataDaiStataUsdcPoolAddress: Address;
-    let stataDaiStataUsdcPoolState: PoolState;
-    let stataDaiStataUSDCPoolTokens: MinimalTokenWithRate[];
-    // rates
-    let stataUsdcRate: bigint;
-    let stataDaiRate: bigint;
+    let fullyBoostedPoolInput: CreatePoolReClammInput;
+    let fullyBoostedPoolAddress: Address;
+    let fullyBoostedPoolState: PoolState;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8193333n,
+            8438888n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -92,17 +90,6 @@ describe('ReClamm', () => {
             .extend(walletActions);
         testAddress = (await client.getAddresses())[0];
 
-        // fetch token rates
-        stataUsdcRate = await client.readContract({
-            address: stataUSDCRateProvider,
-            abi: parseAbi(['function getRate() view returns (uint256)']),
-            functionName: 'getRate',
-        });
-        stataDaiRate = await client.readContract({
-            address: stataDAIRateProvider,
-            abi: parseAbi(['function getRate() view returns (uint256)']),
-            functionName: 'getRate',
-        });
         // set erc20 token balances with slots
         await setTokenBalances(
             client,
@@ -172,16 +159,13 @@ describe('ReClamm', () => {
             swapFeePercentage: parseUnits('0.01', 18),
             pauseManager: zeroAddress,
             swapFeeManager: zeroAddress,
-            initialMinPrice: parseUnits('0.5', 18),
-            initialMaxPrice: parseUnits('8', 18),
-            initialTargetPrice: parseUnits('3', 18),
             priceShiftDailyRate: parseUnits('1', 18),
             centerednessMargin: parseUnits('0.2', 18),
             chainId,
             protocolVersion: 3 as const,
         };
 
-        createBalDaiPoolInput = {
+        standardPoolInput = {
             ...baseReClammInput,
             symbol: 'BAL-DAI',
             tokens: [
@@ -198,9 +182,16 @@ describe('ReClamm', () => {
                     paysYieldFees: false,
                 },
             ],
+            priceParams: {
+                initialMinPrice: parseUnits('0.5', 18),
+                initialMaxPrice: parseUnits('8', 18),
+                initialTargetPrice: parseUnits('3', 18),
+                tokenAPriceIncludesRate: false,
+                tokenBPriceIncludesRate: false,
+            },
         };
 
-        createWethStataUsdcPoolInput = {
+        semiBoostedPoolInput = {
             ...baseReClammInput,
             symbol: 'WETH-stataUSDC',
             tokens: [
@@ -217,88 +208,70 @@ describe('ReClamm', () => {
                     paysYieldFees: true,
                 },
             ],
+            priceParams: {
+                initialMinPrice: parseUnits('0.5', 18),
+                initialMaxPrice: parseUnits('8', 18),
+                initialTargetPrice: parseUnits('3', 18),
+                tokenAPriceIncludesRate: false,
+                tokenBPriceIncludesRate: true,
+            },
         };
-        wethStataUsdcPoolTokens = [
-            {
-                address: WETH.address,
-                index: 0,
-                decimals: WETH.decimals,
-            },
-            {
-                address: stataUSDC.address,
-                index: 1,
-                decimals: stataUSDC.decimals,
-                rate: stataUsdcRate,
-            },
-        ];
 
-        createStataDaiStataUsdcPoolInput = {
+        fullyBoostedPoolInput = {
             ...baseReClammInput,
             symbol: 'stataUSDC-stataDAI',
             tokens: [
-                {
-                    address: stataDAI.address,
-                    rateProvider: stataDAIRateProvider,
-                    tokenType: TokenType.TOKEN_WITH_RATE,
-                    paysYieldFees: true,
-                },
                 {
                     address: stataUSDC.address,
                     rateProvider: stataUSDCRateProvider,
                     tokenType: TokenType.TOKEN_WITH_RATE,
                     paysYieldFees: true,
                 },
+                {
+                    address: stataDAI.address,
+                    rateProvider: stataDAIRateProvider,
+                    tokenType: TokenType.TOKEN_WITH_RATE,
+                    paysYieldFees: true,
+                },
             ],
+            priceParams: {
+                initialMinPrice: parseUnits('0.5', 18),
+                initialMaxPrice: parseUnits('8', 18),
+                initialTargetPrice: parseUnits('3', 18),
+                tokenAPriceIncludesRate: true,
+                tokenBPriceIncludesRate: true,
+            },
         };
-        stataDaiStataUSDCPoolTokens = [
-            {
-                address: stataUSDC.address,
-                index: 0,
-                decimals: stataUSDC.decimals,
-                rate: stataUsdcRate,
-            },
-            {
-                address: stataDAI.address,
-                index: 1,
-                decimals: stataDAI.decimals,
-                rate: stataDaiRate,
-            },
-        ];
 
-        balDaiPoolAddress = await doCreatePool({
+        standardPoolAddress = await doCreatePool({
             client,
             testAddress,
-            createPoolInput: createBalDaiPoolInput,
+            createPoolInput: standardPoolInput,
         });
-
-        wethStataUsdcPoolAddress = await doCreatePool({
+        semiBoostedPoolAddress = await doCreatePool({
             client,
             testAddress,
-            createPoolInput: createWethStataUsdcPoolInput,
+            createPoolInput: semiBoostedPoolInput,
         });
-
-        stataDaiStataUsdcPoolAddress = await doCreatePool({
+        fullyBoostedPoolAddress = await doCreatePool({
             client,
             testAddress,
-            createPoolInput: createStataDaiStataUsdcPoolInput,
+            createPoolInput: fullyBoostedPoolInput,
         });
 
-        // Get pool state
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-        wethStataUsdcPoolState = await initPoolDataProvider.getInitPoolData(
-            wethStataUsdcPoolAddress,
+        semiBoostedPoolState = await initPoolDataProvider.getInitPoolData(
+            semiBoostedPoolAddress,
             poolType,
             protocolVersion,
         );
-
-        balDaiPoolState = await initPoolDataProvider.getInitPoolData(
-            balDaiPoolAddress,
+        standardPoolState = await initPoolDataProvider.getInitPoolData(
+            standardPoolAddress,
             poolType,
             protocolVersion,
         );
-
-        stataDaiStataUsdcPoolState = await initPoolDataProvider.getInitPoolData(
-            stataDaiStataUsdcPoolAddress,
+        fullyBoostedPoolState = await initPoolDataProvider.getInitPoolData(
+            fullyBoostedPoolAddress,
             poolType,
             protocolVersion,
         );
@@ -316,44 +289,48 @@ describe('ReClamm', () => {
         snapshot = await client.snapshot();
     });
 
-    describe('pool create', () => {
-        test('pool should be created', async () => {
-            expect(stataDaiStataUsdcPoolAddress).to.not.be.undefined;
+    describe('creation', () => {
+        test('address exists', async () => {
+            expect(fullyBoostedPoolAddress).to.not.be.undefined;
         });
 
-        test('pool should be registered with Vault', async () => {
+        test('pool is registered with Vault', async () => {
             const isPoolRegistered = await client.readContract({
                 address: balancerV3Contracts.Vault[chainId],
                 abi: vaultExtensionAbi_V3,
                 functionName: 'isPoolRegistered',
-                args: [stataDaiStataUsdcPoolAddress],
+                args: [fullyBoostedPoolAddress],
             });
             expect(isPoolRegistered).to.be.true;
         });
     });
 
-    describe('pool init', () => {
+    describe('initialization', () => {
         describe('with zero tokens having a rate', () => {
             test('reference: 18 decimal token A', async () => {
-                // user chooses an amount for one of the tokens
-                const referenceAmountIn = {
-                    address: BAL.address,
-                    rawAmount: parseUnits('10', BAL.decimals),
-                    decimals: BAL.decimals,
-                };
-
-                // helper calculates the amount for the other token
-                const amountsIn = await computeReClammInitAmounts({
-                    ...createBalDaiPoolInput,
-                    tokens: balDaiPoolState.tokens,
-                    referenceAmountIn: referenceAmountIn,
+                const initAmountsRaw = await client.readContract({
+                    address: standardPoolAddress,
+                    abi: reclammPoolAbi,
+                    functionName: 'computeInitialBalancesRaw',
+                    args: [BAL.address, parseUnits('1', BAL.decimals)],
                 });
+
+                const amountsIn = standardPoolState.tokens.map(
+                    (token, index) => ({
+                        address: token.address,
+                        rawAmount: initAmountsRaw[index],
+                        decimals: token.decimals,
+                    }),
+                );
 
                 const initPoolInput = {
                     amountsIn,
                     minBptAmountOut: 0n,
                     chainId,
                 };
+
+                console.log('standardPoolState', standardPoolState);
+                console.log('initPoolInput', initPoolInput);
 
                 const permit2 = await Permit2Helper.signInitPoolApproval({
                     ...initPoolInput,
@@ -364,7 +341,7 @@ describe('ReClamm', () => {
                 const initPool = new InitPool();
                 const initPoolBuildOutput = initPool.buildCallWithPermit2(
                     initPoolInput,
-                    balDaiPoolState,
+                    standardPoolState,
                     permit2,
                 );
 
@@ -384,19 +361,20 @@ describe('ReClamm', () => {
             }, 120_000);
 
             test('reference: 18 decimal token B', async () => {
-                // user chooses an amount for one of the tokens
-                const referenceAmountIn = {
-                    address: DAI.address,
-                    rawAmount: parseUnits('10', DAI.decimals),
-                    decimals: DAI.decimals,
-                };
-
-                // helper calculates the amount for the other token
-                const amountsIn = await computeReClammInitAmounts({
-                    ...createBalDaiPoolInput,
-                    tokens: balDaiPoolState.tokens,
-                    referenceAmountIn: referenceAmountIn,
+                const initAmountsRaw = await client.readContract({
+                    address: standardPoolAddress,
+                    abi: reclammPoolAbi,
+                    functionName: 'computeInitialBalancesRaw',
+                    args: [DAI.address, parseUnits('1', DAI.decimals)],
                 });
+
+                const amountsIn = standardPoolState.tokens.map(
+                    (token, index) => ({
+                        address: token.address,
+                        rawAmount: initAmountsRaw[index],
+                        decimals: token.decimals,
+                    }),
+                );
 
                 const initPoolInput = {
                     amountsIn,
@@ -413,7 +391,7 @@ describe('ReClamm', () => {
                 const initPool = new InitPool();
                 const initPoolBuildOutput = initPool.buildCallWithPermit2(
                     initPoolInput,
-                    balDaiPoolState,
+                    standardPoolState,
                     permit2,
                 );
 
@@ -434,20 +412,21 @@ describe('ReClamm', () => {
         }, 120_000);
 
         describe('with one token having a rate', async () => {
-            test('reference: 18 decimal token with no rate', async () => {
-                // user chooses an amount for one of the tokens
-                const referenceAmountIn = {
-                    address: WETH.address,
-                    rawAmount: parseUnits('0.1', WETH.decimals),
-                    decimals: WETH.decimals,
-                };
-
-                // helper calculates the amount for the other token
-                const amountsIn = await computeReClammInitAmounts({
-                    ...createWethStataUsdcPoolInput,
-                    tokens: wethStataUsdcPoolTokens,
-                    referenceAmountIn,
+            test('reference: 18 decimal token without rate', async () => {
+                const initAmountsRaw = await client.readContract({
+                    address: semiBoostedPoolAddress,
+                    abi: reclammPoolAbi,
+                    functionName: 'computeInitialBalancesRaw',
+                    args: [WETH.address, parseUnits('1', WETH.decimals)],
                 });
+
+                const amountsIn = semiBoostedPoolState.tokens.map(
+                    (token, index) => ({
+                        address: token.address,
+                        rawAmount: initAmountsRaw[index],
+                        decimals: token.decimals,
+                    }),
+                );
 
                 const initPoolInput = {
                     amountsIn,
@@ -464,7 +443,7 @@ describe('ReClamm', () => {
                 const initPool = new InitPool();
                 const initPoolBuildOutput = initPool.buildCallWithPermit2(
                     initPoolInput,
-                    wethStataUsdcPoolState,
+                    semiBoostedPoolState,
                     permit2,
                 );
 
@@ -484,19 +463,23 @@ describe('ReClamm', () => {
             }, 120_000);
 
             test('reference: 6 decimal token with rate', async () => {
-                // user chooses an amount for one of the tokens
-                const referenceAmountIn = {
-                    address: stataUSDC.address,
-                    rawAmount: parseUnits('10', stataUSDC.decimals),
-                    decimals: stataUSDC.decimals,
-                };
-
-                // helper calculates the amount for the other token
-                const amountsIn = await computeReClammInitAmounts({
-                    ...createWethStataUsdcPoolInput,
-                    tokens: wethStataUsdcPoolTokens,
-                    referenceAmountIn,
+                const initAmountsRaw = await client.readContract({
+                    address: semiBoostedPoolAddress,
+                    abi: reclammPoolAbi,
+                    functionName: 'computeInitialBalancesRaw',
+                    args: [
+                        stataUSDC.address,
+                        parseUnits('1', stataUSDC.decimals),
+                    ],
                 });
+
+                const amountsIn = semiBoostedPoolState.tokens.map(
+                    (token, index) => ({
+                        address: token.address,
+                        rawAmount: initAmountsRaw[index],
+                        decimals: token.decimals,
+                    }),
+                );
 
                 const initPoolInput = {
                     amountsIn,
@@ -513,7 +496,7 @@ describe('ReClamm', () => {
                 const initPool = new InitPool();
                 const initPoolBuildOutput = initPool.buildCallWithPermit2(
                     initPoolInput,
-                    wethStataUsdcPoolState,
+                    semiBoostedPoolState,
                     permit2,
                 );
 
@@ -533,20 +516,30 @@ describe('ReClamm', () => {
             }, 120_000);
         });
 
-        describe('with both tokens having rates', () => {
-            test('reference: 18 decimal token with rate', async () => {
-                const referenceAmountIn = {
-                    address: stataDAI.address,
-                    rawAmount: parseUnits('1', stataDAI.decimals), // reverts if changed from 1 to 10?
-                    decimals: stataDAI.decimals,
-                };
-
-                // helper calculates the amount for the other token
-                const amountsIn = await computeReClammInitAmounts({
-                    ...createStataDaiStataUsdcPoolInput,
-                    tokens: stataDaiStataUSDCPoolTokens,
-                    referenceAmountIn,
+        describe('pool with both tokens having rates', () => {
+            test('reference token: 18 decimals with rate', async () => {
+                const initAmountsRaw = await client.readContract({
+                    address: fullyBoostedPoolAddress,
+                    abi: reclammPoolAbi,
+                    functionName: 'computeInitialBalancesRaw',
+                    args: [
+                        stataDAI.address,
+                        parseUnits('1', stataDAI.decimals),
+                    ],
                 });
+
+                console.log('initAmountsRaw', initAmountsRaw);
+
+                const amountsIn = fullyBoostedPoolState.tokens.map(
+                    (token, index) => ({
+                        address: token.address,
+                        rawAmount: initAmountsRaw[index],
+                        decimals: token.decimals,
+                    }),
+                );
+
+                console.log('fullyBoostedPoolState', fullyBoostedPoolState);
+                console.log('amountsIn', amountsIn);
 
                 const initPoolInput = {
                     amountsIn,
@@ -563,7 +556,7 @@ describe('ReClamm', () => {
                 const initPool = new InitPool();
                 const initPoolBuildOutput = initPool.buildCallWithPermit2(
                     initPoolInput,
-                    stataDaiStataUsdcPoolState,
+                    fullyBoostedPoolState,
                     permit2,
                 );
 
@@ -582,18 +575,24 @@ describe('ReClamm', () => {
                 });
             });
 
-            test('reference: 6 decimal token with rate', async () => {
-                const referenceAmountIn = {
-                    address: stataUSDC.address,
-                    rawAmount: parseUnits('1', stataUSDC.decimals), // reverts if changed from 1 to 10
-                    decimals: stataUSDC.decimals,
-                };
-                // helper calculates the amount for the other token
-                const amountsIn = await computeReClammInitAmounts({
-                    ...createStataDaiStataUsdcPoolInput,
-                    tokens: stataDaiStataUSDCPoolTokens,
-                    referenceAmountIn,
+            test('reference token: 6 decimals with rate', async () => {
+                const initAmountsRaw = await client.readContract({
+                    address: fullyBoostedPoolAddress,
+                    abi: reclammPoolAbi,
+                    functionName: 'computeInitialBalancesRaw',
+                    args: [
+                        stataUSDC.address,
+                        parseUnits('1', stataUSDC.decimals),
+                    ],
                 });
+
+                const amountsIn = fullyBoostedPoolState.tokens.map(
+                    (token, index) => ({
+                        address: token.address,
+                        rawAmount: initAmountsRaw[index],
+                        decimals: token.decimals,
+                    }),
+                );
 
                 const initPoolInput = {
                     amountsIn,
@@ -610,7 +609,7 @@ describe('ReClamm', () => {
                 const initPool = new InitPool();
                 const initPoolBuildOutput = initPool.buildCallWithPermit2(
                     initPoolInput,
-                    stataDaiStataUsdcPoolState,
+                    fullyBoostedPoolState,
                     permit2,
                 );
 

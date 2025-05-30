@@ -140,9 +140,13 @@ export type CreatePoolReClammInput = Omit<
     'poolHooksContract' | 'disableUnbalancedLiquidity' | 'enableDonation'
 > & {
     poolType: PoolType.ReClamm;
-    initialMinPrice: bigint;
-    initialMaxPrice: bigint;
-    initialTargetPrice: bigint;
+    priceParams: {
+        initialMinPrice: bigint;
+        initialMaxPrice: bigint;
+        initialTargetPrice: bigint;
+        tokenAPriceIncludesRate: boolean;
+        tokenBPriceIncludesRate: boolean;
+    };
     priceShiftDailyRate: bigint;
     centerednessMargin: bigint;
 };
