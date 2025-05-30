@@ -73,7 +73,7 @@ const targetContracts = [...targetContractsV2, ...targetContractsV3];
 const balancerV2Contracts: ContractRegistry = {};
 const balancerV3Contracts: ContractRegistry = {};
 
-const branch = 'deployment/reclamm-test-2'; // option to point this at a balancer-deployments PR branch
+const branch = 'deployment/reclamm-test-3'; // point this at any balancer-deployments branch
 
 async function updateBalancerDeployments() {
     const supportedNetworks = await fetchSupportedNetworks();

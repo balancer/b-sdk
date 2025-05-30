@@ -79,7 +79,7 @@ describe('ReClamm', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8438888n,
+            8441262n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -528,8 +528,6 @@ describe('ReClamm', () => {
                     ],
                 });
 
-                console.log('initAmountsRaw', initAmountsRaw);
-
                 const amountsIn = fullyBoostedPoolState.tokens.map(
                     (token, index) => ({
                         address: token.address,
@@ -537,9 +535,6 @@ describe('ReClamm', () => {
                         decimals: token.decimals,
                     }),
                 );
-
-                console.log('fullyBoostedPoolState', fullyBoostedPoolState);
-                console.log('amountsIn', amountsIn);
 
                 const initPoolInput = {
                     amountsIn,

@@ -51,8 +51,8 @@ export const balancerV3Contracts = {
         [ChainId.SEPOLIA]: '0xA714753434481DbaBf7921963f18190636eCde69',
     },
     ReClammPoolFactory: {
-        [ChainId.BASE]: '0x0C8f71D19f87c0bD1b9baD2484EcC3388D5DbB98',
-        [ChainId.SEPOLIA]: '0xc6D15965fAA99368392Fd2c1e65319041032FF19',
+        [ChainId.BASE]: '0xa3b370092aeb56770B23315252aB5E16DAcBF62B',
+        [ChainId.SEPOLIA]: '0x29001C9500D97508a7D82Ded442f0417584660ac',
     },
     Router: {
         [ChainId.ARBITRUM_ONE]: '0xEAedc32a51c510d35ebC11088fD5fF2b47aACF2E',
