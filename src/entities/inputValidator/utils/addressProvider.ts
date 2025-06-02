@@ -1,13 +1,13 @@
 import { balancerV3Contracts } from '@/utils';
 import { SDKError } from '@/utils';
 import { ChainId } from '@/utils/constants';
-import { Hex } from '@/types';
+import { Hex, Address } from '@/types';
 
 /**
  * Represents a mapping from ChainId to contract address.
  * Not all contracts are deployed on every chain, so this is a partial record.
  */
-type ContractAddresses = Partial<Record<ChainId, string>>;
+type ContractAddresses = Partial<Record<ChainId, Address>>;
 
 /**
  * Utility class for retrieving Balancer V3 contract addresses for a given chain.
