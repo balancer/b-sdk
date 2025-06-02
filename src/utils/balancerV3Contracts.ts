@@ -51,8 +51,8 @@ export const balancerV3Contracts = {
         [ChainId.SEPOLIA]: '0xA714753434481DbaBf7921963f18190636eCde69',
     },
     ReClammPoolFactory: {
-        [ChainId.BASE]: '0x0f08eEf2C785AA5e7539684aF04755dEC1347b7c',
-        [ChainId.SEPOLIA]: '0xC34978818FE7B25dcbea848660D4821645e3dA5b',
+        [ChainId.BASE]: '0xa3b370092aeb56770B23315252aB5E16DAcBF62B',
+        [ChainId.SEPOLIA]: '0x29001C9500D97508a7D82Ded442f0417584660ac',
     },
     Router: {
         [ChainId.ARBITRUM_ONE]: '0xEAedc32a51c510d35ebC11088fD5fF2b47aACF2E',
@@ -82,7 +82,7 @@ export const balancerV3Contracts = {
         [ChainId.MAINNET]: '0x355bD33F0033066BB3DE396a6d069be57353AD95',
         [ChainId.OPTIMISM]: '0x3BEb058DE1A25dd24223fd9e1796df8589429AcE',
         [ChainId.SEPOLIA]: '0x2f1d6F4C40047dC122cA7e46B0D1eC27739BFc66',
-        [ChainId.SONIC]: '0x6187F6C78ca4d89490d959e9c629B93214e6776e',
+        [ChainId.SONIC]: '0x3D9319BB29DAF6081D01DC56b6203EfcC90f0bAD',
     },
     Vault: {
         [ChainId.ARBITRUM_ONE]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',

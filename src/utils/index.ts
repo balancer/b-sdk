@@ -10,4 +10,3 @@ export * from './sortByAddress';
 export * from './types';
 export * from './balancerV2Contracts';
 export * from './balancerV3Contracts';
-export * from './calculateReClammInitAmounts';
