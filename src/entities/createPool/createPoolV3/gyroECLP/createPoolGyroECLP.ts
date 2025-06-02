@@ -12,6 +12,10 @@ import { Hex } from '@/types';
 import { Big } from 'big.js';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 
+const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
+const D38 = 10n ** 38n; // 38 decimal precision for derived param return values
+const D100 = 10n ** 100n; // 100 decimal precision for internal calculations
+
 export type EclpParams = {
     alpha: bigint;
     beta: bigint;
@@ -45,9 +49,9 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
     }
 
     private encodeCall(input: CreatePoolGyroECLPInput): Hex {
-        input = sortECLPInputByTokenAddress(input);
+        const sortedInput = sortECLPInputByTokenAddress(input);
 
-        const tokens = input.tokens.map(({ address, ...rest }) => ({
+        const tokens = sortedInput.tokens.map(({ address, ...rest }) => ({
             token: address,
             ...rest,
         }));
@@ -62,8 +66,8 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
             input.name || input.symbol,
             input.symbol,
             tokens,
-            input.eclpParams,
-            calcDerivedParams(input.eclpParams),
+            sortedInput.eclpParams,
+            calcDerivedParams(sortedInput.eclpParams),
             roleAccounts,
             input.swapFeePercentage,
             input.poolHooksContract,
@@ -84,32 +88,26 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
 export function sortECLPInputByTokenAddress(
     input: CreatePoolGyroECLPInput,
 ): CreatePoolGyroECLPInput {
-    if (
+    const isTokensSorted =
         input.tokens[0].address.toLowerCase() <
-        input.tokens[1].address.toLowerCase()
-    ) {
-        return input;
-    } else {
-        const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
-        return {
-            ...input,
-            tokens: [input.tokens[1], input.tokens[0]],
-            eclpParams: {
-                alpha: (D18 * D18) / input.eclpParams.beta,
-                beta: (D18 * D18) / input.eclpParams.alpha,
-                c: input.eclpParams.s,
-                s: input.eclpParams.c,
-                lambda: input.eclpParams.lambda,
-            },
-        };
-    }
+        input.tokens[1].address.toLowerCase();
+
+    if (isTokensSorted) return input;
+
+    return {
+        ...input,
+        tokens: [input.tokens[1], input.tokens[0]],
+        eclpParams: {
+            alpha: (D18 * D18) / input.eclpParams.beta,
+            beta: (D18 * D18) / input.eclpParams.alpha,
+            c: input.eclpParams.s,
+            s: input.eclpParams.c,
+            lambda: input.eclpParams.lambda,
+        },
+    };
 }
 
 export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
-    const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
-    const D38 = 10n ** 38n; // 38 decimal precision for derived param return values
-    const D100 = 10n ** 100n; // 100 decimal precision for internal calculations
-
     let { alpha, beta, c, s, lambda } = params; // params start at 18
 
     // scale from 18 to 100

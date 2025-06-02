@@ -36,7 +36,7 @@ import {
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 const poolType = PoolType.GyroE;
-const BAL = TOKENS[chainId].BAL;
+const WETH = TOKENS[chainId].WETH;
 const DAI = TOKENS[chainId].DAI;
 
 describe('GyroECLP - create & init', () => {
@@ -66,24 +66,25 @@ describe('GyroECLP - create & init', () => {
         await setTokenBalances(
             client,
             testAddress,
-            [DAI.address, BAL.address],
-            [DAI.slot!, BAL.slot!],
-            [parseUnits('100', 18), parseUnits('100', 18)],
+            [DAI.address, WETH.address],
+            [DAI.slot!, WETH.slot!],
+            [parseUnits('10000', 18), parseUnits('10000', 18)],
         );
 
         await approveSpenderOnTokens(
             client,
             testAddress,
-            [DAI.address, BAL.address],
+            [DAI.address, WETH.address],
             PERMIT2[chainId],
         );
 
+        // WETH in terms of DAI
         InputWithProperOrder = {
             poolType,
-            symbol: '50BAL-50DAI',
+            symbol: 'GYRO-WETH-DAI',
             tokens: [
                 {
-                    address: BAL.address,
+                    address: WETH.address,
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                     paysYieldFees: false,
@@ -104,14 +105,15 @@ describe('GyroECLP - create & init', () => {
             protocolVersion,
             enableDonation: false,
             eclpParams: {
-                alpha: 998502246630054917n,
-                beta: 1000200040008001600n,
-                c: 707106781186547524n,
-                s: 707106781186547524n,
-                lambda: 4000000000000000000000n,
+                alpha: parseUnits('2320', 18),
+                beta: parseUnits('2835', 18),
+                c: parseUnits('0.000391844822639777', 18),
+                s: parseUnits('0.999999923228814538', 18),
+                lambda: parseUnits('100000', 18),
             },
         };
 
+        // DAI in terms of WETH
         InputWithReversedOrder = {
             ...InputWithProperOrder,
             tokens: [
@@ -122,12 +124,19 @@ describe('GyroECLP - create & init', () => {
                     paysYieldFees: false,
                 },
                 {
-                    address: BAL.address,
+                    address: WETH.address,
                     rateProvider: zeroAddress,
                     tokenType: TokenType.STANDARD,
                     paysYieldFees: false,
                 },
             ],
+            eclpParams: {
+                alpha: parseUnits('0.00035', 18),
+                beta: parseUnits('0.00043', 18),
+                s: parseUnits('0.000391844822639777', 18),
+                c: parseUnits('0.999999923228814538', 18),
+                lambda: parseUnits('100000', 18),
+            },
         };
 
         poolAddress = await doCreatePool({
@@ -175,13 +184,13 @@ describe('GyroECLP - create & init', () => {
         const initPoolInput = {
             amountsIn: [
                 {
-                    address: BAL.address,
-                    rawAmount: parseUnits('10', BAL.decimals),
-                    decimals: BAL.decimals,
+                    address: WETH.address,
+                    rawAmount: parseUnits('1', WETH.decimals),
+                    decimals: WETH.decimals,
                 },
                 {
                     address: DAI.address,
-                    rawAmount: parseUnits('17', DAI.decimals),
+                    rawAmount: parseUnits('2552', DAI.decimals),
                     decimals: DAI.decimals,
                 },
             ],
@@ -210,7 +219,7 @@ describe('GyroECLP - create & init', () => {
         );
 
         const txOutput = await sendTransactionGetBalances(
-            [BAL.address, DAI.address],
+            [WETH.address, DAI.address],
             client,
             testAddress,
             initPoolBuildOutput.to,
@@ -226,13 +235,13 @@ describe('GyroECLP - create & init', () => {
             amountsIn: [
                 {
                     address: DAI.address,
-                    rawAmount: parseUnits('17', DAI.decimals),
+                    rawAmount: parseUnits('2552', DAI.decimals),
                     decimals: DAI.decimals,
                 },
                 {
-                    address: BAL.address,
-                    rawAmount: parseUnits('10', BAL.decimals),
-                    decimals: BAL.decimals,
+                    address: WETH.address,
+                    rawAmount: parseUnits('1', WETH.decimals),
+                    decimals: WETH.decimals,
                 },
             ],
             minBptAmountOut: 0n,
@@ -260,7 +269,7 @@ describe('GyroECLP - create & init', () => {
         );
 
         const txOutput = await sendTransactionGetBalances(
-            [DAI.address, BAL.address],
+            [DAI.address, WETH.address],
             client,
             testAddress,
             initPoolBuildOutput.to,
