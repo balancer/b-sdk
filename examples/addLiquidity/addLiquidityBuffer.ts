@@ -27,7 +27,6 @@ import {
     AddLiquidityBufferInput,
     AddLiquidityBufferV3,
     PERMIT2,
-    balancerV3Contracts,
 } from '../../src';
 import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import {
@@ -35,6 +34,7 @@ import {
     approveSpenderOnTokens,
     sendTransactionGetBalances,
 } from 'test/lib/utils';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 async function runAgainstFork() {
     // User defined inputs
@@ -93,13 +93,13 @@ async function runAgainstFork() {
         client,
         userAccount,
         wrappedTokenAddress,
-        balancerV3Contracts.BufferRouter[chainId],
+        AddressProvider.BufferRouter(chainId),
     );
     await approveSpenderOnPermit2(
         client,
         userAccount,
         underlyingTokenAddress,
-        balancerV3Contracts.BufferRouter[chainId],
+        AddressProvider.BufferRouter(chainId),
     );
 
     // send the transaction

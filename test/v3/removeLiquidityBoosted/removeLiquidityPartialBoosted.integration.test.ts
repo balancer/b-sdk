@@ -38,6 +38,7 @@ import {
 } from 'test/lib/utils';
 import { validateTokenAmounts } from 'test/lib/utils/removeLiquidityNestedHelper';
 import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const chainId = ChainId.SEPOLIA;
 const USDT = TOKENS[chainId].USDT_AAVE;
@@ -153,7 +154,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 client,
                 testAddress,
                 parentBptToken.address,
-                balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                AddressProvider.CompositeLiquidityRouter(chainId),
             );
 
             const queryOutput = await removeLiquidityBoosted.query(
@@ -183,7 +184,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 ),
             );
             expect(removeLiquidityBuildCallOutput.to).to.eq(
-                balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                AddressProvider.CompositeLiquidityRouter(chainId),
             );
 
             // send remove liquidity transaction and check balance changes
@@ -217,7 +218,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 client,
                 testAddress,
                 parentBptToken.address,
-                balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                AddressProvider.CompositeLiquidityRouter(chainId),
             );
 
             const queryOutput = await removeLiquidityBoosted.query(
@@ -248,7 +249,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 ),
             );
             expect(removeLiquidityBuildCallOutput.to).to.eq(
-                balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                AddressProvider.CompositeLiquidityRouter(chainId),
             );
 
             const tokenAmountsForBalanceCheck = [

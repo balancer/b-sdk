@@ -1,5 +1,4 @@
 import {
-    balancerV3Contracts,
     ChainId,
     NATIVE_ASSETS,
     PoolState,
@@ -27,6 +26,7 @@ import {
     getCheck,
 } from './removeLiquidityHelper';
 import { Hex } from 'viem';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export const sdkRemoveLiquidityRecovery = async ({
     removeLiquidity,
@@ -172,7 +172,7 @@ export function assertRemoveLiquidityRecovery(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : balancerV3Contracts.Router[chainId],
+                : AddressProvider.Router(chainId),
     };
 
     if (protocolVersion === 3)

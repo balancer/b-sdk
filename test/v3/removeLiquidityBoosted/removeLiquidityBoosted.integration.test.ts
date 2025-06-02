@@ -44,6 +44,7 @@ import {
 
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
@@ -104,7 +105,7 @@ describe('remove liquidity boosted proportional', () => {
                 client,
                 testAddress,
                 token.underlyingToken?.address ?? token.address,
-                balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                AddressProvider.CompositeLiquidityRouter(chainId),
             );
         }
 
@@ -168,7 +169,7 @@ describe('remove liquidity boosted proportional', () => {
                 client,
                 testAddress,
                 [boostedPool_USDC_USDT.address] as Address[],
-                balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                AddressProvider.CompositeLiquidityRouter(chainId),
             );
         });
         test('unwrap both tokens', async () => {

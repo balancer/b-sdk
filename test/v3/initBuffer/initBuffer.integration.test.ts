@@ -34,6 +34,7 @@ import {
 } from '../../lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { InitBufferBuildCallInput } from '@/entities/initBuffer/types';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const chainId = ChainId.MAINNET;
 const USDC = TOKENS[chainId].USDC;
@@ -94,7 +95,7 @@ describe('Buffer Init', () => {
                 client,
                 testAddress,
                 USDC.address,
-                balancerV3Contracts.BufferRouter[chainId],
+                AddressProvider.BufferRouter(chainId),
             );
         });
 

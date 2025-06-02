@@ -24,10 +24,11 @@ import {
     MAX_UINT256,
     ZERO_ADDRESS,
     PERMIT2,
-    balancerV3Contracts,
+    // balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     PublicWalletClient,
 } from '@/utils';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;
@@ -109,7 +110,7 @@ export const approveToken = async (
                 client,
                 accountAddress,
                 tokenAddress,
-                balancerV3Contracts.Router[chainId],
+                AddressProvider.Router(chainId),
                 amount,
                 deadline,
             );
@@ -118,7 +119,7 @@ export const approveToken = async (
                 client,
                 accountAddress,
                 tokenAddress,
-                balancerV3Contracts.BatchRouter[chainId],
+                AddressProvider.BatchRouter(chainId),
                 amount,
                 deadline,
             );
@@ -137,7 +138,7 @@ export const approveToken = async (
                 client,
                 accountAddress,
                 tokenAddress,
-                balancerV3Contracts.BufferRouter[chainId],
+                AddressProvider.BufferRouter(chainId),
                 amount,
                 deadline,
             );

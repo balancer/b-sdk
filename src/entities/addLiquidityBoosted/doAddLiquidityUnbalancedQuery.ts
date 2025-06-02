@@ -1,9 +1,10 @@
 import { createPublicClient, Hex, http } from 'viem';
 
-import { balancerV3Contracts, ChainId, CHAINS } from '@/utils';
+import { ChainId, CHAINS } from '@/utils';
 
 import { Address } from '@/types';
 import { balancerCompositeLiquidityRouterBoostedAbiExtended } from '@/abi';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export const doAddLiquidityUnbalancedQuery = async (
     rpcUrl: string,
@@ -21,7 +22,7 @@ export const doAddLiquidityUnbalancedQuery = async (
     });
 
     const { result: bptAmountOut } = await client.simulateContract({
-        address: balancerV3Contracts.CompositeLiquidityRouter[chainId],
+        address: AddressProvider.CompositeLiquidityRouter(chainId),
         abi: balancerCompositeLiquidityRouterBoostedAbiExtended,
         functionName: 'queryAddLiquidityUnbalancedToERC4626Pool',
         args: [

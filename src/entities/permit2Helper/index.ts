@@ -6,7 +6,6 @@ import {
     PermitDetails,
 } from './allowanceTransfer';
 import {
-    balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     ChainId,
     PERMIT2,
@@ -31,6 +30,7 @@ import { permit2Abi } from '@/abi';
 import { getAmountsCall } from '../addLiquidity/helpers';
 import { AddLiquidityBufferBuildCallInput } from '../addLiquidityBuffer/types';
 import { InitBufferBuildCallInput } from '../initBuffer/types';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export * from './allowanceTransfer';
 export * from './constants';
@@ -54,7 +54,7 @@ export class Permit2Helper {
             input.expirations,
             input.amountsIn.length,
         );
-        const spender = balancerV3Contracts.Router[input.chainId];
+        const spender = AddressProvider.Router(input.chainId);
         const details: PermitDetails[] = [];
         for (let i = 0; i < input.amountsIn.length; i++) {
             details.push(
@@ -86,7 +86,7 @@ export class Permit2Helper {
             input.amountsIn.length,
         );
         const amounts = getAmountsCall(input);
-        const spender = balancerV3Contracts.Router[input.chainId];
+        const spender = AddressProvider.Router(input.chainId);
         const details: PermitDetails[] = [];
         for (let i = 0; i < input.amountsIn.length; i++) {
             details.push(
@@ -151,8 +151,7 @@ export class Permit2Helper {
             input.amountsIn.length,
         );
         const amounts = getAmountsCall(input);
-        const spender =
-            balancerV3Contracts.CompositeLiquidityRouter[input.chainId];
+        const spender = AddressProvider.CompositeLiquidityRouter(input.chainId);
         const details: PermitDetails[] = [];
 
         for (let i = 0; i < input.amountsIn.length; i++) {
@@ -180,7 +179,7 @@ export class Permit2Helper {
         },
     ): Promise<Permit2> {
         validateNoncesAndExpirations(input.nonces, input.expirations, 2);
-        const spender = balancerV3Contracts.BufferRouter[input.chainId];
+        const spender = AddressProvider.BufferRouter(input.chainId);
         const details: PermitDetails[] = [
             await getDetails(
                 input.client,
@@ -213,7 +212,7 @@ export class Permit2Helper {
         },
     ): Promise<Permit2> {
         validateNoncesAndExpirations(input.nonces, input.expirations, 2);
-        const spender = balancerV3Contracts.BufferRouter[input.chainId];
+        const spender = AddressProvider.BufferRouter(input.chainId);
         const details: PermitDetails[] = [
             await getDetails(
                 input.client,
@@ -261,8 +260,8 @@ export class Permit2Helper {
 
         const chainId = await input.client.getChainId();
         const spender = input.queryOutput.pathAmounts
-            ? balancerV3Contracts.BatchRouter[chainId]
-            : balancerV3Contracts.Router[chainId];
+            ? AddressProvider.BatchRouter(chainId)
+            : AddressProvider.Router(chainId);
 
         // build permit details
         const details: PermitDetails[] = [

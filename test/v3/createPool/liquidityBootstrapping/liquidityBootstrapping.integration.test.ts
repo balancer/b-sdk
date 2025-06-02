@@ -19,7 +19,7 @@ import {
     CreatePoolLiquidityBootstrappingInput,
     LBPParams,
     InitPoolInput,
-    balancerV3Contracts,
+    // balancerV3Contracts,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../../lib/utils/createPoolHelper';
@@ -32,6 +32,7 @@ import {
     approveSpenderOnTokens,
     sendTransactionGetBalances,
 } from 'test/lib/utils/helper';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
@@ -95,7 +96,7 @@ describe('create liquidityBootstrapping pool test', () => {
     }, 120_000);
     test('Registration', async () => {
         const isPoolRegistered = await client.readContract({
-            address: balancerV3Contracts.Vault[chainId],
+            address: AddressProvider.Vault(chainId),
             abi: vaultExtensionAbi_V3,
             functionName: 'isPoolRegistered',
             args: [poolAddress],

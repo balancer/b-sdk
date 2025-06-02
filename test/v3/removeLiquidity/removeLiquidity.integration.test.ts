@@ -58,6 +58,7 @@ import {
     setTokenBalances,
     TOKENS,
 } from 'test/lib/utils';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const protocolVersion = 3;
 
@@ -160,7 +161,7 @@ describe('remove liquidity test', () => {
                 txInput.client,
                 txInput.testAddress,
                 txInput.poolState.address,
-                balancerV3Contracts.Router[chainId],
+                AddressProvider.Router(chainId),
             );
         });
 
@@ -484,7 +485,7 @@ async function putPoolIntoRecoveryMode(
 ) {
     // get the actionId for the enableRecoveryMode function
     const actionId = await client.readContract({
-        address: balancerV3Contracts.VaultAdmin[chainId],
+        address: AddressProvider.VaultAdmin(chainId),
         abi: vaultAdminAbi_V3,
         functionName: 'getActionId',
         args: [toFunctionSelector('function enableRecoveryMode(address)')],
@@ -510,7 +511,7 @@ async function putPoolIntoRecoveryMode(
     // Test accounts enabled recovery mode. account is the testAddress
     const { request: enableRecoveryModeRequest } =
         await client.simulateContract({
-            address: balancerV3Contracts.Vault[chainId],
+            address: AddressProvider.Vault(chainId),
             abi: [...authorizerAbi, ...vaultAdminAbi_V3],
             functionName: 'enableRecoveryMode',
             args: [poolState.address],

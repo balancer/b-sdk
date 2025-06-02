@@ -46,6 +46,7 @@ import {
 } from 'test/lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
@@ -205,7 +206,7 @@ describe('Boosted AddLiquidity', () => {
                     client,
                     testAddress,
                     token.address,
-                    balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                    AddressProvider.CompositeLiquidityRouter(chainId),
                 );
 
                 if (token.underlyingToken) {
@@ -213,7 +214,7 @@ describe('Boosted AddLiquidity', () => {
                         client,
                         testAddress,
                         token.underlyingToken.address,
-                        balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                        AddressProvider.CompositeLiquidityRouter(chainId),
                     );
                 }
             }

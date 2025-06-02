@@ -13,7 +13,7 @@ import {
 } from 'viem';
 import {
     Address,
-    balancerV3Contracts,
+    // balancerV3Contracts,
     CHAINS,
     ChainId,
     PERMIT2,
@@ -38,6 +38,7 @@ import {
     TOKENS,
 } from 'test/lib/utils';
 import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const chainId = ChainId.SEPOLIA;
 const USDT = TOKENS[chainId].USDT_AAVE;
@@ -94,7 +95,7 @@ describe('V3 add liquidity partial boosted', () => {
                 client,
                 testAddress,
                 token.underlyingToken?.address ?? token.address,
-                balancerV3Contracts.CompositeLiquidityRouter[chainId],
+                AddressProvider.CompositeLiquidityRouter(chainId),
             );
         }
 

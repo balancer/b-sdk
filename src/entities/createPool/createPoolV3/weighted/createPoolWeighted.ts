@@ -9,13 +9,13 @@ import {
 import { weightedPoolFactoryAbiExtended_V3 } from '@/abi';
 import { balancerV3Contracts, sortByAddress } from '@/utils';
 import { Hex } from '@/types';
-
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 export class CreatePoolWeightedV3 implements CreatePoolBase {
     buildCall(input: CreatePoolV3WeightedInput): CreatePoolBuildCallOutput {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: balancerV3Contracts.WeightedPoolFactory[input.chainId],
+            to: AddressProvider.WeightedPoolFactory(input.chainId),
         };
     }
 
