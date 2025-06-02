@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/gyroECLP/gyroECLP.integration.test.ts
+// pnpm test v3/createPool/gyroECLP/gyroECLP.integration.test.ts
 import {
     Address,
     createTestClient,
@@ -43,8 +43,10 @@ describe('GyroECLP - create & init', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
-    let createPoolInput: CreatePoolGyroECLPInput;
+    let InputWithProperOrder: CreatePoolGyroECLPInput;
+    let InputWithReversedOrder: CreatePoolGyroECLPInput;
     let poolAddress: Address;
+    let poolAddressReversedOrder: Address;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(
@@ -76,7 +78,7 @@ describe('GyroECLP - create & init', () => {
             PERMIT2[chainId],
         );
 
-        createPoolInput = {
+        InputWithProperOrder = {
             poolType,
             symbol: '50BAL-50DAI',
             tokens: [
@@ -110,18 +112,46 @@ describe('GyroECLP - create & init', () => {
             },
         };
 
+        InputWithReversedOrder = {
+            ...InputWithProperOrder,
+            tokens: [
+                {
+                    address: DAI.address,
+                    rateProvider: zeroAddress,
+                    tokenType: TokenType.STANDARD,
+                    paysYieldFees: false,
+                },
+                {
+                    address: BAL.address,
+                    rateProvider: zeroAddress,
+                    tokenType: TokenType.STANDARD,
+                    paysYieldFees: false,
+                },
+            ],
+        };
+
         poolAddress = await doCreatePool({
             client,
             testAddress,
-            createPoolInput,
+            createPoolInput: InputWithProperOrder,
+        });
+
+        poolAddressReversedOrder = await doCreatePool({
+            client,
+            testAddress,
+            createPoolInput: InputWithReversedOrder,
         });
     }, 120_000);
 
-    test('pool should be created', async () => {
+    test('create with proper order', async () => {
         expect(poolAddress).to.not.be.undefined;
     });
 
-    test('pool should be registered with Vault', async () => {
+    test('create with reversed order', async () => {
+        expect(poolAddressReversedOrder).to.not.be.undefined;
+    });
+
+    test('registration with vault', async () => {
         const isPoolRegistered = await client.readContract({
             address: balancerV3Contracts.Vault[chainId],
             abi: vaultExtensionAbi_V3,
@@ -131,7 +161,17 @@ describe('GyroECLP - create & init', () => {
         expect(isPoolRegistered).to.be.true;
     });
 
-    test('pool should init', async () => {
+    test('registration with vault (reversed order)', async () => {
+        const isPoolRegistered = await client.readContract({
+            address: balancerV3Contracts.Vault[chainId],
+            abi: vaultExtensionAbi_V3,
+            functionName: 'isPoolRegistered',
+            args: [poolAddressReversedOrder],
+        });
+        expect(isPoolRegistered).to.be.true;
+    });
+
+    test('init with proper order', async () => {
         const initPoolInput = {
             amountsIn: [
                 {
@@ -171,6 +211,56 @@ describe('GyroECLP - create & init', () => {
 
         const txOutput = await sendTransactionGetBalances(
             [BAL.address, DAI.address],
+            client,
+            testAddress,
+            initPoolBuildOutput.to,
+            initPoolBuildOutput.callData,
+            initPoolBuildOutput.value,
+        );
+
+        assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
+    }, 120_000);
+
+    test('init with reversed order', async () => {
+        const initPoolInput = {
+            amountsIn: [
+                {
+                    address: DAI.address,
+                    rawAmount: parseUnits('17', DAI.decimals),
+                    decimals: DAI.decimals,
+                },
+                {
+                    address: BAL.address,
+                    rawAmount: parseUnits('10', BAL.decimals),
+                    decimals: BAL.decimals,
+                },
+            ],
+            minBptAmountOut: 0n,
+            chainId,
+        };
+
+        const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
+        const poolState = await initPoolDataProvider.getInitPoolData(
+            poolAddressReversedOrder,
+            poolType,
+            protocolVersion,
+        );
+
+        const permit2 = await Permit2Helper.signInitPoolApproval({
+            ...initPoolInput,
+            client,
+            owner: testAddress,
+        });
+
+        const initPool = new InitPool();
+        const initPoolBuildOutput = initPool.buildCallWithPermit2(
+            initPoolInput,
+            poolState,
+            permit2,
+        );
+
+        const txOutput = await sendTransactionGetBalances(
+            [DAI.address, BAL.address],
             client,
             testAddress,
             initPoolBuildOutput.to,
