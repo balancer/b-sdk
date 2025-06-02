@@ -1,4 +1,4 @@
-// pnpm test -- createPool/gyroECLP/gyroECLP.validation.test.ts
+// pnpm test createPool/gyroECLP/gyroECLP.validation.test.ts
 import { zeroAddress, parseUnits } from 'viem';
 import {
     ChainId,
@@ -8,7 +8,6 @@ import {
     CreatePoolGyroECLPInput,
     inputValidationError,
     DerivedEclpParams,
-    CreatePoolGyroECLP,
 } from 'src';
 import { calcDerivedParams } from 'src/entities/createPool/createPoolV3/gyroECLP/createPoolGyroECLP';
 import { TOKENS } from 'test/lib/utils/addresses';
@@ -91,7 +90,9 @@ describe('create GyroECLP pool input validations', () => {
     };
 
     // Helper function to validate modified derived ECLP params (which should error out)
-    const validateModifiedDerivedParams = (updates: any) => {
+    const validateModifiedDerivedParams = (
+        updates: Partial<DerivedEclpParams>,
+    ) => {
         const derivedEclpParams1 = {
             ...derivedEclpParams,
             ...updates,
@@ -288,13 +289,17 @@ describe('create GyroECLP pool input validations', () => {
     describe('Validate Derived Params', () => {
         test('DerivedTauAlphaYWrong()', async () => {
             expect(() =>
-                validateModifiedDerivedParams({ tauAlpha: { y: -1n } }),
+                validateModifiedDerivedParams({
+                    tauAlpha: { x: derivedEclpParams.tauAlpha.x, y: -1n },
+                }),
             ).toThrowError('tuaAlpha.y must be > 0');
         });
 
         test('DerivedTauBetaYWrong()', async () => {
             expect(() =>
-                validateModifiedDerivedParams({ tauBeta: { y: -1n } }),
+                validateModifiedDerivedParams({
+                    tauBeta: { x: derivedEclpParams.tauBeta.x, y: -1n },
+                }),
             ).toThrowError('tauBeta.y must be > 0');
         });
 
@@ -303,6 +308,7 @@ describe('create GyroECLP pool input validations', () => {
                 validateModifiedDerivedParams({
                     tauBeta: {
                         x: derivedEclpParams.tauAlpha.x,
+                        y: derivedEclpParams.tauBeta.y,
                     },
                 }),
             ).toThrowError('tauBeta.x must be > tauAlpha.x');
