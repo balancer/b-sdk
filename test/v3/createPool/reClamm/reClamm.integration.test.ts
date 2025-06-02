@@ -184,8 +184,8 @@ describe('ReClamm', () => {
             ],
             priceParams: {
                 initialMinPrice: parseUnits('0.5', 18),
-                initialMaxPrice: parseUnits('8', 18),
-                initialTargetPrice: parseUnits('3', 18),
+                initialMaxPrice: parseUnits('3', 18),
+                initialTargetPrice: parseUnits('2.5', 18),
                 tokenAPriceIncludesRate: false,
                 tokenBPriceIncludesRate: false,
             },
@@ -209,9 +209,9 @@ describe('ReClamm', () => {
                 },
             ],
             priceParams: {
-                initialMinPrice: parseUnits('0.5', 18),
-                initialMaxPrice: parseUnits('8', 18),
-                initialTargetPrice: parseUnits('3', 18),
+                initialMinPrice: parseUnits('1500', 18),
+                initialMaxPrice: parseUnits('2500', 18),
+                initialTargetPrice: parseUnits('2200', 18),
                 tokenAPriceIncludesRate: false,
                 tokenBPriceIncludesRate: true,
             },
@@ -235,9 +235,9 @@ describe('ReClamm', () => {
                 },
             ],
             priceParams: {
-                initialMinPrice: parseUnits('0.5', 18),
-                initialMaxPrice: parseUnits('8', 18),
-                initialTargetPrice: parseUnits('3', 18),
+                initialMinPrice: parseUnits('0.8', 18),
+                initialMaxPrice: parseUnits('1.2', 18),
+                initialTargetPrice: parseUnits('1.0', 18),
                 tokenAPriceIncludesRate: true,
                 tokenBPriceIncludesRate: true,
             },
@@ -260,13 +260,13 @@ describe('ReClamm', () => {
         });
 
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-        semiBoostedPoolState = await initPoolDataProvider.getInitPoolData(
-            semiBoostedPoolAddress,
+        standardPoolState = await initPoolDataProvider.getInitPoolData(
+            standardPoolAddress,
             poolType,
             protocolVersion,
         );
-        standardPoolState = await initPoolDataProvider.getInitPoolData(
-            standardPoolAddress,
+        semiBoostedPoolState = await initPoolDataProvider.getInitPoolData(
+            semiBoostedPoolAddress,
             poolType,
             protocolVersion,
         );
@@ -328,9 +328,6 @@ describe('ReClamm', () => {
                     minBptAmountOut: 0n,
                     chainId,
                 };
-
-                console.log('standardPoolState', standardPoolState);
-                console.log('initPoolInput', initPoolInput);
 
                 const permit2 = await Permit2Helper.signInitPoolApproval({
                     ...initPoolInput,
