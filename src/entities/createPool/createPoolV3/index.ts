@@ -12,6 +12,8 @@ import { CreatePoolStableSurge } from './stableSurge/createStableSurge';
 import { CreatePoolGyroECLP } from './gyroECLP/createPoolGyroECLP';
 import { CreatePoolReClamm } from './reClamm/createPoolReClamm';
 
+import { CreatePoolLiquidityBootstrapping } from './liquidityBootstrapping/createLiquidityBootstrapping';
+
 export class CreatePoolV3 implements CreatePoolBase {
     private readonly createPoolTypes: Record<string, CreatePoolBase> = {};
 
@@ -22,6 +24,8 @@ export class CreatePoolV3 implements CreatePoolBase {
             [PoolType.StableSurge]: new CreatePoolStableSurge(),
             [PoolType.GyroE]: new CreatePoolGyroECLP(),
             [PoolType.ReClamm]: new CreatePoolReClamm(),
+            [PoolType.LiquidityBootstrapping]:
+                new CreatePoolLiquidityBootstrapping(),
         };
     }
 

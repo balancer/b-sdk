@@ -1,5 +1,36 @@
 # @balancer/sdk
 
+## 4.1.2
+
+### Patch Changes
+
+- 112b340: fix failing test
+
+## 4.1.1
+
+### Patch Changes
+
+- d0d958c: fix pnpm-workspace.yaml
+- 6879394: API client headers
+
+## 4.1.0
+
+### Minor Changes
+
+- 0c94547: adds lbp creation functionality
+
+## 4.0.3
+
+### Patch Changes
+
+- 0a91173: Add permit2 address for optimism network
+
+## 4.0.2
+
+### Patch Changes
+
+- 2ddcb83: Prevent biome from incorrectly formatting package.json
+
 ## 4.0.1
 
 ### Patch Changes

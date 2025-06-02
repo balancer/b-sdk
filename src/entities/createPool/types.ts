@@ -25,7 +25,8 @@ export type CreatePoolInput =
     | CreatePoolV3StableInput
     | CreatePoolStableSurgeInput
     | CreatePoolGyroECLPInput
-    | CreatePoolReClammInput;
+    | CreatePoolReClammInput
+    | CreatePoolLiquidityBootstrappingInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;
@@ -149,4 +150,34 @@ export type CreatePoolReClammInput = Omit<
     };
     priceShiftDailyRate: bigint;
     centerednessMargin: bigint;
+};
+
+export type LBPParams = {
+    owner: Address;
+    projectToken: Address;
+    reserveToken: Address;
+    projectTokenStartWeight: bigint;
+    reserveTokenStartWeight: bigint;
+    projectTokenEndWeight: bigint;
+    reserveTokenEndWeight: bigint;
+    startTime: bigint;
+    endTime: bigint;
+    blockProjectTokenSwapsIn: boolean;
+};
+
+// The pool uses default liquidity management values (no setters available)
+// swapFeeManager replaced by LBPParams.owner
+// pauseManager is governance by default
+// the pool is the hook itself. No hooksetter available
+export type CreatePoolLiquidityBootstrappingInput = Omit<
+    CreatePoolV3BaseInput,
+    | 'pauseManager'
+    | 'swapFeeManager'
+    | 'poolHooksContract'
+    | 'enableDonation'
+    | 'disableUnbalancedLiquidity'
+    | 'tokens'
+> & {
+    lbpParams: LBPParams;
+    poolType: PoolType.LiquidityBootstrapping;
 };
