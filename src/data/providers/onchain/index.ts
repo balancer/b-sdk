@@ -7,7 +7,7 @@ import {
 } from 'viem';
 import { PoolState } from '@/entities';
 import { CHAINS } from '@/utils';
-import { balancerV3Contracts } from '@/utils';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { vaultExtensionAbi_V3 } from '@/abi';
 
 export class Pools {
@@ -25,7 +25,7 @@ export class Pools {
     async fetchPoolState(id: Address, poolType: string): Promise<PoolState> {
         // First call fetches pool tokens from vault
         const poolTokens = await this.client.readContract({
-            address: balancerV3Contracts.Vault[this.chainId],
+            address: AddressProvider.Vault(this.chainId),
             abi: vaultExtensionAbi_V3,
             functionName: 'getPoolTokens',
             args: [id],

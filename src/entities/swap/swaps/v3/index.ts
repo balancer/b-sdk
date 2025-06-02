@@ -11,7 +11,7 @@ import { TokenAmount } from '../../../tokenAmount';
 import { SwapKind, Hex } from '../../../../types';
 import {
     DEFAULT_USERDATA,
-    balancerV3Contracts,
+    // balancerV3Contracts,
     NATIVE_ASSETS,
     MAX_UINT256,
     CHAINS,
@@ -125,7 +125,7 @@ export class SwapV3 implements SwapBase {
         sender?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
-            address: balancerV3Contracts.Router[this.chainId],
+            address: AddressProvider.Router(this.chainId),
             abi: balancerRouterAbiExtended,
             client,
         });
@@ -222,7 +222,7 @@ export class SwapV3 implements SwapBase {
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         // Note - batchSwaps are made via the Batch Router
         const batchRouterContract = getContract({
-            address: balancerV3Contracts.BatchRouter[this.chainId],
+            address: AddressProvider.BatchRouter(this.chainId),
             abi: balancerBatchRouterAbiExtended,
             client,
         });

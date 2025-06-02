@@ -12,7 +12,6 @@ import {
     AddLiquidityUnbalancedInput,
     AddLiquidityV3BuildCallInput,
     Address,
-    balancerV3Contracts,
     NATIVE_ASSETS,
     PoolState,
     Slippage,
@@ -30,6 +29,7 @@ import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
 import { AddLiquidityV2BaseBuildCallInput } from '@/entities/addLiquidity/addLiquidityV2/types';
 import { AddLiquidityV2ComposableStableQueryOutput } from '@/entities/addLiquidity/addLiquidityV2/composableStable/types';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 type AddLiquidityOutput = {
     addLiquidityQueryOutput: AddLiquidityQueryOutput;
@@ -230,7 +230,7 @@ export function assertAddLiquidityUnbalanced(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : balancerV3Contracts.Router[chainId],
+                : AddressProvider.Router(chainId),
         amountsIn: expectedAmountsIn,
         tokenInIndex: undefined,
         // Should match inputs
@@ -309,7 +309,7 @@ export function assertAddLiquiditySingleToken(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : balancerV3Contracts.Router[chainId],
+                : AddressProvider.Router(chainId),
         bptOut: TokenAmount.fromRawAmount(
             bptToken,
             addLiquidityInput.bptOut.rawAmount,
@@ -384,7 +384,7 @@ export function assertAddLiquidityProportional(
             to = VAULT_V2[chainId];
             break;
         case 3:
-            to = balancerV3Contracts.Router[chainId];
+            to = AddressProvider.Router(chainId);
             break;
     }
 
@@ -546,7 +546,7 @@ function assertAddLiquidityBuildCallOutput(
             to = VAULT_V2[addLiquidityInput.chainId];
             break;
         case 3:
-            to = balancerV3Contracts.Router[addLiquidityInput.chainId];
+            to = AddressProvider.Router(addLiquidityInput.chainId);
             break;
     }
 

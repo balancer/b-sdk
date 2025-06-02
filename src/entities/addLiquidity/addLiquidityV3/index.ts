@@ -11,8 +11,7 @@ import {
     getValue,
 } from '@/entities/utils';
 import { Hex } from '@/types';
-import { balancerV3Contracts, missingParameterError } from '@/utils';
-
+import { missingParameterError } from '@/utils';
 import { getAmountsCall } from '../helpers';
 import {
     AddLiquidityBase,

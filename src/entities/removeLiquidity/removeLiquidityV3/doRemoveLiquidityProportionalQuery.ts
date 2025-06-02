@@ -1,7 +1,8 @@
 import { balancerRouterAbiExtended } from '@/abi';
-import { balancerV3Contracts, ChainId, CHAINS } from '@/utils';
+import { ChainId, CHAINS } from '@/utils';
 import { createPublicClient, Hex, http } from 'viem';
 import { Address } from '@/types';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export const doRemoveLiquidityProportionalQuery = async (
     rpcUrl: string,
@@ -17,7 +18,7 @@ export const doRemoveLiquidityProportionalQuery = async (
         chain: CHAINS[chainId],
     });
     const { result: amountsOut } = await client.simulateContract({
-        address: balancerV3Contracts.Router[chainId],
+        address: AddressProvider.Router(chainId),
         abi: balancerRouterAbiExtended,
         functionName: 'queryRemoveLiquidityProportional',
         args: [poolAddress, exactBptAmountIn, sender, userData],
