@@ -104,8 +104,9 @@ export function sortECLPInputByTokenAddress(input: {
     return {
         tokens: [tokens[1], tokens[0]],
         eclpParams: {
-            alpha: (D18 * D18) / beta,
-            beta: (D18 * D18) / alpha,
+            // scale from 18 to 100 decmails for reciprocal calculation
+            alpha: (D100 * D100) / ((beta * D100) / D18),
+            beta: (D100 * D100) / ((alpha * D100) / D18),
             c: s,
             s: c,
             lambda: lambda,
