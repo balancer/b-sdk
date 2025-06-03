@@ -1,10 +1,10 @@
 // pnpm test -- v3/createPool/gyroECLP/gyroECLP.helpers.test.ts
-import { calcDerivedParams } from 'src';
+import { computeDerivedEclpParams } from 'src';
 
 describe('GyroECLP - helpers', () => {
     test('calc derived params #1', async () => {
         // https://github.com/balancer/balancer-v3-foundry-starter/blob/main/script/GyroECLPCreate.s.sol
-        const derivedParams = calcDerivedParams({
+        const derivedParams = computeDerivedEclpParams({
             alpha: 998502246630054917n,
             beta: 1000200040008001600n,
             c: 707106781186547524n,
@@ -31,7 +31,7 @@ describe('GyroECLP - helpers', () => {
 
     test('calc derived params #2', async () => {
         // https://beets.fi/pools/sonic/v2/0x83952912178aa33c3853ee5d942c96254b235dcc0002000000000000000000ab
-        const derivedParams = calcDerivedParams({
+        const derivedParams = computeDerivedEclpParams({
             alpha: 998000000000000000n,
             beta: 1000500000000000000n,
             c: 707106781186547524n,
@@ -58,7 +58,7 @@ describe('GyroECLP - helpers', () => {
 
     test('calc derived params #3', async () => {
         // https://beets.fi/pools/sonic/v2/0xe7734b495a552ab6f4c78406e672cca7175181e10002000000000000000000c5
-        const derivedParams = calcDerivedParams({
+        const derivedParams = computeDerivedEclpParams({
             alpha: 424242420000000000n,
             beta: 909090900000000000n,
             c: 791285002436294737n,

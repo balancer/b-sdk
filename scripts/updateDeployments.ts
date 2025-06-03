@@ -60,6 +60,7 @@ const targetContractsV3 = [
     'GyroECLPPoolFactory',
     'LBPoolFactory',
     'ReClammPoolFactory',
+    'MockGyroECLPPool',
 ];
 
 const targetContracts = [...targetContractsV2, ...targetContractsV3];
