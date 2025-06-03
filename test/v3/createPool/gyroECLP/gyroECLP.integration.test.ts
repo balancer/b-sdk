@@ -79,6 +79,13 @@ describe('GyroECLP - create & init', () => {
             [DAI.address, WETH.address],
             PERMIT2[chainId],
         );
+        const eclpParams = {
+            alpha: parseUnits('2378', 18),
+            beta: parseUnits('2906', 18),
+            c: parseUnits('0.000378501108390785', 18),
+            s: parseUnits('0.999999928368452908', 18),
+            lambda: parseUnits('100000', 18),
+        };
 
         // WETH in terms of DAI
         poolInput = {
@@ -106,13 +113,7 @@ describe('GyroECLP - create & init', () => {
             chainId,
             protocolVersion,
             enableDonation: false,
-            eclpParams: {
-                alpha: parseUnits('2378', 18),
-                beta: parseUnits('2906', 18),
-                c: parseUnits('0.000378501108390785', 18),
-                s: parseUnits('0.999999928368452908', 18),
-                lambda: parseUnits('100000', 18),
-            },
+            eclpParams,
         };
 
         poolAddress = await doCreatePool({

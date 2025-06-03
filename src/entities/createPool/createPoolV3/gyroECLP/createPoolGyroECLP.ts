@@ -64,17 +64,17 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         };
 
         const args = [
-            input.name || input.symbol,
+            input.name ?? input.symbol,
             input.symbol,
             formattedTokens,
             eclpParams,
-            calcDerivedParams(eclpParams),
+            input.derivedEclpParams ?? computeDerivedEclpParams(eclpParams),
             roleAccounts,
             input.swapFeePercentage,
             input.poolHooksContract,
             input.enableDonation,
             input.disableUnbalancedLiquidity,
-            input.salt || getRandomBytes32(),
+            input.salt ?? getRandomBytes32(),
         ] as const;
 
         return encodeFunctionData({
@@ -114,7 +114,9 @@ export function sortECLPInputByTokenAddress(input: {
     };
 }
 
-export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
+export function computeDerivedEclpParams(
+    params: EclpParams,
+): DerivedEclpParams {
     let { alpha, beta, c, s, lambda } = params; // params start at 18
 
     // scale from 18 to 100

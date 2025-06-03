@@ -9,7 +9,7 @@ import {
     inputValidationError,
     DerivedEclpParams,
 } from 'src';
-import { calcDerivedParams } from 'src/entities/createPool/createPoolV3/gyroECLP/createPoolGyroECLP';
+import { computeDerivedEclpParams } from 'src/entities/createPool/createPoolV3/gyroECLP/createPoolGyroECLP';
 import { TOKENS } from 'test/lib/utils/addresses';
 
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
@@ -68,7 +68,9 @@ describe('create GyroECLP pool input validations', () => {
             },
         };
 
-        derivedEclpParams = calcDerivedParams(createPoolInput.eclpParams);
+        derivedEclpParams = computeDerivedEclpParams(
+            createPoolInput.eclpParams,
+        );
     });
 
     // Helper function to modify input parameters succinctly
