@@ -158,7 +158,7 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
     const v = (s * s * tauBeta.y + c * c * tauAlpha.y) / (D100 * D100);
 
     // all return values scaled to 38 decimal places
-    const ret = {
+    const derivedParams = {
         tauAlpha: {
             x: (tauAlpha.x * D38) / D100,
             y: (tauAlpha.y * D38) / D100,
@@ -175,9 +175,9 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
     };
 
     // Sanity check
-    GyroECLPMath.validateDerivedParams(params, ret);
+    GyroECLPMath.validateDerivedParams(params, derivedParams);
 
-    return ret;
+    return derivedParams;
 }
 
 function bigIntSqrt(val: bigint): bigint {

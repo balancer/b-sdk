@@ -8,7 +8,6 @@ import {
     zeroAddress,
     parseUnits,
     TestActions,
-    parseAbi,
 } from 'viem';
 import {
     CHAINS,
@@ -123,17 +122,17 @@ describe('GyroECLP - create & init', () => {
         });
 
         // flip the token order and calculate the inverted param values (i.e. DAI in terms of WETH)
-        const poolInputInvertedTokenOrder = {
-            ...poolInput,
-            tokens: [poolInput.tokens[1], poolInput.tokens[0]],
-        };
-        const { eclpParams: invertedEclpParams } = sortECLPInputByTokenAddress(
-            poolInputInvertedTokenOrder,
-        );
+        const invertedTokens = [poolInput.tokens[1], poolInput.tokens[0]];
 
-        // use "out of order" tokens with inverted param values to create test pool for comparison
+        const { eclpParams: invertedEclpParams } = sortECLPInputByTokenAddress({
+            tokens: invertedTokens,
+            eclpParams: poolInput.eclpParams,
+        });
+
+        // use inverted tokens and eclp params to create test pool for comparison
         poolInputInvertedParams = {
-            ...poolInputInvertedTokenOrder,
+            ...poolInput,
+            tokens: invertedTokens,
             eclpParams: invertedEclpParams,
         };
 
