@@ -5,9 +5,10 @@ import {
     CreatePoolBuildCallOutput,
     PoolRoleAccounts,
     CreatePoolGyroECLPInput,
+    TokenConfig,
 } from '../../types';
 import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
-import { balancerV3Contracts, sortByAddress } from '@/utils';
+import { balancerV3Contracts } from '@/utils';
 import { Hex } from '@/types';
 import { Big } from 'big.js';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
@@ -49,9 +50,9 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
     }
 
     private encodeCall(input: CreatePoolGyroECLPInput): Hex {
-        const sortedInput = sortECLPInputByTokenAddress(input);
+        const { tokens, eclpParams } = sortECLPInputByTokenAddress(input);
 
-        const tokens = sortedInput.tokens.map(({ address, ...rest }) => ({
+        const formattedTokens = tokens.map(({ address, ...rest }) => ({
             token: address,
             ...rest,
         }));
@@ -65,9 +66,9 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         const args = [
             input.name || input.symbol,
             input.symbol,
-            tokens,
-            sortedInput.eclpParams,
-            calcDerivedParams(sortedInput.eclpParams),
+            formattedTokens,
+            eclpParams,
+            calcDerivedParams(eclpParams),
             roleAccounts,
             input.swapFeePercentage,
             input.poolHooksContract,
@@ -85,24 +86,29 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
 }
 
 // We cannot just sort the tokens, but we have to update the ECLP params, too, to preserve their meaning!
-export function sortECLPInputByTokenAddress(
-    input: CreatePoolGyroECLPInput,
-): CreatePoolGyroECLPInput {
-    const isTokensSorted =
-        input.tokens[0].address.toLowerCase() <
-        input.tokens[1].address.toLowerCase();
+export function sortECLPInputByTokenAddress(input: {
+    tokens: TokenConfig[];
+    eclpParams: EclpParams;
+}): {
+    tokens: TokenConfig[];
+    eclpParams: EclpParams;
+} {
+    const { tokens, eclpParams } = input;
+    const { alpha, beta, c, s, lambda } = eclpParams;
 
-    if (isTokensSorted) return input;
+    // if tokens already sorted, do nothing
+    if (tokens[0].address.toLowerCase() < tokens[1].address.toLowerCase())
+        return input;
 
+    // otherwise, fix token order and invert the ECLP params
     return {
-        ...input,
-        tokens: [input.tokens[1], input.tokens[0]],
+        tokens: [tokens[1], tokens[0]],
         eclpParams: {
-            alpha: (D18 * D18) / input.eclpParams.beta,
-            beta: (D18 * D18) / input.eclpParams.alpha,
-            c: input.eclpParams.s,
-            s: input.eclpParams.c,
-            lambda: input.eclpParams.lambda,
+            alpha: (D18 * D18) / beta,
+            beta: (D18 * D18) / alpha,
+            c: s,
+            s: c,
+            lambda: lambda,
         },
     };
 }

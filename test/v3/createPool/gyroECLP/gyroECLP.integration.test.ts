@@ -8,6 +8,7 @@ import {
     zeroAddress,
     parseUnits,
     TestActions,
+    parseAbi,
 } from 'viem';
 import {
     CHAINS,
@@ -22,6 +23,8 @@ import {
     vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
+    mockGyroEclpPoolAbi_V3,
+    sortECLPInputByTokenAddress,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import {
@@ -43,10 +46,10 @@ describe('GyroECLP - create & init', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
-    let InputWithProperOrder: CreatePoolGyroECLPInput;
-    let InputWithReversedOrder: CreatePoolGyroECLPInput;
+    let poolInput: CreatePoolGyroECLPInput;
+    let poolInputInvertedParams: CreatePoolGyroECLPInput;
     let poolAddress: Address;
-    let poolAddressReversedOrder: Address;
+    let poolAddressInvertedParams: Address;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(
@@ -79,7 +82,7 @@ describe('GyroECLP - create & init', () => {
         );
 
         // WETH in terms of DAI
-        InputWithProperOrder = {
+        poolInput = {
             poolType,
             symbol: 'GYRO-WETH-DAI',
             tokens: [
@@ -105,36 +108,10 @@ describe('GyroECLP - create & init', () => {
             protocolVersion,
             enableDonation: false,
             eclpParams: {
-                alpha: parseUnits('2320', 18),
-                beta: parseUnits('2835', 18),
-                c: parseUnits('0.000391844822639777', 18),
-                s: parseUnits('0.999999923228814538', 18),
-                lambda: parseUnits('100000', 18),
-            },
-        };
-
-        // DAI in terms of WETH
-        InputWithReversedOrder = {
-            ...InputWithProperOrder,
-            tokens: [
-                {
-                    address: DAI.address,
-                    rateProvider: zeroAddress,
-                    tokenType: TokenType.STANDARD,
-                    paysYieldFees: false,
-                },
-                {
-                    address: WETH.address,
-                    rateProvider: zeroAddress,
-                    tokenType: TokenType.STANDARD,
-                    paysYieldFees: false,
-                },
-            ],
-            eclpParams: {
-                alpha: parseUnits('0.00035', 18),
-                beta: parseUnits('0.00043', 18),
-                s: parseUnits('0.000391844822639777', 18),
-                c: parseUnits('0.999999923228814538', 18),
+                alpha: parseUnits('2378', 18),
+                beta: parseUnits('2906', 18),
+                c: parseUnits('0.000378501108390785', 18),
+                s: parseUnits('0.999999928368452908', 18),
                 lambda: parseUnits('100000', 18),
             },
         };
@@ -142,25 +119,37 @@ describe('GyroECLP - create & init', () => {
         poolAddress = await doCreatePool({
             client,
             testAddress,
-            createPoolInput: InputWithProperOrder,
+            createPoolInput: poolInput,
         });
 
-        poolAddressReversedOrder = await doCreatePool({
+        // flip the token order and calculate the inverted param values (i.e. DAI in terms of WETH)
+        const poolInputInvertedTokenOrder = {
+            ...poolInput,
+            tokens: [poolInput.tokens[1], poolInput.tokens[0]],
+        };
+        const { eclpParams: invertedEclpParams } = sortECLPInputByTokenAddress(
+            poolInputInvertedTokenOrder,
+        );
+
+        // use "out of order" tokens with inverted param values to create test pool for comparison
+        poolInputInvertedParams = {
+            ...poolInputInvertedTokenOrder,
+            eclpParams: invertedEclpParams,
+        };
+
+        poolAddressInvertedParams = await doCreatePool({
             client,
             testAddress,
-            createPoolInput: InputWithReversedOrder,
+            createPoolInput: poolInputInvertedParams,
         });
     }, 120_000);
 
-    test('create with proper order', async () => {
+    test('creation', async () => {
         expect(poolAddress).to.not.be.undefined;
+        expect(poolAddressInvertedParams).to.not.be.undefined;
     });
 
-    test('create with reversed order', async () => {
-        expect(poolAddressReversedOrder).to.not.be.undefined;
-    });
-
-    test('registration with vault', async () => {
+    test('registration', async () => {
         const isPoolRegistered = await client.readContract({
             address: balancerV3Contracts.Vault[chainId],
             abi: vaultExtensionAbi_V3,
@@ -170,17 +159,24 @@ describe('GyroECLP - create & init', () => {
         expect(isPoolRegistered).to.be.true;
     });
 
-    test('registration with vault (reversed order)', async () => {
-        const isPoolRegistered = await client.readContract({
-            address: balancerV3Contracts.Vault[chainId],
-            abi: vaultExtensionAbi_V3,
-            functionName: 'isPoolRegistered',
-            args: [poolAddressReversedOrder],
+    test('equivalent ECLP params for pool created with inverted input', async () => {
+        const eclpParams = await client.readContract({
+            address: poolAddress,
+            abi: mockGyroEclpPoolAbi_V3,
+            functionName: 'getGyroECLPPoolImmutableData',
+            args: [],
         });
-        expect(isPoolRegistered).to.be.true;
+        const eclpParamsWithInvertedInput = await client.readContract({
+            address: poolAddressInvertedParams,
+            abi: mockGyroEclpPoolAbi_V3,
+            functionName: 'getGyroECLPPoolImmutableData',
+            args: [],
+        });
+
+        expect(eclpParams).to.deep.equal(eclpParamsWithInvertedInput);
     });
 
-    test('init with proper order', async () => {
+    test('initialization', async () => {
         const initPoolInput = {
             amountsIn: [
                 {
@@ -220,56 +216,6 @@ describe('GyroECLP - create & init', () => {
 
         const txOutput = await sendTransactionGetBalances(
             [WETH.address, DAI.address],
-            client,
-            testAddress,
-            initPoolBuildOutput.to,
-            initPoolBuildOutput.callData,
-            initPoolBuildOutput.value,
-        );
-
-        assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
-    }, 120_000);
-
-    test('init with reversed order', async () => {
-        const initPoolInput = {
-            amountsIn: [
-                {
-                    address: DAI.address,
-                    rawAmount: parseUnits('2552', DAI.decimals),
-                    decimals: DAI.decimals,
-                },
-                {
-                    address: WETH.address,
-                    rawAmount: parseUnits('1', WETH.decimals),
-                    decimals: WETH.decimals,
-                },
-            ],
-            minBptAmountOut: 0n,
-            chainId,
-        };
-
-        const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-        const poolState = await initPoolDataProvider.getInitPoolData(
-            poolAddressReversedOrder,
-            poolType,
-            protocolVersion,
-        );
-
-        const permit2 = await Permit2Helper.signInitPoolApproval({
-            ...initPoolInput,
-            client,
-            owner: testAddress,
-        });
-
-        const initPool = new InitPool();
-        const initPoolBuildOutput = initPool.buildCallWithPermit2(
-            initPoolInput,
-            poolState,
-            permit2,
-        );
-
-        const txOutput = await sendTransactionGetBalances(
-            [DAI.address, WETH.address],
             client,
             testAddress,
             initPoolBuildOutput.to,
