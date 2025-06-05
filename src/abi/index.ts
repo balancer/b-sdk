@@ -18,6 +18,11 @@ import {
     stableSurgePoolFactoryAbi_V3,
     reClammPoolFactoryAbi_V3,
     lBPoolFactoryAbi_V3,
+    weightedPoolAbi_V3,
+    stablePoolAbi_V3,
+    liquidityBootstrappingPoolAbi_V3,
+    gyro2CLPAbi_V3,
+    gyroECLPAbi_V3,
 } from './v3';
 
 export * from './authorizer';
@@ -36,28 +41,44 @@ export const commonABIsV3 = [
     ...permit2Abi,
 ];
 
+export const poolABIsV3 = [
+    ...weightedPoolAbi_V3,
+    ...stablePoolAbi_V3,
+    ...liquidityBootstrappingPoolAbi_V3,
+    ...gyro2CLPAbi_V3,
+    ...gyroECLPAbi_V3,
+];
+
 // V3 Routers ABIs Extended
 
-export const balancerRouterAbiExtended = [...routerAbi_V3, ...commonABIsV3];
+export const balancerRouterAbiExtended = [
+    ...routerAbi_V3,
+    ...commonABIsV3,
+    ...poolABIsV3,
+];
 
 export const balancerCompositeLiquidityRouterBoostedAbiExtended = [
     ...compositeLiquidityRouterAbi_V3,
     ...commonABIsV3,
+    ...poolABIsV3,
 ];
 
 export const balancerCompositeLiquidityRouterNestedAbiExtended = [
     ...balancerCompositeLiquidityRouterNestedAbi,
     ...commonABIsV3,
+    ...poolABIsV3,
 ];
 
 export const balancerBufferRouterAbiExtended = [
     ...bufferRouterAbi_V3,
     ...commonABIsV3,
+    ...poolABIsV3,
 ];
 
 export const balancerBatchRouterAbiExtended = [
     ...batchRouterAbi_V3,
     ...commonABIsV3,
+    ...poolABIsV3,
 ];
 
 // V3 Pool Factories ABIs Extended
