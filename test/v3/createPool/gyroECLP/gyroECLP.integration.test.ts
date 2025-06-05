@@ -45,10 +45,10 @@ describe('GyroECLP - create & init', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;
-    let poolInput: CreatePoolGyroECLPInput;
-    let poolInputInvertedParams: CreatePoolGyroECLPInput;
-    let poolAddress: Address;
-    let poolAddressInvertedParams: Address;
+    let poolInputSortedTokens: CreatePoolGyroECLPInput;
+    let poolInputUnsortedTokens: CreatePoolGyroECLPInput;
+    let poolFromSortedInput: Address;
+    let poolFromUnsortedInput: Address;
 
     beforeAll(async () => {
         ({ rpcUrl } = await startFork(
@@ -87,8 +87,8 @@ describe('GyroECLP - create & init', () => {
             lambda: parseUnits('100000', 18),
         };
 
-        // WETH in terms of DAI
-        poolInput = {
+        // Here tokens are numerically sorted already.
+        poolInputSortedTokens = {
             poolType,
             symbol: 'GYRO-WETH-DAI',
             tokens: [
@@ -116,37 +116,35 @@ describe('GyroECLP - create & init', () => {
             eclpParams,
         };
 
-        poolAddress = await doCreatePool({
+        poolFromSortedInput = await doCreatePool({
             client,
             testAddress,
-            createPoolInput: poolInput,
+            createPoolInput: poolInputSortedTokens,
         });
 
-        // flip the token order and calculate the inverted param values (i.e. DAI in terms of WETH)
-        const invertedTokens = [poolInput.tokens[1], poolInput.tokens[0]];
-
-        const { eclpParams: invertedEclpParams } = sortECLPInputByTokenAddress({
-            tokens: invertedTokens,
-            eclpParams: poolInput.eclpParams,
-        });
-
-        // use inverted tokens and eclp params to create test pool for comparison
-        poolInputInvertedParams = {
-            ...poolInput,
-            tokens: invertedTokens,
-            eclpParams: invertedEclpParams,
+        // Here tokens are numerically unsorted. The create function should sort them along with corresponding eclp params.
+        poolInputUnsortedTokens = {
+            ...poolInputSortedTokens,
+            tokens: [poolInputSortedTokens.tokens[1], poolInputSortedTokens.tokens[0]],
+            eclpParams: {
+                alpha: parseUnits('2906', 18),
+                beta: parseUnits('2378', 18),
+                c: parseUnits('0.999999928368452908', 18),
+                s: parseUnits('0.000378501108390785', 18),
+                lambda: parseUnits('100000', 18),
+            },
         };
 
-        poolAddressInvertedParams = await doCreatePool({
+        poolFromUnsortedInput = await doCreatePool({
             client,
             testAddress,
-            createPoolInput: poolInputInvertedParams,
+            createPoolInput: poolInputUnsortedTokens,
         });
     }, 120_000);
 
     test('creation', async () => {
-        expect(poolAddress).to.not.be.undefined;
-        expect(poolAddressInvertedParams).to.not.be.undefined;
+        expect(poolFromSortedInput).to.not.be.undefined;
+        expect(poolFromUnsortedInput).to.not.be.undefined;
     });
 
     test('registration', async () => {
@@ -154,25 +152,24 @@ describe('GyroECLP - create & init', () => {
             address: balancerV3Contracts.Vault[chainId],
             abi: vaultExtensionAbi_V3,
             functionName: 'isPoolRegistered',
-            args: [poolAddress],
+            args: [poolFromSortedInput],
         });
         expect(isPoolRegistered).to.be.true;
     });
 
-    test('equivalent ECLP params for pool created with inverted input', async () => {
+    test('pools created with sorted and unsorted input should have the same ECLP params', async () => {
         const eclpParams = await client.readContract({
-            address: poolAddress,
+            address: poolFromSortedInput,
             abi: mockGyroEclpPoolAbi_V3,
             functionName: 'getGyroECLPPoolImmutableData',
             args: [],
         });
         const eclpParamsWithInvertedInput = await client.readContract({
-            address: poolAddressInvertedParams,
+            address: poolFromUnsortedInput,
             abi: mockGyroEclpPoolAbi_V3,
             functionName: 'getGyroECLPPoolImmutableData',
             args: [],
         });
-
         expect(eclpParams).to.deep.equal(eclpParamsWithInvertedInput);
     });
 
@@ -196,7 +193,7 @@ describe('GyroECLP - create & init', () => {
 
         const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
         const poolState = await initPoolDataProvider.getInitPoolData(
-            poolAddress,
+            poolFromSortedInput,
             poolType,
             protocolVersion,
         );
