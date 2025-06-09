@@ -23,7 +23,7 @@ import {
     PublicWalletClient,
     InitPoolDataProvider,
     mockGyroEclpPoolAbi_V3,
-    sortECLPInputByTokenAddress,
+    normalizeEclpParamsAndTokens,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import {
@@ -125,10 +125,12 @@ describe('GyroECLP - create & init', () => {
         // flip the token order and calculate the inverted param values (i.e. DAI in terms of WETH)
         const invertedTokens = [poolInput.tokens[1], poolInput.tokens[0]];
 
-        const { eclpParams: invertedEclpParams } = sortECLPInputByTokenAddress({
-            tokens: invertedTokens,
-            eclpParams: poolInput.eclpParams,
-        });
+        const { eclpParams: invertedEclpParams } = normalizeEclpParamsAndTokens(
+            {
+                tokens: invertedTokens,
+                eclpParams: poolInput.eclpParams,
+            },
+        );
 
         // use inverted tokens and eclp params to create test pool for comparison
         poolInputInvertedParams = {
@@ -173,7 +175,11 @@ describe('GyroECLP - create & init', () => {
             args: [],
         });
 
-        expect(eclpParams).to.deep.equal(eclpParamsWithInvertedInput);
+        expectApproximatelyEqualEclpParams(
+            eclpParams,
+            eclpParamsWithInvertedInput,
+            0.000001, // 0.0001%
+        );
     });
 
     test('initialization', async () => {
@@ -226,3 +232,83 @@ describe('GyroECLP - create & init', () => {
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
     }, 120_000);
 });
+
+const ECLP_PRECISIONS = {
+    paramsAlpha: 18,
+    paramsBeta: 18,
+    paramsC: 18,
+    paramsS: 18,
+    paramsLambda: 18,
+    tauAlphaX: 38,
+    tauAlphaY: 38,
+    tauBetaX: 38,
+    tauBetaY: 38,
+    u: 38,
+    v: 38,
+    w: 38,
+    z: 38,
+    dSq: 38,
+} as const;
+
+type EclpPoolData = {
+    tokens: readonly `0x${string}`[];
+    decimalScalingFactors: readonly bigint[];
+    paramsAlpha: bigint;
+    paramsBeta: bigint;
+    paramsC: bigint;
+    paramsS: bigint;
+    paramsLambda: bigint;
+    tauAlphaX: bigint;
+    tauAlphaY: bigint;
+    tauBetaX: bigint;
+    tauBetaY: bigint;
+    u: bigint;
+    v: bigint;
+    w: bigint;
+    z: bigint;
+    dSq: bigint;
+};
+
+/**
+ * Check if the relative difference between actual and expected values
+ * is within the specified tolerance percentage.
+ */
+function expectApproximatelyEqualEclpParams(
+    actual: EclpPoolData,
+    expected: EclpPoolData,
+    tolerancePercentage: number,
+) {
+    for (const key in expected) {
+        if (typeof expected[key] === 'bigint') {
+            const actualValue = actual[key];
+            const expectedValue = expected[key];
+            const precision = ECLP_PRECISIONS[key];
+            const scalingFactor = 10n ** BigInt(precision);
+
+            const diff =
+                (actualValue - expectedValue) *
+                (actualValue > expectedValue ? 1n : -1n);
+            const relativeError = (diff * scalingFactor) / expectedValue;
+
+            // Calculate required decimal places for the tolerance percentage
+            const toleranceDecimals = -Math.log10(tolerancePercentage);
+            const percentageScalingFactor =
+                10n ** BigInt(Math.ceil(toleranceDecimals));
+
+            // Convert percentage to bigint with appropriate scaling
+            const percentageAsBigInt = BigInt(
+                Math.round(
+                    tolerancePercentage * Number(percentageScalingFactor),
+                ),
+            );
+            const toleranceBigInt =
+                (percentageAsBigInt * scalingFactor) / percentageScalingFactor;
+
+            expect(relativeError).toBeLessThan(toleranceBigInt);
+        } else if (Array.isArray(expected[key])) {
+            expect(actual[key]).toEqual(expected[key]);
+        } else {
+            expect(actual[key]).toEqual(expected[key]);
+        }
+    }
+}

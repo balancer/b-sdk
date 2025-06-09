@@ -50,7 +50,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
     }
 
     private encodeCall(input: CreatePoolGyroECLPInput): Hex {
-        const { tokens, eclpParams } = sortECLPInputByTokenAddress(input);
+        const { tokens, eclpParams } = normalizeEclpParamsAndTokens(input);
 
         const formattedTokens = tokens.map(({ address, ...rest }) => ({
             token: address,
@@ -86,7 +86,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
 }
 
 // We cannot just sort the tokens, but we have to update the ECLP params, too, to preserve their meaning!
-export function sortECLPInputByTokenAddress(input: {
+export function normalizeEclpParamsAndTokens(input: {
     tokens: TokenConfig[];
     eclpParams: EclpParams;
 }): {
@@ -104,9 +104,8 @@ export function sortECLPInputByTokenAddress(input: {
     return {
         tokens: [tokens[1], tokens[0]],
         eclpParams: {
-            // scale from 18 to 100 decmails for reciprocal calculation
-            alpha: (D100 * D100) / ((beta * D100) / D18),
-            beta: (D100 * D100) / ((alpha * D100) / D18),
+            alpha: (D18 * D18) / beta,
+            beta: (D18 * D18) / alpha,
             c: s,
             s: c,
             lambda: lambda,
