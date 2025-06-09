@@ -5,11 +5,17 @@ import {
     CreatePoolBuildCallOutput,
     PoolRoleAccounts,
     CreatePoolGyroECLPInput,
+    TokenConfig,
 } from '../../types';
 import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
-import { balancerV3Contracts, sortByAddress } from '@/utils';
+import { balancerV3Contracts } from '@/utils';
 import { Hex } from '@/types';
 import { Big } from 'big.js';
+import { GyroECLPMath } from '@balancer-labs/balancer-maths';
+
+const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
+const D38 = 10n ** 38n; // 38 decimal precision for derived param return values
+const D100 = 10n ** 100n; // 100 decimal precision for internal calculations
 
 export type EclpParams = {
     alpha: bigint;
@@ -44,9 +50,9 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
     }
 
     private encodeCall(input: CreatePoolGyroECLPInput): Hex {
-        const sortedTokenConfigs = sortByAddress(input.tokens);
+        const { tokens, eclpParams } = normalizeEclpParamsAndTokens(input);
 
-        const tokens = sortedTokenConfigs.map(({ address, ...rest }) => ({
+        const formattedTokens = tokens.map(({ address, ...rest }) => ({
             token: address,
             ...rest,
         }));
@@ -58,17 +64,17 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         };
 
         const args = [
-            input.name || input.symbol,
+            input.name ?? input.symbol,
             input.symbol,
-            tokens,
-            input.eclpParams,
-            input.derivedEclpParams,
+            formattedTokens,
+            eclpParams,
+            input.derivedEclpParams ?? computeDerivedEclpParams(eclpParams),
             roleAccounts,
             input.swapFeePercentage,
             input.poolHooksContract,
             input.enableDonation,
             input.disableUnbalancedLiquidity,
-            input.salt || getRandomBytes32(),
+            input.salt ?? getRandomBytes32(),
         ] as const;
 
         return encodeFunctionData({
@@ -79,11 +85,37 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
     }
 }
 
-export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
-    const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
-    const D38 = 10n ** 38n; // 38 decimal precision for derived param return values
-    const D100 = 10n ** 100n; // 100 decimal precision for internal calculations
+// We cannot just sort the tokens, but we have to update the ECLP params, too, to preserve their meaning!
+export function normalizeEclpParamsAndTokens(input: {
+    tokens: TokenConfig[];
+    eclpParams: EclpParams;
+}): {
+    tokens: TokenConfig[];
+    eclpParams: EclpParams;
+} {
+    const { tokens, eclpParams } = input;
+    const { alpha, beta, c, s, lambda } = eclpParams;
 
+    // if tokens already sorted, do nothing
+    if (tokens[0].address.toLowerCase() < tokens[1].address.toLowerCase())
+        return input;
+
+    // otherwise, fix token order and invert the ECLP params
+    return {
+        tokens: [tokens[1], tokens[0]],
+        eclpParams: {
+            alpha: (D18 * D18) / beta,
+            beta: (D18 * D18) / alpha,
+            c: s,
+            s: c,
+            lambda: lambda,
+        },
+    };
+}
+
+export function computeDerivedEclpParams(
+    params: EclpParams,
+): DerivedEclpParams {
     let { alpha, beta, c, s, lambda } = params; // params start at 18
 
     // scale from 18 to 100
@@ -128,7 +160,7 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
     const v = (s * s * tauBeta.y + c * c * tauAlpha.y) / (D100 * D100);
 
     // all return values scaled to 38 decimal places
-    return {
+    const derivedParams = {
         tauAlpha: {
             x: (tauAlpha.x * D38) / D100,
             y: (tauAlpha.y * D38) / D100,
@@ -143,6 +175,11 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
         z: (z * D38) / D100,
         dSq: (dSq * D38) / D100,
     };
+
+    // Sanity check
+    GyroECLPMath.validateDerivedParams(params, derivedParams);
+
+    return derivedParams;
 }
 
 function bigIntSqrt(val: bigint): bigint {
