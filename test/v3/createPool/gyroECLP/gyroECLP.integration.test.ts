@@ -178,7 +178,7 @@ describe('GyroECLP - create & init', () => {
         expectApproximatelyEqualEclpParams(
             eclpParams,
             eclpParamsWithInvertedInput,
-            0.000001, // 0.0001%
+            0.0000000000001, // 0.00000000001%
         );
     });
 

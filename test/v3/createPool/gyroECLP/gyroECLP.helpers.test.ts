@@ -1,5 +1,12 @@
 // pnpm test v3/createPool/gyroECLP/gyroECLP.helpers.test.ts
-import { computeDerivedEclpParams, normalizeEclpParamsAndTokens } from 'src';
+import {
+    computeDerivedEclpParams,
+    normalizeEclpParamsAndTokens,
+    TokenType,
+    TokenConfig,
+} from 'src';
+import { parseUnits, zeroAddress } from 'viem';
+import { areBigIntsWithinPercent } from '../../../lib/utils/swapHelpers';
 
 describe('Unit tests for GyroECLP helpers', () => {
     describe('computeDerivedEclpParams', () => {
@@ -84,11 +91,174 @@ describe('Unit tests for GyroECLP helpers', () => {
             });
         });
     });
+    describe('normalizeEclpParamsAndTokens', () => {
+        const standardTokenConfig = {
+            rateProvider: zeroAddress,
+            tokenType: TokenType.STANDARD,
+            paysYieldFees: false,
+        };
 
-    // TODO: unit test to make sure numbers "sane" within a small tolerance
-    // describe('normalizeEclpParamsAndTokens', () => {
-    //     test('case 1', async () => {});
-    //     test('case 2', async () => {});
-    //     test('case 3', async () => {});
-    // });
+        const eclpParamsKeys = ['alpha', 'beta', 'c', 's', 'lambda'] as const;
+        const tolerancePercent = 0.00000001; // 0.00000001% tolerance (minimum possible value given magic numbers of areBigIntsWithinPercent: 1e8 for percentFactor and 1e10 for tolerance)
+
+        test('Correlated assets: USDC / DAI', async () => {
+            const tokensInOrder: TokenConfig[] = [
+                {
+                    address: '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a', // USDC
+                    ...standardTokenConfig,
+                },
+                {
+                    address: '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613', // DAI
+                    ...standardTokenConfig,
+                },
+            ];
+            const normalizedEclpParams = {
+                alpha: parseUnits('0.900058521243211174', 18),
+                beta: parseUnits('1.100071525963924657', 18),
+                c: parseUnits('0.707083792244761648', 18),
+                s: parseUnits('0.707129769380957930', 18),
+                lambda: parseUnits('1000', 18),
+            };
+
+            const tokensReversedOrder = [...tokensInOrder].reverse();
+
+            const { eclpParams: invertedEclpParams } =
+                normalizeEclpParamsAndTokens({
+                    tokens: tokensReversedOrder,
+                    eclpParams: normalizedEclpParams,
+                });
+
+            const paramsWithoutInversion = normalizeEclpParamsAndTokens({
+                tokens: tokensInOrder,
+                eclpParams: normalizedEclpParams,
+            });
+
+            const paramsWithInversion = normalizeEclpParamsAndTokens({
+                tokens: tokensReversedOrder,
+                eclpParams: invertedEclpParams,
+            });
+
+            // Compare each parameter with a small tolerance
+            for (const param of eclpParamsKeys) {
+                expect(
+                    areBigIntsWithinPercent(
+                        paramsWithoutInversion.eclpParams[param],
+                        paramsWithInversion.eclpParams[param],
+                        tolerancePercent,
+                    ),
+                ).to.be.true;
+            }
+
+            expect(paramsWithoutInversion.tokens).to.deep.equal(
+                paramsWithInversion.tokens,
+            );
+        });
+
+        test('Semicorrelated assets: WBTC / WETH', async () => {
+            const tokensInOrder: TokenConfig[] = [
+                {
+                    address: '0x29f2d40b0605204364af54ec677bd022da425d03', // WBTC
+                    ...standardTokenConfig,
+                },
+                {
+                    address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9', // WETH
+                    ...standardTokenConfig,
+                },
+            ];
+            const normalizedEclpParams = {
+                alpha: parseUnits('37.830258074007538482', 18),
+                beta: parseUnits('46.236982090453658145', 18),
+                c: parseUnits('0.023783750356145063', 18),
+                s: parseUnits('0.999717126600818302', 18),
+                lambda: parseUnits('1000', 18),
+            };
+
+            const tokensReversedOrder = [...tokensInOrder].reverse();
+
+            const { eclpParams: invertedEclpParams } =
+                normalizeEclpParamsAndTokens({
+                    tokens: tokensReversedOrder,
+                    eclpParams: normalizedEclpParams,
+                });
+
+            const paramsWithoutInversion = normalizeEclpParamsAndTokens({
+                tokens: tokensInOrder,
+                eclpParams: normalizedEclpParams,
+            });
+
+            const paramsWithInversion = normalizeEclpParamsAndTokens({
+                tokens: tokensReversedOrder,
+                eclpParams: invertedEclpParams,
+            });
+
+            // Compare each parameter with a small tolerance
+            for (const param of eclpParamsKeys) {
+                expect(
+                    areBigIntsWithinPercent(
+                        paramsWithoutInversion.eclpParams[param],
+                        paramsWithInversion.eclpParams[param],
+                        tolerancePercent,
+                    ),
+                ).to.be.true;
+            }
+
+            // Compare tokens array
+            expect(paramsWithoutInversion.tokens).to.deep.equal(
+                paramsWithInversion.tokens,
+            );
+        });
+
+        test('Uncorrelated assets: WBTC / DAI', async () => {
+            const tokensInOrder: TokenConfig[] = [
+                {
+                    address: '0x29f2d40b0605204364af54ec677bd022da425d03', // WBTC
+                    ...standardTokenConfig,
+                },
+                {
+                    address: '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a', // DAI
+                    ...standardTokenConfig,
+                },
+            ];
+
+            const normalizedEclpParams = {
+                alpha: parseUnits('98000', 18),
+                beta: parseUnits('120000', 18),
+                c: parseUnits('0.000009207254171956', 18),
+                s: parseUnits('0.999999999957613235', 18),
+                lambda: parseUnits('1000000', 18),
+            };
+
+            const tokensReversedOrder = [...tokensInOrder].reverse();
+
+            const { eclpParams: invertedEclpParams } =
+                normalizeEclpParamsAndTokens({
+                    tokens: tokensReversedOrder,
+                    eclpParams: normalizedEclpParams,
+                });
+
+            const paramsWithoutInversion = normalizeEclpParamsAndTokens({
+                tokens: tokensInOrder,
+                eclpParams: normalizedEclpParams,
+            });
+
+            const paramsWithInversion = normalizeEclpParamsAndTokens({
+                tokens: tokensReversedOrder,
+                eclpParams: invertedEclpParams,
+            });
+
+            for (const param of eclpParamsKeys) {
+                expect(
+                    areBigIntsWithinPercent(
+                        paramsWithoutInversion.eclpParams[param],
+                        paramsWithInversion.eclpParams[param],
+                        tolerancePercent,
+                    ),
+                ).to.be.true;
+            }
+
+            expect(paramsWithoutInversion.tokens).to.deep.equal(
+                paramsWithInversion.tokens,
+            );
+        });
+    });
 });
