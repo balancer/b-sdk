@@ -262,7 +262,7 @@ describe('ReClamm', () => {
 
         test('pool is registered with Vault', async () => {
             const isPoolRegistered = await client.readContract({
-                address: balancerV3Contracts.Vault[chainId],
+                address: AddressProvider.Vault(chainId),
                 abi: vaultExtensionAbi_V3,
                 functionName: 'isPoolRegistered',
                 args: [fullyBoostedPoolAddress],
