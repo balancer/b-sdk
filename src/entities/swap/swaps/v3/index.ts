@@ -11,7 +11,7 @@ import { TokenAmount } from '../../../tokenAmount';
 import { SwapKind, Hex } from '../../../../types';
 import {
     DEFAULT_USERDATA,
-    balancerV3Contracts,
+    // balancerV3Contracts,
     NATIVE_ASSETS,
     MAX_UINT256,
     CHAINS,
@@ -46,6 +46,8 @@ import {
 import { SwapBase } from '../types';
 import { getLimitAmount, getPathLimits } from '../../limits';
 import { Permit2 } from '@/entities/permit2Helper';
+
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export * from './types';
 
@@ -123,7 +125,7 @@ export class SwapV3 implements SwapBase {
         sender?: Address,
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         const routerContract = getContract({
-            address: balancerV3Contracts.Router[this.chainId],
+            address: AddressProvider.Router(this.chainId),
             abi: balancerRouterAbiExtended,
             client,
         });
@@ -141,7 +143,7 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
             return {
-                to: balancerV3Contracts.Router[this.chainId],
+                to: AddressProvider.Router(this.chainId),
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -164,7 +166,7 @@ export class SwapV3 implements SwapBase {
                     { blockNumber: block },
                 );
             return {
-                to: balancerV3Contracts.Router[this.chainId],
+                to: AddressProvider.Router(this.chainId),
                 swapKind: SwapKind.GivenOut,
                 expectedAmountIn: TokenAmount.fromRawAmount(
                     this.inputAmount.token,
@@ -220,7 +222,7 @@ export class SwapV3 implements SwapBase {
     ): Promise<ExactInQueryOutput | ExactOutQueryOutput> {
         // Note - batchSwaps are made via the Batch Router
         const batchRouterContract = getContract({
-            address: balancerV3Contracts.BatchRouter[this.chainId],
+            address: AddressProvider.BatchRouter(this.chainId),
             abi: balancerBatchRouterAbiExtended,
             client,
         });
@@ -242,7 +244,7 @@ export class SwapV3 implements SwapBase {
                 );
 
             return {
-                to: balancerV3Contracts.BatchRouter[this.chainId],
+                to: AddressProvider.BatchRouter(this.chainId),
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -263,7 +265,7 @@ export class SwapV3 implements SwapBase {
         );
 
         return {
-            to: balancerV3Contracts.BatchRouter[this.chainId],
+            to: AddressProvider.BatchRouter(this.chainId),
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,
@@ -360,7 +362,7 @@ export class SwapV3 implements SwapBase {
         }
         if (!this.isBatchSwap) {
             call = {
-                to: balancerV3Contracts.Router[this.chainId],
+                to: AddressProvider.Router(this.chainId),
                 callData: this.callDataSingleSwap(
                     limitAmount,
                     input.deadline ?? MAX_UINT256,
@@ -379,7 +381,7 @@ export class SwapV3 implements SwapBase {
                     'V3 BatchSwaps need path limits for call construction',
                 );
             call = {
-                to: balancerV3Contracts.BatchRouter[this.chainId],
+                to: AddressProvider.BatchRouter(this.chainId),
                 callData: this.callDataBatchSwap(
                     limitAmount.amount,
                     pathLimits,

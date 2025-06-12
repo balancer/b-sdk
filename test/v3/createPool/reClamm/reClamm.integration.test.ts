@@ -20,7 +20,7 @@ import {
     InitPool,
     Permit2Helper,
     PERMIT2,
-    balancerV3Contracts,
+    // balancerV3Contracts,
     vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
@@ -35,6 +35,7 @@ import {
     approveSpenderOnTokens,
     sendTransactionGetBalances,
 } from '../../../lib/utils';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
@@ -184,7 +185,7 @@ describe('ReClamm - create & init', () => {
 
     test('pool should be registered with Vault', async () => {
         const isPoolRegistered = await client.readContract({
-            address: balancerV3Contracts.Vault[chainId],
+            address: AddressProvider.Vault(chainId),
             abi: vaultExtensionAbi_V3,
             functionName: 'isPoolRegistered',
             args: [wethUsdcPoolAddress],

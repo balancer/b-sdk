@@ -1,7 +1,6 @@
 import { Hex, zeroAddress } from 'viem';
 import {
     Address,
-    balancerV3Contracts,
     ChainId,
     missingParameterError,
     NATIVE_ASSETS,
@@ -30,6 +29,7 @@ import {
     RemoveLiquidityV2BuildCallInput,
 } from '@/entities/removeLiquidity/removeLiquidityV2/types';
 import { RemoveLiquidityV2ComposableStableQueryOutput } from '@/entities/removeLiquidity/removeLiquidityV2/composableStable/types';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export type RemoveLiquidityOutput = {
     removeLiquidityQueryOutput: RemoveLiquidityQueryOutput;
@@ -299,7 +299,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : balancerV3Contracts.Router[chainId],
+                : AddressProvider.Router(chainId),
         amountsOut: expectedAmountsOut,
         tokenOutIndex: tokensWithoutBpt.findIndex(
             (t) => t.address === removeLiquidityInput.amountOut.address,
@@ -380,7 +380,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
         to:
             protocolVersion === 2
                 ? VAULT_V2[chainId]
-                : balancerV3Contracts.Router[chainId],
+                : AddressProvider.Router(chainId),
         bptIn: TokenAmount.fromRawAmount(
             bptToken,
             removeLiquidityInput.bptIn.rawAmount,
@@ -467,7 +467,7 @@ export function assertRemoveLiquidityProportional(
             to = VAULT_V2[chainId];
             break;
         case 3:
-            to = balancerV3Contracts.Router[chainId];
+            to = AddressProvider.Router(chainId);
             break;
     }
 
@@ -603,7 +603,7 @@ export function assertRemoveLiquidityBuildCallOutput(
             to = VAULT_V2[removeLiquidityQueryOutput.chainId];
             break;
         case 3:
-            to = balancerV3Contracts.Router[removeLiquidityQueryOutput.chainId];
+            to = AddressProvider.Router(removeLiquidityQueryOutput.chainId);
             break;
     }
 

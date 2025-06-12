@@ -16,11 +16,11 @@ import {
     ChainId,
     SwapKind,
     Swap,
-    balancerV3Contracts,
     PERMIT2,
     PublicWalletClient,
 } from '@/index';
 import { Path } from '@/entities/swap/paths/types';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 import {
     approveSpenderOnTokens,
@@ -206,7 +206,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenIn,
                         });
                         await assertSwapExactIn({
-                            contractToCall: balancerV3Contracts.Router[chainId],
+                            contractToCall: AddressProvider.Router(chainId),
                             client,
                             rpcUrl,
                             chainId,
@@ -221,7 +221,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenOut,
                         });
                         await assertSwapExactOut({
-                            contractToCall: balancerV3Contracts.Router[chainId],
+                            contractToCall: AddressProvider.Router(chainId),
                             client,
                             rpcUrl,
                             chainId,
@@ -239,8 +239,7 @@ describe('SwapV3', () => {
                                 swapKind: SwapKind.GivenIn,
                             });
                             await assertSwapExactIn({
-                                contractToCall:
-                                    balancerV3Contracts.Router[chainId],
+                                contractToCall: AddressProvider.Router(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -255,8 +254,7 @@ describe('SwapV3', () => {
                                 swapKind: SwapKind.GivenOut,
                             });
                             await assertSwapExactOut({
-                                contractToCall:
-                                    balancerV3Contracts.Router[chainId],
+                                contractToCall: AddressProvider.Router(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -277,8 +275,7 @@ describe('SwapV3', () => {
                                 swapKind: SwapKind.GivenIn,
                             });
                             await assertSwapExactIn({
-                                contractToCall:
-                                    balancerV3Contracts.Router[chainId],
+                                contractToCall: AddressProvider.Router(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -297,8 +294,7 @@ describe('SwapV3', () => {
                                 swapKind: SwapKind.GivenOut,
                             });
                             await assertSwapExactOut({
-                                contractToCall:
-                                    balancerV3Contracts.Router[chainId],
+                                contractToCall: AddressProvider.Router(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -319,7 +315,7 @@ describe('SwapV3', () => {
                         test('GivenIn', async () => {
                             await assertSwapExactIn({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -334,7 +330,7 @@ describe('SwapV3', () => {
                         test('GivenOut', async () => {
                             await assertSwapExactOut({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -353,9 +349,7 @@ describe('SwapV3', () => {
                             test('GivenIn', async () => {
                                 await assertSwapExactIn({
                                     contractToCall:
-                                        balancerV3Contracts.BatchRouter[
-                                            chainId
-                                        ],
+                                        AddressProvider.BatchRouter(chainId),
                                     client,
                                     rpcUrl,
                                     chainId,
@@ -370,9 +364,7 @@ describe('SwapV3', () => {
                             test('GivenOut', async () => {
                                 await assertSwapExactOut({
                                     contractToCall:
-                                        balancerV3Contracts.BatchRouter[
-                                            chainId
-                                        ],
+                                        AddressProvider.BatchRouter(chainId),
                                     client,
                                     rpcUrl,
                                     chainId,
@@ -394,9 +386,7 @@ describe('SwapV3', () => {
                                 });
                                 await assertSwapExactIn({
                                     contractToCall:
-                                        balancerV3Contracts.BatchRouter[
-                                            chainId
-                                        ],
+                                        AddressProvider.BatchRouter(chainId),
                                     client,
                                     rpcUrl,
                                     chainId,
@@ -412,9 +402,7 @@ describe('SwapV3', () => {
                                 });
                                 await assertSwapExactOut({
                                     contractToCall:
-                                        balancerV3Contracts.BatchRouter[
-                                            chainId
-                                        ],
+                                        AddressProvider.BatchRouter(chainId),
                                     client,
                                     rpcUrl,
                                     chainId,
@@ -435,7 +423,7 @@ describe('SwapV3', () => {
                             });
                             await assertSwapExactIn({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -451,7 +439,7 @@ describe('SwapV3', () => {
                             });
                             await assertSwapExactOut({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -470,9 +458,7 @@ describe('SwapV3', () => {
                                 });
                                 await assertSwapExactIn({
                                     contractToCall:
-                                        balancerV3Contracts.BatchRouter[
-                                            chainId
-                                        ],
+                                        AddressProvider.BatchRouter(chainId),
                                     client,
                                     rpcUrl,
                                     chainId,
@@ -488,9 +474,7 @@ describe('SwapV3', () => {
                                 });
                                 await assertSwapExactOut({
                                     contractToCall:
-                                        balancerV3Contracts.BatchRouter[
-                                            chainId
-                                        ],
+                                        AddressProvider.BatchRouter(chainId),
                                     client,
                                     rpcUrl,
                                     chainId,
@@ -511,9 +495,7 @@ describe('SwapV3', () => {
                                 });
                                 await assertSwapExactIn({
                                     contractToCall:
-                                        balancerV3Contracts.BatchRouter[
-                                            chainId
-                                        ],
+                                        AddressProvider.BatchRouter(chainId),
                                     client,
                                     rpcUrl,
                                     chainId,
@@ -532,9 +514,7 @@ describe('SwapV3', () => {
                                 });
                                 await assertSwapExactOut({
                                     contractToCall:
-                                        balancerV3Contracts.BatchRouter[
-                                            chainId
-                                        ],
+                                        AddressProvider.BatchRouter(chainId),
                                     client,
                                     rpcUrl,
                                     chainId,
@@ -561,7 +541,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenIn,
                         });
                         await assertSwapExactIn({
-                            contractToCall: balancerV3Contracts.Router[chainId],
+                            contractToCall: AddressProvider.Router(chainId),
                             client,
                             rpcUrl,
                             chainId,
@@ -577,7 +557,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenOut,
                         });
                         await assertSwapExactOut({
-                            contractToCall: balancerV3Contracts.Router[chainId],
+                            contractToCall: AddressProvider.Router(chainId),
                             client,
                             rpcUrl,
                             chainId,
@@ -595,7 +575,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenIn,
                         });
                         await assertSwapExactIn({
-                            contractToCall: balancerV3Contracts.Router[chainId],
+                            contractToCall: AddressProvider.Router(chainId),
                             client,
                             rpcUrl,
                             chainId,
@@ -611,7 +591,7 @@ describe('SwapV3', () => {
                             swapKind: SwapKind.GivenOut,
                         });
                         await assertSwapExactOut({
-                            contractToCall: balancerV3Contracts.Router[chainId],
+                            contractToCall: AddressProvider.Router(chainId),
                             client,
                             rpcUrl,
                             chainId,
@@ -631,7 +611,7 @@ describe('SwapV3', () => {
                         test('GivenIn', async () => {
                             await assertSwapExactIn({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -647,7 +627,7 @@ describe('SwapV3', () => {
                         test('GivenOut', async () => {
                             await assertSwapExactOut({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -665,7 +645,7 @@ describe('SwapV3', () => {
                         test('GivenIn', async () => {
                             await assertSwapExactIn({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -681,7 +661,7 @@ describe('SwapV3', () => {
                         test('GivenOut', async () => {
                             await assertSwapExactOut({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -706,7 +686,7 @@ describe('SwapV3', () => {
                             });
                             await assertSwapExactIn({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -723,7 +703,7 @@ describe('SwapV3', () => {
                             });
                             await assertSwapExactOut({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -742,7 +722,7 @@ describe('SwapV3', () => {
                             });
                             await assertSwapExactIn({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -759,7 +739,7 @@ describe('SwapV3', () => {
                             });
                             await assertSwapExactOut({
                                 contractToCall:
-                                    balancerV3Contracts.BatchRouter[chainId],
+                                    AddressProvider.BatchRouter(chainId),
                                 client,
                                 rpcUrl,
                                 chainId,
@@ -828,8 +808,7 @@ describe('SwapV3', () => {
                     });
                     // Buffers can have a small difference due to rates so we don't check for 100% match between result and query
                     await assertSwapExactIn({
-                        contractToCall:
-                            balancerV3Contracts.BatchRouter[chainId],
+                        contractToCall: AddressProvider.BatchRouter(chainId),
                         client,
                         rpcUrl,
                         chainId,
@@ -854,8 +833,7 @@ describe('SwapV3', () => {
                         swapKind: SwapKind.GivenOut,
                     });
                     await assertSwapExactOut({
-                        contractToCall:
-                            balancerV3Contracts.BatchRouter[chainId],
+                        contractToCall: AddressProvider.BatchRouter(chainId),
                         client,
                         rpcUrl,
                         chainId,

@@ -16,3 +16,4 @@ export * from './stablePool';
 export * from './liquidityBootstrappingPool';
 export * from './gyro2CLP';
 export * from './gyroECLP';
+export * from './mockGyroEclpPool';
