@@ -66,7 +66,7 @@ const targetContractsV3 = [
     'GyroECLPPoolFactory',
     'LBPoolFactory',
     'ReClammPoolFactory',
-    'MockGyroECLPPool',
+    'MockGyroEclpPool',
 ];
 
 const targetContracts = [...targetContractsV2, ...targetContractsV3];
@@ -74,7 +74,7 @@ const targetContracts = [...targetContractsV2, ...targetContractsV3];
 const balancerV2Contracts: ContractRegistry = {};
 const balancerV3Contracts: ContractRegistry = {};
 
-const branch = 'deployment/reclamm-test-3'; // point this at any balancer-deployments branch
+const branch = 'master'; // point this at any balancer-deployments branch
 
 async function updateBalancerDeployments() {
     const supportedNetworks = await fetchSupportedNetworks();
@@ -214,6 +214,7 @@ function exportAbis() {
                 contract[0].toLowerCase() + contract.slice(1)
             }';`,
     );
+
     const exportAbisV3 = targetContractsV3.map(
         (contract) =>
             `export * from './${
