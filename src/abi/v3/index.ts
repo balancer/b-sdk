@@ -11,3 +11,4 @@ export * from './stableSurgePoolFactory';
 export * from './gyroECLPPoolFactory';
 export * from './lBPoolFactory';
 export * from './reClammPoolFactory';
+export * from './mockGyroEclpPool';
