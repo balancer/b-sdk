@@ -2,7 +2,6 @@ import { Account, Address, Hex, parseAbi } from 'viem';
 
 import {
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
-    balancerV3Contracts,
     ChainId,
     MAX_UINT256,
     PublicWalletClient,
@@ -11,6 +10,7 @@ import { getNonce } from './helper';
 import { RemoveLiquidityBaseBuildCallInput } from '../removeLiquidity/types';
 import { getAmountsCall } from '../removeLiquidity/helper';
 import { TokenAmount } from '../tokenAmount';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 type PermitApproval = {
     /** Address of the token to approve */
@@ -51,7 +51,7 @@ export class PermitHelper {
             input.client,
             input.bptIn.token.address,
             input.owner,
-            balancerV3Contracts.Router[input.chainId],
+            AddressProvider.Router(input.chainId),
             nonce,
             amounts.maxBptAmountIn,
             input.deadline,
@@ -106,7 +106,7 @@ export class PermitHelper {
             input.client,
             input.bptIn.token.address,
             input.owner,
-            balancerV3Contracts.CompositeLiquidityRouter[input.chainId],
+            AddressProvider.CompositeLiquidityRouter(input.chainId),
             nonce,
             amounts.maxBptAmountIn,
             input.deadline,

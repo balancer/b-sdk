@@ -10,13 +10,7 @@ import {
     Token,
     TokenAmount,
 } from '@/entities';
-import {
-    balancerV3Contracts,
-    ChainId,
-    NATIVE_ASSETS,
-    PERMIT2,
-    PublicWalletClient,
-} from '@/utils';
+import { ChainId, NATIVE_ASSETS, PERMIT2, PublicWalletClient } from '@/utils';
 import { Address, TestActions, TransactionReceipt, zeroAddress } from 'viem';
 import {
     approveSpenderOnPermit2,
@@ -25,6 +19,7 @@ import {
     setTokenBalances,
 } from './helper';
 import { areBigIntsWithinPercent } from './swapHelpers';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export async function GetBoostedBpt(
     chainId: ChainId,
@@ -69,7 +64,7 @@ export async function GetBoostedBpt(
             client,
             testAddress,
             amount.address,
-            balancerV3Contracts.CompositeLiquidityRouter[chainId],
+            AddressProvider.CompositeLiquidityRouter(chainId),
         );
     }
 
@@ -114,7 +109,7 @@ export async function GetBoostedBpt(
             client,
             testAddress,
             amount.address,
-            balancerV3Contracts.CompositeLiquidityRouter[chainId],
+            AddressProvider.CompositeLiquidityRouter(chainId),
             0n,
         );
     }
@@ -232,7 +227,7 @@ export const assertAddLiquidityBoostedUnbalanced = (
 
     expect(protocolVersion).toEqual(3);
     expect(bptOut.amount > 0n).to.be.true;
-    expect(to).to.eq(balancerV3Contracts.CompositeLiquidityRouter[chainId]);
+    expect(to).to.eq(AddressProvider.CompositeLiquidityRouter(chainId));
     expect(transactionReceipt.status).to.eq('success');
 
     // add one extra index for native token balance
@@ -279,7 +274,7 @@ export const assertAddLiquidityBoostedProportional = (
 
     expect(protocolVersion).toEqual(3);
     expect(bptOut.amount > 0n).to.be.true;
-    expect(to).to.eq(balancerV3Contracts.CompositeLiquidityRouter[chainId]);
+    expect(to).to.eq(AddressProvider.CompositeLiquidityRouter(chainId));
     expect(transactionReceipt.status).to.eq('success');
 
     // add one extra index for native token balance

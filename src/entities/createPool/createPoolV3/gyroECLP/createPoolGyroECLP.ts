@@ -11,6 +11,7 @@ import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
 import { balancerV3Contracts } from '@/utils';
 import { Hex } from '@/types';
 import { Big } from 'big.js';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 
 const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
@@ -45,7 +46,7 @@ export class CreatePoolGyroECLP implements CreatePoolBase {
         const callData = this.encodeCall(input);
         return {
             callData,
-            to: balancerV3Contracts.GyroECLPPoolFactory[input.chainId],
+            to: AddressProvider.GyroECLPPoolFactory(input.chainId),
         };
     }
 
