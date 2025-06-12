@@ -91,6 +91,9 @@ describe('query propagates LBP specific errors', () => {
             swapKind: SwapKind.GivenIn,
         };
         const swap = new Swap(sampleSwapInput);
-        const queryOutput = await swap.query(rpcUrl, 8467070n, testAddress);
+        // this should fail
+        await expect(
+            swap.query(rpcUrl, 8467070n, testAddress),
+        ).rejects.toThrowError('SwapsDisabled');
     });
 });
