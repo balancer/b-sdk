@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.2.0
+
+### Minor Changes
+
+- b4cee37: Add address validation for network deployments
+
 ## 4.1.3
 
 ### Patch Changes
