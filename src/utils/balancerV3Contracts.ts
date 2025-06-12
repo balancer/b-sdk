@@ -52,7 +52,7 @@ export const balancerV3Contracts = {
     },
     ReClammPoolFactory: {
         [ChainId.BASE]: '0xa3b370092aeb56770B23315252aB5E16DAcBF62B',
-        [ChainId.SEPOLIA]: '0x29001C9500D97508a7D82Ded442f0417584660ac',
+        [ChainId.SEPOLIA]: '0x2A4054779DaDf4Cf3F4849f1AC307845F182cfE5',
     },
     Router: {
         [ChainId.ARBITRUM_ONE]: '0xEAedc32a51c510d35ebC11088fD5fF2b47aACF2E',

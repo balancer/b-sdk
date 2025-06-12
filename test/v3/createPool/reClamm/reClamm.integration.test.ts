@@ -11,6 +11,7 @@ import {
     Hex,
     parseAbi,
     erc4626Abi,
+    erc20Abi,
 } from 'viem';
 import {
     CHAINS,
@@ -79,7 +80,7 @@ describe('ReClamm', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8441262n,
+            8525279n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -103,42 +104,6 @@ describe('ReClamm', () => {
                 parseUnits('10000', BAL.decimals),
             ],
         );
-
-        // must call deposit to get erc4626 balances
-        await approveSpenderOnTokens(
-            client,
-            testAddress,
-            [DAI.address],
-            stataDAI.address,
-        );
-        const depositDaiHash = await client.writeContract({
-            account: testAddress,
-            chain: CHAINS[chainId],
-            abi: erc4626Abi,
-            address: stataDAI.address,
-            functionName: 'deposit',
-            args: [parseUnits('10', DAI.decimals), testAddress],
-        });
-        await client.waitForTransactionReceipt({
-            hash: depositDaiHash,
-        }); // wait for deposit confirmation before starting tests
-        await approveSpenderOnTokens(
-            client,
-            testAddress,
-            [USDC.address],
-            stataUSDC.address,
-        );
-        const depositUsdcHash = await client.writeContract({
-            account: testAddress,
-            chain: CHAINS[chainId],
-            abi: erc4626Abi,
-            address: stataUSDC.address,
-            functionName: 'deposit',
-            args: [parseUnits('1000', USDC.decimals), testAddress],
-        });
-        await client.waitForTransactionReceipt({
-            hash: depositUsdcHash,
-        }); // wait for deposit confirmation before starting tests
 
         await approveSpenderOnTokens(
             client,
@@ -202,7 +167,7 @@ describe('ReClamm', () => {
                     paysYieldFees: false,
                 },
                 {
-                    address: stataUSDC.address,
+                    address: USDC.address,
                     rateProvider: stataUSDCRateProvider,
                     tokenType: TokenType.TOKEN_WITH_RATE,
                     paysYieldFees: true,
@@ -222,13 +187,13 @@ describe('ReClamm', () => {
             symbol: 'stataUSDC-stataDAI',
             tokens: [
                 {
-                    address: stataUSDC.address,
+                    address: USDC.address,
                     rateProvider: stataUSDCRateProvider,
                     tokenType: TokenType.TOKEN_WITH_RATE,
                     paysYieldFees: true,
                 },
                 {
-                    address: stataDAI.address,
+                    address: DAI.address,
                     rateProvider: stataDAIRateProvider,
                     tokenType: TokenType.TOKEN_WITH_RATE,
                     paysYieldFees: true,
@@ -393,7 +358,7 @@ describe('ReClamm', () => {
                 );
 
                 const txOutput = await sendTransactionGetBalances(
-                    [DAI.address, BAL.address],
+                    [BAL.address, DAI.address],
                     client,
                     testAddress,
                     initPoolBuildOutput.to,
@@ -445,7 +410,7 @@ describe('ReClamm', () => {
                 );
 
                 const txOutput = await sendTransactionGetBalances(
-                    [WETH.address, stataUSDC.address],
+                    [WETH.address, USDC.address],
                     client,
                     testAddress,
                     initPoolBuildOutput.to,
@@ -464,10 +429,7 @@ describe('ReClamm', () => {
                     address: semiBoostedPoolAddress,
                     abi: reclammPoolAbi,
                     functionName: 'computeInitialBalancesRaw',
-                    args: [
-                        stataUSDC.address,
-                        parseUnits('1', stataUSDC.decimals),
-                    ],
+                    args: [USDC.address, parseUnits('1', USDC.decimals)],
                 });
 
                 const amountsIn = semiBoostedPoolState.tokens.map(
@@ -498,7 +460,7 @@ describe('ReClamm', () => {
                 );
 
                 const txOutput = await sendTransactionGetBalances(
-                    [stataUSDC.address, WETH.address],
+                    [WETH.address, USDC.address],
                     client,
                     testAddress,
                     initPoolBuildOutput.to,
@@ -519,10 +481,7 @@ describe('ReClamm', () => {
                     address: fullyBoostedPoolAddress,
                     abi: reclammPoolAbi,
                     functionName: 'computeInitialBalancesRaw',
-                    args: [
-                        stataDAI.address,
-                        parseUnits('1', stataDAI.decimals),
-                    ],
+                    args: [DAI.address, parseUnits('1', DAI.decimals)],
                 });
 
                 const amountsIn = fullyBoostedPoolState.tokens.map(
@@ -553,7 +512,7 @@ describe('ReClamm', () => {
                 );
 
                 const txOutput = await sendTransactionGetBalances(
-                    [stataDAI.address, stataUSDC.address],
+                    [USDC.address, DAI.address],
                     client,
                     testAddress,
                     initPoolBuildOutput.to,
@@ -572,10 +531,7 @@ describe('ReClamm', () => {
                     address: fullyBoostedPoolAddress,
                     abi: reclammPoolAbi,
                     functionName: 'computeInitialBalancesRaw',
-                    args: [
-                        stataUSDC.address,
-                        parseUnits('1', stataUSDC.decimals),
-                    ],
+                    args: [USDC.address, parseUnits('1', USDC.decimals)],
                 });
 
                 const amountsIn = fullyBoostedPoolState.tokens.map(
@@ -606,7 +562,7 @@ describe('ReClamm', () => {
                 );
 
                 const txOutput = await sendTransactionGetBalances(
-                    [stataUSDC.address, stataDAI.address],
+                    [USDC.address, DAI.address],
                     client,
                     testAddress,
                     initPoolBuildOutput.to,
