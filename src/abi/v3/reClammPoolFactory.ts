@@ -68,12 +68,33 @@ export const reClammPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'InvalidTokenType',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'MaxTokens',
         type: 'error',
     },
     {
         inputs: [],
         name: 'PoolPauseWindowDurationOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint8',
+                name: 'bits',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
+        ],
+        name: 'SafeCastOverflowedUintDowncast',
         type: 'error',
     },
     {
@@ -177,29 +198,46 @@ export const reClammPoolFactoryAbi_V3 = [
                 type: 'uint256',
             },
             {
+                components: [
+                    {
+                        internalType: 'uint256',
+                        name: 'initialMinPrice',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'initialMaxPrice',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'initialTargetPrice',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'tokenAPriceIncludesRate',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'tokenBPriceIncludesRate',
+                        type: 'bool',
+                    },
+                ],
+                internalType: 'struct ReClammPriceParams',
+                name: 'priceParams',
+                type: 'tuple',
+            },
+            {
                 internalType: 'uint256',
-                name: 'initialMinPrice',
+                name: 'dailyPriceShiftExponent',
                 type: 'uint256',
             },
             {
                 internalType: 'uint256',
-                name: 'initialMaxPrice',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'initialTargetPrice',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'priceShiftDailyRate',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint64',
                 name: 'centerednessMargin',
-                type: 'uint64',
+                type: 'uint256',
             },
             {
                 internalType: 'bytes32',

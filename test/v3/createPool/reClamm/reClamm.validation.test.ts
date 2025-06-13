@@ -1,4 +1,4 @@
-// pnpm test -- createPool/reClamm/reClamm.validation.test.ts
+// pnpm test createPool/reClamm/reClamm.validation.test.ts
 
 import { parseUnits, zeroAddress } from 'viem';
 import {
@@ -37,9 +37,13 @@ describe('create reclamm pool input validations', () => {
             swapFeePercentage: parseUnits('0.01', 18),
             pauseManager: zeroAddress,
             swapFeeManager: zeroAddress,
-            initialMinPrice: parseUnits('0.5', 18),
-            initialMaxPrice: parseUnits('8', 18),
-            initialTargetPrice: parseUnits('3', 18),
+            priceParams: {
+                initialMinPrice: parseUnits('0.5', 18),
+                initialMaxPrice: parseUnits('8', 18),
+                initialTargetPrice: parseUnits('3', 18),
+                tokenAPriceIncludesRate: false,
+                tokenBPriceIncludesRate: false,
+            },
             priceShiftDailyRate: parseUnits('1', 18),
             centerednessMargin: parseUnits('0.2', 18),
             chainId,
