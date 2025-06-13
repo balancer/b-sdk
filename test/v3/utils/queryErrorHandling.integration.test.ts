@@ -3,32 +3,24 @@
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     createTestClient,
-    Hex,
     http,
-    parseUnits,
     publicActions,
     TestActions,
     walletActions,
-    zeroAddress,
 } from 'viem';
 import {
     Address,
-    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
     CHAINS,
     ChainId,
-    PERMIT2,
     PublicWalletClient,
-    Slippage,
-    Token,
-    TokenAmount,
-    AddLiquidityNested,
-    AddLiquidityNestedInput,
-    AddLiquidityNestedQueryOutputV3,
-    AddLiquidityNestedCallInput,
-    SDKError,
+    AddLiquidity,
     Swap,
     SwapInput,
     SwapKind,
+    AddLiquidityUnbalancedInput,
+    AddLiquidityBaseInput,
+    AddLiquidityKind,
+    PoolState,
 } from '@/index';
 
 const chainId = ChainId.SEPOLIA;
@@ -91,5 +83,80 @@ describe('query propagates LBP specific errors', () => {
         await expect(
             swap.query(rpcUrl, 8467070n, testAddress),
         ).rejects.toThrowError('SwapsDisabled');
+    });
+    test('Query propagates MaxInAmountOut error', async () => {
+        const sampleSwapInput: SwapInput = {
+            chainId: chainId,
+            paths: [
+                {
+                    pools: ['0x52c5b95c675514ff5b2470161efafc0c672cf353'],
+                    tokens: [
+                        {
+                            address:
+                                '0x0f409E839a6A790aecB737E4436293Be11717f95',
+                            decimals: 18,
+                        },
+                        {
+                            address:
+                                '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',
+                            decimals: 18,
+                        },
+                    ],
+                    inputAmountRaw: 1000000000000000000n,
+                    outputAmountRaw: 0n,
+                    protocolVersion: 3,
+                },
+            ],
+            swapKind: SwapKind.GivenIn,
+        };
+        const swap = new Swap(sampleSwapInput);
+        // this should fail
+        await expect(swap.query(rpcUrl)).rejects.toThrowError('MaxInRatio');
+    });
+    test('Query propagates MaxInvariantRatio for an AddLiquidity', async () => {
+        const addLiquidity = new AddLiquidity();
+        const addLiquidityBaseInput: AddLiquidityBaseInput = {
+            chainId: chainId,
+            rpcUrl: rpcUrl,
+            sender: testAddress,
+        };
+        const addLiquidityInput: AddLiquidityUnbalancedInput = {
+            ...addLiquidityBaseInput,
+            kind: AddLiquidityKind.Unbalanced,
+            amountsIn: [
+                {
+                    address: '0x0f409E839a6A790aecB737E4436293Be11717f95',
+                    decimals: 18,
+                    rawAmount: 100000000000000000000n,
+                },
+                {
+                    address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',
+                    decimals: 18,
+                    rawAmount: 100000000000000000000n,
+                },
+            ],
+        };
+        const poolState: PoolState = {
+            id: '0x52c5b95c675514ff5b2470161efafc0c672cf353',
+            address: '0x52c5b95c675514ff5b2470161efafc0c672cf353',
+            type: 'WEIGHTED',
+            tokens: [
+                {
+                    address: '0x0f409E839a6A790aecB737E4436293Be11717f95',
+                    decimals: 18,
+                    index: 0,
+                },
+                {
+                    address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',
+                    decimals: 18,
+                    index: 1,
+                },
+            ],
+            protocolVersion: 3,
+        };
+
+        await expect(
+            addLiquidity.query(addLiquidityInput, poolState),
+        ).rejects.toThrowError('InvariantRatioAboveMax');
     });
 });
