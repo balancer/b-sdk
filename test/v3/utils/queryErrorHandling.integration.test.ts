@@ -57,10 +57,6 @@ describe('query propagates LBP specific errors', () => {
         testAddress = (await client.getAddresses())[0];
     });
 
-    beforeEach(() => {
-        // nothing needed
-    });
-
     test('Query propagates LBP specific errors', async () => {
         // Assuming the ABIs are correctly part of the used ABIS
         // one test for an LBP error suffices to ensure
