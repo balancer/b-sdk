@@ -104,14 +104,7 @@ describe('ReClamm', () => {
         await approveSpenderOnTokens(
             client,
             testAddress,
-            [
-                WETH.address,
-                USDC.address,
-                DAI.address,
-                BAL.address,
-                stataUSDC.address,
-                stataDAI.address,
-            ],
+            [WETH.address, USDC.address, DAI.address, BAL.address],
             PERMIT2[chainId],
         );
 
