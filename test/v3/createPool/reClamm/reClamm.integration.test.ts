@@ -10,8 +10,6 @@ import {
     TestActions,
     Hex,
     parseAbi,
-    erc4626Abi,
-    erc20Abi,
 } from 'viem';
 import {
     CHAINS,
@@ -23,7 +21,6 @@ import {
     InitPool,
     Permit2Helper,
     PERMIT2,
-    // balancerV3Contracts,
     vaultExtensionAbi_V3,
     PublicWalletClient,
     InitPoolDataProvider,
@@ -49,9 +46,7 @@ const BAL = TOKENS[chainId].BAL;
 const DAI = TOKENS[chainId].DAI_AAVE;
 const USDC = TOKENS[chainId].USDC_AAVE;
 // erc4626
-const stataUSDC = TOKENS[chainId].stataUSDC;
 const stataUSDCRateProvider = '0x34101091673238545de8a846621823d9993c3085';
-const stataDAI = TOKENS[chainId].stataDAI;
 const stataDAIRateProvider = '0x22db61f3a8d81d3d427a157fdae8c7eb5b5fd373';
 
 const reclammPoolAbi = parseAbi([
