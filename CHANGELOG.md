@@ -1,5 +1,15 @@
 # @balancer/sdk
 
+## 4.3.0
+
+### Minor Changes
+
+- 07638a9: additional abis for improved error reporting
+
+### Patch Changes
+
+- 9fc74d3: Update to active reclamm contracts
+
 ## 4.2.0
 
 ### Minor Changes
