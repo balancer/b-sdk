@@ -19,7 +19,7 @@ import {
     fraxtal,
     sonic,
 } from 'viem/chains';
-import { monadTestnet } from './customChains';
+import { monadTestnet, hyperEVM } from './customChains';
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
 /*
@@ -79,6 +79,7 @@ export enum ChainId {
     BASE_GOERLI = 84531,
     SEPOLIA = 11155111,
     MONAD_TESTNET = 10143,
+    HYPER_EVM = 999,
 }
 
 // The Balancer API requires the chain to be passed as a specific string
@@ -97,6 +98,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.SEPOLIA]: 'SEPOLIA',
     [ChainId.SONIC]: 'SONIC',
     [ChainId.MONAD_TESTNET]: 'MONAD_TESTNET',
+    [ChainId.HYPER_EVM]: 'HYPER_EVM',
 };
 
 export const CHAINS: Record<number, Chain> = {
@@ -118,6 +120,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.SEPOLIA]: sepolia,
     [ChainId.SONIC]: sonic,
     [ChainId.MONAD_TESTNET]: monadTestnet,
+    [ChainId.HYPER_EVM]: hyperEVM,
 };
 
 export const PERMIT2: Record<number, Address> = {
