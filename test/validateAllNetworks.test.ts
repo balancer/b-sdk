@@ -95,7 +95,6 @@ describe('validateAllNetworks', () => {
         let client: PublicWalletClient & TestActions;
         let testAddress: Address;
         let rpcUrl: string;
-        let snapshot: Hex;
         let tokenIn: TestToken;
         let tokenOut: TestToken;
         let pool: TestPool;
