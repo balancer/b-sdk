@@ -144,7 +144,7 @@ describe('validateAllNetworks', () => {
                     client,
                     testAddress,
                     [tokenIn.address, tokenOut.address],
-                    [tokenIn.slot, tokenOut.slot],
+                    [tokenIn.slot ?? 0, tokenOut.slot ?? 0],
                     [parseEther('100'), parseEther('100')],
                 );
                 if (PERMIT2[chainId]) {
