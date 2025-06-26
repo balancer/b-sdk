@@ -12,17 +12,21 @@ export type SorInput = {
     swapKind: SwapKind;
     swapAmount: TokenAmount; // API expects input in human readable form
     useProtocolVersion?: 2 | 3; // If not specified API will return best
+    poolIds?: Address[]; // If specified, API will return only paths that contain these poolIds
+    considerPoolsWithHooks?: boolean; // If true, API will return paths that contain pools with hooks
 };
 
 export class SorSwapPaths {
     readonly sorSwapPathQuery = `
-  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!) {
+  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $considerPoolsWithHooks: Boolean, $poolIds: [String!]) {
     sorGetSwapPaths(
     swapAmount: $swapAmount
     chain: $chain
     swapType: $swapType
     tokenIn: $tokenIn
     tokenOut: $tokenOut
+    considerPoolsWithHooks: $considerPoolsWithHooks
+    poolIds: $poolIds
     ) {
       tokenInAmount
       tokenOutAmount
@@ -47,7 +51,7 @@ export class SorSwapPaths {
   }
 `;
     readonly sorSwapPathQueryWithVersion = `
-  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $useProtocolVersion: Int!) {
+  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $useProtocolVersion: Int!, $poolIds: [String!], $considerPoolsWithHooks: Boolean) {
     sorGetSwapPaths(
     swapAmount: $swapAmount
     chain: $chain
@@ -55,6 +59,8 @@ export class SorSwapPaths {
     tokenIn: $tokenIn
     tokenOut: $tokenOut
     useProtocolVersion: $useProtocolVersion
+    considerPoolsWithHooks: $considerPoolsWithHooks
+    poolIds: $poolIds
     ) {
       tokenInAmount
       tokenOutAmount
@@ -82,7 +88,15 @@ export class SorSwapPaths {
     constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
     async fetchSorSwapPaths(sorInput: SorInput): Promise<Path[]> {
-        const variables = {
+        const baseVariables: {
+            chain: string;
+            swapAmount: string;
+            swapType: string;
+            tokenIn: Address;
+            tokenOut: Address;
+            considerPoolsWithHooks: boolean;
+            poolIds?: Address[];
+        } = {
             chain: this.mapGqlChain(sorInput.chainId),
             swapAmount: sorInput.swapAmount.toSignificant(
                 sorInput.swapAmount.token.decimals,
@@ -93,18 +107,26 @@ export class SorSwapPaths {
                     : 'EXACT_OUT',
             tokenIn: sorInput.tokenIn,
             tokenOut: sorInput.tokenOut,
+            considerPoolsWithHooks: sorInput.considerPoolsWithHooks ?? true,
         };
+
+        // Add poolIds only if provided
+        if (sorInput.poolIds && sorInput.poolIds.length > 0) {
+            baseVariables.poolIds = sorInput.poolIds;
+        }
+
+        const variables = sorInput.useProtocolVersion
+            ? {
+                  ...baseVariables,
+                  useProtocolVersion: sorInput.useProtocolVersion,
+              }
+            : baseVariables;
+
         const { data } = await this.balancerApiClient.fetch({
             query: sorInput.useProtocolVersion
                 ? this.sorSwapPathQueryWithVersion
                 : this.sorSwapPathQuery,
-            variables: sorInput.useProtocolVersion
-                ? {
-                      ...variables,
-                      useProtocolVersion:
-                          sorInput.useProtocolVersion.toString(),
-                  }
-                : variables,
+            variables,
         });
         const poolGetPool: Path[] = data.sorGetSwapPaths.paths;
         return poolGetPool;
