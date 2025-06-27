@@ -100,7 +100,7 @@ export class BalancerApiClient {
     async fetch(requestQuery: {
         operationName?: string;
         query: string;
-        variables?: Record<string, string>;
+        variables?: Record<string, string | boolean | string[] | number>;
     }) {
         const response = await fetch(this.apiUrl, {
             method: 'post',
