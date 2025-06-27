@@ -48,6 +48,7 @@ const CHAIN_ANVIL_MAP: Partial<Record<number, keyof typeof ANVIL_NETWORKS>> = {
     [ChainId.ARBITRUM_ONE]: 'ARBITRUM_ONE',
     [ChainId.GNOSIS_CHAIN]: 'GNOSIS_CHAIN',
     [ChainId.SONIC]: 'SONIC',
+    [ChainId.HYPER_EVM]: 'HYPER_EVM',
     // Add/remove mappings as needed for your test coverage
 };
 
@@ -69,23 +70,23 @@ const NETWORK_CONFIG: Partial<
         poolKey: 'MOCK_WETH_BAL_POOL',
         inputAmountRaw: 100000000000n,
     },
+    [ChainId.HYPER_EVM]: {
+        tokenInKey: 'feWETH',
+        tokenOutKey: 'feUSD',
+        poolKey: 'MOCK_FEUSD_FEWETH_POOL',
+        inputAmountRaw: 100000000000n,
+    },
 };
 
 // Optionally override fork block numbers for specific chains. Useful to select pools deployed on V3 after
 // the specified block in anvil-global-setup.ts
 const BLOCK_NUMBER_OVERRIDES: Partial<Record<number, bigint>> = {
-    // Example:
-    // [ChainId.SEPOLIA]: 12345678n,
-    // [ChainId.HYPER_EVM]: 9876543n,
+    [ChainId.HYPER_EVM]: 6892528n,
     [ChainId.MAINNET]: 22788192n,
 };
 
 // List of ChainIds to run the test for. Modify this array to select which chains to test.
-const CHAINS_TO_TEST: number[] = [
-    ChainId.SEPOLIA,
-    // ChainId.HYPER_EVM,
-    // ChainId.MAINNET,
-];
+const CHAINS_TO_TEST: number[] = [ChainId.SEPOLIA, ChainId.HYPER_EVM];
 
 describe('validateAllNetworks', () => {
     // Only test chains that have a mapping to ANVIL_NETWORKS and are in CHAINS_TO_TEST
@@ -95,7 +96,6 @@ describe('validateAllNetworks', () => {
         let client: PublicWalletClient & TestActions;
         let testAddress: Address;
         let rpcUrl: string;
-        let snapshot: Hex;
         let tokenIn: TestToken;
         let tokenOut: TestToken;
         let pool: TestPool;
@@ -145,7 +145,7 @@ describe('validateAllNetworks', () => {
                     client,
                     testAddress,
                     [tokenIn.address, tokenOut.address],
-                    [tokenIn.slot, tokenOut.slot],
+                    [tokenIn.slot ?? 0, tokenOut.slot ?? 0],
                     [parseEther('100'), parseEther('100')],
                 );
                 if (PERMIT2[chainId]) {
