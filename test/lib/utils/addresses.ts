@@ -208,6 +208,18 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 51,
         },
     },
+    [ChainId.HYPER_EVM]: {
+        feUSD: {
+            address: '0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70',
+            decimals: 18,
+            slot: 100, // 100 placeholder. This is not working
+        },
+        feWETH: {
+            address: '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb',
+            decimals: 6,
+            slot: 51,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };
@@ -370,6 +382,15 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         SDAI_BRLA_POOL: {
             address: '0xa91c3c043051e7e680b61d79b3a733d3e2c0fb5e',
             id: '0xa91c3c043051e7e680b61d79b3a733d3e2c0fb5e',
+            type: PoolType.Stable,
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.HYPER_EVM]: {
+        MOCK_FEUSD_FEWETH_POOL: {
+            address: '0x278E31550A3708fb20A7A33bEd0CEcE79FE7ac00',
+            id: '0x278E31550A3708fb20A7A33bEd0CEcE79FE7ac00',
             type: PoolType.Stable,
             decimals: 18,
             slot: 0,
