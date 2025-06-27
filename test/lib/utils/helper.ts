@@ -16,7 +16,6 @@ import {
     toBytes,
     toHex,
     trim,
-    zeroAddress,
 } from 'viem';
 
 import { permit2Abi } from '@/abi';
@@ -63,9 +62,8 @@ export const hasApprovedTokenOnPermit2 = async (
     amount = maxUint160,
 ): Promise<boolean> => {
     const chainId = await client.getChainId();
-    const permitAddress = PERMIT2[chainId];
     const [allowance, ,] = await client.readContract({
-        address: permitAddress,
+        address: PERMIT2[chainId],
         abi: permit2Abi,
         functionName: 'allowance',
         args: [account, token, spender],
@@ -131,8 +129,7 @@ export const approveToken = async (
                     client,
                     accountAddress,
                     tokenAddress,
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId] ??
-                        zeroAddress,
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
                     amount,
                     deadline,
                 );
