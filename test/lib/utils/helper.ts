@@ -16,6 +16,7 @@ import {
     toBytes,
     toHex,
     trim,
+    zeroAddress,
 } from 'viem';
 
 import { permit2Abi } from '@/abi';
@@ -129,7 +130,8 @@ export const approveToken = async (
                     client,
                     accountAddress,
                     tokenAddress,
-                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId],
+                    BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[chainId] ??
+                        zeroAddress,
                     amount,
                     deadline,
                 );
