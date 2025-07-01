@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.4.0
+
+### Minor Changes
+
+- 06adec2: enable hyperEVM support
+
 ## 4.3.0
 
 ### Minor Changes
