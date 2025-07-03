@@ -75,6 +75,13 @@ export class AddressProvider {
             chainId,
         );
     }
+    static LBPoolMigrationRouter(chainId: ChainId): Hex {
+        /* return AddressProvider.getAddress(
+            balancerV3Contracts.LBPoolMigrationRouter,
+            chainId,
+        ); */
+        return '0x0000000000000000000000000000000000000000'; // TODO: remove this
+    }
     static ReClammPoolFactory(chainId: ChainId): Hex {
         return AddressProvider.getAddress(
             balancerV3Contracts.ReClammPoolFactory,

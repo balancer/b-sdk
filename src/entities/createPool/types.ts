@@ -181,3 +181,15 @@ export type CreatePoolLiquidityBootstrappingInput = Omit<
     lbpParams: LBPParams;
     poolType: PoolType.LiquidityBootstrapping;
 };
+
+export type LBPMigrationParams = {
+    bptLockDuration: bigint;
+    bptPercentageToMigrate: bigint;
+    migrationWeightProjectToken: bigint;
+    migrationWeightReserveToken: bigint;
+};
+
+export type CreatePoolLiquidityBootstrappingWithMigrationInput =
+    CreatePoolLiquidityBootstrappingInput & {
+        lbpMigrationParams: LBPMigrationParams;
+    };
