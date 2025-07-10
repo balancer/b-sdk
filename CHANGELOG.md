@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.4.1
+
+### Patch Changes
+
+- 4d30a06: export address provider
+
 ## 4.4.0
 
 ### Minor Changes
