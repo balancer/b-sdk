@@ -76,7 +76,7 @@ describe('ReClamm', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8525279n,
+            8769420n,
         ));
         client = createTestClient({
             mode: 'anvil',
