@@ -98,7 +98,7 @@ export class AddLiquidityBoostedV3 {
                     wrapUnderlying[t.index] = t.isUnderlyingToken;
                 });
 
-                // It is allowed not not provide the same amount of TokenAmounts as inputs
+                // It is allowed not provide the same amount of TokenAmounts as inputs
                 // as the pool has tokens, in this case, the input tokens are filled with
                 // a default value ( 0 in this case ) to assure correct amounts in as the pool has tokens.
                 const sortedTokens = getSortedTokens(tokensIn, input.chainId);
