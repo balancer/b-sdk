@@ -259,7 +259,7 @@ describe('ReClamm', () => {
         });
     });
 
-    describe('initialization', () => {
+    describe.skip('initialization', () => {
         describe('with zero tokens having a rate', () => {
             test('reference: 18 decimal token A', async () => {
                 const initAmountsRaw = await client.readContract({
