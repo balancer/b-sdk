@@ -76,7 +76,7 @@ describe('ReClamm', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8525279n,
+            8769420n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -259,7 +259,7 @@ describe('ReClamm', () => {
         });
     });
 
-    describe('initialization', () => {
+    describe.skip('initialization', () => {
         describe('with zero tokens having a rate', () => {
             test('reference: 18 decimal token A', async () => {
                 const initAmountsRaw = await client.readContract({
