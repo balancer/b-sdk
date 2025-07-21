@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.5.0
+
+### Minor Changes
+
+- da8f344: Update reCLAMM addresses to V2. Also adds Sonic reCLAMM factory.
+
 ## 4.4.1
 
 ### Patch Changes
