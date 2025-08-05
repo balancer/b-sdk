@@ -29,6 +29,8 @@ export const ZERO_ADDRESS: Address =
 export const EMPTY_SENDER = { account: ZERO_ADDRESS };
 
 const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+const HYPER_EVM_NATIVE_ADDRESS: Address =
+    '0x2222222222222222222222222222222222222222';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
 export const MAX_UINT256 =
@@ -248,6 +250,14 @@ export const NATIVE_ASSETS = {
         'S',
         'Sonic',
         '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',
+    ),
+    [ChainId.HYPER_EVM]: new Token(
+        ChainId.HYPER_EVM,
+        HYPER_EVM_NATIVE_ADDRESS,
+        18,
+        'HYPE',
+        'Hype',
+        '0x5555555555555555555555555555555555555555',
     ),
 };
 

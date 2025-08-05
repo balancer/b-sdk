@@ -1,5 +1,23 @@
 # @balancer/sdk
 
+## 4.5.1
+
+### Patch Changes
+
+- 01571a7: Add hyperEVM native asset config
+
+## 4.5.0
+
+### Minor Changes
+
+- da8f344: Update reCLAMM addresses to V2. Also adds Sonic reCLAMM factory.
+
+## 4.4.1
+
+### Patch Changes
+
+- 4d30a06: export address provider
+
 ## 4.4.0
 
 ### Minor Changes
