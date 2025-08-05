@@ -20,6 +20,8 @@ export type MigratePoolLiquidityBootstrappingInput = {
     weightedPoolParams: WeightedPoolParams;
 };
 
+export type MigratePoolQueryInput = MigratePoolLiquidityBootstrappingQueryInput;
+
 export type MigratePoolLiquidityBootstrappingQueryInput =
     MigratePoolLiquidityBootstrappingInput & {
         sender: Address;
@@ -28,10 +30,9 @@ export type MigratePoolLiquidityBootstrappingQueryInput =
 export type MigratePoolQueryOutput =
     MigratePoolLiquidityBootstrappingQueryOutput;
 
-export type MigratePoolBuildCallOutput = {
-    callData: Hex;
-    to: Address;
-};
+// function is not payable, so no value is needed
+export type MigratePoolBuildCallOutput =
+    MigratePoolLiquidityBootstrappingBuildCallOutput;
 
 export type WeightedPoolParams = {
     name?: string;

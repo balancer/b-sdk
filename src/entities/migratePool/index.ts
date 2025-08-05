@@ -2,6 +2,7 @@ import { poolTypeProtocolVersionError } from '@/utils';
 import {
     MigratePoolBase,
     MigratePoolInput,
+    MigratePoolQueryInput,
     MigratePoolBuildCallOutput,
     MigratePoolQueryOutput,
 } from './types';
@@ -24,7 +25,7 @@ export class MigratePool implements MigratePoolBase {
     }
 
     public query(
-        input: MigratePoolInput,
+        input: MigratePoolQueryInput,
         block?: bigint,
     ): Promise<MigratePoolQueryOutput> {
         return this.getMigratePool(input.poolType).query(input, block);

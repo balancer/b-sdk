@@ -24,6 +24,7 @@ import {
     ChainId,
     PoolType,
     MigratePoolLiquidityBootstrappingInput,
+    MigratePoolQueryInput,
     WeightedPoolParams,
     MigratePool,
     CHAINS,
@@ -71,7 +72,7 @@ export default async function runAgainstNetwork() {
         weightedPoolParams,
     };
 
-    const migratePoolQueryInput = {
+    const migratePoolQueryInput: MigratePoolQueryInput = {
         ...migratePoolInput,
         sender: querySender,
     };
