@@ -53,7 +53,10 @@ export const balancerV3Contracts = {
         [ChainId.HYPER_EVM]: '0x013D4382F291be5688AFBcc741Ee8A24C66B2C92',
         [ChainId.MAINNET]: '0x4eff2d77D9fFbAeFB4b141A3e494c085b3FF4Cb5',
         [ChainId.OPTIMISM]: '0xC1A64500E035D9159C8826E982dFb802003227f0',
-        [ChainId.SEPOLIA]: '0xA714753434481DbaBf7921963f18190636eCde69',
+        [ChainId.SEPOLIA]: '0xE92cF5185384f53B2af74A2eBA62ba3A9C0ED65B',
+    },
+    LBPMigrationRouter: {
+        [ChainId.SEPOLIA]: '0x0AE19A3f8c35e0156E0d39307ad4cce1acD42929',
     },
     ReClammPoolFactory: {
         [ChainId.ARBITRUM_ONE]: '0xa1D0791a41318c775707C56eAe247AF81a05322C',

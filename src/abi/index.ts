@@ -23,6 +23,7 @@ import {
     liquidityBootstrappingPoolAbi_V3,
     gyro2CLPAbi_V3,
     gyroECLPAbi_V3,
+    migrationRouter_V3,
 } from './v3';
 
 export * from './authorizer';
@@ -81,6 +82,11 @@ export const balancerBatchRouterAbiExtended = [
     ...poolABIsV3,
 ];
 
+export const balancerMigrationRouterAbiExtended = [
+    ...migrationRouter_V3,
+    ...commonABIsV3,
+    ...poolABIsV3,
+];
 // V3 Pool Factories ABIs Extended
 
 export const weightedPoolFactoryAbiExtended_V3 = [

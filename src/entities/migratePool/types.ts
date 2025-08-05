@@ -1,4 +1,5 @@
 import { Address, Hex } from 'viem';
+import { MigratePool } from './index';
 
 export interface MigratePoolBase {
     query(
@@ -8,7 +9,9 @@ export interface MigratePoolBase {
     buildCall(input: MigratePoolInput): MigratePoolBuildCallOutput;
 }
 
-export type MigratePoolInput = {
+export type MigratePoolInput = MigratePoolLiquidityBootstrappingInput;
+
+export type MigratePoolLiquidityBootstrappingInput = {
     poolType: string;
     pool: Address;
     chainid: number;
@@ -17,24 +20,25 @@ export type MigratePoolInput = {
     weightedPoolParams: WeightedPoolParams;
 };
 
-export type MigratePoolQueryOutput = {
-    poolType: string;
-    pool: Address;
-    chainId: number;
-    to: Address;
-    bptAmountOut: bigint;
-};
+export type MigratePoolLiquidityBootstrappingQueryInput =
+    MigratePoolLiquidityBootstrappingInput & {
+        sender: Address;
+    };
+
+export type MigratePoolQueryOutput =
+    MigratePoolLiquidityBootstrappingQueryOutput;
 
 export type MigratePoolBuildCallOutput = {
     callData: Hex;
     to: Address;
 };
 
-type WeightedPoolParams = {
+export type WeightedPoolParams = {
     name?: string;
     symbol: string;
     pauseManager: Address;
     swapFeeManager: Address;
+    poolCreator?: Address;
     swapFeePercentage: bigint;
     poolHooksContract: Address;
     enableDonation: boolean;
@@ -52,6 +56,7 @@ export type MigratePoolBaseQueryOutput = {
 export type MigratePoolLiquidityBootstrappingQueryOutput =
     MigratePoolBaseQueryOutput & {
         bptAmountOut: bigint;
+        exactAmountsIn: readonly bigint[];
     };
 
 export type MigratePoolLiquidityBootstrappingBuildCallInput =
@@ -71,10 +76,10 @@ export type MigratePoolBaseInput = {
     rpcUrl: string;
 };
 
-export type MigratePoolLiquidityBootstrappingInput = MigratePoolBaseInput & {
+/* export type MigratePoolLiquidityBootstrappingInput = MigratePoolBaseInput & {
     excessReceiver: Address;
     weightedPoolParams: WeightedPoolParams;
-};
+}; */
 
 export type MigratePoolLIquidityBootstrappingQueryInput =
     MigratePoolLiquidityBootstrappingInput & {

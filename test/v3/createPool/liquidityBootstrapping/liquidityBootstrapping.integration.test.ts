@@ -36,7 +36,7 @@ import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider
 
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
-const poolType = PoolType.Weighted;
+const poolType = PoolType.LiquidityBootstrapping;
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 
@@ -52,7 +52,7 @@ describe('create liquidityBootstrapping pool test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            7831624n,
+            8715886n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -83,6 +83,7 @@ describe('create liquidityBootstrapping pool test', () => {
             symbol: 'LBP',
             chainId: chainId,
             poolType: PoolType.LiquidityBootstrapping,
+            poolCreator: testAddress,
         };
 
         poolAddress = await doCreatePool({

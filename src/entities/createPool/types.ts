@@ -26,7 +26,8 @@ export type CreatePoolInput =
     | CreatePoolStableSurgeInput
     | CreatePoolGyroECLPInput
     | CreatePoolReClammInput
-    | CreatePoolLiquidityBootstrappingInput;
+    | CreatePoolLiquidityBootstrappingInput
+    | CreatePoolLiquidityBootstrappingWithMigrationInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;
@@ -180,6 +181,7 @@ export type CreatePoolLiquidityBootstrappingInput = Omit<
 > & {
     lbpParams: LBPParams;
     poolType: PoolType.LiquidityBootstrapping;
+    poolCreator?: Address;
 };
 
 export type LBPMigrationParams = {
