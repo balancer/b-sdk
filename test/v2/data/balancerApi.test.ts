@@ -1,4 +1,4 @@
-// pnpm test -- balancerApi.test.ts
+// pnpm test balancerApi.test.ts
 import {
     BalancerApi,
     ChainId,
@@ -25,6 +25,19 @@ describe('BalancerApi Provider', () => {
         expect(poolStateInput.tokens[1].address).toEqual(
             poolStateInput.address,
         );
+    });
+
+    test('HyperEvm - Should fetch pool state', async () => {
+        const chainId = ChainId.HYPEREVM;
+        // wstEth/WETH CS Pool
+        const poolId = '0x8207c7541ce31b38dbd46890f2a832cf1ef7c512';
+
+        // API is used to fetch relevant pool data
+        const balancerApi = new BalancerApi(API_ENDPOINT, chainId);
+        const poolStateInput: PoolState =
+            await balancerApi.pools.fetchPoolState(poolId);
+
+        expect(poolStateInput.tokens.length).toEqual(2);
     });
 
     test('Should support configuring client name and version', async () => {
