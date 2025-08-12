@@ -29,7 +29,7 @@ export const ZERO_ADDRESS: Address =
 export const EMPTY_SENDER = { account: ZERO_ADDRESS };
 
 const NATIVE_ADDRESS: Address = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-const HYPER_EVM_NATIVE_ADDRESS: Address =
+const HYPEREVM_NATIVE_ADDRESS: Address =
     '0x2222222222222222222222222222222222222222';
 
 export const MAX_UINT112 = 5192296858534827628530496329220095n;
@@ -81,7 +81,7 @@ export enum ChainId {
     BASE_GOERLI = 84531,
     SEPOLIA = 11155111,
     MONAD_TESTNET = 10143,
-    HYPER_EVM = 999,
+    HYPEREVM = 999,
 }
 
 // The Balancer API requires the chain to be passed as a specific string
@@ -100,7 +100,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.SEPOLIA]: 'SEPOLIA',
     [ChainId.SONIC]: 'SONIC',
     [ChainId.MONAD_TESTNET]: 'MONAD_TESTNET',
-    [ChainId.HYPER_EVM]: 'HYPER_EVM',
+    [ChainId.HYPEREVM]: 'HYPEREVM',
 };
 
 export const CHAINS: Record<number, Chain> = {
@@ -122,7 +122,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.SEPOLIA]: sepolia,
     [ChainId.SONIC]: sonic,
     [ChainId.MONAD_TESTNET]: monadTestnet,
-    [ChainId.HYPER_EVM]: hyperEVM,
+    [ChainId.HYPEREVM]: hyperEVM,
 };
 
 export const PERMIT2: Record<number, Address> = {
@@ -135,7 +135,7 @@ export const PERMIT2: Record<number, Address> = {
     [ChainId.MONAD_TESTNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.AVALANCHE]: '0x000000000022d473030f116ddee9f6b43ac78ba3',
     [ChainId.OPTIMISM]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.HYPER_EVM]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.HYPEREVM]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
 };
 
 export const NATIVE_ASSETS = {
@@ -251,9 +251,9 @@ export const NATIVE_ASSETS = {
         'Sonic',
         '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',
     ),
-    [ChainId.HYPER_EVM]: new Token(
-        ChainId.HYPER_EVM,
-        HYPER_EVM_NATIVE_ADDRESS,
+    [ChainId.HYPEREVM]: new Token(
+        ChainId.HYPEREVM,
+        HYPEREVM_NATIVE_ADDRESS,
         18,
         'HYPE',
         'Hype',

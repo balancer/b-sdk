@@ -208,7 +208,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 51,
         },
     },
-    [ChainId.HYPER_EVM]: {
+    [ChainId.HYPEREVM]: {
         feUSD: {
             address: '0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70',
             decimals: 18,
@@ -387,7 +387,7 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             slot: 0,
         },
     },
-    [ChainId.HYPER_EVM]: {
+    [ChainId.HYPEREVM]: {
         MOCK_FEUSD_FEWETH_POOL: {
             address: '0x278E31550A3708fb20A7A33bEd0CEcE79FE7ac00',
             id: '0x278E31550A3708fb20A7A33bEd0CEcE79FE7ac00',

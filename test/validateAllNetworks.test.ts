@@ -48,7 +48,7 @@ const CHAIN_ANVIL_MAP: Partial<Record<number, keyof typeof ANVIL_NETWORKS>> = {
     [ChainId.ARBITRUM_ONE]: 'ARBITRUM_ONE',
     [ChainId.GNOSIS_CHAIN]: 'GNOSIS_CHAIN',
     [ChainId.SONIC]: 'SONIC',
-    [ChainId.HYPER_EVM]: 'HYPER_EVM',
+    [ChainId.HYPEREVM]: 'HYPEREVM',
     // Add/remove mappings as needed for your test coverage
 };
 
@@ -70,7 +70,7 @@ const NETWORK_CONFIG: Partial<
         poolKey: 'MOCK_WETH_BAL_POOL',
         inputAmountRaw: 100000000000n,
     },
-    [ChainId.HYPER_EVM]: {
+    [ChainId.HYPEREVM]: {
         tokenInKey: 'feWETH',
         tokenOutKey: 'feUSD',
         poolKey: 'MOCK_FEUSD_FEWETH_POOL',
@@ -81,12 +81,12 @@ const NETWORK_CONFIG: Partial<
 // Optionally override fork block numbers for specific chains. Useful to select pools deployed on V3 after
 // the specified block in anvil-global-setup.ts
 const BLOCK_NUMBER_OVERRIDES: Partial<Record<number, bigint>> = {
-    [ChainId.HYPER_EVM]: 6892528n,
+    [ChainId.HYPEREVM]: 6892528n,
     [ChainId.MAINNET]: 22788192n,
 };
 
 // List of ChainIds to run the test for. Modify this array to select which chains to test.
-const CHAINS_TO_TEST: number[] = [ChainId.SEPOLIA, ChainId.HYPER_EVM];
+const CHAINS_TO_TEST: number[] = [ChainId.SEPOLIA, ChainId.HYPEREVM];
 
 describe('validateAllNetworks', () => {
     // Only test chains that have a mapping to ANVIL_NETWORKS and are in CHAINS_TO_TEST
