@@ -156,6 +156,8 @@ export class SorSwapPaths {
                 return 'BASE';
             case ChainId.SONIC:
                 return 'SONIC';
+            case ChainId.HYPER_EVM:
+                return 'HYPEREVM';
             default:
                 throw Error(`Unsupported API chain: ${chainId}`);
         }
