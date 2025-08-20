@@ -77,7 +77,8 @@ describe('LiquidityBootstrapping Input Validation', () => {
             ...createPoolInput,
             lbpParams: {
                 ...createPoolInput.lbpParams,
-                startTimestamp: createPoolInput.lbpParams.endTimestamp + BigInt(1),
+                startTimestamp:
+                    createPoolInput.lbpParams.endTimestamp + BigInt(1),
             },
         };
         expect(() => createPool.buildCall(invalidInput)).toThrowError(
