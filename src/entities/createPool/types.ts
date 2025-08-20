@@ -161,8 +161,8 @@ export type LBPParams = {
     reserveTokenStartWeight: bigint;
     projectTokenEndWeight: bigint;
     reserveTokenEndWeight: bigint;
-    startTime: bigint;
-    endTime: bigint;
+    startTimestamp: bigint;
+    endTimestamp: bigint;
     blockProjectTokenSwapsIn: boolean;
 };
 
@@ -185,7 +185,7 @@ export type CreatePoolLiquidityBootstrappingInput = Omit<
 };
 
 export type LBPMigrationParams = {
-    bptLockDuration: bigint;
+    bptLockDurationinSeconds: bigint;
     bptPercentageToMigrate: bigint;
     migrationWeightProjectToken: bigint;
     migrationWeightReserveToken: bigint;
