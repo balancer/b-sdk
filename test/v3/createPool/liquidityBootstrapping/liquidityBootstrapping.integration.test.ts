@@ -30,6 +30,7 @@ import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import {
     setTokenBalances,
     approveSpenderOnTokens,
+    approveTokens,
     sendTransactionGetBalances,
 } from 'test/lib/utils/helper';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
@@ -119,6 +120,13 @@ describe('create liquidityBootstrapping pool test', () => {
             [WETH.address, BAL.address],
             PERMIT2[chainId],
         );
+
+        await approveTokens(
+            client,
+            testAddress,
+            [WETH.address, BAL.address],
+            protocolVersion,
+        );
         const initPoolInput: InitPoolInput = {
             minBptAmountOut: 0n,
             amountsIn: [
@@ -138,32 +146,23 @@ describe('create liquidityBootstrapping pool test', () => {
         };
 
         const initPool = new InitPool();
-        const permit2 = await Permit2Helper.signInitPoolApproval({
-            ...initPoolInput,
-            client,
-            owner: testAddress,
-        });
 
-        const initPoolBuildOutput = initPool.buildCallWithPermit2(
-            initPoolInput,
-            {
-                id: poolAddress,
-                address: poolAddress,
-                type: poolType,
-                protocolVersion: 3,
-                tokens: [
-                    {
-                        ...WETH,
-                        index: 0,
-                    },
-                    {
-                        ...BAL,
-                        index: 1,
-                    },
-                ],
-            },
-            permit2,
-        );
+        const initPoolBuildOutput = initPool.buildCall(initPoolInput, {
+            id: poolAddress,
+            address: poolAddress,
+            type: poolType,
+            protocolVersion: 3,
+            tokens: [
+                {
+                    ...WETH,
+                    index: 0,
+                },
+                {
+                    ...BAL,
+                    index: 1,
+                },
+            ],
+        });
 
         const txOutput = await sendTransactionGetBalances(
             [WETH.address, BAL.address],
