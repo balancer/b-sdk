@@ -71,8 +71,8 @@ describe('create liquidityBootstrapping pool test', () => {
             reserveTokenStartWeight: parseEther('0.5'),
             projectTokenEndWeight: parseEther('0.3'),
             reserveTokenEndWeight: parseEther('0.7'),
-            startTime: BigInt(Math.floor(Date.now() / 1000) + 86400), // now + 1 day
-            endTime: BigInt(Math.floor(Date.now() / 1000) + 691200), // now + 8 days
+            startTimestamp: BigInt(Math.floor(Date.now() / 1000) + 86400), // now + 1 day
+            endTimestamp: BigInt(Math.floor(Date.now() / 1000) + 691200), // now + 8 days
             blockProjectTokenSwapsIn: true,
         };
 

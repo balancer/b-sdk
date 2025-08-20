@@ -71,8 +71,8 @@ const lbpParams: LBPParams = {
     reserveTokenStartWeight: BigInt(0.5 * 1e18), // 50%
     projectTokenEndWeight: BigInt(0.1 * 1e18), // 10%
     reserveTokenEndWeight: BigInt(0.9 * 1e18), // 90%
-    startTime: BigInt(Math.floor(Date.now() / 1000)) + BigInt(5 * 60), // start in 5 minutes
-    endTime: BigInt(Math.floor(Date.now() / 1000)) + BigInt(60 * 60), // end in 1 hour
+    startTimestamp: BigInt(Math.floor(Date.now() / 1000)) + BigInt(5 * 60), // start in 5 minutes
+    endTimestamp: BigInt(Math.floor(Date.now() / 1000)) + BigInt(60 * 60), // end in 1 hour
     blockProjectTokenSwapsIn: false, // don't block project token swaps in
 };
 

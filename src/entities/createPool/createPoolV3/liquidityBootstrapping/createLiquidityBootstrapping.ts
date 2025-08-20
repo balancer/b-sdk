@@ -47,7 +47,11 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
         const args = [
             input.name || input.symbol, // name can be optional
             input.symbol,
-            input.lbpParams,
+            {
+                ...input.lbpParams,
+                startTime: input.lbpParams.startTimestamp,
+                endTime: input.lbpParams.endTimestamp,
+            },
             input.swapFeePercentage,
             input.salt || getRandomBytes32(),
             input.poolCreator ? input.poolCreator : zeroAddress,
@@ -62,23 +66,21 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
     private encodeCallWithMigration(
         input: CreatePoolLiquidityBootstrappingWithMigrationInput,
     ): Hex {
-        const {
-            bptLockDuration,
-            bptPercentageToMigrate,
-            migrationWeightProjectToken,
-            migrationWeightReserveToken,
-        } = input.lbpMigrationParams;
         const args = [
             input.name || input.symbol, // name can be optional
             input.symbol,
-            input.lbpParams,
+            {
+                ...input.lbpParams,
+                startTime: input.lbpParams.startTimestamp,
+                endTime: input.lbpParams.endTimestamp,
+            },
             input.swapFeePercentage,
             input.salt || getRandomBytes32(),
             input.poolCreator ? input.poolCreator : zeroAddress,
-            bptLockDuration,
-            bptPercentageToMigrate,
-            migrationWeightProjectToken,
-            migrationWeightReserveToken,
+            input.lbpMigrationParams.bptLockDurationinSeconds,
+            input.lbpMigrationParams.bptPercentageToMigrate,
+            input.lbpMigrationParams.migrationWeightProjectToken,
+            input.lbpMigrationParams.migrationWeightReserveToken,
         ] as const;
         return encodeFunctionData({
             abi: lBPoolFactoryAbi_V3Extended,

@@ -72,13 +72,13 @@ const lbpParams: LBPParams = {
     reserveTokenStartWeight: BigInt(0.5 * 1e18), // 50%
     projectTokenEndWeight: BigInt(0.1 * 1e18), // 10%
     reserveTokenEndWeight: BigInt(0.9 * 1e18), // 90%
-    startTime: BigInt(Math.floor(Date.now() / 1000)) + BigInt(10 * 60),
-    endTime: BigInt(Math.floor(Date.now() / 1000)) + BigInt(15 * 60), // end in 15 minutes
+    startTimestamp: BigInt(Math.floor(Date.now() / 1000)) + BigInt(10 * 60),
+    endTimestamp: BigInt(Math.floor(Date.now() / 1000)) + BigInt(15 * 60), // end in 15 minutes
     blockProjectTokenSwapsIn: false, // block project token swaps in
 };
 
 const lbpMigrationParams: LBPMigrationParams = {
-    bptLockDuration: BigInt(60 * 60 * 24 * 7), // 7 days
+    bptLockDurationinSeconds: BigInt(60 * 60 * 24 * 7), // 7 days
     bptPercentageToMigrate: BigInt(0.5 * 1e18), // 50%
     migrationWeightProjectToken: BigInt(5.0 * 1e17), // 10%
     migrationWeightReserveToken: BigInt(5.0 * 1e17), // 90%

@@ -49,7 +49,7 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
             );
         }
         // validate start and end times
-        if (input.lbpParams.startTime >= input.lbpParams.endTime) {
+        if (input.lbpParams.startTimestamp >= input.lbpParams.endTimestamp) {
             throw new SDKError(
                 'Input Validation',
                 'Create Pool',
@@ -58,7 +58,7 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
         }
         // cannot be in the past - technically allowed on the sc side.
         // will simply move startTime to now.
-        if (input.lbpParams.startTime < BigInt(Math.floor(Date.now() / 1000))) {
+        if (input.lbpParams.startTimestamp < BigInt(Math.floor(Date.now() / 1000))) {
             throw new SDKError(
                 'Input Validation',
                 'Create Pool',
