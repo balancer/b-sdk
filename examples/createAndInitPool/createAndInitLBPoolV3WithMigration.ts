@@ -4,7 +4,7 @@
  * Change the default export to runAgainstFork or runAgainstNetwork
  *
  * Run with:
- * pnpm example ./examples/createAndInitPool/createAndInitLBPoolV3.ts
+ * pnpm example ./examples/createAndInitPool/createAndInitLBPoolV3WithMigration.ts
  */
 
 import { config } from 'dotenv';
@@ -27,7 +27,8 @@ import { privateKeyToAccount } from 'viem/accounts';
 import {
     ChainId,
     PoolType,
-    CreatePoolLiquidityBootstrappingInput,
+    CreatePoolLiquidityBootstrappingWithMigrationInput,
+    LBPMigrationParams,
     lBPoolFactoryAbi_V3,
     LBPParams,
     InitPoolInputV3,
@@ -71,18 +72,26 @@ const lbpParams: LBPParams = {
     reserveTokenStartWeight: BigInt(0.5 * 1e18), // 50%
     projectTokenEndWeight: BigInt(0.1 * 1e18), // 10%
     reserveTokenEndWeight: BigInt(0.9 * 1e18), // 90%
-    startTimestamp: BigInt(Math.floor(Date.now() / 1000)) + BigInt(5 * 60), // start in 5 minutes
-    endTimestamp: BigInt(Math.floor(Date.now() / 1000)) + BigInt(60 * 60), // end in 1 hour
-    blockProjectTokenSwapsIn: false, // don't block project token swaps in
+    startTimestamp: BigInt(Math.floor(Date.now() / 1000)) + BigInt(10 * 60),
+    endTimestamp: BigInt(Math.floor(Date.now() / 1000)) + BigInt(15 * 60), // end in 15 minutes
+    blockProjectTokenSwapsIn: false, // block project token swaps in
 };
 
-const createPoolInput: CreatePoolLiquidityBootstrappingInput = {
+const lbpMigrationParams: LBPMigrationParams = {
+    bptLockDurationinSeconds: BigInt(60 * 60 * 24 * 7), // 7 days
+    bptPercentageToMigrate: BigInt(0.5 * 1e18), // 50%
+    migrationWeightProjectToken: BigInt(5.0 * 1e17), // 10%
+    migrationWeightReserveToken: BigInt(5.0 * 1e17), // 90%
+};
+
+const createPoolInput: CreatePoolLiquidityBootstrappingWithMigrationInput = {
     poolType: PoolType.LiquidityBootstrapping,
     lbpParams: lbpParams,
-    symbol: 'shortLBP',
+    symbol: 'shortLBP2',
     chainId: chainId,
     protocolVersion: protocolVersion,
     swapFeePercentage: BigInt(0.003 * 1e18), // 0.3% swap fee
+    lbpMigrationParams: lbpMigrationParams,
 };
 
 // init pool config
@@ -103,63 +112,6 @@ const initPoolInput: InitPoolInputV3 = {
     amountsIn: amountsIn,
     minBptAmountOut: 0n,
 };
-
-export async function runAgainstFork() {
-    const { rpcUrl } = await startFork(
-        ANVIL_NETWORKS.SEPOLIA,
-        undefined,
-        7832604n,
-    );
-
-    const client = createTestClient({
-        mode: 'anvil',
-        chain: CHAINS[chainId],
-        transport: http(rpcUrl),
-    })
-        .extend(publicActions)
-        .extend(walletActions);
-    const account = (await client.getAddresses())[0];
-
-    // lbpParams.owner = account as Address;
-    // The LBPool checks if the owner is the initializer
-    createPoolInput.lbpParams.owner = account as Address;
-
-    // Create the pool and parse the tx receipt to get the pool address
-    const poolAddress = await createPool({ client, account });
-
-    // Approve the cannonical permit2 contract to spend tokens that will be used for pool init
-    await approveSpenderOnTokens(
-        client,
-        account,
-        amountsIn.map((t) => t.address),
-        PERMIT2[chainId],
-    );
-
-    // Build the init pool call
-    const initPoolCall = await buildInitPoolCall({
-        client,
-        rpcUrl,
-        account,
-        poolAddress,
-    });
-
-    // Send the init pool tx to local anvil fork
-    await makeForkTx(
-        initPoolCall,
-        {
-            rpcUrl,
-            chainId,
-            impersonateAccount: account,
-            forkTokens: amountsIn.map((a) => ({
-                address: a.address,
-                slot: getSlot(chainId, a.address),
-                rawBalance: a.rawAmount,
-            })),
-        },
-        [...amountsIn.map((a) => a.address), poolAddress],
-        createPoolInput.protocolVersion,
-    );
-}
 
 export default async function runAgainstNetwork() {
     const rpcUrl = process.env.SEPOLIA_RPC_URL;

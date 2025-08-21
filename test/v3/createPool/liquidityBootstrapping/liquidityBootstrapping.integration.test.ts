@@ -30,13 +30,14 @@ import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import {
     setTokenBalances,
     approveSpenderOnTokens,
+    approveTokens,
     sendTransactionGetBalances,
 } from 'test/lib/utils/helper';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
-const poolType = PoolType.Weighted;
+const poolType = PoolType.LiquidityBootstrapping;
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 
@@ -52,7 +53,7 @@ describe('create liquidityBootstrapping pool test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            7831624n,
+            8715886n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -71,8 +72,8 @@ describe('create liquidityBootstrapping pool test', () => {
             reserveTokenStartWeight: parseEther('0.5'),
             projectTokenEndWeight: parseEther('0.3'),
             reserveTokenEndWeight: parseEther('0.7'),
-            startTime: BigInt(Math.floor(Date.now() / 1000) + 86400), // now + 1 day
-            endTime: BigInt(Math.floor(Date.now() / 1000) + 691200), // now + 8 days
+            startTimestamp: BigInt(Math.floor(Date.now() / 1000) + 86400), // now + 1 day
+            endTimestamp: BigInt(Math.floor(Date.now() / 1000) + 691200), // now + 8 days
             blockProjectTokenSwapsIn: true,
         };
 
@@ -83,6 +84,7 @@ describe('create liquidityBootstrapping pool test', () => {
             symbol: 'LBP',
             chainId: chainId,
             poolType: PoolType.LiquidityBootstrapping,
+            poolCreator: testAddress,
         };
 
         poolAddress = await doCreatePool({
@@ -118,6 +120,13 @@ describe('create liquidityBootstrapping pool test', () => {
             [WETH.address, BAL.address],
             PERMIT2[chainId],
         );
+
+        await approveTokens(
+            client,
+            testAddress,
+            [WETH.address, BAL.address],
+            protocolVersion,
+        );
         const initPoolInput: InitPoolInput = {
             minBptAmountOut: 0n,
             amountsIn: [
@@ -137,32 +146,23 @@ describe('create liquidityBootstrapping pool test', () => {
         };
 
         const initPool = new InitPool();
-        const permit2 = await Permit2Helper.signInitPoolApproval({
-            ...initPoolInput,
-            client,
-            owner: testAddress,
-        });
 
-        const initPoolBuildOutput = initPool.buildCallWithPermit2(
-            initPoolInput,
-            {
-                id: poolAddress,
-                address: poolAddress,
-                type: poolType,
-                protocolVersion: 3,
-                tokens: [
-                    {
-                        ...WETH,
-                        index: 0,
-                    },
-                    {
-                        ...BAL,
-                        index: 1,
-                    },
-                ],
-            },
-            permit2,
-        );
+        const initPoolBuildOutput = initPool.buildCall(initPoolInput, {
+            id: poolAddress,
+            address: poolAddress,
+            type: poolType,
+            protocolVersion: 3,
+            tokens: [
+                {
+                    ...WETH,
+                    index: 0,
+                },
+                {
+                    ...BAL,
+                    index: 1,
+                },
+            ],
+        });
 
         const txOutput = await sendTransactionGetBalances(
             [WETH.address, BAL.address],
