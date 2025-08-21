@@ -6,7 +6,7 @@ import {
     zeroAddress,
 } from 'viem';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { CHAINS } from '@/utils';
+import { CHAINS, SDKError } from '@/utils';
 import {
     MigratePoolBase,
     MigratePoolBuildCallOutput,
@@ -16,6 +16,7 @@ import {
 } from '../types';
 import { balancerMigrationRouterAbiExtended } from '@/abi';
 import { getRandomBytes32 } from '@/entities/utils/getRandomBytes32';
+import { Permit2 } from '@/index';
 
 export class MigratePoolLiquidityBootstrapping implements MigratePoolBase {
     public async query(
@@ -78,6 +79,17 @@ export class MigratePoolLiquidityBootstrapping implements MigratePoolBase {
             callData,
             to: AddressProvider.LBPoolMigrationRouter(input.chainid),
         };
+    }
+    public buildCallWithPermit2(
+        _input: MigratePoolLiquidityBootstrappingInput,
+        _permit2: Permit2,
+    ): MigratePoolBuildCallOutput {
+        // not implemented
+        throw new SDKError(
+            'Input Validation',
+            'Migrate Pool',
+            'Action not implemented',
+        );
     }
 
     private encodeCall(input: MigratePoolLiquidityBootstrappingInput): Hex {

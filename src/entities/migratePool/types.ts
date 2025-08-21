@@ -1,13 +1,7 @@
 import { Address, Hex } from 'viem';
 import { MigratePool } from './index';
-
-export interface MigratePoolBase {
-    query(
-        input: MigratePoolInput,
-        block?: bigint,
-    ): Promise<MigratePoolQueryOutput>;
-    buildCall(input: MigratePoolInput): MigratePoolBuildCallOutput;
-}
+import { PoolState } from '../types';
+import { Permit2 } from '../permit2Helper';
 
 export type MigratePoolInput = MigratePoolLiquidityBootstrappingInput;
 
@@ -20,6 +14,22 @@ export type MigratePoolLiquidityBootstrappingInput = {
     weightedPoolParams: WeightedPoolParams;
 };
 
+export interface MigratePoolBase {
+    query(
+        input: MigratePoolInput,
+        block?: bigint,
+    ): Promise<MigratePoolBaseQueryOutput>;
+    buildCall(input: MigratePoolBuildCallInput): MigratePoolBuildCallOutput;
+    buildCallWithPermit2(
+        input: MigratePoolBuildCallInput,
+        permit2: Permit2,
+    ): MigratePoolBuildCallOutput;
+}
+
+export type MigratePoolConfig = {
+    customMigratePoolTypes: Record<string, MigratePoolBase>;
+};
+
 export type MigratePoolQueryInput = MigratePoolLiquidityBootstrappingQueryInput;
 
 export type MigratePoolLiquidityBootstrappingQueryInput =
@@ -28,7 +38,8 @@ export type MigratePoolLiquidityBootstrappingQueryInput =
     };
 
 export type MigratePoolQueryOutput =
-    MigratePoolLiquidityBootstrappingQueryOutput;
+    | MigratePoolLiquidityBootstrappingQueryOutput
+    | MigratePoolBaseQueryOutput;
 
 // function is not payable, so no value is needed
 export type MigratePoolBuildCallOutput =
@@ -64,6 +75,16 @@ export type MigratePoolLiquidityBootstrappingBuildCallInput =
     MigratePoolLiquidityBootstrappingQueryOutput &
         MigratePoolLiquidityBootstrappingInput;
 
+export type MigratePoolBuildCallInput =
+    | MigratePoolLiquidityBootstrappingBuildCallInput
+    | MigratePoolBaseBuildCallInput;
+
+export type MigratePoolBaseBuildCallInput =
+    | MigratePoolInput
+    | (MigratePoolBaseQueryOutput & {
+          bptAmountOut: bigint;
+          exactAmountsIn: bigint[];
+      });
 // usually buildCalOutput functions had a value parameter as the functions are payable. However the LBPMigration Router
 // does not have a payable `migrateLiquidity` function.
 export type MigratePoolLiquidityBootstrappingBuildCallOutput = {

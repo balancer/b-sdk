@@ -5,15 +5,20 @@ import {
     MigratePoolQueryInput,
     MigratePoolBuildCallOutput,
     MigratePoolQueryOutput,
+    MigratePoolConfig,
+    MigratePoolBuildCallInput,
 } from './types';
 import { MigratePoolLiquidityBootstrapping } from './liquidityBootstrapping';
+import { Permit2 } from '../permit2Helper';
 
 export class MigratePool implements MigratePoolBase {
     private readonly migratePoolTypes: Record<string, MigratePoolBase> = {};
 
-    constructor() {
+    constructor(config?: MigratePoolConfig) {
+        const { customMigratePoolTypes } = config || {};
         this.migratePoolTypes = {
             LiquidityBootstrapping: new MigratePoolLiquidityBootstrapping(),
+            ...customMigratePoolTypes,
         };
     }
 
@@ -33,5 +38,14 @@ export class MigratePool implements MigratePoolBase {
 
     public buildCall(input: MigratePoolInput): MigratePoolBuildCallOutput {
         return this.getMigratePool(input.poolType).buildCall(input);
+    }
+    public buildCallWithPermit2(
+        input: MigratePoolBuildCallInput,
+        permit2: Permit2,
+    ): MigratePoolBuildCallOutput {
+        return this.getMigratePool(input.poolType).buildCallWithPermit2(
+            input,
+            permit2,
+        );
     }
 }
