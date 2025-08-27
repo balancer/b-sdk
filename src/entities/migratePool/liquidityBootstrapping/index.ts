@@ -81,17 +81,6 @@ export class MigratePoolLiquidityBootstrapping implements MigratePoolBase {
             to: AddressProvider.LBPoolMigrationRouter(input.chainid),
         };
     }
-    public buildCallWithPermit2(
-        _input: MigratePoolLiquidityBootstrappingInput,
-        _permit2: Permit2,
-    ): MigratePoolBuildCallOutput {
-        // not implemented
-        throw new SDKError(
-            'Input Validation',
-            'Migrate Pool',
-            'Action not implemented',
-        );
-    }
     public buildCallWithdrawBPT(
         input: MigratePoolWithdrawBPTInput,
     ): MigratePoolBuildCallOutput {

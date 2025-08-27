@@ -25,10 +25,6 @@ export interface MigratePoolBase {
         block?: bigint,
     ): Promise<MigratePoolBaseQueryOutput>;
     buildCall(input: MigratePoolBuildCallInput): MigratePoolBuildCallOutput;
-    buildCallWithPermit2(
-        input: MigratePoolBuildCallInput,
-        permit2: Permit2,
-    ): MigratePoolBuildCallOutput;
 }
 
 export type MigratePoolConfig = {

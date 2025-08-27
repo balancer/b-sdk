@@ -39,13 +39,4 @@ export class MigratePool implements MigratePoolBase {
     public buildCall(input: MigratePoolInput): MigratePoolBuildCallOutput {
         return this.getMigratePool(input.poolType).buildCall(input);
     }
-    public buildCallWithPermit2(
-        input: MigratePoolBuildCallInput,
-        permit2: Permit2,
-    ): MigratePoolBuildCallOutput {
-        return this.getMigratePool(input.poolType).buildCallWithPermit2(
-            input,
-            permit2,
-        );
-    }
 }
