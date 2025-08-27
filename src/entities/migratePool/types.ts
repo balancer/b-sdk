@@ -14,6 +14,8 @@ export type MigratePoolLiquidityBootstrappingInput = {
     weightedPoolParams: WeightedPoolParams;
 };
 
+export type MigratePoolWithdrawBPTInput = Omit<MigratePoolLiquidityBootstrappingInput, 'excessReceiver' | 'weightedPoolParams'>;
+
 export interface MigratePoolBase {
     query(
         input: MigratePoolInput,

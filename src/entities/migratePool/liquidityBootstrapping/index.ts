@@ -13,10 +13,11 @@ import {
     MigratePoolLiquidityBootstrappingInput,
     MigratePoolLiquidityBootstrappingQueryInput,
     MigratePoolLiquidityBootstrappingQueryOutput,
+    MigratePoolWithdrawBPTInput,
 } from '../types';
 import { balancerMigrationRouterAbiExtended } from '@/abi';
 import { getRandomBytes32 } from '@/entities/utils/getRandomBytes32';
-import { Permit2 } from '@/index';
+import { Address, Permit2 } from '@/index';
 
 export class MigratePoolLiquidityBootstrapping implements MigratePoolBase {
     public async query(
@@ -91,6 +92,15 @@ export class MigratePoolLiquidityBootstrapping implements MigratePoolBase {
             'Action not implemented',
         );
     }
+    public buildCallWithdrawBPT(
+        input: MigratePoolWithdrawBPTInput,
+    ): MigratePoolBuildCallOutput {
+        const callData = this.encodeWithdrawBPTCall(input.pool);
+        return {
+            callData,
+            to: AddressProvider.LBPoolMigrationRouter(input.chainid),
+        };
+    }
 
     private encodeCall(input: MigratePoolLiquidityBootstrappingInput): Hex {
         const args = [
@@ -119,6 +129,13 @@ export class MigratePoolLiquidityBootstrapping implements MigratePoolBase {
             abi: balancerMigrationRouterAbiExtended,
             functionName: 'migrateLiquidity',
             args,
+        });
+    }
+    private encodeWithdrawBPTCall(pool: Address): Hex {
+        return encodeFunctionData({
+            abi: balancerMigrationRouterAbiExtended,
+            functionName: 'withdrawBPT',
+            args: [pool],
         });
     }
 }

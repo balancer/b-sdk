@@ -184,6 +184,7 @@ export type CreatePoolLiquidityBootstrappingInput = Omit<
     poolCreator?: Address;
 };
 
+// same scale as the Smart contracts
 export type LBPMigrationParams = {
     bptLockDurationinSeconds: bigint;
     bptPercentageToMigrate: bigint;
