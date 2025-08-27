@@ -354,7 +354,7 @@ describe('create liquidityBootstrapping pool test', () => {
         });
         await client.mine({ blocks: 1 });
         expect((await client.getBlock()).timestamp).to.be.greaterThan(
-            unlockTime,
+            Number(unlockTime),
         );
 
         const migratePoolLiquidityBootstrapping =
