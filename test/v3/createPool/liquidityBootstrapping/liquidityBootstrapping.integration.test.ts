@@ -50,6 +50,7 @@ import {
     MigratePoolWithdrawBPTInput,
 } from '../../../../src/entities/migratePool/types';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
+import { MigratePoolLiquidityBootstrapping } from '@/entities/migratePool/liquidityBootstrapping';
 
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
