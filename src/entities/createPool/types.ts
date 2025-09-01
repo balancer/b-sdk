@@ -26,7 +26,8 @@ export type CreatePoolInput =
     | CreatePoolStableSurgeInput
     | CreatePoolGyroECLPInput
     | CreatePoolReClammInput
-    | CreatePoolLiquidityBootstrappingInput;
+    | CreatePoolLiquidityBootstrappingInput
+    | CreatePoolLiquidityBootstrappingWithMigrationInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;
@@ -160,8 +161,8 @@ export type LBPParams = {
     reserveTokenStartWeight: bigint;
     projectTokenEndWeight: bigint;
     reserveTokenEndWeight: bigint;
-    startTime: bigint;
-    endTime: bigint;
+    startTimestamp: bigint;
+    endTimestamp: bigint;
     blockProjectTokenSwapsIn: boolean;
 };
 
@@ -180,4 +181,18 @@ export type CreatePoolLiquidityBootstrappingInput = Omit<
 > & {
     lbpParams: LBPParams;
     poolType: PoolType.LiquidityBootstrapping;
+    poolCreator?: Address;
 };
+
+// same scale as the Smart contracts
+export type LBPMigrationParams = {
+    bptLockDurationinSeconds: bigint;
+    bptPercentageToMigrate: bigint;
+    migrationWeightProjectToken: bigint;
+    migrationWeightReserveToken: bigint;
+};
+
+export type CreatePoolLiquidityBootstrappingWithMigrationInput =
+    CreatePoolLiquidityBootstrappingInput & {
+        lbpMigrationParams: LBPMigrationParams;
+    };
