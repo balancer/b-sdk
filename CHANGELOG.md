@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.6.0
+
+### Minor Changes
+
+- 2f5c270: feat: add lbp creation with migration functionality & bpt unlocking
+
 ## 4.5.2
 
 ### Patch Changes
