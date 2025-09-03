@@ -144,7 +144,7 @@ describe('create GyroECLP pool input validations', () => {
             {
                 address: DAI.address,
                 rateProvider: zeroAddress,
-                tokenType: TokenType.ERC4626_TOKEN,
+                tokenType: TokenType.TOKEN_WITH_RATE,
                 paysYieldFees: false,
             },
         ];

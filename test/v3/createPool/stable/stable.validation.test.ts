@@ -144,7 +144,7 @@ describe('create stable pool input validations', () => {
             {
                 address: TOKENS[chainId].USDC.address, // USDC
                 rateProvider: zeroAddress,
-                tokenType: TokenType.ERC4626_TOKEN,
+                tokenType: TokenType.TOKEN_WITH_RATE,
                 paysYieldFees: false,
             },
         ];
