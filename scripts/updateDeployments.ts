@@ -1,7 +1,7 @@
 import { Abi, Address } from 'viem';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { sonic } from 'viem/chains';
-import { ChainId } from '../src/utils/constants';
+import { ChainId, PERMIT2 } from '../src/utils/constants';
 
 type SupportedNetworkResponse = {
     name: string;
@@ -67,6 +67,7 @@ const targetContractsV3 = [
     'LBPoolFactory',
     'ReClammPoolFactory',
     'MockGyroEclpPool',
+    'LBPMigrationRouter',
 ];
 
 const targetContracts = [...targetContractsV2, ...targetContractsV3];
@@ -114,6 +115,10 @@ async function fetchSupportedNetworks(): Promise<SupportedNetwork[]> {
 }
 
 async function processContractData(supportedNetworks: SupportedNetwork[]) {
+    const permit2Updates: Record<string, Address> = {};
+    const PERMIT2_ADDRESS: Address =
+        '0x000000000022D473030F116dDEE9F6B43aC78BA3';
+
     // Process each network sequentially to maintain consistent order
     for (const { networkName, chainId, deploymentsUrl } of supportedNetworks) {
         const res = await fetch(deploymentsUrl);
@@ -170,7 +175,78 @@ async function processContractData(supportedNetworks: SupportedNetwork[]) {
                 }
             }
         }
+
+        // Check if PERMIT2 entry exists for current chainId
+        const chainKey = chainIdToHumanKey[chainId];
+        if (chainKey && !PERMIT2[chainId]) {
+            // no entry exists yet, possibility to add it
+            // TODO: Verify that at the deployed address is
+            // actually Permit2 code
+
+            permit2Updates[chainKey] = PERMIT2_ADDRESS;
+        }
+
+        // write the update to the constants ts file
     }
+
+    // Update PERMIT2 addresses if needed
+    updatePermit2Addresses(permit2Updates);
+}
+
+// Add this function that matches the style of updateContractAddresses
+function updatePermit2Addresses(permit2Updates: Record<string, Address>) {
+    if (Object.keys(permit2Updates).length === 0) {
+        return; // No updates needed
+    }
+
+    // Read the current constants file
+    const constantsPath = './src/utils/constants.ts';
+    let constantsContent = readFileSync(constantsPath, 'utf-8');
+
+    // Find the existing PERMIT2 object
+    const permit2Regex =
+        /(export const PERMIT2: Record<number, Address> = \{)([\s\S]*?)(\};)/;
+    const permit2Match = constantsContent.match(permit2Regex);
+
+    if (!permit2Match) {
+        throw new Error('Could not find PERMIT2 object in constants file');
+    }
+
+    // Parse existing entries
+    const existingContent = permit2Match[2];
+    const existingPermit2: Record<string, Address> = {};
+
+    // Extract existing entries
+    const entryRegex = /(\[ChainId\.[A-Z_]+\]):\s*'([^']+)'/g;
+    let match;
+    while ((match = entryRegex.exec(existingContent)) !== null) {
+        existingPermit2[match[1]] = match[2] as Address;
+    }
+
+    // Merge with updates (updates take precedence)
+    const mergedPermit2 = { ...existingPermit2, ...permit2Updates };
+
+    // Sort by key for consistent ordering (matching updateContractAddresses style)
+    const sortedPermit2 = Object.fromEntries(
+        Object.entries(mergedPermit2).sort(([a], [b]) => a.localeCompare(b)),
+    );
+
+    // Generate the updated PERMIT2 content
+    const permit2Content = JSON.stringify(sortedPermit2, undefined, 4).replace(
+        /"(\[ChainId\.[A-Z_]+\])"/g,
+        '$1',
+    ); // Remove quotes from ChainId keys
+
+    // Replace the PERMIT2 object in the constants file
+    const updatedConstants = constantsContent.replace(
+        permit2Regex,
+        `$1 ${permit2Content.slice(1, -1)} $3`, // Remove outer braces from JSON
+    );
+
+    writeFileSync(constantsPath, updatedConstants);
+    console.log(
+        `Updated PERMIT2 with ${Object.keys(permit2Updates).length} entries`,
+    );
 }
 
 function updateContractAddresses() {
