@@ -28,7 +28,7 @@ import { doCreatePool } from '../../../lib/utils/createPoolHelper';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { MAX_UINT256, PublicWalletClient } from '@/utils';
 import {
-    migrationRouter_V3,
+    lBPMigrationRouterAbi_V3,
     vaultExtensionAbi_V3,
     weightedPoolFactoryAbiExtended_V3,
 } from 'src/abi/';
@@ -329,14 +329,14 @@ describe('create liquidityBootstrapping pool test', () => {
         // The weighted pool BPT token is still locked.
         const id = await client.readContract({
             address: AddressProvider.LBPoolMigrationRouter(chainId),
-            abi: migrationRouter_V3,
+            abi: lBPMigrationRouterAbi_V3,
             functionName: 'getId',
             args: [newWeightedPoolAddress],
         });
 
         const unlockTime = await client.readContract({
             address: AddressProvider.LBPoolMigrationRouter(chainId),
-            abi: migrationRouter_V3,
+            abi: lBPMigrationRouterAbi_V3,
             functionName: 'getUnlockTimestamp',
             args: [id],
         });
