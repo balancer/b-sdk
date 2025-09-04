@@ -3,7 +3,7 @@ export * from './vaultAdmin';
 export * from './vaultExtension';
 export * from './router';
 export * from './batchRouter';
-export * from './migrationRouter';
+export * from './lBPMigrationRouter';
 export * from './compositeLiquidityRouter';
 export * from './bufferRouter';
 export * from './weightedPoolFactory';
