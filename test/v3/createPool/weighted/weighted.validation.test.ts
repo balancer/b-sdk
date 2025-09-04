@@ -129,7 +129,7 @@ describe('create weighted pool input validations', () => {
                 address: TOKENS[chainId].WETH.address, // WETH
                 weight: parseEther(`${1 / 2}`),
                 rateProvider: zeroAddress,
-                tokenType: TokenType.ERC4626_TOKEN,
+                tokenType: TokenType.TOKEN_WITH_RATE,
                 paysYieldFees: false,
             },
         ];
