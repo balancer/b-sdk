@@ -132,7 +132,7 @@ export class SorSwapPaths {
         return poolGetPool;
     }
 
-    private mapGqlChain(chainId: ChainId): string {
+    public mapGqlChain(chainId: ChainId): string {
         switch (chainId) {
             case ChainId.ARBITRUM_ONE:
                 return 'ARBITRUM';
@@ -158,6 +158,7 @@ export class SorSwapPaths {
                 return 'SONIC';
             case ChainId.HYPEREVM:
                 return 'HYPEREVM';
+            
             default:
                 throw Error(`Unsupported API chain: ${chainId}`);
         }
