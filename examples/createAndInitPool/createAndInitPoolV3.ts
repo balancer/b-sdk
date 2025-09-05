@@ -116,7 +116,7 @@ export default async function runAgainstFork() {
     // Create the pool and parse the tx receipt to get the pool address
     const poolAddress = await createPool({ client, account });
 
-    // Approve the cannonical permit2 contract to spend tokens that will be used for pool init
+    // Approve the canonical permit2 contract to spend tokens that will be used for pool init
     await approveSpenderOnTokens(
         client,
         account,
@@ -165,7 +165,7 @@ export async function runAgainstNetwork() {
     // Create the pool and parse the tx receipt to get the pool address
     const poolAddress = await createPool({ client, account });
 
-    // Approve the cannonical permit2 contract to spend tokens that will be used for pool init
+    // Approve the canonical permit2 contract to spend tokens that will be used for pool init
     for (const token of amountsIn) {
         const tokenContract = getContract({
             address: token.address,
