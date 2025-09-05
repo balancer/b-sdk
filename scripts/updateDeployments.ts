@@ -205,6 +205,10 @@ async function processContractData(supportedNetworks: SupportedNetwork[]) {
             // network
             console.log(`Failed to fetch Permit2 for ${networkName}: ${e}`);
         }
+
+        // TODO: update the native asset
+
+        // TODO: update the api chain map
     }
 }
 
@@ -245,7 +249,7 @@ function updateContractAddresses() {
     if (Object.keys(permit2Updates).length > 0) {
         // Read the current constants file
         const constantsPath = './src/utils/constants.ts';
-        let constantsContent = readFileSync(constantsPath, 'utf-8');
+        const constantsContent = readFileSync(constantsPath, 'utf-8');
 
         // Find the existing PERMIT2 object
         const permit2Regex =
@@ -262,9 +266,11 @@ function updateContractAddresses() {
 
         // Extract existing entries
         const entryRegex = /(\[ChainId\.[A-Z_]+\]):\s*'([^']+)'/g;
-        let match;
-        while ((match = entryRegex.exec(existingContent)) !== null) {
+        let match: RegExpExecArray | null;
+        match = entryRegex.exec(existingContent);
+        while (match !== null) {
             existingPermit2[match[1]] = match[2] as Address;
+            match = entryRegex.exec(existingContent);
         }
 
         // Merge with updates (existing entries take precedence to avoid overwriting)
