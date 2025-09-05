@@ -71,6 +71,11 @@ const introspectionQuery = `
   }
 `;
 
+type GqlChainEnumValue = {
+    name: string;
+    description?: string;
+};
+
 async function fetchSupportedChains(endpoint: string) {
     try {
         const response = await fetch(endpoint, {
@@ -84,15 +89,9 @@ async function fetchSupportedChains(endpoint: string) {
         });
 
         const data = await response.json();
-        const enumValues = data.data.__type.enumValues;
+        const enumValues: GqlChainEnumValue[] = data.data.__type.enumValues;
 
-        enumValues.forEach((enumValue: any) => {
-            console.log(
-                `- ${enumValue.name}: ${enumValue.description || 'No description'}`,
-            );
-        });
-
-        return enumValues.map((ev: any) => ev.name);
+        return enumValues.map((ev: GqlChainEnumValue) => ev.name);
     } catch (error) {
         console.error('Error fetching enum values:', error);
         return [];
