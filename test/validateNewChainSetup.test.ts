@@ -1,4 +1,5 @@
 import { API_CHAIN_NAMES, ChainId } from '@/utils';
+import { NATIVE_ASSETS } from '@/utils/constants';
 import { SorSwapPaths } from '@/data/providers/balancer-api/modules/sorSwapPaths';
 import { BalancerApiClient } from '@/data/providers/balancer-api/client';
 
@@ -56,6 +57,42 @@ describe('Balancer API (sdk) supports all API chains', () => {
                 expect(sorSwapPaths.mapGqlChain(chainId)).toBeDefined();
             }
         }
+    });
+});
+describe('Native asset is defined for all API chains', () => {
+    let supportedChains: SupportedChain[] = [];
+
+    beforeAll(async () => {
+        const chainNames = await fetchSupportedChains(API_ENDPOINT);
+
+        // Build array of objects: { name, chainId }
+        supportedChains = chainNames.map((name: string) => {
+            // Find the chainId for this name in API_CHAIN_NAMES
+            const chainIdEntry = Object.entries(API_CHAIN_NAMES).find(
+                ([, apiName]) => apiName === name,
+            );
+            return {
+                name,
+                chainId: chainIdEntry ? Number(chainIdEntry[0]) : undefined,
+            };
+        });
+    });
+
+    test('Native asset is defined for all API chains', () => {
+        const missingNativeAssets: string[] = [];
+        for (const { name, chainId } of supportedChains) {
+            if (chainId === undefined) continue;
+            if (!NATIVE_ASSETS[chainId]) {
+                missingNativeAssets.push(`${name} (${chainId})`);
+            }
+        }
+        if (missingNativeAssets.length > 0) {
+            console.error(
+                'Missing NATIVE_ASSETS entries for:',
+                missingNativeAssets,
+            );
+        }
+        expect(missingNativeAssets).toHaveLength(0);
     });
 });
 
