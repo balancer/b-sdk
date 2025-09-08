@@ -205,10 +205,6 @@ async function processContractData(supportedNetworks: SupportedNetwork[]) {
             // network
             console.log(`Failed to fetch Permit2 for ${networkName}: ${e}`);
         }
-
-        // TODO: update the native asset
-
-        // TODO: update the api chain map
     }
 }
 
