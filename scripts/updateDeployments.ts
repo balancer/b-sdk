@@ -262,6 +262,7 @@ function updateContractAddresses() {
 
         // Extract existing entries
         const entryRegex = /(\[ChainId\.[A-Z_]+\]):\s*'([^']+)'/g;
+        entryRegex.lastIndex = 0;
         let match: RegExpExecArray | null;
         match = entryRegex.exec(existingContent);
         while (match !== null) {
