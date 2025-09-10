@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.7.0
+
+### Minor Changes
+
+- 508c646: fetch permit2 from deployments and improve new chain deployment setup
+
 ## 4.6.0
 
 ### Minor Changes
