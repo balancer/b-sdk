@@ -3,6 +3,7 @@ import { ChainId } from '@/utils';
 import { Address } from 'viem';
 import { SwapKind } from '@/types';
 import { TokenAmount } from '@/entities';
+import { API_CHAIN_NAMES } from '@/utils/constants';
 import { Path } from '@/entities/swap/paths/types';
 
 export type SorInput = {
@@ -133,33 +134,8 @@ export class SorSwapPaths {
     }
 
     private mapGqlChain(chainId: ChainId): string {
-        switch (chainId) {
-            case ChainId.ARBITRUM_ONE:
-                return 'ARBITRUM';
-            case ChainId.AVALANCHE:
-                return 'AVALANCHE';
-            case ChainId.FANTOM:
-                return 'FANTOM';
-            case ChainId.GNOSIS_CHAIN:
-                return 'GNOSIS';
-            case ChainId.MAINNET:
-                return 'MAINNET';
-            case ChainId.OPTIMISM:
-                return 'OPTIMISM';
-            case ChainId.POLYGON:
-                return 'POLYGON';
-            case ChainId.ZKEVM:
-                return 'ZKEVM';
-            case ChainId.SEPOLIA:
-                return 'SEPOLIA';
-            case ChainId.BASE:
-                return 'BASE';
-            case ChainId.SONIC:
-                return 'SONIC';
-            case ChainId.HYPEREVM:
-                return 'HYPEREVM';
-            default:
-                throw Error(`Unsupported API chain: ${chainId}`);
-        }
+        const mapped = API_CHAIN_NAMES[chainId];
+        if (!mapped) throw Error(`Unsupported API chain: ${chainId}`);
+        return mapped;
     }
 }
