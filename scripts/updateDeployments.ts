@@ -262,12 +262,8 @@ function updateContractAddresses() {
 
         // Extract existing entries
         const entryRegex = /(\[ChainId\.[A-Z_]+\]):\s*'([^']+)'/g;
-        entryRegex.lastIndex = 0;
-        let match: RegExpExecArray | null;
-        match = entryRegex.exec(existingContent);
-        while (match !== null) {
+        for (const match of existingContent.matchAll(entryRegex)) {
             existingPermit2[match[1]] = match[2] as Address;
-            match = entryRegex.exec(existingContent);
         }
 
         // Merge with updates (existing entries take precedence to avoid overwriting)
