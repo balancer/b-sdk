@@ -1,7 +1,7 @@
 import { Abi, Address } from 'viem';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { sonic } from 'viem/chains';
-import { ChainId } from '../src/utils/constants';
+import { ChainId, PERMIT2 } from '../src/utils/constants';
 
 type SupportedNetworkResponse = {
     name: string;
@@ -67,12 +67,14 @@ const targetContractsV3 = [
     'LBPoolFactory',
     'ReClammPoolFactory',
     'MockGyroEclpPool',
+    'LBPMigrationRouter',
 ];
 
 const targetContracts = [...targetContractsV2, ...targetContractsV3];
 
 const balancerV2Contracts: ContractRegistry = {};
 const balancerV3Contracts: ContractRegistry = {};
+const permit2Updates: Record<string, Address> = {};
 
 const branch = 'master'; // point this at any balancer-deployments branch
 
@@ -170,6 +172,39 @@ async function processContractData(supportedNetworks: SupportedNetwork[]) {
                 }
             }
         }
+
+        // Update Permit2 entries
+        // Since Permit2 is not part of the "addresses" folder in the deployments repo
+        // The addresses are being fetched from the task output
+        // https://github.com/balancer/balancer-deployments/tree/master/v3/tasks/00000000-permit2/output
+        try {
+            const permit2Url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/master/v3/tasks/00000000-permit2/output/${networkName}.json`;
+            const permit2Result = await fetch(permit2Url);
+            const permit2Data = await permit2Result.json();
+            const permit2Address = permit2Data.Permit2;
+            if (!permit2Data) {
+                throw new Error(
+                    `Failed to fetch Permit2 data for ${networkName}`,
+                );
+            }
+
+            // Direct check: Does PERMIT2 object have an entry for this chainId?
+            if (!PERMIT2[chainId]) {
+                const chainIdKey = chainIdToHumanKey[chainId];
+                if (chainIdKey) {
+                    permit2Updates[chainIdKey] = permit2Address;
+                } else {
+                    console.warn(
+                        `No ChainId enum found for chainId ${chainId}`,
+                    );
+                }
+            }
+        } catch (e) {
+            // errors here are probably due to the deployments repo not having
+            // an entry for the PERMIT2 address on the task for the given
+            // network
+            console.log(`Failed to fetch Permit2 for ${networkName}: ${e}`);
+        }
     }
 }
 
@@ -205,6 +240,55 @@ function updateContractAddresses() {
             4,
         )} as const;`.replace(/"(\[ChainId\.[A-Z_]+\])"/g, '$1');
     writeFileSync('./src/utils/balancerV3Contracts.ts', balancerV3Content);
+
+    // Update PERMIT2 addresses if there are new entries
+    if (Object.keys(permit2Updates).length > 0) {
+        // Read the current constants file
+        const constantsPath = './src/utils/constants.ts';
+        const constantsContent = readFileSync(constantsPath, 'utf-8');
+
+        // Find the existing PERMIT2 object
+        const permit2Regex =
+            /(export const PERMIT2: Record<number, Address> = \{)([\s\S]*?)(\};)/;
+        const permit2Match = constantsContent.match(permit2Regex);
+
+        if (!permit2Match) {
+            throw new Error('Could not find PERMIT2 object in constants file');
+        }
+
+        // Parse existing entries
+        const existingContent = permit2Match[2];
+        const existingPermit2: Record<string, Address> = {};
+
+        // Extract existing entries
+        const entryRegex = /(\[ChainId\.[A-Z_]+\]):\s*'([^']+)'/g;
+        for (const match of existingContent.matchAll(entryRegex)) {
+            existingPermit2[match[1]] = match[2] as Address;
+        }
+
+        // Merge with updates (existing entries take precedence to avoid overwriting)
+        const mergedPermit2 = { ...existingPermit2, ...permit2Updates };
+
+        // Sort by key for consistent ordering
+        const sortedPermit2 = Object.fromEntries(
+            Object.entries(mergedPermit2).sort(([a], [b]) =>
+                a.localeCompare(b),
+            ),
+        );
+
+        // Generate the updated PERMIT2 content
+        const permit2Entries = Object.entries(sortedPermit2)
+            .map(([key, value]) => `    ${key}: '${value}',`)
+            .join('\n');
+
+        // Replace the PERMIT2 object in the constants file
+        const updatedConstants = constantsContent.replace(
+            permit2Regex,
+            `$1\n${permit2Entries}\n$3`,
+        );
+
+        writeFileSync(constantsPath, updatedConstants);
+    }
 }
 
 function exportAbis() {

@@ -92,7 +92,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.POLYGON]: 'POLYGON',
     [ChainId.FANTOM]: 'FANTOM',
     [ChainId.FRAXTAL]: 'FRAXTAL',
-    [ChainId.ZKSYNC]: 'ZKEVM',
+    [ChainId.ZKEVM]: 'ZKEVM',
     [ChainId.BASE]: 'BASE',
     [ChainId.MODE]: 'MODE',
     [ChainId.ARBITRUM_ONE]: 'ARBITRUM',

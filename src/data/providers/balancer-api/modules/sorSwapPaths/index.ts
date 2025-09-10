@@ -1,6 +1,6 @@
 import { BalancerApiClient } from '../../client';
 import { ChainId } from '@/utils';
-import { Address } from 'viem';
+import { Address, Chain } from 'viem';
 import { SwapKind } from '@/types';
 import { TokenAmount } from '@/entities';
 import { Path } from '@/entities/swap/paths/types';
@@ -132,7 +132,7 @@ export class SorSwapPaths {
         return poolGetPool;
     }
 
-    private mapGqlChain(chainId: ChainId): string {
+    public mapGqlChain(chainId: ChainId): string {
         switch (chainId) {
             case ChainId.ARBITRUM_ONE:
                 return 'ARBITRUM';
@@ -158,6 +158,13 @@ export class SorSwapPaths {
                 return 'SONIC';
             case ChainId.HYPEREVM:
                 return 'HYPEREVM';
+            case ChainId.FRAXTAL:
+                return 'FRAXTAL';
+            case ChainId.MODE:
+                return 'MODE';
+            case ChainId.ZKSYNC:
+                return 'ZKSYNC';
+
             default:
                 throw Error(`Unsupported API chain: ${chainId}`);
         }
