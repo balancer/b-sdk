@@ -22,6 +22,9 @@ export async function doCreatePool(
     const createPool = new CreatePool();
     const { callData, to } = createPool.buildCall(createPoolInput);
 
+    console.log('callData', callData);
+    console.log('to', to);
+
     const abis = {
         2: {
             [PoolType.Weighted]: weightedPoolFactoryAbiExtended_V2,

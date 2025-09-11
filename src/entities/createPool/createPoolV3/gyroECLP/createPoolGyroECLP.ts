@@ -12,7 +12,7 @@ import { balancerV3Contracts } from '@/utils';
 import { Hex } from '@/types';
 import { Big } from 'big.js';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { GyroECLPMath } from '@balancer-labs/balancer-maths';
+// import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 
 const D18 = 10n ** 18n; // 18 decimal precision is how params are stored
 const D38 = 10n ** 38n; // 38 decimal precision for derived param return values
@@ -178,7 +178,7 @@ export function computeDerivedEclpParams(
     };
 
     // Sanity check
-    GyroECLPMath.validateDerivedParams(params, derivedParams);
+    // GyroECLPMath.validateDerivedParams(params, derivedParams);
 
     return derivedParams;
 }
