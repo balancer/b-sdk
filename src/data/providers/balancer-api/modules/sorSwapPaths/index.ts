@@ -1,6 +1,6 @@
 import { BalancerApiClient } from '../../client';
 import { ChainId } from '@/utils';
-import { Address } from 'viem';
+import { Address, Chain } from 'viem';
 import { SwapKind } from '@/types';
 import { TokenAmount } from '@/entities';
 import { API_CHAIN_NAMES } from '@/utils/constants';
@@ -133,7 +133,7 @@ export class SorSwapPaths {
         return poolGetPool;
     }
 
-    private mapGqlChain(chainId: ChainId): string {
+    public mapGqlChain(chainId: ChainId): string {
         const mapped = API_CHAIN_NAMES[chainId];
         if (!mapped) throw Error(`Unsupported API chain: ${chainId}`);
         return mapped;
