@@ -20,32 +20,32 @@ export * from '../generated/types';
 // types from GraphQL Codegen.
 
 import type { 
-    PoolGetPoolQuery,
-    PoolGetPoolWithBalancesQuery,
-    PoolGetPoolWithUnderlyingsQuery,
-    SorGetSwapPathsQuery,
-    SorGetSwapPathsQueryVariables,
-    TokenGetTokensQuery,
-    PoolGetNestedPoolQuery
+    poolGetPoolQuery,
+    poolGetPoolWithBalancesQuery,
+    poolGetPoolWithUnderlyingsQuery,
+    sorGetSwapPathsQuery,
+    sorGetSwapPathsQueryVariables,
+    tokenGetTokensQuery,
+    poolGetNestedPoolQuery
 } from '../generated/types';
 
 // Pool State Types
-export type ApiTokenBase = NonNullable<NonNullable<PoolGetPoolQuery['poolGetPool']>['poolTokens'][0]>;
-export type ApiPoolBase = NonNullable<PoolGetPoolQuery['poolGetPool']>;
-export type ApiPoolResponse = PoolGetPoolQuery['poolGetPool'];
-export type ApiPoolWithBalancesResponse = PoolGetPoolWithBalancesQuery['poolGetPool'];
-export type ApiPoolWithUnderlyingsResponse = PoolGetPoolWithUnderlyingsQuery['poolGetPool'];
+export type ApiTokenBase = NonNullable<NonNullable<poolGetPoolQuery['poolGetPool']>['poolTokens'][0]>;
+export type ApiPoolBase = NonNullable<poolGetPoolQuery['poolGetPool']>;
+export type ApiPoolResponse = poolGetPoolQuery['poolGetPool'];
+export type ApiPoolWithBalancesResponse = poolGetPoolWithBalancesQuery['poolGetPool'];
+export type ApiPoolWithUnderlyingsResponse = poolGetPoolWithUnderlyingsQuery['poolGetPool'];
 
 // SOR Types
-export type ApiSorInput = SorGetSwapPathsQueryVariables;
-export type ApiSorSwapPathsResponse = SorGetSwapPathsQuery['sorGetSwapPaths'];
+export type ApiSorInput = sorGetSwapPathsQueryVariables;
+export type ApiSorSwapPathsResponse = sorGetSwapPathsQuery['sorGetSwapPaths'];
 
 // Buffer State Types
-export type ApiBufferStateResponse = NonNullable<TokenGetTokensQuery['tokenGetTokens']>[0];
+export type ApiBufferStateResponse = NonNullable<tokenGetTokensQuery['tokenGetTokens']>[0];
 
 // Nested Pool Types
-export type ApiNestedPoolResponse = PoolGetNestedPoolQuery['poolGetPool'];
-export type ApiNestedPoolToken = NonNullable<NonNullable<PoolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]>;
+export type ApiNestedPoolResponse = poolGetNestedPoolQuery['poolGetPool'];
+export type ApiNestedPoolToken = NonNullable<NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]>;
 
 // ============================================================================
 // DEPRECATED TYPES - Use generated types instead

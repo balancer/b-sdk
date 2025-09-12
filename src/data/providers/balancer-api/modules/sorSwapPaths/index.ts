@@ -13,7 +13,7 @@ import { sorGetSwapPathsQuery, sorGetSwapPathsQueryVariables } from '../../gener
 export type SorInput = {
     chainId: number;
     swapAmount: { toSignificant: (decimals: number) => string; token: { decimals: number } };
-    swapKind: 'GIVEN_IN' | 'GIVEN_OUT';
+    swapKind: SwapKind;
     tokenIn: Address;
     tokenOut: Address;
     considerPoolsWithHooks?: boolean;
@@ -116,7 +116,7 @@ export class SorSwapPaths {
                 sorInput.swapAmount.token.decimals,
             ), // Must use human scale
             swapType:
-                sorInput.swapKind === 'GIVEN_IN'
+                sorInput.swapKind === SwapKind.GivenIn
                     ? 'EXACT_IN'
                     : 'EXACT_OUT',
             tokenIn: sorInput.tokenIn,
