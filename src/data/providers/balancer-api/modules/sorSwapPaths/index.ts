@@ -5,17 +5,10 @@ import { SwapKind } from '@/types';
 import { TokenAmount } from '@/entities';
 import { API_CHAIN_NAMES } from '@/utils/constants';
 import { Path } from '@/entities/swap/paths/types';
+import { ApiSorInput, ApiSorSwapPathsResponse } from '../../types';
 
-export type SorInput = {
-    chainId: ChainId;
-    tokenIn: Address;
-    tokenOut: Address;
-    swapKind: SwapKind;
-    swapAmount: TokenAmount; // API expects input in human readable form
-    useProtocolVersion?: 2 | 3; // If not specified API will return best
-    poolIds?: Address[]; // If specified, API will return only paths that contain these poolIds
-    considerPoolsWithHooks?: boolean; // If true, API will return paths that contain pools with hooks
-};
+// Re-export the shared type for backward compatibility
+export type SorInput = ApiSorInput;
 
 export class SorSwapPaths {
     readonly sorSwapPathQuery = `
@@ -129,8 +122,19 @@ export class SorSwapPaths {
                 : this.sorSwapPathQuery,
             variables,
         });
-        const poolGetPool: Path[] = data.sorGetSwapPaths.paths;
-        return poolGetPool;
+        const sorResponse: ApiSorSwapPathsResponse = data.sorGetSwapPaths;
+        const paths: Path[] = sorResponse.paths.map(apiPath => ({
+            pools: apiPath.pools as Address[],
+            isBuffer: [apiPath.isBuffer], // Convert boolean to boolean[]
+            tokens: apiPath.tokens.map(token => ({
+                address: token.address,
+                decimals: token.decimals,
+            })),
+            outputAmountRaw: BigInt(apiPath.outputAmountRaw),
+            inputAmountRaw: BigInt(apiPath.inputAmountRaw),
+            protocolVersion: apiPath.protocolVersion as 1 | 2 | 3,
+        }));
+        return paths;
     }
 
     public mapGqlChain(chainId: ChainId): string {

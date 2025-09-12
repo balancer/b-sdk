@@ -8,32 +8,12 @@ import {
 import { Address, Hex } from '../../../../../types';
 import { mapPoolType } from '@/utils/poolTypeMapper';
 import { API_CHAIN_NAMES, isSameAddress, SDKError } from '@/utils';
+import { ApiNestedPoolResponse, ApiNestedPoolToken } from '../../types';
 
-export type PoolGetPool = {
-    id: Hex;
-    protocolVersion: 1 | 2 | 3;
-    address: Address;
-    type: string;
-    poolTokens: Token[];
-};
-
-export type UnderlyingToken = {
-    address: Address;
-    decimals: number;
-};
-
-export type Token = {
-    index: number;
-    address: Address;
-    decimals: number;
-    underlyingToken: UnderlyingToken | null;
-    nestedPool: {
-        id: Hex;
-        address: Address;
-        type: string;
-        tokens: Token[];
-    } | null;
-};
+// Re-export shared types for backward compatibility
+export type PoolGetPool = ApiNestedPoolResponse;
+export type UnderlyingToken = import('../../types').ApiUnderlyingToken;
+export type Token = ApiNestedPoolToken;
 
 export class NestedPools {
     readonly nestedPoolStateQuery = `
@@ -85,20 +65,20 @@ export class NestedPools {
         });
 
         const nestedPoolState = this.mapPoolToNestedPoolState(
-            poolGetPool as PoolGetPool,
+            poolGetPool as ApiNestedPoolResponse,
         );
 
         return nestedPoolState;
     };
 
-    mapPoolToNestedPoolState = (pool: PoolGetPool): NestedPoolState => {
+    mapPoolToNestedPoolState = (pool: ApiNestedPoolResponse): NestedPoolState => {
         return pool.protocolVersion === 2
             ? mapPoolToNestedPoolStateV2(pool)
             : mapPoolToNestedPoolStateV3(pool);
     };
 }
 
-export function mapPoolToNestedPoolStateV3(pool: PoolGetPool): NestedPoolState {
+export function mapPoolToNestedPoolStateV3(pool: ApiNestedPoolResponse): NestedPoolState {
     if (pool.protocolVersion !== 3) {
         throw new SDKError(
             'BalancerApi',
@@ -176,7 +156,7 @@ export function mapPoolToNestedPoolStateV3(pool: PoolGetPool): NestedPoolState {
     };
 }
 
-function getMainToken(token: Token): {
+function getMainToken(token: ApiNestedPoolToken): {
     address: Address;
     decimals: number;
     index: number;
@@ -204,7 +184,7 @@ function getMainToken(token: Token): {
     return nestedTokens[0]; // Return the first token as this is part of an array anyway
 }
 
-export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
+export function mapPoolToNestedPoolStateV2(pool: ApiNestedPoolResponse): NestedPoolState {
     const pools: NestedPoolV2[] = [
         {
             id: pool.id,
