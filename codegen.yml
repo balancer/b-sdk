@@ -1,0 +1,17 @@
+schema: https://api-v3.balancer.fi/graphql
+documents: src/data/providers/balancer-api/modules/**/*.ts
+generates:
+  src/data/providers/balancer-api/generated/types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      scalars:
+        BigDecimal: string
+        BigInt: string
+        Bytes: string
+        AmountHumanReadable: string
+      enumsAsTypes: true
+      namingConvention: keep
+      skipTypename: false
+      useTypeImports: true

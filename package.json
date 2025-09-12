@@ -18,6 +18,9 @@
         "dist/"
     ],
     "scripts": {
+        "fetch-schema": "tsup scripts/fetchSchema.ts --format cjs --out-dir dist/scripts && node dist/scripts/fetchSchema.js",
+        "codegen": "graphql-codegen --config codegen.yml",
+        "prebuild": "pnpm run fetch-schema && pnpm run codegen",
         "build": "tsup",
         "format": "biome format --write .",
         "lint": "dpdm -T ./src && biome check .",
@@ -26,8 +29,8 @@
         "test:ci": "vitest run",
         "changeset": "changeset",
         "changeset:release": "pnpm build && changeset publish",
-        "example": "npx tsx ./examples/lib/executeExample.ts",
-        "update:deployments": "npx tsx ./scripts/updateDeployments.ts && pnpm format"
+        "example": "tsup examples/lib/executeExample.ts --format cjs --out-dir dist/examples && node dist/examples/executeExample.js",
+        "update:deployments": "tsup scripts/updateDeployments.ts --format cjs --out-dir dist/scripts && node dist/scripts/updateDeployments.js && pnpm format"
     },
     "dependencies": {
         "@balancer-labs/balancer-maths": "0.0.27",
@@ -39,11 +42,16 @@
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@changesets/cli": "2.29.1",
+        "@graphql-codegen/cli": "^6.0.0",
+        "@graphql-codegen/typescript": "^5.0.0",
+        "@graphql-codegen/typescript-operations": "^5.0.0",
         "@types/async-retry": "1.4.9",
         "@types/node": "22.14.1",
         "@viem/anvil": "0.0.10",
         "dotenv": "16.5.0",
         "dpdm": "3.14.0",
+        "graphql": "^16.11.0",
+        "graphql-tag": "^2.12.6",
         "pino-pretty": "13.0.0",
         "ts-node": "10.9.2",
         "tsup": "8.4.0",
