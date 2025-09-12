@@ -1,13 +1,17 @@
 import { BalancerApiClient } from '../../client';
 import { PoolState, PoolStateWithBalances } from '../../../../../entities';
 import { mapPoolType } from '../../../../../utils/poolTypeMapper';
-
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
+import { gql } from 'graphql-tag';
+import { DocumentNode, print } from 'graphql';
+import { poolGetPoolQuery, poolGetPoolWithBalancesQuery } from '../../generated/types';
+import { Address, Hex } from 'viem';
+import { HumanAmount } from '../../../../../data/types';
 
 export class Pools {
-    readonly poolStateQuery = `
+    readonly poolStateQuery: DocumentNode = gql`
     query poolGetPool($id: String!, $chain: GqlChain!) {
-      poolGetPool(id: $id, chain:$chain) {
+      poolGetPool(id: $id, chain: $chain) {
         id
         address
         type
@@ -20,9 +24,9 @@ export class Pools {
       }
     }`;
 
-    readonly poolStateWithRawTokensQuery = `
-    query GetPool($id: String!, $chain: GqlChain!) {
-      poolGetPool(id:$id, chain:$chain) {
+    readonly poolStateWithRawTokensQuery: DocumentNode = gql`
+    query poolGetPoolWithBalances($id: String!, $chain: GqlChain!) {
+      poolGetPool(id: $id, chain: $chain) {
         id
         address
         type
@@ -43,42 +47,63 @@ export class Pools {
 
     async fetchPoolState(id: string): Promise<PoolState> {
         const { data } = await this.balancerApiClient.fetch({
-            query: this.poolStateQuery,
+            query: print(this.poolStateQuery),
             variables: {
                 id: id.toLowerCase(),
                 // the API requires chain names to be sent as uppercase strings
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
-        const poolGetPool: PoolState = {
-            ...data.poolGetPool,
-            tokens: data.poolGetPool.poolTokens,
-            type:
-                data.poolGetPool.protocolVersion === 2
-                    ? mapPoolType(data.poolGetPool.type)
-                    : data.poolGetPool.type,
+        
+        // Now data is fully typed as poolGetPoolQuery
+        const apiResponse: poolGetPoolQuery = data;
+        const poolData = apiResponse.poolGetPool;
+        
+        const poolState: PoolState = {
+            id: poolData.id as Hex,
+            address: poolData.address as Address,
+            type: poolData.protocolVersion === 2
+                ? mapPoolType(poolData.type)
+                : poolData.type,
+            protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
+            tokens: poolData.poolTokens.map(token => ({
+                index: token.index,
+                address: token.address as Address,
+                decimals: token.decimals,
+            })),
         };
-        return poolGetPool;
+        return poolState;
     }
 
     async fetchPoolStateWithBalances(
         id: string,
     ): Promise<PoolStateWithBalances> {
         const { data } = await this.balancerApiClient.fetch({
-            query: this.poolStateWithRawTokensQuery,
+            query: print(this.poolStateWithRawTokensQuery),
             variables: {
                 id: id.toLowerCase(),
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
+        
+        // Now data is fully typed as poolGetPoolWithBalancesQuery
+        const apiResponse: poolGetPoolWithBalancesQuery = data;
+        const poolData = apiResponse.poolGetPool;
+        
         const poolStateWithBalances: PoolStateWithBalances = {
-            ...data.poolGetPool,
-            tokens: data.poolGetPool.poolTokens,
-            type:
-                data.poolGetPool.protocolVersion === 2
-                    ? mapPoolType(data.poolGetPool.type)
-                    : data.poolGetPool.type,
-            totalShares: data.poolGetPool.dynamicData.totalShares,
+            id: poolData.id as Hex,
+            address: poolData.address as Address,
+            type: poolData.protocolVersion === 2
+                ? mapPoolType(poolData.type)
+                : poolData.type,
+            protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
+            tokens: poolData.poolTokens.map(token => ({
+                index: token.index,
+                address: token.address as Address,
+                decimals: token.decimals,
+                balance: token.balance as HumanAmount,
+            })),
+            totalShares: poolData.dynamicData.totalShares as HumanAmount,
         };
         return poolStateWithBalances;
     }

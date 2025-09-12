@@ -8,16 +8,18 @@ import {
 import { Address, Hex } from '../../../../../types';
 import { mapPoolType } from '@/utils/poolTypeMapper';
 import { API_CHAIN_NAMES, isSameAddress, SDKError } from '@/utils';
-import { ApiNestedPoolResponse, ApiNestedPoolToken } from '../../types';
+import { gql } from 'graphql-tag';
+import { DocumentNode, print } from 'graphql';
+import { poolGetNestedPoolQuery } from '../../generated/types';
 
-// Re-export shared types for backward compatibility
-export type PoolGetPool = ApiNestedPoolResponse;
-export type UnderlyingToken = import('../../types').ApiUnderlyingToken;
-export type Token = ApiNestedPoolToken;
+// Re-export generated types for backward compatibility
+export type PoolGetPool = poolGetNestedPoolQuery['poolGetPool'];
+export type UnderlyingToken = NonNullable<NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]>['underlyingToken'];
+export type Token = NonNullable<NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]>;
 
 export class NestedPools {
-    readonly nestedPoolStateQuery = `
-  query GetPool($id: String!, $chain: GqlChain!) {
+    readonly nestedPoolStateQuery: DocumentNode = gql`
+  query poolGetNestedPool($id: String!, $chain: GqlChain!) {
     poolGetPool(id: $id, chain: $chain) {
       id
       protocolVersion
@@ -53,10 +55,8 @@ export class NestedPools {
     constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
     fetchNestedPoolState = async (id: string): Promise<NestedPoolState> => {
-        const {
-            data: { poolGetPool },
-        } = await this.balancerApiClient.fetch({
-            query: this.nestedPoolStateQuery,
+        const { data } = await this.balancerApiClient.fetch({
+            query: print(this.nestedPoolStateQuery),
             variables: {
                 id: id.toLowerCase(),
                 // the API requires chain names to be sent as uppercase strings
@@ -64,21 +64,26 @@ export class NestedPools {
             },
         });
 
-        const nestedPoolState = this.mapPoolToNestedPoolState(
-            poolGetPool as ApiNestedPoolResponse,
-        );
+        // Now data is fully typed as poolGetNestedPoolQuery
+        const apiResponse: poolGetNestedPoolQuery = data;
+        const poolData = apiResponse.poolGetPool;
+        
+        if (!poolData) {
+            throw new SDKError('BalancerApi', 'fetchNestedPoolState', 'Pool not found');
+        }
 
+        const nestedPoolState = this.mapPoolToNestedPoolState(poolData);
         return nestedPoolState;
     };
 
-    mapPoolToNestedPoolState = (pool: ApiNestedPoolResponse): NestedPoolState => {
+    mapPoolToNestedPoolState = (pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>): NestedPoolState => {
         return pool.protocolVersion === 2
             ? mapPoolToNestedPoolStateV2(pool)
             : mapPoolToNestedPoolStateV3(pool);
     };
 }
 
-export function mapPoolToNestedPoolStateV3(pool: ApiNestedPoolResponse): NestedPoolState {
+export function mapPoolToNestedPoolStateV3(pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>): NestedPoolState {
     if (pool.protocolVersion !== 3) {
         throw new SDKError(
             'BalancerApi',
@@ -89,22 +94,23 @@ export function mapPoolToNestedPoolStateV3(pool: ApiNestedPoolResponse): NestedP
 
     const pools: NestedPoolV3[] = [
         {
-            id: pool.id,
-            address: pool.address,
+            id: pool.id as Hex,
+            address: pool.address as Address,
             type: pool.type,
             level: 1,
-            tokens: pool.poolTokens.map((t) => {
-                const minimalToken: PoolTokenWithUnderlying = {
-                    address: t.address,
-                    decimals: t.decimals,
-                    index: t.index,
-                    underlyingToken:
-                        t.underlyingToken === null
-                            ? null
-                            : { ...t.underlyingToken, index: t.index },
-                };
-                return minimalToken;
-            }),
+            tokens: pool.poolTokens.map((t) => ({
+                address: t.address as Address,
+                decimals: t.decimals,
+                index: t.index,
+                underlyingToken:
+                    t.underlyingToken === null || t.underlyingToken === undefined
+                        ? null
+                        : { 
+                            address: t.underlyingToken.address as Address,
+                            decimals: t.underlyingToken.decimals,
+                            index: t.index 
+                        },
+            })),
         },
     ];
 
@@ -113,28 +119,29 @@ export function mapPoolToNestedPoolStateV3(pool: ApiNestedPoolResponse): NestedP
         // Filter out phantomBpt
         if (
             !token.nestedPool ||
-            isSameAddress(pool.address, token.nestedPool.address)
+            isSameAddress(pool.address as Address, token.nestedPool.address as Address)
         )
             return;
 
         // map API result to NestedPool
         pools.push({
-            id: token.nestedPool.id,
-            address: token.nestedPool.address,
+            id: token.nestedPool.id as Hex,
+            address: token.nestedPool.address as Address,
             level: 0,
             type: mapPoolType(token.nestedPool.type),
-            tokens: token.nestedPool.tokens.map((t) => {
-                const minimalToken: PoolTokenWithUnderlying = {
-                    address: t.address,
-                    decimals: t.decimals,
-                    index: t.index,
-                    underlyingToken:
-                        t.underlyingToken === null
-                            ? null
-                            : { ...t.underlyingToken, index: t.index },
-                };
-                return minimalToken;
-            }),
+            tokens: token.nestedPool.tokens.map((t) => ({
+                address: t.address as Address,
+                decimals: t.decimals,
+                index: t.index,
+                underlyingToken:
+                    t.underlyingToken === null || t.underlyingToken === undefined
+                        ? null
+                        : { 
+                            address: t.underlyingToken.address as Address,
+                            decimals: t.underlyingToken.decimals,
+                            index: t.index 
+                        },
+            })),
         });
     });
 
@@ -156,7 +163,7 @@ export function mapPoolToNestedPoolStateV3(pool: ApiNestedPoolResponse): NestedP
     };
 }
 
-function getMainToken(token: ApiNestedPoolToken): {
+function getMainToken(token: NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]): {
     address: Address;
     decimals: number;
     index: number;
@@ -165,7 +172,7 @@ function getMainToken(token: ApiNestedPoolToken): {
     if (token.underlyingToken) {
         return {
             index: token.index,
-            address: token.underlyingToken.address,
+            address: token.underlyingToken.address as Address,
             decimals: token.underlyingToken.decimals,
         };
     }
@@ -174,7 +181,7 @@ function getMainToken(token: ApiNestedPoolToken): {
     if (!token.nestedPool) {
         return {
             index: token.index,
-            address: token.address,
+            address: token.address as Address,
             decimals: token.decimals,
         };
     }
@@ -184,22 +191,19 @@ function getMainToken(token: ApiNestedPoolToken): {
     return nestedTokens[0]; // Return the first token as this is part of an array anyway
 }
 
-export function mapPoolToNestedPoolStateV2(pool: ApiNestedPoolResponse): NestedPoolState {
+export function mapPoolToNestedPoolStateV2(pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>): NestedPoolState {
     const pools: NestedPoolV2[] = [
         {
-            id: pool.id,
-            address: pool.address,
+            id: pool.id as Hex,
+            address: pool.address as Address,
             type: mapPoolType(pool.type),
             level: 1,
-            tokens: pool.poolTokens.map((t) => {
-                const minimalToken: PoolTokenWithUnderlying = {
-                    address: t.address,
-                    decimals: t.decimals,
-                    index: t.index,
-                    underlyingToken: null,
-                };
-                return minimalToken;
-            }),
+            tokens: pool.poolTokens.map((t) => ({
+                address: t.address as Address,
+                decimals: t.decimals,
+                index: t.index,
+                underlyingToken: null,
+            })),
         },
     ];
 
@@ -208,25 +212,22 @@ export function mapPoolToNestedPoolStateV2(pool: ApiNestedPoolResponse): NestedP
         // Filter out phantomBpt
         if (
             !token.nestedPool ||
-            isSameAddress(pool.address, token.nestedPool.address)
+            isSameAddress(pool.address as Address, token.nestedPool.address as Address)
         )
             return;
 
         // map API result to NestedPool
         pools.push({
-            id: token.nestedPool.id,
-            address: token.nestedPool.address,
+            id: token.nestedPool.id as Hex,
+            address: token.nestedPool.address as Address,
             level: 0,
             type: mapPoolType(token.nestedPool.type),
-            tokens: token.nestedPool.tokens.map((t) => {
-                const minimalToken: PoolTokenWithUnderlying = {
-                    address: t.address,
-                    decimals: t.decimals,
-                    index: t.index,
-                    underlyingToken: null,
-                };
-                return minimalToken;
-            }),
+            tokens: token.nestedPool.tokens.map((t) => ({
+                address: t.address as Address,
+                decimals: t.decimals,
+                index: t.index,
+                underlyingToken: null,
+            })),
         });
     });
 

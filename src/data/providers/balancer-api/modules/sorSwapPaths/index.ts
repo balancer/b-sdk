@@ -5,22 +5,41 @@ import { SwapKind } from '@/types';
 import { TokenAmount } from '@/entities';
 import { API_CHAIN_NAMES } from '@/utils/constants';
 import { Path } from '@/entities/swap/paths/types';
-import { ApiSorInput, ApiSorSwapPathsResponse } from '../../types';
+import { gql } from 'graphql-tag';
+import { DocumentNode, print } from 'graphql';
+import { sorGetSwapPathsQuery, sorGetSwapPathsQueryVariables } from '../../generated/types';
 
-// Re-export the shared type for backward compatibility
-export type SorInput = ApiSorInput;
+// Re-export the original type for backward compatibility
+export type SorInput = {
+    chainId: number;
+    swapAmount: { toSignificant: (decimals: number) => string; token: { decimals: number } };
+    swapKind: 'GIVEN_IN' | 'GIVEN_OUT';
+    tokenIn: Address;
+    tokenOut: Address;
+    considerPoolsWithHooks?: boolean;
+    poolIds?: Address[];
+    useProtocolVersion?: number;
+};
 
 export class SorSwapPaths {
-    readonly sorSwapPathQuery = `
-  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $considerPoolsWithHooks: Boolean, $poolIds: [String!]) {
+    readonly sorSwapPathQuery: DocumentNode = gql`
+  query sorGetSwapPaths(
+    $chain: GqlChain!
+    $swapType: GqlSorSwapType!
+    $swapAmount: AmountHumanReadable!
+    $tokenIn: String!
+    $tokenOut: String!
+    $considerPoolsWithHooks: Boolean
+    $poolIds: [String!]
+  ) {
     sorGetSwapPaths(
-    swapAmount: $swapAmount
-    chain: $chain
-    swapType: $swapType
-    tokenIn: $tokenIn
-    tokenOut: $tokenOut
-    considerPoolsWithHooks: $considerPoolsWithHooks
-    poolIds: $poolIds
+      swapAmount: $swapAmount
+      chain: $chain
+      swapType: $swapType
+      tokenIn: $tokenIn
+      tokenOut: $tokenOut
+      considerPoolsWithHooks: $considerPoolsWithHooks
+      poolIds: $poolIds
     ) {
       tokenInAmount
       tokenOutAmount
@@ -44,17 +63,26 @@ export class SorSwapPaths {
     }
   }
 `;
-    readonly sorSwapPathQueryWithVersion = `
-  query MyQuery($chain: GqlChain!, $swapType: GqlSorSwapType!, $swapAmount: AmountHumanReadable!, $tokenIn: String!, $tokenOut: String!, $useProtocolVersion: Int!, $poolIds: [String!], $considerPoolsWithHooks: Boolean) {
+    readonly sorSwapPathQueryWithVersion: DocumentNode = gql`
+  query sorGetSwapPathsWithVersion(
+    $chain: GqlChain!
+    $swapType: GqlSorSwapType!
+    $swapAmount: AmountHumanReadable!
+    $tokenIn: String!
+    $tokenOut: String!
+    $useProtocolVersion: Int!
+    $poolIds: [String!]
+    $considerPoolsWithHooks: Boolean
+  ) {
     sorGetSwapPaths(
-    swapAmount: $swapAmount
-    chain: $chain
-    swapType: $swapType
-    tokenIn: $tokenIn
-    tokenOut: $tokenOut
-    useProtocolVersion: $useProtocolVersion
-    considerPoolsWithHooks: $considerPoolsWithHooks
-    poolIds: $poolIds
+      swapAmount: $swapAmount
+      chain: $chain
+      swapType: $swapType
+      tokenIn: $tokenIn
+      tokenOut: $tokenOut
+      useProtocolVersion: $useProtocolVersion
+      considerPoolsWithHooks: $considerPoolsWithHooks
+      poolIds: $poolIds
     ) {
       tokenInAmount
       tokenOutAmount
@@ -82,21 +110,13 @@ export class SorSwapPaths {
     constructor(private readonly balancerApiClient: BalancerApiClient) {}
 
     async fetchSorSwapPaths(sorInput: SorInput): Promise<Path[]> {
-        const baseVariables: {
-            chain: string;
-            swapAmount: string;
-            swapType: string;
-            tokenIn: Address;
-            tokenOut: Address;
-            considerPoolsWithHooks: boolean;
-            poolIds?: Address[];
-        } = {
-            chain: this.mapGqlChain(sorInput.chainId),
+        const baseVariables: sorGetSwapPathsQueryVariables = {
+            chain: this.mapGqlChain(sorInput.chainId) as any, // Cast to GqlChain
             swapAmount: sorInput.swapAmount.toSignificant(
                 sorInput.swapAmount.token.decimals,
             ), // Must use human scale
             swapType:
-                sorInput.swapKind === SwapKind.GivenIn
+                sorInput.swapKind === 'GIVEN_IN'
                     ? 'EXACT_IN'
                     : 'EXACT_OUT',
             tokenIn: sorInput.tokenIn,
@@ -116,18 +136,40 @@ export class SorSwapPaths {
               }
             : baseVariables;
 
+        // Convert to the format expected by the client
+        const clientVariables: Record<string, string | number | boolean | string[]> = {
+            chain: variables.chain as string,
+            swapType: variables.swapType as string,
+            swapAmount: variables.swapAmount,
+            tokenIn: variables.tokenIn,
+            tokenOut: variables.tokenOut,
+            considerPoolsWithHooks: variables.considerPoolsWithHooks ?? true,
+        };
+
+        if (variables.poolIds) {
+            clientVariables.poolIds = variables.poolIds;
+        }
+
+        if (sorInput.useProtocolVersion) {
+            clientVariables.useProtocolVersion = sorInput.useProtocolVersion;
+        }
+
         const { data } = await this.balancerApiClient.fetch({
             query: sorInput.useProtocolVersion
-                ? this.sorSwapPathQueryWithVersion
-                : this.sorSwapPathQuery,
-            variables,
+                ? print(this.sorSwapPathQueryWithVersion)
+                : print(this.sorSwapPathQuery),
+            variables: clientVariables,
         });
-        const sorResponse: ApiSorSwapPathsResponse = data.sorGetSwapPaths;
-        const paths: Path[] = sorResponse.paths.map(apiPath => ({
+
+        // Now data is fully typed as sorGetSwapPathsQuery
+        const apiResponse: sorGetSwapPathsQuery = data;
+        const sorData = apiResponse.sorGetSwapPaths;
+        
+        const paths: Path[] = sorData.paths.map(apiPath => ({
             pools: apiPath.pools as Address[],
-            isBuffer: [apiPath.isBuffer], // Convert boolean to boolean[]
+            isBuffer: apiPath.isBuffer,
             tokens: apiPath.tokens.map(token => ({
-                address: token.address,
+                address: token.address as Address,
                 decimals: token.decimals,
             })),
             outputAmountRaw: BigInt(apiPath.outputAmountRaw),
