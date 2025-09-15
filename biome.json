@@ -6,7 +6,8 @@
             "dist",
             "pnpm-lock.yaml",
             "./local",
-            "./package.json"
+            "./package.json",
+            "src/data/providers/balancer-api/generated/"
         ]
     },
     "organizeImports": {
