@@ -10,6 +10,7 @@ import { DocumentNode, print } from 'graphql';
 import {
     sorGetSwapPathsQuery,
     sorGetSwapPathsQueryVariables,
+    GqlChain,
 } from '../../generated/types';
 
 // Re-export the original type for backward compatibility
@@ -117,7 +118,7 @@ export class SorSwapPaths {
 
     async fetchSorSwapPaths(sorInput: SorInput): Promise<Path[]> {
         const baseVariables: sorGetSwapPathsQueryVariables = {
-            chain: this.mapGqlChain(sorInput.chainId) as any, // Cast to GqlChain
+            chain: this.mapGqlChain(sorInput.chainId) as GqlChain,
             swapAmount: sorInput.swapAmount.toSignificant(
                 sorInput.swapAmount.token.decimals,
             ), // Must use human scale
