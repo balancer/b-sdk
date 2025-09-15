@@ -4,12 +4,6 @@ import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
 import { gql } from 'graphql-tag';
 import { DocumentNode, print } from 'graphql';
-import {
-    poolGetPoolQuery,
-    poolGetPoolWithBalancesQuery,
-} from '../../generated/types';
-import { Address, Hex } from 'viem';
-import { HumanAmount } from '../../../../../data/types';
 
 export class Pools {
     readonly poolStateQuery: DocumentNode = gql`
@@ -53,30 +47,18 @@ export class Pools {
             query: print(this.poolStateQuery),
             variables: {
                 id: id.toLowerCase(),
-                // the API requires chain names to be sent as uppercase strings
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
 
-        // Now data is fully typed as poolGetPoolQuery
-        const apiResponse: poolGetPoolQuery = data;
-        const poolData = apiResponse.poolGetPool;
-
-        const poolState: PoolState = {
-            id: poolData.id as Hex,
-            address: poolData.address as Address,
+        return {
+            ...data.poolGetPool,
+            tokens: data.poolGetPool.poolTokens,
             type:
-                poolData.protocolVersion === 2
-                    ? mapPoolType(poolData.type)
-                    : poolData.type,
-            protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
-            tokens: poolData.poolTokens.map((token) => ({
-                index: token.index,
-                address: token.address as Address,
-                decimals: token.decimals,
-            })),
+                data.poolGetPool.protocolVersion === 2
+                    ? mapPoolType(data.poolGetPool.type)
+                    : data.poolGetPool.type,
         };
-        return poolState;
     }
 
     async fetchPoolStateWithBalances(
@@ -90,26 +72,14 @@ export class Pools {
             },
         });
 
-        // Now data is fully typed as poolGetPoolWithBalancesQuery
-        const apiResponse: poolGetPoolWithBalancesQuery = data;
-        const poolData = apiResponse.poolGetPool;
-
-        const poolStateWithBalances: PoolStateWithBalances = {
-            id: poolData.id as Hex,
-            address: poolData.address as Address,
+        return {
+            ...data.poolGetPool,
+            tokens: data.poolGetPool.poolTokens,
             type:
-                poolData.protocolVersion === 2
-                    ? mapPoolType(poolData.type)
-                    : poolData.type,
-            protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
-            tokens: poolData.poolTokens.map((token) => ({
-                index: token.index,
-                address: token.address as Address,
-                decimals: token.decimals,
-                balance: token.balance as HumanAmount,
-            })),
-            totalShares: poolData.dynamicData.totalShares as HumanAmount,
+                data.poolGetPool.protocolVersion === 2
+                    ? mapPoolType(data.poolGetPool.type)
+                    : data.poolGetPool.type,
+            totalShares: data.poolGetPool.dynamicData.totalShares,
         };
-        return poolStateWithBalances;
     }
 }

@@ -10,16 +10,32 @@ import { mapPoolType } from '@/utils/poolTypeMapper';
 import { API_CHAIN_NAMES, isSameAddress, SDKError } from '@/utils';
 import { gql } from 'graphql-tag';
 import { DocumentNode, print } from 'graphql';
-import { poolGetNestedPoolQuery } from '../../generated/types';
 
-// Re-export generated types for backward compatibility
-export type PoolGetPool = poolGetNestedPoolQuery['poolGetPool'];
-export type UnderlyingToken = NonNullable<
-    NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]
->['underlyingToken'];
-export type Token = NonNullable<
-    NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]
->;
+export type PoolGetPool = {
+    id: Hex;
+    protocolVersion: 1 | 2 | 3;
+    address: Address;
+    type: string;
+    poolTokens: Token[];
+};
+
+export type UnderlyingToken = {
+    address: Address;
+    decimals: number;
+};
+
+export type Token = {
+    index: number;
+    address: Address;
+    decimals: number;
+    underlyingToken: UnderlyingToken | null;
+    nestedPool: {
+        id: Hex;
+        address: Address;
+        type: string;
+        tokens: Token[];
+    } | null;
+};
 
 export class NestedPools {
     readonly nestedPoolStateQuery: DocumentNode = gql`
@@ -68,10 +84,7 @@ export class NestedPools {
             },
         });
 
-        // Now data is fully typed as poolGetNestedPoolQuery
-        const apiResponse: poolGetNestedPoolQuery = data;
-        const poolData = apiResponse.poolGetPool;
-
+        const poolData = data.poolGetPool;
         if (!poolData) {
             throw new SDKError(
                 'BalancerApi',
@@ -80,22 +93,17 @@ export class NestedPools {
             );
         }
 
-        const nestedPoolState = this.mapPoolToNestedPoolState(poolData);
-        return nestedPoolState;
+        return this.mapPoolToNestedPoolState(poolData);
     };
 
-    mapPoolToNestedPoolState = (
-        pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>,
-    ): NestedPoolState => {
+    mapPoolToNestedPoolState = (pool: PoolGetPool): NestedPoolState => {
         return pool.protocolVersion === 2
             ? mapPoolToNestedPoolStateV2(pool)
             : mapPoolToNestedPoolStateV3(pool);
     };
 }
 
-export function mapPoolToNestedPoolStateV3(
-    pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>,
-): NestedPoolState {
+export function mapPoolToNestedPoolStateV3(pool: PoolGetPool): NestedPoolState {
     if (pool.protocolVersion !== 3) {
         throw new SDKError(
             'BalancerApi',
@@ -180,9 +188,7 @@ export function mapPoolToNestedPoolStateV3(
     };
 }
 
-function getMainToken(
-    token: NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0],
-): {
+function getMainToken(token: Token): {
     address: Address;
     decimals: number;
     index: number;
@@ -210,9 +216,7 @@ function getMainToken(
     return nestedTokens[0]; // Return the first token as this is part of an array anyway
 }
 
-export function mapPoolToNestedPoolStateV2(
-    pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>,
-): NestedPoolState {
+export function mapPoolToNestedPoolStateV2(pool: PoolGetPool): NestedPoolState {
     const pools: NestedPoolV2[] = [
         {
             id: pool.id as Hex,
