@@ -38,7 +38,7 @@ describe('contract: sor swap paths (live API)', () => {
             tokenOut: TOKEN_OUT,
             swapKind: SwapKind.GivenIn,
             swapAmount: oneUnit,
-            useProtocolVersion: 3, // Test the versioned query
+            useProtocolVersion: 3,
         });
         expect(Array.isArray(paths)).toBe(true);
     });
