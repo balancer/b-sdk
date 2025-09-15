@@ -18,9 +18,8 @@
         "dist/"
     ],
     "scripts": {
-        "fetch-schema": "tsup scripts/fetchSchema.ts --format cjs --out-dir dist/scripts && node dist/scripts/fetchSchema.js",
         "codegen": "graphql-codegen --config codegen.yml",
-        "prebuild": "pnpm run fetch-schema && pnpm run codegen",
+        "prebuild": "pnpm run codegen",
         "build": "tsup",
         "format": "biome format --write .",
         "lint": "dpdm -T ./src && biome check .",
