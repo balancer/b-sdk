@@ -28,6 +28,20 @@ describe('contract: sor swap paths (live API)', () => {
         });
         expect(Array.isArray(paths)).toBe(true);
     });
+
+    it('fetches SOR swap paths with protocol version', async () => {
+        const token = new Token(CHAIN_ID, TOKEN_IN, 18);
+        const oneUnit = TokenAmount.fromHumanAmount(token, '0.001');
+        const paths = await api.sorSwapPaths.fetchSorSwapPaths({
+            chainId: CHAIN_ID,
+            tokenIn: TOKEN_IN,
+            tokenOut: TOKEN_OUT,
+            swapKind: SwapKind.GivenIn,
+            swapAmount: oneUnit,
+            useProtocolVersion: 3, // Test the versioned query
+        });
+        expect(Array.isArray(paths)).toBe(true);
+    });
 });
 
 
