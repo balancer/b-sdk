@@ -7,12 +7,18 @@ import { API_CHAIN_NAMES } from '@/utils/constants';
 import { Path } from '@/entities/swap/paths/types';
 import { gql } from 'graphql-tag';
 import { DocumentNode, print } from 'graphql';
-import { sorGetSwapPathsQuery, sorGetSwapPathsQueryVariables } from '../../generated/types';
+import {
+    sorGetSwapPathsQuery,
+    sorGetSwapPathsQueryVariables,
+} from '../../generated/types';
 
 // Re-export the original type for backward compatibility
 export type SorInput = {
     chainId: number;
-    swapAmount: { toSignificant: (decimals: number) => string; token: { decimals: number } };
+    swapAmount: {
+        toSignificant: (decimals: number) => string;
+        token: { decimals: number };
+    };
     swapKind: SwapKind;
     tokenIn: Address;
     tokenOut: Address;
@@ -137,7 +143,10 @@ export class SorSwapPaths {
             : baseVariables;
 
         // Convert to the format expected by the client
-        const clientVariables: Record<string, string | number | boolean | string[]> = {
+        const clientVariables: Record<
+            string,
+            string | number | boolean | string[]
+        > = {
             chain: variables.chain as string,
             swapType: variables.swapType as string,
             swapAmount: variables.swapAmount,
@@ -164,11 +173,11 @@ export class SorSwapPaths {
         // Now data is fully typed as sorGetSwapPathsQuery
         const apiResponse: sorGetSwapPathsQuery = data;
         const sorData = apiResponse.sorGetSwapPaths;
-        
-        const paths: Path[] = sorData.paths.map(apiPath => ({
+
+        const paths: Path[] = sorData.paths.map((apiPath) => ({
             pools: apiPath.pools as Address[],
             isBuffer: apiPath.isBuffer,
-            tokens: apiPath.tokens.map(token => ({
+            tokens: apiPath.tokens.map((token) => ({
                 address: token.address as Address,
                 decimals: token.decimals,
             })),

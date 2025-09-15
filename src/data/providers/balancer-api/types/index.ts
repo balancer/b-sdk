@@ -19,33 +19,41 @@ export * from '../generated/types';
 // still reference the old manual type definitions. They map to the generated
 // types from GraphQL Codegen.
 
-import type { 
+import type {
     poolGetPoolQuery,
     poolGetPoolWithBalancesQuery,
     poolGetPoolWithUnderlyingsQuery,
     sorGetSwapPathsQuery,
     sorGetSwapPathsQueryVariables,
     tokenGetTokensQuery,
-    poolGetNestedPoolQuery
+    poolGetNestedPoolQuery,
 } from '../generated/types';
 
 // Pool State Types
-export type ApiTokenBase = NonNullable<NonNullable<poolGetPoolQuery['poolGetPool']>['poolTokens'][0]>;
+export type ApiTokenBase = NonNullable<
+    NonNullable<poolGetPoolQuery['poolGetPool']>['poolTokens'][0]
+>;
 export type ApiPoolBase = NonNullable<poolGetPoolQuery['poolGetPool']>;
 export type ApiPoolResponse = poolGetPoolQuery['poolGetPool'];
-export type ApiPoolWithBalancesResponse = poolGetPoolWithBalancesQuery['poolGetPool'];
-export type ApiPoolWithUnderlyingsResponse = poolGetPoolWithUnderlyingsQuery['poolGetPool'];
+export type ApiPoolWithBalancesResponse =
+    poolGetPoolWithBalancesQuery['poolGetPool'];
+export type ApiPoolWithUnderlyingsResponse =
+    poolGetPoolWithUnderlyingsQuery['poolGetPool'];
 
 // SOR Types
 export type ApiSorInput = sorGetSwapPathsQueryVariables;
 export type ApiSorSwapPathsResponse = sorGetSwapPathsQuery['sorGetSwapPaths'];
 
 // Buffer State Types
-export type ApiBufferStateResponse = NonNullable<tokenGetTokensQuery['tokenGetTokens']>[0];
+export type ApiBufferStateResponse = NonNullable<
+    tokenGetTokensQuery['tokenGetTokens']
+>[0];
 
 // Nested Pool Types
 export type ApiNestedPoolResponse = poolGetNestedPoolQuery['poolGetPool'];
-export type ApiNestedPoolToken = NonNullable<NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]>;
+export type ApiNestedPoolToken = NonNullable<
+    NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]
+>;
 
 // ============================================================================
 // DEPRECATED TYPES - Use generated types instead
@@ -55,7 +63,9 @@ export type ApiNestedPoolToken = NonNullable<NonNullable<poolGetNestedPoolQuery[
 export type GqlPoolTokenBase = ApiTokenBase;
 
 /** @deprecated Use generated types from '../generated/types' instead */
-export type GqlUnderlyingToken = NonNullable<ApiNestedPoolToken['underlyingToken']>;
+export type GqlUnderlyingToken = NonNullable<
+    ApiNestedPoolToken['underlyingToken']
+>;
 
 /** @deprecated Use generated types from '../generated/types' instead */
 export type GqlPoolBase = ApiPoolBase;
@@ -64,10 +74,14 @@ export type GqlPoolBase = ApiPoolBase;
 export type GqlPoolToken = ApiTokenBase;
 
 /** @deprecated Use generated types from '../generated/types' instead */
-export type GqlPoolTokenWithBalance = NonNullable<NonNullable<ApiPoolWithBalancesResponse>['poolTokens'][0]>;
+export type GqlPoolTokenWithBalance = NonNullable<
+    NonNullable<ApiPoolWithBalancesResponse>['poolTokens'][0]
+>;
 
 /** @deprecated Use generated types from '../generated/types' instead */
-export type GqlPoolTokenWithUnderlying = NonNullable<NonNullable<ApiPoolWithUnderlyingsResponse>['poolTokens'][0]>;
+export type GqlPoolTokenWithUnderlying = NonNullable<
+    NonNullable<ApiPoolWithUnderlyingsResponse>['poolTokens'][0]
+>;
 
 /** @deprecated Use generated types from '../generated/types' instead */
 export type GqlPoolResponse = ApiPoolResponse;
@@ -79,7 +93,9 @@ export type GqlPoolWithBalancesResponse = ApiPoolWithBalancesResponse;
 export type GqlPoolWithUnderlyingsResponse = ApiPoolWithUnderlyingsResponse;
 
 /** @deprecated Use generated types from '../generated/types' instead */
-export type GqlSorPathToken = NonNullable<NonNullable<ApiSorSwapPathsResponse>['paths'][0]>['tokens'][0];
+export type GqlSorPathToken = NonNullable<
+    NonNullable<ApiSorSwapPathsResponse>['paths'][0]
+>['tokens'][0];
 
 /** @deprecated Use generated types from '../generated/types' instead */
 export type GqlSorPath = NonNullable<ApiSorSwapPathsResponse>['paths'][0];

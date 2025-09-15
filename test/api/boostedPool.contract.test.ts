@@ -12,9 +12,10 @@ describe('contract: boosted-pool-state (live API)', () => {
     });
 
     it('fetches boosted pool with underlyings', async () => {
-        const pool = await api.boostedPools.fetchPoolStateWithUnderlyings(
-            BOOSTED_POOL_ID,
-        );
+        const pool =
+            await api.boostedPools.fetchPoolStateWithUnderlyings(
+                BOOSTED_POOL_ID,
+            );
         expect(pool.tokens.length).toBeGreaterThan(0);
         // at least one token should have an underlying or be a plain token
         expect(
@@ -24,5 +25,3 @@ describe('contract: boosted-pool-state (live API)', () => {
         ).toBe(true);
     });
 });
-
-

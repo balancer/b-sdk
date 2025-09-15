@@ -18,5 +18,3 @@ describe('contract: buffer-state (live API)', () => {
         expect(state.underlyingToken.address).toBeDefined();
     });
 });
-
-

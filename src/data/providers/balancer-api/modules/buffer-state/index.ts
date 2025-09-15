@@ -33,18 +33,18 @@ export class Buffers {
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
-        
+
         // Now data is fully typed as tokenGetTokensQuery
         const apiResponse: tokenGetTokensQuery = data;
         const tokens = apiResponse.tokenGetTokens;
-        
+
         if (!tokens || tokens.length === 0) {
             throw inputValidationError(
                 'Fetch Buffer State',
                 `No token found for address ${wrappedTokenAddress}`,
             );
         }
-        
+
         const wrappedToken = tokens[0];
         if (!wrappedToken.isErc4626) {
             throw inputValidationError(
@@ -52,7 +52,7 @@ export class Buffers {
                 `wrappedTokenAddress ${wrappedTokenAddress} provided is not an ERC4626`,
             );
         }
-        
+
         const bufferState: BufferState = {
             wrappedToken: {
                 address: wrappedToken.address as Address,

@@ -14,8 +14,12 @@ import { poolGetNestedPoolQuery } from '../../generated/types';
 
 // Re-export generated types for backward compatibility
 export type PoolGetPool = poolGetNestedPoolQuery['poolGetPool'];
-export type UnderlyingToken = NonNullable<NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]>['underlyingToken'];
-export type Token = NonNullable<NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]>;
+export type UnderlyingToken = NonNullable<
+    NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]
+>['underlyingToken'];
+export type Token = NonNullable<
+    NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]
+>;
 
 export class NestedPools {
     readonly nestedPoolStateQuery: DocumentNode = gql`
@@ -67,23 +71,31 @@ export class NestedPools {
         // Now data is fully typed as poolGetNestedPoolQuery
         const apiResponse: poolGetNestedPoolQuery = data;
         const poolData = apiResponse.poolGetPool;
-        
+
         if (!poolData) {
-            throw new SDKError('BalancerApi', 'fetchNestedPoolState', 'Pool not found');
+            throw new SDKError(
+                'BalancerApi',
+                'fetchNestedPoolState',
+                'Pool not found',
+            );
         }
 
         const nestedPoolState = this.mapPoolToNestedPoolState(poolData);
         return nestedPoolState;
     };
 
-    mapPoolToNestedPoolState = (pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>): NestedPoolState => {
+    mapPoolToNestedPoolState = (
+        pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>,
+    ): NestedPoolState => {
         return pool.protocolVersion === 2
             ? mapPoolToNestedPoolStateV2(pool)
             : mapPoolToNestedPoolStateV3(pool);
     };
 }
 
-export function mapPoolToNestedPoolStateV3(pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>): NestedPoolState {
+export function mapPoolToNestedPoolStateV3(
+    pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>,
+): NestedPoolState {
     if (pool.protocolVersion !== 3) {
         throw new SDKError(
             'BalancerApi',
@@ -103,13 +115,14 @@ export function mapPoolToNestedPoolStateV3(pool: NonNullable<poolGetNestedPoolQu
                 decimals: t.decimals,
                 index: t.index,
                 underlyingToken:
-                    t.underlyingToken === null || t.underlyingToken === undefined
+                    t.underlyingToken === null ||
+                    t.underlyingToken === undefined
                         ? null
-                        : { 
-                            address: t.underlyingToken.address as Address,
-                            decimals: t.underlyingToken.decimals,
-                            index: t.index 
-                        },
+                        : {
+                              address: t.underlyingToken.address as Address,
+                              decimals: t.underlyingToken.decimals,
+                              index: t.index,
+                          },
             })),
         },
     ];
@@ -119,7 +132,10 @@ export function mapPoolToNestedPoolStateV3(pool: NonNullable<poolGetNestedPoolQu
         // Filter out phantomBpt
         if (
             !token.nestedPool ||
-            isSameAddress(pool.address as Address, token.nestedPool.address as Address)
+            isSameAddress(
+                pool.address as Address,
+                token.nestedPool.address as Address,
+            )
         )
             return;
 
@@ -134,13 +150,14 @@ export function mapPoolToNestedPoolStateV3(pool: NonNullable<poolGetNestedPoolQu
                 decimals: t.decimals,
                 index: t.index,
                 underlyingToken:
-                    t.underlyingToken === null || t.underlyingToken === undefined
+                    t.underlyingToken === null ||
+                    t.underlyingToken === undefined
                         ? null
-                        : { 
-                            address: t.underlyingToken.address as Address,
-                            decimals: t.underlyingToken.decimals,
-                            index: t.index 
-                        },
+                        : {
+                              address: t.underlyingToken.address as Address,
+                              decimals: t.underlyingToken.decimals,
+                              index: t.index,
+                          },
             })),
         });
     });
@@ -163,7 +180,9 @@ export function mapPoolToNestedPoolStateV3(pool: NonNullable<poolGetNestedPoolQu
     };
 }
 
-function getMainToken(token: NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0]): {
+function getMainToken(
+    token: NonNullable<poolGetNestedPoolQuery['poolGetPool']>['poolTokens'][0],
+): {
     address: Address;
     decimals: number;
     index: number;
@@ -191,7 +210,9 @@ function getMainToken(token: NonNullable<poolGetNestedPoolQuery['poolGetPool']>[
     return nestedTokens[0]; // Return the first token as this is part of an array anyway
 }
 
-export function mapPoolToNestedPoolStateV2(pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>): NestedPoolState {
+export function mapPoolToNestedPoolStateV2(
+    pool: NonNullable<poolGetNestedPoolQuery['poolGetPool']>,
+): NestedPoolState {
     const pools: NestedPoolV2[] = [
         {
             id: pool.id as Hex,
@@ -212,7 +233,10 @@ export function mapPoolToNestedPoolStateV2(pool: NonNullable<poolGetNestedPoolQu
         // Filter out phantomBpt
         if (
             !token.nestedPool ||
-            isSameAddress(pool.address as Address, token.nestedPool.address as Address)
+            isSameAddress(
+                pool.address as Address,
+                token.nestedPool.address as Address,
+            )
         )
             return;
 

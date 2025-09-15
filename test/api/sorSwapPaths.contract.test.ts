@@ -43,5 +43,3 @@ describe('contract: sor swap paths (live API)', () => {
         expect(Array.isArray(paths)).toBe(true);
     });
 });
-
-

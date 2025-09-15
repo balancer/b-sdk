@@ -40,28 +40,31 @@ export class BoostedPools {
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
-        
+
         // Now data is fully typed as poolGetPoolWithUnderlyingsQuery
         const apiResponse: poolGetPoolWithUnderlyingsQuery = data;
         const poolData = apiResponse.poolGetPool;
-        
+
         const poolStateWithUnderlyings: PoolStateWithUnderlyings = {
             ...poolData,
             id: poolData.id as Hex,
             address: poolData.address as Address,
             protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
-            tokens: poolData.poolTokens.map(token => ({
+            tokens: poolData.poolTokens.map((token) => ({
                 ...token,
                 address: token.address as Address,
-                underlyingToken: token.underlyingToken ? {
-                    address: token.underlyingToken.address as Address,
-                    decimals: token.underlyingToken.decimals,
-                    index: token.index,
-                } : null,
+                underlyingToken: token.underlyingToken
+                    ? {
+                          address: token.underlyingToken.address as Address,
+                          decimals: token.underlyingToken.decimals,
+                          index: token.index,
+                      }
+                    : null,
             })),
-            type: poolData.protocolVersion === 2
-                ? mapPoolType(poolData.type)
-                : poolData.type,
+            type:
+                poolData.protocolVersion === 2
+                    ? mapPoolType(poolData.type)
+                    : poolData.type,
         };
         return poolStateWithUnderlyings;
     }

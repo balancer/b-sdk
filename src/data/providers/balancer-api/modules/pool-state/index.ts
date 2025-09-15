@@ -4,7 +4,10 @@ import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
 import { gql } from 'graphql-tag';
 import { DocumentNode, print } from 'graphql';
-import { poolGetPoolQuery, poolGetPoolWithBalancesQuery } from '../../generated/types';
+import {
+    poolGetPoolQuery,
+    poolGetPoolWithBalancesQuery,
+} from '../../generated/types';
 import { Address, Hex } from 'viem';
 import { HumanAmount } from '../../../../../data/types';
 
@@ -54,19 +57,20 @@ export class Pools {
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
-        
+
         // Now data is fully typed as poolGetPoolQuery
         const apiResponse: poolGetPoolQuery = data;
         const poolData = apiResponse.poolGetPool;
-        
+
         const poolState: PoolState = {
             id: poolData.id as Hex,
             address: poolData.address as Address,
-            type: poolData.protocolVersion === 2
-                ? mapPoolType(poolData.type)
-                : poolData.type,
+            type:
+                poolData.protocolVersion === 2
+                    ? mapPoolType(poolData.type)
+                    : poolData.type,
             protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
-            tokens: poolData.poolTokens.map(token => ({
+            tokens: poolData.poolTokens.map((token) => ({
                 index: token.index,
                 address: token.address as Address,
                 decimals: token.decimals,
@@ -85,19 +89,20 @@ export class Pools {
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
-        
+
         // Now data is fully typed as poolGetPoolWithBalancesQuery
         const apiResponse: poolGetPoolWithBalancesQuery = data;
         const poolData = apiResponse.poolGetPool;
-        
+
         const poolStateWithBalances: PoolStateWithBalances = {
             id: poolData.id as Hex,
             address: poolData.address as Address,
-            type: poolData.protocolVersion === 2
-                ? mapPoolType(poolData.type)
-                : poolData.type,
+            type:
+                poolData.protocolVersion === 2
+                    ? mapPoolType(poolData.type)
+                    : poolData.type,
             protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
-            tokens: poolData.poolTokens.map(token => ({
+            tokens: poolData.poolTokens.map((token) => ({
                 index: token.index,
                 address: token.address as Address,
                 decimals: token.decimals,

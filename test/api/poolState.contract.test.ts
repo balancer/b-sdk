@@ -26,5 +26,3 @@ describe('contract: pool-state (live API)', () => {
         expect(pool.tokens[0].balance).toBeDefined();
     });
 });
-
-
