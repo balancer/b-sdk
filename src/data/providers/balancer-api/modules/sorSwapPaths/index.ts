@@ -15,17 +15,14 @@ import {
 
 // Re-export the original type for backward compatibility
 export type SorInput = {
-    chainId: number;
-    swapAmount: {
-        toSignificant: (decimals: number) => string;
-        token: { decimals: number };
-    };
-    swapKind: SwapKind;
+    chainId: ChainId;
     tokenIn: Address;
     tokenOut: Address;
-    considerPoolsWithHooks?: boolean;
-    poolIds?: Address[];
-    useProtocolVersion?: number;
+    swapKind: SwapKind;
+    swapAmount: TokenAmount; // API expects input in human readable form
+    useProtocolVersion?: 2 | 3; // If not specified API will return best
+    poolIds?: Address[]; // If specified, API will return only paths that contain these poolIds
+    considerPoolsWithHooks?: boolean; // If true, API will return paths that contain pools with hooks
 };
 
 export class SorSwapPaths {
@@ -143,32 +140,11 @@ export class SorSwapPaths {
               }
             : baseVariables;
 
-        // Convert to the format expected by the client
-        const clientVariables: Record<
-            string,
-            string | number | boolean | string[]
-        > = {
-            chain: variables.chain as string,
-            swapType: variables.swapType as string,
-            swapAmount: variables.swapAmount,
-            tokenIn: variables.tokenIn,
-            tokenOut: variables.tokenOut,
-            considerPoolsWithHooks: variables.considerPoolsWithHooks ?? true,
-        };
-
-        if (variables.poolIds) {
-            clientVariables.poolIds = variables.poolIds;
-        }
-
-        if (sorInput.useProtocolVersion) {
-            clientVariables.useProtocolVersion = sorInput.useProtocolVersion;
-        }
-
         const { data } = await this.balancerApiClient.fetch({
             query: sorInput.useProtocolVersion
                 ? print(this.sorSwapPathQueryWithVersion)
                 : print(this.sorSwapPathQuery),
-            variables: clientVariables,
+            variables: variables as Record<string, string | boolean | string[] | number>,
         });
 
         // Now data is fully typed as sorGetSwapPathsQuery
