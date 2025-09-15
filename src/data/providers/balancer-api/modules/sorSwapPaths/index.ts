@@ -144,7 +144,10 @@ export class SorSwapPaths {
             query: sorInput.useProtocolVersion
                 ? print(this.sorSwapPathQueryWithVersion)
                 : print(this.sorSwapPathQuery),
-            variables: variables as Record<string, string | boolean | string[] | number>,
+            variables: variables as Record<
+                string,
+                string | boolean | string[] | number
+            >,
         });
 
         // Now data is fully typed as sorGetSwapPathsQuery
