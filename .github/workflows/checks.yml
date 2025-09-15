@@ -63,6 +63,6 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Generate types from live API
-      run: pnpm run codegen
+        run: pnpm run codegen
       - name: Build
         run: pnpm build
