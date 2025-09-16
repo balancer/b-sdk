@@ -18,8 +18,6 @@ describe('contract: boosted-pool-state (live API)', () => {
             );
         expect(pool.tokens.length).toBeGreaterThan(0);
         // at least one token should have an underlying token
-        expect(
-            pool.tokens.some((t) => t.underlyingToken !== null),
-        ).toBe(true);
+        expect(pool.tokens.some((t) => t.underlyingToken !== null)).toBe(true);
     });
 });

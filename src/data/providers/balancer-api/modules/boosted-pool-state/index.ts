@@ -53,11 +53,13 @@ export class BoostedPools {
                 address: token.address as Address,
                 decimals: token.decimals,
                 index: token.index,
-                underlyingToken: token.underlyingToken ? {
-                    address: token.underlyingToken.address as Address,
-                    decimals: token.underlyingToken.decimals,
-                    index: token.index,
-                } : null,
+                underlyingToken: token.underlyingToken
+                    ? {
+                          address: token.underlyingToken.address as Address,
+                          decimals: token.underlyingToken.decimals,
+                          index: token.index,
+                      }
+                    : null,
             })),
             type:
                 poolData.protocolVersion === 2
