@@ -36,6 +36,7 @@ export class BoostedPools {
             query: print(this.boostedPoolStateQuery),
             variables: {
                 id: id.toLowerCase(),
+                // the API requires chain names to be sent as uppercase strings
                 chain: API_CHAIN_NAMES[this.balancerApiClient.chainId],
             },
         });
