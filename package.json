@@ -28,8 +28,8 @@
         "test:ci": "vitest run",
         "changeset": "changeset",
         "changeset:release": "pnpm build && changeset publish",
-        "example": "tsup examples/lib/executeExample.ts --format cjs --out-dir dist/examples && node dist/examples/executeExample.js",
-        "update:deployments": "tsup scripts/updateDeployments.ts --format cjs --out-dir dist/scripts && node dist/scripts/updateDeployments.js && pnpm format"
+        "example": "npx tsx ./examples/lib/executeExample.ts",
+        "update:deployments": "npx tsx ./scripts/updateDeployments.ts && pnpm format"
     },
     "dependencies": {
         "@balancer-labs/balancer-maths": "0.0.27",
