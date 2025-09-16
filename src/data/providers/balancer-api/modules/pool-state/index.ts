@@ -4,6 +4,11 @@ import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
 import { gql } from 'graphql-tag';
 import { DocumentNode, print } from 'graphql';
+import { Address } from 'viem';
+import {
+    poolGetPoolQuery,
+    poolGetPoolWithBalancesQuery,
+} from '../../generated/types';
 
 export class Pools {
     readonly poolStateQuery: DocumentNode = gql`
@@ -51,13 +56,24 @@ export class Pools {
             },
         });
 
+        // Now data is fully typed as poolGetPoolQuery
+        const apiResponse: poolGetPoolQuery = data;
+        const poolData = apiResponse.poolGetPool;
+
         return {
-            ...data.poolGetPool,
-            tokens: data.poolGetPool.poolTokens,
+            ...poolData,
+            id: poolData.id as `0x${string}`,
+            address: poolData.address as Address,
+            protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
+            tokens: poolData.poolTokens.map((token) => ({
+                address: token.address as Address,
+                decimals: token.decimals,
+                index: token.index,
+            })),
             type:
-                data.poolGetPool.protocolVersion === 2
-                    ? mapPoolType(data.poolGetPool.type)
-                    : data.poolGetPool.type,
+                poolData.protocolVersion === 2
+                    ? mapPoolType(poolData.type)
+                    : poolData.type,
         };
     }
 
@@ -72,14 +88,26 @@ export class Pools {
             },
         });
 
+        // Now data is fully typed as poolGetPoolWithBalancesQuery
+        const apiResponse: poolGetPoolWithBalancesQuery = data;
+        const poolData = apiResponse.poolGetPool;
+
         return {
-            ...data.poolGetPool,
-            tokens: data.poolGetPool.poolTokens,
+            ...poolData,
+            id: poolData.id as `0x${string}`,
+            address: poolData.address as Address,
+            protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
+            tokens: poolData.poolTokens.map((token) => ({
+                address: token.address as Address,
+                decimals: token.decimals,
+                index: token.index,
+                balance: token.balance as `${number}`,
+            })),
             type:
-                data.poolGetPool.protocolVersion === 2
-                    ? mapPoolType(data.poolGetPool.type)
-                    : data.poolGetPool.type,
-            totalShares: data.poolGetPool.dynamicData.totalShares,
+                poolData.protocolVersion === 2
+                    ? mapPoolType(poolData.type)
+                    : poolData.type,
+            totalShares: poolData.dynamicData.totalShares as `${number}`,
         };
     }
 }

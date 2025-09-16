@@ -4,6 +4,8 @@ import { mapPoolType } from '../../../../../utils/poolTypeMapper';
 import { API_CHAIN_NAMES } from '../../../../../utils/constants';
 import { gql } from 'graphql-tag';
 import { DocumentNode, print } from 'graphql';
+import { Address } from 'viem';
+import { poolGetPoolWithUnderlyingsQuery } from '../../generated/types';
 
 export class BoostedPools {
     readonly boostedPoolStateQuery: DocumentNode = gql`
@@ -38,13 +40,29 @@ export class BoostedPools {
             },
         });
 
+        // Now data is fully typed as poolGetPoolWithUnderlyingsQuery
+        const apiResponse: poolGetPoolWithUnderlyingsQuery = data;
+        const poolData = apiResponse.poolGetPool;
+
         return {
-            ...data.poolGetPool,
-            tokens: data.poolGetPool.poolTokens,
+            ...poolData,
+            id: poolData.id as `0x${string}`,
+            address: poolData.address as Address,
+            protocolVersion: poolData.protocolVersion as 1 | 2 | 3,
+            tokens: poolData.poolTokens.map((token) => ({
+                address: token.address as Address,
+                decimals: token.decimals,
+                index: token.index,
+                underlyingToken: token.underlyingToken ? {
+                    address: token.underlyingToken.address as Address,
+                    decimals: token.underlyingToken.decimals,
+                    index: token.index,
+                } : null,
+            })),
             type:
-                data.poolGetPool.protocolVersion === 2
-                    ? mapPoolType(data.poolGetPool.type)
-                    : data.poolGetPool.type,
+                poolData.protocolVersion === 2
+                    ? mapPoolType(poolData.type)
+                    : poolData.type,
         };
     }
 }

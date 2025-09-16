@@ -10,6 +10,7 @@ import { mapPoolType } from '@/utils/poolTypeMapper';
 import { API_CHAIN_NAMES, isSameAddress, SDKError } from '@/utils';
 import { gql } from 'graphql-tag';
 import { DocumentNode, print } from 'graphql';
+import { poolGetNestedPoolQuery } from '../../generated/types';
 
 export type PoolGetPool = {
     id: Hex;
@@ -84,7 +85,10 @@ export class NestedPools {
             },
         });
 
-        const poolData = data.poolGetPool;
+        // Now data is fully typed as poolGetNestedPoolQuery
+        const apiResponse: poolGetNestedPoolQuery = data;
+        const poolData = apiResponse.poolGetPool;
+
         if (!poolData) {
             throw new SDKError(
                 'BalancerApi',
@@ -93,7 +97,7 @@ export class NestedPools {
             );
         }
 
-        return this.mapPoolToNestedPoolState(poolData);
+        return this.mapPoolToNestedPoolState(poolData as PoolGetPool);
     };
 
     mapPoolToNestedPoolState = (pool: PoolGetPool): NestedPoolState => {
