@@ -18,6 +18,8 @@
         "dist/"
     ],
     "scripts": {
+        "codegen": "graphql-codegen --config codegen.yml",
+        "prebuild": "pnpm run codegen",
         "build": "tsup",
         "format": "biome format --write .",
         "lint": "dpdm -T ./src && biome check .",
@@ -39,11 +41,16 @@
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@changesets/cli": "2.29.1",
+        "@graphql-codegen/cli": "^6.0.0",
+        "@graphql-codegen/typescript": "^5.0.0",
+        "@graphql-codegen/typescript-operations": "^5.0.0",
         "@types/async-retry": "1.4.9",
         "@types/node": "22.14.1",
         "@viem/anvil": "0.0.10",
         "dotenv": "16.5.0",
         "dpdm": "3.14.0",
+        "graphql": "^16.11.0",
+        "graphql-tag": "^2.12.6",
         "pino-pretty": "13.0.0",
         "ts-node": "10.9.2",
         "tsup": "8.4.0",
