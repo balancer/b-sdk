@@ -26,6 +26,7 @@ type NetworksWithFork = Extract<
     | 'GNOSIS_CHAIN'
     | 'SONIC'
     | 'HYPEREVM'
+    | 'PLASMA'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -42,6 +43,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     GNOSIS_CHAIN: 9545,
     SONIC: 9645,
     HYPEREVM: 9745,
+    PLASMA: 9845,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -117,6 +119,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: 'https://rpc.hyperliquid.xyz/evm',
         port: ANVIL_PORTS.HYPEREVM,
         forkBlockNumber: 6892528n,
+    },
+    PLASMA: {
+        rpcEnv: 'PLASMA_RPC_URL',
+        fallBackRpc: 'https://rpc.plasma.to/',
+        port: ANVIL_PORTS.PLASMA,
+        forkBlockNumber: 1274881n,
     },
 };
 
