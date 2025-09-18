@@ -229,7 +229,6 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         weETH: {
             address: '0xA3D68b74bF0528fdD07263c60d6488749044914b',
             decimals: 18,
-            slot: 3, // not true
         },
     },
 };
