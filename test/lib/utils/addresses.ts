@@ -221,16 +221,16 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         },
     },
     [ChainId.PLASMA]: {
-            USDT: {
-                address: '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb',
-                decimals: 6,
-                slot: 51,
-            },
-            WXPL: {
-                address: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
-                decimals: 18,
-                slot: 3,
-            },
+        USDT: {
+            address: '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb',
+            decimals: 6,
+            slot: 51,
+        },
+        WXPL: {
+            address: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
+            decimals: 18,
+            slot: 3,
+        },
     },
 };
 
