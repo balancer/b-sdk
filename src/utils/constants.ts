@@ -19,7 +19,7 @@ import {
     fraxtal,
     sonic,
 } from 'viem/chains';
-import { monadTestnet, hyperEVM } from './customChains';
+import { monadTestnet, hyperEVM, plasma } from './customChains';
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
 /*
@@ -82,6 +82,7 @@ export enum ChainId {
     SEPOLIA = 11155111,
     MONAD_TESTNET = 10143,
     HYPEREVM = 999,
+    PLASMA = 9745,
 }
 
 // The Balancer API requires the chain to be passed as a specific string
@@ -102,6 +103,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.SONIC]: 'SONIC',
     [ChainId.MONAD_TESTNET]: 'MONAD_TESTNET',
     [ChainId.HYPEREVM]: 'HYPEREVM',
+    [ChainId.PLASMA]: 'PLASMA',
 };
 
 export const CHAINS: Record<number, Chain> = {
@@ -124,19 +126,21 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.SONIC]: sonic,
     [ChainId.MONAD_TESTNET]: monadTestnet,
     [ChainId.HYPEREVM]: hyperEVM,
+    [ChainId.PLASMA]: plasma,
 };
 
 export const PERMIT2: Record<number, Address> = {
-    [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.MAINNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.GNOSIS_CHAIN]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.SONIC]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.ARBITRUM_ONE]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.BASE]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-    [ChainId.MONAD_TESTNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.AVALANCHE]: '0x000000000022d473030f116ddee9f6b43ac78ba3',
-    [ChainId.OPTIMISM]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.BASE]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.GNOSIS_CHAIN]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.HYPEREVM]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.MAINNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.MONAD_TESTNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.OPTIMISM]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.PLASMA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.SONIC]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
 };
 
 export const NATIVE_ASSETS = {
@@ -259,6 +263,14 @@ export const NATIVE_ASSETS = {
         'HYPE',
         'Hype',
         '0x5555555555555555555555555555555555555555',
+    ),
+    [ChainId.PLASMA]: new Token(
+        ChainId.PLASMA,
+        NATIVE_ADDRESS,
+        18,
+        'XPL',
+        'Xpl',
+        '0x6100E367285b01F48D07953803A2d8dCA5D19873',
     ),
 };
 
