@@ -82,7 +82,7 @@ export enum ChainId {
     SEPOLIA = 11155111,
     MONAD_TESTNET = 10143,
     HYPEREVM = 999,
-    PLASMA = 9745
+    PLASMA = 9745,
 }
 
 // The Balancer API requires the chain to be passed as a specific string
@@ -126,7 +126,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.SONIC]: sonic,
     [ChainId.MONAD_TESTNET]: monadTestnet,
     [ChainId.HYPEREVM]: hyperEVM,
-    [ChainId.PLASMA]: plasma
+    [ChainId.PLASMA]: plasma,
 };
 
 export const PERMIT2: Record<number, Address> = {

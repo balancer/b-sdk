@@ -83,4 +83,4 @@ export const plasma = /*#__PURE__*/ defineChain({
             blockCreated: 1,
         },
     },
-})
+});
