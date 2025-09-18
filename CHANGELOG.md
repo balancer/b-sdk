@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 4.8.0
+
+### Minor Changes
+
+- ccc4bec: refactor Balancer API class
+- 305d7db: add plasma chain
+
 ## 4.7.0
 
 ### Minor Changes
