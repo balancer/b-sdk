@@ -94,7 +94,11 @@ const BLOCK_NUMBER_OVERRIDES: Partial<Record<number, bigint>> = {
 };
 
 // List of ChainIds to run the test for. Modify this array to select which chains to test.
-const CHAINS_TO_TEST: number[] = [ChainId.SEPOLIA, ChainId.HYPEREVM, ChainId.PLASMA];
+const CHAINS_TO_TEST: number[] = [
+    ChainId.SEPOLIA,
+    ChainId.HYPEREVM,
+    ChainId.PLASMA,
+];
 
 describe('validateAllNetworks', () => {
     // Only test chains that have a mapping to ANVIL_NETWORKS and are in CHAINS_TO_TEST
