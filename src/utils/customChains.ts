@@ -44,7 +44,7 @@ export const hyperEVM = /*#__PURE__*/ defineChain({
     blockExplorers: {
         default: {
           name: 'Hyperscan',
-          url: 'https://hyperevmscan.io/',
+          url: 'https://hyperevmscan.io',
         },
     },
     contracts: {
@@ -66,14 +66,14 @@ export const plasma = /*#__PURE__*/ defineChain({
     },
     rpcUrls: {
         default: {
-            http: ['https://rpc.plasma.to/'],
-            webSocket: ['wss://rpc.plasma.to/'],
+            http: ['https://rpc.plasma.to'],
+            webSocket: ['wss://rpc.plasma.to'],
         },
     },
     blockExplorers: {
         default: {
             name: 'Plasma Explorer',
-            url: 'https://plasmascan.to/',
+            url: 'https://plasmascan.to',
             apiUrl: 'https://api.routescan.io/v2/network/mainnet/evm/9745/etherscan/api?',
         },
     },
