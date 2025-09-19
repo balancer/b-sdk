@@ -43,8 +43,8 @@ export const hyperEVM = /*#__PURE__*/ defineChain({
     },
     blockExplorers: {
         default: {
-            name: 'HyperEVM Mainnet explorer',
-            url: 'https://www.hyperscan.com/',
+          name: 'Hyperscan',
+          url: 'https://hyperevmscan.io/',
         },
     },
     contracts: {
