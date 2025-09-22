@@ -49,6 +49,7 @@ const CHAIN_ANVIL_MAP: Partial<Record<number, keyof typeof ANVIL_NETWORKS>> = {
     [ChainId.GNOSIS_CHAIN]: 'GNOSIS_CHAIN',
     [ChainId.SONIC]: 'SONIC',
     [ChainId.HYPEREVM]: 'HYPEREVM',
+    [ChainId.PLASMA]: 'PLASMA',
     // Add/remove mappings as needed for your test coverage
 };
 
@@ -76,6 +77,12 @@ const NETWORK_CONFIG: Partial<
         poolKey: 'MOCK_FEUSD_FEWETH_POOL',
         inputAmountRaw: 100000000000n,
     },
+    [ChainId.PLASMA]: {
+        tokenInKey: 'USDT',
+        tokenOutKey: 'weETH',
+        poolKey: 'MOCK_USDT_WXPL_POOL',
+        inputAmountRaw: 10000n,
+    },
 };
 
 // Optionally override fork block numbers for specific chains. Useful to select pools deployed on V3 after
@@ -83,10 +90,15 @@ const NETWORK_CONFIG: Partial<
 const BLOCK_NUMBER_OVERRIDES: Partial<Record<number, bigint>> = {
     [ChainId.HYPEREVM]: 6892528n,
     [ChainId.MAINNET]: 22788192n,
+    [ChainId.PLASMA]: 1274881n,
 };
 
 // List of ChainIds to run the test for. Modify this array to select which chains to test.
-const CHAINS_TO_TEST: number[] = [ChainId.SEPOLIA, ChainId.HYPEREVM];
+const CHAINS_TO_TEST: number[] = [
+    ChainId.SEPOLIA,
+    ChainId.HYPEREVM,
+    ChainId.PLASMA,
+];
 
 describe('validateAllNetworks', () => {
     // Only test chains that have a mapping to ANVIL_NETWORKS and are in CHAINS_TO_TEST

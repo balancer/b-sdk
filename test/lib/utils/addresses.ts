@@ -220,6 +220,17 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             slot: 51,
         },
     },
+    [ChainId.PLASMA]: {
+        USDT: {
+            address: '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb',
+            decimals: 6,
+            slot: 51,
+        },
+        weETH: {
+            address: '0xA3D68b74bF0528fdD07263c60d6488749044914b',
+            decimals: 18,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };
@@ -392,6 +403,15 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             address: '0x278E31550A3708fb20A7A33bEd0CEcE79FE7ac00',
             id: '0x278E31550A3708fb20A7A33bEd0CEcE79FE7ac00',
             type: PoolType.Stable,
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.PLASMA]: {
+        MOCK_USDT_WXPL_POOL: {
+            address: '0xc9a38dfbca8b620ec10e7b7169ed3ff7338311fa',
+            id: '0xc9a38dfbca8b620ec10e7b7169ed3ff7338311fa',
+            type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
