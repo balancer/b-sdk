@@ -61,14 +61,17 @@ describe('Balancer API (sdk) supports all API chains', () => {
                     if (!result) {
                         unsupportedChains.push(`ChainId ${chainId}`);
                     }
-                } catch (error) {
+                } catch (_error) {
                     unsupportedChains.push(`ChainId ${chainId}`);
                 }
             }
         }
 
         if (unsupportedChains.length > 0) {
-            console.warn('⚠️  Chains that cannot be used for SOR paths:', unsupportedChains);
+            console.warn(
+                '⚠️  Chains that cannot be used for SOR paths:',
+                unsupportedChains,
+            );
         }
 
         // Always pass the test
