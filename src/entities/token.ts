@@ -1,11 +1,11 @@
 import { Address } from 'viem';
-import { InputToken } from '../types';
-export class Token {
-    public readonly chainId: number;
-    public readonly address: Address;
-    public readonly decimals: number;
-    public readonly symbol?: string;
-    public readonly name?: string;
+import { BaseToken } from './baseToken';
+
+/**
+ * Token extends BaseToken and adds wrapped token functionality
+ * This maintains backward compatibility while providing a cleaner base class
+ */
+export class Token extends BaseToken {
     public readonly wrapped: Address;
 
     public constructor(
@@ -16,33 +16,16 @@ export class Token {
         name?: string,
         wrapped?: Address,
     ) {
-        this.chainId = chainId;
-        // Addresses are always lowercased for speed
-        this.address = address.toLowerCase() as Address;
-        this.decimals = decimals;
-        this.symbol = symbol;
-        this.name = name;
+        // Call parent constructor with core properties
+        super(chainId, address, decimals, symbol, name);
+        
+        // Add wrapped functionality
         this.wrapped = (
             wrapped ? wrapped.toLowerCase() : address.toLowerCase()
         ) as Address;
     }
 
-    public isEqual(token: Token) {
-        return this.chainId === token.chainId && this.address === token.address;
-    }
-
     public isUnderlyingEqual(token: Token) {
         return this.chainId === token.chainId && this.wrapped === token.wrapped;
-    }
-
-    public isSameAddress(address: Address) {
-        return this.address === address.toLowerCase();
-    }
-
-    public toInputToken(): InputToken {
-        return {
-            address: this.address,
-            decimals: this.decimals,
-        };
     }
 }
