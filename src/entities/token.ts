@@ -18,7 +18,7 @@ export class Token extends BaseToken {
     ) {
         // Call parent constructor with core properties
         super(chainId, address, decimals, symbol, name);
-        
+
         // Add wrapped functionality
         this.wrapped = (
             wrapped ? wrapped.toLowerCase() : address.toLowerCase()
