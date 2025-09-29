@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 4.8.1
+
+### Patch Changes
+
+- 5945fac: Fix scientific notation parsing for slippage inputs
+- 992a082: update hyperevm block explorer
+
 ## 4.8.0
 
 ### Minor Changes
