@@ -104,7 +104,11 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
         );
         const amountsOut = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
-                new BaseToken(input.chainId, amountIn.address, amountIn.decimals),
+                new BaseToken(
+                    input.chainId,
+                    amountIn.address,
+                    amountIn.decimals,
+                ),
                 amountIn.rawAmount,
             ),
         );

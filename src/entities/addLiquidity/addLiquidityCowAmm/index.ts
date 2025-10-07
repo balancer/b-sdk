@@ -52,7 +52,11 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
         );
         const amountsIn = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
-                new BaseToken(input.chainId, amountIn.address, amountIn.decimals),
+                new BaseToken(
+                    input.chainId,
+                    amountIn.address,
+                    amountIn.decimals,
+                ),
                 amountIn.rawAmount,
             ),
         );

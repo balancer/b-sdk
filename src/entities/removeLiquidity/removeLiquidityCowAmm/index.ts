@@ -38,12 +38,20 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         );
 
         const bptIn = TokenAmount.fromRawAmount(
-            new BaseToken(input.chainId, input.bptIn.address, input.bptIn.decimals),
+            new BaseToken(
+                input.chainId,
+                input.bptIn.address,
+                input.bptIn.decimals,
+            ),
             input.bptIn.rawAmount,
         );
         const amountsOut = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
-                new BaseToken(input.chainId, amountIn.address, amountIn.decimals),
+                new BaseToken(
+                    input.chainId,
+                    amountIn.address,
+                    amountIn.decimals,
+                ),
                 amountIn.rawAmount,
             ),
         );
