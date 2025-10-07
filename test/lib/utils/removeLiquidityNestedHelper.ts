@@ -26,6 +26,7 @@ import {
     sendTransactionGetBalances,
     setTokenBalances,
 } from './helper';
+import { BaseToken } from '@/entities/baseToken';
 
 // AddLiquidityNestedInput
 
@@ -123,7 +124,7 @@ export async function GetNestedBpt(
     return balanceDeltas[0];
 }
 
-const isSameToken = (token1: Token, token2: Token): boolean => {
+const isSameToken = (token1: BaseToken, token2: BaseToken): boolean => {
     return (
         token1.address.toLowerCase() === token2.address.toLowerCase() &&
         token1.chainId === token2.chainId
@@ -140,7 +141,7 @@ const isSameToken = (token1: Token, token2: Token): boolean => {
  */
 export const validateTokenAmounts = (
     amounts: TokenAmount[],
-    tokens: Token[],
+    tokens: BaseToken[],
 ): void => {
     // Check that we have the same number of amounts as main tokens
     expect(amounts.length).to.equal(

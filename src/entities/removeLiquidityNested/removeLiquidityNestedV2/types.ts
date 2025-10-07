@@ -5,6 +5,7 @@ import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolKind } from '@/entities/types';
 import { PoolType } from '@/types';
 import { ChainId } from '@/utils';
+import { BaseToken } from '@/entities/baseToken';
 
 export type RemoveLiquidityNestedProportionalInputV2 = {
     bptAmountIn: bigint;
@@ -20,7 +21,7 @@ export type RemoveLiquidityNestedSingleTokenInputV2 =
 
 export type RemoveLiquidityNestedCallAttributesV2 = {
     chainId: ChainId;
-    sortedTokens: Token[];
+    sortedTokens: BaseToken[];
     poolId: Address;
     poolAddress: Address;
     poolType: PoolType;

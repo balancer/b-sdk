@@ -5,13 +5,14 @@ import { TokenAmount } from '../../tokenAmount';
 import { NestedPoolState } from '../../types';
 import { AddLiquidityNestedInput } from '../types';
 import { AddLiquidityNestedCallInputV2 } from './types';
+import { BaseToken } from '@/entities/baseToken';
 
 export const validateQueryInput = (
     input: AddLiquidityNestedInput,
     nestedPoolState: NestedPoolState,
 ): TokenAmount[] => {
     const mainTokens = nestedPoolState.mainTokens.map(
-        (t) => new Token(input.chainId, t.address, t.decimals),
+        (t) => new BaseToken(input.chainId, t.address, t.decimals),
     );
     const amountsIn = input.amountsIn.map((amountIn) => {
         const tokenIn = mainTokens.find((t) =>
@@ -35,7 +36,7 @@ export const validateBuildCallInput = (
     if (input.wethIsEth) {
         if (
             !input.amountsIn.some((a) =>
-                a.token.isUnderlyingEqual(NATIVE_ASSETS[chainId]),
+                a.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped),
             )
         ) {
             throw inputValidationError(

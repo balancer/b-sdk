@@ -1,13 +1,13 @@
 import { Hex } from 'viem';
 import { RemoveLiquidityNestedCallAttributesV2 } from './types';
-import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 import { Relayer } from '@/entities/relayer';
 
 export const getPeekCalls = (
     calls: RemoveLiquidityNestedCallAttributesV2[],
     isProportional: boolean,
 ) => {
-    const tokensOut: Token[] = [];
+    const tokensOut: BaseToken[] = [];
     const peekCalls: Hex[] = [];
 
     if (isProportional) {

@@ -11,7 +11,7 @@ import { AddLiquidityBoostedV3 } from '../addLiquidityBoosted';
 import { RemoveLiquidityBoostedV3 } from '../removeLiquidityBoosted';
 import { RemoveLiquidityBoostedProportionalInput } from '../removeLiquidityBoosted/types';
 import { Address, BaseError, ContractFunctionRevertedError } from 'viem';
-import { Token } from '../token';
+import { BaseToken } from '@/entities/baseToken';
 
 /**
  * Calculate price impact on add liquidity unbalanced operations
@@ -131,7 +131,7 @@ async function queryAddLiquidityForTokenDelta(
     addLiquidity: AddLiquidityBoostedV3,
     input: AddLiquidityBoostedUnbalancedInput,
     poolState: PoolStateWithUnderlyings,
-    poolTokens: Token[],
+    poolTokens: BaseToken[],
     tokenIndex: number,
     delta: bigint,
 ): Promise<bigint> {
@@ -178,7 +178,7 @@ async function zeroOutDeltas(
     addLiquidity: AddLiquidityBoostedV3,
     input: AddLiquidityBoostedUnbalancedInput,
     poolState: PoolStateWithUnderlyings,
-    poolTokens: Token[],
+    poolTokens: BaseToken[],
     deltas: bigint[],
     deltaBPTs: bigint[],
 ) {

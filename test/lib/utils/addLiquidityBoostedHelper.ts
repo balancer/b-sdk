@@ -7,7 +7,6 @@ import {
     AddLiquidityKind,
     PoolStateWithUnderlyings,
     Slippage,
-    Token,
     TokenAmount,
 } from '@/entities';
 import { ChainId, NATIVE_ASSETS, PERMIT2, PublicWalletClient } from '@/utils';
@@ -20,6 +19,7 @@ import {
 } from './helper';
 import { areBigIntsWithinPercent } from './swapHelpers';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import { BaseToken } from '@/entities/baseToken';
 
 export async function GetBoostedBpt(
     chainId: ChainId,
@@ -117,8 +117,8 @@ export async function GetBoostedBpt(
 }
 
 export const assertTokenMatch = (
-    tokenDefined: Token[],
-    tokenReturned: Token[],
+    tokenDefined: BaseToken[],
+    tokenReturned: BaseToken[],
 ) => {
     tokenDefined.map((tokenAmount) => {
         expect(
@@ -188,7 +188,11 @@ export const doAddLiquidityBoosted = async (
         addLiquidityBoostedQueryOutput.bptOut,
         // add zero address so we can check for native token balance change
         TokenAmount.fromRawAmount(
-            new Token(addLiquidityBoostedQueryOutput.chainId, zeroAddress, 18),
+            new BaseToken(
+                addLiquidityBoostedQueryOutput.chainId,
+                zeroAddress,
+                18,
+            ),
             0n,
         ),
     ];

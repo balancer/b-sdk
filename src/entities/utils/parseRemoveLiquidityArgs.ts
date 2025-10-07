@@ -1,5 +1,5 @@
 import { Address } from '../../types';
-import { Token } from '../token';
+import { BaseToken } from '../baseToken';
 import { ExitPoolRequest } from '../removeLiquidity/types';
 import { replaceWrapped } from './replaceWrapped';
 
@@ -16,7 +16,7 @@ export function parseRemoveLiquidityArgs({
 }: {
     chainId?: number;
     wethIsEth?: boolean;
-    sortedTokens: Token[];
+    sortedTokens: BaseToken[];
     poolId: Address;
     sender: Address;
     recipient: Address;

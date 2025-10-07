@@ -1,5 +1,5 @@
 import { Address, Hex } from '../../types';
-import { Token } from '../token';
+import { BaseToken } from '../baseToken';
 import { replaceWrapped } from './replaceWrapped';
 
 export function parseAddLiquidityArgs({
@@ -15,7 +15,7 @@ export function parseAddLiquidityArgs({
 }: {
     chainId?: number;
     wethIsEth?: boolean;
-    sortedTokens: Token[];
+    sortedTokens: BaseToken[];
     poolId: Hex;
     sender: Address;
     recipient: Address;
