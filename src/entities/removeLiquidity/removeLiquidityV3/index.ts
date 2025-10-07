@@ -1,4 +1,4 @@
-import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import { getSortedTokens } from '@/entities/utils';
@@ -108,7 +108,7 @@ export class RemoveLiquidityV3 implements RemoveLiquidityBase {
                 break;
         }
 
-        const bptToken = new Token(input.chainId, poolState.address, 18);
+        const bptToken = new BaseToken(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBaseQueryOutput & { userData: Hex } = {
             to: AddressProvider.Router(input.chainId),

@@ -1,11 +1,10 @@
 import { inputValidationError, NATIVE_ASSETS } from '@/utils';
 
-import { Token } from '../../token';
+import { BaseToken } from '../../baseToken';
 import { TokenAmount } from '../../tokenAmount';
 import { NestedPoolState } from '../../types';
 import { AddLiquidityNestedInput } from '../types';
 import { AddLiquidityNestedCallInputV2 } from './types';
-import { BaseToken } from '@/entities/baseToken';
 
 export const validateQueryInput = (
     input: AddLiquidityNestedInput,

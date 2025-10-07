@@ -8,10 +8,10 @@ import {
     RemoveLiquidityRecoveryInput,
     RemoveLiquidityV3BuildCallInput,
     Slippage,
-    Token,
     TokenAmount,
     VAULT_V2,
 } from 'src';
+import { BaseToken } from '@/entities/baseToken';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances } from './helper';
 import { RemoveLiquidityRecoveryTxInput } from './types';
@@ -145,7 +145,7 @@ export function assertRemoveLiquidityRecovery(
         removeLiquidityBuildCallOutput,
     } = removeLiquidityOutput;
 
-    const bptToken = new Token(
+    const bptToken = new BaseToken(
         removeLiquidityRecoveryInput.chainId,
         poolState.address,
         18,

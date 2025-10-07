@@ -1,5 +1,5 @@
 import { encodeFunctionData } from 'viem';
-import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { StableEncoder } from '@/entities/encoders/stable';
 import { protocolVersionError, VAULT_V2, ZERO_ADDRESS } from '@/utils';
@@ -49,7 +49,7 @@ export class AddLiquidityStable implements AddLiquidityBase {
             args,
         );
 
-        const bpt = new Token(input.chainId, poolState.address, 18);
+        const bpt = new BaseToken(input.chainId, poolState.address, 18);
         const bptOut = TokenAmount.fromRawAmount(bpt, queryOutput.bptOut);
 
         const amountsIn = queryOutput.amountsIn.map((a, i) =>

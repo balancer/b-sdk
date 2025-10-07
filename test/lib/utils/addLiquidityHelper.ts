@@ -15,7 +15,7 @@ import {
     NATIVE_ASSETS,
     PoolState,
     Slippage,
-    Token,
+
     TokenAmount,
     VAULT_V2,
     Permit2Helper,
@@ -24,6 +24,7 @@ import {
     PublicWalletClient,
     missingParameterError,
 } from 'src';
+import { BaseToken } from '@/entities/baseToken';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
@@ -208,7 +209,7 @@ export function assertAddLiquidityUnbalanced(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsIn = poolState.tokens.map((t) => {
-        const token = new Token(
+        const token = new BaseToken(
             addLiquidityInput.chainId,
             t.address,
             t.decimals,
@@ -290,7 +291,7 @@ export function assertAddLiquiditySingleToken(
             protocolVersion,
         );
 
-    const bptToken = new Token(
+    const bptToken = new BaseToken(
         addLiquidityInput.chainId,
         poolState.address,
         18,

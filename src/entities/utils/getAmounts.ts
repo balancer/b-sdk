@@ -1,5 +1,6 @@
 import { InputAmount } from '../../types';
-import { Token } from '../token';
+import { BaseToken } from '../baseToken';
+import { Token } from '@/entities/token';
 
 /**
  * Get amounts from array of TokenAmounts returning default if not a value for tokens.
@@ -9,7 +10,7 @@ import { Token } from '../token';
  * @returns
  */
 export function getAmounts(
-    tokens: Token[],
+    tokens: BaseToken[],
     amounts: InputAmount[],
     defaultAmount = 0n,
 ): bigint[] {

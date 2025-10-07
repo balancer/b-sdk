@@ -13,7 +13,7 @@ import { balancerCompositeLiquidityRouterBoostedAbiExtended } from '@/abi';
 import { PoolStateWithUnderlyings } from '@/entities/types';
 
 import { TokenAmount } from '@/entities/tokenAmount';
-import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 
 import { getAmountsCall } from '../removeLiquidity/helper';
 
@@ -68,11 +68,11 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             const { decimals } =
                 poolStateTokenMap[tokenOut.toLowerCase() as Address];
 
-            const token = new Token(input.chainId, tokenOut, decimals);
+            const token = new BaseToken(input.chainId, tokenOut, decimals);
             return TokenAmount.fromRawAmount(token, amount);
         });
 
-        const bptToken = new Token(input.chainId, poolState.address, 18);
+        const bptToken = new BaseToken(input.chainId, poolState.address, 18);
 
         const output: RemoveLiquidityBoostedQueryOutput = {
             to: AddressProvider.CompositeLiquidityRouter(input.chainId),

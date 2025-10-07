@@ -5,7 +5,6 @@ import {
     parseAbiParameters,
     Hex,
 } from 'viem';
-import { Token } from '@/entities/token';
 import { BaseToken } from '@/entities/baseToken';
 import {
     BALANCER_RELAYER,

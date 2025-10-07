@@ -17,7 +17,6 @@ import {
     ChainId,
     CHAINS,
     PublicWalletClient,
-    Token,
     RemoveLiquidityNestedInput,
     RemoveLiquidityNestedCallInput,
     RemoveLiquidityNested,
@@ -42,18 +41,19 @@ import {
     USDT,
     WETH,
 } from 'test/mockData/nestedPool';
+import { BaseToken } from '@/entities/baseToken';
 
 const chainId = ChainId.SEPOLIA;
 
-const parentBptToken = new Token(
+const parentBptToken = new BaseToken(
     chainId,
     NESTED_WITH_BOOSTED_POOL.address,
     NESTED_WITH_BOOSTED_POOL.decimals,
 );
 // These are the underlying tokens
-const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
-const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
-const wethToken = new Token(chainId, WETH.address, WETH.decimals);
+const usdcToken = new BaseToken(chainId, USDC.address, USDC.decimals);
+const usdtToken = new BaseToken(chainId, USDT.address, USDT.decimals);
+const wethToken = new BaseToken(chainId, WETH.address, WETH.decimals);
 const mainTokens = [wethToken, usdtToken, usdcToken];
 
 describe('V3 remove liquidity nested test, with Permit direct approval', () => {

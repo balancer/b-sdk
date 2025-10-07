@@ -13,7 +13,7 @@ import {
 } from '../../types';
 import { vaultV2Abi } from '../../../../abi';
 import { VAULT_V2, MAX_UINT256 } from '../../../../utils';
-import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 import { getValue } from '@/entities/utils/getValue';
 import { TokenAmount } from '@/entities/tokenAmount';
 
@@ -44,7 +44,7 @@ export class InitPoolComposableStable implements InitPoolBase {
         });
 
         const amountsIn = input.amountsIn.map((a) => {
-            const token = new Token(input.chainId, a.address, a.decimals);
+            const token = new BaseToken(input.chainId, a.address, a.decimals);
             return TokenAmount.fromRawAmount(token, a.rawAmount);
         });
 
@@ -58,7 +58,7 @@ export class InitPoolComposableStable implements InitPoolBase {
     private getAmounts(
         input: InitPoolInputV2,
         poolAddress: Address,
-        poolTokens: Token[],
+        poolTokens: BaseToken[],
     ): InitPoolAmountsComposableStable {
         const bptIndex = poolTokens.findIndex((t) => t.address === poolAddress);
         const maxAmountsIn = getAmounts(poolTokens, [

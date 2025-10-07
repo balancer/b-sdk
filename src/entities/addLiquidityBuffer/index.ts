@@ -6,7 +6,7 @@ import { Permit2 } from '@/entities/permit2Helper';
 import { BufferState } from '@/entities/types';
 
 import { doAddLiquidityQuery } from './doAddLiquidityQuery';
-import { Token } from '../token';
+import { BaseToken } from '../baseToken';
 import {
     balancerBufferRouterAbiExtended,
     balancerRouterAbiExtended,
@@ -35,7 +35,7 @@ export class AddLiquidityBufferV3 {
                 input.exactSharesToIssue,
                 block,
             );
-        const underlyingToken = new Token(
+        const underlyingToken = new BaseToken(
             input.chainId,
             bufferState.underlyingToken.address,
             bufferState.underlyingToken.decimals,
@@ -44,7 +44,7 @@ export class AddLiquidityBufferV3 {
             underlyingToken,
             amountUnderlyingIn,
         );
-        const wrappedToken = new Token(
+        const wrappedToken = new BaseToken(
             input.chainId,
             bufferState.wrappedToken.address,
             bufferState.wrappedToken.decimals,

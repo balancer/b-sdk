@@ -1,11 +1,10 @@
 import { Address, Hex } from 'viem';
 import { Slippage } from '@/entities/slippage';
-import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolKind } from '@/entities/types';
 import { PoolType } from '@/types';
 import { ChainId } from '@/utils';
-import { BaseToken } from '@/entities/baseToken';
 
 export type RemoveLiquidityNestedProportionalInputV2 = {
     bptAmountIn: bigint;

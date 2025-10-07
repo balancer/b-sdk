@@ -22,6 +22,7 @@ import {
 } from '../../../utils';
 import { getAmountsCall, getAmountsQuery } from '../../helper';
 import { RemoveLiquidityV2BaseBuildCallInput } from '../types';
+import { BaseToken } from '@/entities/baseToken';
 
 export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     public async query(
@@ -56,7 +57,7 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             args,
         );
 
-        const bpt = new Token(input.chainId, poolState.address, 18);
+        const bpt = new BaseToken(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(bpt, queryOutput.bptIn);
 
         const amountsOut = queryOutput.amountsOut.map((a, i) =>
@@ -92,14 +93,14 @@ export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
             input.bptIn,
         );
 
-        const bptToken = new Token(input.chainId, poolState.address, 18);
+        const bptToken = new BaseToken(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(
             bptToken,
             input.bptIn.rawAmount,
         );
         const amountsOut = tokenAmounts.map((amount) =>
             TokenAmount.fromRawAmount(
-                new Token(input.chainId, amount.address, amount.decimals),
+                new BaseToken(input.chainId, amount.address, amount.decimals),
                 amount.rawAmount,
             ),
         );

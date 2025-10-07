@@ -1,5 +1,5 @@
 import { encodeFunctionData } from 'viem';
-import { Token } from '../../../token';
+import { BaseToken } from '../../../baseToken';
 import { TokenAmount } from '../../../tokenAmount';
 import { StableEncoder } from '../../../encoders/stable';
 import {
@@ -60,7 +60,7 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
             args,
         );
 
-        const bpt = new Token(input.chainId, poolState.address, 18);
+        const bpt = new BaseToken(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(bpt, queryOutput.bptIn);
 
         const amountsOut = queryOutput.amountsOut.map((a, i) =>
@@ -97,14 +97,14 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
             input.bptIn,
         );
 
-        const bptToken = new Token(input.chainId, poolState.address, 18);
+        const bptToken = new BaseToken(input.chainId, poolState.address, 18);
         const bptIn = TokenAmount.fromRawAmount(
             bptToken,
             input.bptIn.rawAmount,
         );
         const amountsOut = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
-                new Token(input.chainId, amountIn.address, amountIn.decimals),
+                new BaseToken(input.chainId, amountIn.address, amountIn.decimals),
                 amountIn.rawAmount,
             ),
         );

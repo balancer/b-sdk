@@ -13,7 +13,6 @@ import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
 import { encodeSwapData } from './swap';
 import { AuraBalSwapQueryOutput, AuraBalSwapQueryInput } from './types';
-import { Token } from '@/entities/token';
 import { BaseToken } from '@/entities/baseToken';
 import { encodeExitData } from './exitPool';
 

@@ -4,7 +4,7 @@ import { InitPoolBase, InitPoolBuildOutput, InitPoolInputV3 } from './types';
 import { balancerV3Contracts } from '@/utils';
 import { encodeFunctionData, Address } from 'viem';
 import { getSortedTokens, parseInitializeArgs, getAmounts } from '../utils';
-import { Token } from '../token';
+import { BaseToken } from '../baseToken';
 import { TokenAmount } from '../tokenAmount';
 import { getValue } from '../utils/getValue';
 import { Permit2 } from '@/entities/permit2Helper';
@@ -30,7 +30,7 @@ export class InitPoolV3 implements InitPoolBase {
         });
 
         const amountsIn = input.amountsIn.map((a) => {
-            const token = new Token(input.chainId, a.address, a.decimals);
+            const token = new BaseToken(input.chainId, a.address, a.decimals);
             return TokenAmount.fromRawAmount(token, a.rawAmount);
         });
 
@@ -70,7 +70,7 @@ export class InitPoolV3 implements InitPoolBase {
 
     private getAmounts(
         input: InitPoolInputV3,
-        tokens: Token[],
+        tokens: BaseToken[],
     ): { exactAmountsIn: bigint[] } {
         return {
             exactAmountsIn: getAmounts(tokens, input.amountsIn),

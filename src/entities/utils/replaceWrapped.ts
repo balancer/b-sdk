@@ -1,5 +1,4 @@
 import { BaseToken } from '../baseToken';
-import { Token } from '../token';
 import { NATIVE_ASSETS, ZERO_ADDRESS } from '../../utils';
 
 export function replaceWrapped(

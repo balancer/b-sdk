@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 import {
     AuraBalSwapKind,
     SwapQueryInput,
@@ -21,8 +21,8 @@ export function isAuraBalSwap(input: SwapQueryInput): boolean {
 }
 
 function isMainnet(
-    tokenIn: Token,
-    tokenOut: Token,
+    tokenIn: BaseToken,
+    tokenOut: BaseToken,
     swapAmount: TokenAmount,
 ): boolean {
     if (
@@ -36,7 +36,7 @@ function isMainnet(
     return true;
 }
 
-function isAddressEqual(token: Token, amount: TokenAmount): boolean {
+function isAddressEqual(token: BaseToken, amount: TokenAmount): boolean {
     if (!token.isSameAddress(amount.token.address))
         throw inputValidationError(
             'auraBal Swap',
@@ -51,7 +51,7 @@ function isGivenIn(kind: SwapKind): boolean {
     return true;
 }
 
-function hasSupportedTokens(tokenIn: Token, tokenOut: Token): boolean {
+function hasSupportedTokens(tokenIn: BaseToken, tokenOut: BaseToken): boolean {
     const tokenInIsAuraBal = auraBalToken.isSameAddress(tokenIn.address);
     const tokenOutIsAuraBal = auraBalToken.isSameAddress(tokenOut.address);
     if (tokenInIsAuraBal && tokenOutIsAuraBal)
@@ -93,6 +93,6 @@ export function parseInputs(input: SwapQueryInput): AuraBalSwapQueryInput {
     };
 }
 
-function isSupportedToken(token: Token): boolean {
+function isSupportedToken(token: BaseToken): boolean {
     return supportedTokens.some((t) => token.isSameAddress(t as Address));
 }

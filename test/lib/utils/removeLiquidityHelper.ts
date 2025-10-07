@@ -17,10 +17,10 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityV3BuildCallInput,
     Slippage,
-    Token,
     TokenAmount,
     VAULT_V2,
 } from 'src';
+import { BaseToken } from '@/entities/baseToken';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import { RemoveLiquidityTxInput } from './types';
@@ -206,7 +206,7 @@ export function assertRemoveLiquidityUnbalanced(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsOut = poolState.tokens.map((t) => {
-        const token = new Token(
+        const token = new BaseToken(
             removeLiquidityInput.chainId,
             t.address,
             t.decimals,
@@ -274,7 +274,7 @@ export function assertRemoveLiquiditySingleTokenExactOut(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsOut = poolState.tokens.map((t) => {
-        const token = new Token(
+        const token = new BaseToken(
             removeLiquidityInput.chainId,
             t.address,
             t.decimals,
@@ -361,7 +361,7 @@ export function assertRemoveLiquiditySingleTokenExactIn(
             protocolVersion,
         );
 
-    const bptToken = new Token(
+    const bptToken = new BaseToken(
         removeLiquidityInput.chainId,
         poolState.address,
         18,
@@ -451,7 +451,7 @@ export function assertRemoveLiquidityProportional(
         removeLiquidityBuildCallOutput,
     } = removeLiquidityOutput;
 
-    const bptToken = new Token(
+    const bptToken = new BaseToken(
         removeLiquidityInput.chainId,
         poolState.address,
         18,

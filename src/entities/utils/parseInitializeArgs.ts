@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { Token } from '../token';
+import { BaseToken } from '../baseToken';
 import { InitializeArgs } from '../initPool';
 import { DEFAULT_USERDATA } from '@/utils';
 
@@ -15,7 +15,7 @@ export function parseInitializeArgs({
     wethIsEth?: boolean;
     chainId: number;
     poolAddress: Address;
-    sortedTokens: Token[];
+    sortedTokens: BaseToken[];
 }): { args: InitializeArgs } {
     return {
         args: [

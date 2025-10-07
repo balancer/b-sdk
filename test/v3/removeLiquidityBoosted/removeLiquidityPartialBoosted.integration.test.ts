@@ -39,19 +39,20 @@ import {
 import { validateTokenAmounts } from 'test/lib/utils/removeLiquidityNestedHelper';
 import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import { BaseToken } from '@/entities/baseToken';
 
 const chainId = ChainId.SEPOLIA;
 const USDT = TOKENS[chainId].USDT_AAVE;
 const WETH = TOKENS[chainId].WETH;
 
-const parentBptToken = new Token(
+const parentBptToken = new BaseToken(
     chainId,
     partialBoostedPool_WETH_stataUSDT.address,
     18,
 );
 // These are the underlying tokens
-const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
-const wethToken = new Token(chainId, WETH.address, WETH.decimals);
+const usdtToken = new BaseToken(chainId, USDT.address, USDT.decimals);
+const wethToken = new BaseToken(chainId, WETH.address, WETH.decimals);
 
 describe('V3 remove liquidity partial boosted', () => {
     let rpcUrl: string;
