@@ -6,6 +6,7 @@ import {
     Hex,
 } from 'viem';
 import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 import {
     BALANCER_RELAYER,
     ChainId,
@@ -18,7 +19,7 @@ import { balWethAssets, balWethId } from './constants';
 import { replaceWrapped } from './replaceWrapped';
 
 export function encodeJoinData(
-    token: Token,
+    token: BaseToken,
     sender: Address,
     inputAmount: bigint,
     wethIsEth: boolean,
@@ -31,7 +32,8 @@ export function encodeJoinData(
         );
 
     const useNativeAsset =
-        wethIsEth && token.isUnderlyingEqual(NATIVE_ASSETS[ChainId.MAINNET]);
+        wethIsEth &&
+        token.isSameAddress(NATIVE_ASSETS[ChainId.MAINNET].wrapped);
 
     const maxAmountsIn = Array(balWethAssets.length).fill(0n);
     maxAmountsIn[tokenInIndex] = inputAmount;
