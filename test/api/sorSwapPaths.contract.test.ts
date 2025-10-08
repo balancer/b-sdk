@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { BalancerApi } from '@/data/providers/balancer-api';
 import { API_ENDPOINT, ChainId } from '@/utils';
 import { Address } from 'viem';
-import { Token, TokenAmount } from '@/entities';
+import { TokenAmount } from '@/entities';
+import { BaseToken } from '@/entities/baseToken';
 import { SwapKind } from '@/types';
 
 // Inline minimal constants
@@ -17,7 +18,7 @@ describe('contract: sor swap paths (live API)', () => {
     });
 
     it('fetches SOR swap paths', async () => {
-        const token = new Token(CHAIN_ID, TOKEN_IN, 18);
+        const token = new BaseToken(CHAIN_ID, TOKEN_IN, 18);
         const oneUnit = TokenAmount.fromHumanAmount(token, '0.001');
         const paths = await api.sorSwapPaths.fetchSorSwapPaths({
             chainId: CHAIN_ID,
@@ -30,7 +31,7 @@ describe('contract: sor swap paths (live API)', () => {
     });
 
     it('fetches SOR swap paths with protocol version', async () => {
-        const token = new Token(CHAIN_ID, TOKEN_IN, 18);
+        const token = new BaseToken(CHAIN_ID, TOKEN_IN, 18);
         const oneUnit = TokenAmount.fromHumanAmount(token, '0.001');
         const paths = await api.sorSwapPaths.fetchSorSwapPaths({
             chainId: CHAIN_ID,

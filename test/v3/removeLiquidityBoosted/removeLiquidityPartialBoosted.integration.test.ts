@@ -18,7 +18,6 @@ import {
     ChainId,
     CHAINS,
     PublicWalletClient,
-    Token,
     balancerV3Contracts,
     Slippage,
     RemoveLiquidityBoostedV3,
@@ -258,7 +257,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 queryOutput.bptIn,
                 // add zero address so we can check for native token balance change
                 TokenAmount.fromRawAmount(
-                    new Token(queryOutput.chainId, zeroAddress, 18),
+                    new BaseToken(queryOutput.chainId, zeroAddress, 18),
                     0n,
                 ),
             ];

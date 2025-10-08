@@ -1,7 +1,8 @@
 // pnpm test -- swapV2.test.ts
 import { ChainId } from '@/index';
 import { SwapKind } from '@/types';
-import { Token, TokenAmount } from '@/entities';
+import { TokenAmount } from '@/entities';
+import { BaseToken } from '@/entities/baseToken';
 import { SwapV2 } from '@/entities/swap/swaps/v2';
 import { Path, TokenApi } from '@/entities/swap/paths/types';
 
@@ -55,7 +56,7 @@ describe('SwapV2', () => {
                         paths: [pathTo6Decimals],
                         swapKind: SwapKind.GivenIn,
                     });
-                    const tokenOut = new Token(
+                    const tokenOut = new BaseToken(
                         1,
                         pathTo6Decimals.tokens[
                             pathTo6Decimals.tokens.length - 1
@@ -80,7 +81,7 @@ describe('SwapV2', () => {
                         paths: [pathFrom6Decimals],
                         swapKind: SwapKind.GivenIn,
                     });
-                    const tokenOut = new Token(
+                    const tokenOut = new BaseToken(
                         1,
                         pathFrom6Decimals.tokens[
                             pathFrom6Decimals.tokens.length - 1
@@ -106,7 +107,7 @@ describe('SwapV2', () => {
                         paths: [pathTo6Decimals],
                         swapKind: SwapKind.GivenOut,
                     });
-                    const tokenIn = new Token(
+                    const tokenIn = new BaseToken(
                         1,
                         pathTo6Decimals.tokens[0].address,
                         pathTo6Decimals.tokens[0].decimals,
@@ -127,7 +128,7 @@ describe('SwapV2', () => {
                         paths: [pathFrom6Decimals],
                         swapKind: SwapKind.GivenOut,
                     });
-                    const tokenIn = new Token(
+                    const tokenIn = new BaseToken(
                         1,
                         pathFrom6Decimals.tokens[0].address,
                         pathFrom6Decimals.tokens[0].decimals,

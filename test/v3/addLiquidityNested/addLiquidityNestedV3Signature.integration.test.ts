@@ -17,7 +17,6 @@ import {
     PERMIT2,
     PublicWalletClient,
     Slippage,
-    Token,
     TokenAmount,
     AddLiquidityNested,
     AddLiquidityNestedInput,
@@ -38,13 +37,14 @@ import {
     USDT,
     WETH,
 } from 'test/mockData/nestedPool';
+import { BaseToken } from '@/entities/baseToken';
 
 const chainId = ChainId.SEPOLIA;
 
 // These are the underlying tokens
-const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
-const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
-const wethToken = new Token(chainId, WETH.address, WETH.decimals);
+const usdcToken = new BaseToken(chainId, USDC.address, USDC.decimals);
+const usdtToken = new BaseToken(chainId, USDT.address, USDT.decimals);
+const wethToken = new BaseToken(chainId, WETH.address, WETH.decimals);
 const mainTokens = [wethToken, usdtToken, usdcToken];
 
 describe('V3 add liquidity nested test, with Permit2 signature', () => {

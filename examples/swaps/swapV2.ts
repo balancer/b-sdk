@@ -10,14 +10,15 @@ import {
     ChainId,
     Slippage,
     SwapKind,
-    Token,
-    TokenAmount,
     SwapBuildCallInput,
     VAULT_V2,
 } from '../../src';
+import { BaseToken } from '@/entities/baseToken';
 import { querySmartPath } from './querySmartPath';
 import { setupExampleFork } from '../lib/setupExampleFork';
 import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
+import { TokenAmount } from '@/entities';
+
 const swapV2 = async () => {
     // Choose chain id to start fork
     const chainId = ChainId.MAINNET;
@@ -25,13 +26,13 @@ const swapV2 = async () => {
 
     // User defines these params for querying swap with SOR
     const swapKind = SwapKind.GivenIn;
-    const tokenIn = new Token(
+    const tokenIn = new BaseToken(
         chainId,
         TOKENS[chainId].WETH.address,
         TOKENS[chainId].WETH.decimals,
         'WETH',
     );
-    const tokenOut = new Token(
+    const tokenOut = new BaseToken(
         chainId,
         TOKENS[chainId].BAL.address,
         TOKENS[chainId].BAL.decimals,

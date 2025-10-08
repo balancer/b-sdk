@@ -11,7 +11,7 @@ import {
     AddLiquidityNestedBuildCallOutput,
     AddLiquidityNestedInput,
 } from '../types';
-import { Token } from '@/entities/token';
+import { BaseToken } from '@/entities/baseToken';
 import { getAmounts, getValue } from '@/entities/utils';
 import { TokenAmount } from '@/entities/tokenAmount';
 import {
@@ -57,7 +57,7 @@ export class AddLiquidityNestedV3 {
         // query function input, `tokensIn` array, must have all tokens from child pools
         // and all tokens that are not BPTs from the nested pool (parent pool).
         const mainTokens = nestedPoolState.mainTokens.map(
-            (t) => new Token(input.chainId, t.address, t.decimals),
+            (t) => new BaseToken(input.chainId, t.address, t.decimals),
         );
         // This will add 0 amount for any tokensIn the user hasn't included
         const maxAmountsIn = getAmounts(mainTokens, input.amountsIn, 0n);
@@ -74,7 +74,7 @@ export class AddLiquidityNestedV3 {
             block,
         );
 
-        const bptToken = new Token(input.chainId, parentPool.address, 18);
+        const bptToken = new BaseToken(input.chainId, parentPool.address, 18);
 
         return {
             to: BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[input.chainId],

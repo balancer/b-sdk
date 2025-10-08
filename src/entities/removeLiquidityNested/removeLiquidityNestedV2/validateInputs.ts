@@ -1,5 +1,5 @@
 import { inputValidationError, NATIVE_ASSETS } from '../../../utils';
-import { Token } from '../../token';
+import { BaseToken } from '../../baseToken';
 import { NestedPoolState } from '../../types';
 import {
     RemoveLiquidityNestedCallInputV2,
@@ -16,7 +16,7 @@ export const validateQueryInput = (
     const tokenOut = 'tokenOut' in input ? input.tokenOut : undefined;
     const isProportional = tokenOut === undefined;
     const mainTokens = nestedPoolState.mainTokens.map(
-        (token) => new Token(input.chainId, token.address, token.decimals),
+        (token) => new BaseToken(input.chainId, token.address, token.decimals),
     );
     if (!isProportional) {
         validateInputsSingleToken(
@@ -30,7 +30,7 @@ export const validateQueryInput = (
 
 const validateInputsSingleToken = (
     input: RemoveLiquidityNestedSingleTokenInputV2,
-    mainTokens: Token[],
+    mainTokens: BaseToken[],
 ) => {
     const tokenOut = mainTokens.find((t) => t.isSameAddress(input.tokenOut));
 

@@ -19,7 +19,6 @@ import {
     PERMIT2,
     PublicWalletClient,
     Slippage,
-    Token,
     TokenAmount,
     AddLiquidityBoostedV3,
     AddLiquidityKind,
@@ -39,14 +38,15 @@ import {
 } from 'test/lib/utils';
 import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import { BaseToken } from '@/entities/baseToken';
 
 const chainId = ChainId.SEPOLIA;
 const USDT = TOKENS[chainId].USDT_AAVE;
 const WETH = TOKENS[chainId].WETH;
 
 // These are the underlying tokens
-const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
-const wethToken = new Token(chainId, WETH.address, WETH.decimals);
+const usdtToken = new BaseToken(chainId, USDT.address, USDT.decimals);
+const wethToken = new BaseToken(chainId, WETH.address, WETH.decimals);
 
 describe('V3 add liquidity partial boosted', () => {
     let rpcUrl: string;

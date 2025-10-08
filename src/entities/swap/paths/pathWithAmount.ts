@@ -1,6 +1,6 @@
 import { TokenAmount } from '../../tokenAmount';
 import { Address } from 'viem';
-import { Token } from '../../token';
+import { BaseToken } from '../../baseToken';
 import { TokenApi } from './types';
 
 export class PathWithAmount {
@@ -18,12 +18,12 @@ export class PathWithAmount {
         outputAmountRaw: bigint,
         isBuffer: boolean[] | undefined,
     ) {
-        const tokenIn = new Token(
+        const tokenIn = new BaseToken(
             chainId,
             tokens[0].address,
             tokens[0].decimals,
         );
-        const tokenOut = new Token(
+        const tokenOut = new BaseToken(
             chainId,
             tokens[tokens.length - 1].address,
             tokens[tokens.length - 1].decimals,

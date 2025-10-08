@@ -10,7 +10,6 @@ import {
     RemoveLiquidityNestedQueryOutput,
     RemoveLiquidityNestedQueryOutputV3,
     Slippage,
-    Token,
     TokenAmount,
 } from '@/entities';
 import {
@@ -232,7 +231,7 @@ export const doRemoveLiquidityNested = async (
         removeLiquidityNestedQueryOutput.bptAmountIn,
         // add zero address so we can check for native token balance change
         TokenAmount.fromRawAmount(
-            new Token(
+            new BaseToken(
                 removeLiquidityNestedQueryOutput.chainId,
                 zeroAddress,
                 18,

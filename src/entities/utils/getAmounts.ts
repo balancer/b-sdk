@@ -1,6 +1,5 @@
 import { InputAmount } from '../../types';
 import { BaseToken } from '../baseToken';
-import { Token } from '@/entities/token';
 
 /**
  * Get amounts from array of TokenAmounts returning default if not a value for tokens.

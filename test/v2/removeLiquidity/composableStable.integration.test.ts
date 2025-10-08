@@ -16,7 +16,6 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
     Slippage,
-    Token,
     PoolState,
     RemoveLiquidity,
     Address,
@@ -40,6 +39,7 @@ import {
 } from '../../lib/utils/removeLiquidityHelper';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
+import { BaseToken } from '@/entities/baseToken';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);
@@ -94,7 +94,7 @@ describe('composable stable remove liquidity test', () => {
                 (t) => t.address === txInput.poolState.address,
             );
             const poolTokensWithoutBpt = txInput.poolState.tokens
-                .map((t) => new Token(chainId, t.address, t.decimals))
+                .map((t) => new BaseToken(chainId, t.address, t.decimals))
                 .filter((_, index) => index !== bptIndex);
 
             amountsOut = poolTokensWithoutBpt.map((t) => ({
