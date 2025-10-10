@@ -1,11 +1,11 @@
 import { inputValidationError } from './errors';
-import { BaseToken } from '../entities/baseToken';
+import { Token } from '../entities/token';
 import { TokenAmount } from '../entities/tokenAmount';
 import { Address, SwapKind, BigintIsh } from '@/types';
 
 export function checkInputs(
-    tokenIn: BaseToken,
-    tokenOut: BaseToken,
+    tokenIn: Token,
+    tokenOut: Token,
     swapKind: SwapKind,
     swapAmount: BigintIsh | TokenAmount,
 ): TokenAmount {

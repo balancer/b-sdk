@@ -23,7 +23,7 @@ import {
     PermitHelper,
     RemoveLiquidityNestedCallInputV3,
 } from 'src';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
@@ -41,9 +41,9 @@ import {
 const chainId = ChainId.SEPOLIA;
 
 // These are the underlying tokens
-const usdtToken = new BaseToken(chainId, USDT.address, USDT.decimals);
-const usdcToken = new BaseToken(chainId, USDC.address, USDC.decimals);
-const wethToken = new BaseToken(chainId, WETH.address, WETH.decimals);
+const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
+const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
+const wethToken = new Token(chainId, WETH.address, WETH.decimals);
 const mainTokens = [wethToken, usdtToken, usdcToken];
 
 describe('V3 remove liquidity nested test, with Permit signature', () => {

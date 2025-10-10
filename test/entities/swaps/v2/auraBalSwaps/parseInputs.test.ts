@@ -1,17 +1,17 @@
 // pnpm test -- parseInputs.test.ts
 import { AuraBalSwapKind, TokenAmount } from '@/entities';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { auraBalToken } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
 import { parseInputs } from '@/entities/swap/swaps/v2/auraBalSwaps/parseInputs';
 import { SwapKind } from '@/types';
 import { ChainId, inputValidationError } from '@/utils';
 
-const usdc = new BaseToken(
+const usdc = new Token(
     ChainId.MAINNET,
     '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     6,
 );
-const bal = new BaseToken(
+const bal = new Token(
     ChainId.MAINNET,
     '0xba100000625a3754423978a60c9317c58a424e3D',
     18,

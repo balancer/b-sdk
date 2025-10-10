@@ -19,7 +19,7 @@ import {
 } from './helper';
 import { areBigIntsWithinPercent } from './swapHelpers';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 export async function GetBoostedBpt(
     chainId: ChainId,
@@ -117,8 +117,8 @@ export async function GetBoostedBpt(
 }
 
 export const assertTokenMatch = (
-    tokenDefined: BaseToken[],
-    tokenReturned: BaseToken[],
+    tokenDefined: Token[],
+    tokenReturned: Token[],
 ) => {
     tokenDefined.map((tokenAmount) => {
         expect(
@@ -188,11 +188,7 @@ export const doAddLiquidityBoosted = async (
         addLiquidityBoostedQueryOutput.bptOut,
         // add zero address so we can check for native token balance change
         TokenAmount.fromRawAmount(
-            new BaseToken(
-                addLiquidityBoostedQueryOutput.chainId,
-                zeroAddress,
-                18,
-            ),
+            new Token(addLiquidityBoostedQueryOutput.chainId, zeroAddress, 18),
             0n,
         ),
     ];

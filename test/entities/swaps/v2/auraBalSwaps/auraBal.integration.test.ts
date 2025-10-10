@@ -26,13 +26,13 @@ import {
     auraBalToken,
     BAL,
 } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
 
 const chainId = ChainId.MAINNET;
-const bal = new BaseToken(chainId, BAL, 18);
-const weth = new BaseToken(chainId, NATIVE_ASSETS[chainId].wrapped, 18);
+const bal = new Token(chainId, BAL, 18);
+const weth = new Token(chainId, NATIVE_ASSETS[chainId].wrapped, 18);
 
 describe('auraBalSwaps:Integration tests', () => {
     let rpcUrl: string;
@@ -91,8 +91,8 @@ describe('auraBalSwaps:Integration tests', () => {
 
 async function testAuraBalSwap(
     client: PublicWalletClient & TestActions,
-    tokenIn: BaseToken,
-    tokenOut: BaseToken,
+    tokenIn: Token,
+    tokenOut: Token,
     tokenInSlot: number,
     rpcUrl: string,
     wethIsEth = false,

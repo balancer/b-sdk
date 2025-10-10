@@ -1,6 +1,6 @@
 import { inputValidationError, NATIVE_ASSETS } from '@/utils';
 
-import { BaseToken } from '../../baseToken';
+import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
 import { NestedPoolState } from '../../types';
 import { AddLiquidityNestedInput } from '../types';
@@ -11,7 +11,7 @@ export const validateQueryInput = (
     nestedPoolState: NestedPoolState,
 ): TokenAmount[] => {
     const mainTokens = nestedPoolState.mainTokens.map(
-        (t) => new BaseToken(input.chainId, t.address, t.decimals),
+        (t) => new Token(input.chainId, t.address, t.decimals),
     );
     const amountsIn = input.amountsIn.map((amountIn) => {
         const tokenIn = mainTokens.find((t) =>

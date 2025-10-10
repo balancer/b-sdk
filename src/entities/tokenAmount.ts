@@ -3,26 +3,26 @@ import { parseUnits } from 'viem';
 import { InputAmount, BigintIsh } from '../types';
 import { DECIMAL_SCALES } from '../utils/constants';
 import { WAD } from '../utils/math';
-import { BaseToken } from './baseToken';
+import { Token } from './token';
 
 export class TokenAmount {
-    public readonly token: BaseToken;
+    public readonly token: Token;
     public readonly scalar: bigint;
     public readonly decimalScale: bigint;
     public amount: bigint;
     public scale18: bigint;
 
-    public static fromRawAmount(token: BaseToken, rawAmount: BigintIsh) {
+    public static fromRawAmount(token: Token, rawAmount: BigintIsh) {
         return new TokenAmount(token, rawAmount);
     }
 
-    public static fromHumanAmount(token: BaseToken, humanAmount: `${number}`) {
+    public static fromHumanAmount(token: Token, humanAmount: `${number}`) {
         const rawAmount = parseUnits(humanAmount, token.decimals);
         return new TokenAmount(token, rawAmount);
     }
 
     public static fromScale18Amount(
-        token: BaseToken,
+        token: Token,
         scale18Amount: BigintIsh,
         divUp?: boolean,
     ) {
@@ -37,11 +37,11 @@ export class TokenAmount {
         input: InputAmount,
         chainId: number,
     ): TokenAmount {
-        const token = new BaseToken(chainId, input.address, input.decimals);
+        const token = new Token(chainId, input.address, input.decimals);
         return new TokenAmount(token, input.rawAmount);
     }
 
-    protected constructor(token: BaseToken, amount: BigintIsh) {
+    protected constructor(token: Token, amount: BigintIsh) {
         this.decimalScale = DECIMAL_SCALES[token.decimals];
         this.token = token;
         this.amount = BigInt(amount);

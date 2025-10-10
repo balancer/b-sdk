@@ -5,7 +5,7 @@ import {
     parseAbiParameters,
     Hex,
 } from 'viem';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { BALANCER_RELAYER, ChainId, inputValidationError } from '@/utils';
 import { batchRelayerLibraryAbi } from '@/abi';
 import { Relayer } from '@/entities/relayer';
@@ -13,7 +13,7 @@ import { balWethAssets, balWethId } from './constants';
 import { replaceWrapped } from './replaceWrapped';
 
 export function encodeExitData(
-    token: BaseToken,
+    token: Token,
     userAddress: Address,
     swapOpRef: bigint,
     limit: bigint,

@@ -1,4 +1,4 @@
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import {
@@ -38,20 +38,12 @@ export class RemoveLiquidityCowAmm implements RemoveLiquidityBase {
         );
 
         const bptIn = TokenAmount.fromRawAmount(
-            new BaseToken(
-                input.chainId,
-                input.bptIn.address,
-                input.bptIn.decimals,
-            ),
+            new Token(input.chainId, input.bptIn.address, input.bptIn.decimals),
             input.bptIn.rawAmount,
         );
         const amountsOut = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
-                new BaseToken(
-                    input.chainId,
-                    amountIn.address,
-                    amountIn.decimals,
-                ),
+                new Token(input.chainId, amountIn.address, amountIn.decimals),
                 amountIn.rawAmount,
             ),
         );

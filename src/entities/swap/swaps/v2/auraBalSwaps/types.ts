@@ -1,17 +1,17 @@
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { SwapKind } from '@/types';
 
 export type SwapQueryInput = {
-    tokenIn: BaseToken;
-    tokenOut: BaseToken;
+    tokenIn: Token;
+    tokenOut: Token;
     kind: SwapKind;
     swapAmount: TokenAmount;
 };
 
 export interface AuraBalSwapQueryInput {
     kind: AuraBalSwapKind;
-    swapToken: BaseToken;
+    swapToken: Token;
     inputAmount: TokenAmount;
 }
 

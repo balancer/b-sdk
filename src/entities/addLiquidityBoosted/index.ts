@@ -19,7 +19,7 @@ import {
 } from '../addLiquidity/types';
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuery';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { balancerV3Contracts, protocolVersionError } from '@/utils';
 import {
     balancerCompositeLiquidityRouterBoostedAbiExtended,
@@ -52,7 +52,7 @@ export class AddLiquidityBoostedV3 {
             type: 'Boosted',
         });
 
-        const bptToken = new BaseToken(input.chainId, poolState.address, 18);
+        const bptToken = new Token(input.chainId, poolState.address, 18);
         const wrapUnderlying: boolean[] = new Array(
             poolState.tokens.length,
         ).fill(false);
@@ -151,7 +151,7 @@ export class AddLiquidityBoostedV3 {
                 amountsIn = tokensIn.map((t, i) => {
                     const tokenInAddress = t.toLowerCase() as Address;
                     const { decimals } = poolStateTokenMap[tokenInAddress];
-                    const token = new BaseToken(
+                    const token = new Token(
                         input.chainId,
                         tokenInAddress,
                         decimals,

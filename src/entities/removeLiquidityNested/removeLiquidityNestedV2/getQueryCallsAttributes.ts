@@ -2,7 +2,7 @@ import { Address } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 
 import { BALANCER_RELAYER, ChainId, ZERO_ADDRESS } from '@/utils';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { NestedPoolV2, PoolKind } from '@/entities/types';
 import {
     RemoveLiquidityNestedCallAttributesV2,
@@ -51,7 +51,7 @@ export const getQueryCallsAttributes = (
         );
     }
 
-    const bptIn = new BaseToken(chainId, poolsTopDown[0].address, 18);
+    const bptIn = new Token(chainId, poolsTopDown[0].address, 18);
     const _bptAmountIn = TokenAmount.fromRawAmount(bptIn, bptAmountIn);
     return { callsAttributes, bptAmountIn: _bptAmountIn };
 };
@@ -74,7 +74,7 @@ const getProportionalCallsAttributes = (
     for (const pool of poolsSortedByLevel) {
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
-            .map((t) => new BaseToken(chainId, t.address, t.decimals));
+            .map((t) => new Token(chainId, t.address, t.decimals));
 
         const sortedTokensWithoutBpt = sortedTokens.filter(
             (t) => !t.isSameAddress(pool.address),
@@ -139,7 +139,7 @@ const getSingleTokenCallsAttributes = (
         const pool = removeLiquidityPath[i];
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
-            .map((t) => new BaseToken(chainId, t.address, t.decimals));
+            .map((t) => new Token(chainId, t.address, t.decimals));
         const isLastCall = i === removeLiquidityPath.length - 1;
         const currenTokenOut = isLastCall
             ? tokenOut
@@ -261,7 +261,7 @@ const getSenderProportional = (
 // Recipient's logic: if there is at least one token that is an output of the
 // whole multicall, then the recipient is the user, otherwise it's the relayer.
 const getRecipientProportional = (
-    sortedTokensWithoutBpt: BaseToken[],
+    sortedTokensWithoutBpt: Token[],
     poolsSortedByLevel: NestedPoolV2[],
     accountAddress: Address,
     chainId: ChainId,

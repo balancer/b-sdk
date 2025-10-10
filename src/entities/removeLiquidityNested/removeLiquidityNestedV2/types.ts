@@ -1,6 +1,6 @@
 import { Address, Hex } from 'viem';
 import { Slippage } from '@/entities/slippage';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolKind } from '@/entities/types';
 import { PoolType } from '@/types';
@@ -20,7 +20,7 @@ export type RemoveLiquidityNestedSingleTokenInputV2 =
 
 export type RemoveLiquidityNestedCallAttributesV2 = {
     chainId: ChainId;
-    sortedTokens: BaseToken[];
+    sortedTokens: Token[];
     poolId: Address;
     poolAddress: Address;
     poolType: PoolType;

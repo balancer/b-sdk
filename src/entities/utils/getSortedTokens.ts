@@ -1,11 +1,11 @@
 import { MinimalToken } from '../../data/types';
-import { BaseToken } from '../baseToken';
+import { Token } from '../token';
 
 export function getSortedTokens(
     tokens: MinimalToken[],
     chainId: number,
-): BaseToken[] {
+): Token[] {
     return tokens
         .sort((a, b) => a.index - b.index)
-        .map((t) => new BaseToken(chainId, t.address, t.decimals));
+        .map((t) => new Token(chainId, t.address, t.decimals));
 }

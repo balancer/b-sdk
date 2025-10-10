@@ -1,7 +1,7 @@
 import { encodeFunctionData, zeroAddress } from 'viem';
 import { balancerRouterAbiExtended } from '@/abi';
 import { Permit2 } from '@/entities/permit2Helper';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import {
@@ -33,7 +33,7 @@ export class AddLiquidityV3 implements AddLiquidityBase {
         block?: bigint,
     ): Promise<AddLiquidityBaseQueryOutput> {
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const bptToken = new BaseToken(input.chainId, poolState.address, 18);
+        const bptToken = new Token(input.chainId, poolState.address, 18);
 
         let bptOut: TokenAmount;
         let amountsIn: TokenAmount[];

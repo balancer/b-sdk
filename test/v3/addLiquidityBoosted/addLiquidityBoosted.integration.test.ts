@@ -46,7 +46,7 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
@@ -54,9 +54,9 @@ const USDT = TOKENS[chainId].USDT_AAVE;
 const stataUSDT = TOKENS[chainId].stataUSDT;
 
 // These are the underlying tokens
-const usdtToken = new BaseToken(chainId, USDT.address, USDT.decimals);
-const usdcToken = new BaseToken(chainId, USDC.address, USDC.decimals);
-const stataUsdtToken = new BaseToken(
+const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
+const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
+const stataUsdtToken = new Token(
     chainId,
     stataUSDT.address,
     stataUSDT.decimals,
@@ -618,8 +618,8 @@ describe('Boosted AddLiquidity', () => {
                 // make sure to pass Tokens in correct order. Same as poolTokens but as underlyings instead
                 assertTokenMatch(
                     [
-                        new BaseToken(111555111, USDC.address, USDC.decimals),
-                        new BaseToken(111555111, USDT.address, USDT.decimals),
+                        new Token(111555111, USDC.address, USDC.decimals),
+                        new Token(111555111, USDT.address, USDT.decimals),
                     ],
                     addLiquidityBuildCallOutput.maxAmountsIn.map(
                         (a) => a.token,

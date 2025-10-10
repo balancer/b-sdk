@@ -15,14 +15,14 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
 } from '../../src';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 interface QuerySmartPath {
     rpcUrl: string;
     chainId: ChainId;
     swapKind: SwapKind;
-    tokenIn: BaseToken;
-    tokenOut: BaseToken;
+    tokenIn: Token;
+    tokenOut: Token;
     swapAmount: TokenAmount;
 }
 

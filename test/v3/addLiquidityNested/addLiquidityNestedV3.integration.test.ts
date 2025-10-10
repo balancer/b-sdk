@@ -27,7 +27,7 @@ import {
     AddLiquidityNestedCallInput,
     SDKError,
 } from '@/index';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     approveSpenderOnPermit2,
@@ -46,15 +46,15 @@ import {
 
 const chainId = ChainId.SEPOLIA;
 
-const parentBptToken = new BaseToken(
+const parentBptToken = new Token(
     chainId,
     NESTED_WITH_BOOSTED_POOL.address,
     NESTED_WITH_BOOSTED_POOL.decimals,
 );
 // These are the underlying tokens
-const usdcToken = new BaseToken(chainId, USDC.address, USDC.decimals);
-const usdtToken = new BaseToken(chainId, USDT.address, USDT.decimals);
-const wethToken = new BaseToken(chainId, WETH.address, WETH.decimals);
+const usdcToken = new Token(chainId, USDC.address, USDC.decimals);
+const usdtToken = new Token(chainId, USDT.address, USDT.decimals);
+const wethToken = new Token(chainId, WETH.address, WETH.decimals);
 const mainTokens = [wethToken, usdtToken, usdcToken];
 
 describe('V3 add liquidity nested test, with Permit2 direct approval', () => {

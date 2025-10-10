@@ -30,7 +30,7 @@ export * from './removeLiquidityNested/removeLiquidityNestedV3';
 export * from './removeLiquidityNested/removeLiquidityNestedV3/types';
 export * from './slippage';
 export * from './nativeToken';
-export * from './baseToken';
+export * from './token';
 export * from './tokenAmount';
 export * from './types';
 export * from './utils';

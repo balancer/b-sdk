@@ -1,5 +1,5 @@
 import { MAX_UINT256, missingParameterError } from '@/utils';
-import { BaseToken } from '../baseToken';
+import { Token } from '../token';
 import { RemoveLiquidityAmounts } from '../types';
 import { getAmounts } from '../utils';
 import {
@@ -9,7 +9,7 @@ import {
 } from './types';
 
 export const getAmountsQuery = (
-    tokens: BaseToken[],
+    tokens: Token[],
     input: RemoveLiquidityInput,
     bptIndex = -1,
 ): RemoveLiquidityAmounts => {

@@ -13,7 +13,7 @@ import {
     SwapBuildCallInput,
     VAULT_V2,
 } from '../../src';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { querySmartPath } from './querySmartPath';
 import { setupExampleFork } from '../lib/setupExampleFork';
 import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
@@ -26,13 +26,13 @@ const swapV2 = async () => {
 
     // User defines these params for querying swap with SOR
     const swapKind = SwapKind.GivenIn;
-    const tokenIn = new BaseToken(
+    const tokenIn = new Token(
         chainId,
         TOKENS[chainId].WETH.address,
         TOKENS[chainId].WETH.decimals,
         'WETH',
     );
-    const tokenOut = new BaseToken(
+    const tokenOut = new Token(
         chainId,
         TOKENS[chainId].BAL.address,
         TOKENS[chainId].BAL.decimals,

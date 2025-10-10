@@ -12,7 +12,7 @@ import {
     getSortedTokens,
     parseAddLiquidityArgs,
 } from '../../../utils';
-import { BaseToken } from '../../../baseToken';
+import { Token } from '../../../token';
 import { WeightedEncoder } from '../../../encoders';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { getValue } from '@/entities/utils/getValue';
@@ -41,7 +41,7 @@ export class InitPoolWeighted implements InitPoolBase {
         });
 
         const amountsIn = input.amountsIn.map((a) => {
-            const token = new BaseToken(input.chainId, a.address, a.decimals);
+            const token = new Token(input.chainId, a.address, a.decimals);
             return TokenAmount.fromRawAmount(token, a.rawAmount);
         });
 
@@ -54,7 +54,7 @@ export class InitPoolWeighted implements InitPoolBase {
 
     private getAmounts(
         input: InitPoolInputV2,
-        poolTokens: BaseToken[],
+        poolTokens: Token[],
     ): InitPoolAmounts {
         return {
             maxAmountsIn: getAmounts(poolTokens, input.amountsIn),

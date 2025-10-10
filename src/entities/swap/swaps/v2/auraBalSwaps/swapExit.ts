@@ -13,7 +13,7 @@ import { Relayer } from '@/entities/relayer';
 import { auraBalToken, balWethAddress, auraBAL } from './constants';
 import { encodeSwapData } from './swap';
 import { AuraBalSwapQueryOutput, AuraBalSwapQueryInput } from './types';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { encodeExitData } from './exitPool';
 
 // auraBal[swap]8020Bpt[exit]token
@@ -86,7 +86,7 @@ export function buildSwapExitCall(
     user: Address,
     inputAmount: bigint,
     exitLimit: bigint,
-    exitToken: BaseToken,
+    exitToken: Token,
     wethIsEth: boolean,
     relayerApprovalSignature?: Hex,
 ): Hex {

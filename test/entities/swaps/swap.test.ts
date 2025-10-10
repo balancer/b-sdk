@@ -10,7 +10,7 @@ import {
 import { Path, TokenApi } from '@/entities/swap/paths/types';
 
 import { TOKENS } from 'test/lib/utils/addresses';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 const chainId = ChainId.MAINNET;
 const wethIsEth = false;
@@ -212,7 +212,7 @@ describe('Swap', () => {
 
         describe('GivenIn', () => {
             const swapKind = SwapKind.GivenIn as const;
-            const tokenIn = new BaseToken(
+            const tokenIn = new Token(
                 1,
                 pathTo6Decimals.tokens[0].address,
                 pathTo6Decimals.tokens[0].decimals,
@@ -224,7 +224,7 @@ describe('Swap', () => {
                     paths: [pathTo6Decimals],
                     swapKind,
                 });
-                const tokenOut = new BaseToken(
+                const tokenOut = new Token(
                     1,
                     pathTo6Decimals.tokens[pathTo6Decimals.tokens.length - 1]
                         .address,
@@ -260,7 +260,7 @@ describe('Swap', () => {
                     paths: [pathFrom6Decimals],
                     swapKind,
                 });
-                const tokenOut = new BaseToken(
+                const tokenOut = new Token(
                     1,
                     pathFrom6Decimals.tokens[
                         pathFrom6Decimals.tokens.length - 1
@@ -295,7 +295,7 @@ describe('Swap', () => {
         });
         describe('GivenOut', () => {
             const swapKind = SwapKind.GivenOut as const;
-            const tokenOut = new BaseToken(
+            const tokenOut = new Token(
                 1,
                 pathTo6Decimals.tokens[pathTo6Decimals.tokens.length - 1]
                     .address,
@@ -310,7 +310,7 @@ describe('Swap', () => {
                     swapKind,
                 });
                 const slippage = Slippage.fromPercentage('0.1');
-                const tokenIn = new BaseToken(
+                const tokenIn = new Token(
                     1,
                     pathTo6Decimals.tokens[0].address,
                     pathTo6Decimals.tokens[0].decimals,
@@ -346,7 +346,7 @@ describe('Swap', () => {
                     swapKind: SwapKind.GivenOut,
                 });
                 const slippage = Slippage.fromPercentage('0.1');
-                const tokenIn = new BaseToken(
+                const tokenIn = new Token(
                     1,
                     pathFrom6Decimals.tokens[0].address,
                     pathFrom6Decimals.tokens[0].decimals,

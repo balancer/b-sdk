@@ -1,5 +1,5 @@
 import { Address, PoolType } from '@/types';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import {
     ZERO_ADDRESS,
     BALANCER_RELAYER,
@@ -31,7 +31,7 @@ export const getQueryCallsAttributes = (
     for (const pool of poolsSortedByLevel) {
         const sortedTokens = pool.tokens
             .sort((a, b) => a.index - b.index)
-            .map((t) => new BaseToken(chainId, t.address, t.decimals));
+            .map((t) => new Token(chainId, t.address, t.decimals));
         const maxAmountsIn = getMaxAmountsIn(sortedTokens, amountsIn, calls);
         if (maxAmountsIn.every((a) => a.amount === 0n && !a.isRef)) {
             continue;
@@ -61,7 +61,7 @@ export const getQueryCallsAttributes = (
 };
 
 const getMaxAmountsIn = (
-    sortedTokens: BaseToken[],
+    sortedTokens: Token[],
     amountsIn: { address: Address; rawAmount: bigint }[],
     calls: AddLiquidityNestedCallAttributes[],
 ): { amount: bigint; isRef: boolean }[] => {

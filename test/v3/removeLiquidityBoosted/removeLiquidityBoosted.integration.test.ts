@@ -44,7 +44,7 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
@@ -243,12 +243,12 @@ describe('remove liquidity boosted proportional', () => {
             // make sure to pass Tokens in correct order. Same as poolTokens but as underlyings instead
             assertTokenMatch(
                 [
-                    new BaseToken(
+                    new Token(
                         111555111,
                         USDC.address as Address,
                         USDC.decimals,
                     ),
-                    new BaseToken(
+                    new Token(
                         111555111,
                         USDT.address as Address,
                         USDT.decimals,
@@ -335,12 +335,12 @@ describe('remove liquidity boosted proportional', () => {
             // make sure to pass Tokens in correct order
             assertTokenMatch(
                 [
-                    new BaseToken(
+                    new Token(
                         111555111,
                         USDC.address as Address,
                         USDC.decimals,
                     ),
-                    new BaseToken(
+                    new Token(
                         111555111,
                         stataUSDT.address as Address,
                         stataUSDT.decimals,
@@ -434,12 +434,12 @@ describe('remove liquidity boosted proportional', () => {
             // make sure to pass Tokens in correct order. Same as poolTokens but as underlyings instead
             assertTokenMatch(
                 [
-                    new BaseToken(
+                    new Token(
                         111555111,
                         USDC.address as Address,
                         USDC.decimals,
                     ),
-                    new BaseToken(
+                    new Token(
                         111555111,
                         USDT.address as Address,
                         USDT.decimals,

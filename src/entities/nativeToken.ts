@@ -1,11 +1,11 @@
 import { Address } from 'viem';
-import { BaseToken } from './baseToken';
+import { Token } from './token';
 
 /**
  * NativeToken extends BaseToken and adds mandatory wrapped token functionality
  * This class is specifically designed for native tokens that always have a wrapped version
  */
-export class NativeToken extends BaseToken {
+export class NativeToken extends Token {
     public readonly wrapped: Address;
 
     public constructor(

@@ -5,7 +5,7 @@ import {
     parseAbiParameters,
     Hex,
 } from 'viem';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import {
     BALANCER_RELAYER,
     ChainId,
@@ -18,7 +18,7 @@ import { balWethAssets, balWethId } from './constants';
 import { replaceWrapped } from './replaceWrapped';
 
 export function encodeJoinData(
-    token: BaseToken,
+    token: Token,
     sender: Address,
     inputAmount: bigint,
     wethIsEth: boolean,

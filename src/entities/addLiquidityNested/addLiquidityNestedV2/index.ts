@@ -1,5 +1,5 @@
 import { encodeFunctionData } from 'viem';
-import { BaseToken } from '../../baseToken';
+import { Token } from '../../token';
 import { BALANCER_RELAYER, ZERO_ADDRESS } from '../../../utils';
 import { Relayer } from '../../relayer';
 import { encodeCalls } from './encodeCalls';
@@ -50,7 +50,7 @@ export class AddLiquidityNestedV2 {
             encodedMulticall,
         );
 
-        const tokenOut = new BaseToken(
+        const tokenOut = new Token(
             input.chainId,
             callsAttributes[callsAttributes.length - 1].poolAddress,
             18,

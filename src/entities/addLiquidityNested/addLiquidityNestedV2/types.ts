@@ -1,7 +1,7 @@
 import { Address, Hex } from 'viem';
 import { PoolType } from '../../../types';
 import { ChainId } from '../../../utils';
-import { BaseToken } from '../../baseToken';
+import { Token } from '../../token';
 import { TokenAmount } from '../../tokenAmount';
 import { PoolKind } from '../../types';
 import { Slippage } from '@/entities/slippage';
@@ -14,7 +14,7 @@ export type AddLiquidityNestedInputV2 = AddLiquidityNestedBaseInput & {
 export type AddLiquidityNestedCallAttributes = {
     chainId: ChainId;
     wethIsEth?: boolean;
-    sortedTokens: BaseToken[];
+    sortedTokens: Token[];
     poolId: Hex;
     poolAddress: Address;
     poolType: PoolType;

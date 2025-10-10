@@ -20,7 +20,7 @@ import {
     SDKError,
 } from '@/utils';
 import { balancerCompositeLiquidityRouterNestedAbiExtended } from '@/abi';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 
 export class RemoveLiquidityNestedV3 {
@@ -43,10 +43,10 @@ export class RemoveLiquidityNestedV3 {
         // query function input, `tokensIn` array, must have all tokens from child pools
         // and all tokens that are not BPTs from the nested pool (parent pool).
         const mainTokens = nestedPoolState.mainTokens.map(
-            (t) => new BaseToken(input.chainId, t.address, t.decimals),
+            (t) => new Token(input.chainId, t.address, t.decimals),
         );
 
-        const bptToken = new BaseToken(input.chainId, parentPool.address, 18);
+        const bptToken = new Token(input.chainId, parentPool.address, 18);
 
         const amountsOut =
             await this.doQueryRemoveLiquidityProportionalNestedPool(

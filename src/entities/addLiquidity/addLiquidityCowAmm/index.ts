@@ -1,6 +1,6 @@
 import { encodeFunctionData } from 'viem';
 import { cowAmmPoolAbi } from '@/abi/cowAmmPool';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { PoolState } from '@/entities/types';
 import { poolTypeError, protocolVersionError } from '@/utils';
@@ -47,16 +47,12 @@ export class AddLiquidityCowAmm implements AddLiquidityBase {
         );
 
         const bptOut = TokenAmount.fromRawAmount(
-            new BaseToken(input.chainId, bptAmount.address, bptAmount.decimals),
+            new Token(input.chainId, bptAmount.address, bptAmount.decimals),
             bptAmount.rawAmount,
         );
         const amountsIn = tokenAmounts.map((amountIn) =>
             TokenAmount.fromRawAmount(
-                new BaseToken(
-                    input.chainId,
-                    amountIn.address,
-                    amountIn.decimals,
-                ),
+                new Token(input.chainId, amountIn.address, amountIn.decimals),
                 amountIn.rawAmount,
             ),
         );

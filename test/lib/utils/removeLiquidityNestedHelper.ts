@@ -25,7 +25,7 @@ import {
     sendTransactionGetBalances,
     setTokenBalances,
 } from './helper';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 // AddLiquidityNestedInput
 
@@ -123,7 +123,7 @@ export async function GetNestedBpt(
     return balanceDeltas[0];
 }
 
-const isSameToken = (token1: BaseToken, token2: BaseToken): boolean => {
+const isSameToken = (token1: Token, token2: Token): boolean => {
     return (
         token1.address.toLowerCase() === token2.address.toLowerCase() &&
         token1.chainId === token2.chainId
@@ -140,7 +140,7 @@ const isSameToken = (token1: BaseToken, token2: BaseToken): boolean => {
  */
 export const validateTokenAmounts = (
     amounts: TokenAmount[],
-    tokens: BaseToken[],
+    tokens: Token[],
 ): void => {
     // Check that we have the same number of amounts as main tokens
     expect(amounts.length).to.equal(
@@ -231,7 +231,7 @@ export const doRemoveLiquidityNested = async (
         removeLiquidityNestedQueryOutput.bptAmountIn,
         // add zero address so we can check for native token balance change
         TokenAmount.fromRawAmount(
-            new BaseToken(
+            new Token(
                 removeLiquidityNestedQueryOutput.chainId,
                 zeroAddress,
                 18,

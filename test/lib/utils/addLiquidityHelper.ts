@@ -23,7 +23,7 @@ import {
     PublicWalletClient,
     missingParameterError,
 } from 'src';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
@@ -208,7 +208,7 @@ export function assertAddLiquidityUnbalanced(
 
     // Get an amount for each pool token defaulting to 0 if not provided as input (this will include BPT token if in tokenList)
     const expectedAmountsIn = poolState.tokens.map((t) => {
-        const token = new BaseToken(
+        const token = new Token(
             addLiquidityInput.chainId,
             t.address,
             t.decimals,
@@ -290,7 +290,7 @@ export function assertAddLiquiditySingleToken(
             protocolVersion,
         );
 
-    const bptToken = new BaseToken(
+    const bptToken = new Token(
         addLiquidityInput.chainId,
         poolState.address,
         18,

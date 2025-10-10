@@ -13,7 +13,7 @@ import { TokenAmount } from '../tokenAmount';
 import { PoolState } from '../types';
 import { priceImpactABA } from './helper';
 import { Swap, SwapInput } from '../swap';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 export const addLiquidityUnbalanced = async (
     input: AddLiquidityUnbalancedInput,
@@ -25,7 +25,7 @@ export const addLiquidityUnbalanced = async (
     const addLiquidity = new AddLiquidity();
     let amountsIn: TokenAmount[];
     let bptOut: TokenAmount;
-    let poolTokens: BaseToken[];
+    let poolTokens: Token[];
     try {
         const queryResult = await addLiquidity.query(input, poolState);
         amountsIn = queryResult.amountsIn;

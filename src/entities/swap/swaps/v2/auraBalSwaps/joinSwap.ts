@@ -14,7 +14,7 @@ import { auraBalToken, balWethAddress, auraBAL } from './constants';
 import { encodeJoinData } from './joinPool';
 import { encodeSwapData } from './swap';
 import { AuraBalSwapQueryOutput, AuraBalSwapQueryInput } from './types';
-import { BaseToken } from '@/entities/baseToken';
+import { Token } from '@/entities/token';
 
 // token[join]8020BPT[swap]auraBAL
 export async function queryJoinSwap(
@@ -81,7 +81,7 @@ export function buildJoinSwapCall(
     userAddress: Address,
     inputAmount: bigint,
     swapLimit: bigint,
-    joinToken: BaseToken,
+    joinToken: Token,
     wethIsEth: boolean,
     relayerApprovalSignature?: Hex,
 ): { callData: Hex; value: bigint } {
