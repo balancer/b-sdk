@@ -1,4 +1,5 @@
 import { encodeFunctionData } from 'viem';
+import { Token } from '../../../token';
 import { TokenAmount } from '../../../tokenAmount';
 import { WeightedEncoder } from '../../../encoders/weighted';
 import { protocolVersionError, VAULT_V2, ZERO_ADDRESS } from '@/utils';
@@ -21,7 +22,6 @@ import {
 } from '../../../utils';
 import { getAmountsCall, getAmountsQuery } from '../../helper';
 import { RemoveLiquidityV2BaseBuildCallInput } from '../types';
-import { Token } from '@/entities/token';
 
 export class RemoveLiquidityWeighted implements RemoveLiquidityBase {
     public async query(

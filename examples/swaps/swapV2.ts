@@ -10,14 +10,14 @@ import {
     ChainId,
     Slippage,
     SwapKind,
+    Token,
+    TokenAmount,
     SwapBuildCallInput,
     VAULT_V2,
 } from '../../src';
-import { Token } from '@/entities/token';
 import { querySmartPath } from './querySmartPath';
 import { setupExampleFork } from '../lib/setupExampleFork';
 import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
-import { TokenAmount } from '@/entities';
 
 const swapV2 = async () => {
     // Choose chain id to start fork

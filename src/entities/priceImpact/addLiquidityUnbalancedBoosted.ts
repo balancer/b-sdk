@@ -11,7 +11,7 @@ import { AddLiquidityBoostedV3 } from '../addLiquidityBoosted';
 import { RemoveLiquidityBoostedV3 } from '../removeLiquidityBoosted';
 import { RemoveLiquidityBoostedProportionalInput } from '../removeLiquidityBoosted/types';
 import { Address, BaseError, ContractFunctionRevertedError } from 'viem';
-import { Token } from '@/entities/token';
+import { Token } from '../token';
 
 /**
  * Calculate price impact on add liquidity unbalanced operations

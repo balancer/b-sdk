@@ -14,6 +14,7 @@ import {
     Relayer,
     Slippage,
     AuraBalSwap,
+    Token,
     TokenAmount,
     SwapKind,
     isAuraBalSwap,
@@ -23,7 +24,6 @@ import { ANVIL_NETWORKS, startFork } from '../../test/anvil/anvil-global-setup';
 import { makeForkTx } from 'examples/lib/makeForkTx';
 import { getSlot } from 'examples/lib/getSlot';
 import { exit } from 'node:process';
-import { Token } from '@/entities/token';
 
 const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
     const tokenIn = new Token(

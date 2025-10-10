@@ -19,7 +19,7 @@ import {
 } from '../addLiquidity/types';
 import { doAddLiquidityUnbalancedQuery } from './doAddLiquidityUnbalancedQuery';
 import { doAddLiquidityProportionalQuery } from './doAddLiquidityPropotionalQuery';
-import { Token } from '@/entities/token';
+import { Token } from '../token';
 import { balancerV3Contracts, protocolVersionError } from '@/utils';
 import {
     balancerCompositeLiquidityRouterBoostedAbiExtended,

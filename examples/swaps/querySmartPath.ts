@@ -10,12 +10,12 @@ import {
     API_ENDPOINT,
     ChainId,
     SwapKind,
+    Token,
     TokenAmount,
     Swap,
     ExactInQueryOutput,
     ExactOutQueryOutput,
 } from '../../src';
-import { Token } from '@/entities/token';
 
 interface QuerySmartPath {
     rpcUrl: string;

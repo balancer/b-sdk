@@ -9,11 +9,11 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
 } from '../removeLiquidity/types';
+import { Token } from '../token';
 import { TokenAmount } from '../tokenAmount';
 import { PoolState } from '../types';
 import { priceImpactABA } from './helper';
 import { Swap, SwapInput } from '../swap';
-import { Token } from '@/entities/token';
 
 export const addLiquidityUnbalanced = async (
     input: AddLiquidityUnbalancedInput,
