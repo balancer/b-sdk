@@ -10,6 +10,7 @@ import {
     RemoveLiquidityNestedQueryOutput,
     RemoveLiquidityNestedQueryOutputV3,
     Slippage,
+    Token,
     TokenAmount,
 } from '@/entities';
 import {
@@ -25,7 +26,6 @@ import {
     sendTransactionGetBalances,
     setTokenBalances,
 } from './helper';
-import { Token } from '@/entities/token';
 
 // AddLiquidityNestedInput
 

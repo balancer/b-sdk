@@ -16,6 +16,7 @@ import {
     ChainId,
     CHAINS,
     PublicWalletClient,
+    Token,
     RemoveLiquidityNestedInput,
     RemoveLiquidityNested,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
@@ -23,7 +24,6 @@ import {
     PermitHelper,
     RemoveLiquidityNestedCallInputV3,
 } from 'src';
-import { Token } from '@/entities/token';
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {

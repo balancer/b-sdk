@@ -3,6 +3,7 @@ import { ChainId, inputValidationError, Slippage } from '@/index';
 import { SwapKind } from '@/types';
 import {
     Swap,
+    Token,
     TokenAmount,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
@@ -10,7 +11,6 @@ import {
 import { Path, TokenApi } from '@/entities/swap/paths/types';
 
 import { TOKENS } from 'test/lib/utils/addresses';
-import { Token } from '@/entities/token';
 
 const chainId = ChainId.MAINNET;
 const wethIsEth = false;

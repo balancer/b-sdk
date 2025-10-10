@@ -22,6 +22,7 @@ import {
     CHAINS,
     ChainId,
     PERMIT2,
+    Token,
     PublicWalletClient,
     AddLiquidityBoostedV3,
     RemoveLiquidityBoostedV3,
@@ -44,7 +45,6 @@ import {
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { Token } from '@/entities/token';
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;

@@ -17,6 +17,7 @@ import {
     PERMIT2,
     PublicWalletClient,
     Slippage,
+    Token,
     TokenAmount,
     AddLiquidityNested,
     AddLiquidityNestedInput,
@@ -37,7 +38,6 @@ import {
     USDT,
     WETH,
 } from 'test/mockData/nestedPool';
-import { Token } from '@/entities/token';
 
 const chainId = ChainId.SEPOLIA;
 

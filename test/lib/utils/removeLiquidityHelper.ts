@@ -17,10 +17,10 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityV3BuildCallInput,
     Slippage,
+    Token,
     TokenAmount,
     VAULT_V2,
 } from 'src';
-import { Token } from '@/entities/token';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances, TxOutput } from './helper';
 import { RemoveLiquidityTxInput } from './types';

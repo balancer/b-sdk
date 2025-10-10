@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { BalancerApi } from '@/data/providers/balancer-api';
 import { API_ENDPOINT, ChainId } from '@/utils';
 import { Address } from 'viem';
-import { TokenAmount } from '@/entities';
-import { Token } from '@/entities/token';
+import { Token, TokenAmount } from '@/entities';
 import { SwapKind } from '@/types';
 
 // Inline minimal constants

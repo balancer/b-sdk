@@ -18,7 +18,6 @@ import {
 import { querySmartPath } from './querySmartPath';
 import { setupExampleFork } from '../lib/setupExampleFork';
 import { TOKENS, approveSpenderOnToken } from 'test/lib/utils';
-
 const swapV2 = async () => {
     // Choose chain id to start fork
     const chainId = ChainId.MAINNET;

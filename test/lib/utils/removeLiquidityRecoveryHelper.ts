@@ -8,10 +8,10 @@ import {
     RemoveLiquidityRecoveryInput,
     RemoveLiquidityV3BuildCallInput,
     Slippage,
+    Token,
     TokenAmount,
     VAULT_V2,
 } from 'src';
-import { Token } from '@/entities/token';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { sendTransactionGetBalances } from './helper';
 import { RemoveLiquidityRecoveryTxInput } from './types';

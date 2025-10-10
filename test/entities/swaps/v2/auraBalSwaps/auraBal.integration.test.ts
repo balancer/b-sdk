@@ -12,6 +12,7 @@ import {
 import {
     Relayer,
     Slippage,
+    Token,
     TokenAmount,
     AuraBalSwap,
     BALANCER_RELAYER,
@@ -26,7 +27,6 @@ import {
     auraBalToken,
     BAL,
 } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
-import { Token } from '@/entities/token';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import { forkSetup, sendTransactionGetBalances } from 'test/lib/utils';
 

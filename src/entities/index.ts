@@ -29,7 +29,6 @@ export * from './removeLiquidityNested/removeLiquidityNestedV2/types';
 export * from './removeLiquidityNested/removeLiquidityNestedV3';
 export * from './removeLiquidityNested/removeLiquidityNestedV3/types';
 export * from './slippage';
-export * from './nativeToken';
 export * from './token';
 export * from './tokenAmount';
 export * from './types';

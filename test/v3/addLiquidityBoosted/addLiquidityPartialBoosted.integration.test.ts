@@ -19,6 +19,7 @@ import {
     PERMIT2,
     PublicWalletClient,
     Slippage,
+    Token,
     TokenAmount,
     AddLiquidityBoostedV3,
     AddLiquidityKind,
@@ -38,7 +39,6 @@ import {
 } from 'test/lib/utils';
 import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { Token } from '@/entities/token';
 
 const chainId = ChainId.SEPOLIA;
 const USDT = TOKENS[chainId].USDT_AAVE;

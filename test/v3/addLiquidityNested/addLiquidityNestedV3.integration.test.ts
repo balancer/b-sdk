@@ -20,6 +20,7 @@ import {
     PERMIT2,
     PublicWalletClient,
     Slippage,
+    Token,
     TokenAmount,
     AddLiquidityNested,
     AddLiquidityNestedInput,
@@ -27,7 +28,6 @@ import {
     AddLiquidityNestedCallInput,
     SDKError,
 } from '@/index';
-import { Token } from '@/entities/token';
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
     approveSpenderOnPermit2,

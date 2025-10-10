@@ -7,6 +7,7 @@ import {
     AddLiquidityKind,
     PoolStateWithUnderlyings,
     Slippage,
+    Token,
     TokenAmount,
 } from '@/entities';
 import { ChainId, NATIVE_ASSETS, PERMIT2, PublicWalletClient } from '@/utils';
@@ -19,7 +20,6 @@ import {
 } from './helper';
 import { areBigIntsWithinPercent } from './swapHelpers';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { Token } from '@/entities/token';
 
 export async function GetBoostedBpt(
     chainId: ChainId,

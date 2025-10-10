@@ -17,6 +17,7 @@ import {
     ChainId,
     CHAINS,
     PublicWalletClient,
+    Token,
     RemoveLiquidityNestedInput,
     RemoveLiquidityNestedCallInput,
     RemoveLiquidityNested,
@@ -41,7 +42,6 @@ import {
     USDT,
     WETH,
 } from 'test/mockData/nestedPool';
-import { Token } from '@/entities/token';
 
 const chainId = ChainId.SEPOLIA;
 

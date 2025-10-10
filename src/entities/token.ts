@@ -1,11 +1,6 @@
 import { Address } from 'viem';
 import { InputToken } from '../types';
 
-/**
- * Token contains the core functionality for all tokens
- * This class handles the essential token properties and methods
- * without any wrapped token logic
- */
 export class Token {
     public readonly chainId: number;
     public readonly address: Address;

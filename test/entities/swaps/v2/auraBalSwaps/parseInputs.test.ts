@@ -1,6 +1,5 @@
 // pnpm test -- parseInputs.test.ts
-import { AuraBalSwapKind, TokenAmount } from '@/entities';
-import { Token } from '@/entities/token';
+import { AuraBalSwapKind, Token, TokenAmount } from '@/entities';
 import { auraBalToken } from '@/entities/swap/swaps/v2/auraBalSwaps/constants';
 import { parseInputs } from '@/entities/swap/swaps/v2/auraBalSwaps/parseInputs';
 import { SwapKind } from '@/types';

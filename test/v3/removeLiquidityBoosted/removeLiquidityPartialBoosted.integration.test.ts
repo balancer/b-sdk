@@ -18,6 +18,7 @@ import {
     ChainId,
     CHAINS,
     PublicWalletClient,
+    Token,
     balancerV3Contracts,
     Slippage,
     RemoveLiquidityBoostedV3,
@@ -38,7 +39,6 @@ import {
 import { validateTokenAmounts } from 'test/lib/utils/removeLiquidityNestedHelper';
 import { partialBoostedPool_WETH_stataUSDT } from 'test/mockData/partialBoostedPool';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { Token } from '@/entities/token';
 
 const chainId = ChainId.SEPOLIA;
 const USDT = TOKENS[chainId].USDT_AAVE;
