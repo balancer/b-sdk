@@ -15,7 +15,6 @@ import {
     NATIVE_ASSETS,
     PoolState,
     Slippage,
-    Token,
     TokenAmount,
     VAULT_V2,
     Permit2Helper,
@@ -24,6 +23,7 @@ import {
     PublicWalletClient,
     missingParameterError,
 } from 'src';
+import { Token } from '@/entities/token';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';

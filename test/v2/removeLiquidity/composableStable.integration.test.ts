@@ -16,7 +16,6 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
     Slippage,
-    Token,
     PoolState,
     RemoveLiquidity,
     Address,
@@ -40,6 +39,7 @@ import {
 } from '../../lib/utils/removeLiquidityHelper';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
+import { Token } from '@/entities/token';
 
 const chainId = ChainId.MAINNET;
 const { rpcUrl } = await startFork(ANVIL_NETWORKS.MAINNET);

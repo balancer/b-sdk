@@ -144,7 +144,7 @@ async function testAuraBalSwap(
 
     if (
         wethIsEth &&
-        tokenIn.isUnderlyingEqual(NATIVE_ASSETS[ChainId.MAINNET])
+        tokenIn.isSameAddress(NATIVE_ASSETS[ChainId.MAINNET].wrapped)
     ) {
         expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[2]);
         expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[1]);
@@ -152,7 +152,7 @@ async function testAuraBalSwap(
         expect(balanceDeltas[0]).to.eq(0n);
     } else if (
         wethIsEth &&
-        tokenOut.isUnderlyingEqual(NATIVE_ASSETS[ChainId.MAINNET])
+        tokenOut.isSameAddress(NATIVE_ASSETS[ChainId.MAINNET].wrapped)
     ) {
         expect(queryOutput.inputAmount.amount).to.equal(balanceDeltas[0]);
         expect(queryOutput.expectedAmountOut.amount).to.equal(balanceDeltas[2]);
