@@ -31,8 +31,7 @@ export function encodeJoinData(
         );
 
     const useNativeAsset =
-        wethIsEth &&
-        token.isSameAddress(NATIVE_ASSETS[ChainId.MAINNET].wrapped);
+        wethIsEth && NATIVE_ASSETS[ChainId.MAINNET].isWrapped(token);
 
     const maxAmountsIn = Array(balWethAssets.length).fill(0n);
     maxAmountsIn[tokenInIndex] = inputAmount;

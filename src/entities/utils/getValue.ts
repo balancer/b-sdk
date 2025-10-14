@@ -9,7 +9,7 @@ export const getValue = (
     if (wethIsEth) {
         value =
             amountsIn.find((a) =>
-                a.token.isSameAddress(NATIVE_ASSETS[a.token.chainId].wrapped),
+                NATIVE_ASSETS[a.token.chainId].isWrapped(a.token),
             )?.amount ?? 0n;
     }
     return value;

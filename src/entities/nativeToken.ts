@@ -26,4 +26,8 @@ export class NativeToken extends Token {
     public isWrappedEqual(token: NativeToken) {
         return this.chainId === token.chainId && this.wrapped === token.wrapped;
     }
+
+    public isWrapped(token: Token) {
+        return this.chainId === token.chainId && this.wrapped === token.address;
+    }
 }

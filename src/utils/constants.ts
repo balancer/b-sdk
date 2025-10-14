@@ -1,5 +1,5 @@
 import { Address, Chain } from 'viem';
-import { NativeToken } from '../../src';
+import { NativeToken } from '../entities/nativeToken';
 import {
     arbitrum,
     avalanche,
