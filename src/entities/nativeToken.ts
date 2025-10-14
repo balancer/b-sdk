@@ -23,7 +23,7 @@ export class NativeToken extends Token {
         this.wrapped = wrapped.toLowerCase() as Address;
     }
 
-    public isUnderlyingEqual(token: NativeToken) {
+    public isWrappedEqual(token: NativeToken) {
         return this.chainId === token.chainId && this.wrapped === token.wrapped;
     }
 }
