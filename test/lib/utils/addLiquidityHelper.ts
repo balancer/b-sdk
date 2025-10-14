@@ -22,8 +22,8 @@ import {
     isSameAddress,
     PublicWalletClient,
     missingParameterError,
+    Token,
 } from 'src';
-import { Token } from '@/entities/token';
 import { getTokensForBalanceCheck } from './getTokensForBalanceCheck';
 import { TxOutput, sendTransactionGetBalances } from './helper';
 import { AddLiquidityTxInput } from './types';
