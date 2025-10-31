@@ -107,7 +107,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.MONAD_TESTNET]: 'MONAD_TESTNET',
     [ChainId.HYPEREVM]: 'HYPEREVM',
     [ChainId.PLASMA]: 'PLASMA',
-    [ChainId.X_LAYER]: 'X_LAYER',
+    [ChainId.X_LAYER]: 'XLAYER',
 };
 
 export const CHAINS: Record<number, Chain> = {
