@@ -36,7 +36,7 @@
         "@types/big.js": "6.2.2",
         "big.js": "6.2.2",
         "decimal.js-light": "2.5.1",
-        "viem": "2.27.0"
+        "viem": "2.38.5"
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",

@@ -18,8 +18,9 @@ import {
     mode,
     fraxtal,
     sonic,
+    plasma,
 } from 'viem/chains';
-import { monadTestnet, hyperEVM, plasma } from './customChains';
+import { monadTestnet, hyperEVM } from './customChains';
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
 /*
