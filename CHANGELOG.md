@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.10.0
+
+### Minor Changes
+
+- d2e14fb: Add X Layer support.
+
 ## 4.9.0
 
 ### Minor Changes
