@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.9.0
+
+### Minor Changes
+
+- a398076: Bump Viem to 2.38.5. Use Viem Plasma chain.
+
 ## 4.8.1
 
 ### Patch Changes
