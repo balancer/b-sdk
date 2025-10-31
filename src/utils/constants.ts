@@ -19,6 +19,7 @@ import {
     fraxtal,
     sonic,
     plasma,
+    xLayer,
 } from 'viem/chains';
 import { monadTestnet, hyperEVM } from './customChains';
 export const ZERO_ADDRESS: Address =
@@ -84,6 +85,7 @@ export enum ChainId {
     MONAD_TESTNET = 10143,
     HYPEREVM = 999,
     PLASMA = 9745,
+    X_LAYER = 196,
 }
 
 // The Balancer API requires the chain to be passed as a specific string
@@ -105,6 +107,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.MONAD_TESTNET]: 'MONAD_TESTNET',
     [ChainId.HYPEREVM]: 'HYPEREVM',
     [ChainId.PLASMA]: 'PLASMA',
+    [ChainId.X_LAYER]: 'X_LAYER',
 };
 
 export const CHAINS: Record<number, Chain> = {
@@ -128,6 +131,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.MONAD_TESTNET]: monadTestnet,
     [ChainId.HYPEREVM]: hyperEVM,
     [ChainId.PLASMA]: plasma,
+    [ChainId.X_LAYER]: xLayer,
 };
 
 export const PERMIT2: Record<number, Address> = {
@@ -142,6 +146,7 @@ export const PERMIT2: Record<number, Address> = {
     [ChainId.PLASMA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.SONIC]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.X_LAYER]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
 };
 
 export const NATIVE_ASSETS = {
@@ -272,6 +277,14 @@ export const NATIVE_ASSETS = {
         'XPL',
         'Xpl',
         '0x6100E367285b01F48D07953803A2d8dCA5D19873',
+    ),
+    [ChainId.X_LAYER]: new Token(
+        ChainId.X_LAYER,
+        NATIVE_ADDRESS,
+        18,
+        'OKB',
+        'Okb',
+        '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
     ),
 };
 
