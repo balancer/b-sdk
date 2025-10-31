@@ -50,6 +50,7 @@ const CHAIN_ANVIL_MAP: Partial<Record<number, keyof typeof ANVIL_NETWORKS>> = {
     [ChainId.SONIC]: 'SONIC',
     [ChainId.HYPEREVM]: 'HYPEREVM',
     [ChainId.PLASMA]: 'PLASMA',
+    [ChainId.X_LAYER]: 'X_LAYER',
     // Add/remove mappings as needed for your test coverage
 };
 
@@ -83,6 +84,12 @@ const NETWORK_CONFIG: Partial<
         poolKey: 'MOCK_USDT_WXPL_POOL',
         inputAmountRaw: 10000n,
     },
+    [ChainId.X_LAYER]: {
+        tokenInKey: 'OKB',
+        tokenOutKey: 'WETH',
+        poolKey: 'MOCK_OKB_WETH_POOL',
+        inputAmountRaw: 100000000000n,
+    },
 };
 
 // Optionally override fork block numbers for specific chains. Useful to select pools deployed on V3 after
@@ -91,6 +98,7 @@ const BLOCK_NUMBER_OVERRIDES: Partial<Record<number, bigint>> = {
     [ChainId.HYPEREVM]: 6892528n,
     [ChainId.MAINNET]: 22788192n,
     [ChainId.PLASMA]: 1274881n,
+    [ChainId.X_LAYER]: 43138155n,
 };
 
 // List of ChainIds to run the test for. Modify this array to select which chains to test.
@@ -98,6 +106,7 @@ const CHAINS_TO_TEST: number[] = [
     ChainId.SEPOLIA,
     ChainId.HYPEREVM,
     ChainId.PLASMA,
+    ChainId.X_LAYER,
 ];
 
 describe('validateAllNetworks', () => {
