@@ -16,6 +16,7 @@ export const balancerV2Contracts = {
         [ChainId.POLYGON]: '0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6',
         [ChainId.SEPOLIA]: '0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6',
         [ChainId.SONIC]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
+        [ChainId.X_LAYER]: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
         [ChainId.ZKEVM]: '0xA331D84eC860Bf466b4CdCcFb4aC09a1B43F3aE6',
     },
     BalancerQueries: {

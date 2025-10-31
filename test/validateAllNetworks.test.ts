@@ -85,10 +85,10 @@ const NETWORK_CONFIG: Partial<
         inputAmountRaw: 10000n,
     },
     [ChainId.X_LAYER]: {
-        tokenInKey: 'OKB',
-        tokenOutKey: 'WETH',
-        poolKey: 'MOCK_OKB_WETH_POOL',
-        inputAmountRaw: 100000000000n,
+        tokenInKey: 'USDT',
+        tokenOutKey: 'xBTC',
+        poolKey: 'MOCK_USDT_xBTC_POOL',
+        inputAmountRaw: 10000n,
     },
 };
 
@@ -98,7 +98,7 @@ const BLOCK_NUMBER_OVERRIDES: Partial<Record<number, bigint>> = {
     [ChainId.HYPEREVM]: 6892528n,
     [ChainId.MAINNET]: 22788192n,
     [ChainId.PLASMA]: 1274881n,
-    [ChainId.X_LAYER]: 43138155n,
+    [ChainId.X_LAYER]: 43173129n,
 };
 
 // List of ChainIds to run the test for. Modify this array to select which chains to test.

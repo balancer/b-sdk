@@ -233,12 +233,12 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
     },
     [ChainId.X_LAYER]: {
         USDT: {
-            address: '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb',
+            address: '0x779ded0c9e1022225f8e0630b35a9b54be713736',
             decimals: 6,
             slot: 51,
         },
-        weETH: {
-            address: '0xA3D68b74bF0528fdD07263c60d6488749044914b',
+        xBTC: {
+            address: '0xb7c00000bcdeef966b20b3d884b98e64d2b06b4f',
             decimals: 18,
         },
     },
@@ -428,9 +428,9 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         },
     },
     [ChainId.X_LAYER]: {
-        MOCK_USDT_WXPL_POOL: {
-            address: '0xc9a38dfbca8b620ec10e7b7169ed3ff7338311fa',
-            id: '0xc9a38dfbca8b620ec10e7b7169ed3ff7338311fa',
+        MOCK_USDT_xBTC_POOL: {
+            address: '0x089664b3b67ad603cd45659f21b51d2b3305a502',
+            id: '0x089664b3b67ad603cd45659f21b51d2b3305a502',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
