@@ -27,6 +27,7 @@ type NetworksWithFork = Extract<
     | 'SONIC'
     | 'HYPEREVM'
     | 'PLASMA'
+    | 'X_LAYER'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -44,6 +45,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     SONIC: 9645,
     HYPEREVM: 9745,
     PLASMA: 9845,
+    X_LAYER: 9945,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -125,6 +127,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: 'https://rpc.plasma.to/',
         port: ANVIL_PORTS.PLASMA,
         forkBlockNumber: 1274881n,
+    },
+    X_LAYER: {
+        rpcEnv: 'X_LAYER_RPC_URL',
+        fallBackRpc: 'https://rpc.xlayer.tech',
+        port: ANVIL_PORTS.X_LAYER,
+        forkBlockNumber: 43138155n,
     },
 };
 

@@ -12,6 +12,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
         [ChainId.SEPOLIA]: '0xC85b652685567C1B074e8c0D4389f83a2E458b1C',
         [ChainId.SONIC]: '0x7761659F9e9834ad367e4d25E0306ba7A4968DAf',
+        [ChainId.X_LAYER]: '0x36caC20dd805d128c1a6Dd16eeA845C574b5A17C',
     },
     BufferRouter: {
         [ChainId.ARBITRUM_ONE]: '0x311334883921Fb1b813826E585dF1C2be4358615',
@@ -24,6 +25,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x4132f7AcC9dB7A6cF7BE2Dd3A9DC8b30C7E6E6c8',
         [ChainId.SEPOLIA]: '0xb5F3A41515457CC6E2716c62a011D260441CcfC9',
         [ChainId.SONIC]: '0x532dA919D3EB5606b5867A6f505969c57F3A721b',
+        [ChainId.X_LAYER]: '0x85a80afee867aDf27B50BdB7b76DA70f1E853062',
     },
     CompositeLiquidityRouter: {
         [ChainId.ARBITRUM_ONE]: '0xC1A64500E035D9159C8826E982dFb802003227f0',
@@ -36,6 +38,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x5cF4928a3205728bd12830E1840F7DB85c62a4B9',
         [ChainId.SEPOLIA]: '0x6A20a4b6DcFF78e6D21BF0dbFfD58C96644DB9cb',
         [ChainId.SONIC]: '0xE42FFA682A26EF8F25891db4882932711D42e467',
+        [ChainId.X_LAYER]: '0x9805dcfD25e6De36bad8fe9D3Fe2c9b44B764102',
     },
     GyroECLPPoolFactory: {
         [ChainId.ARBITRUM_ONE]: '0x88ED12A90142fDBFe2a28f7d5b48927254C7e760',
@@ -48,6 +51,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0xE3881627B8DeeBCCF9c23B291430a549Fc0bE5F7',
         [ChainId.SEPOLIA]: '0x589cA6855C348d831b394676c25B125BcdC7F8ce',
         [ChainId.SONIC]: '0xf023731dD8758D7C869af10005e6380Cb57775a9',
+        [ChainId.X_LAYER]: '0x5cF4928a3205728bd12830E1840F7DB85c62a4B9',
     },
     LBPMigrationRouter: {
         [ChainId.ARBITRUM_ONE]: '0xFc2986feAB34713E659da84F3B1FA32c1da95832',
@@ -56,6 +60,7 @@ export const balancerV3Contracts = {
         [ChainId.HYPEREVM]: '0xb21A277466e7dB6934556a1Ce12eb3F032815c8A',
         [ChainId.MAINNET]: '0xCC267D25576b48f08A90C3605624Ab62a73a7A4E',
         [ChainId.SEPOLIA]: '0x0AE19A3f8c35e0156E0d39307ad4cce1acD42929',
+        // TODO: add X_LAYER
     },
     LBPoolFactory: {
         [ChainId.ARBITRUM_ONE]: '0x8D217CB74f675B46cC2767C8cF0aAB53BE1c4818',
@@ -64,6 +69,7 @@ export const balancerV3Contracts = {
         [ChainId.HYPEREVM]: '0xa1D0791a41318c775707C56eAe247AF81a05322C',
         [ChainId.MAINNET]: '0x02916d8F0891309806FCb347Bf4191692cbDDcAF',
         [ChainId.SEPOLIA]: '0xE92cF5185384f53B2af74A2eBA62ba3A9C0ED65B',
+        // TODO: add X_LAYER
     },
     ReClammPoolFactory: {
         [ChainId.ARBITRUM_ONE]: '0x355bD33F0033066BB3DE396a6d069be57353AD95',
@@ -76,6 +82,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x662112B8CB18889e81459b92CA0f894a2ef2c1B8',
         [ChainId.SEPOLIA]: '0xf58A574530Ea5cEB727095e6039170c1e8068fcA',
         [ChainId.SONIC]: '0x99c13B259138a8ad8badbBfB87A4074591310De0',
+        [ChainId.X_LAYER]: '0x013D4382F291be5688AFBcc741Ee8A24C66B2C92',
     },
     Router: {
         [ChainId.ARBITRUM_ONE]: '0xEAedc32a51c510d35ebC11088fD5fF2b47aACF2E',
@@ -88,6 +95,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x9dA18982a33FD0c7051B19F0d7C76F2d5E7e017c',
         [ChainId.SEPOLIA]: '0x5e315f96389C1aaF9324D97d3512ae1e0Bf3C21a',
         [ChainId.SONIC]: '0x93db4682A40721e7c698ea0a842389D10FA8Dae5',
+        [ChainId.X_LAYER]: '0xc3ccacE87f6d3A81724075ADcb5ddd85a8A1bB68',
     },
     StablePoolFactory: {
         [ChainId.ARBITRUM_ONE]: '0x44d33798dddCdAbc93Fe6a40C80588033Dc502d3',
@@ -100,6 +108,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x81cFAE226343B24BA12EC6521Db2C79E7aeeb310',
         [ChainId.SEPOLIA]: '0xc274A11E09a3c92Ac64eAff5bEC4ee8f5dfEe207',
         [ChainId.SONIC]: '0x482eE54595f79B6BA34b75754A4983134148Affb',
+        [ChainId.X_LAYER]: '0x9dA18982a33FD0c7051B19F0d7C76F2d5E7e017c',
     },
     StableSurgePoolFactory: {
         [ChainId.ARBITRUM_ONE]: '0x201efd508c8DfE9DE1a13c2452863A78CB2a86Cc',
@@ -112,6 +121,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x6B5dA774890Db7B7b96C6f44e6a4b0F657399E2e',
         [ChainId.SEPOLIA]: '0x2f1d6F4C40047dC122cA7e46B0D1eC27739BFc66',
         [ChainId.SONIC]: '0x3D9319BB29DAF6081D01DC56b6203EfcC90f0bAD',
+        [ChainId.X_LAYER]: '0x6817149cb753BF529565B4D023d7507eD2ff4Bc0',
     },
     Vault: {
         [ChainId.ARBITRUM_ONE]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
@@ -124,6 +134,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
         [ChainId.SEPOLIA]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
         [ChainId.SONIC]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
+        [ChainId.X_LAYER]: '0xbA1333333333a1BA1108E8412f11850A5C319bA9',
     },
     VaultAdmin: {
         [ChainId.ARBITRUM_ONE]: '0x35fFB749B273bEb20F40f35EdeB805012C539864',
@@ -136,6 +147,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x35fFB749B273bEb20F40f35EdeB805012C539864',
         [ChainId.SEPOLIA]: '0x35fFB749B273bEb20F40f35EdeB805012C539864',
         [ChainId.SONIC]: '0x35fFB749B273bEb20F40f35EdeB805012C539864',
+        [ChainId.X_LAYER]: '0x35fFB749B273bEb20F40f35EdeB805012C539864',
     },
     VaultExtension: {
         [ChainId.ARBITRUM_ONE]: '0x0E8B07657D719B86e06bF0806D6729e3D528C9A9',
@@ -148,6 +160,7 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0x0E8B07657D719B86e06bF0806D6729e3D528C9A9',
         [ChainId.SEPOLIA]: '0x0E8B07657D719B86e06bF0806D6729e3D528C9A9',
         [ChainId.SONIC]: '0x0E8B07657D719B86e06bF0806D6729e3D528C9A9',
+        [ChainId.X_LAYER]: '0x0E8B07657D719B86e06bF0806D6729e3D528C9A9',
     },
     WeightedPoolFactory: {
         [ChainId.ARBITRUM_ONE]: '0xD961E30156C2E0D0d925A0De45f931CB7815e970',
@@ -160,5 +173,6 @@ export const balancerV3Contracts = {
         [ChainId.PLASMA]: '0xf23b4DB826DbA14c0e857029dfF076b1c0264843',
         [ChainId.SEPOLIA]: '0x7532d5a3bE916e4a4D900240F49F0BABd4FD855C',
         [ChainId.SONIC]: '0x4726Eb55c37F0353F6d5011B5652d44A87d60fc3',
+        [ChainId.X_LAYER]: '0xf23b4DB826DbA14c0e857029dfF076b1c0264843',
     },
 } as const;
