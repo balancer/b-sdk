@@ -16,7 +16,6 @@ import {
     RemoveLiquidityUnbalancedInput,
     RemoveLiquidityKind,
     Slippage,
-    Token,
     PoolState,
     RemoveLiquidity,
     Address,
@@ -28,6 +27,7 @@ import {
     InputAmount,
     PoolType,
     RemoveLiquiditySingleTokenExactOutInput,
+    Token,
 } from '../../../src';
 import { forkSetup } from '../../lib/utils/helper';
 import { RemoveLiquidityTxInput } from '../../lib/utils/types';

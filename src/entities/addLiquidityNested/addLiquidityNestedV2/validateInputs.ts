@@ -35,7 +35,7 @@ export const validateBuildCallInput = (
     if (input.wethIsEth) {
         if (
             !input.amountsIn.some((a) =>
-                a.token.isUnderlyingEqual(NATIVE_ASSETS[chainId]),
+                NATIVE_ASSETS[chainId].isWrapped(a.token),
             )
         ) {
             throw inputValidationError(
