@@ -152,7 +152,8 @@ export const addLiquidityUnbalanced = async (
                     deltas[resultTokenIndex] + resultAmount.amount;
                 deltaBPTs[resultTokenIndex] =
                     await queryAddLiquidityForTokenDelta(resultTokenIndex);
-            } catch {
+            } catch (err) {
+                console.log(err);
                 throw new SDKError(
                     'Price Impact',
                     'Add Liquidity Unbalanced',

@@ -59,6 +59,10 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0xda00000035fef4082F78dEF6A8903bee419FbF8E',
             decimals: 6,
         },
+        wjAura: {
+            address: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f',
+            decimals: 18,
+        },
     },
     [ChainId.OPTIMISM]: {
         FRAX: {
@@ -301,6 +305,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             id: '0x5dd88b3aa3143173eb26552923922bdf33f50949',
             address: '0x5dd88b3aa3143173eb26552923922bdf33f50949',
             type: PoolType.Stable,
+            decimals: 18,
+            slot: 0,
+        },
+        B_wjAura_wETH: {
+            id: '0x68e3266c9c8bbd44ad9dca5afbfe629022aee9fe000200000000000000000512',
+            address: '0x68e3266C9C8bbD44ad9Dca5AFBfe629022AeE9fE',
+            type: PoolType.Weighted,
             decimals: 18,
             slot: 0,
         },
