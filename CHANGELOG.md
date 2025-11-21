@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 4.10.1
+
+### Patch Changes
+
+- bca04a3: Bump Viem and Balancer Maths deps.
+
 ## 4.10.0
 
 ### Minor Changes
