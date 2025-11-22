@@ -60,7 +60,7 @@ async function runAgainstFork() {
 
     // prepare example by adding liquidity to the pool, so we can remove it
     await prepExample(rpcUrl, chainId, pool, slippage, userAccount, client);
-    // TODO: suppress prepExample logs to avoid poluting the console with unnecessary content
+    // TODO: suppress prepExample logs to avoid polluting the console with unnecessary content
 
     const bptIn: InputAmount = {
         rawAmount: parseEther('0.0001'),
