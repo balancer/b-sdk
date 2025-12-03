@@ -59,6 +59,10 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0xda00000035fef4082F78dEF6A8903bee419FbF8E',
             decimals: 6,
         },
+        eigen: {
+            address: '0xec53bf9167f50cdeb3ae105f56099aaab9061f83',
+            decimals: 18,
+        },
     },
     [ChainId.OPTIMISM]: {
         FRAX: {
