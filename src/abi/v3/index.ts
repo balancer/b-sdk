@@ -18,3 +18,4 @@ export * from './liquidityBootstrappingPool';
 export * from './gyro2CLP';
 export * from './gyroECLP';
 export * from './mockGyroEclpPool';
+export * from './unbalancedAddViaSwapRouter';
