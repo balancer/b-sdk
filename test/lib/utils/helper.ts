@@ -144,12 +144,23 @@ export const approveToken = async (
                 amount,
                 deadline,
             );
+            // Approve UnbalancedAddViaSwapRouter to spend account tokens using Permit2
+            const unbalancedAddViaSwapRouterApprovedOnPermit2 =
+                await approveSpenderOnPermit2(
+                    client,
+                    accountAddress,
+                    tokenAddress,
+                    AddressProvider.UnbalancedAddViaSwapRouter(chainId),
+                    amount,
+                    deadline,
+                );
             approved =
                 approved &&
                 routerApprovedOnPermit2 &&
                 batchRouterApprovedOnPermit2 &&
                 compositeRouterApprovedOnPermit2 &&
-                bufferRouterApprovedOnPermit2;
+                bufferRouterApprovedOnPermit2 &&
+                unbalancedAddViaSwapRouterApprovedOnPermit2;
         }
     }
     return approved;
