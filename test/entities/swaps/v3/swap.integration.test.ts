@@ -51,7 +51,7 @@ import {
     allTestsHaveSavedData,
     hasSavedTestData,
 } from 'test/lib/utils';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect } from 'vitest';
 
@@ -59,6 +59,10 @@ import { expect } from 'vitest';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const swapTestDataPath = join(__dirname, 'swapTestData.json');
+const jobId =
+    basename(__filename)
+        .split('')
+        .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 10000;
 
 // Load existing test data (if file exists)
 const savedSwapTestData = loadSwapTestData(swapTestDataPath);
@@ -317,7 +321,7 @@ for (const test of tests) {
             // Only stop fork if it was started
             if (fork) {
                 console.log('stopFork', test.name);
-                await stopAnvilFork(test.anvilNetwork);
+                await stopAnvilFork(test.anvilNetwork, jobId);
             }
         });
     });
@@ -440,7 +444,7 @@ async function setupForkAndClient(test: Test): Promise<{
     client: PublicWalletClient & TestActions;
     snapshotPreApprove: Hex;
 }> {
-    const fork = await startFork(test.anvilNetwork);
+    const fork = await startFork(test.anvilNetwork, jobId);
     const client = createTestClient({
         mode: 'anvil',
         chain: CHAINS[test.chainId],
