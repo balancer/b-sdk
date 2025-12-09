@@ -242,6 +242,17 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
         },
     },
+    [ChainId.BASE]: {
+        WETH: {
+            address: '0x4200000000000000000000000000000000000006',
+            decimals: 18,
+        },
+        USDC: {
+            address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+            decimals: 6,
+            slot: 9,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };
