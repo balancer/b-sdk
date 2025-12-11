@@ -72,7 +72,7 @@ const swapTestData: Record<string, unknown> = {};
 
 // Test configuration constants
 const TEST_CONSTANTS = {
-    ANVIL_TEST_ADDRESS: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // Anvil's default test address from mnemonic "test test test test test test test test test test test junk"
+    ANVIL_TEST_ADDRESS: '0x831eFb058FEdCd16Cd6b9174206DFe452dDCe8C3', // address from mnemonic "you twelve word test phrase boat cat like this example dog car"
     BALANCE_MULTIPLIER: 10n, // For setting token balances
     slippage: Slippage.fromPercentage('0.1'),
     deadline: 999999999999999999n,

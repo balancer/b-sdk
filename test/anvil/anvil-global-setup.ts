@@ -170,7 +170,8 @@ function getAnvilOptions(
         forkUrl,
         port,
         forkBlockNumber,
-        mnemonic: 'test test test test test test test test test test test junk', // Anvil's default mnemonic for deterministic accounts
+        mnemonic:
+            'you twelve word test phrase boat cat like this example dog car', // mnemonic for deterministic accounts - should not have delegated accounts
     };
 }
 
