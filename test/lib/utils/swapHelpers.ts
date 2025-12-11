@@ -11,6 +11,8 @@ import {
     SwapKind,
     Permit2Helper,
     PublicWalletClient,
+    ExactOutQueryOutput,
+    ExactInQueryOutput,
 } from '../../../src';
 import { sendTransactionGetBalances } from '../../lib/utils/helper';
 
@@ -93,6 +95,47 @@ export async function assertSwapExactIn({
         call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
     }
 
+    await assertResultExactIn({
+        wethIsEth,
+        swap,
+        chainId,
+        contractToCall,
+        client,
+        testAddress,
+        call,
+        outputTest,
+        exactInQueryOutput: expected,
+    });
+}
+
+export async function assertResultExactIn({
+    wethIsEth,
+    swap,
+    chainId,
+    contractToCall,
+    client,
+    testAddress,
+    call,
+    outputTest,
+    exactInQueryOutput,
+}: {
+    wethIsEth: boolean;
+    swap: Swap;
+    chainId: ChainId;
+    contractToCall: Address;
+    client: PublicWalletClient & TestActions;
+    testAddress: Address;
+    call: SwapBuildOutputExactIn;
+    outputTest: {
+        testExactOutAmount: boolean;
+        percentage: number;
+    };
+    exactInQueryOutput: ExactInQueryOutput;
+}) {
+    if (exactInQueryOutput.swapKind !== SwapKind.GivenIn)
+        throw Error('Expected GivenIn');
+    expect(exactInQueryOutput.expectedAmountOut.amount > 0n).to.be.true;
+
     const isEthInput =
         wethIsEth &&
         swap.inputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
@@ -122,7 +165,7 @@ export async function assertSwapExactIn({
         swap.outputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
     let expectedEthDelta = 0n;
     let expectedTokenInDelta = swap.inputAmount.amount;
-    let expectedTokenOutDelta = expected.expectedAmountOut.amount;
+    let expectedTokenOutDelta = exactInQueryOutput.expectedAmountOut.amount;
     if (isEthInput) {
         // Should send eth instead of tokenIn (weth)
         expectedEthDelta = swap.inputAmount.amount;
@@ -130,7 +173,7 @@ export async function assertSwapExactIn({
     }
     if (isEthOutput) {
         // should receive eth instead of tokenOut (weth)
-        expectedEthDelta = expected.expectedAmountOut.amount;
+        expectedEthDelta = exactInQueryOutput.expectedAmountOut.amount;
         expectedTokenOutDelta = 0n;
     }
 
@@ -220,6 +263,47 @@ export async function assertSwapExactOut({
         call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
     }
 
+    await assertResultExactOut({
+        wethIsEth,
+        swap,
+        chainId,
+        contractToCall,
+        client,
+        testAddress,
+        call,
+        inputTest,
+        exactOutQueryOutput: expected,
+    });
+}
+
+export async function assertResultExactOut({
+    wethIsEth,
+    swap,
+    chainId,
+    contractToCall,
+    client,
+    testAddress,
+    call,
+    inputTest,
+    exactOutQueryOutput,
+}: {
+    wethIsEth: boolean;
+    swap: Swap;
+    chainId: ChainId;
+    contractToCall: Address;
+    client: PublicWalletClient & TestActions;
+    testAddress: Address;
+    call: SwapBuildOutputExactOut;
+    inputTest: {
+        testExactInAmount: boolean;
+        percentage: number;
+    };
+    exactOutQueryOutput: ExactOutQueryOutput;
+}) {
+    if (exactOutQueryOutput.swapKind !== SwapKind.GivenOut)
+        throw Error('Expected GivenOut');
+    expect(exactOutQueryOutput.expectedAmountIn.amount > 0n).to.be.true;
+
     const isEthInput =
         wethIsEth &&
         swap.inputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
@@ -250,11 +334,11 @@ export async function assertSwapExactOut({
         wethIsEth &&
         swap.outputAmount.token.isSameAddress(NATIVE_ASSETS[chainId].wrapped);
     let expectedEthDelta = 0n;
-    let expectedTokenInDelta = expected.expectedAmountIn.amount;
+    let expectedTokenInDelta = exactOutQueryOutput.expectedAmountIn.amount;
     let expectedTokenOutDelta = swap.outputAmount.amount;
     if (isEthInput) {
         // Should send eth instead of tokenIn (weth)
-        expectedEthDelta = expected.expectedAmountIn.amount;
+        expectedEthDelta = exactOutQueryOutput.expectedAmountIn.amount;
         expectedTokenInDelta = 0n;
     }
     if (isEthOutput) {
