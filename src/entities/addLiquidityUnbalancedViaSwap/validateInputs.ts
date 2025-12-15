@@ -1,9 +1,18 @@
 import { SDKError } from '@/utils';
 import { AddLiquidityUnbalancedViaSwapInput } from './types';
+import { PoolState } from '../types';
 
 export const validateAddLiquidityUnbalancedViaSwapInput = (
     input: AddLiquidityUnbalancedViaSwapInput,
+    poolState: PoolState,
 ): void => {
+    if (poolState.type !== 'RECLAMM') {
+        throw new SDKError(
+            'AddLiquidityUnbalancedViaSwap',
+            'validateInput',
+            'Weighted pools are not supported for unbalanced via swap',
+        );
+    }
     if (!input.pool) {
         throw new SDKError(
             'AddLiquidityUnbalancedViaSwap',
@@ -49,13 +58,4 @@ export const validateAddLiquidityUnbalancedViaSwapInput = (
         }
     }
 
-    // Validate that the exactToken in Index in the amountsIn array is not 0
-    // Because this is not a reasonable operation to do.
-    if (input.amountsIn[input.exactTokenIndex].rawAmount == 0n) {
-        throw new SDKError(
-            'AddLiquidityUnbalancedViaSwap',
-            'validateInput',
-            'Exact token amount must be greater than 0',
-        );
-    }
 };

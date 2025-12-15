@@ -388,6 +388,14 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
+        // reclamm 
+        MOCK_RECLAMM_POOL: {
+            address: '0x6920364080c82ad004efb9d580f28b597c6d9c99',
+            id: '0x6920364080c82ad004efb9d580f28b597c6d9c99',
+            type: PoolType.ReClamm,
+            decimals: 18,
+            slot: 0,
+        },
     },
     [ChainId.GNOSIS_CHAIN]: {
         SDAI_BRLA_POOL: {
@@ -397,6 +405,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
+        reclammGNO_wstETH: {
+            address: '0xa50085ff1dfa173378e7d26a76117d68d5eba539',
+            id: '0xa50085ff1dfa173378e7d26a76117d68d5eba539',
+            type: PoolType.ReClamm,
+            decimals: 18,
+            slot: 0,
+        }
     },
     [ChainId.HYPEREVM]: {
         MOCK_FEUSD_FEWETH_POOL: {

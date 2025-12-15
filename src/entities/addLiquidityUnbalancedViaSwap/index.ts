@@ -9,7 +9,7 @@ import {
 } from '@/abi';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { getValue, getSortedTokens } from '@/entities/utils';
-import { Hex, Address } from '@/types';
+import { Hex, Address, InputAmount } from '@/types';
 import { doAddLiquidityUnbalancedViaSwapQuery } from './doAddLiquidityUnbalancedViaSwapQuery';
 import { validateAddLiquidityUnbalancedViaSwapInput } from './validateInputs';
 import { getAmountsCallUnbalancedViaSwap } from './helpers';
@@ -24,6 +24,7 @@ import {
     getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensGivenIn,
     getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensExactInMinAdjustable,
     getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensGivenOut,
+    getBptAmountFromReferenceAmountnbalancedViaSwapFromAdjustableAmount,
 } from '../utils/unbalancedJoinViaSwapHelpers';
 import { SwapKind } from '@/types';
 import { SDKError } from '@/utils/errors';
@@ -43,7 +44,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         poolState: PoolState,
         block?: bigint,
     ): Promise<AddLiquidityUnbalancedViaSwapQueryOutput> {
-        validateAddLiquidityUnbalancedViaSwapInput(input);
+        validateAddLiquidityUnbalancedViaSwapInput(input, poolState);
 
         // GivenIn is the default swap kind. A GivenIn Swap
         // is expected to produce the lower amount of maxAdjustableAmount.
@@ -83,24 +84,90 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         // than what the user has intention of adding.
 
         // There are going to be two calculation scenarions.
-        // 1. The user wants to join purely single sided (Will throw an error)
+        // 1. The user wants to join purely single sided:
+        //    - Either via exactamounts being set and adjustable amount being 0 (will throw error as calculation fragile)
+        //    - Or via exactamounts being 0 and adjustable amount being a limit (will be accepted as a single sided join)
         // 2. The user wants to join unbalanced with two tokens (GivenIn or GivenOut)
 
-        // The exactAmountIn is not 0, as this has been validated in the validateInputs function before
-
-        // NOTE: A purely single-sided join (maxAdjustableAmountRaw = 0) is not
-        // supported by the UnbalancedAddViaSwapRouter: the proportional add
-        // always contributes some adjustable token, and the internal correction
-        // swap cannot, in general, drive the final adjustable contribution all
-        // the way to zero without violating Vault/router constraints. We therefore
-        // treat this as an unsupported configuration at the SDK level.
-        if (input.amountsIn.some((amount) => amount.rawAmount == 0n)) {
+        
+        if (
+            input.amountsIn[exactTokenIndex].rawAmount > 0n &&
+            input.amountsIn[adjustableTokenIndex].rawAmount === 0n
+        ) {
             throw new SDKError(
                 'UnbalancedJoinViaSwap',
                 'AddLiquidityUnbalancedViaSwapV3.query',
                 'Single-sided joins with maxAdjustableAmount = 0 are not supported by UnbalancedAddViaSwapRouter. Please provide a non-zero adjustable amount or use a different path.',
             );
+
+        } else if (
+            input.amountsIn[exactTokenIndex].rawAmount === 0n &&
+            input.amountsIn[adjustableTokenIndex].rawAmount > 0n
+        ) {
+            // Single-sided join: exact token amount is zero, adjustable token has a finite budget.
+            // We treat the adjustable token as the reference and derive a BPT target from it.
+
+            const adjustableBudgetRaw = amountsIn[adjustableTokenIndex].amount;
+
+            const bptAmount =
+                await getBptAmountFromReferenceAmountnbalancedViaSwapFromAdjustableAmount(
+                    {
+                        chainId: input.chainId,
+                        rpcUrl: input.rpcUrl,
+                        referenceAmount: {
+                            address: amountsIn[adjustableTokenIndex].token.address,
+                            rawAmount: adjustableBudgetRaw,
+                            decimals:
+                                amountsIn[adjustableTokenIndex].token.decimals,
+                        },
+                        kind: 'Proportional' as any,
+                        maxAdjustableAmountRaw: adjustableBudgetRaw,
+                    },
+                    poolState,
+                );
+
+            const bptToken = new Token(input.chainId, poolState.address, 18);
+            const bptOut = TokenAmount.fromRawAmount(
+                bptToken,
+                bptAmount.rawAmount,
+            );
+
+            // Query the router with exactAmount = 0 and maxAdjustableAmount = adjustableBudgetRaw.
+            const amountsInNumbers = await doAddLiquidityUnbalancedViaSwapQuery(
+                input.rpcUrl,
+                input.chainId,
+                input.pool,
+                sender,
+                bptAmount.rawAmount,
+                exactToken,
+                0n,
+                adjustableBudgetRaw,
+                addLiquidityUserData,
+                swapUserData,
+                block,
+            );
+
+            const finalAmountsIn = sortedTokens.map((token, index) =>
+                TokenAmount.fromRawAmount(token, amountsInNumbers[index]),
+            );
+
+            const output: AddLiquidityUnbalancedViaSwapQueryOutput = {
+                pool: input.pool,
+                bptOut,
+                amountsIn: finalAmountsIn,
+                chainId: input.chainId,
+                protocolVersion: 3,
+                to: AddressProvider.Router(input.chainId),
+                addLiquidityUserData,
+                swapUserData,
+                exactToken,
+                exactAmount: 0n,
+                adjustableTokenIndex,
+            };
+
+            return output;
         } else {
+            // if Both amounts are non zero
             if (swapKind === SwapKind.GivenIn) {
                 // probably the better option for the user
                 const bptAmount =
