@@ -252,6 +252,10 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 6,
             slot: 9,
         },
+        EURC: {
+            address: '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42',
+            decimals: 6,
+        },
     },
 };
 
