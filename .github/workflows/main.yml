@@ -12,5 +12,6 @@ jobs:
 
   release:
     name: Release
+    needs: checks
     uses: ./.github/workflows/release.yml
     secrets: inherit
