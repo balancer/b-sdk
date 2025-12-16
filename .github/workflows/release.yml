@@ -1,7 +1,12 @@
 name: Release
 
 on:
+  workflow_call:
   workflow_dispatch:
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
 
 jobs:
   release:
