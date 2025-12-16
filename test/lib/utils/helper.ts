@@ -145,8 +145,9 @@ export const approveToken = async (
                 deadline,
             );
             // Approve UnbalancedAddViaSwapRouter to spend account tokens using Permit2
-            const unbalancedAddViaSwapRouterApprovedOnPermit2 =
-                await approveSpenderOnPermit2(
+            // for now only on Sepolia, as the Router is not deploy on other chains yet
+            if (client.chain.id === 11155111n) {
+                const unbalancedAddViaSwapRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
                     client,
                     accountAddress,
                     tokenAddress,
@@ -154,13 +155,8 @@ export const approveToken = async (
                     amount,
                     deadline,
                 );
-            approved =
-                approved &&
-                routerApprovedOnPermit2 &&
-                batchRouterApprovedOnPermit2 &&
-                compositeRouterApprovedOnPermit2 &&
-                bufferRouterApprovedOnPermit2 &&
-                unbalancedAddViaSwapRouterApprovedOnPermit2;
+            }    
+            approved = approved && routerApprovedOnPermit2 && batchRouterApprovedOnPermit2 && compositeRouterApprovedOnPermit2 && bufferRouterApprovedOnPermit2;
         }
     }
     return approved;

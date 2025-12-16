@@ -1,3 +1,5 @@
+// pnpm test test/validateAllNetworks.test.ts 
+
 import { config } from 'dotenv';
 config();
 import {
