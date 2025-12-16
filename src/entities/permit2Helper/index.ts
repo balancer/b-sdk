@@ -288,7 +288,7 @@ export class Permit2Helper {
     }
 }
 
-const signPermit2 = async (
+export const signPermit2 = async (
     client: Client & WalletActions,
     owner: Address | Account,
     spender: Address,
@@ -320,7 +320,7 @@ const signPermit2 = async (
     return { batch, signature };
 };
 
-const getDetails = async (
+export const getDetails = async (
     client: Client & PublicActions,
     token: Address,
     owner: Address | Account,
