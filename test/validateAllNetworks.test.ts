@@ -1,39 +1,39 @@
-// pnpm test test/validateAllNetworks.test.ts 
+// pnpm test test/validateAllNetworks.test.ts
 
 import { config } from 'dotenv';
 config();
-import {
-    Address,
-    createTestClient,
-    http,
-    parseEther,
-    publicActions,
-    walletActions,
-    TestActions,
-    Hex,
-} from 'viem';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import { Path } from '@/entities/swap/paths/types';
 import {
     CHAINS,
     ChainId,
-    SwapKind,
-    Swap,
     PERMIT2,
     PublicWalletClient,
+    Swap,
+    SwapKind,
 } from '@/index';
-import { Path } from '@/entities/swap/paths/types';
-import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import {
+    ANVIL_NETWORKS,
+    NetworkSetup,
+    startFork,
+} from 'test/anvil/anvil-global-setup';
+import { POOLS, TOKENS, TestPool, TestToken } from 'test/lib/utils/addresses';
 import {
     approveSpenderOnTokens,
     approveTokens,
     setTokenBalances,
 } from 'test/lib/utils/helper';
-import { POOLS, TOKENS, TestToken, TestPool } from 'test/lib/utils/addresses';
 import { assertSwapExactIn } from 'test/lib/utils/swapHelpers';
 import {
-    ANVIL_NETWORKS,
-    startFork,
-    NetworkSetup,
-} from 'test/anvil/anvil-global-setup';
+    http,
+    Address,
+    Hex,
+    TestActions,
+    createTestClient,
+    parseEther,
+    publicActions,
+    walletActions,
+} from 'viem';
 
 const protocolVersion = 3;
 

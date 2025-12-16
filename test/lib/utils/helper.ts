@@ -10,8 +10,8 @@ import {
     erc20Abi,
     hexToBigInt,
     keccak256,
-    maxUint160,
     maxUint48,
+    maxUint160,
     pad,
     toBytes,
     toHex,
@@ -20,16 +20,16 @@ import {
 } from 'viem';
 
 import { permit2Abi } from '@/abi';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import {
-    VAULT_V2,
-    MAX_UINT256,
-    ZERO_ADDRESS,
-    PERMIT2,
     // balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
+    MAX_UINT256,
+    PERMIT2,
     PublicWalletClient,
+    VAULT_V2,
+    ZERO_ADDRESS,
 } from '@/utils';
-import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;
@@ -147,7 +147,7 @@ export const approveToken = async (
             // Approve UnbalancedAddViaSwapRouter to spend account tokens using Permit2
             // for now only on Sepolia, as the Router is not deploy on other chains yet
             if (client.chain.id === 11155111n) {
-                const unbalancedAddViaSwapRouterApprovedOnPermit2 = await approveSpenderOnPermit2(
+                await approveSpenderOnPermit2(
                     client,
                     accountAddress,
                     tokenAddress,
@@ -155,8 +155,13 @@ export const approveToken = async (
                     amount,
                     deadline,
                 );
-            }    
-            approved = approved && routerApprovedOnPermit2 && batchRouterApprovedOnPermit2 && compositeRouterApprovedOnPermit2 && bufferRouterApprovedOnPermit2;
+            }
+            approved =
+                approved &&
+                routerApprovedOnPermit2 &&
+                batchRouterApprovedOnPermit2 &&
+                compositeRouterApprovedOnPermit2 &&
+                bufferRouterApprovedOnPermit2;
         }
     }
     return approved;
