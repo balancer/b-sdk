@@ -147,7 +147,7 @@ describe('add liquidity unbalanced via swap test', () => {
             POOLS[chainId].MOCK_RECLAMM_POOL.id,
         );
 
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]], undefined, 9718873n));
 
         client = createTestClient({
             mode: 'anvil',
