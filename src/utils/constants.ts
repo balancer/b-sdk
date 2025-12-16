@@ -278,13 +278,13 @@ export const NATIVE_ASSETS = {
         'XPL',
         'Xpl',
     ),
-    [ChainId.X_LAYER]: new Token(
+    [ChainId.X_LAYER]: new NativeToken(
         ChainId.X_LAYER,
         NATIVE_ADDRESS,
         18,
+        '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
         'OKB',
         'Okb',
-        '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
     ),
 };
 
