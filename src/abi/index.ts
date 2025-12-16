@@ -24,6 +24,7 @@ import {
     gyro2CLPAbi_V3,
     gyroECLPAbi_V3,
     lBPMigrationRouterAbi_V3,
+    unbalancedAddViaSwapRouterAbi_V3,
 } from './v3';
 
 export * from './authorizer';
@@ -84,6 +85,12 @@ export const balancerBatchRouterAbiExtended = [
 
 export const balancerMigrationRouterAbiExtended = [
     ...lBPMigrationRouterAbi_V3,
+    ...commonABIsV3,
+    ...poolABIsV3,
+];
+
+export const balancerUnbalancedAddViaSwapRouterAbiExtended = [
+    ...unbalancedAddViaSwapRouterAbi_V3,
     ...commonABIsV3,
     ...poolABIsV3,
 ];

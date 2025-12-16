@@ -90,6 +90,12 @@ export class AddressProvider {
     static Router(chainId: ChainId): Hex {
         return AddressProvider.getAddress(balancerV3Contracts.Router, chainId);
     }
+    static UnbalancedAddViaSwapRouter(chainId: ChainId): Hex {
+        return AddressProvider.getAddress(
+            balancerV3Contracts.UnbalancedAddViaSwapRouter,
+            chainId,
+        );
+    }
     static StablePoolFactory(chainId: ChainId): Hex {
         return AddressProvider.getAddress(
             balancerV3Contracts.StablePoolFactory,
