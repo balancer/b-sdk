@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "@balancer-labs/balancer-maths"
+      - dependency-name: "viem"
+    open-pull-requests-limit: 5

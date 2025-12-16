@@ -1,5 +1,23 @@
 # @balancer/sdk
 
+## 4.10.1
+
+### Patch Changes
+
+- bca04a3: Bump Viem and Balancer Maths deps.
+
+## 4.10.0
+
+### Minor Changes
+
+- d2e14fb: Add X Layer support.
+
+## 4.9.0
+
+### Minor Changes
+
+- a398076: Bump Viem to 2.38.5. Use Viem Plasma chain.
+
 ## 4.8.1
 
 ### Patch Changes

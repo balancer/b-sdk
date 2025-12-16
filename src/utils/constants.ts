@@ -1,5 +1,5 @@
 import { Address, Chain } from 'viem';
-import { Token } from '../entities/token';
+import { NativeToken } from '../entities/nativeToken';
 import {
     arbitrum,
     avalanche,
@@ -18,8 +18,10 @@ import {
     mode,
     fraxtal,
     sonic,
+    plasma,
+    xLayer,
 } from 'viem/chains';
-import { monadTestnet, hyperEVM, plasma } from './customChains';
+import { monadTestnet, hyperEVM } from './customChains';
 export const ZERO_ADDRESS: Address =
     '0x0000000000000000000000000000000000000000';
 /*
@@ -83,6 +85,7 @@ export enum ChainId {
     MONAD_TESTNET = 10143,
     HYPEREVM = 999,
     PLASMA = 9745,
+    X_LAYER = 196,
 }
 
 // The Balancer API requires the chain to be passed as a specific string
@@ -104,6 +107,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.MONAD_TESTNET]: 'MONAD_TESTNET',
     [ChainId.HYPEREVM]: 'HYPEREVM',
     [ChainId.PLASMA]: 'PLASMA',
+    [ChainId.X_LAYER]: 'XLAYER',
 };
 
 export const CHAINS: Record<number, Chain> = {
@@ -127,6 +131,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.MONAD_TESTNET]: monadTestnet,
     [ChainId.HYPEREVM]: hyperEVM,
     [ChainId.PLASMA]: plasma,
+    [ChainId.X_LAYER]: xLayer,
 };
 
 export const PERMIT2: Record<number, Address> = {
@@ -141,136 +146,145 @@ export const PERMIT2: Record<number, Address> = {
     [ChainId.PLASMA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.SONIC]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.X_LAYER]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
 };
 
 export const NATIVE_ASSETS = {
-    [ChainId.ARBITRUM_ONE]: new Token(
+    [ChainId.ARBITRUM_ONE]: new NativeToken(
         ChainId.ARBITRUM_ONE,
         NATIVE_ADDRESS,
         18,
+        '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         'ETH',
         'Ether',
-        '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
     ),
-    [ChainId.BASE]: new Token(
+    [ChainId.BASE]: new NativeToken(
         ChainId.BASE,
         NATIVE_ADDRESS,
         18,
+        '0x4200000000000000000000000000000000000006',
         'ETH',
         'Ether',
-        '0x4200000000000000000000000000000000000006',
     ),
-    [ChainId.FANTOM]: new Token(
+    [ChainId.FANTOM]: new NativeToken(
         ChainId.FANTOM,
         NATIVE_ADDRESS,
         18,
+        '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
         'FANTOM',
         'Fantom',
-        '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
     ),
-    [ChainId.FRAXTAL]: new Token(
+    [ChainId.FRAXTAL]: new NativeToken(
         ChainId.FRAXTAL,
         NATIVE_ADDRESS,
         18,
+        '0xfc00000000000000000000000000000000000006',
         'FRAXTAL',
         'Fraxtal',
-        '0xfc00000000000000000000000000000000000006',
     ),
-    [ChainId.GNOSIS_CHAIN]: new Token(
+    [ChainId.GNOSIS_CHAIN]: new NativeToken(
         ChainId.GNOSIS_CHAIN,
         NATIVE_ADDRESS,
         18,
-        'xDAI',
-        'xDAI',
         '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
+        'xDAI',
+        'xDAI',
     ),
-    [ChainId.GOERLI]: new Token(
+    [ChainId.GOERLI]: new NativeToken(
         ChainId.GOERLI,
         NATIVE_ADDRESS,
         18,
+        '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
         'ETH',
         'Ether',
-        '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
     ),
-    [ChainId.MAINNET]: new Token(
+    [ChainId.MAINNET]: new NativeToken(
         ChainId.MAINNET,
         NATIVE_ADDRESS,
         18,
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         'ETH',
         'Ether',
-        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     ),
-    [ChainId.MODE]: new Token(
+    [ChainId.MODE]: new NativeToken(
         ChainId.MODE,
         NATIVE_ADDRESS,
         18,
+        '0x4200000000000000000000000000000000000006',
         'ETH',
         'Ether',
-        '0x4200000000000000000000000000000000000006',
     ),
-    [ChainId.OPTIMISM]: new Token(
+    [ChainId.OPTIMISM]: new NativeToken(
         ChainId.OPTIMISM,
         NATIVE_ADDRESS,
         18,
+        '0x4200000000000000000000000000000000000006',
         'ETH',
         'Ether',
-        '0x4200000000000000000000000000000000000006',
     ),
-    [ChainId.POLYGON]: new Token(
+    [ChainId.POLYGON]: new NativeToken(
         ChainId.POLYGON,
         NATIVE_ADDRESS,
         18,
+        '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
         'MATIC',
         'Matic',
-        '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
     ),
-    [ChainId.SEPOLIA]: new Token(
+    [ChainId.SEPOLIA]: new NativeToken(
         ChainId.SEPOLIA,
         NATIVE_ADDRESS,
         18,
+        '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
         'ETH',
         'Ether',
-        '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
     ),
-    [ChainId.AVALANCHE]: new Token(
+    [ChainId.AVALANCHE]: new NativeToken(
         ChainId.AVALANCHE,
         NATIVE_ADDRESS,
         18,
+        '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
         'AVAX',
         'Avax',
-        '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
     ),
-    [ChainId.ZKEVM]: new Token(
+    [ChainId.ZKEVM]: new NativeToken(
         ChainId.ZKEVM,
         NATIVE_ADDRESS,
         18,
+        '0xa2036f0538221a77a3937f1379699f44945018d0',
         'MATIC',
         'Matic',
-        '0xa2036f0538221a77a3937f1379699f44945018d0',
     ),
-    [ChainId.SONIC]: new Token(
+    [ChainId.SONIC]: new NativeToken(
         ChainId.SONIC,
         NATIVE_ADDRESS,
         18,
+        '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',
         'S',
         'Sonic',
-        '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',
     ),
-    [ChainId.HYPEREVM]: new Token(
+    [ChainId.HYPEREVM]: new NativeToken(
         ChainId.HYPEREVM,
         HYPEREVM_NATIVE_ADDRESS,
         18,
+        '0x5555555555555555555555555555555555555555',
         'HYPE',
         'Hype',
-        '0x5555555555555555555555555555555555555555',
     ),
-    [ChainId.PLASMA]: new Token(
+    [ChainId.PLASMA]: new NativeToken(
         ChainId.PLASMA,
         NATIVE_ADDRESS,
         18,
+        '0x6100E367285b01F48D07953803A2d8dCA5D19873',
         'XPL',
         'Xpl',
-        '0x6100E367285b01F48D07953803A2d8dCA5D19873',
+    ),
+    [ChainId.X_LAYER]: new Token(
+        ChainId.X_LAYER,
+        NATIVE_ADDRESS,
+        18,
+        'OKB',
+        'Okb',
+        '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
     ),
 };
 
