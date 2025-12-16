@@ -27,7 +27,7 @@
         "test": "vitest dev",
         "test:ci": "vitest run",
         "changeset": "changeset",
-        "changeset:release": "pnpm build && changeset publish",
+        "changeset:release": "pnpm build && changeset publish --provenance",
         "example": "npx tsx ./examples/lib/executeExample.ts",
         "update:deployments": "npx tsx ./scripts/updateDeployments.ts && pnpm format"
     },
