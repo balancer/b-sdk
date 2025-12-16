@@ -388,7 +388,7 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
-        // reclamm 
+        // reclamm
         MOCK_RECLAMM_POOL: {
             address: '0x6920364080c82ad004efb9d580f28b597c6d9c99',
             id: '0x6920364080c82ad004efb9d580f28b597c6d9c99',
@@ -411,7 +411,7 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             type: PoolType.ReClamm,
             decimals: 18,
             slot: 0,
-        }
+        },
     },
     [ChainId.HYPEREVM]: {
         MOCK_FEUSD_FEWETH_POOL: {

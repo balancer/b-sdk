@@ -19,16 +19,9 @@ import {
     AddLiquidityUnbalancedViaSwapBuildCallInput,
     AddLiquidityUnbalancedViaSwapBuildCallOutput,
 } from './types';
-import { getBptAmountFromReferenceAmount } from '../utils/proportionalAmountsHelpers';
-import {
-    getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensGivenIn,
-    getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensExactInMinAdjustable,
-    getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensGivenOut,
-    getBptAmountFromReferenceAmountnbalancedViaSwapFromAdjustableAmount,
-} from '../utils/unbalancedJoinViaSwapHelpers';
-import { SwapKind } from '@/types';
+import { getBptAmountFromReferenceAmountnbalancedViaSwapFromAdjustableAmount } from '../utils/unbalancedJoinViaSwapHelpers';
 import { SDKError } from '@/utils/errors';
-import { MAX_UINT256 } from '@/utils';
+import { AddLiquidityKind } from '../addLiquidity/types';
 
 // Export types
 export type {
@@ -46,19 +39,13 @@ export class AddLiquidityUnbalancedViaSwapV3 {
     ): Promise<AddLiquidityUnbalancedViaSwapQueryOutput> {
         validateAddLiquidityUnbalancedViaSwapInput(input, poolState);
 
-        // GivenIn is the default swap kind. A GivenIn Swap
-        // is expected to produce the lower amount of maxAdjustableAmount.
-        // as it downscales the exactBptAmountOut calculated from the
-        // proportional join helper (calcBptOutFromReferenceAmount).
-        const swapKind = input.swapKind ?? SwapKind.GivenIn;
-
         const sender = input.sender ?? zeroAddress;
         const addLiquidityUserData = input.addLiquidityUserData ?? '0x';
         const swapUserData = input.swapUserData ?? '0x';
 
         // Convert input amounts to TokenAmount objects
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-        const amountsIn = sortedTokens.map((token, index) => {
+        const amountsIn = sortedTokens.map((token) => {
             const inputAmount = input.amountsIn.find(
                 (amount) =>
                     amount.address.toLowerCase() ===
@@ -74,22 +61,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         const exactTokenIndex = input.exactTokenIndex;
         const adjustableTokenIndex = exactTokenIndex === 0 ? 1 : 0;
         const exactToken = amountsIn[exactTokenIndex].token.address;
-        const exactAmount = amountsIn[exactTokenIndex].amount;
 
-        const maxAdjustableAmountRaw = amountsIn[adjustableTokenIndex].amount;
-
-        // Calculate BPT amount from the reference amount (like proportional)
-        // Only proportional amount is possible here as not every pool type
-        // has a unbalanced way to add. The bpt amount here is actually higher
-        // than what the user has intention of adding.
-
-        // There are going to be two calculation scenarions.
-        // 1. The user wants to join purely single sided:
-        //    - Either via exactamounts being set and adjustable amount being 0 (will throw error as calculation fragile)
-        //    - Or via exactamounts being 0 and adjustable amount being a limit (will be accepted as a single sided join)
-        // 2. The user wants to join unbalanced with two tokens (GivenIn or GivenOut)
-
-        
         if (
             input.amountsIn[exactTokenIndex].rawAmount > 0n &&
             input.amountsIn[adjustableTokenIndex].rawAmount === 0n
@@ -99,8 +71,8 @@ export class AddLiquidityUnbalancedViaSwapV3 {
                 'AddLiquidityUnbalancedViaSwapV3.query',
                 'Single-sided joins with maxAdjustableAmount = 0 are not supported by UnbalancedAddViaSwapRouter. Please provide a non-zero adjustable amount or use a different path.',
             );
-
-        } else if (
+        }
+        if (
             input.amountsIn[exactTokenIndex].rawAmount === 0n &&
             input.amountsIn[adjustableTokenIndex].rawAmount > 0n
         ) {
@@ -115,12 +87,13 @@ export class AddLiquidityUnbalancedViaSwapV3 {
                         chainId: input.chainId,
                         rpcUrl: input.rpcUrl,
                         referenceAmount: {
-                            address: amountsIn[adjustableTokenIndex].token.address,
+                            address:
+                                amountsIn[adjustableTokenIndex].token.address,
                             rawAmount: adjustableBudgetRaw,
                             decimals:
                                 amountsIn[adjustableTokenIndex].token.decimals,
                         },
-                        kind: 'Proportional' as any,
+                        kind: AddLiquidityKind.Proportional,
                         maxAdjustableAmountRaw: adjustableBudgetRaw,
                     },
                     poolState,
@@ -164,169 +137,14 @@ export class AddLiquidityUnbalancedViaSwapV3 {
                 exactAmount: 0n,
                 adjustableTokenIndex,
             };
-
             return output;
-        } else {
-            // if Both amounts are non zero
-            if (swapKind === SwapKind.GivenIn) {
-                // probably the better option for the user
-                const bptAmount =
-                    input.minimizeAdjustableAmount === true
-                        ? await getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensExactInMinAdjustable(
-                              {
-                                  chainId: input.chainId,
-                                  rpcUrl: input.rpcUrl,
-                                  referenceAmount: {
-                                      address: exactToken,
-                                      rawAmount: exactAmount,
-                                      decimals:
-                                          amountsIn[exactTokenIndex].token
-                                              .decimals,
-                                  },
-                                  kind: 'Proportional' as any, // Add the required kind property
-                                  maxAdjustableAmountRaw:
-                                      maxAdjustableAmountRaw,
-                              },
-                              poolState,
-                          )
-                        : await getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensGivenIn(
-                              {
-                                  chainId: input.chainId,
-                                  rpcUrl: input.rpcUrl,
-                                  referenceAmount: {
-                                      address: exactToken,
-                                      rawAmount: exactAmount,
-                                      decimals:
-                                          amountsIn[exactTokenIndex].token
-                                              .decimals,
-                                  },
-                                  kind: 'Proportional' as any, // Add the required kind property
-                                  maxAdjustableAmountRaw:
-                                      maxAdjustableAmountRaw,
-                              },
-                              poolState,
-                          );
-                const bptToken = new Token(
-                    input.chainId,
-                    poolState.address,
-                    18,
-                );
-                const bptOut = TokenAmount.fromRawAmount(
-                    bptToken,
-                    bptAmount.rawAmount,
-                );
-
-                // Query the router to get the actual amounts in needed
-                // The Router expects a BPTAmount, exactTokenAmount, and maxAdjustableAmount
-                const amountsInNumbers =
-                    await doAddLiquidityUnbalancedViaSwapQuery(
-                        input.rpcUrl,
-                        input.chainId,
-                        input.pool,
-                        sender,
-                        bptAmount.rawAmount,
-                        exactToken,
-                        exactAmount,
-                        amountsIn[adjustableTokenIndex].amount,
-                        addLiquidityUserData,
-                        swapUserData,
-                        block,
-                    );
-
-                // Create final TokenAmount objects from the query result
-                const finalAmountsIn = sortedTokens.map((token, index) => {
-                    return TokenAmount.fromRawAmount(
-                        token,
-                        amountsInNumbers[index],
-                    );
-                });
-
-                const output: AddLiquidityUnbalancedViaSwapQueryOutput = {
-                    pool: input.pool,
-                    bptOut,
-                    amountsIn: finalAmountsIn,
-                    chainId: input.chainId,
-                    protocolVersion: 3,
-                    to: AddressProvider.Router(input.chainId),
-                    addLiquidityUserData,
-                    swapUserData,
-                    exactToken,
-                    exactAmount,
-                    adjustableTokenIndex,
-                };
-
-                return output;
-            } else {
-                // the option available for the user
-                // intention is to trigger an EXACT_OUT correction swap
-                const bptAmount =
-                    await getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensGivenOut(
-                        {
-                            chainId: input.chainId,
-                            rpcUrl: input.rpcUrl,
-                            referenceAmount: {
-                                address: exactToken,
-                                rawAmount: exactAmount,
-                                decimals:
-                                    amountsIn[exactTokenIndex].token.decimals,
-                            },
-                            kind: 'Proportional' as any, // Add the required kind property
-                            maxAdjustableAmountRaw: maxAdjustableAmountRaw,
-                        },
-                        poolState,
-                    );
-                const bptToken = new Token(
-                    input.chainId,
-                    poolState.address,
-                    18,
-                );
-                const bptOut = TokenAmount.fromRawAmount(
-                    bptToken,
-                    bptAmount.rawAmount,
-                );
-
-                // Query the router to get the actual amounts in needed
-                // The Router expects a BPTAmount, exactTokenAmount, and maxAdjustableAmount
-                const amountsInNumbers =
-                    await doAddLiquidityUnbalancedViaSwapQuery(
-                        input.rpcUrl,
-                        input.chainId,
-                        input.pool,
-                        sender,
-                        bptAmount.rawAmount,
-                        exactToken,
-                        exactAmount,
-                        amountsIn[adjustableTokenIndex].amount,
-                        addLiquidityUserData,
-                        swapUserData,
-                        block,
-                    );
-
-                // Create final TokenAmount objects from the query result
-                const finalAmountsIn = sortedTokens.map((token, index) => {
-                    return TokenAmount.fromRawAmount(
-                        token,
-                        amountsInNumbers[index],
-                    );
-                });
-
-                const output: AddLiquidityUnbalancedViaSwapQueryOutput = {
-                    pool: input.pool,
-                    bptOut,
-                    amountsIn: finalAmountsIn,
-                    chainId: input.chainId,
-                    protocolVersion: 3,
-                    to: AddressProvider.Router(input.chainId),
-                    addLiquidityUserData,
-                    swapUserData,
-                    exactToken,
-                    exactAmount,
-                    adjustableTokenIndex,
-                };
-
-                return output;
-            }
         }
+        // Two token join - currently not supported
+        throw new SDKError(
+            'UnbalancedJoinViaSwap',
+            'AddLiquidityUnbalancedViaSwapV3.query',
+            'Two-token joins are not supported by The SDK yet. Please provide a single-sided join.',
+        );
     }
 
     buildCall(
@@ -349,7 +167,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
                     maxAdjustableAmount: amounts.maxAdjustableAmount,
                     addLiquidityUserData: input.addLiquidityUserData,
                     swapUserData: input.swapUserData,
-                } as any,
+                },
             ] as const,
         });
 
@@ -399,113 +217,3 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         };
     }
 }
-
-/**
- * Standalone discovery helper used by frontends/tests to fetch "natural"
- * amountsIn and bptOut for an unbalanced-join-via-swap operation, without
- * enforcing any maxAdjustableAmount cap.
- *
- * It:
- *  - Computes a BPT target using the GivenIn/GivenOut BPT helper with
- *    maxAdjustableAmountRaw = MAX_UINT256.
- *  - Calls the router's query function with that BPT and MAX_UINT256.
- *  - Returns the resulting bptOut and amountsIn, which callers can use to
- *    suggest an appropriate maxAdjustableAmount to users.
- *
- * The swapKind parameter overrides input.swapKind and defaults to GivenIn.
- */
-export const discoverNaturalAmountsUnbalancedViaSwap = async (
-    input: AddLiquidityUnbalancedViaSwapInput,
-    poolState: PoolState,
-    swapKind: SwapKind = SwapKind.GivenIn,
-    block?: bigint,
-): Promise<AddLiquidityUnbalancedViaSwapQueryOutput> => {
-    validateAddLiquidityUnbalancedViaSwapInput(input);
-
-    const sender = input.sender ?? zeroAddress;
-    const addLiquidityUserData = input.addLiquidityUserData ?? '0x';
-    const swapUserData = input.swapUserData ?? '0x';
-
-    const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
-    const amountsIn = sortedTokens.map((token) => {
-        const inputAmount = input.amountsIn.find(
-            (amount) =>
-                amount.address.toLowerCase() === token.address.toLowerCase(),
-        );
-        if (!inputAmount) {
-            throw new Error(`Token amount not found for ${token.address}`);
-        }
-        return TokenAmount.fromRawAmount(token, inputAmount.rawAmount);
-    });
-
-    const exactTokenIndex = input.exactTokenIndex;
-    const adjustableTokenIndex = exactTokenIndex === 0 ? 1 : 0;
-    const exactToken = amountsIn[exactTokenIndex].token.address;
-    const exactAmount = amountsIn[exactTokenIndex].amount;
-
-    const maxAdjustableUnlimited = MAX_UINT256;
-
-    const referenceAmount: InputAmount = {
-        address: exactToken,
-        rawAmount: exactAmount,
-        decimals: amountsIn[exactTokenIndex].token.decimals,
-    };
-
-    const bptAmount =
-        swapKind === SwapKind.GivenIn
-            ? await getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensGivenIn(
-                  {
-                      chainId: input.chainId,
-                      rpcUrl: input.rpcUrl,
-                      referenceAmount,
-                      kind: 'Proportional' as any,
-                      maxAdjustableAmountRaw: maxAdjustableUnlimited,
-                  },
-                  poolState,
-              )
-            : await getBptAmountFromReferenceAmountUnbalancedViaSwapTwoTokensGivenOut(
-                  {
-                      chainId: input.chainId,
-                      rpcUrl: input.rpcUrl,
-                      referenceAmount,
-                      kind: 'Proportional' as any,
-                      maxAdjustableAmountRaw: maxAdjustableUnlimited,
-                  },
-                  poolState,
-              );
-
-    const amountsInNumbers = await doAddLiquidityUnbalancedViaSwapQuery(
-        input.rpcUrl,
-        input.chainId,
-        input.pool,
-        sender,
-        bptAmount.rawAmount,
-        exactToken,
-        exactAmount,
-        maxAdjustableUnlimited,
-        addLiquidityUserData,
-        swapUserData,
-        block,
-    );
-
-    const finalAmountsIn = sortedTokens.map((token, index) =>
-        TokenAmount.fromRawAmount(token, amountsInNumbers[index]),
-    );
-
-    const bptToken = new Token(input.chainId, poolState.address, 18);
-    const bptOut = TokenAmount.fromRawAmount(bptToken, bptAmount.rawAmount);
-
-    return {
-        pool: input.pool,
-        bptOut,
-        amountsIn: finalAmountsIn,
-        chainId: input.chainId,
-        protocolVersion: 3,
-        to: AddressProvider.Router(input.chainId),
-        addLiquidityUserData,
-        swapUserData,
-        exactToken,
-        exactAmount,
-        adjustableTokenIndex,
-    };
-};
