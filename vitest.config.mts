@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
             pool: 'forks',
             poolOptions: {
                 forks: {
+                    minForks: 1,
                     maxForks: process.env.CI ? 2 : undefined, // Limit in CI
                 },
             },
