@@ -26,12 +26,13 @@ import {
     setTokenBalances,
 } from 'test/lib/utils/helper';
 import { POOLS, TOKENS, TestToken, TestPool } from 'test/lib/utils/addresses';
-import { assertSwapExactIn } from 'test/lib/utils/swapHelpers';
 import {
     ANVIL_NETWORKS,
     startFork,
     NetworkSetup,
 } from 'test/anvil/anvil-global-setup';
+import { runSwapTest } from 'test/lib/utils/swapTestRunner';
+import { TEST_CONSTANTS } from 'test/entities/swaps/v3/swapTestConfig';
 
 const protocolVersion = 3;
 
@@ -208,19 +209,27 @@ describe('validateAllNetworks', () => {
                 protocolVersion,
             );
 
-            const swap = new Swap({
-                chainId,
-                paths: [swapPath],
-                swapKind: SwapKind.GivenIn,
-            });
-            await assertSwapExactIn({
-                contractToCall: AddressProvider.Router(chainId),
-                client,
-                rpcUrl,
-                chainId,
-                swap,
-                wethIsEth: false,
-            });
+            // Use runSwapTest without saving results
+            // Pass empty objects so data isn't persisted
+            await runSwapTest(
+                {
+                    chainId,
+                    path: swapPath,
+                    swapKind: SwapKind.GivenIn,
+                    wethIsEth: false,
+                    fork: { rpcUrl },
+                    routerAddress: AddressProvider.Router(chainId),
+                    client,
+                    testAddress,
+                    slippage: TEST_CONSTANTS.slippage,
+                    deadline: TEST_CONSTANTS.deadline,
+                    testName: `validateAllNetworks-${chainId}`,
+                    context: 'network validation',
+                    outputTest: TEST_CONSTANTS.defaultOutputTest,
+                },
+                {}, // Empty savedSwapTestData - always run fresh
+                {}, // Empty swapTestData - don't save results
+            );
         });
     });
 });
