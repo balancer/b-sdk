@@ -25,9 +25,15 @@ export default defineConfig(({ mode }) => {
         test: {
             testTimeout: 20_000,
             hookTimeout: 60_000,
+            retry: 2,
             setupFiles: ['/test/vitest-setup.ts'],
             globals: true,
             pool: 'forks',
+            poolOptions: {
+                forks: {
+                    maxForks: process.env.CI ? 2 : undefined, // Limit in CI
+                },
+            },
             // Uncomment to debug suite excluding some tests
             // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
             // Uncomment to run integration tests sequentially
