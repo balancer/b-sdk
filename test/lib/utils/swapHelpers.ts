@@ -206,10 +206,6 @@ export async function assertSwapExactOut({
     swap,
     wethIsEth,
     usePermit2Signatures = false,
-    inputTest = {
-        testExactInAmount: true,
-        percentage: 0,
-    },
 }: {
     contractToCall: Address;
     client: PublicWalletClient & TestActions;
@@ -218,10 +214,6 @@ export async function assertSwapExactOut({
     swap: Swap;
     wethIsEth: boolean;
     usePermit2Signatures?: boolean;
-    inputTest?: {
-        testExactInAmount: boolean;
-        percentage: number;
-    };
 }) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
@@ -271,7 +263,6 @@ export async function assertSwapExactOut({
         client,
         testAddress,
         call,
-        inputTest,
         exactOutQueryOutput: expected,
     });
 }
@@ -284,7 +275,6 @@ export async function assertResultExactOut({
     client,
     testAddress,
     call,
-    inputTest,
     exactOutQueryOutput,
 }: {
     wethIsEth: boolean;
@@ -294,10 +284,6 @@ export async function assertResultExactOut({
     client: PublicWalletClient & TestActions;
     testAddress: Address;
     call: SwapBuildOutputExactOut;
-    inputTest: {
-        testExactInAmount: boolean;
-        percentage: number;
-    };
     exactOutQueryOutput: ExactOutQueryOutput;
 }) {
     if (exactOutQueryOutput.swapKind !== SwapKind.GivenOut)
@@ -347,23 +333,9 @@ export async function assertResultExactOut({
         expectedTokenOutDelta = 0n;
     }
 
-    if (inputTest.testExactInAmount)
-        expect(balanceDeltas).to.deep.eq([
-            expectedEthDelta,
-            expectedTokenInDelta,
-            expectedTokenOutDelta,
-        ]);
-    else {
-        // Here we check that output diff is within an acceptable tolerance.
-        // !!! This should only be used in the case of buffers as all other cases can be equal
-        expect(balanceDeltas[0]).to.eq(expectedEthDelta);
-        expect(balanceDeltas[2]).to.eq(expectedTokenOutDelta);
-        expect(
-            areBigIntsWithinPercent(
-                balanceDeltas[1],
-                expectedTokenInDelta,
-                inputTest.percentage,
-            ),
-        ).toBe(true);
-    }
+    expect(balanceDeltas).to.deep.eq([
+        expectedEthDelta,
+        expectedTokenInDelta,
+        expectedTokenOutDelta,
+    ]);
 }

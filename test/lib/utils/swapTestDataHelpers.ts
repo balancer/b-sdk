@@ -1,4 +1,4 @@
-import { Address } from 'viem';
+import { Address, Hex } from 'viem';
 import { readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { TokenAmount } from '@/entities/tokenAmount';
@@ -9,6 +9,7 @@ import {
     ExactOutQueryOutput,
     SwapBuildOutputExactIn,
     SwapBuildOutputExactOut,
+    Permit2,
 } from '@/index';
 
 // JSON serialization utility
@@ -321,6 +322,189 @@ export function serializeCallData(
 }
 
 /**
+ * Serializes a Permit2 object to JSON-serializable format.
+ * @param permit2 - The Permit2 object to serialize
+ * @returns Serialized Permit2 data
+ */
+export function serializePermit2(permit2: Permit2): unknown {
+    return {
+        batch: {
+            details: permit2.batch.details.map((detail) => ({
+                token: detail.token,
+                amount: detail.amount.toString(),
+                expiration: detail.expiration,
+                nonce: detail.nonce,
+            })),
+            spender: permit2.batch.spender,
+            sigDeadline: permit2.batch.sigDeadline.toString(),
+        },
+        signature: permit2.signature,
+    };
+}
+
+/**
+ * Deserializes a Permit2 object from JSON.
+ * Validates the structure and data before creating the Permit2 instance.
+ * @param serialized - The serialized Permit2 data
+ * @returns A Permit2 instance
+ * @throws Error if the data structure is invalid or validation fails
+ */
+export function deserializePermit2(serialized: unknown): Permit2 {
+    if (typeof serialized !== 'object' || serialized === null) {
+        throw new Error(
+            `Invalid serialized Permit2: expected object, got ${typeof serialized}`,
+        );
+    }
+
+    const data = serialized as {
+        batch?: {
+            details?: unknown[];
+            spender?: Address;
+            sigDeadline?: string;
+        };
+        signature?: Hex;
+    };
+
+    if (!data.batch || typeof data.batch !== 'object') {
+        throw new Error(
+            'Invalid serialized Permit2: missing or invalid "batch" field',
+        );
+    }
+
+    if (!Array.isArray(data.batch.details)) {
+        throw new Error(
+            'Invalid serialized Permit2: batch.details must be an array',
+        );
+    }
+
+    if (!data.batch.spender || typeof data.batch.spender !== 'string') {
+        throw new Error(
+            'Invalid serialized Permit2: batch.spender must be a valid address string',
+        );
+    }
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(data.batch.spender)) {
+        throw new Error(
+            `Invalid serialized Permit2: batch.spender "${data.batch.spender}" is not a valid Ethereum address`,
+        );
+    }
+
+    if (!data.batch.sigDeadline || typeof data.batch.sigDeadline !== 'string') {
+        throw new Error(
+            'Invalid serialized Permit2: batch.sigDeadline must be a string',
+        );
+    }
+
+    let sigDeadlineBigInt: bigint;
+    try {
+        sigDeadlineBigInt = BigInt(data.batch.sigDeadline);
+    } catch {
+        throw new Error(
+            `Invalid serialized Permit2: batch.sigDeadline "${data.batch.sigDeadline}" cannot be converted to BigInt`,
+        );
+    }
+
+    if (sigDeadlineBigInt < 0n) {
+        throw new Error(
+            `Invalid serialized Permit2: batch.sigDeadline cannot be negative, got ${data.batch.sigDeadline}`,
+        );
+    }
+
+    if (!data.signature || typeof data.signature !== 'string') {
+        throw new Error(
+            'Invalid serialized Permit2: signature must be a valid hex string',
+        );
+    }
+
+    // Validate signature is a hex string
+    if (!/^0x[a-fA-F0-9]+$/.test(data.signature)) {
+        throw new Error(
+            `Invalid serialized Permit2: signature "${data.signature}" is not a valid hex string`,
+        );
+    }
+
+    // Deserialize details array
+    const details = data.batch.details.map((detail, index) => {
+        if (typeof detail !== 'object' || detail === null) {
+            throw new Error(
+                `Invalid serialized Permit2: batch.details[${index}] must be an object`,
+            );
+        }
+
+        const detailData = detail as {
+            token?: Address;
+            amount?: string;
+            expiration?: number;
+            nonce?: number;
+        };
+
+        if (!detailData.token || typeof detailData.token !== 'string') {
+            throw new Error(
+                `Invalid serialized Permit2: batch.details[${index}].token must be a valid address string`,
+            );
+        }
+
+        if (!/^0x[a-fA-F0-9]{40}$/.test(detailData.token)) {
+            throw new Error(
+                `Invalid serialized Permit2: batch.details[${index}].token "${detailData.token}" is not a valid Ethereum address`,
+            );
+        }
+
+        if (!detailData.amount || typeof detailData.amount !== 'string') {
+            throw new Error(
+                `Invalid serialized Permit2: batch.details[${index}].amount must be a string`,
+            );
+        }
+
+        let amountBigInt: bigint;
+        try {
+            amountBigInt = BigInt(detailData.amount);
+        } catch {
+            throw new Error(
+                `Invalid serialized Permit2: batch.details[${index}].amount "${detailData.amount}" cannot be converted to BigInt`,
+            );
+        }
+
+        if (amountBigInt < 0n) {
+            throw new Error(
+                `Invalid serialized Permit2: batch.details[${index}].amount cannot be negative, got ${detailData.amount}`,
+            );
+        }
+
+        if (
+            typeof detailData.expiration !== 'number' ||
+            detailData.expiration < 0
+        ) {
+            throw new Error(
+                `Invalid serialized Permit2: batch.details[${index}].expiration must be a non-negative number, got ${detailData.expiration}`,
+            );
+        }
+
+        if (typeof detailData.nonce !== 'number' || detailData.nonce < 0) {
+            throw new Error(
+                `Invalid serialized Permit2: batch.details[${index}].nonce must be a non-negative number, got ${detailData.nonce}`,
+            );
+        }
+
+        return {
+            token: detailData.token,
+            amount: amountBigInt,
+            expiration: detailData.expiration,
+            nonce: detailData.nonce,
+        };
+    });
+
+    return {
+        batch: {
+            details,
+            spender: data.batch.spender,
+            sigDeadline: sigDeadlineBigInt,
+        },
+        signature: data.signature,
+    };
+}
+
+/**
  * Loads swap test data from a JSON file.
  * Returns an empty object if the file doesn't exist or can't be read.
  * @param filePath - Path to the JSON file
@@ -395,26 +579,51 @@ export async function saveSwapTestData(
 
 /**
  * Type representing saved swap test data with serialized query output and call data.
+ * permit2 is optional and only present for "permit2 signature approval" tests.
  */
 export type SavedSwapTestData = {
     queryOutput: unknown;
-    call: unknown;
+    call: {
+        to: Address;
+        callData: string; // Hex string in JSON
+        value: string; // Serialized as string in JSON
+    };
+    permit2?: unknown;
 };
 
 /**
  * Type guard to check if data is valid saved swap test data.
  * Valid saved data must be an object with both 'queryOutput' and 'call' properties.
+ * The 'call' property must be an object with 'to', 'callData', and 'value' properties.
+ * 'permit2' is optional and only present for "permit2 signature approval" tests.
  * @param data - Data to check
  * @returns True if data is valid SavedSwapTestData, false otherwise
  */
 export function hasSavedTestData(data: unknown): data is SavedSwapTestData {
-    return (
-        data !== undefined &&
-        data !== null &&
-        typeof data === 'object' &&
-        'queryOutput' in data &&
-        'call' in data
-    );
+    if (data === undefined || data === null || typeof data !== 'object') {
+        return false;
+    }
+
+    const obj = data as Record<string, unknown>;
+
+    // Check top-level structure
+    if (!('queryOutput' in obj) || !('call' in obj)) {
+        return false;
+    }
+
+    // Check that call is an object with required properties
+    const call = obj.call;
+    if (
+        typeof call !== 'object' ||
+        call === null ||
+        !('to' in call) ||
+        !('callData' in call) ||
+        !('value' in call)
+    ) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -490,6 +699,45 @@ export function allTestsHaveSavedData(
         typeof tokenOutput !== 'object' ||
         !hasSavedTestData((tokenOutput as Record<string, unknown>).GivenIn) ||
         !hasSavedTestData((tokenOutput as Record<string, unknown>).GivenOut)
+    ) {
+        return false;
+    }
+
+    // Check permit2 signature approval tests
+    const permit2Signature = testDataObj['permit2 signature approval'];
+    if (!permit2Signature || typeof permit2Signature !== 'object') {
+        return false;
+    }
+    const permit2SignatureObj = permit2Signature as Record<string, unknown>;
+
+    // Check native output tests (if applicable)
+    if (test.isNative === 'output') {
+        const nativeOutput = permit2SignatureObj['native output'];
+        if (
+            !nativeOutput ||
+            typeof nativeOutput !== 'object' ||
+            !hasSavedTestData(
+                (nativeOutput as Record<string, unknown>).GivenIn,
+            ) ||
+            !hasSavedTestData(
+                (nativeOutput as Record<string, unknown>).GivenOut,
+            )
+        ) {
+            return false;
+        }
+    }
+
+    // Check token output tests (always present)
+    const tokenOutputSignature = permit2SignatureObj['token output'];
+    if (
+        !tokenOutputSignature ||
+        typeof tokenOutputSignature !== 'object' ||
+        !hasSavedTestData(
+            (tokenOutputSignature as Record<string, unknown>).GivenIn,
+        ) ||
+        !hasSavedTestData(
+            (tokenOutputSignature as Record<string, unknown>).GivenOut,
+        )
     ) {
         return false;
     }
