@@ -23,8 +23,8 @@ import {
 
 import { ANVIL_NETWORKS, startFork } from 'test/anvil/anvil-global-setup';
 import {
-    assertSwapExactIn,
-    assertSwapExactOut,
+    assertV2SwapExactIn,
+    assertV2SwapExactOut,
     forkSetup,
     TOKENS,
 } from 'test/lib/utils';
@@ -94,8 +94,8 @@ describe('SwapV2', () => {
         snapshot = await client.snapshot();
     });
 
-    describe('swap should be executed correcly', () => {
-        describe('wethIsEth: false', () => {
+    describe.sequential('swap should be executed correcly', () => {
+        describe.sequential('wethIsEth: false', () => {
             const wethIsEth = false;
             const swapParams = {
                 chainId,
@@ -106,7 +106,7 @@ describe('SwapV2', () => {
                     ...swapParams,
                     swapKind: SwapKind.GivenIn,
                 });
-                await assertSwapExactIn({
+                await assertV2SwapExactIn({
                     contractToCall: vault,
                     client,
                     rpcUrl,
@@ -120,7 +120,7 @@ describe('SwapV2', () => {
                     ...swapParams,
                     swapKind: SwapKind.GivenOut,
                 });
-                await assertSwapExactOut({
+                await assertV2SwapExactOut({
                     contractToCall: vault,
                     client,
                     rpcUrl,
@@ -130,16 +130,16 @@ describe('SwapV2', () => {
                 });
             });
         });
-        describe('wethIsEth: true', () => {
+        describe.sequential('wethIsEth: true', () => {
             const wethIsEth = true;
-            describe('eth out', async () => {
+            describe.sequential('eth out', async () => {
                 test('GivenIn', async () => {
                     const swap = new Swap({
                         chainId,
                         paths: [pathBalWeth],
                         swapKind: SwapKind.GivenIn,
                     });
-                    await assertSwapExactIn({
+                    await assertV2SwapExactIn({
                         contractToCall: vault,
                         client,
                         rpcUrl,
@@ -154,7 +154,7 @@ describe('SwapV2', () => {
                         paths: [pathBalWeth],
                         swapKind: SwapKind.GivenOut,
                     });
-                    await assertSwapExactOut({
+                    await assertV2SwapExactOut({
                         contractToCall: vault,
                         client,
                         rpcUrl,
@@ -164,7 +164,7 @@ describe('SwapV2', () => {
                     });
                 });
             });
-            describe('eth in', () => {
+            describe.sequential('eth in', () => {
                 test('GivenIn', async () => {
                     const pathWethBal = {
                         ...pathBalWeth,
@@ -175,7 +175,7 @@ describe('SwapV2', () => {
                         paths: [pathWethBal],
                         swapKind: SwapKind.GivenIn,
                     });
-                    await assertSwapExactIn({
+                    await assertV2SwapExactIn({
                         contractToCall: vault,
                         client,
                         rpcUrl,
@@ -194,7 +194,7 @@ describe('SwapV2', () => {
                         paths: [pathWethBal],
                         swapKind: SwapKind.GivenOut,
                     });
-                    await assertSwapExactOut({
+                    await assertV2SwapExactOut({
                         contractToCall: vault,
                         client,
                         rpcUrl,

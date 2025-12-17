@@ -31,18 +31,13 @@ export function areBigIntsWithinPercent(
     return difference <= tolerance;
 }
 
-export async function assertSwapExactIn({
+export async function assertV2SwapExactIn({
     contractToCall,
     client,
     rpcUrl,
     chainId,
     swap,
     wethIsEth,
-    usePermit2Signatures = false,
-    outputTest = {
-        testExactOutAmount: true,
-        percentage: 0,
-    },
 }: {
     contractToCall: Address;
     client: PublicWalletClient & TestActions;
@@ -64,36 +59,16 @@ export async function assertSwapExactIn({
     if (expected.swapKind !== SwapKind.GivenIn) throw Error('Expected GivenIn');
     expect(expected.expectedAmountOut.amount > 0n).to.be.true;
 
-    let buildCallInput: SwapBuildCallInput = {
+    const buildCallInput: SwapBuildCallInput = {
         slippage,
         deadline,
         queryOutput: expected,
         wethIsEth,
+        sender: testAddress,
+        recipient: testAddress,
     };
 
-    if (swap.protocolVersion === 2) {
-        buildCallInput = {
-            ...buildCallInput,
-            sender: testAddress,
-            recipient: testAddress,
-        };
-    }
-
-    let call: SwapBuildOutputExactIn;
-    if (usePermit2Signatures) {
-        const permit2 = await Permit2Helper.signSwapApproval({
-            ...buildCallInput,
-            client,
-            owner: testAddress,
-        });
-
-        call = swap.buildCallWithPermit2(
-            buildCallInput,
-            permit2,
-        ) as SwapBuildOutputExactIn;
-    } else {
-        call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
-    }
+    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
 
     await assertResultExactIn({
         wethIsEth,
@@ -103,7 +78,10 @@ export async function assertSwapExactIn({
         client,
         testAddress,
         call,
-        outputTest,
+        outputTest: {
+            testExactOutAmount: true,
+            percentage: 0,
+        },
         exactInQueryOutput: expected,
     });
 }
@@ -198,14 +176,13 @@ export async function assertResultExactIn({
     }
 }
 
-export async function assertSwapExactOut({
+export async function assertV2SwapExactOut({
     contractToCall,
     client,
     rpcUrl,
     chainId,
     swap,
     wethIsEth,
-    usePermit2Signatures = false,
 }: {
     contractToCall: Address;
     client: PublicWalletClient & TestActions;
@@ -213,7 +190,6 @@ export async function assertSwapExactOut({
     chainId: ChainId;
     swap: Swap;
     wethIsEth: boolean;
-    usePermit2Signatures?: boolean;
 }) {
     const testAddress = (await client.getAddresses())[0];
     const slippage = Slippage.fromPercentage('0.1');
@@ -223,37 +199,18 @@ export async function assertSwapExactOut({
     if (expected.swapKind !== SwapKind.GivenOut)
         throw Error('Expected GivenOut');
 
-    let buildCallInput: SwapBuildCallInput = {
+    const buildCallInput: SwapBuildCallInput = {
         slippage,
         deadline,
         queryOutput: expected,
         wethIsEth,
+        sender: testAddress,
+        recipient: testAddress,
     };
 
-    if (swap.protocolVersion === 2) {
-        buildCallInput = {
-            ...buildCallInput,
-            sender: testAddress,
-            recipient: testAddress,
-        };
-    }
     expect(expected.expectedAmountIn.amount > 0n).to.be.true;
 
-    let call: SwapBuildOutputExactOut;
-    if (usePermit2Signatures) {
-        const permit2 = await Permit2Helper.signSwapApproval({
-            ...buildCallInput,
-            client,
-            owner: testAddress,
-        });
-
-        call = swap.buildCallWithPermit2(
-            buildCallInput,
-            permit2,
-        ) as SwapBuildOutputExactOut;
-    } else {
-        call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
-    }
+    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
 
     await assertResultExactOut({
         wethIsEth,
