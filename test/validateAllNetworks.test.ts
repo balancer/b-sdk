@@ -218,7 +218,7 @@ describe('validateAllNetworks', () => {
                     swapKind: SwapKind.GivenIn,
                     wethIsEth: false,
                     fork: { rpcUrl },
-                    routerAddress: AddressProvider.Router(chainId),
+                    contractToCall: AddressProvider.Router(chainId),
                     client,
                     testAddress,
                     slippage: TEST_CONSTANTS.slippage,

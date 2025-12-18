@@ -12,5 +12,8 @@ export * from './removeLiquidityHelper';
 export * from './removeLiquidityRecoveryHelper';
 export * from './swapHelpers';
 export * from './swapTestDataHelpers';
+export * from './swapTestRunner';
+export * from './swapAssertHelpers';
+export * from './swapTestFixture';
 export * from './types';
 export * from './addLiquidityBoostedHelper';

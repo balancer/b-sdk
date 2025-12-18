@@ -4,7 +4,10 @@ import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
 } from '@/index';
-import { deserializeQueryOutput, hasSavedTestData } from './swapTestDataHelpers';
+import {
+    deserializeQueryOutput,
+    hasSavedTestData,
+} from './swapTestDataHelpers';
 
 /**
  * Loads query output from saved test data or by querying the swap.
@@ -51,4 +54,3 @@ export async function loadQueryOutput<
     }
     return queryResult as T;
 }
-

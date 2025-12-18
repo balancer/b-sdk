@@ -11,12 +11,11 @@ import {
 } from '@/index';
 import { expect } from 'vitest';
 import { assertResultExactIn, assertResultExactOut } from './swapHelpers';
-import { TEST_CONSTANTS } from '../../entities/swaps/v3/swapTestConfig';
 
 export async function assertSwapResultWithForkTest({
     swap,
     chainId,
-    routerAddress,
+    contractToCall,
     client,
     testAddress,
     call,
@@ -27,14 +26,14 @@ export async function assertSwapResultWithForkTest({
 }: {
     swap: Swap;
     chainId: ChainId;
-    routerAddress: Address;
+    contractToCall: Address;
     client?: PublicWalletClient & TestActions;
     testAddress: Address;
     call: SwapBuildOutputExactIn | SwapBuildOutputExactOut;
     queryOutput: ExactInQueryOutput | ExactOutQueryOutput;
     swapKind: SwapKind;
     wethIsEth: boolean;
-    outputTest?: {
+    outputTest: {
         testExactOutAmount: boolean;
         percentage: number;
     };
@@ -50,11 +49,11 @@ export async function assertSwapResultWithForkTest({
             wethIsEth,
             swap,
             chainId,
-            contractToCall: routerAddress,
+            contractToCall,
             client,
             testAddress,
             call: call as SwapBuildOutputExactIn,
-            outputTest: outputTest || TEST_CONSTANTS.defaultOutputTest,
+            outputTest,
             exactInQueryOutput: queryOutput as ExactInQueryOutput,
         });
     } else {
@@ -62,7 +61,7 @@ export async function assertSwapResultWithForkTest({
             wethIsEth,
             swap,
             chainId,
-            contractToCall: routerAddress,
+            contractToCall,
             client,
             testAddress,
             call: call as SwapBuildOutputExactOut,

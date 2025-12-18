@@ -25,7 +25,6 @@ import {
     deserializePermit2,
     serializeQueryOutput,
 } from './swapTestDataHelpers';
-import { TEST_CONSTANTS } from '../../entities/swaps/v3/swapTestConfig';
 
 /**
  * Configuration for running a swap test.
@@ -36,7 +35,7 @@ export type TestSwapConfig = {
     swapKind: SwapKind;
     wethIsEth: boolean;
     fork?: { rpcUrl: string };
-    routerAddress: Address;
+    contractToCall: Address;
     client?: PublicWalletClient & TestActions;
     testAddress: Address;
     slippage: Slippage;
@@ -44,7 +43,7 @@ export type TestSwapConfig = {
     testName: string;
     context: string;
     subContext?: string;
-    outputTest?: {
+    outputTest: {
         testExactOutAmount: boolean;
         percentage: number;
     };
@@ -69,7 +68,7 @@ async function executeSwapTestCore(
         swapKind,
         wethIsEth,
         fork,
-        routerAddress,
+        contractToCall,
         client,
         testAddress,
         slippage,
@@ -77,7 +76,7 @@ async function executeSwapTestCore(
         testName,
         context,
         subContext,
-        outputTest = TEST_CONSTANTS.defaultOutputTest,
+        outputTest,
     } = config;
 
     const swap = new Swap({
@@ -111,6 +110,7 @@ async function executeSwapTestCore(
               );
 
     // Build and serialize call (use permit2 variant if permit2 is provided)
+    // V2 swaps require sender and recipient, V3 swaps don't
     const { call, serializedCall } = permit2ToUse
         ? buildAndSerializeCallWithPermit2(
               swap,
@@ -126,6 +126,8 @@ async function executeSwapTestCore(
               slippage,
               deadline,
               wethIsEth,
+              swap.protocolVersion === 2 ? testAddress : undefined,
+              swap.protocolVersion === 2 ? testAddress : undefined,
           );
 
     if (hasSavedTestData(savedData)) {
@@ -137,7 +139,7 @@ async function executeSwapTestCore(
     await assertSwapResultWithForkTest({
         swap,
         chainId,
-        routerAddress,
+        contractToCall,
         client,
         testAddress,
         call,
@@ -175,12 +177,7 @@ export async function runSwapTest(
     savedSwapTestData: Record<string, unknown>,
     swapTestData: Record<string, unknown>,
 ): Promise<void> {
-    return executeSwapTestCore(
-        config,
-        savedSwapTestData,
-        swapTestData,
-        undefined,
-    );
+    return executeSwapTestCore(config, savedSwapTestData, swapTestData);
 }
 
 /**

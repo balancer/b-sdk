@@ -101,4 +101,3 @@ export function setTestData(
         contextDataObj[swapKindKey] = dataToSave;
     }
 }
-

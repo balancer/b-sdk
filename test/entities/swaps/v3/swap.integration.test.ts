@@ -11,7 +11,7 @@ import {
 
 import { stopAnvilFork } from 'test/anvil/anvil-global-setup';
 import {
-    setupForkAndClient,
+    setupForkAndClientV3,
     setupPermit2Approval,
     setupPermit2Signature,
 } from 'test/lib/utils/swapTestFixture';
@@ -24,7 +24,6 @@ import {
 import {
     runSwapTest,
     runSwapTestWithSignature,
-    type TestSwapConfig,
 } from 'test/lib/utils/swapTestRunner';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -53,7 +52,7 @@ for (const test of tests) {
         let fork: { rpcUrl: string } | undefined;
         let client: (PublicWalletClient & TestActions) | undefined;
         const testAddress = TEST_CONSTANTS.ANVIL_TEST_ADDRESS;
-        const routerAddress =
+        const contractToCall =
             test.path.pools.length > 1
                 ? AddressProvider.BatchRouter(test.chainId)
                 : AddressProvider.Router(test.chainId);
@@ -61,7 +60,11 @@ for (const test of tests) {
         beforeAll(async () => {
             // Only run fork/client setup if at least one test doesn't have saved data
             if (!allTestsHaveSavedData(test, savedSwapTestData)) {
-                const setup = await setupForkAndClient(test, jobId);
+                const setup = await setupForkAndClientV3(
+                    test,
+                    jobId,
+                    testAddress,
+                );
                 fork = setup.fork;
                 client = setup.client;
                 snapshotPreApprove = setup.snapshotPreApprove;
@@ -77,7 +80,7 @@ for (const test of tests) {
                             swapKind: SwapKind.GivenIn,
                             wethIsEth: true,
                             fork,
-                            routerAddress,
+                            contractToCall,
                             client,
                             testAddress,
                             slippage: TEST_CONSTANTS.slippage,
@@ -85,6 +88,9 @@ for (const test of tests) {
                             testName: test.name,
                             context: 'native input',
                             subContext: undefined,
+                            outputTest:
+                                test.outputTest ||
+                                TEST_CONSTANTS.defaultOutputTest,
                         },
                         savedSwapTestData,
                         swapTestData,
@@ -98,7 +104,7 @@ for (const test of tests) {
                             swapKind: SwapKind.GivenOut,
                             wethIsEth: true,
                             fork,
-                            routerAddress,
+                            contractToCall,
                             client,
                             testAddress,
                             slippage: TEST_CONSTANTS.slippage,
@@ -106,6 +112,9 @@ for (const test of tests) {
                             testName: test.name,
                             context: 'native input',
                             subContext: undefined,
+                            outputTest:
+                                test.outputTest ||
+                                TEST_CONSTANTS.defaultOutputTest,
                         },
                         savedSwapTestData,
                         swapTestData,
@@ -125,7 +134,8 @@ for (const test of tests) {
                             client,
                             testAddress,
                             test.path,
-                            routerAddress,
+                            contractToCall,
+                            TEST_CONSTANTS.BALANCE_MULTIPLIER,
                         );
                     permit2 = permit2Sig;
                     snapShotPermit2 = snapshot;
@@ -152,7 +162,7 @@ for (const test of tests) {
                                 swapKind: SwapKind.GivenIn,
                                 wethIsEth: true,
                                 fork,
-                                routerAddress,
+                                contractToCall,
                                 client,
                                 testAddress,
                                 slippage: TEST_CONSTANTS.slippage,
@@ -160,6 +170,9 @@ for (const test of tests) {
                                 testName: test.name,
                                 context: 'permit2 signature approval',
                                 subContext: 'native output',
+                                outputTest:
+                                    test.outputTest ||
+                                    TEST_CONSTANTS.defaultOutputTest,
                             },
                             savedSwapTestData,
                             swapTestData,
@@ -174,7 +187,7 @@ for (const test of tests) {
                                 swapKind: SwapKind.GivenOut,
                                 wethIsEth: true,
                                 fork,
-                                routerAddress,
+                                contractToCall,
                                 client,
                                 testAddress,
                                 slippage: TEST_CONSTANTS.slippage,
@@ -182,6 +195,9 @@ for (const test of tests) {
                                 testName: test.name,
                                 context: 'permit2 signature approval',
                                 subContext: 'native output',
+                                outputTest:
+                                    test.outputTest ||
+                                    TEST_CONSTANTS.defaultOutputTest,
                             },
                             savedSwapTestData,
                             swapTestData,
@@ -200,7 +216,7 @@ for (const test of tests) {
                             swapKind: SwapKind.GivenIn,
                             wethIsEth: false,
                             fork,
-                            routerAddress,
+                            contractToCall,
                             client,
                             testAddress,
                             slippage: TEST_CONSTANTS.slippage,
@@ -208,7 +224,9 @@ for (const test of tests) {
                             testName: test.name,
                             context: 'permit2 signature approval',
                             subContext: 'token output',
-                            outputTest: test.outputTest,
+                            outputTest:
+                                test.outputTest ||
+                                TEST_CONSTANTS.defaultOutputTest,
                         },
                         savedSwapTestData,
                         swapTestData,
@@ -224,7 +242,7 @@ for (const test of tests) {
                             swapKind: SwapKind.GivenOut,
                             wethIsEth: false,
                             fork,
-                            routerAddress,
+                            contractToCall,
                             client,
                             testAddress,
                             slippage: TEST_CONSTANTS.slippage,
@@ -232,6 +250,9 @@ for (const test of tests) {
                             testName: test.name,
                             context: 'permit2 signature approval',
                             subContext: 'token output',
+                            outputTest:
+                                test.outputTest ||
+                                TEST_CONSTANTS.defaultOutputTest,
                         },
                         savedSwapTestData,
                         swapTestData,
@@ -248,8 +269,9 @@ for (const test of tests) {
                         client,
                         testAddress,
                         test.path,
-                        routerAddress,
+                        contractToCall,
                         snapshotPreApprove,
+                        TEST_CONSTANTS.BALANCE_MULTIPLIER,
                     );
                 }
             });
@@ -264,7 +286,7 @@ for (const test of tests) {
                                 swapKind: SwapKind.GivenIn,
                                 wethIsEth: true,
                                 fork,
-                                routerAddress,
+                                contractToCall,
                                 client,
                                 testAddress,
                                 slippage: TEST_CONSTANTS.slippage,
@@ -272,6 +294,9 @@ for (const test of tests) {
                                 testName: test.name,
                                 context: 'permit2 direct approval',
                                 subContext: 'native output',
+                                outputTest:
+                                    test.outputTest ||
+                                    TEST_CONSTANTS.defaultOutputTest,
                             },
                             savedSwapTestData,
                             swapTestData,
@@ -285,7 +310,7 @@ for (const test of tests) {
                                 swapKind: SwapKind.GivenOut,
                                 wethIsEth: true,
                                 fork,
-                                routerAddress,
+                                contractToCall,
                                 client,
                                 testAddress,
                                 slippage: TEST_CONSTANTS.slippage,
@@ -293,6 +318,9 @@ for (const test of tests) {
                                 testName: test.name,
                                 context: 'permit2 direct approval',
                                 subContext: 'native output',
+                                outputTest:
+                                    test.outputTest ||
+                                    TEST_CONSTANTS.defaultOutputTest,
                             },
                             savedSwapTestData,
                             swapTestData,
@@ -310,7 +338,7 @@ for (const test of tests) {
                             swapKind: SwapKind.GivenIn,
                             wethIsEth: false,
                             fork,
-                            routerAddress,
+                            contractToCall,
                             client,
                             testAddress,
                             slippage: TEST_CONSTANTS.slippage,
@@ -318,7 +346,9 @@ for (const test of tests) {
                             testName: test.name,
                             context: 'permit2 direct approval',
                             subContext: 'token output',
-                            outputTest: test.outputTest,
+                            outputTest:
+                                test.outputTest ||
+                                TEST_CONSTANTS.defaultOutputTest,
                         },
                         savedSwapTestData,
                         swapTestData,
@@ -333,7 +363,7 @@ for (const test of tests) {
                             swapKind: SwapKind.GivenOut,
                             wethIsEth: false,
                             fork,
-                            routerAddress,
+                            contractToCall,
                             client,
                             testAddress,
                             slippage: TEST_CONSTANTS.slippage,
@@ -341,6 +371,9 @@ for (const test of tests) {
                             testName: test.name,
                             context: 'permit2 direct approval',
                             subContext: 'token output',
+                            outputTest:
+                                test.outputTest ||
+                                TEST_CONSTANTS.defaultOutputTest,
                         },
                         savedSwapTestData,
                         swapTestData,

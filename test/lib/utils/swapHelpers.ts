@@ -1,15 +1,12 @@
 import { Address, TestActions } from 'viem';
 import {
     ChainId,
-    Slippage,
     Swap,
     ZERO_ADDRESS,
     SwapBuildOutputExactOut,
     NATIVE_ASSETS,
     SwapBuildOutputExactIn,
-    SwapBuildCallInput,
     SwapKind,
-    Permit2Helper,
     PublicWalletClient,
     ExactOutQueryOutput,
     ExactInQueryOutput,
@@ -29,61 +26,6 @@ export function areBigIntsWithinPercent(
     const percentFactor = BigInt(Math.floor(percent * 1e8));
     const tolerance = (value2 * percentFactor) / BigInt(1e10);
     return difference <= tolerance;
-}
-
-export async function assertV2SwapExactIn({
-    contractToCall,
-    client,
-    rpcUrl,
-    chainId,
-    swap,
-    wethIsEth,
-}: {
-    contractToCall: Address;
-    client: PublicWalletClient & TestActions;
-    rpcUrl: string;
-    chainId: ChainId;
-    swap: Swap;
-    wethIsEth: boolean;
-    usePermit2Signatures?: boolean;
-    outputTest?: {
-        testExactOutAmount: boolean;
-        percentage: number;
-    };
-}) {
-    const testAddress = (await client.getAddresses())[0];
-    const slippage = Slippage.fromPercentage('0.1');
-    const deadline = 999999999999999999n;
-
-    const expected = await swap.query(rpcUrl);
-    if (expected.swapKind !== SwapKind.GivenIn) throw Error('Expected GivenIn');
-    expect(expected.expectedAmountOut.amount > 0n).to.be.true;
-
-    const buildCallInput: SwapBuildCallInput = {
-        slippage,
-        deadline,
-        queryOutput: expected,
-        wethIsEth,
-        sender: testAddress,
-        recipient: testAddress,
-    };
-
-    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactIn;
-
-    await assertResultExactIn({
-        wethIsEth,
-        swap,
-        chainId,
-        contractToCall,
-        client,
-        testAddress,
-        call,
-        outputTest: {
-            testExactOutAmount: true,
-            percentage: 0,
-        },
-        exactInQueryOutput: expected,
-    });
 }
 
 export async function assertResultExactIn({
@@ -174,54 +116,6 @@ export async function assertResultExactIn({
             ),
         ).toBe(true);
     }
-}
-
-export async function assertV2SwapExactOut({
-    contractToCall,
-    client,
-    rpcUrl,
-    chainId,
-    swap,
-    wethIsEth,
-}: {
-    contractToCall: Address;
-    client: PublicWalletClient & TestActions;
-    rpcUrl: string;
-    chainId: ChainId;
-    swap: Swap;
-    wethIsEth: boolean;
-}) {
-    const testAddress = (await client.getAddresses())[0];
-    const slippage = Slippage.fromPercentage('0.1');
-    const deadline = 999999999999999999n;
-
-    const expected = await swap.query(rpcUrl);
-    if (expected.swapKind !== SwapKind.GivenOut)
-        throw Error('Expected GivenOut');
-
-    const buildCallInput: SwapBuildCallInput = {
-        slippage,
-        deadline,
-        queryOutput: expected,
-        wethIsEth,
-        sender: testAddress,
-        recipient: testAddress,
-    };
-
-    expect(expected.expectedAmountIn.amount > 0n).to.be.true;
-
-    const call = swap.buildCall(buildCallInput) as SwapBuildOutputExactOut;
-
-    await assertResultExactOut({
-        wethIsEth,
-        swap,
-        chainId,
-        contractToCall,
-        client,
-        testAddress,
-        call,
-        exactOutQueryOutput: expected,
-    });
 }
 
 export async function assertResultExactOut({
