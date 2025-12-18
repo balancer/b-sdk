@@ -25,7 +25,10 @@ export const serializeTokenAmount = (tokenAmount: TokenAmount) => {
             ...(tokenAmount.token.name !== undefined && {
                 name: tokenAmount.token.name,
             }),
-            wrapped: tokenAmount.token.wrapped,
+            ...('wrapped' in tokenAmount.token &&
+                tokenAmount.token.wrapped !== undefined && {
+                    wrapped: tokenAmount.token.wrapped,
+                }),
         },
         amount: tokenAmount.amount.toString(),
         scalar: tokenAmount.scalar.toString(),
@@ -66,7 +69,7 @@ export const deserializeTokenAmount = (serialized: unknown): TokenAmount => {
             decimals: number;
             symbol?: string;
             name?: string;
-            wrapped: Address;
+            wrapped?: Address;
         };
         amount: string;
         scalar?: string;
@@ -81,10 +84,11 @@ export const deserializeTokenAmount = (serialized: unknown): TokenAmount => {
         typeof data.token.chainId !== 'number' ||
         typeof data.token.address !== 'string' ||
         typeof data.token.decimals !== 'number' ||
-        typeof data.token.wrapped !== 'string'
+        (data.token.wrapped !== undefined &&
+            typeof data.token.wrapped !== 'string')
     ) {
         throw new Error(
-            'Invalid serialized TokenAmount: token object is malformed or missing required fields (chainId, address, decimals, wrapped)',
+            'Invalid serialized TokenAmount: token object is malformed or missing required fields (chainId, address, decimals)',
         );
     }
 
@@ -117,7 +121,10 @@ export const deserializeTokenAmount = (serialized: unknown): TokenAmount => {
             `Invalid serialized TokenAmount: token address "${data.token.address}" is not a valid Ethereum address`,
         );
     }
-    if (!/^0x[a-fA-F0-9]{40}$/.test(data.token.wrapped)) {
+    if (
+        data.token.wrapped !== undefined &&
+        !/^0x[a-fA-F0-9]{40}$/.test(data.token.wrapped)
+    ) {
         throw new Error(
             `Invalid serialized TokenAmount: wrapped address "${data.token.wrapped}" is not a valid Ethereum address`,
         );
@@ -136,7 +143,6 @@ export const deserializeTokenAmount = (serialized: unknown): TokenAmount => {
         data.token.decimals,
         data.token.symbol,
         data.token.name,
-        data.token.wrapped,
     );
     return TokenAmount.fromRawAmount(token, amountBigInt);
 };

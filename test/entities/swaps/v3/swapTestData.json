@@ -9,8 +9,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x4200000000000000000000000000000000000006",
-                            "decimals": 18,
-                            "wrapped": "0x4200000000000000000000000000000000000006"
+                            "decimals": 18
                         },
                         "amount": "10000000000000000",
                         "scalar": "1",
@@ -21,8 +20,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                            "decimals": 6,
-                            "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                            "decimals": 6
                         },
                         "amount": "27910757",
                         "scalar": "1000000000000",
@@ -38,8 +36,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                            "decimals": 6,
-                            "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                            "decimals": 6
                         },
                         "amount": "27882846",
                         "scalar": "1000000000000",
@@ -56,8 +53,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                            "decimals": 6,
-                            "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                            "decimals": 6
                         },
                         "amount": "100000000",
                         "scalar": "1000000000000",
@@ -68,8 +64,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x4200000000000000000000000000000000000006",
-                            "decimals": 18,
-                            "wrapped": "0x4200000000000000000000000000000000000006"
+                            "decimals": 18
                         },
                         "amount": "36196306603632216",
                         "scalar": "1",
@@ -85,8 +80,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x4200000000000000000000000000000000000006",
-                            "decimals": 18,
-                            "wrapped": "0x4200000000000000000000000000000000000006"
+                            "decimals": 18
                         },
                         "amount": "36232502910235848",
                         "scalar": "1",
@@ -106,8 +100,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "10000000000000000",
                             "scalar": "1",
@@ -118,8 +111,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "27346989",
                             "scalar": "1000000000000",
@@ -135,8 +127,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "27319642",
                             "scalar": "1000000000000",
@@ -168,8 +159,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "100000000",
                             "scalar": "1000000000000",
@@ -180,8 +170,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "36782051712834578",
                             "scalar": "1",
@@ -197,8 +186,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "36818833764547412",
                             "scalar": "1",
@@ -234,8 +222,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "10000000000000000",
                             "scalar": "1",
@@ -246,8 +233,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "27910757",
                             "scalar": "1000000000000",
@@ -263,8 +249,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "27882846",
                             "scalar": "1000000000000",
@@ -281,8 +266,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "100000000",
                             "scalar": "1000000000000",
@@ -293,8 +277,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "36196306603632216",
                             "scalar": "1",
@@ -310,8 +293,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "36232502910235848",
                             "scalar": "1",
@@ -334,8 +316,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "1000000000",
                             "scalar": "1000000000000",
@@ -346,8 +327,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "331115889255098973",
                             "scalar": "1",
@@ -363,8 +343,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "330784773365843874",
                             "scalar": "1",
@@ -396,8 +375,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "100000000000000000",
                             "scalar": "1",
@@ -408,8 +386,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "286143408",
                             "scalar": "1000000000000",
@@ -425,8 +402,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "286429551",
                             "scalar": "1000000000000",
@@ -460,8 +436,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "1000000000",
                             "scalar": "1000000000000",
@@ -472,8 +447,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "331115889255098973",
                             "scalar": "1",
@@ -489,8 +463,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "330784773365843874",
                             "scalar": "1",
@@ -522,8 +495,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "100000000000000000",
                             "scalar": "1",
@@ -534,8 +506,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "286143408",
                             "scalar": "1000000000000",
@@ -551,8 +522,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "286429551",
                             "scalar": "1000000000000",
@@ -588,8 +558,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "1000000000",
                             "scalar": "1000000000000",
@@ -600,8 +569,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "331115889255098973",
                             "scalar": "1",
@@ -617,8 +585,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "330784773365843874",
                             "scalar": "1",
@@ -635,8 +602,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "100000000000000000",
                             "scalar": "1",
@@ -647,8 +613,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "334014320",
                             "scalar": "1000000000000",
@@ -664,8 +629,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "334348334",
                             "scalar": "1000000000000",
@@ -684,8 +648,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "1000000000",
                             "scalar": "1000000000000",
@@ -696,8 +659,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "272624076217920941",
                             "scalar": "1",
@@ -713,8 +675,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "272351452141703020",
                             "scalar": "1",
@@ -731,8 +692,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "100000000000000000",
                             "scalar": "1",
@@ -743,8 +703,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "403791060",
                             "scalar": "1000000000000",
@@ -760,8 +719,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-                                "decimals": 6,
-                                "wrapped": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                                "decimals": 6
                             },
                             "amount": "404194851",
                             "scalar": "1000000000000",
@@ -784,8 +742,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x4200000000000000000000000000000000000006",
-                            "decimals": 18,
-                            "wrapped": "0x4200000000000000000000000000000000000006"
+                            "decimals": 18
                         },
                         "amount": "10000000000000000",
                         "scalar": "1",
@@ -796,8 +753,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                            "decimals": 6,
-                            "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                            "decimals": 6
                         },
                         "amount": "24016376",
                         "scalar": "1000000000000",
@@ -813,8 +769,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                            "decimals": 6,
-                            "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                            "decimals": 6
                         },
                         "amount": "23992359",
                         "scalar": "1000000000000",
@@ -832,8 +787,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                            "decimals": 6,
-                            "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                            "decimals": 6
                         },
                         "amount": "100000000",
                         "scalar": "1000000000000",
@@ -844,8 +798,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x4200000000000000000000000000000000000006",
-                            "decimals": 18,
-                            "wrapped": "0x4200000000000000000000000000000000000006"
+                            "decimals": 18
                         },
                         "amount": "42120778391056420",
                         "scalar": "1",
@@ -861,8 +814,7 @@
                         "token": {
                             "chainId": 8453,
                             "address": "0x4200000000000000000000000000000000000006",
-                            "decimals": 18,
-                            "wrapped": "0x4200000000000000000000000000000000000006"
+                            "decimals": 18
                         },
                         "amount": "42162899169447476",
                         "scalar": "1",
@@ -883,8 +835,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "10000000000000000",
                             "scalar": "1",
@@ -895,8 +846,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "23469866",
                             "scalar": "1000000000000",
@@ -912,8 +862,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "23446396",
                             "scalar": "1000000000000",
@@ -946,8 +895,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "100000000",
                             "scalar": "1000000000000",
@@ -958,8 +906,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "42915394418564706",
                             "scalar": "1",
@@ -975,8 +922,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "42958309812983270",
                             "scalar": "1",
@@ -1013,8 +959,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "10000000000000000",
                             "scalar": "1",
@@ -1025,8 +970,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "24016376",
                             "scalar": "1000000000000",
@@ -1042,8 +986,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "23992359",
                             "scalar": "1000000000000",
@@ -1061,8 +1004,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "100000000",
                             "scalar": "1000000000000",
@@ -1073,8 +1015,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "42120778391056420",
                             "scalar": "1",
@@ -1090,8 +1031,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "42162899169447476",
                             "scalar": "1",
@@ -1115,8 +1055,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "100000000",
                             "scalar": "1000000000000",
@@ -1127,8 +1066,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "41102074809553470",
                             "scalar": "1",
@@ -1144,8 +1082,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "41060972734743916",
                             "scalar": "1",
@@ -1178,8 +1115,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "10000000000000000",
                             "scalar": "1",
@@ -1190,8 +1126,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "24160779",
                             "scalar": "1000000000000",
@@ -1207,8 +1142,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "24184939",
                             "scalar": "1000000000000",
@@ -1243,8 +1177,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "100000000",
                             "scalar": "1000000000000",
@@ -1255,8 +1188,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "41102074809553470",
                             "scalar": "1",
@@ -1272,8 +1204,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "41060972734743916",
                             "scalar": "1",
@@ -1306,8 +1237,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "10000000000000000",
                             "scalar": "1",
@@ -1318,8 +1248,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "24160779",
                             "scalar": "1000000000000",
@@ -1335,8 +1264,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "24184939",
                             "scalar": "1000000000000",
@@ -1373,8 +1301,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "100000000",
                             "scalar": "1000000000000",
@@ -1385,8 +1312,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "41102074809553470",
                             "scalar": "1",
@@ -1402,8 +1328,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "41060972734743916",
                             "scalar": "1",
@@ -1421,8 +1346,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "10000000000000000",
                             "scalar": "1",
@@ -1433,8 +1357,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "24609406",
                             "scalar": "1000000000000",
@@ -1450,8 +1373,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "24634015",
                             "scalar": "1000000000000",
@@ -1471,8 +1393,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "100000000",
                             "scalar": "1000000000000",
@@ -1483,8 +1404,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "40176740744878721",
                             "scalar": "1",
@@ -1500,8 +1420,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "40136564004133842",
                             "scalar": "1",
@@ -1519,8 +1438,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x4200000000000000000000000000000000000006",
-                                "decimals": 18,
-                                "wrapped": "0x4200000000000000000000000000000000000006"
+                                "decimals": 18
                             },
                             "amount": "10000000000000000",
                             "scalar": "1",
@@ -1531,8 +1449,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "25174229",
                             "scalar": "1000000000000",
@@ -1548,8 +1465,7 @@
                             "token": {
                                 "chainId": 8453,
                                 "address": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42",
-                                "decimals": 6,
-                                "wrapped": "0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42"
+                                "decimals": 6
                             },
                             "amount": "25199403",
                             "scalar": "1000000000000",
@@ -1572,8 +1488,7 @@
                         "token": {
                             "chainId": 11155111,
                             "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                            "decimals": 18,
-                            "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                            "decimals": 18
                         },
                         "amount": "100000000000000",
                         "scalar": "1",
@@ -1584,8 +1499,7 @@
                         "token": {
                             "chainId": 11155111,
                             "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                            "decimals": 6,
-                            "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                            "decimals": 6
                         },
                         "amount": "576500",
                         "scalar": "1000000000000",
@@ -1601,8 +1515,7 @@
                         "token": {
                             "chainId": 11155111,
                             "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                            "decimals": 6,
-                            "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                            "decimals": 6
                         },
                         "amount": "575923",
                         "scalar": "1000000000000",
@@ -1620,8 +1533,7 @@
                         "token": {
                             "chainId": 11155111,
                             "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                            "decimals": 6,
-                            "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                            "decimals": 6
                         },
                         "amount": "600000",
                         "scalar": "1000000000000",
@@ -1632,8 +1544,7 @@
                         "token": {
                             "chainId": 11155111,
                             "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                            "decimals": 18,
-                            "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                            "decimals": 18
                         },
                         "amount": "104118574098812",
                         "scalar": "1",
@@ -1649,8 +1560,7 @@
                         "token": {
                             "chainId": 11155111,
                             "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                            "decimals": 18,
-                            "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                            "decimals": 18
                         },
                         "amount": "104222692672910",
                         "scalar": "1",
@@ -1671,8 +1581,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100000000000000",
                             "scalar": "1",
@@ -1683,8 +1592,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "576061",
                             "scalar": "1000000000000",
@@ -1700,8 +1608,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "575484",
                             "scalar": "1000000000000",
@@ -1734,8 +1641,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "600000",
                             "scalar": "1000000000000",
@@ -1746,8 +1652,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "104159047509227",
                             "scalar": "1",
@@ -1763,8 +1668,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "104263206556736",
                             "scalar": "1",
@@ -1801,8 +1705,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100000000000000",
                             "scalar": "1",
@@ -1813,8 +1716,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "576500",
                             "scalar": "1000000000000",
@@ -1830,8 +1732,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "575923",
                             "scalar": "1000000000000",
@@ -1849,8 +1750,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "600000",
                             "scalar": "1000000000000",
@@ -1861,8 +1761,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "104118574098812",
                             "scalar": "1",
@@ -1878,8 +1777,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "104222692672910",
                             "scalar": "1",
@@ -1903,8 +1801,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "600000",
                             "scalar": "1000000000000",
@@ -1915,8 +1812,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100949709114218",
                             "scalar": "1",
@@ -1932,8 +1828,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100848759405103",
                             "scalar": "1",
@@ -1966,8 +1861,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100000000000000",
                             "scalar": "1",
@@ -1978,8 +1872,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "594370",
                             "scalar": "1000000000000",
@@ -1995,8 +1888,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "594964",
                             "scalar": "1000000000000",
@@ -2031,8 +1923,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "600000",
                             "scalar": "1000000000000",
@@ -2043,8 +1934,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100949709114218",
                             "scalar": "1",
@@ -2060,8 +1950,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100848759405103",
                             "scalar": "1",
@@ -2094,8 +1983,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100000000000000",
                             "scalar": "1",
@@ -2106,8 +1994,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "594370",
                             "scalar": "1000000000000",
@@ -2123,8 +2010,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "594964",
                             "scalar": "1000000000000",
@@ -2161,8 +2047,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "600000",
                             "scalar": "1000000000000",
@@ -2173,8 +2058,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100949709114218",
                             "scalar": "1",
@@ -2190,8 +2074,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100848759405103",
                             "scalar": "1",
@@ -2209,8 +2092,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100000000000000",
                             "scalar": "1",
@@ -2221,8 +2103,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "594597",
                             "scalar": "1000000000000",
@@ -2238,8 +2119,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "595191",
                             "scalar": "1000000000000",
@@ -2259,8 +2139,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "600000",
                             "scalar": "1000000000000",
@@ -2271,8 +2150,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100872970306657",
                             "scalar": "1",
@@ -2288,8 +2166,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100772097336350",
                             "scalar": "1",
@@ -2307,8 +2184,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                                "decimals": 18,
-                                "wrapped": "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                                "decimals": 18
                             },
                             "amount": "100000000000000",
                             "scalar": "1",
@@ -2319,8 +2195,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "595049",
                             "scalar": "1000000000000",
@@ -2336,8 +2211,7 @@
                             "token": {
                                 "chainId": 11155111,
                                 "address": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                                "decimals": 6,
-                                "wrapped": "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8"
+                                "decimals": 6
                             },
                             "amount": "595644",
                             "scalar": "1000000000000",
@@ -2356,13 +2230,12 @@
                     "queryOutput": {
                         "swapKind": 0,
                         "to": "0x136f1EFcC3f8f88516B9E94110D56FDBfB1778d1",
-                        "pathAmounts": ["9999530199327128141686"],
+                        "pathAmounts": ["9999530198927941607705"],
                         "amountIn": {
                             "token": {
                                 "chainId": 1,
                                 "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                                "decimals": 6,
-                                "wrapped": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+                                "decimals": 6
                             },
                             "amount": "10000000000",
                             "scalar": "1000000000000",
@@ -2373,30 +2246,28 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
-                                "decimals": 18,
-                                "wrapped": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f"
+                                "decimals": 18
                             },
-                            "amount": "9999530199327128141686",
+                            "amount": "9999530198927941607705",
                             "scalar": "1",
                             "decimalScale": "1000000000000000000",
-                            "scale18": "9999530199327128141686"
+                            "scale18": "9999530198927941607705"
                         }
                     },
                     "call": {
                         "to": "0x136f1EFcC3f8f88516B9E94110D56FDBfB1778d1",
-                        "callData": "0x19c6989f00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000000260000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000136f1efcc3f8f88516b9e94110d56fdbfb1778d1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000ffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000ffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000412916dafc5c43306388c6fcb45dd7f4f22951698b24a9f52e4e6766ee5b2e5e4e5a7097aa3667fcf04802180ae8f037fc8a93afa5c99eac41c38b4032f83e71cf1b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000002a4286f580d00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000de0b6b3a763ffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000028000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000002540be40000000000000000000000000000000000000000000000021d889640c518cc85280000000000000000000000000000000000000000000000000000000000000003000000000000000000000000d4fa2d31b7968e448877f69a96de69f5de8cd23e000000000000000000000000d4fa2d31b7968e448877f69a96de69f5de8cd23e000000000000000000000000000000000000000000000000000000000000000100000000000000000000000085b2b559bc2d21104c4defdd6efca8a20343361d000000000000000000000000c71ea051a5f82c67adcf634c36ffe6334793d24c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c71ea051a5f82c67adcf634c36ffe6334793d24c00000000000000000000000040d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                        "callData": "0x19c6989f00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000000260000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000136f1efcc3f8f88516b9e94110d56fdbfb1778d1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000ffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000ffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000412916dafc5c43306388c6fcb45dd7f4f22951698b24a9f52e4e6766ee5b2e5e4e5a7097aa3667fcf04802180ae8f037fc8a93afa5c99eac41c38b4032f83e71cf1b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000002a4286f580d00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000de0b6b3a763ffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000028000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000002540be40000000000000000000000000000000000000000000000021d889640683f3881310000000000000000000000000000000000000000000000000000000000000003000000000000000000000000d4fa2d31b7968e448877f69a96de69f5de8cd23e000000000000000000000000d4fa2d31b7968e448877f69a96de69f5de8cd23e000000000000000000000000000000000000000000000000000000000000000100000000000000000000000085b2b559bc2d21104c4defdd6efca8a20343361d000000000000000000000000c71ea051a5f82c67adcf634c36ffe6334793d24c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c71ea051a5f82c67adcf634c36ffe6334793d24c00000000000000000000000040d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
                         "value": "0",
                         "minAmountOut": {
                             "token": {
                                 "chainId": 1,
                                 "address": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
-                                "decimals": 18,
-                                "wrapped": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f"
+                                "decimals": 18
                             },
-                            "amount": "9989530669127801013544",
+                            "amount": "9989530668729013666097",
                             "scalar": "1",
                             "decimalScale": "1000000000000000000",
-                            "scale18": "9989530669127801013544"
+                            "scale18": "9989530668729013666097"
                         }
                     },
                     "permit2": {
@@ -2424,8 +2295,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
-                                "decimals": 18,
-                                "wrapped": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f"
+                                "decimals": 18
                             },
                             "amount": "100000000000000000000",
                             "scalar": "1",
@@ -2436,8 +2306,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                                "decimals": 6,
-                                "wrapped": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+                                "decimals": 6
                             },
                             "amount": "100004670",
                             "scalar": "1000000000000",
@@ -2453,8 +2322,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                                "decimals": 6,
-                                "wrapped": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+                                "decimals": 6
                             },
                             "amount": "100104674",
                             "scalar": "1000000000000",
@@ -2491,8 +2359,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                                "decimals": 6,
-                                "wrapped": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+                                "decimals": 6
                             },
                             "amount": "10000000000",
                             "scalar": "1000000000000",
@@ -2503,8 +2370,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
-                                "decimals": 18,
-                                "wrapped": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f"
+                                "decimals": 18
                             },
                             "amount": "9999530198927941607705",
                             "scalar": "1",
@@ -2520,8 +2386,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
-                                "decimals": 18,
-                                "wrapped": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f"
+                                "decimals": 18
                             },
                             "amount": "9989530668729013666097",
                             "scalar": "1",
@@ -2539,8 +2404,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
-                                "decimals": 18,
-                                "wrapped": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f"
+                                "decimals": 18
                             },
                             "amount": "100000000000000000000",
                             "scalar": "1",
@@ -2551,8 +2415,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                                "decimals": 6,
-                                "wrapped": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+                                "decimals": 6
                             },
                             "amount": "100004734",
                             "scalar": "1000000000000",
@@ -2568,8 +2431,7 @@
                             "token": {
                                 "chainId": 1,
                                 "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                                "decimals": 6,
-                                "wrapped": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+                                "decimals": 6
                             },
                             "amount": "100104738",
                             "scalar": "1000000000000",
