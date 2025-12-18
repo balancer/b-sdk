@@ -28,6 +28,7 @@ type NetworksWithFork = Extract<
     | 'HYPEREVM'
     | 'PLASMA'
     | 'X_LAYER'
+    | 'BASE'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -46,6 +47,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     HYPEREVM: 9745,
     PLASMA: 9845,
     X_LAYER: 9945,
+    BASE: 10045,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -134,6 +136,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         port: ANVIL_PORTS.X_LAYER,
         forkBlockNumber: 43138155n,
     },
+    BASE: {
+        rpcEnv: 'BASE_RPC_URL',
+        fallBackRpc: 'https://base.drpc.org',
+        port: ANVIL_PORTS.BASE,
+        forkBlockNumber: 38940000n,
+    },
 };
 
 function getAnvilOptions(
@@ -162,6 +170,8 @@ function getAnvilOptions(
         forkUrl,
         port,
         forkBlockNumber,
+        mnemonic:
+            'you twelve word test phrase boat cat like this example dog car', // mnemonic for deterministic accounts - should not have delegated accounts
     };
 }
 
