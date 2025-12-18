@@ -9,7 +9,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "4.10.1",
+    "version": "5.0.0",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
         "test": "vitest dev",
         "test:ci": "vitest run",
         "changeset": "changeset",
-        "changeset:release": "pnpm build && changeset publish",
+        "changeset:release": "pnpm build && changeset publish --provenance",
         "example": "npx tsx ./examples/lib/executeExample.ts",
         "update:deployments": "npx tsx ./scripts/updateDeployments.ts && pnpm format"
     },
@@ -36,7 +36,7 @@
         "@types/big.js": "6.2.2",
         "big.js": "6.2.2",
         "decimal.js-light": "2.5.1",
-        "viem": "2.39.3"
+        "viem": "2.42.0"
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
