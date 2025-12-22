@@ -107,3 +107,65 @@ export function setTestData(
     contextDataObj[key] = dataToSave;
 }
 
+/**
+ * Gets buffer test data from the nested structure.
+ * Buffer tests use a single key 'Buffer' instead of multiple kinds.
+ * @param savedData - The saved test data (nested structure)
+ * @param testName - Name of the test case
+ * @param context - Test context (e.g., 'permit2 direct approval')
+ * @returns The test data if found, undefined otherwise
+ */
+export function getBufferTestData(
+    savedData: Record<string, unknown>,
+    testName: string,
+    context: string,
+): unknown {
+    const testData = savedData[testName];
+    if (!testData || typeof testData !== 'object') {
+        return undefined;
+    }
+
+    const testDataObj = testData as Record<string, unknown>;
+    const contextData = testDataObj[context];
+    if (!contextData || typeof contextData !== 'object') {
+        return undefined;
+    }
+
+    const contextDataObj = contextData as Record<string, unknown>;
+    return contextDataObj['Buffer'];
+}
+
+/**
+ * Sets buffer test data in the nested structure.
+ * Buffer tests use a single key 'Buffer' instead of multiple kinds.
+ * @param testData - The test data object to update
+ * @param testName - Name of the test case
+ * @param context - Test context (e.g., 'permit2 direct approval')
+ * @param data - The data to save (queryOutput, call, and optional permit2)
+ * @param permit2 - Optional Permit2 to save (only for "permit2 signature approval" tests)
+ */
+export function setBufferTestData(
+    testData: Record<string, unknown>,
+    testName: string,
+    context: string,
+    data: { queryOutput: unknown; call: unknown },
+    permit2?: Permit2,
+): void {
+    // Include permit2 in data if provided
+    const dataToSave = permit2
+        ? { ...data, permit2: serializePermit2(permit2) }
+        : data;
+
+    if (!testData[testName]) {
+        testData[testName] = {};
+    }
+    const testDataObj = testData[testName] as Record<string, unknown>;
+
+    if (!testDataObj[context]) {
+        testDataObj[context] = {};
+    }
+    const contextDataObj = testDataObj[context] as Record<string, unknown>;
+
+    contextDataObj['Buffer'] = dataToSave;
+}
+

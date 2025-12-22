@@ -6,7 +6,14 @@ import { PublicWalletClient, AddressProvider } from '@/index';
 
 import { stopAnvilFork } from 'test/anvil/anvil-global-setup';
 import { setupForkAndClientV3 } from 'test/lib/utils/addLiquidityTestFixture';
-import { TEST_CONSTANTS, TEST_CONTEXTS, tests } from './addLiquidityTestConfig';
+import { setupForkAndClientV3Buffer } from 'test/lib/utils/addLiquidityBufferTestFixture';
+import {
+    TEST_CONSTANTS,
+    TEST_CONTEXTS,
+    tests,
+    isRegularTest,
+    isBufferTest,
+} from './addLiquidityTestConfig';
 import {
     loadAddLiquidityTestData,
     saveAddLiquidityTestData,
@@ -18,6 +25,11 @@ import {
     setupPermit2SignatureContext,
     setupPermit2DirectApprovalContext,
 } from 'test/lib/utils/addLiquidityTestHelpers';
+import {
+    setupAndRunBufferTestCases,
+    setupPermit2SignatureContextBuffer,
+    setupPermit2DirectApprovalContextBuffer,
+} from 'test/lib/utils/addLiquidityBufferTestHelpers';
 import { generateJobId } from 'test/lib/utils';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,23 +57,27 @@ for (const test of tests) {
         let fork: { rpcUrl: string } | undefined;
         let client: (PublicWalletClient & TestActions) | undefined;
         const testAddress = TEST_CONSTANTS.ANVIL_TEST_ADDRESS;
-        const contractToCall = AddressProvider.Router(test.chainId);
+        const contractToCall = isBufferTest(test)
+            ? AddressProvider.BufferRouter(test.chainId)
+            : AddressProvider.Router(test.chainId);
 
         beforeAll(async () => {
             // Only run fork/client setup if at least one test doesn't have saved data
-            if (!allTestsHaveSavedData(test, savedAddLiquidityTestData)) {
-                const setup = await setupForkAndClientV3(
-                    test,
-                    jobId,
-                    testAddress,
-                );
+            const testConfig = isBufferTest(test)
+                ? { name: test.name, testType: 'buffer' as const }
+                : { name: test.name, isNativeIn: test.isNativeIn };
+            if (!allTestsHaveSavedData(testConfig, savedAddLiquidityTestData)) {
+                const setup = isBufferTest(test)
+                    ? await setupForkAndClientV3Buffer(test, jobId, testAddress)
+                    : await setupForkAndClientV3(test, jobId, testAddress);
                 fork = setup.fork;
                 client = setup.client;
                 snapshotPreApprove = setup.snapshotPreApprove;
             }
         });
 
-        if (test.isNativeIn) {
+        // Buffer tests don't support native input
+        if (isRegularTest(test) && test.isNativeIn) {
             describe.sequential(TEST_CONTEXTS.NATIVE_INPUT, () => {
                 let snapshotNativeInput: Hex | undefined;
                 beforeAll(async () => {
@@ -97,17 +113,25 @@ for (const test of tests) {
         }
 
         describe.sequential(TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL, () => {
-            let permit2: Awaited<
-                ReturnType<typeof setupPermit2SignatureContext>
-            >;
+            let permit2:
+                | Awaited<ReturnType<typeof setupPermit2SignatureContextBuffer>>
+                | Awaited<ReturnType<typeof setupPermit2SignatureContext>>;
             beforeAll(async () => {
-                permit2 = await setupPermit2SignatureContext(
-                    client,
-                    fork,
-                    test,
-                    testAddress,
-                    contractToCall,
-                );
+                permit2 = isBufferTest(test)
+                    ? await setupPermit2SignatureContextBuffer(
+                          client,
+                          fork,
+                          test,
+                          testAddress,
+                          contractToCall,
+                      )
+                    : await setupPermit2SignatureContext(
+                          client,
+                          fork,
+                          test,
+                          testAddress,
+                          contractToCall,
+                      );
             });
             beforeEach(async () => {
                 // Only run if fork/client were initialized
@@ -120,43 +144,85 @@ for (const test of tests) {
                 }
             });
 
-            setupAndRunTestCases(
-                test,
-                TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL,
-                () => fork,
-                contractToCall,
-                () => client,
-                testAddress,
-                false, // wethIsEth
-                savedAddLiquidityTestData,
-                addLiquidityTestData,
-                () => permit2?.permit2,
-            );
+            if (isBufferTest(test)) {
+                setupAndRunBufferTestCases(
+                    test,
+                    TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL,
+                    () => fork,
+                    contractToCall,
+                    () => client,
+                    testAddress,
+                    savedAddLiquidityTestData,
+                    addLiquidityTestData,
+                    () =>
+                        permit2 && 'permit2' in permit2
+                            ? permit2.permit2
+                            : undefined,
+                );
+            } else {
+                setupAndRunTestCases(
+                    test,
+                    TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL,
+                    () => fork,
+                    contractToCall,
+                    () => client,
+                    testAddress,
+                    false, // wethIsEth
+                    savedAddLiquidityTestData,
+                    addLiquidityTestData,
+                    () =>
+                        permit2 && 'permit2' in permit2
+                            ? permit2.permit2
+                            : undefined,
+                );
+            }
         });
 
         describe.sequential(TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL, () => {
             beforeAll(async () => {
-                snapshotPreApprove = await setupPermit2DirectApprovalContext(
-                    client,
-                    fork,
-                    snapshotPreApprove,
-                    test,
-                    testAddress,
-                    contractToCall,
-                );
+                snapshotPreApprove = isBufferTest(test)
+                    ? await setupPermit2DirectApprovalContextBuffer(
+                          client,
+                          fork,
+                          snapshotPreApprove,
+                          test,
+                          testAddress,
+                          contractToCall,
+                      )
+                    : await setupPermit2DirectApprovalContext(
+                          client,
+                          fork,
+                          snapshotPreApprove,
+                          test,
+                          testAddress,
+                          contractToCall,
+                      );
             });
 
-            setupAndRunTestCases(
-                test,
-                TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL,
-                () => fork,
-                contractToCall,
-                () => client,
-                testAddress,
-                false, // wethIsEth
-                savedAddLiquidityTestData,
-                addLiquidityTestData,
-            );
+            if (isBufferTest(test)) {
+                setupAndRunBufferTestCases(
+                    test,
+                    TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL,
+                    () => fork,
+                    contractToCall,
+                    () => client,
+                    testAddress,
+                    savedAddLiquidityTestData,
+                    addLiquidityTestData,
+                );
+            } else {
+                setupAndRunTestCases(
+                    test,
+                    TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL,
+                    () => fork,
+                    contractToCall,
+                    () => client,
+                    testAddress,
+                    false, // wethIsEth
+                    savedAddLiquidityTestData,
+                    addLiquidityTestData,
+                );
+            }
         });
 
         afterAll(async () => {

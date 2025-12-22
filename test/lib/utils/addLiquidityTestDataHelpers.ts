@@ -5,6 +5,9 @@ import {
     AddLiquidityQueryOutput,
     AddLiquidityBuildCallOutput,
     AddLiquidityKind,
+    AddLiquidityBufferQueryOutput,
+    AddLiquidityBufferBuildCallOutput,
+    TokenAmount,
 } from '@/index';
 import {
     serializeTokenAmount,
@@ -291,6 +294,16 @@ export type SavedAddLiquidityTestData = {
 };
 
 /**
+ * Type representing saved buffer add liquidity test data with serialized query output and call data.
+ * permit2 is optional and only present for "permit2 signature approval" tests.
+ */
+export type SavedAddLiquidityBufferTestData = {
+    queryOutput: unknown;
+    call: unknown;
+    permit2?: unknown;
+};
+
+/**
  * Type guard to check if data is valid saved add liquidity test data.
  * @param data - Data to check
  * @returns True if data is valid SavedAddLiquidityTestData, false otherwise
@@ -392,11 +405,12 @@ export async function saveAddLiquidityTestData(
  */
 type TestConfig = {
     name: string;
-    isNativeIn: boolean;
+    isNativeIn?: boolean;
+    testType?: 'regular' | 'buffer';
 };
 
 /**
- * Checks if a context has all required test data saved.
+ * Checks if a context has all required test data saved for regular tests.
  * @param contextData - The context data object
  * @returns True if all required tests have saved data, false otherwise
  */
@@ -417,6 +431,20 @@ function hasAllContextTests(contextData: unknown): boolean {
 }
 
 /**
+ * Checks if a context has buffer test data saved.
+ * @param contextData - The context data object
+ * @returns True if buffer test has saved data, false otherwise
+ */
+function hasBufferContextTest(contextData: unknown): boolean {
+    if (!contextData || typeof contextData !== 'object') {
+        return false;
+    }
+
+    const contextObj = contextData as Record<string, unknown>;
+    return hasSavedTestData(contextObj['Buffer']);
+}
+
+/**
  * Checks if all tests for a given test configuration have valid saved data.
  * @param test - The test configuration
  * @param savedData - Nested record of saved test data
@@ -433,6 +461,26 @@ export function allTestsHaveSavedData(
 
     const testDataObj = testData as Record<string, unknown>;
 
+    // Buffer tests only have permit2 contexts
+    if (test.testType === 'buffer') {
+        // Check permit2 direct approval tests
+        if (!hasBufferContextTest(testDataObj[TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL])) {
+            return false;
+        }
+
+        // Check permit2 signature approval tests
+        if (
+            !hasBufferContextTest(
+                testDataObj[TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL],
+            )
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // Regular tests
     // Check native input tests (if applicable)
     if (test.isNativeIn) {
         if (!hasAllContextTests(testDataObj[TEST_CONTEXTS.NATIVE_INPUT])) {
@@ -457,6 +505,213 @@ export function allTestsHaveSavedData(
     }
 
     return true;
+}
+
+/**
+ * Serializes an AddLiquidityBufferQueryOutput to JSON-serializable format.
+ * @param queryOutput - The AddLiquidityBufferQueryOutput to serialize
+ * @returns Serialized query output data
+ */
+export function serializeBufferQueryOutput(
+    queryOutput: AddLiquidityBufferQueryOutput,
+): unknown {
+    return {
+        exactSharesToIssue: queryOutput.exactSharesToIssue.toString(),
+        wrappedAmountIn: serializeTokenAmount(queryOutput.wrappedAmountIn),
+        underlyingAmountIn: serializeTokenAmount(
+            queryOutput.underlyingAmountIn,
+        ),
+        chainId: queryOutput.chainId,
+        protocolVersion: queryOutput.protocolVersion,
+        to: queryOutput.to,
+    };
+}
+
+/**
+ * Deserializes an AddLiquidityBufferQueryOutput from JSON.
+ * @param serialized - The serialized query output data
+ * @returns An AddLiquidityBufferQueryOutput instance
+ * @throws Error if the data structure is invalid
+ */
+export function deserializeBufferQueryOutput(
+    serialized: unknown,
+): AddLiquidityBufferQueryOutput {
+    if (typeof serialized !== 'object' || serialized === null) {
+        throw new Error(
+            `Invalid serialized AddLiquidityBufferQueryOutput: expected object, got ${typeof serialized}`,
+        );
+    }
+
+    const data = serialized as {
+        exactSharesToIssue?: string;
+        wrappedAmountIn?: unknown;
+        underlyingAmountIn?: unknown;
+        chainId?: number;
+        protocolVersion?: number;
+        to?: string;
+    };
+
+    if (!data.exactSharesToIssue || typeof data.exactSharesToIssue !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferQueryOutput: missing or invalid "exactSharesToIssue"',
+        );
+    }
+
+    if (!data.wrappedAmountIn) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferQueryOutput: missing "wrappedAmountIn"',
+        );
+    }
+
+    if (!data.underlyingAmountIn) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferQueryOutput: missing "underlyingAmountIn"',
+        );
+    }
+
+    if (typeof data.chainId !== 'number') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferQueryOutput: missing or invalid "chainId"',
+        );
+    }
+
+    if (data.protocolVersion !== 3) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferQueryOutput: protocolVersion must be 3',
+        );
+    }
+
+    if (!data.to || typeof data.to !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferQueryOutput: missing or invalid "to"',
+        );
+    }
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(data.to)) {
+        throw new Error(
+            `Invalid serialized AddLiquidityBufferQueryOutput: "to" address "${data.to}" is not a valid Ethereum address`,
+        );
+    }
+
+    return {
+        exactSharesToIssue: BigInt(data.exactSharesToIssue),
+        wrappedAmountIn: deserializeTokenAmount(data.wrappedAmountIn),
+        underlyingAmountIn: deserializeTokenAmount(data.underlyingAmountIn),
+        chainId: data.chainId,
+        protocolVersion: 3,
+        to: data.to as Address,
+    };
+}
+
+/**
+ * Serializes an AddLiquidityBufferBuildCallOutput to JSON-serializable format.
+ * @param call - The AddLiquidityBufferBuildCallOutput to serialize
+ * @returns Serialized call data
+ */
+export function serializeBufferCall(
+    call: AddLiquidityBufferBuildCallOutput,
+): unknown {
+    return {
+        to: call.to,
+        callData: call.callData,
+        value: call.value.toString(),
+        exactSharesToIssue: call.exactSharesToIssue.toString(),
+        maxWrappedAmountIn: serializeTokenAmount(call.maxWrappedAmountIn),
+        maxUnderlyingAmountIn: serializeTokenAmount(
+            call.maxUnderlyingAmountIn,
+        ),
+    };
+}
+
+/**
+ * Deserializes an AddLiquidityBufferBuildCallOutput from JSON.
+ * @param serialized - The serialized call data
+ * @returns An AddLiquidityBufferBuildCallOutput instance
+ * @throws Error if the data structure is invalid
+ */
+export function deserializeBufferCall(
+    serialized: unknown,
+): AddLiquidityBufferBuildCallOutput {
+    if (typeof serialized !== 'object' || serialized === null) {
+        throw new Error(
+            `Invalid serialized AddLiquidityBufferBuildCallOutput: expected object, got ${typeof serialized}`,
+        );
+    }
+
+    const data = serialized as {
+        to?: string;
+        callData?: string;
+        value?: string;
+        exactSharesToIssue?: string;
+        maxWrappedAmountIn?: unknown;
+        maxUnderlyingAmountIn?: unknown;
+    };
+
+    if (!data.to || typeof data.to !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferBuildCallOutput: missing or invalid "to"',
+        );
+    }
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(data.to)) {
+        throw new Error(
+            `Invalid serialized AddLiquidityBufferBuildCallOutput: "to" address "${data.to}" is not a valid Ethereum address`,
+        );
+    }
+
+    if (!data.callData || typeof data.callData !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferBuildCallOutput: missing or invalid "callData"',
+        );
+    }
+
+    if (!data.value || typeof data.value !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferBuildCallOutput: missing or invalid "value"',
+        );
+    }
+
+    let valueBigInt: bigint;
+    try {
+        valueBigInt = BigInt(data.value);
+    } catch {
+        throw new Error(
+            `Invalid serialized AddLiquidityBufferBuildCallOutput: value "${data.value}" cannot be converted to BigInt`,
+        );
+    }
+
+    if (valueBigInt < 0n) {
+        throw new Error(
+            `Invalid serialized AddLiquidityBufferBuildCallOutput: value cannot be negative, got ${data.value}`,
+        );
+    }
+
+    if (!data.exactSharesToIssue || typeof data.exactSharesToIssue !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferBuildCallOutput: missing or invalid "exactSharesToIssue"',
+        );
+    }
+
+    if (!data.maxWrappedAmountIn) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferBuildCallOutput: missing "maxWrappedAmountIn"',
+        );
+    }
+
+    if (!data.maxUnderlyingAmountIn) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBufferBuildCallOutput: missing "maxUnderlyingAmountIn"',
+        );
+    }
+
+    return {
+        to: data.to as Address,
+        callData: data.callData as Hex,
+        value: valueBigInt,
+        exactSharesToIssue: BigInt(data.exactSharesToIssue),
+        maxWrappedAmountIn: deserializeTokenAmount(data.maxWrappedAmountIn),
+        maxUnderlyingAmountIn: deserializeTokenAmount(data.maxUnderlyingAmountIn),
+    };
 }
 
 // Re-export Permit2 serialization functions for convenience

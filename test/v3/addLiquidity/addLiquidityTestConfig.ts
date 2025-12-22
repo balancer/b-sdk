@@ -1,4 +1,11 @@
-import { ChainId, Slippage, PoolState, InputAmount, Address } from '@/index';
+import {
+    ChainId,
+    Slippage,
+    PoolState,
+    InputAmount,
+    Address,
+    BufferState,
+} from '@/index';
 import { ANVIL_NETWORKS, NetworkSetup } from 'test/anvil/anvil-global-setup';
 
 // Test context constants for add liquidity tests
@@ -17,20 +24,45 @@ export const TEST_CONSTANTS = {
     ADD_LIQUIDITY_TEST_DATA_FILENAME: 'addLiquidityTestData.json',
 } as const;
 
-export type Test = {
+// Base test type with common fields
+type TestBase = {
     name: string;
     chainId: ChainId;
     anvilNetwork: NetworkSetup;
-    poolState: PoolState; // Hardcoded pool state in config
-    isNativeIn: boolean;
-    // Input amounts for each test type (all configurable per test)
-    unbalancedAmounts: InputAmount[]; // Required - amounts for each pool token
-    singleTokenBptOut: InputAmount; // Required - BPT amount for single token test
-    singleTokenIn: Address; // Required - which token to use for single token test
-    proportionalBptOut: InputAmount; // Required - BPT amount for proportional test
-    proportionalAmountIn: InputAmount; // Required - token amount for proportional test
     blockNumber?: bigint;
 };
+
+// Regular add liquidity test
+export type RegularTest = TestBase & {
+    testType: 'regular';
+    poolState: PoolState;
+    isNativeIn: boolean;
+    // Input amounts for each test type (all configurable per test)
+    unbalancedAmounts: InputAmount[];
+    singleTokenBptOut: InputAmount;
+    singleTokenIn: Address;
+    proportionalBptOut: InputAmount;
+    proportionalAmountIn: InputAmount;
+};
+
+// Buffer add liquidity test
+export type BufferTest = TestBase & {
+    testType: 'buffer';
+    bufferState: BufferState;
+    exactSharesToIssue: bigint;
+};
+
+// Discriminated union of all test types
+export type Test = RegularTest | BufferTest;
+
+// Type guards
+export function isRegularTest(test: Test): test is RegularTest {
+    return test.testType === 'regular';
+}
+
+export function isBufferTest(test: Test): test is BufferTest {
+    return test.testType === 'buffer';
+}
 
 /**
  * Mainnet pool configuration for add liquidity tests.
@@ -70,6 +102,7 @@ const mainnetPoolState: PoolState = {
  */
 export const tests: Test[] = [
     {
+        testType: 'regular',
         name: 'Add Liquidity: WETH + Token Pool',
         chainId: ChainId.MAINNET,
         anvilNetwork: ANVIL_NETWORKS.MAINNET,
@@ -106,5 +139,24 @@ export const tests: Test[] = [
             rawAmount: 1000000000000000000n, // 1 WETH
         },
         blockNumber: 24045600n, // Specific block number for consistent pool state
+    },
+    {
+        testType: 'buffer',
+        name: 'Add Liquidity Buffer: USDC + stataUSDC',
+        chainId: ChainId.SEPOLIA,
+        anvilNetwork: ANVIL_NETWORKS.SEPOLIA,
+        bufferState: {
+            wrappedToken: {
+                address:
+                    '0x8a88124522dbbf1e56352ba3de1d9f78c143751e' as Address,
+                decimals: 6,
+            },
+            underlyingToken: {
+                address:
+                    '0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8' as Address,
+                decimals: 6,
+            },
+        },
+        exactSharesToIssue: 1000000n,
     },
 ];
