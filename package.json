@@ -32,7 +32,7 @@
         "update:deployments": "npx tsx ./scripts/updateDeployments.ts && pnpm format"
     },
     "dependencies": {
-        "@balancer-labs/balancer-maths": "0.0.37",
+        "@balancer-labs/balancer-maths": "0.0.38",
         "@types/big.js": "6.2.2",
         "big.js": "6.2.2",
         "decimal.js-light": "2.5.1",
