@@ -21,8 +21,8 @@ importers:
         specifier: 2.5.1
         version: 2.5.1
       viem:
-        specifier: 2.42.0
-        version: 2.42.0(typescript@5.8.3)
+        specifier: 2.43.3
+        version: 2.43.3(typescript@5.8.3)
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -1515,8 +1515,8 @@ packages:
     resolution: {integrity: sha512-Nst5JdK47VIl9UcGwtv2Rcgyn5lWtZ0/mhRQ4G8NN2isxpq2TO30iqHzmwoJycjWuyUfg3GFXqP/gFHXeV57IA==}
     engines: {node: '>=16.0.0'}
 
-  abitype@1.1.0:
-    resolution: {integrity: sha512-6Vh4HcRxNMLA0puzPjM5GBgT4aAcFGKZzSgAXvuZ27shJP6NEpielTuqbBmZILR5/xd0PizkBGy5hReKz9jl5A==}
+  abitype@1.2.3:
+    resolution: {integrity: sha512-Ofer5QUnuUdTFsBRwARMoWKOH1ND5ehwYhJ3OJ/BQO+StkwQjHw0XyVh4vDttzHB7QOFhPHa/o413PJ82gU/Tg==}
     peerDependencies:
       typescript: '>=5.0.4'
       zod: ^3.22.0 || ^4.0.0
@@ -2466,8 +2466,8 @@ packages:
   outdent@0.5.0:
     resolution: {integrity: sha512-/jHxFIzoMXdqPzTaCpFzAAWhpkSjZPF4Vsn6jAfNpmbH/ymsmd7Qc6VE9BGn0L6YMj6uwpQLxCECpus4ukKS9Q==}
 
-  ox@0.9.6:
-    resolution: {integrity: sha512-8SuCbHPvv2eZLYXrNmC0EC12rdzXQLdhnOMlHDW2wiCPLxBrOOJwX5L5E61by+UjTPOryqQiRSnjIKCI+GykKg==}
+  ox@0.11.1:
+    resolution: {integrity: sha512-1l1gOLAqg0S0xiN1dH5nkPna8PucrZgrIJOfS49MLNiMevxu07Iz4ZjuJS9N+xifvT+PsZyIptS7WHM8nC+0+A==}
     peerDependencies:
       typescript: '>=5.4.0'
     peerDependenciesMeta:
@@ -3030,8 +3030,8 @@ packages:
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
-  viem@2.42.0:
-    resolution: {integrity: sha512-H0WC6czWi7ITBoHkHJVGyjLOecqh/9XJzl4V9XVIwGs/JC3UAJ44rPvkzuYbhDknLWcnREMY/MnXJY7fc7mpGA==}
+  viem@2.43.3:
+    resolution: {integrity: sha512-zM251fspfSjENCtfmT7cauuD+AA/YAlkFU7cksdEQJxj7wDuO0XFRWRH+RMvfmTFza88B9kug5cKU+Wk2nAjJg==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -4674,7 +4674,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  abitype@1.1.0(typescript@5.8.3):
+  abitype@1.2.3(typescript@5.8.3):
     optionalDependencies:
       typescript: 5.8.3
 
@@ -5614,7 +5614,7 @@ snapshots:
 
   outdent@0.5.0: {}
 
-  ox@0.9.6(typescript@5.8.3):
+  ox@0.11.1(typescript@5.8.3):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/ciphers': 1.3.0
@@ -5622,7 +5622,7 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.1.0(typescript@5.8.3)
+      abitype: 1.2.3(typescript@5.8.3)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.8.3
@@ -6185,15 +6185,15 @@ snapshots:
 
   v8-compile-cache-lib@3.0.1: {}
 
-  viem@2.42.0(typescript@5.8.3):
+  viem@2.43.3(typescript@5.8.3):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.1.0(typescript@5.8.3)
+      abitype: 1.2.3(typescript@5.8.3)
       isows: 1.0.7(ws@8.18.3)
-      ox: 0.9.6(typescript@5.8.3)
+      ox: 0.11.1(typescript@5.8.3)
       ws: 8.18.3
     optionalDependencies:
       typescript: 5.8.3
