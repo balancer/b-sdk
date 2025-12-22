@@ -14,9 +14,9 @@ import {
     testsV2,
     allTestsHaveSavedDataV2,
 } from './swapTestConfig';
-import { loadSwapTestData, saveSwapTestData } from 'test/lib/utils';
+import { loadSwapTestData, saveSwapTestData, generateJobId } from 'test/lib/utils';
 import { runSwapTest } from 'test/lib/utils/swapTestRunner';
-import { join, dirname, basename } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Get the directory of the current test file
@@ -26,10 +26,7 @@ const swapTestDataPath = join(
     __dirname,
     TEST_CONSTANTS_V2.SWAP_TEST_DATA_FILENAME,
 );
-const jobId =
-    basename(__filename)
-        .split('')
-        .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 10000;
+const jobId = generateJobId(__filename);
 
 // Load existing test data (if file exists)
 const savedSwapTestData = loadSwapTestData(swapTestDataPath);

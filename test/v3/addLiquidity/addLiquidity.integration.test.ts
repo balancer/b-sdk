@@ -1,521 +1,179 @@
-// pnpm test -- v3/addLiquidity/addLiquidity.integration.test.ts
-
+// pnpm test ./test/v3/addLiquidity/addLiquidity.integration.test.ts
 import { config } from 'dotenv';
 config();
+import { TestActions, Hex } from 'viem';
+import { PublicWalletClient, AddressProvider } from '@/index';
 
+import { stopAnvilFork } from 'test/anvil/anvil-global-setup';
+import { setupForkAndClientV3 } from 'test/lib/utils/addLiquidityTestFixture';
+import { TEST_CONSTANTS, TEST_CONTEXTS, tests } from './addLiquidityTestConfig';
 import {
-    Address,
-    createTestClient,
-    http,
-    parseUnits,
-    publicActions,
-    TestActions,
-    walletActions,
-} from 'viem';
-
+    loadAddLiquidityTestData,
+    saveAddLiquidityTestData,
+    allTestsHaveSavedData,
+} from 'test/lib/utils/addLiquidityTestDataHelpers';
 import {
-    AddLiquidityUnbalancedInput,
-    AddLiquiditySingleTokenInput,
-    AddLiquidityProportionalInput,
-    AddLiquidityKind,
-    Slippage,
-    Hex,
-    PoolState,
-    CHAINS,
-    ChainId,
-    AddLiquidity,
-    AddLiquidityInput,
-    InputAmount,
-    PoolType,
-    PERMIT2,
-    PublicWalletClient,
-} from '@/index';
-import {
-    AddLiquidityTxInput,
-    assertAddLiquidityUnbalanced,
-    assertAddLiquiditySingleToken,
-    assertAddLiquidityProportional,
-    doAddLiquidity,
-    POOLS,
-    TOKENS,
-    setTokenBalances,
-    approveSpenderOnTokens,
-    approveTokens,
-} from '../../lib/utils';
-import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
+    setupAndRunTestCases,
+    setupNativeInputContext,
+    setupPermit2SignatureContext,
+    setupPermit2DirectApprovalContext,
+} from 'test/lib/utils/addLiquidityTestHelpers';
+import { generateJobId } from 'test/lib/utils';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const protocolVersion = 3;
+// Get the directory of the current test file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const addLiquidityTestDataPath = join(
+    __dirname,
+    TEST_CONSTANTS.ADD_LIQUIDITY_TEST_DATA_FILENAME,
+);
+const jobId = generateJobId(__filename);
 
-const chainId = ChainId.SEPOLIA;
-const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.id;
+// Load existing test data (if file exists)
+const savedAddLiquidityTestData = loadAddLiquidityTestData(
+    addLiquidityTestDataPath,
+);
 
-const BAL = TOKENS[chainId].BAL;
-const WETH = TOKENS[chainId].WETH;
+// Data collection for add liquidity test call data (nested structure)
+const addLiquidityTestData: Record<string, unknown> = {};
 
-describe('add liquidity test', () => {
-    let client: PublicWalletClient & TestActions;
-    let txInput: AddLiquidityTxInput;
-    let poolState: PoolState;
-    let tokens: Address[];
-    let rpcUrl: string;
-    let snapshot: Hex;
+for (const test of tests) {
+    describe.sequential(test.name, () => {
+        let snapshotPreApprove: Hex | undefined;
+        let fork: { rpcUrl: string } | undefined;
+        let client: (PublicWalletClient & TestActions) | undefined;
+        const testAddress = TEST_CONSTANTS.ANVIL_TEST_ADDRESS;
+        const contractToCall = AddressProvider.Router(test.chainId);
 
-    beforeAll(async () => {
-        // setup mock api
-        const api = new MockApi();
-
-        // get pool state from api
-        poolState = await api.getPool(poolId);
-
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
-
-        client = createTestClient({
-            mode: 'anvil',
-            chain: CHAINS[chainId],
-            transport: http(rpcUrl),
-        })
-            .extend(publicActions)
-            .extend(walletActions);
-
-        const testAddress = (await client.getAddresses())[0];
-
-        txInput = {
-            client,
-            addLiquidity: new AddLiquidity(),
-            slippage: Slippage.fromPercentage('1'), // 1%
-            poolState,
-            testAddress,
-            addLiquidityInput: {} as AddLiquidityInput,
-        };
-
-        tokens = [...poolState.tokens.map((t) => t.address)];
-
-        await setTokenBalances(
-            client,
-            testAddress,
-            tokens,
-            [WETH.slot, BAL.slot] as number[],
-            [...poolState.tokens.map((t) => parseUnits('100', t.decimals))],
-        );
-
-        await approveSpenderOnTokens(
-            client,
-            testAddress,
-            tokens,
-            PERMIT2[chainId],
-        );
-
-        snapshot = await client.snapshot();
-    });
-
-    beforeEach(async () => {
-        await client.revert({
-            id: snapshot,
+        beforeAll(async () => {
+            // Only run fork/client setup if at least one test doesn't have saved data
+            if (!allTestsHaveSavedData(test, savedAddLiquidityTestData)) {
+                const setup = await setupForkAndClientV3(
+                    test,
+                    jobId,
+                    testAddress,
+                );
+                fork = setup.fork;
+                client = setup.client;
+                snapshotPreApprove = setup.snapshotPreApprove;
+            }
         });
-        snapshot = await client.snapshot();
-    });
 
-    describe('permit2 direct approval', () => {
-        beforeEach(async () => {
-            await approveTokens(
-                client,
-                txInput.testAddress,
-                tokens,
-                protocolVersion,
+        if (test.isNativeIn) {
+            describe.sequential(TEST_CONTEXTS.NATIVE_INPUT, () => {
+                let snapshotNativeInput: Hex | undefined;
+                beforeAll(async () => {
+                    snapshotNativeInput = await setupNativeInputContext(
+                        client,
+                        fork,
+                        test,
+                        testAddress,
+                    );
+                });
+                beforeEach(async () => {
+                    // Only run if fork/client were initialized
+                    if (client && fork && snapshotNativeInput) {
+                        await client.revert({
+                            id: snapshotNativeInput,
+                        });
+                        snapshotNativeInput = await client.snapshot();
+                    }
+                });
+
+                setupAndRunTestCases(
+                    test,
+                    TEST_CONTEXTS.NATIVE_INPUT,
+                    () => fork,
+                    contractToCall,
+                    () => client,
+                    testAddress,
+                    true, // wethIsEth
+                    savedAddLiquidityTestData,
+                    addLiquidityTestData,
+                );
+            });
+        }
+
+        describe.sequential(TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL, () => {
+            let permit2: Awaited<
+                ReturnType<typeof setupPermit2SignatureContext>
+            >;
+            beforeAll(async () => {
+                permit2 = await setupPermit2SignatureContext(
+                    client,
+                    fork,
+                    test,
+                    testAddress,
+                    contractToCall,
+                );
+            });
+            beforeEach(async () => {
+                // Only run if fork/client were initialized
+                // Signatures consume the nonce so we need to reset snapshot after each sig test
+                if (client && fork && permit2) {
+                    await client.revert({
+                        id: permit2.snapshot,
+                    });
+                    permit2.snapshot = await client.snapshot();
+                }
+            });
+
+            setupAndRunTestCases(
+                test,
+                TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL,
+                () => fork,
+                contractToCall,
+                () => client,
+                testAddress,
+                false, // wethIsEth
+                savedAddLiquidityTestData,
+                addLiquidityTestData,
+                () => permit2?.permit2,
             );
         });
 
-        describe('add liquidity unbalanced', () => {
-            let addLiquidityInput: AddLiquidityUnbalancedInput;
-            beforeAll(() => {
-                addLiquidityInput = {
-                    chainId,
-                    rpcUrl,
-                    kind: AddLiquidityKind.Unbalanced,
-                    amountsIn: txInput.poolState.tokens.map((t) => ({
-                        rawAmount: parseUnits('0.01', t.decimals),
-                        decimals: t.decimals,
-                        address: t.address,
-                    })),
-                };
-            });
-            test('token inputs', async () => {
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                });
-                assertAddLiquidityUnbalanced(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
+        describe.sequential(TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL, () => {
+            beforeAll(async () => {
+                snapshotPreApprove = await setupPermit2DirectApprovalContext(
+                    client,
+                    fork,
+                    snapshotPreApprove,
+                    test,
+                    testAddress,
+                    contractToCall,
                 );
             });
 
-            test('with native', async () => {
-                const wethIsEth = true;
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                    wethIsEth,
-                });
-                assertAddLiquidityUnbalanced(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                    wethIsEth,
-                );
-            });
+            setupAndRunTestCases(
+                test,
+                TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL,
+                () => fork,
+                contractToCall,
+                () => client,
+                testAddress,
+                false, // wethIsEth
+                savedAddLiquidityTestData,
+                addLiquidityTestData,
+            );
         });
 
-        describe('add liquidity single asset', () => {
-            let addLiquidityInput: AddLiquiditySingleTokenInput;
-            beforeAll(() => {
-                const tokenIn = WETH.address;
-                addLiquidityInput = {
-                    tokenIn,
-                    chainId,
-                    rpcUrl,
-                    kind: AddLiquidityKind.SingleToken,
-                    bptOut: {
-                        rawAmount: parseUnits('0.01', 18),
-                        decimals: 18,
-                        address: poolState.address,
-                    },
-                };
-            });
-            test('with token', async () => {
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                });
-
-                assertAddLiquiditySingleToken(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                );
-            });
-
-            test('with native', async () => {
-                const wethIsEth = true;
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                    wethIsEth,
-                });
-
-                assertAddLiquiditySingleToken(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                    wethIsEth,
-                );
-            });
-        });
-        describe('add liquidity proportional', () => {
-            let addLiquidityInput: AddLiquidityProportionalInput;
-            describe('with bptOut as referenceAmount', () => {
-                beforeAll(() => {
-                    const referenceAmount: InputAmount = {
-                        rawAmount: parseUnits('1', 18),
-                        decimals: 18,
-                        address: poolState.address,
-                    };
-
-                    addLiquidityInput = {
-                        referenceAmount,
-                        kind: AddLiquidityKind.Proportional,
-                        chainId: chainId,
-                        rpcUrl: rpcUrl,
-                    };
-                });
-                test('with token', async () => {
-                    // call the addLiquidity function
-                    // assert the output
-                    const addLiquidityOutput = await doAddLiquidity({
-                        ...txInput,
-                        addLiquidityInput,
-                    });
-
-                    assertAddLiquidityProportional(
-                        txInput.poolState,
-                        addLiquidityInput,
-                        addLiquidityOutput,
-                        txInput.slippage,
-                        chainId,
-                        protocolVersion,
-                    );
-                });
-                test('with native', async () => {
-                    // call the addLiquidity function
-                    // assert the output
-                    const wethIsEth = true;
-                    const addLiquidityOutput = await doAddLiquidity({
-                        ...txInput,
-                        addLiquidityInput,
-                        wethIsEth,
-                    });
-
-                    assertAddLiquidityProportional(
-                        txInput.poolState,
-                        addLiquidityInput,
-                        addLiquidityOutput,
-                        txInput.slippage,
-                        chainId,
-                        protocolVersion,
-                        wethIsEth,
-                    );
-                });
-            });
-            describe('with amountIn as referenceAmount', () => {
-                beforeAll(() => {
-                    const token = txInput.poolState.tokens[0];
-                    const referenceAmount: InputAmount = {
-                        rawAmount: parseUnits('0.01', token.decimals),
-                        decimals: token.decimals,
-                        address: token.address,
-                    };
-
-                    addLiquidityInput = {
-                        referenceAmount,
-                        kind: AddLiquidityKind.Proportional,
-                        chainId: chainId,
-                        rpcUrl: rpcUrl,
-                    };
-                });
-                test('with token', async () => {
-                    const addLiquidityOutput = await doAddLiquidity({
-                        ...txInput,
-                        addLiquidityInput,
-                    });
-
-                    assertAddLiquidityProportional(
-                        txInput.poolState,
-                        addLiquidityInput,
-                        addLiquidityOutput,
-                        txInput.slippage,
-                        chainId,
-                        protocolVersion,
-                    );
-                });
-                test('with native', async () => {
-                    const wethIsEth = true;
-                    const addLiquidityOutput = await doAddLiquidity({
-                        ...txInput,
-                        addLiquidityInput,
-                        wethIsEth,
-                    });
-
-                    assertAddLiquidityProportional(
-                        txInput.poolState,
-                        addLiquidityInput,
-                        addLiquidityOutput,
-                        txInput.slippage,
-                        chainId,
-                        protocolVersion,
-                        wethIsEth,
-                    );
-                });
-            });
+        afterAll(async () => {
+            // Only stop fork if it was started
+            if (fork) {
+                console.log('stopFork', test.name);
+                await stopAnvilFork(test.anvilNetwork, jobId);
+            }
         });
     });
-
-    describe('permit2 signatures', () => {
-        beforeEach(async () => {
-            txInput = {
-                ...txInput,
-                usePermit2Signatures: true,
-            };
-        });
-        describe('add liquidity unbalanced', () => {
-            let addLiquidityInput: AddLiquidityUnbalancedInput;
-            beforeAll(() => {
-                addLiquidityInput = {
-                    chainId,
-                    rpcUrl,
-                    kind: AddLiquidityKind.Unbalanced,
-                    amountsIn: txInput.poolState.tokens.map((t) => ({
-                        rawAmount: parseUnits('0.01', t.decimals),
-                        decimals: t.decimals,
-                        address: t.address,
-                    })),
-                };
-            });
-            test('token inputs', async () => {
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                });
-                assertAddLiquidityUnbalanced(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                );
-            });
-
-            test('with native', async () => {
-                const wethIsEth = true;
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                    wethIsEth,
-                });
-                assertAddLiquidityUnbalanced(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                    wethIsEth,
-                );
-            });
-        });
-
-        describe('add liquidity single asset', () => {
-            let addLiquidityInput: AddLiquiditySingleTokenInput;
-            beforeAll(() => {
-                const tokenIn = WETH.address;
-                addLiquidityInput = {
-                    tokenIn,
-                    chainId,
-                    rpcUrl,
-                    kind: AddLiquidityKind.SingleToken,
-                    bptOut: {
-                        rawAmount: parseUnits('1', 16),
-                        decimals: 18,
-                        address: poolState.address,
-                    },
-                };
-            });
-            test('with token', async () => {
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                });
-
-                assertAddLiquiditySingleToken(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                );
-            });
-
-            test('with native', async () => {
-                const wethIsEth = true;
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                    wethIsEth,
-                });
-
-                assertAddLiquiditySingleToken(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                    wethIsEth,
-                );
-            });
-        });
-
-        describe('add liquidity proportional', () => {
-            let addLiquidityInput: AddLiquidityProportionalInput;
-            beforeAll(() => {
-                const referenceAmount: InputAmount = {
-                    rawAmount: parseUnits('1', 18),
-                    decimals: 18,
-                    address: poolState.address,
-                };
-
-                addLiquidityInput = {
-                    referenceAmount,
-                    kind: AddLiquidityKind.Proportional,
-                    chainId: chainId,
-                    rpcUrl: rpcUrl,
-                };
-            });
-            test('with token', async () => {
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                });
-
-                assertAddLiquidityProportional(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                );
-            });
-            test('with native', async () => {
-                const wethIsEth = true;
-                const addLiquidityOutput = await doAddLiquidity({
-                    ...txInput,
-                    addLiquidityInput,
-                    wethIsEth,
-                });
-
-                assertAddLiquidityProportional(
-                    txInput.poolState,
-                    addLiquidityInput,
-                    addLiquidityOutput,
-                    txInput.slippage,
-                    chainId,
-                    protocolVersion,
-                    wethIsEth,
-                );
-            });
-        });
-    });
-});
-
-/*********************** Mock To Represent API Requirements **********************/
-class MockApi {
-    public async getPool(id: Hex): Promise<PoolState> {
-        const tokens = [
-            {
-                address: WETH.address,
-                decimals: WETH.decimals,
-                index: 0,
-            },
-            {
-                address: BAL.address,
-                decimals: BAL.decimals,
-                index: 1,
-            },
-        ];
-
-        return {
-            id,
-            address: id,
-            type: PoolType.Weighted,
-            tokens,
-            protocolVersion,
-        };
-    }
 }
 
-/******************************************************************************/
+// Write add liquidity test data to JSON file after all tests complete
+afterAll(async () => {
+    await saveAddLiquidityTestData(
+        addLiquidityTestDataPath,
+        savedAddLiquidityTestData,
+        addLiquidityTestData,
+    );
+});

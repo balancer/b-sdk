@@ -18,6 +18,8 @@ import {
     trim,
     zeroAddress,
 } from 'viem';
+import { createHash } from 'node:crypto';
+import { basename } from 'node:path';
 
 import { permit2Abi } from '@/abi';
 import {
@@ -649,3 +651,20 @@ export const getSlots = async (
     }
     return _slots;
 };
+
+/**
+ * Generates a stable job ID based on the filename hash.
+ * This ensures consistent job IDs across runs while avoiding collisions.
+ * The job ID is used for fork management to create unique RPC URLs for parallel test execution.
+ *
+ * @param filename - The full file path (typically from fileURLToPath(import.meta.url))
+ * @returns A deterministic job ID in the range 0-9999
+ */
+export function generateJobId(filename: string): number {
+    return (
+        Number.parseInt(
+            createHash('md5').update(basename(filename)).digest('hex').slice(0, 8),
+            16,
+        ) % 10000
+    );
+}
