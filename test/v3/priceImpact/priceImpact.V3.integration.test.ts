@@ -1,4 +1,4 @@
-// pnpm test -- priceImpact/priceImpact.V3.integration.test.ts
+// pnpm test test/v3/priceImpact/priceImpact.V3.integration.test.ts
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -18,12 +18,19 @@ import { TOKENS } from 'test/lib/utils/addresses';
 import { boostedPool_USDC_USDT } from 'test/mockData/boostedPool';
 import { partialBoostedPool_USDT_stataDAI } from 'test/mockData/partialBoostedPool';
 import { nestedWithBoostedPool } from 'test/mockData/nestedPool';
+import { generateJobId } from 'test/lib/utils';
+import { fileURLToPath } from 'node:url';
 
 const chainId = ChainId.SEPOLIA;
 const USDC = TOKENS[chainId].USDC_AAVE;
 const USDT = TOKENS[chainId].USDT_AAVE;
 const DAI = TOKENS[chainId].DAI_AAVE;
 const WETH = TOKENS[chainId].WETH;
+
+// Get the directory of the current test file
+const __filename = fileURLToPath(import.meta.url);
+
+const jobId = generateJobId(__filename);
 
 /**
  * FIXME: tests are here just as a sanity check. We should find a way to
@@ -32,7 +39,7 @@ const WETH = TOKENS[chainId].WETH;
 describe('PriceImpact V3', () => {
     let rpcUrl: string;
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]], jobId));
     });
 
     describe('Full Boosted Pool Boosted Pool AddLiquidity', () => {

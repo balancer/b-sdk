@@ -23,7 +23,15 @@ import {
     PoolState,
 } from '@/index';
 
+import { generateJobId } from 'test/lib/utils';
+import { fileURLToPath } from 'node:url';
+
 const chainId = ChainId.SEPOLIA;
+
+// Get the directory of the current test file
+const __filename = fileURLToPath(import.meta.url);
+
+const jobId = generateJobId(__filename);
 
 describe('query propagates LBP specific errors', () => {
     let rpcUrl: string;
@@ -32,11 +40,7 @@ describe('query propagates LBP specific errors', () => {
 
     beforeAll(async () => {
         // set up chain and test client
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            8467070n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA, jobId, 8467070n));
 
         client = createTestClient({
             mode: 'anvil',
