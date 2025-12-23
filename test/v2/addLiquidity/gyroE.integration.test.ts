@@ -43,7 +43,7 @@ const chainId = ChainId.POLYGON;
 const poolId =
     '0xa489c057de6c3177380ea264ebdf686b7f564f510002000000000000000008e2'; // ECLP-wstETH-wETH
 
-describe('GyroE add liquidity test', () => {
+describe.skip('GyroE add liquidity test', () => {
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
 

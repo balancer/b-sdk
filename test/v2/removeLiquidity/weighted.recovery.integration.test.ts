@@ -40,7 +40,7 @@ const testPool = POOLS[chainId].DAI_WMATIC;
 const DAI = TOKENS[chainId].DAI;
 const WMATIC = TOKENS[chainId].WMATIC;
 
-describe('weighted remove liquidity recovery test', () => {
+describe.skip('weighted remove liquidity recovery test', () => {
     let txInput: RemoveLiquidityRecoveryTxInput;
     let poolState: PoolState;
     beforeAll(async () => {

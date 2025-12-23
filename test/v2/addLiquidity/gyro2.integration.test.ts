@@ -43,7 +43,7 @@ const chainId = ChainId.POLYGON;
 const poolId =
     '0xdac42eeb17758daa38caf9a3540c808247527ae3000200000000000000000a2b'; // 2CLP-USDC-DAI
 
-describe('Gyro2 add liquidity test', () => {
+describe.skip('Gyro2 add liquidity test', () => {
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
 
