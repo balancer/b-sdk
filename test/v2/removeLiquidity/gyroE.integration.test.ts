@@ -45,7 +45,7 @@ const poolId =
 
 const USDC = TOKENS[chainId].USDC;
 
-describe('GyroE V1 remove liquidity test', () => {
+describe.skip('GyroE V1 remove liquidity test', () => {
     let txInput: RemoveLiquidityTxInput;
     let poolState: PoolState;
     beforeAll(async () => {

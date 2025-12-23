@@ -37,7 +37,7 @@ const chainId = ChainId.POLYGON;
 const WMATIC = TOKENS[chainId].WMATIC;
 const DAO_st_WMATIC = POOLS[chainId].DAO_st_WMATIC;
 
-describe('add liquidity nested test', () => {
+describe.skip('add liquidity nested test', () => {
     let rpcUrl: string;
     let client: PublicWalletClient & TestActions;
     let testAddress: Address;

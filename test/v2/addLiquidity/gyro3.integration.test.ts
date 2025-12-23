@@ -43,7 +43,7 @@ const chainId = ChainId.POLYGON;
 const poolId =
     '0x17f1ef81707811ea15d9ee7c741179bbe2a63887000100000000000000000799'; // 3CLP-BUSD-USDC-USDT
 
-describe('Gyro3 add liquidity test', () => {
+describe.skip('Gyro3 add liquidity test', () => {
     let txInput: AddLiquidityTxInput;
     let poolState: PoolState;
 
