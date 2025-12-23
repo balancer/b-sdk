@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import { basename } from 'node:path';
 import {
     Address,
     Client,
@@ -10,28 +12,26 @@ import {
     erc20Abi,
     hexToBigInt,
     keccak256,
-    maxUint160,
     maxUint48,
+    maxUint160,
     pad,
     toBytes,
     toHex,
     trim,
     zeroAddress,
 } from 'viem';
-import { createHash } from 'node:crypto';
-import { basename } from 'node:path';
 
 import { permit2Abi } from '@/abi';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import {
-    VAULT_V2,
-    MAX_UINT256,
-    ZERO_ADDRESS,
-    PERMIT2,
     // balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
+    MAX_UINT256,
+    PERMIT2,
     PublicWalletClient,
+    VAULT_V2,
+    ZERO_ADDRESS,
 } from '@/utils';
-import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;
@@ -663,7 +663,10 @@ export const getSlots = async (
 export function generateJobId(filename: string): number {
     return (
         Number.parseInt(
-            createHash('md5').update(basename(filename)).digest('hex').slice(0, 8),
+            createHash('md5')
+                .update(basename(filename))
+                .digest('hex')
+                .slice(0, 8),
             16,
         ) % 10000
     );

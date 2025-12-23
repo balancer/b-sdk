@@ -1,26 +1,25 @@
-import { Address, Hex } from 'viem';
 import { readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import {
-    AddLiquidityQueryOutput,
+    AddLiquidityBoostedQueryOutput,
+    AddLiquidityBufferBuildCallOutput,
+    AddLiquidityBufferQueryOutput,
     AddLiquidityBuildCallOutput,
     AddLiquidityKind,
-    AddLiquidityBufferQueryOutput,
-    AddLiquidityBufferBuildCallOutput,
-    AddLiquidityBoostedQueryOutput,
-    AddLiquidityNestedQueryOutputV3,
     AddLiquidityNestedBuildCallOutput,
-    TokenAmount,
+    AddLiquidityNestedQueryOutputV3,
+    AddLiquidityQueryOutput,
     Address,
     Hex,
+    TokenAmount,
 } from '@/index';
+import { TEST_CONTEXTS } from '../../v3/addLiquidity/addLiquidityTestConfig';
 import {
-    serializeTokenAmount,
+    deserializePermit2,
     deserializeTokenAmount,
     serializePermit2,
-    deserializePermit2,
+    serializeTokenAmount,
 } from './swapTestDataHelpers';
-import { TEST_CONTEXTS } from '../../v3/addLiquidity/addLiquidityTestConfig';
 
 /**
  * Serializes an AddLiquidityQueryOutput to JSON-serializable format.
@@ -462,7 +461,7 @@ function hasBufferContextTest(contextData: unknown): boolean {
     }
 
     const contextObj = contextData as Record<string, unknown>;
-    return hasSavedTestData(contextObj['Buffer']);
+    return hasSavedTestData(contextObj.Buffer);
 }
 
 function hasNestedContextTest(contextData: unknown): boolean {
@@ -471,7 +470,7 @@ function hasNestedContextTest(contextData: unknown): boolean {
     }
 
     const contextObj = contextData as Record<string, unknown>;
-    return hasSavedTestData(contextObj['Nested']);
+    return hasSavedTestData(contextObj.Nested);
 }
 
 /**
@@ -514,7 +513,11 @@ export function allTestsHaveSavedData(
     // Buffer tests only have permit2 contexts
     if (test.testType === 'buffer') {
         // Check permit2 direct approval tests
-        if (!hasBufferContextTest(testDataObj[TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL])) {
+        if (
+            !hasBufferContextTest(
+                testDataObj[TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL],
+            )
+        ) {
             return false;
         }
 
@@ -567,7 +570,11 @@ export function allTestsHaveSavedData(
     // Nested tests only have permit2 contexts (and optionally native input)
     if (test.testType === 'nested') {
         // Check permit2 direct approval tests
-        if (!hasNestedContextTest(testDataObj[TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL])) {
+        if (
+            !hasNestedContextTest(
+                testDataObj[TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL],
+            )
+        ) {
             return false;
         }
 
@@ -583,9 +590,7 @@ export function allTestsHaveSavedData(
         // Nested tests with native input also need native input context
         if (test.isNativeIn) {
             if (
-                !hasNestedContextTest(
-                    testDataObj[TEST_CONTEXTS.NATIVE_INPUT],
-                )
+                !hasNestedContextTest(testDataObj[TEST_CONTEXTS.NATIVE_INPUT])
             ) {
                 return false;
             }
@@ -665,7 +670,10 @@ export function deserializeBufferQueryOutput(
         to?: string;
     };
 
-    if (!data.exactSharesToIssue || typeof data.exactSharesToIssue !== 'string') {
+    if (
+        !data.exactSharesToIssue ||
+        typeof data.exactSharesToIssue !== 'string'
+    ) {
         throw new Error(
             'Invalid serialized AddLiquidityBufferQueryOutput: missing or invalid "exactSharesToIssue"',
         );
@@ -731,9 +739,7 @@ export function serializeBufferCall(
         value: call.value.toString(),
         exactSharesToIssue: call.exactSharesToIssue.toString(),
         maxWrappedAmountIn: serializeTokenAmount(call.maxWrappedAmountIn),
-        maxUnderlyingAmountIn: serializeTokenAmount(
-            call.maxUnderlyingAmountIn,
-        ),
+        maxUnderlyingAmountIn: serializeTokenAmount(call.maxUnderlyingAmountIn),
     };
 }
 
@@ -800,7 +806,10 @@ export function deserializeBufferCall(
         );
     }
 
-    if (!data.exactSharesToIssue || typeof data.exactSharesToIssue !== 'string') {
+    if (
+        !data.exactSharesToIssue ||
+        typeof data.exactSharesToIssue !== 'string'
+    ) {
         throw new Error(
             'Invalid serialized AddLiquidityBufferBuildCallOutput: missing or invalid "exactSharesToIssue"',
         );
@@ -824,7 +833,9 @@ export function deserializeBufferCall(
         value: valueBigInt,
         exactSharesToIssue: BigInt(data.exactSharesToIssue),
         maxWrappedAmountIn: deserializeTokenAmount(data.maxWrappedAmountIn),
-        maxUnderlyingAmountIn: deserializeTokenAmount(data.maxUnderlyingAmountIn),
+        maxUnderlyingAmountIn: deserializeTokenAmount(
+            data.maxUnderlyingAmountIn,
+        ),
     };
 }
 

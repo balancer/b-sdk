@@ -1,18 +1,14 @@
-import { TestActions, Hex } from 'viem';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import {
-    PublicWalletClient,
-    Permit2,
-    AddLiquidityKind,
-    ChainId,
-    Address,
-    AddLiquidityBoostedUnbalancedInput,
     AddLiquidityBoostedProportionalInput,
+    AddLiquidityBoostedUnbalancedInput,
+    AddLiquidityKind,
+    Address,
+    ChainId,
+    Permit2,
+    PublicWalletClient,
 } from '@/index';
-import {
-    setupPermit2ApprovalBoosted,
-    setupPermit2SignatureBoosted,
-    setupNativeInputBalancesBoosted,
-} from '../addLiquidityBoostedTestFixture';
+import { Hex, TestActions } from 'viem';
 import {
     TEST_CONSTANTS,
     TEST_CONTEXTS,
@@ -20,15 +16,19 @@ import {
     isBoostedTest,
 } from '../../../v3/addLiquidity/addLiquidityTestConfig';
 import {
+    setupNativeInputBalancesBoosted,
+    setupPermit2ApprovalBoosted,
+    setupPermit2SignatureBoosted,
+} from '../addLiquidityBoostedTestFixture';
+import {
+    TestAddLiquidityBoostedConfig,
     runAddLiquidityBoostedTest,
     runAddLiquidityBoostedTestWithSignature,
-    TestAddLiquidityBoostedConfig,
 } from '../addLiquidityBoostedTestRunner';
-import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import {
     AddLiquidityTestStrategy,
-    TestCaseConfig,
     ContextSetupConfig,
+    TestCaseConfig,
 } from '../addLiquidityTestStrategy';
 
 /**
@@ -50,7 +50,8 @@ const TEST_CASES: TestCaseConfig<
                 amountsIn: test.unbalancedAmounts,
             };
         },
-        getDescription: () => `should handle ${AddLiquidityKind.Unbalanced} add liquidity`,
+        getDescription: () =>
+            `should handle ${AddLiquidityKind.Unbalanced} add liquidity`,
     },
     {
         kind: AddLiquidityKind.Proportional,
@@ -68,7 +69,7 @@ const TEST_CASES: TestCaseConfig<
             };
         },
         getDescription: () =>
-            `should handle Proportional add liquidity with bptOut`,
+            'should handle Proportional add liquidity with bptOut',
     },
     {
         kind: AddLiquidityKind.Proportional,
@@ -86,7 +87,7 @@ const TEST_CASES: TestCaseConfig<
             };
         },
         getDescription: () =>
-            `should handle Proportional add liquidity with amountIn`,
+            'should handle Proportional add liquidity with amountIn',
     },
 ];
 
@@ -227,4 +228,3 @@ export class BoostedTestStrategy implements AddLiquidityTestStrategy {
         return isBoostedTest(test) && (test.isNativeIn ?? false);
     }
 }
-

@@ -1,16 +1,20 @@
-import { Address, TestActions, zeroAddress } from 'viem';
 import {
+    AddLiquidityNestedBuildCallOutput,
     AddLiquidityNestedInput,
     AddLiquidityNestedQueryOutputV3,
-    AddLiquidityNestedBuildCallOutput,
-    PublicWalletClient,
+    NATIVE_ASSETS,
     NestedPoolState,
+    PublicWalletClient,
     Token,
     TokenAmount,
-    NATIVE_ASSETS,
 } from '@/index';
+import { Address, TestActions, zeroAddress } from 'viem';
 import { expect } from 'vitest';
-import { sendTransactionGetBalances, TxOutput, areBigIntsWithinPercent } from './helper';
+import {
+    TxOutput,
+    areBigIntsWithinPercent,
+    sendTransactionGetBalances,
+} from './helper';
 
 /**
  * Runs full integration test assertions for nested add liquidity.
@@ -18,8 +22,8 @@ import { sendTransactionGetBalances, TxOutput, areBigIntsWithinPercent } from '.
  * @param params - Parameters for the assertion
  */
 export async function assertAddLiquidityNestedResultWithForkTest({
-    addLiquidityNestedInput,
-    nestedPoolState,
+    addLiquidityNestedInput: _addLiquidityNestedInput,
+    nestedPoolState: _nestedPoolState,
     client,
     testAddress,
     call,
@@ -99,12 +103,13 @@ export async function assertAddLiquidityNestedResultWithForkTest({
     // For native input, move the WETH amount to the zeroAddress position
     if (wethIsEth) {
         const wrappedNative = NATIVE_ASSETS[queryOutput.chainId].wrapped;
-        const wethIndex = queryOutput.amountsIn.findIndex((a) =>
-            a.token.address === wrappedNative,
+        const wethIndex = queryOutput.amountsIn.findIndex(
+            (a) => a.token.address === wrappedNative,
         );
         if (wethIndex >= 0) {
             // Move WETH amount to zeroAddress position
-            expectedDeltas[expectedDeltas.length - 1] = queryOutput.amountsIn[wethIndex].amount;
+            expectedDeltas[expectedDeltas.length - 1] =
+                queryOutput.amountsIn[wethIndex].amount;
             // WETH balance should not change (sent as ETH)
             expectedDeltas[wethIndex] = 0n;
         }
@@ -144,4 +149,3 @@ export function assertAddLiquidityNestedResultWithSavedData(
     expect(builtCall.value).to.equal(BigInt(savedCall.value));
     expect(builtCall.minBptOut).to.equal(BigInt(savedCall.minBptOut));
 }
-

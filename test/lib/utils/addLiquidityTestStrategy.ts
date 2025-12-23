@@ -1,11 +1,11 @@
-import { TestActions, Hex } from 'viem';
 import {
-    PublicWalletClient,
-    Permit2,
     AddLiquidityKind,
-    ChainId,
     Address,
+    ChainId,
+    Permit2,
+    PublicWalletClient,
 } from '@/index';
+import { Hex, TestActions } from 'viem';
 import { Test } from '../../v3/addLiquidity/addLiquidityTestConfig';
 
 /**
@@ -100,4 +100,3 @@ export interface AddLiquidityTestStrategy {
      */
     supportsNativeInput(test: Test): boolean;
 }
-

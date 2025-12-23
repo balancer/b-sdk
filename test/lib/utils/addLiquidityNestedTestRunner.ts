@@ -1,31 +1,34 @@
-import { Address, TestActions } from 'viem';
 import {
-    ChainId,
     AddLiquidityNested,
+    AddLiquidityNestedBuildCallOutput,
     AddLiquidityNestedInput,
     AddLiquidityNestedQueryOutputV3,
-    AddLiquidityNestedBuildCallOutput,
-    Slippage,
-    PublicWalletClient,
-    Permit2,
+    ChainId,
     NestedPoolState,
+    Permit2,
+    PublicWalletClient,
+    Slippage,
 } from '@/index';
-import {
-    hasSavedTestData,
-    deserializePermit2,
-    serializeNestedQueryOutput,
-    SavedAddLiquidityNestedTestData,
-} from './addLiquidityTestDataHelpers';
-import { getNestedTestData, setNestedTestData } from './addLiquidityTestDataAccess';
-import { loadNestedQueryOutput } from './addLiquidityNestedQueryHelpers';
-import {
-    buildAndSerializeNestedCall,
-    buildAndSerializeNestedCallWithPermit2,
-} from './addLiquidityNestedBuildHelpers';
+import { Address, TestActions } from 'viem';
 import {
     assertAddLiquidityNestedResultWithForkTest,
     assertAddLiquidityNestedResultWithSavedData,
 } from './addLiquidityNestedAssertHelpers';
+import {
+    buildAndSerializeNestedCall,
+    buildAndSerializeNestedCallWithPermit2,
+} from './addLiquidityNestedBuildHelpers';
+import { loadNestedQueryOutput } from './addLiquidityNestedQueryHelpers';
+import {
+    getNestedTestData,
+    setNestedTestData,
+} from './addLiquidityTestDataAccess';
+import {
+    SavedAddLiquidityNestedTestData,
+    deserializePermit2,
+    hasSavedTestData,
+    serializeNestedQueryOutput,
+} from './addLiquidityTestDataHelpers';
 
 /**
  * Configuration for running a nested add liquidity test.
@@ -58,7 +61,7 @@ async function executeAddLiquidityNestedTestCore(
     permit2ToUse?: Permit2,
 ): Promise<void> {
     const {
-        chainId,
+        chainId: _chainId,
         nestedPoolState,
         addLiquidityNestedInput,
         wethIsEth,
@@ -200,4 +203,3 @@ export async function runAddLiquidityNestedTestWithSignature(
         permit2ToUse,
     );
 }
-

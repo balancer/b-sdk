@@ -1,7 +1,7 @@
 import {
-    AddLiquidityBufferV3,
     AddLiquidityBufferInput,
     AddLiquidityBufferQueryOutput,
+    AddLiquidityBufferV3,
     BufferState,
 } from '@/index';
 import {
@@ -51,4 +51,3 @@ export async function loadBufferQueryOutput(
 
     return await addLiquidityBuffer.query(inputWithRpcUrl, bufferState);
 }
-

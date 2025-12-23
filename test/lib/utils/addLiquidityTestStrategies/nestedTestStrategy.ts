@@ -1,17 +1,13 @@
-import { TestActions, Hex } from 'viem';
 import {
-    PublicWalletClient,
-    Permit2,
     AddLiquidityKind,
-    ChainId,
-    Address,
     AddLiquidityNestedInput,
+    Address,
+    ChainId,
+    Permit2,
+    PublicWalletClient,
 } from '@/index';
-import {
-    setupPermit2ApprovalNested,
-    setupPermit2SignatureNested,
-    setupNativeInputBalancesNested,
-} from '../addLiquidityNestedTestFixture';
+import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED } from '@/index';
+import { Hex, TestActions } from 'viem';
 import {
     TEST_CONSTANTS,
     TEST_CONTEXTS,
@@ -19,15 +15,19 @@ import {
     isNestedTest,
 } from '../../../v3/addLiquidity/addLiquidityTestConfig';
 import {
+    setupNativeInputBalancesNested,
+    setupPermit2ApprovalNested,
+    setupPermit2SignatureNested,
+} from '../addLiquidityNestedTestFixture';
+import {
+    TestAddLiquidityNestedConfig,
     runAddLiquidityNestedTest,
     runAddLiquidityNestedTestWithSignature,
-    TestAddLiquidityNestedConfig,
 } from '../addLiquidityNestedTestRunner';
-import { BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED } from '@/index';
 import {
     AddLiquidityTestStrategy,
-    TestCaseConfig,
     ContextSetupConfig,
+    TestCaseConfig,
 } from '../addLiquidityTestStrategy';
 
 /**
@@ -184,4 +184,3 @@ export class NestedTestStrategy implements AddLiquidityTestStrategy {
         return isNestedTest(test) && (test.isNativeIn ?? false);
     }
 }
-

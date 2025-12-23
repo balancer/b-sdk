@@ -1,9 +1,9 @@
 import {
     AddLiquidityNested,
-    AddLiquidityNestedQueryOutputV3,
     AddLiquidityNestedCallInputV3,
-    Slippage,
+    AddLiquidityNestedQueryOutputV3,
     Permit2,
+    Slippage,
 } from '@/index';
 import {
     serializeNestedCall,
@@ -69,4 +69,3 @@ export function buildAndSerializeNestedCallWithPermit2(
 
     return { call, serializedCall };
 }
-

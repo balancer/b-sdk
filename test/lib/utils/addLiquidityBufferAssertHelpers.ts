@@ -1,15 +1,15 @@
-import { Address, TestActions } from 'viem';
 import {
+    AddLiquidityBufferBuildCallOutput,
     AddLiquidityBufferInput,
     AddLiquidityBufferQueryOutput,
-    AddLiquidityBufferBuildCallOutput,
+    BufferState,
     ChainId,
     PublicWalletClient,
-    BufferState,
     Slippage,
 } from '@/index';
+import { Address, TestActions } from 'viem';
 import { expect } from 'vitest';
-import { sendTransactionGetBalances, TxOutput } from './helper';
+import { TxOutput, sendTransactionGetBalances } from './helper';
 
 /**
  * Runs full integration test assertions for buffer add liquidity.
@@ -17,9 +17,9 @@ import { sendTransactionGetBalances, TxOutput } from './helper';
  * @param params - Parameters for the assertion
  */
 export async function assertAddLiquidityBufferResultWithForkTest({
-    addLiquidityBufferInput,
+    addLiquidityBufferInput: _addLiquidityBufferInput,
     bufferState,
-    chainId,
+    chainId: _chainId,
     client,
     testAddress,
     call,
@@ -98,4 +98,3 @@ export function assertAddLiquidityBufferResultWithSavedData(
         BigInt(savedCall.exactSharesToIssue),
     );
 }
-

@@ -51,4 +51,3 @@ export async function loadBoostedQueryOutput(
 
     return await addLiquidityBoosted.query(inputWithRpcUrl, boostedPoolState);
 }
-

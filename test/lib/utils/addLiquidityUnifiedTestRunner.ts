@@ -1,11 +1,10 @@
-import { TestActions, Hex } from 'viem';
-import {
-    PublicWalletClient,
-    Permit2,
-    Address,
-} from '@/index';
+import { Address, Permit2, PublicWalletClient } from '@/index';
+import { Hex, TestActions } from 'viem';
 import { Test } from '../../v3/addLiquidity/addLiquidityTestConfig';
-import { AddLiquidityTestStrategy, ContextSetupConfig } from './addLiquidityTestStrategy';
+import {
+    AddLiquidityTestStrategy,
+    ContextSetupConfig,
+} from './addLiquidityTestStrategy';
 
 /**
  * Sets up and runs all test cases for a given context using the unified strategy pattern.
@@ -125,4 +124,3 @@ export async function setupPermit2DirectApprovalContext(
 
     return await strategy.setupPermit2DirectApprovalContext(config);
 }
-

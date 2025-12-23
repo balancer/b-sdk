@@ -57,4 +57,3 @@ export function buildAndSerializeBufferCallWithPermit2(
     const serializedCall = serializeBufferCall(call);
     return { call, serializedCall };
 }
-

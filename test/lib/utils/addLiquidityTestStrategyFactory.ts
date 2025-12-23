@@ -1,15 +1,15 @@
 import { Test } from '../../v3/addLiquidity/addLiquidityTestConfig';
 import {
-    isRegularTest,
-    isBufferTest,
     isBoostedTest,
+    isBufferTest,
     isNestedTest,
+    isRegularTest,
 } from '../../v3/addLiquidity/addLiquidityTestConfig';
-import { AddLiquidityTestStrategy } from './addLiquidityTestStrategy';
-import { RegularTestStrategy } from './addLiquidityTestStrategies/regularTestStrategy';
-import { BufferTestStrategy } from './addLiquidityTestStrategies/bufferTestStrategy';
 import { BoostedTestStrategy } from './addLiquidityTestStrategies/boostedTestStrategy';
+import { BufferTestStrategy } from './addLiquidityTestStrategies/bufferTestStrategy';
 import { NestedTestStrategy } from './addLiquidityTestStrategies/nestedTestStrategy';
+import { RegularTestStrategy } from './addLiquidityTestStrategies/regularTestStrategy';
+import { AddLiquidityTestStrategy } from './addLiquidityTestStrategy';
 
 /**
  * Factory function to get the correct strategy based on test type.
@@ -32,4 +32,3 @@ export function getTestStrategy(test: Test): AddLiquidityTestStrategy {
     }
     throw new Error(`Unknown test type: ${(test as Test).testType}`);
 }
-

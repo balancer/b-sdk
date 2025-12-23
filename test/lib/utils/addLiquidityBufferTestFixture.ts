@@ -1,28 +1,28 @@
-import { Address, Hex, TestActions, parseUnits, erc4626Abi } from 'viem';
-import { createTestClient, http, publicActions, walletActions } from 'viem';
 import {
+    AddressProvider,
+    BufferState,
     CHAINS,
     ChainId,
-    PERMIT2,
     MAX_UINT256,
-    PublicWalletClient,
+    PERMIT2,
+    Permit2,
     PermitDetails,
+    PublicWalletClient,
     getDetails,
     signPermit2,
-    Permit2,
-    BufferState,
-    AddressProvider,
 } from '@/index';
+import { Address, Hex, TestActions, erc4626Abi, parseUnits } from 'viem';
+import { http, createTestClient, publicActions, walletActions } from 'viem';
 import { startFork } from '../../anvil/anvil-global-setup';
+import { NetworkSetup } from '../../anvil/anvil-global-setup';
+import type { BufferTest } from '../../v3/addLiquidity/addLiquidityTestConfig';
 import {
+    approveSpenderOnPermit2,
     approveSpenderOnTokens,
     findTokenBalanceSlot,
     setTokenBalance,
     setTokenBalances,
-    approveSpenderOnPermit2,
 } from './helper';
-import type { BufferTest } from '../../v3/addLiquidity/addLiquidityTestConfig';
-import { NetworkSetup } from '../../anvil/anvil-global-setup';
 
 /**
  * Sets up the fork and test client for buffer add liquidity integration tests.
@@ -149,13 +149,7 @@ export async function setupPermit2ApprovalBuffer(
     ];
 
     // Set token balances
-    await setTokenBalances(
-        client,
-        testAddress,
-        tokens,
-        slots,
-        balances,
-    );
+    await setTokenBalances(client, testAddress, tokens, slots, balances);
 
     // Second step of permit2 flow - user Permit2 approves router to spend wrapped and underlying tokens
     for (const token of tokens) {
@@ -204,13 +198,7 @@ export async function setupPermit2SignatureBuffer(
     ];
 
     // Set token balances
-    await setTokenBalances(
-        client,
-        testAddress,
-        tokens,
-        slots,
-        balances,
-    );
+    await setTokenBalances(client, testAddress, tokens, slots, balances);
 
     // Approve router via Permit2 for wrapped and underlying tokens
     for (const token of tokens) {
@@ -241,4 +229,3 @@ export async function setupPermit2SignatureBuffer(
 
     return { permit2, snapshot };
 }
-

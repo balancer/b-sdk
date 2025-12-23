@@ -63,4 +63,3 @@ export function buildAndSerializeBoostedCallWithPermit2(
     const serializedCall = serializeBoostedCall(call);
     return { call, serializedCall };
 }
-

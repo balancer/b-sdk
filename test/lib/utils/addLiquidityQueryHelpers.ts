@@ -51,4 +51,3 @@ export async function loadQueryOutput(
 
     return await addLiquidity.query(inputWithRpcUrl, poolState);
 }
-

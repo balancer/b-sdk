@@ -4,11 +4,11 @@ import {
     AddLiquidityNestedQueryOutputV3,
     NestedPoolState,
 } from '@/index';
-import {
-    hasSavedTestData,
-    deserializeNestedQueryOutput,
-} from './addLiquidityTestDataHelpers';
 import { getNestedTestData } from './addLiquidityTestDataAccess';
+import {
+    deserializeNestedQueryOutput,
+    hasSavedTestData,
+} from './addLiquidityTestDataHelpers';
 
 /**
  * Loads nested query output from saved data or by querying the SDK.
@@ -46,4 +46,3 @@ export async function loadNestedQueryOutput(
 
     return queryOutput;
 }
-

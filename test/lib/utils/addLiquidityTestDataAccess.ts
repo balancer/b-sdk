@@ -132,7 +132,7 @@ export function getBufferTestData(
     }
 
     const contextDataObj = contextData as Record<string, unknown>;
-    return contextDataObj['Buffer'];
+    return contextDataObj.Buffer;
 }
 
 /**
@@ -166,7 +166,7 @@ export function setBufferTestData(
     }
     const contextDataObj = testDataObj[context] as Record<string, unknown>;
 
-    contextDataObj['Buffer'] = dataToSave;
+    contextDataObj.Buffer = dataToSave;
 }
 
 /**
@@ -253,7 +253,7 @@ export function getNestedTestData(
     }
 
     const contextDataObj = contextData as Record<string, unknown>;
-    return contextDataObj['Nested'];
+    return contextDataObj.Nested;
 }
 
 /**
@@ -287,6 +287,5 @@ export function setNestedTestData(
     }
     const contextDataObj = testDataObj[context] as Record<string, unknown>;
 
-    contextDataObj['Nested'] = dataToSave;
+    contextDataObj.Nested = dataToSave;
 }
-
