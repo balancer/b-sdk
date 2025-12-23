@@ -1,5 +1,6 @@
 import {
     AddLiquidityNested,
+    AddLiquidityNestedBuildCallOutput,
     AddLiquidityNestedCallInputV3,
     AddLiquidityNestedQueryOutputV3,
     Permit2,
@@ -24,7 +25,7 @@ export function buildAndSerializeNestedCall(
     slippage: Slippage,
     wethIsEth?: boolean,
 ): {
-    call: AddLiquidityNestedCallInputV3;
+    call: AddLiquidityNestedBuildCallOutput;
     serializedCall: unknown;
 } {
     const buildInput: AddLiquidityNestedCallInputV3 = {
@@ -55,7 +56,7 @@ export function buildAndSerializeNestedCallWithPermit2(
     permit2: Permit2,
     wethIsEth?: boolean,
 ): {
-    call: AddLiquidityNestedCallInputV3;
+    call: AddLiquidityNestedBuildCallOutput;
     serializedCall: unknown;
 } {
     const buildInput: AddLiquidityNestedCallInputV3 = {

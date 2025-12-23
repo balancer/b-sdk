@@ -21,7 +21,7 @@ import {
     setTokenBalances,
     approveSpenderOnPermit2,
 } from './helper';
-import type { Test } from '../../v3/addLiquidity/addLiquidityTestConfig';
+import type { RegularTest } from '../../v3/addLiquidity/addLiquidityTestConfig';
 import { NetworkSetup } from '../../anvil/anvil-global-setup';
 import { InputAmount } from '@/index';
 
@@ -34,7 +34,7 @@ import { InputAmount } from '@/index';
  * @returns Fork RPC URL, test client, and pre-approval snapshot
  */
 export async function setupForkAndClientV3(
-    test: Test,
+    test: RegularTest,
     jobId: number,
     testAddress: Address,
 ): Promise<{

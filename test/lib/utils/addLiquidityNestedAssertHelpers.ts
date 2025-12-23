@@ -10,11 +10,7 @@ import {
 } from '@/index';
 import { Address, TestActions, zeroAddress } from 'viem';
 import { expect } from 'vitest';
-import {
-    TxOutput,
-    areBigIntsWithinPercent,
-    sendTransactionGetBalances,
-} from './helper';
+import { TxOutput, sendTransactionGetBalances } from './helper';
 
 /**
  * Runs full integration test assertions for nested add liquidity.
