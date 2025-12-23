@@ -5,8 +5,11 @@ import {
     InputAmount,
     Address,
     BufferState,
+    PoolStateWithUnderlyings,
+    NestedPoolState,
 } from '@/index';
 import { ANVIL_NETWORKS, NetworkSetup } from 'test/anvil/anvil-global-setup';
+import { nestedWithBoostedPool } from 'test/mockData/nestedPool';
 
 // Test context constants for add liquidity tests
 export const TEST_CONTEXTS = {
@@ -52,8 +55,28 @@ export type BufferTest = TestBase & {
     exactSharesToIssue: bigint;
 };
 
+// Boosted add liquidity test
+export type BoostedTest = TestBase & {
+    testType: 'boosted';
+    boostedPoolState: PoolStateWithUnderlyings;
+    isNativeIn?: boolean; // Optional - whether to test with native input (WETH as ETH)
+    // Input amounts for each test type
+    unbalancedAmounts: InputAmount[]; // Required - amounts for unbalanced test
+    proportionalBptOut: InputAmount; // Required - BPT amount for proportional test with BPT reference
+    proportionalAmountIn: InputAmount; // Required - token amount for proportional test with token reference
+    proportionalTokensIn: Address[]; // Required - tokens to use for proportional test
+};
+
+// Nested add liquidity test
+export type NestedTest = TestBase & {
+    testType: 'nested';
+    nestedPoolState: NestedPoolState;
+    isNativeIn?: boolean; // Optional - whether to test with native input (WETH as ETH)
+    unbalancedAmounts: InputAmount[]; // Single test case input (unbalanced only)
+};
+
 // Discriminated union of all test types
-export type Test = RegularTest | BufferTest;
+export type Test = RegularTest | BufferTest | BoostedTest | NestedTest;
 
 // Type guards
 export function isRegularTest(test: Test): test is RegularTest {
@@ -62,6 +85,14 @@ export function isRegularTest(test: Test): test is RegularTest {
 
 export function isBufferTest(test: Test): test is BufferTest {
     return test.testType === 'buffer';
+}
+
+export function isBoostedTest(test: Test): test is BoostedTest {
+    return test.testType === 'boosted';
+}
+
+export function isNestedTest(test: Test): test is NestedTest {
+    return test.testType === 'nested';
 }
 
 /**
@@ -158,5 +189,158 @@ export const tests: Test[] = [
             },
         },
         exactSharesToIssue: 1000000n,
+    },
+    {
+        testType: 'boosted',
+        name: 'Add Liquidity Boosted: USDC + USDT Pool',
+        chainId: ChainId.SEPOLIA,
+        anvilNetwork: ANVIL_NETWORKS.SEPOLIA,
+        boostedPoolState: {
+            id: '0x59fa488dda749cdd41772bb068bb23ee955a6d7a',
+            address: '0x59fa488dda749cdd41772bb068bb23ee955a6d7a',
+            type: 'Stable',
+            protocolVersion: 3,
+            tokens: [
+                {
+                    index: 0,
+                    address:
+                        '0x8a88124522dbbf1e56352ba3de1d9f78c143751e' as Address,
+                    decimals: 6,
+                    underlyingToken: {
+                        address:
+                            '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8' as Address,
+                        decimals: 6,
+                        index: 0,
+                    },
+                },
+                {
+                    index: 1,
+                    address:
+                        '0x978206fae13faf5a8d293fb614326b237684b750' as Address,
+                    decimals: 6,
+                    underlyingToken: {
+                        address:
+                            '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0' as Address,
+                        decimals: 6,
+                        index: 1,
+                    },
+                },
+            ],
+        },
+        unbalancedAmounts: [
+            {
+                address:
+                    '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8' as Address, // USDC_AAVE (underlying)
+                decimals: 6,
+                rawAmount: 1000000n, // 1 USDC
+            },
+            {
+                address:
+                    '0x978206fae13faf5a8d293fb614326b237684b750' as Address, // stataUSDT (wrapped)
+                decimals: 6,
+                rawAmount: 2000000n, // 2 stataUSDT
+            },
+        ],
+        proportionalBptOut: {
+            address: '0x59fa488dda749cdd41772bb068bb23ee955a6d7a' as Address, // BPT
+            decimals: 18,
+            rawAmount: 1000000000000000000n, // 1 BPT
+        },
+        proportionalAmountIn: {
+            address: '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8' as Address, // USDC_AAVE
+            decimals: 6,
+            rawAmount: 481201n, // Reference amount from old test
+        },
+        proportionalTokensIn: [
+            '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8' as Address, // USDC_AAVE
+            '0x978206fae13faf5a8d293fb614326b237684b750' as Address, // stataUSDT
+        ],
+        blockNumber: 8069420n, // Specific block number for consistent pool state
+    },
+    {
+        testType: 'boosted',
+        name: 'Add Liquidity Partial Boosted: WETH + stataUSDT Pool',
+        chainId: ChainId.SEPOLIA,
+        anvilNetwork: ANVIL_NETWORKS.SEPOLIA,
+        boostedPoolState: {
+            id: '0x445A49D1Ad280B68026629fE029Ed0Fbef549a94',
+            address: '0x445A49D1Ad280B68026629fE029Ed0Fbef549a94' as Address,
+            type: 'Weighted',
+            protocolVersion: 3,
+            tokens: [
+                {
+                    index: 0,
+                    address:
+                        '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' as Address, // WETH (no underlying)
+                    decimals: 18,
+                    underlyingToken: null,
+                },
+                {
+                    index: 1,
+                    address:
+                        '0x978206fae13faf5a8d293fb614326b237684b750' as Address, // stataUSDT
+                    decimals: 6,
+                    underlyingToken: {
+                        address:
+                            '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0' as Address, // USDT_AAVE
+                        decimals: 6,
+                        index: 1,
+                    },
+                },
+            ],
+        },
+        isNativeIn: true, // Partial boosted pools support native input (WETH)
+        unbalancedAmounts: [
+            {
+                address:
+                    '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0' as Address, // USDT_AAVE (underlying)
+                decimals: 6,
+                rawAmount: 1000000n, // 1 USDT
+            },
+            {
+                address:
+                    '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' as Address, // WETH
+                decimals: 18,
+                rawAmount: 20000000000000000n, // 0.02 WETH
+            },
+        ],
+        proportionalBptOut: {
+            address: '0x445A49D1Ad280B68026629fE029Ed0Fbef549a94' as Address, // BPT
+            decimals: 18,
+            rawAmount: 1000000000000000000n, // 1 BPT
+        },
+        proportionalAmountIn: {
+            address: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0' as Address, // USDT_AAVE
+            decimals: 6,
+            rawAmount: 1000000n, // 1 USDT
+        },
+        proportionalTokensIn: [
+            '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0' as Address, // USDT_AAVE
+            '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' as Address, // WETH
+        ],
+        blockNumber: 8069420n, // Specific block number for consistent pool state
+    },
+    {
+        testType: 'nested',
+        name: 'Add Liquidity Nested: Nested with Boosted Pool',
+        chainId: ChainId.SEPOLIA,
+        anvilNetwork: ANVIL_NETWORKS.SEPOLIA,
+        nestedPoolState: nestedWithBoostedPool,
+        isNativeIn: true, // Support both native and non-native
+        unbalancedAmounts: [
+            {
+                address:
+                    '0x7b79995e5f793a07bc00c21412e50ecae098e7f9' as Address, // WETH
+                decimals: 18,
+                rawAmount: 1000000000000000n, // 0.001 WETH
+            },
+            {
+                address:
+                    '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8' as Address, // USDC_AAVE
+                decimals: 6,
+                rawAmount: 2000000n, // 2 USDC
+            },
+        ],
+        blockNumber: 8069420n, // Specific block number for consistent pool state
     },
 ];

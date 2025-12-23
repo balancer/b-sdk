@@ -7,7 +7,12 @@ import {
     AddLiquidityKind,
     AddLiquidityBufferQueryOutput,
     AddLiquidityBufferBuildCallOutput,
+    AddLiquidityBoostedQueryOutput,
+    AddLiquidityNestedQueryOutputV3,
+    AddLiquidityNestedBuildCallOutput,
     TokenAmount,
+    Address,
+    Hex,
 } from '@/index';
 import {
     serializeTokenAmount,
@@ -304,6 +309,22 @@ export type SavedAddLiquidityBufferTestData = {
 };
 
 /**
+ * Type representing saved boosted add liquidity test data with serialized query output and call data.
+ * permit2 is optional and only present for "permit2 signature approval" tests.
+ */
+export type SavedAddLiquidityBoostedTestData = {
+    queryOutput: unknown;
+    call: unknown;
+    permit2?: unknown;
+};
+
+export type SavedAddLiquidityNestedTestData = {
+    queryOutput: unknown;
+    call: unknown;
+    permit2?: unknown;
+};
+
+/**
  * Type guard to check if data is valid saved add liquidity test data.
  * @param data - Data to check
  * @returns True if data is valid SavedAddLiquidityTestData, false otherwise
@@ -406,7 +427,7 @@ export async function saveAddLiquidityTestData(
 type TestConfig = {
     name: string;
     isNativeIn?: boolean;
-    testType?: 'regular' | 'buffer';
+    testType?: 'regular' | 'buffer' | 'boosted' | 'nested';
 };
 
 /**
@@ -444,6 +465,35 @@ function hasBufferContextTest(contextData: unknown): boolean {
     return hasSavedTestData(contextObj['Buffer']);
 }
 
+function hasNestedContextTest(contextData: unknown): boolean {
+    if (!contextData || typeof contextData !== 'object') {
+        return false;
+    }
+
+    const contextObj = contextData as Record<string, unknown>;
+    return hasSavedTestData(contextObj['Nested']);
+}
+
+/**
+ * Checks if a context has all required boosted test data saved.
+ * @param contextData - The context data object
+ * @returns True if all required tests have saved data, false otherwise
+ */
+function hasAllBoostedContextTests(contextData: unknown): boolean {
+    if (!contextData || typeof contextData !== 'object') {
+        return false;
+    }
+
+    const contextObj = contextData as Record<string, unknown>;
+    const requiredTests = [
+        'Unbalanced',
+        'Proportional_bptOut',
+        'Proportional_amountIn',
+    ];
+
+    return requiredTests.every((test) => hasSavedTestData(contextObj[test]));
+}
+
 /**
  * Checks if all tests for a given test configuration have valid saved data.
  * @param test - The test configuration
@@ -475,6 +525,70 @@ export function allTestsHaveSavedData(
             )
         ) {
             return false;
+        }
+
+        return true;
+    }
+
+    // Boosted tests only have permit2 contexts (and optionally native input)
+    if (test.testType === 'boosted') {
+        // Check permit2 direct approval tests
+        if (
+            !hasAllBoostedContextTests(
+                testDataObj[TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL],
+            )
+        ) {
+            return false;
+        }
+
+        // Check permit2 signature approval tests
+        if (
+            !hasAllBoostedContextTests(
+                testDataObj[TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL],
+            )
+        ) {
+            return false;
+        }
+
+        // Boosted tests with native input also need native input context
+        if (test.isNativeIn) {
+            if (
+                !hasAllBoostedContextTests(
+                    testDataObj[TEST_CONTEXTS.NATIVE_INPUT],
+                )
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Nested tests only have permit2 contexts (and optionally native input)
+    if (test.testType === 'nested') {
+        // Check permit2 direct approval tests
+        if (!hasNestedContextTest(testDataObj[TEST_CONTEXTS.PERMIT2_DIRECT_APPROVAL])) {
+            return false;
+        }
+
+        // Check permit2 signature approval tests
+        if (
+            !hasNestedContextTest(
+                testDataObj[TEST_CONTEXTS.PERMIT2_SIGNATURE_APPROVAL],
+            )
+        ) {
+            return false;
+        }
+
+        // Nested tests with native input also need native input context
+        if (test.isNativeIn) {
+            if (
+                !hasNestedContextTest(
+                    testDataObj[TEST_CONTEXTS.NATIVE_INPUT],
+                )
+            ) {
+                return false;
+            }
         }
 
         return true;
@@ -711,6 +825,381 @@ export function deserializeBufferCall(
         exactSharesToIssue: BigInt(data.exactSharesToIssue),
         maxWrappedAmountIn: deserializeTokenAmount(data.maxWrappedAmountIn),
         maxUnderlyingAmountIn: deserializeTokenAmount(data.maxUnderlyingAmountIn),
+    };
+}
+
+/**
+ * Serializes an AddLiquidityBoostedQueryOutput to JSON-serializable format.
+ * @param queryOutput - The AddLiquidityBoostedQueryOutput to serialize
+ * @returns Serialized query output data
+ */
+export function serializeBoostedQueryOutput(
+    queryOutput: AddLiquidityBoostedQueryOutput,
+): unknown {
+    return {
+        poolId: queryOutput.poolId,
+        poolType: queryOutput.poolType,
+        addLiquidityKind: queryOutput.addLiquidityKind,
+        wrapUnderlying: queryOutput.wrapUnderlying,
+        bptOut: serializeTokenAmount(queryOutput.bptOut),
+        amountsIn: queryOutput.amountsIn.map(serializeTokenAmount),
+        chainId: queryOutput.chainId,
+        protocolVersion: queryOutput.protocolVersion,
+        userData: queryOutput.userData,
+        to: queryOutput.to,
+    };
+}
+
+/**
+ * Deserializes an AddLiquidityBoostedQueryOutput from JSON.
+ * @param serialized - The serialized query output data
+ * @returns An AddLiquidityBoostedQueryOutput instance
+ * @throws Error if the data structure is invalid
+ */
+export function deserializeBoostedQueryOutput(
+    serialized: unknown,
+): AddLiquidityBoostedQueryOutput {
+    if (typeof serialized !== 'object' || serialized === null) {
+        throw new Error(
+            `Invalid serialized AddLiquidityBoostedQueryOutput: expected object, got ${typeof serialized}`,
+        );
+    }
+
+    const data = serialized as {
+        poolId?: string;
+        poolType?: string;
+        addLiquidityKind?: string;
+        wrapUnderlying?: boolean[];
+        bptOut?: unknown;
+        amountsIn?: unknown[];
+        chainId?: number;
+        protocolVersion?: number;
+        userData?: string;
+        to?: string;
+    };
+
+    if (!data.poolId || typeof data.poolId !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: missing or invalid "poolId"',
+        );
+    }
+
+    if (!data.poolType || typeof data.poolType !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: missing or invalid "poolType"',
+        );
+    }
+
+    if (
+        !data.addLiquidityKind ||
+        !Object.values(AddLiquidityKind).includes(
+            data.addLiquidityKind as AddLiquidityKind,
+        )
+    ) {
+        throw new Error(
+            `Invalid serialized AddLiquidityBoostedQueryOutput: invalid "addLiquidityKind", got ${data.addLiquidityKind}`,
+        );
+    }
+
+    if (!Array.isArray(data.wrapUnderlying)) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: "wrapUnderlying" must be an array',
+        );
+    }
+
+    if (!data.bptOut) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: missing "bptOut"',
+        );
+    }
+
+    if (!Array.isArray(data.amountsIn)) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: "amountsIn" must be an array',
+        );
+    }
+
+    if (typeof data.chainId !== 'number') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: missing or invalid "chainId"',
+        );
+    }
+
+    if (data.protocolVersion !== 3) {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: protocolVersion must be 3',
+        );
+    }
+
+    if (!data.userData || typeof data.userData !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: missing or invalid "userData"',
+        );
+    }
+
+    if (!data.to || typeof data.to !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityBoostedQueryOutput: missing or invalid "to"',
+        );
+    }
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(data.to)) {
+        throw new Error(
+            `Invalid serialized AddLiquidityBoostedQueryOutput: "to" address "${data.to}" is not a valid Ethereum address`,
+        );
+    }
+
+    return {
+        poolId: data.poolId as Hex,
+        poolType: data.poolType,
+        addLiquidityKind: data.addLiquidityKind as AddLiquidityKind,
+        wrapUnderlying: data.wrapUnderlying,
+        bptOut: deserializeTokenAmount(data.bptOut),
+        amountsIn: data.amountsIn.map(deserializeTokenAmount),
+        chainId: data.chainId,
+        protocolVersion: 3,
+        userData: data.userData as Hex,
+        to: data.to as Address,
+    };
+}
+
+/**
+ * Serializes an AddLiquidityBuildCallOutput (boosted) to JSON-serializable format.
+ * Boosted uses the same AddLiquidityBuildCallOutput type as regular tests.
+ * @param call - The AddLiquidityBuildCallOutput to serialize
+ * @returns Serialized call data
+ */
+export function serializeBoostedCall(
+    call: AddLiquidityBuildCallOutput,
+): unknown {
+    return serializeCall(call);
+}
+
+/**
+ * Deserializes an AddLiquidityBuildCallOutput (boosted) from JSON.
+ * Boosted uses the same AddLiquidityBuildCallOutput type as regular tests.
+ * @param serialized - The serialized call data
+ * @returns An AddLiquidityBuildCallOutput instance
+ * @throws Error if the data structure is invalid
+ */
+export function deserializeBoostedCall(
+    serialized: unknown,
+): AddLiquidityBuildCallOutput {
+    return deserializeCall(serialized);
+}
+
+/**
+ * Serializes an AddLiquidityNestedQueryOutputV3 to JSON-serializable format.
+ * @param queryOutput - The AddLiquidityNestedQueryOutputV3 to serialize
+ * @returns Serialized query output data
+ */
+export function serializeNestedQueryOutput(
+    queryOutput: AddLiquidityNestedQueryOutputV3,
+): unknown {
+    return {
+        to: queryOutput.to,
+        amountsIn: queryOutput.amountsIn.map(serializeTokenAmount),
+        bptOut: serializeTokenAmount(queryOutput.bptOut),
+        protocolVersion: queryOutput.protocolVersion,
+        parentPool: queryOutput.parentPool,
+        userData: queryOutput.userData,
+        chainId: queryOutput.chainId,
+    };
+}
+
+/**
+ * Deserializes an AddLiquidityNestedQueryOutputV3 from JSON.
+ * @param serialized - The serialized query output data
+ * @returns An AddLiquidityNestedQueryOutputV3 instance
+ * @throws Error if the data structure is invalid
+ */
+export function deserializeNestedQueryOutput(
+    serialized: unknown,
+): AddLiquidityNestedQueryOutputV3 {
+    if (typeof serialized !== 'object' || serialized === null) {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedQueryOutputV3: expected object, got ${typeof serialized}`,
+        );
+    }
+
+    const data = serialized as {
+        to?: string;
+        amountsIn?: unknown[];
+        bptOut?: unknown;
+        protocolVersion?: number;
+        parentPool?: string;
+        userData?: string;
+        chainId?: number;
+    };
+
+    if (!data.to || typeof data.to !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedQueryOutputV3: missing or invalid "to"',
+        );
+    }
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(data.to)) {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedQueryOutputV3: "to" address "${data.to}" is not a valid Ethereum address`,
+        );
+    }
+
+    if (!Array.isArray(data.amountsIn)) {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedQueryOutputV3: "amountsIn" must be an array',
+        );
+    }
+
+    if (!data.bptOut) {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedQueryOutputV3: missing "bptOut"',
+        );
+    }
+
+    if (data.protocolVersion !== 3) {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedQueryOutputV3: protocolVersion must be 3',
+        );
+    }
+
+    if (!data.parentPool || typeof data.parentPool !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedQueryOutputV3: missing or invalid "parentPool"',
+        );
+    }
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(data.parentPool)) {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedQueryOutputV3: "parentPool" address "${data.parentPool}" is not a valid Ethereum address`,
+        );
+    }
+
+    if (!data.userData || typeof data.userData !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedQueryOutputV3: missing or invalid "userData"',
+        );
+    }
+
+    if (typeof data.chainId !== 'number') {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedQueryOutputV3: missing or invalid "chainId"',
+        );
+    }
+
+    return {
+        to: data.to as Address,
+        amountsIn: data.amountsIn.map(deserializeTokenAmount),
+        bptOut: deserializeTokenAmount(data.bptOut),
+        protocolVersion: 3,
+        parentPool: data.parentPool as Address,
+        userData: data.userData as Hex,
+        chainId: data.chainId,
+    };
+}
+
+/**
+ * Serializes an AddLiquidityNestedBuildCallOutput to JSON-serializable format.
+ * @param call - The AddLiquidityNestedBuildCallOutput to serialize
+ * @returns Serialized call data
+ */
+export function serializeNestedCall(
+    call: AddLiquidityNestedBuildCallOutput,
+): unknown {
+    return {
+        to: call.to,
+        callData: call.callData,
+        value: call.value.toString(),
+        minBptOut: call.minBptOut.toString(),
+    };
+}
+
+/**
+ * Deserializes an AddLiquidityNestedBuildCallOutput from JSON.
+ * @param serialized - The serialized call data
+ * @returns An AddLiquidityNestedBuildCallOutput instance
+ * @throws Error if the data structure is invalid
+ */
+export function deserializeNestedCall(
+    serialized: unknown,
+): AddLiquidityNestedBuildCallOutput {
+    if (typeof serialized !== 'object' || serialized === null) {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedBuildCallOutput: expected object, got ${typeof serialized}`,
+        );
+    }
+
+    const data = serialized as {
+        to?: string;
+        callData?: string;
+        value?: string;
+        minBptOut?: string;
+    };
+
+    if (!data.to || typeof data.to !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedBuildCallOutput: missing or invalid "to"',
+        );
+    }
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(data.to)) {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedBuildCallOutput: "to" address "${data.to}" is not a valid Ethereum address`,
+        );
+    }
+
+    if (!data.callData || typeof data.callData !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedBuildCallOutput: missing or invalid "callData"',
+        );
+    }
+
+    if (!data.value || typeof data.value !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedBuildCallOutput: missing or invalid "value"',
+        );
+    }
+
+    let valueBigInt: bigint;
+    try {
+        valueBigInt = BigInt(data.value);
+    } catch {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedBuildCallOutput: value "${data.value}" cannot be converted to BigInt`,
+        );
+    }
+
+    if (valueBigInt < 0n) {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedBuildCallOutput: value cannot be negative, got ${data.value}`,
+        );
+    }
+
+    if (!data.minBptOut || typeof data.minBptOut !== 'string') {
+        throw new Error(
+            'Invalid serialized AddLiquidityNestedBuildCallOutput: missing or invalid "minBptOut"',
+        );
+    }
+
+    let minBptOutBigInt: bigint;
+    try {
+        minBptOutBigInt = BigInt(data.minBptOut);
+    } catch {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedBuildCallOutput: minBptOut "${data.minBptOut}" cannot be converted to BigInt`,
+        );
+    }
+
+    if (minBptOutBigInt < 0n) {
+        throw new Error(
+            `Invalid serialized AddLiquidityNestedBuildCallOutput: minBptOut cannot be negative, got ${data.minBptOut}`,
+        );
+    }
+
+    return {
+        to: data.to as Address,
+        callData: data.callData as Hex,
+        value: valueBigInt,
+        minBptOut: minBptOutBigInt,
     };
 }
 
