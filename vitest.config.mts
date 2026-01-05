@@ -32,7 +32,11 @@ export default defineConfig(({ mode }) => {
             // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
             // Run tests sequentially to avoid concurrent fork access issues
             fileParallelism: false,
-            threads: 1,
+            poolOptions: {
+                forks: {
+                    singleFork: true,
+                },
+            },
             sequence: {
                 concurrent: false,
             },
