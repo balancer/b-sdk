@@ -3,7 +3,7 @@ dotenv.config();
 
 import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { ChainId } from '../../src/utils/constants';
-import { sleep } from '../lib/utils/promises';
+import { sleep, retryWithBackoff } from '../lib/utils/promises';
 
 export type NetworkSetup = {
     rpcEnv: string;
@@ -225,6 +225,13 @@ export async function startFork(
     // Avoid starting fork if it was running already
     if (runningForks[port]) return { rpcUrl };
 
+    // Stagger fork starts to prevent simultaneous RPC hits
+    // Random delay between 0-500ms to spread out requests
+    const staggerDelay = Math.floor(Math.random() * 500);
+    if (staggerDelay > 0) {
+        await sleep(staggerDelay);
+    }
+
     // https://www.npmjs.com/package/@viem/anvil
     const anvil = createAnvil({ ...anvilOptions, port, blockTime });
     // Save reference to running fork
@@ -237,11 +244,56 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
         await sleep(5000);
         return { rpcUrl };
     }
+
+    const forkBlockNumber = blockNumber ?? anvilOptions.forkBlockNumber;
     console.log('🛠️  Starting anvil', {
         port,
-        forkBlockNumber: blockNumber ?? anvilOptions.forkBlockNumber,
+        forkBlockNumber,
+        network: network.rpcEnv,
+        forkUrl: anvilOptions.forkUrl.replace(
+            /([?&]api[_-]?key=)[^&]*/gi,
+            '$1***',
+        ), // Mask API keys in logs
     });
-    await anvil.start();
+
+    try {
+        await retryWithBackoff(
+            async () => {
+                await anvil.start();
+            },
+            {
+                maxAttempts: 3,
+                initialDelayMs: 2000,
+                maxDelayMs: 10000,
+                shouldRetry: (error) => {
+                    const errorMessage =
+                        error instanceof Error ? error.message : String(error);
+                    // Retry on rate limiting, network errors, and anvil startup failures
+                    return (
+                        errorMessage.includes('429') ||
+                        errorMessage.includes('Max retries exceeded') ||
+                        errorMessage.includes('failed to get account') ||
+                        errorMessage.includes('failed to fetch') ||
+                        errorMessage.includes('failed to create genesis') ||
+                        errorMessage.includes('state') ||
+                        errorMessage.includes('not available') ||
+                        errorMessage.includes('failed to fetch network chain ID') ||
+                        errorMessage.includes('Anvil failed to start')
+                    );
+                },
+            },
+        );
+    } catch (error) {
+        // Clean up the reference if startup failed
+        delete runningForks[port];
+        const errorMessage =
+            error instanceof Error ? error.message : String(error);
+        throw new Error(
+            `Failed to start anvil fork after retries: ${errorMessage}\n` +
+                `Network: ${network.rpcEnv}, Port: ${port}, Block: ${forkBlockNumber}`,
+        );
+    }
+
     return {
         rpcUrl,
     };
