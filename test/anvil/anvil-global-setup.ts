@@ -277,7 +277,9 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
                         errorMessage.includes('failed to create genesis') ||
                         errorMessage.includes('state') ||
                         errorMessage.includes('not available') ||
-                        errorMessage.includes('failed to fetch network chain ID') ||
+                        errorMessage.includes(
+                            'failed to fetch network chain ID',
+                        ) ||
                         errorMessage.includes('Anvil failed to start')
                     );
                 },
