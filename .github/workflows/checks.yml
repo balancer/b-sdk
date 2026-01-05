@@ -2,47 +2,41 @@ name: Checks
 on:
   workflow_call:
   workflow_dispatch:
+
 jobs:
-  install:
-    name: Install
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/actions/setup
   code-quality:
-    name: Code quality
-    needs: install
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
+    runs-on: ubuntu-latest  # Keep Linux for simple checks
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup
-      - name: Lint code
-        run: pnpm lint
-      - name: Format code
-        run: pnpm format
-      - name: Check types
-        run: pnpm check-types
+      - name: Lint, Format, Type Check
+        run: |
+          pnpm lint
+          pnpm format
+          pnpm check-types
+
   test:
-    name: Test
-    needs: install
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
+    runs-on: macos-latest  # 3 cores, 14GB RAM, ~50% faster
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup
+      
+      - name: Cache Foundry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.foundry/bin
+            ~/.foundry/cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-
+      
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+      
       - name: Test
         run: pnpm test:ci
         env:
@@ -51,18 +45,11 @@ jobs:
           FANTOM_RPC_URL: ${{ secrets.FANTOM_RPC_URL }}
           OPTIMISM_RPC_URL: ${{ secrets.OPTIMISM_RPC_URL }}
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+
   build:
-    name: Build
-    needs: install
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
+    runs-on: ubuntu-latest  # Keep Linux for builds
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup
-      - name: Generate types from live API
-        run: pnpm run codegen
-      - name: Build
-        run: pnpm build
+      - run: pnpm run codegen && pnpm build
