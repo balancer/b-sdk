@@ -26,7 +26,7 @@
         "check-types": "tsc --noEmit --skipLibCheck",
         "test": "vitest dev",
         "test:all": "vitest run",
-        "test:unit": "vitest run --exclude \"**/*.integration.test.ts\"",
+        "test:no-integration": "vitest run --exclude \"**/*.integration.test.ts\"",
         "test:no-v2": "vitest run --exclude \"test/v2/**\"",
         "changeset": "changeset",
         "changeset:release": "pnpm build && changeset publish --provenance",
