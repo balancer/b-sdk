@@ -166,17 +166,74 @@ function getAnvilOptions(
 }
 
 // Controls the current running forks to avoid starting the same fork twice
-let runningForks: Record<number, Anvil> = {};
+// Also tracks the block number each fork was started at
+let runningForks: Record<number, { anvil: Anvil; blockNumber: bigint }> = {};
 
 // Make sure that forks are stopped after each test suite
 export async function stopAnvilForks() {
+    const ports = Object.keys(runningForks).map(Number);
+
     await Promise.all(
-        Object.values(runningForks).map(async (anvil) => {
+        Object.values(runningForks).map(async ({ anvil }) => {
             // console.log('Stopping anvil fork', anvil.options);
             return anvil.stop();
         }),
     );
     runningForks = {};
+
+    // Wait for all ports to be released
+    await Promise.all(
+        ports.map(async (port) => {
+            await waitForPortAvailable(port, 5000);
+        }),
+    );
+}
+
+// Helper to check if a port is available
+async function isPortAvailable(port: number): Promise<boolean> {
+    return new Promise((resolve) => {
+        const net = require('node:net');
+        const server = net.createServer();
+        server.once('error', (err: NodeJS.ErrnoException) => {
+            if (err.code === 'EADDRINUSE') {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
+        });
+        server.once('listening', () => {
+            server.close();
+            resolve(true);
+        });
+        server.listen(port, '127.0.0.1');
+    });
+}
+
+// Wait for a port to become available (with timeout)
+async function waitForPortAvailable(
+    port: number,
+    maxWaitMs = 5000,
+): Promise<boolean> {
+    const startTime = Date.now();
+    while (Date.now() - startTime < maxWaitMs) {
+        if (await isPortAvailable(port)) {
+            return true;
+        }
+        await sleep(200);
+    }
+    return false;
+}
+
+// Helper to kill any process using a specific port
+async function killProcessOnPort(port: number): Promise<void> {
+    return new Promise((resolve) => {
+        const { exec } = require('node:child_process');
+        // Use lsof to find and kill any process on this port (macOS/Linux)
+        exec(`lsof -ti:${port} | xargs kill -9 2>/dev/null || true`, () => {
+            // Give a moment for the port to be released
+            setTimeout(resolve, 500);
+        });
+    });
 }
 
 // Stop a specific anvil fork
@@ -192,7 +249,7 @@ export async function stopAnvilFork(
     // Avoid starting fork if it was running already
     if (!runningForks[port]) return;
 
-    await runningForks[port].stop();
+    await runningForks[port].anvil.stop();
     delete runningForks[port];
 }
 
@@ -212,6 +269,7 @@ export async function startFork(
 
     const defaultAnvilPort = 8545;
     const port = (anvilOptions.port || defaultAnvilPort) + jobId;
+    const requestedBlockNumber = blockNumber ?? network.forkBlockNumber;
 
     if (!anvilOptions.forkUrl) {
         throw Error(
@@ -220,15 +278,49 @@ export async function startFork(
     }
     const rpcUrl = `http://127.0.0.1:${port}`;
 
-    console.log('checking rpcUrl', port, runningForks);
-
-    // Avoid starting fork if it was running already
-    if (runningForks[port]) return { rpcUrl };
+    // Check if fork is already running at the correct block number
+    if (runningForks[port]) {
+        if (runningForks[port].blockNumber === requestedBlockNumber) {
+            // Fork is already running at the correct block number, reuse it
+            return { rpcUrl };
+        }
+        // Fork is running but at a different block number, stop it
+        console.log(
+            `🔄 Restarting fork on port ${port}: block ${runningForks[port].blockNumber} -> ${requestedBlockNumber}`,
+        );
+        await runningForks[port].anvil.stop();
+        delete runningForks[port];
+        // Wait for port to be released before starting new fork
+        const portAvailable = await waitForPortAvailable(port, 5000);
+        if (!portAvailable) {
+            throw new Error(
+                `Port ${port} is still in use after stopping anvil fork. This may indicate an orphaned process.`,
+            );
+        }
+    } else {
+        // Check if port is available (might be from a previous test file in the same run)
+        if (!(await isPortAvailable(port))) {
+            // Port is in use but not tracked - this is a problem
+            // The fork from a previous test has advanced block numbers, so we can't reuse it
+            // Kill the process and start fresh at the correct block number
+            console.log(
+                `🔄 Port ${port} is in use but not tracked. Killing existing process and starting fresh fork at block ${requestedBlockNumber}.`,
+            );
+            await killProcessOnPort(port);
+            // Wait for port to be released
+            const portAvailable = await waitForPortAvailable(port, 5000);
+            if (!portAvailable) {
+                throw new Error(
+                    `Port ${port} is still in use after killing process. Please run 'killall anvil' to clean up.`,
+                );
+            }
+        }
+    }
 
     // https://www.npmjs.com/package/@viem/anvil
     const anvil = createAnvil({ ...anvilOptions, port, blockTime });
-    // Save reference to running fork
-    runningForks[port] = anvil;
+    // Save reference to running fork with its block number
+    runningForks[port] = { anvil, blockNumber: requestedBlockNumber };
 
     if (process.env.SKIP_GLOBAL_SETUP === 'true') {
         console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
@@ -239,7 +331,7 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
     }
     console.log('🛠️  Starting anvil', {
         port,
-        forkBlockNumber: blockNumber ?? anvilOptions.forkBlockNumber,
+        forkBlockNumber: requestedBlockNumber,
     });
     await anvil.start();
     return {
