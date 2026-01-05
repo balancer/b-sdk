@@ -177,6 +177,8 @@ export async function stopAnvilForks() {
         }),
     );
     runningForks = {};
+    // Add delay to allow OS to release ports before next test file starts
+    await sleep(1000);
 }
 
 // Stop a specific anvil fork

@@ -30,8 +30,9 @@ export default defineConfig(({ mode }) => {
             pool: 'forks',
             // Uncomment to debug suite excluding some tests
             // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
-            // Uncomment to run integration tests sequentially
-            // threads: false,
+            // Run tests sequentially to avoid fork conflicts and RPC rate limiting
+            threads: 1,
+            maxConcurrency: 1,
         },
         plugins: [tsconfigPaths()],
     };
