@@ -28,6 +28,11 @@ export default defineConfig(({ mode }) => {
             setupFiles: ['/test/vitest-setup.ts'],
             globals: true,
             pool: 'forks',
+            poolOptions: {
+                forks: {
+                    singleFork: true,
+                },
+            },
             // Uncomment to debug suite excluding some tests
             // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
             // Run tests sequentially to avoid fork conflicts and RPC rate limiting
