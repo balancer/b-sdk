@@ -4,7 +4,6 @@ dotenv.config();
 import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { ChainId } from '../../src/utils/constants';
 import { sleep, retryWithBackoff } from '../lib/utils/promises';
-import { createPublicClient, http, type Address } from 'viem';
 
 export type NetworkSetup = {
     rpcEnv: string;
@@ -166,11 +165,8 @@ function getAnvilOptions(
     };
 }
 
-// Controls the current running forks to avoid starting the same fork twice
+// Controls the current running forks for cleanup purposes
 let runningForks: Record<number, Anvil> = {};
-
-// Track unhealthy forks that should not be reused
-const unhealthyForks = new Set<number>();
 
 // Mutex for fork creation to prevent simultaneous RPC hits
 let forkCreationLock: Promise<void> = Promise.resolve();
@@ -186,7 +182,6 @@ export async function stopAnvilForks() {
         }),
     );
     runningForks = {};
-    unhealthyForks.clear();
 }
 
 // Stop a specific anvil fork
@@ -204,7 +199,6 @@ export async function stopAnvilFork(
 
     await runningForks[port].stop();
     delete runningForks[port];
-    unhealthyForks.delete(port);
 }
 
 /**
@@ -232,25 +226,6 @@ function generateUniquePort(
     // Fallback: use timestamp-based offset for uniqueness
     const timestampOffset = Math.floor(Date.now() / 1000) % 100;
     return basePort + jobId + timestampOffset;
-}
-
-/**
- * Check if a fork is healthy by making a simple RPC call
- */
-async function checkForkHealth(rpcUrl: string): Promise<boolean> {
-    try {
-        const client = createPublicClient({
-            transport: http(rpcUrl, {
-                retryCount: 1,
-                retryDelay: 1000,
-            }),
-        });
-        // Simple health check - try to get block number
-        await client.getBlockNumber();
-        return true;
-    } catch {
-        return false;
-    }
 }
 
 /*
@@ -283,26 +258,7 @@ export async function startFork(
 
     console.log('checking rpcUrl', port, runningForks);
 
-    // Check if fork exists and is healthy before reusing
-    if (runningForks[port] && !unhealthyForks.has(port)) {
-        // Health check before reusing
-        const isHealthy = await checkForkHealth(rpcUrl);
-        if (isHealthy) {
-            return { rpcUrl };
-        }
-        // Fork is unhealthy, stop it and create a new one
-        console.warn(
-            `Fork at port ${port} is unhealthy, stopping and recreating...`,
-        );
-        try {
-            await runningForks[port].stop();
-        } catch {
-            // Ignore cleanup errors
-        }
-        delete runningForks[port];
-        unhealthyForks.delete(port);
-    }
-
+    // Always create a fresh fork - no reuse to avoid state conflicts
     // Use mutex to serialize fork creation
     await forkCreationLock;
 
@@ -362,9 +318,8 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
                     // Create a fresh anvil instance for each retry attempt
                     anvil = createAnvil({ ...anvilOptions, port, blockTime });
                     await anvil.start();
-                    // Only save reference if startup succeeded
+                    // Save reference for cleanup purposes
                     runningForks[port] = anvil;
-                    unhealthyForks.delete(port); // Mark as healthy
                     lastForkStartTime = Date.now();
                 },
                 {
@@ -400,8 +355,7 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
                 rpcUrl,
             };
         } catch (error) {
-            // Mark fork as unhealthy and clean up
-            unhealthyForks.add(port);
+            // Clean up on failure
             delete runningForks[port];
             // Try to stop the anvil instance if it exists to prevent unhandled rejections
             if (anvil) {
@@ -424,18 +378,5 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
         // Outer catch for mutex/lock errors
         resolveLock!();
         throw error;
-    }
-}
-
-/**
- * Mark a fork as unhealthy (e.g., when a test fails due to fork issues)
- * This prevents other tests from reusing a bad fork
- */
-export function markForkUnhealthy(rpcUrl: string): void {
-    const portMatch = rpcUrl.match(/:(\d+)$/);
-    if (portMatch) {
-        const port = Number.parseInt(portMatch[1], 10);
-        unhealthyForks.add(port);
-        console.warn(`Marked fork at port ${port} as unhealthy`);
     }
 }
