@@ -171,7 +171,9 @@ let runningForks: Record<number, Anvil> = {};
 // Mutex for fork creation to prevent simultaneous RPC hits
 let forkCreationLock: Promise<void> = Promise.resolve();
 let lastForkStartTime = 0;
-const MIN_DELAY_BETWEEN_FORK_STARTS = 2000; // 2 seconds minimum between fork starts
+// In CI, use longer delays to handle stricter rate limits
+const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+const MIN_DELAY_BETWEEN_FORK_STARTS = isCI ? 5000 : 2000; // 5 seconds in CI, 2 seconds locally
 
 // Make sure that forks are stopped after each test suite
 export async function stopAnvilForks() {
@@ -258,14 +260,59 @@ export async function startFork(
 
     console.log('checking rpcUrl', port, runningForks);
 
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/7f662b26-1a32-4a2e-98ea-db0b93d9db39', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            location: 'anvil-global-setup.ts:259',
+            message: 'startFork called',
+            data: {
+                network: network.rpcEnv,
+                port,
+                blockNumber: blockNumber?.toString(),
+                forkBlockNumber: anvilOptions.forkBlockNumber?.toString(),
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'A,E',
+        }),
+    }).catch(() => {});
+    // #endregion
+
     // Always create a fresh fork - no reuse to avoid state conflicts
     // Use mutex to serialize fork creation
     await forkCreationLock;
 
     // Wait for minimum delay between fork starts
     const timeSinceLastStart = Date.now() - lastForkStartTime;
-    if (timeSinceLastStart < MIN_DELAY_BETWEEN_FORK_STARTS) {
-        await sleep(MIN_DELAY_BETWEEN_FORK_STARTS - timeSinceLastStart);
+    const waitTime =
+        timeSinceLastStart < MIN_DELAY_BETWEEN_FORK_STARTS
+            ? MIN_DELAY_BETWEEN_FORK_STARTS - timeSinceLastStart
+            : 0;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/7f662b26-1a32-4a2e-98ea-db0b93d9db39', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            location: 'anvil-global-setup.ts:266',
+            message: 'delay calculation',
+            data: {
+                timeSinceLastStart,
+                waitTime,
+                lastForkStartTime,
+                network: network.rpcEnv,
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'A',
+        }),
+    }).catch(() => {});
+    // #endregion
+    if (waitTime > 0) {
+        await sleep(waitTime);
     }
 
     // Create new lock for next fork creation
@@ -276,9 +323,28 @@ export async function startFork(
 
     try {
         // Stagger fork starts to prevent simultaneous RPC hits
-        // Random delay between 0-5000ms to spread out requests more
+        // Random delay between 0-5000ms locally, 0-10000ms in CI to spread out requests more
         // Longer delay in CI to reduce rate limiting
-        const staggerDelay = Math.floor(Math.random() * 5000);
+        const maxStaggerDelay = isCI ? 10000 : 5000;
+        const staggerDelay = Math.floor(Math.random() * maxStaggerDelay);
+        // #region agent log
+        fetch(
+            'http://127.0.0.1:7242/ingest/7f662b26-1a32-4a2e-98ea-db0b93d9db39',
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    location: 'anvil-global-setup.ts:281',
+                    message: 'stagger delay',
+                    data: { staggerDelay, network: network.rpcEnv, port },
+                    timestamp: Date.now(),
+                    sessionId: 'debug-session',
+                    runId: 'run1',
+                    hypothesisId: 'A',
+                }),
+            },
+        ).catch(() => {});
+        // #endregion
         if (staggerDelay > 0) {
             await sleep(staggerDelay);
         }
@@ -307,6 +373,31 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
         try {
             await retryWithBackoff(
                 async () => {
+                    const attemptStartTime = Date.now();
+                    // #region agent log
+                    fetch(
+                        'http://127.0.0.1:7242/ingest/7f662b26-1a32-4a2e-98ea-db0b93d9db39',
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                location: 'anvil-global-setup.ts:319',
+                                message: 'anvil.start attempt',
+                                data: {
+                                    network: network.rpcEnv,
+                                    port,
+                                    blockNumber: forkBlockNumber?.toString(),
+                                    timeSinceLastFork:
+                                        attemptStartTime - lastForkStartTime,
+                                },
+                                timestamp: Date.now(),
+                                sessionId: 'debug-session',
+                                runId: 'run1',
+                                hypothesisId: 'A,D',
+                            }),
+                        },
+                    ).catch(() => {});
+                    // #endregion
                     // Clean up any previous failed attempt
                     if (anvil) {
                         try {
@@ -321,18 +412,40 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
                     // Save reference for cleanup purposes
                     runningForks[port] = anvil;
                     lastForkStartTime = Date.now();
+                    // #region agent log
+                    fetch(
+                        'http://127.0.0.1:7242/ingest/7f662b26-1a32-4a2e-98ea-db0b93d9db39',
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                location: 'anvil-global-setup.ts:323',
+                                message: 'anvil.start success',
+                                data: {
+                                    network: network.rpcEnv,
+                                    port,
+                                    duration: Date.now() - attemptStartTime,
+                                },
+                                timestamp: Date.now(),
+                                sessionId: 'debug-session',
+                                runId: 'run1',
+                                hypothesisId: 'D',
+                            }),
+                        },
+                    ).catch(() => {});
+                    // #endregion
                 },
                 {
                     maxAttempts: 5,
-                    initialDelayMs: 3000,
-                    maxDelayMs: 20000,
+                    // In CI, use longer initial delay and max delay for 429 errors
+                    initialDelayMs: isCI ? 5000 : 3000,
+                    maxDelayMs: isCI ? 30000 : 20000,
                     shouldRetry: (error) => {
                         const errorMessage =
                             error instanceof Error
                                 ? error.message
                                 : String(error);
-                        // Retry on rate limiting, network errors, and anvil startup failures
-                        return (
+                        const isRetryable =
                             errorMessage.includes('429') ||
                             errorMessage.includes('Max retries exceeded') ||
                             errorMessage.includes('failed to get account') ||
@@ -344,8 +457,42 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
                                 'failed to fetch network chain ID',
                             ) ||
                             errorMessage.includes('Anvil failed to start') ||
-                            errorMessage.includes('Anvil exited')
-                        );
+                            errorMessage.includes('Anvil exited');
+                        // #region agent log
+                        fetch(
+                            'http://127.0.0.1:7242/ingest/7f662b26-1a32-4a2e-98ea-db0b93d9db39',
+                            {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    location: 'anvil-global-setup.ts:329',
+                                    message: 'retry decision',
+                                    data: {
+                                        network: network.rpcEnv,
+                                        port,
+                                        isRetryable,
+                                        errorType: errorMessage.includes('429')
+                                            ? '429'
+                                            : errorMessage.includes('state')
+                                              ? 'state'
+                                              : errorMessage.includes('genesis')
+                                                ? 'genesis'
+                                                : 'other',
+                                        errorSnippet: errorMessage.substring(
+                                            0,
+                                            100,
+                                        ),
+                                    },
+                                    timestamp: Date.now(),
+                                    sessionId: 'debug-session',
+                                    runId: 'run1',
+                                    hypothesisId: 'B,C',
+                                }),
+                            },
+                        ).catch(() => {});
+                        // #endregion
+                        // Retry on rate limiting, network errors, and anvil startup failures
+                        return isRetryable;
                     },
                 },
             );
