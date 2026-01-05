@@ -4,6 +4,7 @@ dotenv.config();
 import { Anvil, CreateAnvilOptions, createAnvil } from '@viem/anvil';
 import { ChainId } from '../../src/utils/constants';
 import { sleep, retryWithBackoff } from '../lib/utils/promises';
+import { createPublicClient, http, type Address } from 'viem';
 
 export type NetworkSetup = {
     rpcEnv: string;
@@ -168,6 +169,14 @@ function getAnvilOptions(
 // Controls the current running forks to avoid starting the same fork twice
 let runningForks: Record<number, Anvil> = {};
 
+// Track unhealthy forks that should not be reused
+const unhealthyForks = new Set<number>();
+
+// Mutex for fork creation to prevent simultaneous RPC hits
+let forkCreationLock: Promise<void> = Promise.resolve();
+let lastForkStartTime = 0;
+const MIN_DELAY_BETWEEN_FORK_STARTS = 2000; // 2 seconds minimum between fork starts
+
 // Make sure that forks are stopped after each test suite
 export async function stopAnvilForks() {
     await Promise.all(
@@ -177,6 +186,7 @@ export async function stopAnvilForks() {
         }),
     );
     runningForks = {};
+    unhealthyForks.clear();
 }
 
 // Stop a specific anvil fork
@@ -194,6 +204,53 @@ export async function stopAnvilFork(
 
     await runningForks[port].stop();
     delete runningForks[port];
+    unhealthyForks.delete(port);
+}
+
+/**
+ * Generate a unique port for a test suite to prevent fork sharing
+ * Uses test file path hash + network port to ensure isolation
+ */
+function generateUniquePort(
+    basePort: number,
+    jobId: number,
+    testSuiteId?: string,
+): number {
+    // If testSuiteId is provided (e.g., from vitest), use it to create unique ports
+    if (testSuiteId) {
+        // Simple hash function to convert test suite ID to a number
+        let hash = 0;
+        for (let i = 0; i < testSuiteId.length; i++) {
+            const char = testSuiteId.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        // Use hash to create unique port offset (0-99 range)
+        const offset = Math.abs(hash) % 100;
+        return basePort + jobId + offset;
+    }
+    // Fallback: use timestamp-based offset for uniqueness
+    const timestampOffset = Math.floor(Date.now() / 1000) % 100;
+    return basePort + jobId + timestampOffset;
+}
+
+/**
+ * Check if a fork is healthy by making a simple RPC call
+ */
+async function checkForkHealth(rpcUrl: string): Promise<boolean> {
+    try {
+        const client = createPublicClient({
+            transport: http(rpcUrl, {
+                retryCount: 1,
+                retryDelay: 1000,
+            }),
+        });
+        // Simple health check - try to get block number
+        await client.getBlockNumber();
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 /*
@@ -207,11 +264,15 @@ export async function startFork(
     jobId = Number(process.env.VITEST_WORKER_ID) || 0,
     blockNumber?: bigint, // If not provided, the fork will start from the network's forkBlockNumber
     blockTime?: number,
+    testSuiteId?: string, // Optional test suite identifier for unique port generation
 ) {
     const anvilOptions = getAnvilOptions(network, blockNumber);
 
     const defaultAnvilPort = 8545;
-    const port = (anvilOptions.port || defaultAnvilPort) + jobId;
+    const basePort = anvilOptions.port || defaultAnvilPort;
+
+    // Generate unique port per test suite to prevent fork sharing
+    const port = generateUniquePort(basePort, jobId, testSuiteId);
 
     if (!anvilOptions.forkUrl) {
         throw Error(
@@ -222,99 +283,159 @@ export async function startFork(
 
     console.log('checking rpcUrl', port, runningForks);
 
-    // Avoid starting fork if it was running already
-    if (runningForks[port]) return { rpcUrl };
-
-    // Stagger fork starts to prevent simultaneous RPC hits
-    // Random delay between 0-2000ms to spread out requests more
-    // Longer delay in CI to reduce rate limiting
-    const staggerDelay = Math.floor(Math.random() * 2000);
-    if (staggerDelay > 0) {
-        await sleep(staggerDelay);
+    // Check if fork exists and is healthy before reusing
+    if (runningForks[port] && !unhealthyForks.has(port)) {
+        // Health check before reusing
+        const isHealthy = await checkForkHealth(rpcUrl);
+        if (isHealthy) {
+            return { rpcUrl };
+        }
+        // Fork is unhealthy, stop it and create a new one
+        console.warn(
+            `Fork at port ${port} is unhealthy, stopping and recreating...`,
+        );
+        try {
+            await runningForks[port].stop();
+        } catch {
+            // Ignore cleanup errors
+        }
+        delete runningForks[port];
+        unhealthyForks.delete(port);
     }
 
-    if (process.env.SKIP_GLOBAL_SETUP === 'true') {
-        console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
-anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --fork-block-number=17878719
-`);
-        await sleep(5000);
-        return { rpcUrl };
+    // Use mutex to serialize fork creation
+    await forkCreationLock;
+
+    // Wait for minimum delay between fork starts
+    const timeSinceLastStart = Date.now() - lastForkStartTime;
+    if (timeSinceLastStart < MIN_DELAY_BETWEEN_FORK_STARTS) {
+        await sleep(MIN_DELAY_BETWEEN_FORK_STARTS - timeSinceLastStart);
     }
 
-    const forkBlockNumber = blockNumber ?? anvilOptions.forkBlockNumber;
-    console.log('🛠️  Starting anvil', {
-        port,
-        forkBlockNumber,
-        network: network.rpcEnv,
-        forkUrl: anvilOptions.forkUrl.replace(
-            /([?&]api[_-]?key=)[^&]*/gi,
-            '$1***',
-        ), // Mask API keys in logs
+    // Create new lock for next fork creation
+    let resolveLock: () => void;
+    forkCreationLock = new Promise((resolve) => {
+        resolveLock = resolve;
     });
 
-    let anvil: Anvil | undefined;
     try {
-        await retryWithBackoff(
-            async () => {
-                // Clean up any previous failed attempt
-                if (anvil) {
-                    try {
-                        await anvil.stop();
-                    } catch {
-                        // Ignore cleanup errors from previous attempts
-                    }
-                }
-                // Create a fresh anvil instance for each retry attempt
-                anvil = createAnvil({ ...anvilOptions, port, blockTime });
-                await anvil.start();
-                // Only save reference if startup succeeded
-                runningForks[port] = anvil;
-            },
-            {
-                maxAttempts: 5,
-                initialDelayMs: 3000,
-                maxDelayMs: 20000,
-                shouldRetry: (error) => {
-                    const errorMessage =
-                        error instanceof Error ? error.message : String(error);
-                    // Retry on rate limiting, network errors, and anvil startup failures
-                    return (
-                        errorMessage.includes('429') ||
-                        errorMessage.includes('Max retries exceeded') ||
-                        errorMessage.includes('failed to get account') ||
-                        errorMessage.includes('failed to fetch') ||
-                        errorMessage.includes('failed to create genesis') ||
-                        errorMessage.includes('state') ||
-                        errorMessage.includes('not available') ||
-                        errorMessage.includes(
-                            'failed to fetch network chain ID',
-                        ) ||
-                        errorMessage.includes('Anvil failed to start') ||
-                        errorMessage.includes('Anvil exited')
-                    );
-                },
-            },
-        );
-    } catch (error) {
-        // Clean up the reference if startup failed
-        delete runningForks[port];
-        // Try to stop the anvil instance if it exists to prevent unhandled rejections
-        if (anvil) {
-            try {
-                await anvil.stop();
-            } catch {
-                // Ignore cleanup errors
-            }
+        // Stagger fork starts to prevent simultaneous RPC hits
+        // Random delay between 0-5000ms to spread out requests more
+        // Longer delay in CI to reduce rate limiting
+        const staggerDelay = Math.floor(Math.random() * 5000);
+        if (staggerDelay > 0) {
+            await sleep(staggerDelay);
         }
-        const errorMessage =
-            error instanceof Error ? error.message : String(error);
-        throw new Error(
-            `Failed to start anvil fork after retries: ${errorMessage}\n` +
-                `Network: ${network.rpcEnv}, Port: ${port}, Block: ${forkBlockNumber}`,
-        );
-    }
 
-    return {
-        rpcUrl,
-    };
+        if (process.env.SKIP_GLOBAL_SETUP === 'true') {
+            console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
+anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --fork-block-number=17878719
+`);
+            await sleep(5000);
+            resolveLock!();
+            return { rpcUrl };
+        }
+
+        const forkBlockNumber = blockNumber ?? anvilOptions.forkBlockNumber;
+        console.log('🛠️  Starting anvil', {
+            port,
+            forkBlockNumber,
+            network: network.rpcEnv,
+            forkUrl: anvilOptions.forkUrl.replace(
+                /([?&]api[_-]?key=)[^&]*/gi,
+                '$1***',
+            ), // Mask API keys in logs
+        });
+
+        let anvil: Anvil | undefined;
+        try {
+            await retryWithBackoff(
+                async () => {
+                    // Clean up any previous failed attempt
+                    if (anvil) {
+                        try {
+                            await anvil.stop();
+                        } catch {
+                            // Ignore cleanup errors from previous attempts
+                        }
+                    }
+                    // Create a fresh anvil instance for each retry attempt
+                    anvil = createAnvil({ ...anvilOptions, port, blockTime });
+                    await anvil.start();
+                    // Only save reference if startup succeeded
+                    runningForks[port] = anvil;
+                    unhealthyForks.delete(port); // Mark as healthy
+                    lastForkStartTime = Date.now();
+                },
+                {
+                    maxAttempts: 5,
+                    initialDelayMs: 3000,
+                    maxDelayMs: 20000,
+                    shouldRetry: (error) => {
+                        const errorMessage =
+                            error instanceof Error
+                                ? error.message
+                                : String(error);
+                        // Retry on rate limiting, network errors, and anvil startup failures
+                        return (
+                            errorMessage.includes('429') ||
+                            errorMessage.includes('Max retries exceeded') ||
+                            errorMessage.includes('failed to get account') ||
+                            errorMessage.includes('failed to fetch') ||
+                            errorMessage.includes('failed to create genesis') ||
+                            errorMessage.includes('state') ||
+                            errorMessage.includes('not available') ||
+                            errorMessage.includes(
+                                'failed to fetch network chain ID',
+                            ) ||
+                            errorMessage.includes('Anvil failed to start') ||
+                            errorMessage.includes('Anvil exited')
+                        );
+                    },
+                },
+            );
+
+            resolveLock!();
+            return {
+                rpcUrl,
+            };
+        } catch (error) {
+            // Mark fork as unhealthy and clean up
+            unhealthyForks.add(port);
+            delete runningForks[port];
+            // Try to stop the anvil instance if it exists to prevent unhandled rejections
+            if (anvil) {
+                try {
+                    await anvil.stop();
+                } catch {
+                    // Ignore cleanup errors
+                }
+            }
+            resolveLock!();
+            const errorMessage =
+                error instanceof Error ? error.message : String(error);
+            const forkBlockNumber = blockNumber ?? anvilOptions.forkBlockNumber;
+            throw new Error(
+                `Failed to start anvil fork after retries: ${errorMessage}\n` +
+                    `Network: ${network.rpcEnv}, Port: ${port}, Block: ${forkBlockNumber}`,
+            );
+        }
+    } catch (error) {
+        // Outer catch for mutex/lock errors
+        resolveLock!();
+        throw error;
+    }
+}
+
+/**
+ * Mark a fork as unhealthy (e.g., when a test fails due to fork issues)
+ * This prevents other tests from reusing a bad fork
+ */
+export function markForkUnhealthy(rpcUrl: string): void {
+    const portMatch = rpcUrl.match(/:(\d+)$/);
+    if (portMatch) {
+        const port = Number.parseInt(portMatch[1], 10);
+        unhealthyForks.add(port);
+        console.warn(`Marked fork at port ${port} as unhealthy`);
+    }
 }
