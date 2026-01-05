@@ -57,9 +57,12 @@ export async function retryWithBackoff<T>(
                 break;
             }
 
+            const errorMsg =
+                error instanceof Error ? error.message : String(error);
+            // Use stderr for CI visibility (matches vitest's stderr output)
             console.warn(
                 `Attempt ${attempt}/${maxAttempts} failed, retrying in ${delay}ms...`,
-                error instanceof Error ? error.message : String(error),
+                errorMsg,
             );
 
             await sleep(delay);

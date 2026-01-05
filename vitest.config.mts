@@ -28,15 +28,11 @@ export default defineConfig(({ mode }) => {
             setupFiles: ['/test/vitest-setup.ts'],
             globals: true,
             pool: 'forks',
-            poolOptions: {
-                forks: {
-                    maxThreads: 2,
-                },
-            },
+            // Use 1 thread in CI to reduce RPC rate limiting
+            // Can be overridden with VITEST_MAX_THREADS env var
+            threads: Number(process.env.VITEST_MAX_THREADS) || 1,
             // Uncomment to debug suite excluding some tests
             // exclude: ['test/*weighted*.integration.*', 'node_modules', 'dist'],
-            // Uncomment to run integration tests sequentially
-            // threads: false,
         },
         plugins: [tsconfigPaths()],
     };

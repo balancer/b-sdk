@@ -226,16 +226,12 @@ export async function startFork(
     if (runningForks[port]) return { rpcUrl };
 
     // Stagger fork starts to prevent simultaneous RPC hits
-    // Random delay between 0-500ms to spread out requests
-    const staggerDelay = Math.floor(Math.random() * 500);
+    // Random delay between 0-2000ms to spread out requests more
+    // Longer delay in CI to reduce rate limiting
+    const staggerDelay = Math.floor(Math.random() * 2000);
     if (staggerDelay > 0) {
         await sleep(staggerDelay);
     }
-
-    // https://www.npmjs.com/package/@viem/anvil
-    const anvil = createAnvil({ ...anvilOptions, port, blockTime });
-    // Save reference to running fork
-    runningForks[port] = anvil;
 
     if (process.env.SKIP_GLOBAL_SETUP === 'true') {
         console.warn(`🛠️  Skipping global anvil setup. You must run the anvil fork manually. Example:
@@ -256,15 +252,28 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
         ), // Mask API keys in logs
     });
 
+    let anvil: Anvil | undefined;
     try {
         await retryWithBackoff(
             async () => {
+                // Clean up any previous failed attempt
+                if (anvil) {
+                    try {
+                        await anvil.stop();
+                    } catch {
+                        // Ignore cleanup errors from previous attempts
+                    }
+                }
+                // Create a fresh anvil instance for each retry attempt
+                anvil = createAnvil({ ...anvilOptions, port, blockTime });
                 await anvil.start();
+                // Only save reference if startup succeeded
+                runningForks[port] = anvil;
             },
             {
-                maxAttempts: 3,
-                initialDelayMs: 2000,
-                maxDelayMs: 10000,
+                maxAttempts: 5,
+                initialDelayMs: 3000,
+                maxDelayMs: 20000,
                 shouldRetry: (error) => {
                     const errorMessage =
                         error instanceof Error ? error.message : String(error);
@@ -280,7 +289,8 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
                         errorMessage.includes(
                             'failed to fetch network chain ID',
                         ) ||
-                        errorMessage.includes('Anvil failed to start')
+                        errorMessage.includes('Anvil failed to start') ||
+                        errorMessage.includes('Anvil exited')
                     );
                 },
             },
@@ -288,6 +298,14 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
     } catch (error) {
         // Clean up the reference if startup failed
         delete runningForks[port];
+        // Try to stop the anvil instance if it exists to prevent unhandled rejections
+        if (anvil) {
+            try {
+                await anvil.stop();
+            } catch {
+                // Ignore cleanup errors
+            }
+        }
         const errorMessage =
             error instanceof Error ? error.message : String(error);
         throw new Error(
