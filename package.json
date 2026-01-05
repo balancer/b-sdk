@@ -25,7 +25,7 @@
         "lint": "dpdm -T ./src && biome check .",
         "check-types": "tsc --noEmit --skipLibCheck",
         "test": "vitest dev",
-        "test:ci": "vitest run test/entities/swaps/v3/swapV3.integration.test.ts test/v3/addLiquidity/addLiquidity.integration.test.ts",
+        "test:ci": "vitest run",
         "changeset": "changeset",
         "changeset:release": "pnpm build && changeset publish --provenance",
         "example": "npx tsx ./examples/lib/executeExample.ts",
