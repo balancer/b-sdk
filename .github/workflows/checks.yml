@@ -3,25 +3,14 @@ on:
   workflow_call:
   workflow_dispatch:
 jobs:
-  install:
-    name: Install
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/actions/setup
   code-quality:
     name: Code quality
-    needs: install
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       matrix:
         node-version: [18]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup
       - name: Lint code
@@ -32,17 +21,24 @@ jobs:
         run: pnpm check-types
   test:
     name: Test
-    needs: install
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       matrix:
         node-version: [18]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup
+      - name: Cache Foundry
+        uses: actions/cache@v4
+        id: cache-foundry
+        with:
+          path: ~/.foundry
+          key: foundry-${{ runner.os }}-v1.4.2
+          restore-keys: |
+            foundry-${{ runner.os }}-
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@v1.4.2
       - name: Test
         run: pnpm test:no-integration
         env:
@@ -51,15 +47,18 @@ jobs:
           FANTOM_RPC_URL: ${{ secrets.FANTOM_RPC_URL }}
           OPTIMISM_RPC_URL: ${{ secrets.OPTIMISM_RPC_URL }}
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          GNOSIS_CHAIN_RPC_URL: ${{ secrets.GNOSIS_CHAIN_RPC_URL }}
+          HYPER_EVM_URL: ${{ secrets.HYPER_EVM_URL }}
+          PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL }}
   build:
     name: Build
-    needs: install
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       matrix:
         node-version: [18]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup
       - name: Generate types from live API
