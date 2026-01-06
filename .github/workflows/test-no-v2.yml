@@ -19,11 +19,11 @@ jobs:
         id: cache-foundry
         with:
           path: ~/.foundry
-          key: foundry-${{ runner.os }}-v1.4.2
+          key: foundry-${{ runner.os }}
           restore-keys: |
             foundry-${{ runner.os }}-
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1.4.2
+        uses: foundry-rs/foundry-toolchain@v1
       - name: Test
         run: pnpm test:no-v2
         env:
