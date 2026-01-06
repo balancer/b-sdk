@@ -1,0 +1,39 @@
+name: Test No V2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test No V2
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node-version: [18]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Cache Foundry
+        uses: actions/cache@v4
+        id: cache-foundry
+        with:
+          path: ~/.foundry
+          key: foundry-${{ runner.os }}-v1.4.2
+          restore-keys: |
+            foundry-${{ runner.os }}-
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1.4.2
+      - name: Test
+        run: pnpm test:no-v2
+        env:
+          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
+          POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
+          FANTOM_RPC_URL: ${{ secrets.FANTOM_RPC_URL }}
+          OPTIMISM_RPC_URL: ${{ secrets.OPTIMISM_RPC_URL }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          GNOSIS_CHAIN_RPC_URL: ${{ secrets.GNOSIS_CHAIN_RPC_URL }}
+          HYPER_EVM_URL: ${{ secrets.HYPER_EVM_URL }}
+          PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL }}
+
