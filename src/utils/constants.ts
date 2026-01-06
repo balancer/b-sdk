@@ -282,7 +282,7 @@ export const NATIVE_ASSETS = {
         ChainId.X_LAYER,
         NATIVE_ADDRESS,
         18,
-        '0xe538905cf8410324e03A5A23C1c177a474D5b2b',
+        '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
         'OKB',
         'Okb',
     ),
