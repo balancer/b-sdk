@@ -1,26 +1,11 @@
-name: Checks
+name: Test No V2
+
 on:
-  workflow_call:
   workflow_dispatch:
+
 jobs:
-  code-quality:
-    name: Code quality
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        node-version: [18]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup
-        uses: ./.github/actions/setup
-      - name: Lint code
-        run: pnpm lint
-      - name: Format code
-        run: pnpm format
-      - name: Check types
-        run: pnpm check-types
   test:
-    name: Test
+    name: Test No V2
     runs-on: macos-latest
     strategy:
       matrix:
@@ -40,7 +25,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
       - name: Test
-        run: pnpm test:no-integration
+        run: pnpm test:no-v2
         env:
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
@@ -51,17 +36,4 @@ jobs:
           GNOSIS_CHAIN_RPC_URL: ${{ secrets.GNOSIS_CHAIN_RPC_URL }}
           HYPER_EVM_URL: ${{ secrets.HYPER_EVM_URL }}
           PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL }}
-  build:
-    name: Build
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        node-version: [18]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup
-        uses: ./.github/actions/setup
-      - name: Generate types from live API
-        run: pnpm run codegen
-      - name: Build
-        run: pnpm build
+

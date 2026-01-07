@@ -221,6 +221,6 @@ describe('validateAllNetworks', () => {
                 swap,
                 wethIsEth: false,
             });
-        });
+        }, 60_000);
     });
 });
