@@ -721,6 +721,7 @@ export type GqlPoolDynamicData = {
   /** Disabled for bricked pools */
   swapEnabled: Scalars['Boolean']['output'];
   swapFee: Scalars['BigDecimal']['output'];
+  /** @deprecated No longer supported */
   swapsCount: Scalars['BigInt']['output'];
   totalLiquidity: Scalars['BigDecimal']['output'];
   totalLiquidity24hAgo: Scalars['BigDecimal']['output'];
@@ -2801,7 +2802,6 @@ export type MevTaxHookParams = {
 export type Mutation = {
   __typename?: 'Mutation';
   beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String']['output'];
-  beetsSyncFbeetsRatio: Scalars['String']['output'];
   createLBP: Scalars['Boolean']['output'];
   poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
   poolLoadSnapshotsForPools: Scalars['String']['output'];
