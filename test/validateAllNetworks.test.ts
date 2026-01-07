@@ -107,7 +107,7 @@ const CHAINS_TO_TEST: number[] = [
     ChainId.SEPOLIA,
     ChainId.HYPEREVM,
     ChainId.PLASMA,
-    ChainId.X_LAYER,
+    // ChainId.X_LAYER, // X_LAYER is not live and RPC is giving issues on CI (No Alchemy available)
 ];
 
 describe('validateAllNetworks', () => {
