@@ -130,7 +130,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     },
     X_LAYER: {
         rpcEnv: 'X_LAYER_RPC_URL',
-        fallBackRpc: 'https://rpc.xlayer.tech',
+        fallBackRpc: 'https://xlayer.drpc.org',
         port: ANVIL_PORTS.X_LAYER,
         forkBlockNumber: 43138155n,
     },
@@ -207,6 +207,7 @@ export async function startFork(
     jobId = Number(process.env.VITEST_WORKER_ID) || 0,
     blockNumber?: bigint, // If not provided, the fork will start from the network's forkBlockNumber
     blockTime?: number,
+    startTimeout?: number, // Timeout in milliseconds for starting anvil (default: 60 seconds)
 ) {
     const anvilOptions = getAnvilOptions(network, blockNumber);
 
@@ -226,7 +227,14 @@ export async function startFork(
     if (runningForks[port]) return { rpcUrl };
 
     // https://www.npmjs.com/package/@viem/anvil
-    const anvil = createAnvil({ ...anvilOptions, port, blockTime });
+    // Pass startTimeout directly to createAnvil - it defaults to 10_000ms
+    const timeout = startTimeout ?? 60_000; // Default to 60 seconds
+    const anvil = createAnvil({
+        ...anvilOptions,
+        port,
+        blockTime,
+        startTimeout: timeout,
+    });
     // Save reference to running fork
     runningForks[port] = anvil;
 
@@ -240,8 +248,11 @@ anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/<your-key> --port 8545 --f
     console.log('🛠️  Starting anvil', {
         port,
         forkBlockNumber: blockNumber ?? anvilOptions.forkBlockNumber,
+        startTimeout: timeout,
     });
+
     await anvil.start();
+
     return {
         rpcUrl,
     };
