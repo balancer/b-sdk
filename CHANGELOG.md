@@ -1,5 +1,13 @@
 # @balancer/sdk
 
+## 5.0.1
+
+### Patch Changes
+
+- 4b8c63c: Bump viem from 2.42.0 to 2.43.5.
+  Bump @balancer-labs/balancer-maths from 0.0.37 to 0.0.38.
+- 29e0d09: Fix incorrect swap parameter
+
 ## 5.0.0
 
 ### Major Changes
