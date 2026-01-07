@@ -34,6 +34,6 @@ jobs:
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
           GNOSIS_CHAIN_RPC_URL: ${{ secrets.GNOSIS_CHAIN_RPC_URL }}
-          HYPER_EVM_URL: ${{ secrets.HYPER_EVM_URL }}
+          HYPEREVM_RPC_URL: ${{ secrets.HYPEREVM_RPC_URL }}
           PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL }}
 

@@ -130,7 +130,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     },
     X_LAYER: {
         rpcEnv: 'X_LAYER_RPC_URL',
-        fallBackRpc: 'https://xlayer.drpc.org',
+        fallBackRpc: 'https://rpc.ankr.com/xlayer',
         port: ANVIL_PORTS.X_LAYER,
         forkBlockNumber: 43138155n,
     },
