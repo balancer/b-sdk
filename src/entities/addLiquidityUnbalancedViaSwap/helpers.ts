@@ -8,10 +8,7 @@ export const getAmountsCallUnbalancedViaSwap = (
     maxAdjustableAmount: bigint;
 } => {
     // Apply slippage to decrease exactBptAmountOut (negative direction)
-    const exactBptAmountOut = input.slippage.applyTo(
-        input.bptOut.amount,
-        -1,
-    );
+    const exactBptAmountOut = input.slippage.applyTo(input.bptOut.amount, -1);
 
     // Keep adjustable amount unchanged (no slippage applied)
     const adjustableAmount = input.amountsIn[input.adjustableTokenIndex];

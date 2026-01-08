@@ -25,7 +25,7 @@ import {
     SwapKind,
     TokenAmount,
 } from '@/index';
-import {    
+import {
     unbalancedAddViaSwapRouterAbi_V3,
     vaultExtensionAbi_V3,
     vaultAbi_V3,
@@ -46,7 +46,7 @@ import {
     approveTokens,
     sendTransactionGetBalances,
     areBigIntsWithinPercent,
-    SimulateParams
+    SimulateParams,
 } from '../../lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
@@ -55,7 +55,6 @@ const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 const poolId = POOLS[chainId].MOCK_WETH_BAL_POOL.id;
 
-const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 const DAI = TOKENS[chainId].DAI;
 const STATA_USDC = TOKENS[chainId].stataUSDC;
@@ -353,15 +352,12 @@ describe('add liquidity unbalanced via swap test', () => {
                     };
 
                     // the pool has these tokens
-                    
 
                     // the add liquidity input is
                     // weth 0x7b79995e5f793a07bc00c21412e50ecae098e7f9
                     // dai 0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613
 
-                    // the dai is not the same? 
-
-
+                    // the dai is not the same?
 
                     try {
                         const queryOutput =
@@ -393,7 +389,7 @@ describe('add liquidity unbalanced via swap test', () => {
                         expect(daiIn).toBeGreaterThan(0n);
                         expect(daiIn).toBeLessThanOrEqual(daiBudgetRaw);
 
-                        // 
+                        //
                         const deltaRaw = daiBudgetRaw - daiIn;
                         const deltaPctMilli =
                             daiBudgetRaw === 0n
@@ -411,7 +407,7 @@ describe('add liquidity unbalanced via swap test', () => {
                         // Execute the transaction
                         const deadline = 281474976710654n; // Large deadline for testing
                         // the queryoutput returns the actual amountsIn, not the
-                        // daiBudgetRaw. 
+                        // daiBudgetRaw.
                         const buildCallInput = {
                             ...queryOutput,
                             slippage: Slippage.fromPercentage('1'), // 1% slippage
@@ -419,7 +415,9 @@ describe('add liquidity unbalanced via swap test', () => {
                         };
 
                         const buildCallOutput =
-                            addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
+                            addLiquidityUnbalancedViaSwap.buildCall(
+                                buildCallInput,
+                            );
 
                         expect(buildCallOutput.to).toBe(
                             AddressProvider.UnbalancedAddViaSwapRouter(chainId),
@@ -430,17 +428,26 @@ describe('add liquidity unbalanced via swap test', () => {
 
                         // attach optional simulate params to the transaction
                         const simulateParams: SimulateParams = {
-                            abi: [...unbalancedAddViaSwapRouterAbi_V3, ...vaultExtensionAbi_V3, ...vaultAbi_V3, ...permit2Abi] as Abi,
+                            abi: [
+                                ...unbalancedAddViaSwapRouterAbi_V3,
+                                ...vaultExtensionAbi_V3,
+                                ...vaultAbi_V3,
+                                ...permit2Abi,
+                            ],
                             functionName: 'addLiquidityUnbalanced',
                             args: [
                                 buildCallInput.pool,
                                 buildCallInput.deadline,
                                 false,
                                 {
-                                    exactBptAmountOut: buildCallInput.bptOut.amount,
+                                    exactBptAmountOut:
+                                        buildCallInput.bptOut.amount,
                                     exactToken: buildCallInput.exactToken,
                                     exactAmount: buildCallInput.exactAmount,
-                                    maxAdjustableAmount: buildCallInput.amountsIn[buildCallInput.adjustableTokenIndex].amount,
+                                    maxAdjustableAmount:
+                                        buildCallInput.amountsIn[
+                                            buildCallInput.adjustableTokenIndex
+                                        ].amount,
                                     addLiquidityUserData: '0x',
                                     swapUserData: '0x',
                                 },
@@ -451,7 +458,9 @@ describe('add liquidity unbalanced via swap test', () => {
                         const { transactionReceipt, balanceDeltas } =
                             await sendTransactionGetBalances(
                                 [
-                                    ...reclammPoolState.tokens.map((t) => t.address),
+                                    ...reclammPoolState.tokens.map(
+                                        (t) => t.address,
+                                    ),
                                     queryOutput.bptOut.token.address, // BPT token
                                 ],
                                 client,
