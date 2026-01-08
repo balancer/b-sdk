@@ -23,12 +23,20 @@ import {
     PERMIT2,
     PublicWalletClient,
     SwapKind,
+    TokenAmount,
 } from '@/index';
+import {    
+    unbalancedAddViaSwapRouterAbi_V3,
+    vaultExtensionAbi_V3,
+    vaultAbi_V3,
+    permit2Abi,
+} from '@/abi';
 import {
     AddLiquidityUnbalancedViaSwapV3,
     AddLiquidityUnbalancedViaSwapInput,
 } from '@/entities/addLiquidityUnbalancedViaSwap';
 import { getPoolStateWithBalancesV3 } from '@/entities/utils/getPoolStateWithBalancesV3';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { appendFileSync } from 'node:fs';
 import {
     POOLS,
@@ -36,6 +44,9 @@ import {
     setTokenBalances,
     approveSpenderOnTokens,
     approveTokens,
+    sendTransactionGetBalances,
+    areBigIntsWithinPercent,
+    SimulateParams
 } from '../../lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
 
@@ -71,8 +82,8 @@ class MockApi {
                         index: 0,
                     },
                     {
-                        address: BAL.address,
-                        decimals: BAL.decimals,
+                        address: DAI.address,
+                        decimals: DAI.decimals,
                         index: 1,
                     },
                 ],
@@ -171,7 +182,7 @@ describe('add liquidity unbalanced via swap test', () => {
             client,
             testAddress,
             tokens,
-            [WETH.slot, BAL.slot] as number[],
+            [WETH.slot, DAI.slot] as number[],
             [...poolState.tokens.map((t) => parseUnits('1000', t.decimals))],
         );
 
@@ -341,6 +352,17 @@ describe('add liquidity unbalanced via swap test', () => {
                         daiBudgetRaw: daiBudgetRaw.toString(),
                     };
 
+                    // the pool has these tokens
+                    
+
+                    // the add liquidity input is
+                    // weth 0x7b79995e5f793a07bc00c21412e50ecae098e7f9
+                    // dai 0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613
+
+                    // the dai is not the same? 
+
+
+
                     try {
                         const queryOutput =
                             await addLiquidityUnbalancedViaSwap.query(
@@ -371,6 +393,7 @@ describe('add liquidity unbalanced via swap test', () => {
                         expect(daiIn).toBeGreaterThan(0n);
                         expect(daiIn).toBeLessThanOrEqual(daiBudgetRaw);
 
+                        // 
                         const deltaRaw = daiBudgetRaw - daiIn;
                         const deltaPctMilli =
                             daiBudgetRaw === 0n
@@ -385,6 +408,79 @@ describe('add liquidity unbalanced via swap test', () => {
                             ].amount;
                         expect(wethIn).toBe(0n);
 
+                        // Execute the transaction
+                        const deadline = 281474976710654n; // Large deadline for testing
+                        // the queryoutput returns the actual amountsIn, not the
+                        // daiBudgetRaw. 
+                        const buildCallInput = {
+                            ...queryOutput,
+                            slippage: Slippage.fromPercentage('1'), // 1% slippage
+                            deadline,
+                        };
+
+                        const buildCallOutput =
+                            addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
+
+                        expect(buildCallOutput.to).toBe(
+                            AddressProvider.UnbalancedAddViaSwapRouter(chainId),
+                        );
+                        expect(buildCallOutput.value).toBe(0n);
+
+                        // Send transaction and check balance changes
+
+                        // attach optional simulate params to the transaction
+                        const simulateParams: SimulateParams = {
+                            abi: [...unbalancedAddViaSwapRouterAbi_V3, ...vaultExtensionAbi_V3, ...vaultAbi_V3, ...permit2Abi] as Abi,
+                            functionName: 'addLiquidityUnbalanced',
+                            args: [
+                                buildCallInput.pool,
+                                buildCallInput.deadline,
+                                false,
+                                {
+                                    exactBptAmountOut: buildCallInput.bptOut.amount,
+                                    exactToken: buildCallInput.exactToken,
+                                    exactAmount: buildCallInput.exactAmount,
+                                    maxAdjustableAmount: buildCallInput.amountsIn[buildCallInput.adjustableTokenIndex].amount,
+                                    addLiquidityUserData: '0x',
+                                    swapUserData: '0x',
+                                },
+                            ] as const,
+                            address: buildCallOutput.to,
+                            account: testAddress,
+                        };
+                        const { transactionReceipt, balanceDeltas } =
+                            await sendTransactionGetBalances(
+                                [
+                                    ...reclammPoolState.tokens.map((t) => t.address),
+                                    queryOutput.bptOut.token.address, // BPT token
+                                ],
+                                client,
+                                testAddress,
+                                buildCallOutput.to,
+                                buildCallOutput.callData,
+                                buildCallOutput.value,
+                                simulateParams,
+                            );
+
+                        expect(transactionReceipt.status).toBe('success');
+
+                        // Verify input token amounts (WETH should be 0, DAI should be used)
+                        const wethDelta = balanceDeltas[0];
+                        const daiDelta = balanceDeltas[1];
+                        const bptDelta = balanceDeltas[2];
+
+                        expect(wethDelta).toBe(0n);
+                        expect(daiDelta).toBeGreaterThan(0n);
+                        expect(daiDelta).toBeLessThanOrEqual(daiBudgetRaw);
+                        expect(bptDelta).toBeGreaterThan(0n);
+
+                        // Verify BPT output is within acceptable tolerance
+                        areBigIntsWithinPercent(
+                            bptDelta,
+                            queryOutput.bptOut.amount,
+                            0.01, // 1% tolerance
+                        );
+
                         if (ENABLE_LOGGING) {
                             appendFileSync(
                                 'single-sided-adjustable-results.log',
@@ -396,6 +492,9 @@ describe('add liquidity unbalanced via swap test', () => {
                                     deltaRaw: deltaRaw.toString(),
                                     deltaPct: deltaPct,
                                     bptOut: queryOutput.bptOut.amount.toString(),
+                                    transactionExecuted: true,
+                                    bptDelta: bptDelta.toString(),
+                                    daiDelta: daiDelta.toString(),
                                 })}\n`,
                             );
                         }
