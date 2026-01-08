@@ -11,12 +11,8 @@ import {
     PublicWalletClient,
     Swap,
     SwapKind,
+    Address,
 } from '@/index';
-import {
-    ANVIL_NETWORKS,
-    NetworkSetup,
-    startFork,
-} from 'test/anvil/anvil-global-setup';
 import { POOLS, TOKENS, TestPool, TestToken } from 'test/lib/utils/addresses';
 import {
     approveSpenderOnTokens,
@@ -30,6 +26,14 @@ import {
     stopAnvilFork,
     NetworkSetup,
 } from 'test/anvil/anvil-global-setup';
+import {
+    http,
+    TestActions,
+    createTestClient,
+    parseEther,
+    publicActions,
+    walletActions,
+} from 'viem';
 
 const protocolVersion = 3;
 
