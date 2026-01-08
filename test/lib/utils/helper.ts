@@ -1,5 +1,6 @@
 import {
     Address,
+    Abi,
     Client,
     Hex,
     PublicActions,
@@ -30,6 +31,7 @@ import {
     VAULT_V2,
     ZERO_ADDRESS,
 } from '@/utils';
+import { SimulateParams } from './types';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;
@@ -335,6 +337,7 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
+    simulateParams?: SimulateParams,
 ): Promise<TxOutput> {
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
@@ -365,6 +368,21 @@ export async function sendTransactionGetBalances(
     //         '0x',
     //     ],
     // });
+
+    if (simulateParams) {
+        try {
+            await client.simulateContract({
+                address: simulateParams.address,
+                abi: simulateParams.abi,
+                functionName: simulateParams.functionName,
+                args: simulateParams.args,
+                account: simulateParams.account,
+                value,
+            });
+        } catch (error) {
+            console.error('Transaction simulation failed:', error);
+        }
+    }
 
     // Send transaction to local fork
     const hash = await client.sendTransaction({
