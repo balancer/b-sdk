@@ -150,6 +150,12 @@ export class AddLiquidityUnbalancedViaSwapV3 {
     buildCall(
         input: AddLiquidityUnbalancedViaSwapBuildCallInput,
     ): AddLiquidityUnbalancedViaSwapBuildCallOutput {
+
+        // the queryOutput returns the actual amountsIn for a calculated BPT amount.
+        // the BPT amount is calculated based on a proportional join helper with some
+        // inline bptAmount adjustments. (bpt gets increased by a certain percentage).
+        // Simply using slippage to decrease the exactBptAmount would open up the
+        // join with some freetom in the adjustable amount.
         const amounts = getAmountsCallUnbalancedViaSwap(input);
         const wethIsEth = input.wethIsEth ?? false;
 
