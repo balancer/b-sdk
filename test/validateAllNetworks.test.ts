@@ -25,15 +25,11 @@ import {
 } from 'test/lib/utils/helper';
 import { assertSwapExactIn } from 'test/lib/utils/swapHelpers';
 import {
-    http,
-    Address,
-    Hex,
-    TestActions,
-    createTestClient,
-    parseEther,
-    publicActions,
-    walletActions,
-} from 'viem';
+    ANVIL_NETWORKS,
+    startFork,
+    stopAnvilFork,
+    NetworkSetup,
+} from 'test/anvil/anvil-global-setup';
 
 const protocolVersion = 3;
 
@@ -108,7 +104,7 @@ const CHAINS_TO_TEST: number[] = [
     ChainId.SEPOLIA,
     ChainId.HYPEREVM,
     ChainId.PLASMA,
-    ChainId.X_LAYER,
+    // ChainId.X_LAYER, // X_LAYER is not live and RPC is giving issues on CI (No Alchemy available)
 ];
 
 describe('validateAllNetworks', () => {
@@ -143,8 +139,18 @@ describe('validateAllNetworks', () => {
             // Use override block number if present
             const blockNumber = BLOCK_NUMBER_OVERRIDES[chainId];
 
+            // Use longer timeout for X_LAYER due to slow RPC
+            const startTimeout =
+                chainId === ChainId.X_LAYER ? 120_000 : undefined;
+
             // Start fork and get rpcUrl
-            const fork = await startFork(anvilNetwork, undefined, blockNumber);
+            const fork = await startFork(
+                anvilNetwork,
+                undefined,
+                blockNumber,
+                undefined,
+                startTimeout,
+            );
             rpcUrl = fork.rpcUrl;
 
             client = createTestClient({
@@ -202,6 +208,19 @@ describe('validateAllNetworks', () => {
             }
         });
 
+        afterAll(async () => {
+            // Clean up after each chain test
+            const anvilKey = CHAIN_ANVIL_MAP[chainId];
+            if (anvilKey) {
+                const blockNumber = BLOCK_NUMBER_OVERRIDES[chainId];
+                await stopAnvilFork(
+                    ANVIL_NETWORKS[anvilKey],
+                    undefined,
+                    blockNumber,
+                );
+            }
+        });
+
         test('GivenIn', async () => {
             await approveTokens(
                 client,
@@ -223,6 +242,6 @@ describe('validateAllNetworks', () => {
                 swap,
                 wethIsEth: false,
             });
-        });
+        }, 60_000);
     });
 });

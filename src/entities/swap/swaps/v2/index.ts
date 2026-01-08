@@ -118,7 +118,7 @@ export class SwapV2 implements SwapBase {
 
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: VAULT_V2[this.chainId],
+                to: queriesContract.address,
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -128,7 +128,7 @@ export class SwapV2 implements SwapBase {
             };
         }
         return {
-            to: VAULT_V2[this.chainId],
+            to: queriesContract.address,
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,
@@ -156,7 +156,7 @@ export class SwapV2 implements SwapBase {
 
         if (this.swapKind === SwapKind.GivenIn) {
             return {
-                to: VAULT_V2[this.chainId],
+                to: queriesContract.address,
                 swapKind: SwapKind.GivenIn,
                 expectedAmountOut: TokenAmount.fromRawAmount(
                     this.outputAmount.token,
@@ -170,7 +170,7 @@ export class SwapV2 implements SwapBase {
             };
         }
         return {
-            to: VAULT_V2[this.chainId],
+            to: queriesContract.address,
             swapKind: SwapKind.GivenOut,
             expectedAmountIn: TokenAmount.fromRawAmount(
                 this.inputAmount.token,
