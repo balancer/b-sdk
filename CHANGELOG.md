@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 5.0.2
+
+### Patch Changes
+
+- d31fc84: Remove pool type Boosted
+- 568d700: Remove unnecessary dependencies
+
 ## 5.0.1
 
 ### Patch Changes
