@@ -8,9 +8,7 @@ import {
     TokenConfig,
 } from '../../types';
 import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
-import { balancerV3Contracts } from '@/utils';
 import { Hex } from '@/types';
-import { Big } from 'big.js';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 
@@ -184,5 +182,17 @@ export function computeDerivedEclpParams(
 }
 
 function bigIntSqrt(val: bigint): bigint {
-    return BigInt(new Big(val.toString()).sqrt().toFixed(0));
+    if (val < 0n) throw new Error('Square root of negative number');
+    if (val < 2n) return val;
+
+    // Newton-Raphson iteration (standard approach for integer square roots)
+    let x = val;
+    let y = (x + 1n) / 2n;
+
+    while (y < x) {
+        x = y;
+        y = (x + val / x) / 2n;
+    }
+
+    return x;
 }
