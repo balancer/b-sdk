@@ -1,5 +1,5 @@
 /**
- * Example showing how to create and initialise a V2 ComposableStable pool.
+ * Example showing how to create and initialise a V2 weighted pool.
  * (Runs against a local Anvil fork)
  * Note
  * - other pool types, e.g. Weighted, can be created using the relative pool types.
@@ -17,15 +17,16 @@ import {
     parseEther,
 } from 'viem';
 import {
-    composableStableFactoryAbiExtended,
+    weightedPoolFactoryAbiExtended_V2,
     CreatePool,
-    CreatePoolV2ComposableStableInput,
+    CreatePoolV2WeightedInput,
     PoolType,
     ChainId,
     CHAINS,
     InitPoolDataProvider,
     InitPool,
     InitPoolInput,
+    CreatePoolInput,
 } from 'src';
 import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
@@ -44,24 +45,22 @@ async function runAgainstFork() {
         .extend(publicActions)
         .extend(walletActions);
     const userAccount = (await client.getAddresses())[0];
-    const createPoolInput: CreatePoolV2ComposableStableInput = {
+    const createPoolInput: CreatePoolV2WeightedInput = {
         name: 'Test Pool',
         symbol: '50BAL-50WETH',
-        poolType: PoolType.ComposableStable,
+        poolType: PoolType.Weighted,
         tokens: [
             {
                 address: '0xba100000625a3754423978a60c9317c58a424e3d',
                 rateProvider: zeroAddress,
-                tokenRateCacheDuration: BigInt(100),
+                weight: parseEther('0.5'),
             },
             {
                 address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
                 rateProvider: zeroAddress,
-                tokenRateCacheDuration: BigInt(100),
+                weight: parseEther('0.5'),
             },
         ],
-        amplificationParameter: BigInt(62),
-        exemptFromYieldProtocolFeeFlag: false,
         swapFee: '0.01',
         poolOwnerAddress: userAccount,
         protocolVersion: 2, // For V3 creation change to 3
@@ -109,7 +108,7 @@ async function runAgainstFork() {
     );
 }
 
-const createPoolCall = async (createPoolInput) => {
+const createPoolCall = async (createPoolInput: CreatePoolInput) => {
     const createPool = new CreatePool();
     const call = createPool.buildCall(createPoolInput);
     return call;
@@ -123,7 +122,7 @@ const initPool = async ({
     initAmounts,
 }) => {
     const initPool = new InitPool();
-    const poolType = PoolType.ComposableStable;
+    const poolType = PoolType.Weighted;
     const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
 
     const initPoolInput: InitPoolInput = {
@@ -156,7 +155,7 @@ async function createPool({ client, call, userAccount }) {
     const poolCreatedEvent = findEventInReceiptLogs({
         receipt: transactionReceipt,
         eventName: 'PoolCreated',
-        abi: composableStableFactoryAbiExtended,
+        abi: weightedPoolFactoryAbiExtended_V2,
         to: call.to,
     });
 
