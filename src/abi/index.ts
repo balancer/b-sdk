@@ -1,7 +1,6 @@
 import { balancerCompositeLiquidityRouterNestedAbi } from './balancerCompositeLiquidityRouterNested';
 import { balancerQueriesAbi } from './balancerQueries';
 import { balancerRelayerAbi } from './balancerRelayer';
-import { composableStableFactoryV6Abi_V2 } from './composableStableFactoryV6.V2';
 import { permit2Abi } from './permit2';
 import { vaultAbi_V2 } from './v2';
 import { weightedPoolFactoryV4Abi_V2 } from './weightedPoolFactoryV4.V2';
@@ -136,11 +135,6 @@ export const balancerRelayerAbiExtended = [
 ];
 
 // V2 Pool Factories ABIs Extended
-
-export const composableStableFactoryAbiExtended = [
-    ...composableStableFactoryV6Abi_V2,
-    ...commonABIsV2,
-];
 
 export const weightedPoolFactoryAbiExtended_V2 = [
     ...weightedPoolFactoryV4Abi_V2,
