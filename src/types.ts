@@ -14,7 +14,6 @@ export enum PoolType {
     Stable = 'Stable',
     StableSurge = 'StableSurge',
     Weighted = 'Weighted',
-    Boosted = 'Boosted',
     ReClamm = 'ReClamm',
     LiquidityBootstrapping = 'LiquidityBootstrapping',
 }
