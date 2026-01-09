@@ -8,9 +8,7 @@ import {
     TokenConfig,
 } from '../../types';
 import { gyroECLPPoolFactoryAbiExtended } from '@/abi';
-import { balancerV3Contracts } from '@/utils';
 import { Hex } from '@/types';
-import { Big } from 'big.js';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { GyroECLPMath } from '@balancer-labs/balancer-maths';
 
