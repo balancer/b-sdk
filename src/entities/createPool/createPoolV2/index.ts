@@ -1,7 +1,6 @@
 import { PoolType } from '@/types';
 import { poolTypeProtocolVersionError } from '@/utils';
 
-import { CreatePoolComposableStableV2 } from './composableStable/createPoolComposableStable';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
@@ -15,7 +14,6 @@ export class CreatePoolV2 implements CreatePoolBase {
     constructor() {
         this.createPoolTypes = {
             [PoolType.Weighted]: new CreatePoolWeightedV2(),
-            [PoolType.ComposableStable]: new CreatePoolComposableStableV2(),
         };
     }
 

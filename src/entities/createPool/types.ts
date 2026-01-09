@@ -20,7 +20,6 @@ export type CreatePoolBaseInput = {
 
 export type CreatePoolInput =
     | CreatePoolV2WeightedInput
-    | CreatePoolV2ComposableStableInput
     | CreatePoolV3WeightedInput
     | CreatePoolV3StableInput
     | CreatePoolStableSurgeInput
@@ -50,36 +49,12 @@ export type CreatePoolV2WeightedInput = CreatePoolV2BaseInput & {
     }[];
 };
 
-export type CreatePoolV2ComposableStableInput = CreatePoolV2BaseInput & {
-    poolType: PoolType.ComposableStable;
-    tokens: {
-        address: Address;
-        rateProvider: Address;
-        tokenRateCacheDuration: bigint;
-    }[];
-    amplificationParameter: bigint;
-    exemptFromYieldProtocolFeeFlag: boolean;
-};
-
 export type CreatePoolV2WeightedArgs = [
     string,
     string,
     Address[],
     bigint[],
     Address[],
-    bigint,
-    Address,
-    Hex,
-];
-
-export type CreatePoolV2ComposableStableArgs = [
-    string,
-    string,
-    Address[],
-    bigint,
-    Address[],
-    bigint[],
-    boolean,
     bigint,
     Address,
     Hex,

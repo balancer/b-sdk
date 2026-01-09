@@ -46,7 +46,6 @@ const targetContractsV2 = [
     'BalancerRelayer',
     'BalancerQueries',
     'WeightedPoolFactory',
-    'ComposableStablePoolFactory',
     'Authorizer', // only ABI?
     // 'BatchRelayer', // Named "BatchRelayerLibrary" in SDK. TODO: investigate https://github.com/balancer/balancer-deployments/tree/master/v2/tasks/20231031-batch-relayer-v6
 ];
