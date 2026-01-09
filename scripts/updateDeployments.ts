@@ -68,6 +68,8 @@ const targetContractsV3 = [
     'ReClammPoolFactory',
     'MockGyroEclpPool',
     'LBPMigrationRouter',
+    'MevCaptureHook',
+    'StableSurgeHook',
 ];
 
 const targetContracts = [...targetContractsV2, ...targetContractsV3];
