@@ -4,7 +4,6 @@ import {
     Address,
     PoolType,
     weightedPoolFactoryAbiExtended_V2,
-    composableStableFactoryAbiExtended,
     weightedPoolFactoryAbiExtended_V3,
     stablePoolFactoryAbiExtended,
     gyroECLPPoolFactoryAbiExtended,
@@ -25,7 +24,6 @@ export async function doCreatePool(
     const abis = {
         2: {
             [PoolType.Weighted]: weightedPoolFactoryAbiExtended_V2,
-            [PoolType.ComposableStable]: composableStableFactoryAbiExtended,
         },
         3: {
             [PoolType.Weighted]: weightedPoolFactoryAbiExtended_V3,
