@@ -11,9 +11,6 @@ importers:
       '@balancer-labs/balancer-maths':
         specifier: 0.0.38
         version: 0.0.38
-      decimal.js-light:
-        specifier: 2.5.1
-        version: 2.5.1
       viem:
         specifier: 2.43.5
         version: 2.43.5(typescript@5.8.3)
@@ -1794,9 +1791,6 @@ packages:
     peerDependenciesMeta:
       supports-color:
         optional: true
-
-  decimal.js-light@2.5.1:
-    resolution: {integrity: sha512-qIMFpTMZmny+MMIitAB6D7iVPEorVw6YQRWkvarTkT4tBeSLLiHzcwj6q0MmYSFCiVpiqPJTJEYIrpcPzVEIvg==}
 
   deep-eql@5.0.2:
     resolution: {integrity: sha512-h5k/5U50IJJFpzfL6nO9jaaumfjO/f2NjK/oYB2Djzm4p9L+3T9qWpZqZ2hAbLPuuYq9wrU08WQyBTL5GbPk5Q==}
@@ -4935,8 +4929,6 @@ snapshots:
   debug@4.4.1:
     dependencies:
       ms: 2.1.3
-
-  decimal.js-light@2.5.1: {}
 
   deep-eql@5.0.2: {}
 
