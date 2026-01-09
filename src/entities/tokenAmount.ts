@@ -1,4 +1,3 @@
-import _Decimal from 'decimal.js-light';
 import { parseUnits } from 'viem';
 import { InputAmount, BigintIsh } from '../types';
 import { DECIMAL_SCALES } from '../utils/constants';
@@ -79,10 +78,37 @@ export class TokenAmount {
     }
 
     public toSignificant(significantDigits = 6): string {
-        return new _Decimal(this.amount.toString())
-            .div(new _Decimal(this.decimalScale.toString()))
-            .toDecimalPlaces(significantDigits)
-            .toFixed();
+        if (this.amount === 0n) return '0';
+
+        // Scale up for precision, then divide
+        const scaleFactor = 10n ** BigInt(significantDigits);
+        const scaled = (this.amount * scaleFactor) / this.decimalScale;
+
+        if (scaled === 0n) return '0';
+
+        const scaledStr = scaled.toString();
+
+        // Small number: needs leading "0."
+        if (scaledStr.length <= significantDigits) {
+            const padded = scaledStr.padStart(significantDigits, '0');
+            // Trim trailing zeros manually
+            let end = padded.length;
+            while (end > 0 && padded[end - 1] === '0') end--;
+            if (end === 0) return '0';
+            return `0.${padded.slice(0, end)}`;
+        }
+
+        // Large number: insert decimal point
+        const intLen = scaledStr.length - significantDigits;
+        const intPart = scaledStr.slice(0, intLen);
+        const fracPart = scaledStr.slice(intLen);
+
+        // Trim trailing zeros from fractional part
+        let end = fracPart.length;
+        while (end > 0 && fracPart[end - 1] === '0') end--;
+
+        if (end === 0) return intPart;
+        return `${intPart}.${fracPart.slice(0, end)}`;
     }
 
     public toInputAmount(): InputAmount {

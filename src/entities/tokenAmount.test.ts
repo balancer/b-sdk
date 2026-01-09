@@ -1,6 +1,7 @@
+// pnpm test tokenAmount.test.ts
+
 import { ChainId, NATIVE_ASSETS, TokenAmount } from '@balancer/sdk';
 import { parseUnits } from 'viem';
-import _Decimal from 'decimal.js-light';
 
 const weth = NATIVE_ASSETS[ChainId.MAINNET];
 
