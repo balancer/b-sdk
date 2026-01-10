@@ -1,5 +1,6 @@
 import {
     Address,
+    Abi,
     Client,
     Hex,
     PublicActions,
@@ -10,8 +11,8 @@ import {
     erc20Abi,
     hexToBigInt,
     keccak256,
-    maxUint160,
     maxUint48,
+    maxUint160,
     pad,
     toBytes,
     toHex,
@@ -20,16 +21,17 @@ import {
 } from 'viem';
 
 import { permit2Abi } from '@/abi';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import {
-    VAULT_V2,
-    MAX_UINT256,
-    ZERO_ADDRESS,
-    PERMIT2,
     // balancerV3Contracts,
     BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED,
+    MAX_UINT256,
+    PERMIT2,
     PublicWalletClient,
+    VAULT_V2,
+    ZERO_ADDRESS,
 } from '@/utils';
-import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import { SimulateParams } from './types';
 
 export type TxOutput = {
     transactionReceipt: TransactionReceipt;
@@ -144,6 +146,18 @@ export const approveToken = async (
                 amount,
                 deadline,
             );
+            // Approve UnbalancedAddViaSwapRouter to spend account tokens using Permit2
+            // for now only on Sepolia, as the Router is not deployed on other chains yet
+            if (client.chain?.id === 11155111) {
+                await approveSpenderOnPermit2(
+                    client,
+                    accountAddress,
+                    tokenAddress,
+                    AddressProvider.UnbalancedAddViaSwapRouter(chainId),
+                    amount,
+                    deadline,
+                );
+            }
             approved =
                 approved &&
                 routerApprovedOnPermit2 &&
@@ -323,6 +337,7 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
+    simulateParams?: SimulateParams,
 ): Promise<TxOutput> {
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
@@ -353,6 +368,21 @@ export async function sendTransactionGetBalances(
     //         '0x',
     //     ],
     // });
+
+    if (simulateParams) {
+        try {
+            await client.simulateContract({
+                address: simulateParams.address,
+                abi: simulateParams.abi,
+                functionName: simulateParams.functionName,
+                args: simulateParams.args,
+                account: simulateParams.account,
+                value,
+            });
+        } catch (error) {
+            console.error('Transaction simulation failed:', error);
+        }
+    }
 
     // Send transaction to local fork
     const hash = await client.sendTransaction({

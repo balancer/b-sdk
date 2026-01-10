@@ -1,5 +1,5 @@
 import { PublicWalletClient } from '@/utils/types';
-import { TestActions } from 'viem';
+import { Abi, TestActions } from 'viem';
 import {
     AddLiquidity,
     AddLiquidityInput,
@@ -71,4 +71,16 @@ export type AddLiquidityNestedTxInput = {
     testAddress: Address;
     client: PublicWalletClient & TestActions;
     wethIsEth?: boolean;
+};
+
+/**
+ * Optional parameters for contract simulation to extract revert reasons
+ * Can be created in tests and optionally passed to sendTransactionGetBalances
+ */
+export type SimulateParams = {
+    abi: Abi;
+    functionName: string;
+    args: readonly unknown[];
+    address: Address; // Contract address
+    account: Address; // Account address to use for simulation
 };
