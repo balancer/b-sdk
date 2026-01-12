@@ -7,7 +7,7 @@ import {
     VAULT_V2,
     ZERO_ADDRESS,
 } from '../../../../utils';
-import { vaultV2Abi } from '../../../../abi';
+import { vaultAbi_V2 } from '../../../../abi';
 import { parseRemoveLiquidityArgs } from '../../../utils/parseRemoveLiquidityArgs';
 import {
     RemoveLiquidityBase,
@@ -144,7 +144,7 @@ export class RemoveLiquidityStable implements RemoveLiquidityBase {
         });
 
         const callData = encodeFunctionData({
-            abi: vaultV2Abi,
+            abi: vaultAbi_V2,
             functionName: 'exitPool',
             args,
         });

@@ -9,7 +9,7 @@ import {
 import { Address, Hex } from '../../types';
 import { batchRelayerLibraryAbi } from '../../abi/batchRelayerLibrary';
 import { RelayerAuthorization } from './authorization';
-import { vaultV2Abi } from '../../abi';
+import { vaultAbi_V2 } from '../../abi';
 import { MAX_UINT256, PublicWalletClient } from '../../utils';
 
 export class Relayer {
@@ -57,7 +57,7 @@ export class Relayer {
         client: PublicWalletClient,
     ): Promise<Hex> => {
         const approval = encodeFunctionData({
-            abi: vaultV2Abi,
+            abi: vaultAbi_V2,
             functionName: 'setRelayerApproval',
             args: [signerAddress, relayerAddress, true],
         });

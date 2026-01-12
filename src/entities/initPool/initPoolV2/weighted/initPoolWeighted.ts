@@ -6,7 +6,7 @@ import {
     InitPoolInputV2,
 } from '../../types';
 import { VAULT_V2 } from '../../../../utils';
-import { vaultV2Abi } from '../../../../abi';
+import { vaultAbi_V2 } from '../../../../abi';
 import {
     getAmounts,
     getSortedTokens,
@@ -35,7 +35,7 @@ export class InitPoolWeighted implements InitPoolBase {
         });
 
         const callData = encodeFunctionData({
-            abi: vaultV2Abi,
+            abi: vaultAbi_V2,
             functionName: 'joinPool',
             args,
         });

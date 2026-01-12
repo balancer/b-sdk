@@ -2,7 +2,7 @@ import { encodeFunctionData } from 'viem';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { protocolVersionError, VAULT_V2, ZERO_ADDRESS } from '@/utils';
-import { vaultV2Abi } from '@/abi';
+import { vaultAbi_V2 } from '@/abi';
 import {
     AddLiquidityBase,
     AddLiquidityBuildCallOutput,
@@ -97,7 +97,7 @@ export class AddLiquidityComposableStable implements AddLiquidityBase {
         });
 
         const callData = encodeFunctionData({
-            abi: vaultV2Abi,
+            abi: vaultAbi_V2,
             functionName: 'joinPool',
             args,
         });

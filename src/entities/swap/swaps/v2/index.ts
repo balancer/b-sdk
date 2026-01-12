@@ -20,7 +20,7 @@ import {
     getContract,
     http,
 } from 'viem';
-import { balancerQueriesAbiExtended, vaultV2Abi } from '../../../../abi';
+import { balancerQueriesAbiExtended, vaultAbi_V2 } from '../../../../abi';
 import {
     ExactInQueryOutput,
     ExactOutQueryOutput,
@@ -361,7 +361,7 @@ export class SwapV2 implements SwapBase {
             );
         }
         return encodeFunctionData({
-            abi: vaultV2Abi,
+            abi: vaultAbi_V2,
             functionName: 'swap',
             args: [swap, funds, limit, deadline],
         });
@@ -382,7 +382,7 @@ export class SwapV2 implements SwapBase {
         wethIsEth: boolean,
     ): Hex {
         return encodeFunctionData({
-            abi: vaultV2Abi,
+            abi: vaultAbi_V2,
             functionName: 'batchSwap',
             args: [
                 this.swapKind,
