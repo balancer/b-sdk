@@ -1,6 +1,4 @@
-import { inputValidationError } from '@/utils';
 import { AddLiquidityInput } from '../../addLiquidity/types';
-import { CreatePoolV2ComposableStableInput } from '../../createPool/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
@@ -8,8 +6,6 @@ import {
 import { PoolState, PoolStateWithBalances } from '../../types';
 import { InputValidatorBase } from '../inputValidatorBase';
 import { validatePoolHasBpt } from '../utils/validateTokens';
-
-import { validateCreatePoolTokens } from '../utils/validateTokens';
 
 export class InputValidatorComposableStable extends InputValidatorBase {
     validateAddLiquidity(
@@ -34,28 +30,5 @@ export class InputValidatorComposableStable extends InputValidatorBase {
     ): void {
         super.validateRemoveLiquidityRecovery(input, poolStateWithBalances);
         validatePoolHasBpt('Remove Liquidity Recovery', poolStateWithBalances);
-    }
-
-    validateCreatePool(input: CreatePoolV2ComposableStableInput): void {
-        validateCreatePoolTokens(input.tokens);
-        if (input.tokens.length > 5) {
-            throw inputValidationError(
-                'Create Pool',
-                'Composable stable pools can have a maximum of 5 tokens on Balancer v2',
-            );
-        }
-        if (input.amplificationParameter <= BigInt(0)) {
-            throw inputValidationError(
-                'Create Pool',
-                'Amplification parameter must be greater than 0 on Balancer v2',
-            );
-        }
-        if (input.amplificationParameter > BigInt(5000)) {
-            throw inputValidationError(
-                'Create Pool',
-                'Amplification parameter must be equal or lower than 5000 on Balancer v2',
-            );
-        }
-        return;
     }
 }
