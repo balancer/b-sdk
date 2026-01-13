@@ -171,6 +171,28 @@ async function processContractData(supportedNetworks: SupportedNetwork[]) {
                     const path = `./src/abi/${version}/${contractName}.ts`;
                     writeFileSync(path, content);
                 }
+
+                if (networkName === 'mainnet' && version === 'v2') {
+                    const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/${branch}/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
+                    const res = await fetch(url);
+                    if (!res.ok) {
+                        throw new Error(
+                            `Failed to fetch ABI for ${contract.name}: ${res.status} ${res.statusText}`,
+                        );
+                    }
+                    const data: AbiResponse = await res.json();
+
+                    const contractName =
+                        contract.name.charAt(0).toLowerCase() +
+                        contract.name.slice(1);
+                    const content = `export const ${contractName}Abi_${version.toUpperCase()} = ${JSON.stringify(
+                        data.abi,
+                        undefined,
+                        4,
+                    )} as const;`;
+                    const path = `./src/abi/${version}/${contractName}.ts`;
+                    writeFileSync(path, content);
+                }
             }
         }
 

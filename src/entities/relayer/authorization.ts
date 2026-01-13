@@ -1,7 +1,7 @@
 import { concat, pad, parseSignature, toHex } from 'viem';
 import { MAX_UINT256, VAULT_V2, PublicWalletClient } from '../../utils';
 import { Address, Hex } from '../../types';
-import { vaultV2Abi } from '../../abi';
+import { vaultAbi_V2 } from '../../abi';
 
 enum RelayerAction {
     JoinPool = 'JoinPool',
@@ -159,7 +159,7 @@ export class RelayerAuthorization {
         let _nonce = nonce;
         if (_nonce === undefined) {
             _nonce = await client.readContract({
-                abi: vaultV2Abi,
+                abi: vaultAbi_V2,
                 address: verifyingContract,
                 functionName: 'getNextNonce',
                 args: [signerAddress],

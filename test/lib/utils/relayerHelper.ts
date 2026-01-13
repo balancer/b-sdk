@@ -1,5 +1,5 @@
 import { Client, TestActions, WalletActions } from 'viem';
-import { authorizerAbi, vaultV2Abi } from '../../../src/abi';
+import { authorizerAbi_V2, vaultAbi_V2 } from '../../../src/abi';
 import { Address } from '../../../src/types';
 import { BALANCER_RELAYER, VAULT_V2 } from '../../../src/utils';
 
@@ -38,7 +38,7 @@ export const grantRoles = async (
             account: balancerDaoAddress,
             address: authorizerAddress,
             chain: client.chain,
-            abi: authorizerAbi,
+            abi: authorizerAbi_V2,
             functionName: 'grantRole',
             args: [role, BALANCER_RELAYER[chainId]],
         });
@@ -57,7 +57,7 @@ export const approveRelayer = async (
         account,
         address: VAULT_V2[chainId],
         chain: client.chain,
-        abi: vaultV2Abi,
+        abi: vaultAbi_V2,
         functionName: 'setRelayerApproval',
         args: [account, BALANCER_RELAYER[chainId], true],
     });
