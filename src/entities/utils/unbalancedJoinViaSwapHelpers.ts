@@ -54,7 +54,7 @@ export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmoun
 
     // token rates and virtal balances are shared in human amounts
     // and possibly need to be upscaled.
-    // 1. Add virtual balances before calculation proportional BptAmount
+    // 1. Add virtual balances before calculation proportional BptAmount (to pool balances and the reference amount)
     // 2. handle raw vs live amounts
     //     2.1 amountsIn - raw amount
     //     2.2 real tokenBalance - raw amount
@@ -72,6 +72,12 @@ export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmoun
     const virtualBalanceTwoScale18 = parseUnits(pool.virtualBalances[1], 18);
     const tokenRateOneScale18 = parseUnits(pool.tokenRates[0], 18);
     const tokenRateTwoScale18 = parseUnits(pool.tokenRates[1], 18);
+
+
+    const referenceAmountScale18 = referenceAmount.rawAmount * (10n ** BigInt(18 - referenceAmount.decimals));
+    const adjustedReferenceAmountScale18 = referenceAmountScale18 + (adjustableTokenIndex === 0 ? virtualBalanceOneScale18 : virtualBalanceTwoScale18);
+    // downscale reference amount to raw amount as the proportional calculation expects it
+    const adjustedReferenceAmountRaw = adjustedReferenceAmountScale18 / (10n ** BigInt(18 - referenceAmount.decimals));
 
     const PRECISION_FACTOR = 10n ** 18n;
 
@@ -102,7 +108,7 @@ export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmoun
     };
 
     // Use half of the user's adjustable budget as the proportional reference.
-    const halfAdjustableRaw = maxAdjustableAmountRaw / 2n;
+    const halfAdjustableRaw = adjustedReferenceAmountRaw / 2n;
     if (halfAdjustableRaw === 0n) {
         throw new SDKError(
             'UnbalancedJoinViaSwap',
