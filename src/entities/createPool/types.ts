@@ -132,13 +132,14 @@ export type LBPParams = {
     owner: Address;
     projectToken: Address;
     reserveToken: Address;
+    startTimestamp: bigint;
+    endTimestamp: bigint;
+    blockProjectTokenSwapsIn: boolean;
     projectTokenStartWeight: bigint;
     reserveTokenStartWeight: bigint;
     projectTokenEndWeight: bigint;
     reserveTokenEndWeight: bigint;
-    startTimestamp: bigint;
-    endTimestamp: bigint;
-    blockProjectTokenSwapsIn: boolean;
+    reserveTokenVirtualBalance?: bigint; // Optional, defaults to 0n
 };
 
 // The pool uses default liquidity management values (no setters available)
@@ -159,9 +160,9 @@ export type CreatePoolLiquidityBootstrappingInput = Omit<
     poolCreator?: Address;
 };
 
-// same scale as the Smart contracts
+// Updated migration params (lockDuration renamed, migrationRouter auto-resolved)
 export type LBPMigrationParams = {
-    bptLockDurationinSeconds: bigint;
+    lockDurationAfterMigration: bigint;
     bptPercentageToMigrate: bigint;
     migrationWeightProjectToken: bigint;
     migrationWeightReserveToken: bigint;

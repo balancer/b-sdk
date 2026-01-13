@@ -1,4 +1,4 @@
-// pnpm test -- createPool/liquidityBootstrapping/liquidityBootstrapping.validation.test.ts
+// pnpm test createPool/liquidityBootstrapping/liquidityBootstrapping.validation.test.ts
 
 import { parseEther, parseUnits } from 'viem';
 import {
@@ -27,13 +27,13 @@ describe('LiquidityBootstrapping Input Validation', () => {
                 owner: '0x0000000000000000000000000000000000000001',
                 projectToken: BAL.address,
                 reserveToken: WETH.address,
+                startTimestamp: BigInt(Math.floor(Date.now() / 1000) + 86400), // now + 1 day
+                endTimestamp: BigInt(Math.floor(Date.now() / 1000) + 691200), // now + 8 days
+                blockProjectTokenSwapsIn: true,
                 projectTokenStartWeight: parseEther('0.5'),
                 reserveTokenStartWeight: parseEther('0.5'),
                 projectTokenEndWeight: parseEther('0.3'),
                 reserveTokenEndWeight: parseEther('0.7'),
-                startTimestamp: BigInt(Math.floor(Date.now() / 1000) + 86400), // now + 1 day
-                endTimestamp: BigInt(Math.floor(Date.now() / 1000) + 691200), // now + 8 days
-                blockProjectTokenSwapsIn: true,
             },
             symbol: 'LBP',
             chainId,
