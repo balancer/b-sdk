@@ -1,7 +1,7 @@
 import { encodeFunctionData, zeroAddress } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { Token } from '@/entities/token';
-import { PoolState } from '@/entities/types';
+import { PoolState, ReClammPoolStateWithBalances } from '@/entities/types';
 import { Permit2 } from '@/entities/permit2Helper';
 import {
     balancerUnbalancedAddViaSwapRouterAbiExtended,
@@ -34,7 +34,7 @@ export type {
 export class AddLiquidityUnbalancedViaSwapV3 {
     async query(
         input: AddLiquidityUnbalancedViaSwapInput,
-        poolState: PoolState,
+        poolState: ReClammPoolStateWithBalances,
         block?: bigint,
     ): Promise<AddLiquidityUnbalancedViaSwapQueryOutput> {
         validateAddLiquidityUnbalancedViaSwapInput(input, poolState);

@@ -1,4 +1,4 @@
-import { Address, parseUnits } from 'viem';
+import { Address, parseUnits, formatUnits } from 'viem';
 import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
 import {
@@ -13,6 +13,7 @@ import {
     PoolState,
     PoolStateWithUnderlyingBalances,
     PoolStateWithUnderlyings,
+    ReClammPoolStateWithBalances,
 } from '../types';
 import { getPoolStateWithBalancesV2 } from './getPoolStateWithBalancesV2';
 import {
@@ -22,13 +23,10 @@ import {
 import { AddLiquidityBoostedProportionalInput } from '../addLiquidityBoosted/types';
 
 import { calculateProportionalAmounts } from './proportionalAmountsHelpers';
+import { TokenAmount } from '../tokenAmount';
 
 export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmount(
-    pool: {
-        address: Address;
-        totalShares: HumanAmount;
-        tokens: { address: Address; balance: HumanAmount; decimals: number }[];
-    },
+    pool: ReClammPoolStateWithBalances,
     referenceAmount: InputAmount,
     maxAdjustableAmountRaw: bigint,
 ): {
@@ -54,6 +52,55 @@ export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmoun
         );
     }
 
+    // token rates and virtal balances are shared in human amounts
+    // and possibly need to be upscaled.
+    // 1. Add virtual balances before calculation proportional BptAmount
+    // 2. handle raw vs live amounts
+    //     2.1 amountsIn - raw amount
+    //     2.2 real tokenBalance - raw amount
+    //     2.3 virtual tokenBalance - live amount (i.e. scaled to 18 and with rates applied)
+    //     Best to downscale virtual balances to Human amounts first to make the calculations
+    //     Take virtual balances[0] / 1e(18 - decimals[0]) / tokenRates[0]
+
+    // The pool balances are shared in HumanAmount. Before the calculation
+    // the pool balances are upscaled to raw amounts in the calculateProportionalAmounts
+    // referenceAmount is shared in raw Amount
+    // for this function rates and virtual balances are shared in HumanAmounts
+    // What is left is to downscale the virtualBalances from the token rate
+
+    const virtualBalanceOneScale18 = parseUnits(pool.virtualBalances[0], 18);
+    const virtualBalanceTwoScale18 = parseUnits(pool.virtualBalances[1], 18);
+    const tokenRateOneScale18 = parseUnits(pool.tokenRates[0], 18);
+    const tokenRateTwoScale18 = parseUnits(pool.tokenRates[1], 18);
+
+    const PRECISION_FACTOR = 10n ** 18n;
+
+    const effectiveBalanceOneScale18 =
+        (virtualBalanceOneScale18 * PRECISION_FACTOR) / tokenRateOneScale18;
+    const effectiveBalanceTwoScale18 =
+        (virtualBalanceTwoScale18 * PRECISION_FACTOR) / tokenRateTwoScale18;
+
+    // add virtual balances to the pool balances and then forward the pool
+    // to the proportional calculation
+    const poolWithAddedBalancesHumanAmount = {
+        ...pool,
+        tokens: pool.tokens.map((token, i) => ({
+            ...token,
+            balance:
+                i === 0
+                    ? (formatUnits(
+                          parseUnits(token.balance, 18) +
+                              effectiveBalanceOneScale18,
+                          18,
+                      ) as HumanAmount)
+                    : (formatUnits(
+                          parseUnits(token.balance, 18) +
+                              effectiveBalanceTwoScale18,
+                          18,
+                      ) as HumanAmount),
+        })),
+    };
+
     // Use half of the user's adjustable budget as the proportional reference.
     const halfAdjustableRaw = maxAdjustableAmountRaw / 2n;
     if (halfAdjustableRaw === 0n) {
@@ -71,24 +118,13 @@ export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmoun
     };
 
     const { tokenAmounts, bptAmount } = calculateProportionalAmounts(
-        pool,
+        poolWithAddedBalancesHumanAmount,
         halfReferenceAmount,
     );
 
-    // Optionally allow a small uplift on the proportional BPT estimate.
-    // For now we keep this at +20% to use a bit more of the user's budget,
-    // while still leaving headroom
-    const upliftNumerator = 120n; // 20% increase
-    const upliftDenominator = 100n;
-    const increasedBptRaw =
-        (bptAmount.rawAmount * upliftNumerator) / upliftDenominator;
-
     return {
         tokenAmounts,
-        bptAmount: {
-            ...bptAmount,
-            rawAmount: increasedBptRaw,
-        },
+        bptAmount,
     };
 }
 
@@ -97,17 +133,14 @@ export const getBptAmountFromReferenceAmountnbalancedViaSwapFromAdjustableAmount
         input: AddLiquidityProportionalInput & {
             maxAdjustableAmountRaw: bigint;
         },
-        poolState: PoolState,
+        poolState: ReClammPoolStateWithBalances,
     ): Promise<InputAmount> => {
-        const poolStateWithBalances = await getPoolStateWithBalancesV3(
-            poolState,
-            input.chainId,
-            input.rpcUrl,
-        );
+        // reclamms require token rates and virtual balances for the later part
+        // of bpt estimation. They are part of the pool state
 
         const { bptAmount } =
             calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmount(
-                poolStateWithBalances,
+                poolState,
                 input.referenceAmount,
                 input.maxAdjustableAmountRaw,
             );

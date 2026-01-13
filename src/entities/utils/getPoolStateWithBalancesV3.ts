@@ -4,11 +4,12 @@ import {
     formatEther,
     formatUnits,
     http,
+    parseAbi,
     PublicClient,
 } from 'viem';
 
 import { HumanAmount } from '@/data';
-import { CHAINS } from '@/utils';
+import { CHAINS, WAD } from '@/utils';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
 import { getSortedTokens } from './getSortedTokens';
@@ -18,6 +19,8 @@ import {
     PoolStateWithUnderlyingBalances,
     PoolStateWithUnderlyings,
     PoolTokenWithUnderlying,
+    ReClammPoolState,
+    ReClammPoolStateWithBalances,
 } from '../types';
 import { vaultExtensionAbi_V3 } from '@/abi';
 import { TokenAmount } from '../tokenAmount';
@@ -109,6 +112,57 @@ export const getBoostedPoolStateWithBalancesV3 = async (
     return poolStateWithUnderlyingBalances;
 };
 
+export const getReClammPoolStateWithBalances = async (
+    poolState: PoolState,
+    chainId: number,
+    rpcUrl: string,
+): Promise<ReClammPoolStateWithBalances> => {
+    const publicClient = createPublicClient({
+        transport: http(rpcUrl),
+        chain: CHAINS[chainId],
+    });
+
+    // get on-chain pool token balances, total shares, and token rates
+    const { tokenAmounts, totalShares, tokenRates } =
+        await getTokenAmountsAndTotalShares(chainId, poolState, publicClient);
+
+    const sortedTokens = [...poolState.tokens].sort(
+        (a, b) => a.index - b.index,
+    );
+
+    // get virtualBalances from ReClamm pool contract
+    const virtualBalances = await getVirtualBalances(
+        poolState.address,
+        publicClient,
+    );
+
+    // build ReClammPoolStateWithBalances object
+    const reclammPoolStateWithBalances: ReClammPoolStateWithBalances = {
+        ...poolState,
+        type: 'RECLAMM',
+        tokens: sortedTokens.map((token, i) => ({
+            address: token.address,
+            decimals: token.decimals,
+            index: i,
+            balance: formatUnits(
+                tokenAmounts[i].amount,
+                token.decimals,
+            ) as HumanAmount,
+        })),
+        totalShares: formatEther(totalShares) as HumanAmount,
+        virtualBalances: [
+            formatEther(virtualBalances[0]) as HumanAmount,
+            formatEther(virtualBalances[1]) as HumanAmount,
+        ],
+        tokenRates: [
+            formatEther(tokenRates[0]) as HumanAmount,
+            formatEther(tokenRates[1]) as HumanAmount,
+        ],
+    };
+
+    return reclammPoolStateWithBalances;
+};
+
 const getUnderlyingBalances = async (
     sortedTokens: PoolTokenWithUnderlying[],
     tokenAmounts: TokenAmount[],
@@ -153,7 +207,11 @@ const getTokenAmountsAndTotalShares = async (
     chainId: number,
     poolState: PoolState,
     publicClient: PublicClient,
-) => {
+): Promise<{
+    tokenAmounts: TokenAmount[];
+    totalShares: bigint;
+    tokenRates: readonly bigint[];
+}> => {
     // create contract calls to get total supply and balances for each pool token
     const totalSupplyContract = {
         address: AddressProvider.Vault(chainId),
@@ -168,9 +226,19 @@ const getTokenAmountsAndTotalShares = async (
         args: [poolState.address] as const,
     };
 
-    // execute multicall to get total supply and balances for each pool token
+    const getPoolDataContract = {
+        address: AddressProvider.Vault(chainId),
+        abi: vaultExtensionAbi_V3,
+        functionName: 'getPoolData' as const,
+        args: [poolState.address] as const,
+    };
+
     const outputs = await publicClient.multicall({
-        contracts: [totalSupplyContract, getBalanceContracts],
+        contracts: [
+            totalSupplyContract,
+            getBalanceContracts,
+            getPoolDataContract,
+        ],
     });
 
     // throw error if any of the calls failed
@@ -192,10 +260,35 @@ const getTokenAmountsAndTotalShares = async (
         readonly bigint[],
         readonly bigint[],
     ];
+
+    // extract tokenRates from getPoolData result
+    // getPoolData returns: { poolConfigBits, tokens, tokenInfo, balancesRaw, balancesLiveScaled18, tokenRates, decimalScalingFactors }
+    const tokenRates = (outputs[2].result as { tokenRates: readonly bigint[] })
+        .tokenRates;
+
     const poolTokens = getSortedTokens(poolState.tokens, chainId);
     const tokenAmounts = poolTokens.map((token, i) =>
         TokenAmount.fromRawAmount(token, balancesRaw[i]),
     );
 
-    return { tokenAmounts, totalShares };
+    return { tokenAmounts, totalShares, tokenRates };
+};
+
+const getVirtualBalances = async (
+    poolAddress: `0x${string}`,
+    publicClient: PublicClient,
+): Promise<[bigint, bigint]> => {
+    // ABI for ReClamm pool computeCurrentVirtualBalances function
+    const reclammPoolAbi = parseAbi([
+        'function computeCurrentVirtualBalances() view returns (uint256 currentVirtualBalanceA, uint256 currentVirtualBalanceB, bool changed)',
+    ]);
+
+    const result = await publicClient.readContract({
+        address: poolAddress,
+        abi: reclammPoolAbi,
+        functionName: 'computeCurrentVirtualBalances',
+    });
+
+    // Return virtual balances as tuple (scaled18 format)
+    return [result[0], result[1]];
 };

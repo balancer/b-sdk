@@ -17,6 +17,7 @@ import {
     Slippage,
     Hex,
     PoolState,
+    ReClammPoolState,
     CHAINS,
     ChainId,
     InputAmount,
@@ -24,6 +25,7 @@ import {
     PublicWalletClient,
     SwapKind,
     TokenAmount,
+    ReClammPoolStateWithBalances,
 } from '@/index';
 import {
     unbalancedAddViaSwapRouterAbi_V3,
@@ -35,7 +37,10 @@ import {
     AddLiquidityUnbalancedViaSwapV3,
     AddLiquidityUnbalancedViaSwapInput,
 } from '@/entities/addLiquidityUnbalancedViaSwap';
-import { getPoolStateWithBalancesV3 } from '@/entities/utils/getPoolStateWithBalancesV3';
+import {
+    getPoolStateWithBalancesV3,
+    getReClammPoolStateWithBalances,
+} from '@/entities/utils/getPoolStateWithBalancesV3';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { appendFileSync } from 'node:fs';
 import {
@@ -61,7 +66,7 @@ const STATA_USDC = TOKENS[chainId].stataUSDC;
 const STATA_USDT = TOKENS[chainId].stataUSDT;
 
 // Toggle to control whether test results should be logged to files
-const ENABLE_LOGGING = false;
+const ENABLE_LOGGING = true;
 
 class MockApi {
     async getPool(poolId: string): Promise<PoolState> {
@@ -142,6 +147,7 @@ describe('add liquidity unbalanced via swap test', () => {
     let testAddress: Address;
     let poolState: PoolState;
     let reclammPoolState: PoolState;
+    let reclammWithBalances: ReClammPoolStateWithBalances;
     let tokens: Address[];
     let rpcUrl: string;
     let snapshot: Hex;
@@ -209,6 +215,8 @@ describe('add liquidity unbalanced via swap test', () => {
         //   via Permit2, grants max allowances on those tokens to the Balancer V3 Routers
         //   (`Router`, `BatchRouter`, `CompositeLiquidityRouterNested`, `BufferRouter`) so they can pull funds
         //   from the test account when executing add-liquidity and swap operations.
+
+        // but are these actually the tokens of the pool?
         beforeEach(async () => {
             await approveTokens(client, testAddress, tokens, protocolVersion);
         });
@@ -241,7 +249,7 @@ describe('add liquidity unbalanced via swap test', () => {
                 await expect(
                     addLiquidityUnbalancedViaSwap.query(
                         addLiquidityInput,
-                        reclammPoolState,
+                        reclammPoolState as ReClammPoolStateWithBalances,
                     ),
                 ).rejects.toThrow();
             });
@@ -273,7 +281,7 @@ describe('add liquidity unbalanced via swap test', () => {
                 await expect(
                     addLiquidityUnbalancedViaSwap.query(
                         addLiquidityInput,
-                        reclammPoolState,
+                        reclammPoolState as ReClammPoolStateWithBalances,
                     ),
                 ).rejects.toThrow();
             });
@@ -296,7 +304,7 @@ describe('add liquidity unbalanced via swap test', () => {
             let daiPoolBalanceRaw: bigint;
 
             beforeAll(async () => {
-                const reclammWithBalances = await getPoolStateWithBalancesV3(
+                reclammWithBalances = await getReClammPoolStateWithBalances(
                     reclammPoolState,
                     chainId,
                     rpcUrl,
@@ -363,7 +371,7 @@ describe('add liquidity unbalanced via swap test', () => {
                         const queryOutput =
                             await addLiquidityUnbalancedViaSwap.query(
                                 addLiquidityInput,
-                                reclammPoolState,
+                                reclammWithBalances,
                             );
 
                         // Assertions
@@ -653,7 +661,7 @@ describe('add liquidity unbalanced via swap test', () => {
                         const queryOutput =
                             await gnosisAddLiquidityUnbalancedViaSwap.query(
                                 addLiquidityInput,
-                                gnosisReclammPoolState,
+                                reclammWithBalances,
                             );
 
                         // Assertions
