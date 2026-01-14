@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/liquidityBootstrapping/liquidityBootstrapping.integration.test.ts
+// pnpm test v3/createPool/liquidityBootstrapping/liquidityBootstrapping.integration.test.ts
 import {
     Address,
     createTestClient,
@@ -77,7 +77,7 @@ describe('create liquidityBootstrapping pool test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8715886n,
+            10042461n,
         ));
         client = createTestClient({
             mode: 'anvil',
