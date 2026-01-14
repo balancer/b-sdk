@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/liquidityBootstrapping/liquidityBootstrapping.integration.test.ts
+// pnpm test v3/createPool/liquidityBootstrapping/liquidityBootstrapping.integration.test.ts
 import {
     Address,
     createTestClient,
@@ -14,7 +14,6 @@ import {
     CHAINS,
     ChainId,
     PoolType,
-    Permit2Helper,
     PERMIT2,
     InitPool,
     CreatePoolLiquidityBootstrappingInput,
@@ -57,7 +56,7 @@ const chainId = ChainId.SEPOLIA;
 const poolType = PoolType.LiquidityBootstrapping;
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
-const bptLockDurationInSeconds = 1n; // no lock for test simplicity
+const lockDurationAfterMigration = 1n; // no lock for test simplicity
 const saleStart = BigInt(Math.floor(Date.now() / 1000) + 86400); // now + 1 day
 const saleEnd = BigInt(Math.floor(Date.now() / 1000) + 691200); // now + 8 days
 
@@ -78,7 +77,7 @@ describe('create liquidityBootstrapping pool test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            8715886n,
+            10042461n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -95,19 +94,19 @@ describe('create liquidityBootstrapping pool test', () => {
             owner: testAddress,
             projectToken: BAL.address,
             reserveToken: WETH.address,
+            startTimestamp: saleStart,
+            endTimestamp: saleEnd,
+            blockProjectTokenSwapsIn: true,
             projectTokenStartWeight: parseEther('0.5'),
             reserveTokenStartWeight: parseEther('0.5'),
             projectTokenEndWeight: parseEther('0.3'),
             reserveTokenEndWeight: parseEther('0.7'),
-            startTimestamp: saleStart,
-            endTimestamp: saleEnd,
-            blockProjectTokenSwapsIn: true,
         };
 
         createPoolInput = {
             protocolVersion: protocolVersion,
             swapFeePercentage: parseUnits('0.01', 18),
-            lbpParams: lbpParams,
+            lbpParams,
             symbol: 'LBP',
             chainId: chainId,
             poolType: PoolType.LiquidityBootstrapping,
@@ -115,7 +114,7 @@ describe('create liquidityBootstrapping pool test', () => {
         };
 
         lbpMigrationParams = {
-            bptLockDurationinSeconds: bptLockDurationInSeconds,
+            lockDurationAfterMigration: lockDurationAfterMigration,
             bptPercentageToMigrate: parseEther('0.5'),
             migrationWeightProjectToken: parseEther('0.5'),
             migrationWeightReserveToken: parseEther('0.5'),
@@ -350,7 +349,7 @@ describe('create liquidityBootstrapping pool test', () => {
         };
 
         await client.increaseTime({
-            seconds: Number(bptLockDurationInSeconds) + 100,
+            seconds: Number(lockDurationAfterMigration) + 100,
         });
         await client.mine({ blocks: 1 });
         expect((await client.getBlock()).timestamp).to.be.greaterThan(

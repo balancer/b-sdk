@@ -42,10 +42,6 @@ import {
 } from 'src';
 
 import { findEventInReceiptLogs } from 'test/lib/utils/findEventInReceiptLogs';
-import { approveSpenderOnTokens } from 'test/lib/utils/helper';
-import { makeForkTx } from 'examples/lib/makeForkTx';
-import { getSlot } from 'examples/lib/getSlot';
-import { startFork, ANVIL_NETWORKS } from 'test/anvil/anvil-global-setup';
 
 // Create pool config
 const chainId = ChainId.SEPOLIA;
@@ -78,7 +74,7 @@ const lbpParams: LBPParams = {
 };
 
 const lbpMigrationParams: LBPMigrationParams = {
-    bptLockDurationinSeconds: BigInt(60 * 60 * 24 * 7), // 7 days
+    lockDurationAfterMigration: BigInt(60 * 60 * 24 * 7), // 7 days
     bptPercentageToMigrate: BigInt(0.5 * 1e18), // 50%
     migrationWeightProjectToken: BigInt(5.0 * 1e17), // 10%
     migrationWeightReserveToken: BigInt(5.0 * 1e17), // 90%
