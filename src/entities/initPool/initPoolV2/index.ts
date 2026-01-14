@@ -2,7 +2,6 @@ import { PoolState } from '@/entities/types';
 import { PoolType } from '@/types';
 import { poolTypeProtocolVersionError } from '@/utils';
 
-import { InitPoolComposableStable } from './composableStable/initPoolComposableStable';
 import {
     InitPoolBase,
     InitPoolBuildOutput,
@@ -18,7 +17,6 @@ export class InitPoolV2 implements InitPoolBase {
         const { initPoolTypes: customAddLiquidityInitTypes } = config || {};
         this.initPoolTypes = {
             [PoolType.Weighted]: new InitPoolWeighted(),
-            [PoolType.ComposableStable]: new InitPoolComposableStable(),
             ...customAddLiquidityInitTypes,
         };
     }

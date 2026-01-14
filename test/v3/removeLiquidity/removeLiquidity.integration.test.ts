@@ -19,10 +19,9 @@ import {
     AddLiquidityKind,
     AddLiquidityUnbalancedInput,
     CHAINS,
-    balancerV3Contracts,
     ADMIN_OF_AUTHORIZER,
     AUTHORIZER,
-    authorizerAbi,
+    authorizerAbi_V2,
     ChainId,
     Hex,
     InputAmount,
@@ -494,7 +493,7 @@ async function putPoolIntoRecoveryMode(
     // grant the testAddress the right to enable Recovery mode for pools
     const { request: grantRoleRequest } = await client.simulateContract({
         address: AUTHORIZER[chainId],
-        abi: authorizerAbi,
+        abi: authorizerAbi_V2,
         functionName: 'grantRole',
         args: [actionId, authorizedAddress],
         account: ADMIN_OF_AUTHORIZER,
@@ -512,7 +511,7 @@ async function putPoolIntoRecoveryMode(
     const { request: enableRecoveryModeRequest } =
         await client.simulateContract({
             address: AddressProvider.Vault(chainId),
-            abi: [...authorizerAbi, ...vaultAdminAbi_V3],
+            abi: [...authorizerAbi_V2, ...vaultAdminAbi_V3],
             functionName: 'enableRecoveryMode',
             args: [poolState.address],
             account: authorizedAddress,

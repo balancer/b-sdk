@@ -13,7 +13,6 @@ import { InputValidatorGyro } from './gyro/inputValidatorGyro';
 import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
-import { InputValidatorBoosted } from './boosted/inputValidatorBoosted';
 import { InputValidatorLiquidityBootstrapping } from './liquidityBootstrapping/inputValidatorLiquidityBootstrapping';
 import { ChainId, protocolVersionError, SDKError } from '@/utils';
 import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
@@ -31,7 +30,6 @@ export class InputValidator {
             [PoolType.MetaStable]: new InputValidatorStable(),
             [PoolType.Stable]: new InputValidatorStable(),
             [PoolType.Weighted]: new InputValidatorWeighted(),
-            [PoolType.Boosted]: new InputValidatorBoosted(),
             [PoolType.StableSurge]: new InputValidatorStable(),
             [PoolType.ReClamm]: new InputValidatorReClamm(),
             [PoolType.LiquidityBootstrapping]:
@@ -100,9 +98,10 @@ export class InputValidator {
         poolState: PoolStateWithUnderlyings,
     ): void {
         this.validateChain(addLiquidityInput.chainId);
-        (
-            this.validators[PoolType.Boosted] as InputValidatorBoosted
-        ).validateAddLiquidityBoosted(addLiquidityInput, poolState);
+        this.getValidator(poolState.type).validateAddLiquidityBoosted(
+            addLiquidityInput,
+            poolState,
+        );
     }
 
     private validateChain(chainId: number): void {

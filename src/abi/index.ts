@@ -1,10 +1,11 @@
 import { balancerCompositeLiquidityRouterNestedAbi } from './balancerCompositeLiquidityRouterNested';
-import { balancerQueriesAbi } from './balancerQueries';
-import { balancerRelayerAbi } from './balancerRelayer';
-import { composableStableFactoryV6Abi_V2 } from './composableStableFactoryV6.V2';
 import { permit2Abi } from './permit2';
-import { vaultAbi_V2 } from './v2';
-import { weightedPoolFactoryV4Abi_V2 } from './weightedPoolFactoryV4.V2';
+import {
+    balancerQueriesAbi_V2,
+    balancerRelayerAbi_V2,
+    vaultAbi_V2,
+    weightedPoolFactoryAbi_V2,
+} from './v2';
 import {
     vaultAbi_V3,
     vaultExtensionAbi_V3,
@@ -27,13 +28,10 @@ import {
     unbalancedAddViaSwapRouterAbi_V3,
 } from './v3';
 
-export * from './authorizer';
 export * from './batchRelayerLibrary';
 export * from './permit2';
-export * from './vault.V2';
 export * from './v2';
 export * from './v3';
-export * from './weightedPoolV4.V2';
 
 // V3 Common ABIs
 
@@ -133,23 +131,18 @@ export const commonABIsV2 = [...vaultAbi_V2];
 // V2 Relayers ABIs Extended
 
 export const balancerQueriesAbiExtended = [
-    ...balancerQueriesAbi,
+    ...balancerQueriesAbi_V2,
     ...commonABIsV2,
 ];
 
 export const balancerRelayerAbiExtended = [
-    ...balancerRelayerAbi,
+    ...balancerRelayerAbi_V2,
     ...commonABIsV2,
 ];
 
 // V2 Pool Factories ABIs Extended
 
-export const composableStableFactoryAbiExtended = [
-    ...composableStableFactoryV6Abi_V2,
-    ...commonABIsV2,
-];
-
 export const weightedPoolFactoryAbiExtended_V2 = [
-    ...weightedPoolFactoryV4Abi_V2,
+    ...weightedPoolFactoryAbi_V2,
     ...commonABIsV2,
 ];

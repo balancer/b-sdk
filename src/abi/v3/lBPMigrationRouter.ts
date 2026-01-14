@@ -688,7 +688,7 @@ export const lBPMigrationRouterAbi_V3 = [
                     },
                     {
                         internalType: 'uint256',
-                        name: 'bptLockDuration',
+                        name: 'lockDurationAfterMigration',
                         type: 'uint256',
                     },
                     {

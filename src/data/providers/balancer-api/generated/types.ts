@@ -2808,6 +2808,7 @@ export type Mutation = {
   poolReloadAllPoolAprs: Scalars['String']['output'];
   poolReloadPools: Array<GqlPoolMutationResult>;
   poolReloadStakingForAllPools: Scalars['String']['output'];
+  poolReloadSwaps: Scalars['String']['output'];
   poolSyncAllPoolsFromSubgraph: Array<Scalars['String']['output']>;
   poolSyncFxQuoteTokens: Array<GqlPoolMutationResult>;
   poolUpdateLiquidityValuesForAllPools: Scalars['String']['output'];
@@ -2862,6 +2863,12 @@ export type MutationpoolReloadPoolsArgs = {
 
 export type MutationpoolReloadStakingForAllPoolsArgs = {
   stakingTypes: Array<GqlPoolStakingType>;
+};
+
+
+export type MutationpoolReloadSwapsArgs = {
+  chain: GqlChain;
+  poolId: Scalars['String']['input'];
 };
 
 

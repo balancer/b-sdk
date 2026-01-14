@@ -1,12 +1,18 @@
+import { AddLiquidityBoostedInput } from '@/entities/addLiquidityBoosted/types';
 import { AddLiquidityInput, AddLiquidityKind } from '../../addLiquidity/types';
 import {
     RemoveLiquidityInput,
     RemoveLiquidityKind,
     RemoveLiquidityRecoveryInput,
 } from '../../removeLiquidity/types';
-import { PoolState } from '../../types';
+import { PoolState, PoolStateWithUnderlyings } from '../../types';
 import { areTokensInArray } from '../../utils/areTokensInArray';
-import { inputValidationError } from '@/utils';
+import {
+    inputValidationError,
+    isSameAddress,
+    protocolVersionError,
+} from '@/utils';
+import { Address } from '@/types';
 
 export const validateTokensAddLiquidity = (
     addLiquidityInput: AddLiquidityInput,
@@ -107,5 +113,61 @@ export const validateCreatePoolTokens = (tokens: { address: string }[]) => {
             'Create Pool',
             'Minimum of 2 tokens required',
         );
+    }
+};
+
+export const validateTokensAddLiquidityBoosted = (
+    addLiquidityInput: AddLiquidityBoostedInput,
+    poolState: PoolStateWithUnderlyings,
+) => {
+    //check if poolState.protocolVersion is 3
+    if (poolState.protocolVersion !== 3) {
+        throw protocolVersionError(
+            'Add Liquidity Boosted',
+            poolState.protocolVersion,
+        );
+    }
+
+    if (addLiquidityInput.kind === AddLiquidityKind.Unbalanced) {
+        // List of all tokens that can be added to the pool
+        const poolTokens = poolState.tokens
+            .flatMap((token) => [
+                token.address.toLowerCase(),
+                token.underlyingToken?.address.toLowerCase(),
+            ])
+            .filter(Boolean);
+
+        addLiquidityInput.amountsIn.forEach((a) => {
+            if (!poolTokens.includes(a.address.toLowerCase() as Address)) {
+                throw inputValidationError(
+                    'Add Liquidity Boosted',
+                    `amountIn address ${a.address} should exist in poolState tokens`,
+                );
+            }
+        });
+    }
+
+    if (addLiquidityInput.kind === AddLiquidityKind.Proportional) {
+        // if referenceAmount is not the BPT, it must be included in tokensIn
+        if (
+            !isSameAddress(
+                addLiquidityInput.referenceAmount.address,
+                poolState.address,
+            )
+        ) {
+            if (
+                addLiquidityInput.tokensIn.findIndex((tokenIn) =>
+                    isSameAddress(
+                        tokenIn,
+                        addLiquidityInput.referenceAmount.address,
+                    ),
+                ) === -1
+            ) {
+                throw inputValidationError(
+                    'Add Liquidity Boosted',
+                    `referenceAmount address ${addLiquidityInput.referenceAmount.address} should exist in tokensIn`,
+                );
+            }
+        }
     }
 };

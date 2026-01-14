@@ -46,7 +46,6 @@ const targetContractsV2 = [
     'BalancerRelayer',
     'BalancerQueries',
     'WeightedPoolFactory',
-    'ComposableStablePoolFactory',
     'Authorizer', // only ABI?
     // 'BatchRelayer', // Named "BatchRelayerLibrary" in SDK. TODO: investigate https://github.com/balancer/balancer-deployments/tree/master/v2/tasks/20231031-batch-relayer-v6
 ];
@@ -68,6 +67,8 @@ const targetContractsV3 = [
     'ReClammPoolFactory',
     'MockGyroEclpPool',
     'LBPMigrationRouter',
+    'MevCaptureHook',
+    'StableSurgeHook',
 ];
 
 const targetContracts = [...targetContractsV2, ...targetContractsV3];
@@ -150,6 +151,28 @@ async function processContractData(supportedNetworks: SupportedNetwork[]) {
 
                 // Grab contract ABIs using only sepolia, which should include all contracts right? we wouldnt deploy to prod w/o sepolia test right?
                 if (networkName === 'sepolia' && version === 'v3') {
+                    const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/${branch}/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
+                    const res = await fetch(url);
+                    if (!res.ok) {
+                        throw new Error(
+                            `Failed to fetch ABI for ${contract.name}: ${res.status} ${res.statusText}`,
+                        );
+                    }
+                    const data: AbiResponse = await res.json();
+
+                    const contractName =
+                        contract.name.charAt(0).toLowerCase() +
+                        contract.name.slice(1);
+                    const content = `export const ${contractName}Abi_${version.toUpperCase()} = ${JSON.stringify(
+                        data.abi,
+                        undefined,
+                        4,
+                    )} as const;`;
+                    const path = `./src/abi/${version}/${contractName}.ts`;
+                    writeFileSync(path, content);
+                }
+
+                if (networkName === 'mainnet' && version === 'v2') {
                     const url = `https://raw.githubusercontent.com/balancer/balancer-deployments/refs/heads/${branch}/${version}/tasks/${taskId}/artifact/${contract.name}.json`;
                     const res = await fetch(url);
                     if (!res.ok) {

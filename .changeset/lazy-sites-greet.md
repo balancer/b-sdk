@@ -2,4 +2,4 @@
 "@balancer/sdk": patch
 ---
 
-Fix incorrect swap parameter
+Add hooks to addresses

@@ -3,7 +3,7 @@ import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { StableEncoder } from '@/entities/encoders/stable';
 import { protocolVersionError, VAULT_V2, ZERO_ADDRESS } from '@/utils';
-import { vaultV2Abi } from '@/abi';
+import { vaultAbi_V2 } from '@/abi';
 import {
     AddLiquidityBase,
     AddLiquidityInput,
@@ -89,7 +89,7 @@ export class AddLiquidityStable implements AddLiquidityBase {
         });
 
         const callData = encodeFunctionData({
-            abi: vaultV2Abi,
+            abi: vaultAbi_V2,
             functionName: 'joinPool',
             args,
         });

@@ -44,17 +44,42 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
     private encodeCallWithoutMigration(
         input: CreatePoolLiquidityBootstrappingInput,
     ): Hex {
+        const {
+            owner,
+            projectToken,
+            reserveToken,
+            startTimestamp,
+            endTimestamp,
+            blockProjectTokenSwapsIn,
+            projectTokenStartWeight,
+            reserveTokenStartWeight,
+            projectTokenEndWeight,
+            reserveTokenEndWeight,
+            reserveTokenVirtualBalance,
+        } = input.lbpParams;
         const args = [
-            input.name || input.symbol, // name can be optional
-            input.symbol,
             {
-                ...input.lbpParams,
-                startTime: input.lbpParams.startTimestamp,
-                endTime: input.lbpParams.endTimestamp,
+                // LBPCommonParams
+                name: input.name || input.symbol,
+                symbol: input.symbol,
+                owner,
+                projectToken,
+                reserveToken,
+                startTime: startTimestamp,
+                endTime: endTimestamp,
+                blockProjectTokenSwapsIn,
+            },
+            {
+                // LBPParams (weights)
+                projectTokenStartWeight,
+                reserveTokenStartWeight,
+                projectTokenEndWeight,
+                reserveTokenEndWeight,
+                reserveTokenVirtualBalance: reserveTokenVirtualBalance ?? 0n,
             },
             input.swapFeePercentage,
             input.salt || getRandomBytes32(),
-            input.poolCreator ? input.poolCreator : zeroAddress,
+            input.poolCreator ?? zeroAddress,
         ] as const;
         return encodeFunctionData({
             abi: lBPoolFactoryAbi_V3Extended,
@@ -66,21 +91,58 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
     private encodeCallWithMigration(
         input: CreatePoolLiquidityBootstrappingWithMigrationInput,
     ): Hex {
+        const {
+            owner,
+            projectToken,
+            reserveToken,
+            startTimestamp,
+            endTimestamp,
+            blockProjectTokenSwapsIn,
+            projectTokenStartWeight,
+            reserveTokenStartWeight,
+            projectTokenEndWeight,
+            reserveTokenEndWeight,
+            reserveTokenVirtualBalance,
+        } = input.lbpParams;
+        const {
+            lockDurationAfterMigration,
+            bptPercentageToMigrate,
+            migrationWeightProjectToken,
+            migrationWeightReserveToken,
+        } = input.lbpMigrationParams;
         const args = [
-            input.name || input.symbol, // name can be optional
-            input.symbol,
             {
-                ...input.lbpParams,
-                startTime: input.lbpParams.startTimestamp,
-                endTime: input.lbpParams.endTimestamp,
+                // LBPCommonParams
+                name: input.name || input.symbol,
+                symbol: input.symbol,
+                owner,
+                projectToken,
+                reserveToken,
+                startTime: startTimestamp,
+                endTime: endTimestamp,
+                blockProjectTokenSwapsIn,
+            },
+            {
+                // MigrationParams (auto-resolve migrationRouter from chain)
+                migrationRouter: AddressProvider.LBPoolMigrationRouter(
+                    input.chainId,
+                ),
+                lockDurationAfterMigration,
+                bptPercentageToMigrate,
+                migrationWeightProjectToken,
+                migrationWeightReserveToken,
+            },
+            {
+                // LBPParams (weights)
+                projectTokenStartWeight,
+                reserveTokenStartWeight,
+                projectTokenEndWeight,
+                reserveTokenEndWeight,
+                reserveTokenVirtualBalance: reserveTokenVirtualBalance ?? 0n,
             },
             input.swapFeePercentage,
             input.salt || getRandomBytes32(),
-            input.poolCreator ? input.poolCreator : zeroAddress,
-            input.lbpMigrationParams.bptLockDurationinSeconds,
-            input.lbpMigrationParams.bptPercentageToMigrate,
-            input.lbpMigrationParams.migrationWeightProjectToken,
-            input.lbpMigrationParams.migrationWeightReserveToken,
+            input.poolCreator ?? zeroAddress,
         ] as const;
         return encodeFunctionData({
             abi: lBPoolFactoryAbi_V3Extended,

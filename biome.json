@@ -7,7 +7,8 @@
             "pnpm-lock.yaml",
             "./local",
             "./package.json",
-            "src/data/providers/balancer-api/generated/"
+            "src/data/providers/balancer-api/generated/",
+            "./.claude"
         ]
     },
     "organizeImports": {

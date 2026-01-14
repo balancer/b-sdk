@@ -1,5 +1,5 @@
 import { Address, Client, Hex, PublicClient, getContract } from 'viem';
-import { vaultV2Abi, vaultExtensionAbi_V3 } from '../abi';
+import { vaultAbi_V2, vaultExtensionAbi_V3 } from '../abi';
 import { balancerV2Contracts } from './balancerV2Contracts';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
@@ -47,7 +47,7 @@ export async function getPoolTokensV2(
     try {
         const chainId = await client.getChainId();
         const vaultV2 = getContract({
-            abi: vaultV2Abi,
+            abi: vaultAbi_V2,
             address: balancerV2Contracts.Vault[chainId],
             client,
         });

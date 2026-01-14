@@ -4,15 +4,17 @@ import {
 } from '@/entities/removeLiquidity/types';
 import { InitPoolInput, InitPoolInputV3 } from '../initPool/types';
 import { CreatePoolInput } from '../createPool/types';
-import { PoolState } from '../types';
+import { PoolState, PoolStateWithUnderlyings } from '../types';
 import {
     validateTokensAddLiquidity,
+    validateTokensAddLiquidityBoosted,
     validateTokensRemoveLiquidity,
     validateTokensRemoveLiquidityRecovery,
 } from './utils/validateTokens';
 import { AddLiquidityInput } from '@/entities/addLiquidity/types';
 import { areTokensInArray } from '@/entities/utils/areTokensInArray';
 import { isSameAddress, NATIVE_ASSETS, inputValidationError } from '@/utils';
+import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
 
 export class InputValidatorBase {
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
@@ -65,5 +67,12 @@ export class InputValidatorBase {
                 );
             }
         }
+    }
+
+    validateAddLiquidityBoosted(
+        addLiquidityInput: AddLiquidityBoostedInput,
+        poolState: PoolStateWithUnderlyings,
+    ): void {
+        validateTokensAddLiquidityBoosted(addLiquidityInput, poolState);
     }
 }

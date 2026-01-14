@@ -20,7 +20,6 @@ export type CreatePoolBaseInput = {
 
 export type CreatePoolInput =
     | CreatePoolV2WeightedInput
-    | CreatePoolV2ComposableStableInput
     | CreatePoolV3WeightedInput
     | CreatePoolV3StableInput
     | CreatePoolStableSurgeInput
@@ -50,36 +49,12 @@ export type CreatePoolV2WeightedInput = CreatePoolV2BaseInput & {
     }[];
 };
 
-export type CreatePoolV2ComposableStableInput = CreatePoolV2BaseInput & {
-    poolType: PoolType.ComposableStable;
-    tokens: {
-        address: Address;
-        rateProvider: Address;
-        tokenRateCacheDuration: bigint;
-    }[];
-    amplificationParameter: bigint;
-    exemptFromYieldProtocolFeeFlag: boolean;
-};
-
 export type CreatePoolV2WeightedArgs = [
     string,
     string,
     Address[],
     bigint[],
     Address[],
-    bigint,
-    Address,
-    Hex,
-];
-
-export type CreatePoolV2ComposableStableArgs = [
-    string,
-    string,
-    Address[],
-    bigint,
-    Address[],
-    bigint[],
-    boolean,
     bigint,
     Address,
     Hex,
@@ -157,13 +132,14 @@ export type LBPParams = {
     owner: Address;
     projectToken: Address;
     reserveToken: Address;
+    startTimestamp: bigint;
+    endTimestamp: bigint;
+    blockProjectTokenSwapsIn: boolean;
     projectTokenStartWeight: bigint;
     reserveTokenStartWeight: bigint;
     projectTokenEndWeight: bigint;
     reserveTokenEndWeight: bigint;
-    startTimestamp: bigint;
-    endTimestamp: bigint;
-    blockProjectTokenSwapsIn: boolean;
+    reserveTokenVirtualBalance?: bigint; // Optional, defaults to 0n
 };
 
 // The pool uses default liquidity management values (no setters available)
@@ -184,9 +160,9 @@ export type CreatePoolLiquidityBootstrappingInput = Omit<
     poolCreator?: Address;
 };
 
-// same scale as the Smart contracts
+// Updated migration params (lockDuration renamed, migrationRouter auto-resolved)
 export type LBPMigrationParams = {
-    bptLockDurationinSeconds: bigint;
+    lockDurationAfterMigration: bigint;
     bptPercentageToMigrate: bigint;
     migrationWeightProjectToken: bigint;
     migrationWeightReserveToken: bigint;
