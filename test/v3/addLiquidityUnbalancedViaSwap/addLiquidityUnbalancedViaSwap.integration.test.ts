@@ -240,7 +240,6 @@ describe('add liquidity unbalanced via swap test', () => {
                     addLiquidityUserData: '0x',
                     swapUserData: '0x',
                     sender: testAddress,
-                    swapKind: SwapKind.GivenIn,
                 };
 
                 await expect(
@@ -272,7 +271,6 @@ describe('add liquidity unbalanced via swap test', () => {
                     addLiquidityUserData: '0x',
                     swapUserData: '0x',
                     sender: testAddress,
-                    swapKind: SwapKind.GivenIn,
                 };
 
                 await expect(
@@ -346,7 +344,6 @@ describe('add liquidity unbalanced via swap test', () => {
                             ],
                             exactTokenIndex: 0, // WETH is exact, DAI is adjustable
                             addLiquidityUserData: '0x',
-                            swapKind: SwapKind.GivenIn,
                             sender: testAddress,
                         };
 
@@ -644,7 +641,6 @@ describe('add liquidity unbalanced via swap test', () => {
                             ],
                             exactTokenIndex: 0, // wstETH is exact, GNO is adjustable
                             addLiquidityUserData: '0x',
-                            swapKind: SwapKind.GivenIn,
                             sender,
                         };
 
