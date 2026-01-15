@@ -1,4 +1,4 @@
-// pnpm test -- v3/addLiquidityUnbalancedViaSwap/addLiquidityUnbalancedViaSwap.integration.test.ts
+// pnpm test v3/addLiquidityUnbalancedViaSwap/addLiquidityUnbalancedViaSwap.integration.test.ts
 
 import { config } from 'dotenv';
 config();
@@ -17,14 +17,11 @@ import {
     Slippage,
     Hex,
     PoolState,
-    ReClammPoolState,
     CHAINS,
     ChainId,
-    InputAmount,
     PERMIT2,
     PublicWalletClient,
     SwapKind,
-    TokenAmount,
     ReClammPoolStateWithBalances,
 } from '@/index';
 import {
@@ -166,7 +163,7 @@ describe('add liquidity unbalanced via swap test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS[ChainId[chainId]],
             undefined,
-            9718873n,
+            10003483n,
         ));
 
         client = createTestClient({

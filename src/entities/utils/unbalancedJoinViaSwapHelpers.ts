@@ -1,34 +1,86 @@
-import { Address, parseUnits, formatUnits } from 'viem';
+import { parseUnits, formatUnits, Address, Hex } from 'viem';
 import { InputAmount } from '@/types';
 import { HumanAmount } from '@/data';
-import {
-    inputValidationError,
-    isSameAddress,
-    MathSol,
-    WAD,
-    SDKError,
-} from '@/utils';
+import { inputValidationError, MathSol, SDKError, WAD } from '@/utils';
 import { AddLiquidityProportionalInput } from '../addLiquidity/types';
-import {
-    PoolState,
-    PoolStateWithUnderlyingBalances,
-    PoolStateWithUnderlyings,
-    ReClammPoolStateWithBalances,
-} from '../types';
-import { getPoolStateWithBalancesV2 } from './getPoolStateWithBalancesV2';
-import {
-    getBoostedPoolStateWithBalancesV3,
-    getPoolStateWithBalancesV3,
-} from './getPoolStateWithBalancesV3';
-import { AddLiquidityBoostedProportionalInput } from '../addLiquidityBoosted/types';
+import { ReClammPoolStateWithBalances } from '../types';
+import { ChainId } from '@/utils/constants';
+import { doAddLiquidityUnbalancedViaSwapQuery } from '../addLiquidityUnbalancedViaSwap/doAddLiquidityUnbalancedViaSwapQuery';
 
 import { calculateProportionalAmounts } from './proportionalAmountsHelpers';
-import { TokenAmount } from '../tokenAmount';
+
+/**
+ * Calculates a corrected BPT amount based on the ratio between the queried
+ * maxAdjustableAmountIn and the user-provided one.
+ *
+ * This correction factor is used to iteratively approximate the desired
+ * maxAdjustableAmountIn from below. Since the correction overcorrects,
+ * it should be applied twice to get closer to the desired output.
+ *
+ * @param bptAmount - The current BPT amount to correct
+ * @param queriedAdjustableAmount - The adjustable amount returned by the query
+ * @param targetAdjustableAmount - The user-provided target adjustable amount
+ * @returns The corrected BPT amount
+ */
+export function calculateCorrectedBptAmount(
+    bptAmount: bigint,
+    queriedAdjustableAmount: bigint,
+    targetAdjustableAmount: bigint,
+): bigint {
+    const correctionFactor = MathSol.divDownFixed(
+        queriedAdjustableAmount,
+        targetAdjustableAmount,
+    );
+    return MathSol.divDownFixed(bptAmount, correctionFactor);
+}
+
+/**
+ * Performs a query and applies BPT amount correction based on the ratio between
+ * the queried maxAdjustableAmountIn and the user-provided target.
+ *
+ * @returns An object containing the corrected BPT amount and the amounts from the query
+ */
+export async function queryAndAdjustBptAmount(
+    rpcUrl: string,
+    chainId: ChainId,
+    pool: Address,
+    sender: Address,
+    bptAmount: bigint,
+    exactToken: Address,
+    exactAmount: bigint,
+    maxAdjustableAmount: bigint,
+    addLiquidityUserData: Hex,
+    swapUserData: Hex,
+    adjustableTokenIndex: number,
+    targetAdjustableAmount: bigint,
+    block?: bigint,
+): Promise<bigint> {
+    const amountsIn = await doAddLiquidityUnbalancedViaSwapQuery(
+        rpcUrl,
+        chainId,
+        pool,
+        sender,
+        bptAmount,
+        exactToken,
+        exactAmount,
+        maxAdjustableAmount,
+        addLiquidityUserData,
+        swapUserData,
+        block,
+    );
+
+    const correctedBptAmount = calculateCorrectedBptAmount(
+        bptAmount,
+        amountsIn[adjustableTokenIndex],
+        targetAdjustableAmount,
+    );
+
+    return correctedBptAmount;
+}
 
 export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmount(
     pool: ReClammPoolStateWithBalances,
     referenceAmount: InputAmount,
-    maxAdjustableAmountRaw: bigint,
 ): {
     tokenAmounts: InputAmount[];
     bptAmount: InputAmount;
@@ -73,13 +125,33 @@ export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmoun
     const tokenRateOneScale18 = parseUnits(pool.tokenRates[0], 18);
     const tokenRateTwoScale18 = parseUnits(pool.tokenRates[1], 18);
 
+    const realVersusVirtualRatioOne = MathSol.divDownFixed(
+        virtualBalanceOneScale18,
+        parseUnits(pool.tokens[0].balance, 18),
+    );
+    const realVersusVirtualRatioTwo = MathSol.divDownFixed(
+        virtualBalanceTwoScale18,
+        parseUnits(pool.tokens[1].balance, 18),
+    );
 
-    const referenceAmountScale18 = referenceAmount.rawAmount * (10n ** BigInt(18 - referenceAmount.decimals));
-    const adjustedReferenceAmountScale18 = referenceAmountScale18 + (adjustableTokenIndex === 0 ? virtualBalanceOneScale18 : virtualBalanceTwoScale18);
+    const referenceAmountScale18 =
+        referenceAmount.rawAmount *
+        10n ** BigInt(18 - referenceAmount.decimals);
+    const adjustedReferenceAmountScale18 = MathSol.mulDownFixed(
+        referenceAmountScale18,
+        WAD +
+            (adjustableTokenIndex === 0
+                ? realVersusVirtualRatioOne
+                : realVersusVirtualRatioTwo),
+    );
     // downscale reference amount to raw amount as the proportional calculation expects it
-    const adjustedReferenceAmountRaw = adjustedReferenceAmountScale18 / (10n ** BigInt(18 - referenceAmount.decimals));
+    const adjustedReferenceAmountRaw =
+        adjustedReferenceAmountScale18 /
+        10n ** BigInt(18 - referenceAmount.decimals);
 
     const PRECISION_FACTOR = 10n ** 18n;
+
+    // TODO: refactor amounts into PoolTokenWithRate so it's easier to scale up/down
 
     const effectiveBalanceOneScale18 =
         (virtualBalanceOneScale18 * PRECISION_FACTOR) / tokenRateOneScale18;
@@ -109,13 +181,6 @@ export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmoun
 
     // Use half of the user's adjustable budget as the proportional reference.
     const halfAdjustableRaw = adjustedReferenceAmountRaw / 2n;
-    if (halfAdjustableRaw === 0n) {
-        throw new SDKError(
-            'UnbalancedJoinViaSwap',
-            'calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmount',
-            'maxAdjustableAmountRaw is too small to derive a meaningful proportional reference',
-        );
-    }
 
     const halfReferenceAmount: InputAmount = {
         address: referenceAmount.address,
@@ -136,20 +201,20 @@ export function calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmoun
 
 export const getBptAmountFromReferenceAmountnbalancedViaSwapFromAdjustableAmount =
     async (
-        input: AddLiquidityProportionalInput & {
-            maxAdjustableAmountRaw: bigint;
-        },
+        input: AddLiquidityProportionalInput,
         poolState: ReClammPoolStateWithBalances,
-    ): Promise<InputAmount> => {
+    ): Promise<{
+        tokenAmounts: InputAmount[];
+        bptAmount: InputAmount;
+    }> => {
         // reclamms require token rates and virtual balances for the later part
         // of bpt estimation. They are part of the pool state
 
-        const { bptAmount } =
+        const { tokenAmounts, bptAmount } =
             calculateBptAmountFromUnbalancedJoinTwoTokensFromAdjustableAmount(
                 poolState,
                 input.referenceAmount,
-                input.maxAdjustableAmountRaw,
             );
 
-        return bptAmount;
+        return { tokenAmounts, bptAmount };
     };

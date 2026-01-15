@@ -1,15 +1,18 @@
-import { encodeFunctionData, zeroAddress } from 'viem';
+import { encodeFunctionData, maxUint256, zeroAddress } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { Token } from '@/entities/token';
-import { PoolState, ReClammPoolStateWithBalances } from '@/entities/types';
+import { PoolState } from '@/entities/types';
 import { Permit2 } from '@/entities/permit2Helper';
 import {
     balancerUnbalancedAddViaSwapRouterAbiExtended,
     balancerRouterAbiExtended,
 } from '@/abi';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { getValue, getSortedTokens } from '@/entities/utils';
-import { Hex, Address, InputAmount } from '@/types';
+import {
+    getValue,
+    getSortedTokens,
+    getBptAmountFromReferenceAmount,
+} from '@/entities/utils';
 import { doAddLiquidityUnbalancedViaSwapQuery } from './doAddLiquidityUnbalancedViaSwapQuery';
 import { validateAddLiquidityUnbalancedViaSwapInput } from './validateInputs';
 import { getAmountsCallUnbalancedViaSwap } from './helpers';
@@ -19,7 +22,7 @@ import {
     AddLiquidityUnbalancedViaSwapBuildCallInput,
     AddLiquidityUnbalancedViaSwapBuildCallOutput,
 } from './types';
-import { getBptAmountFromReferenceAmountnbalancedViaSwapFromAdjustableAmount } from '../utils/unbalancedJoinViaSwapHelpers';
+import { queryAndAdjustBptAmount } from '../utils/unbalancedJoinViaSwapHelpers';
 import { SDKError } from '@/utils/errors';
 import { AddLiquidityKind } from '../addLiquidity/types';
 
@@ -34,7 +37,7 @@ export type {
 export class AddLiquidityUnbalancedViaSwapV3 {
     async query(
         input: AddLiquidityUnbalancedViaSwapInput,
-        poolState: ReClammPoolStateWithBalances,
+        poolState: PoolState,
         block?: bigint,
     ): Promise<AddLiquidityUnbalancedViaSwapQueryOutput> {
         validateAddLiquidityUnbalancedViaSwapInput(input, poolState);
@@ -76,53 +79,92 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             input.amountsIn[exactTokenIndex].rawAmount === 0n &&
             input.amountsIn[adjustableTokenIndex].rawAmount > 0n
         ) {
-            // Single-sided join: exact token amount is zero, adjustable token has a finite budget.
-            // We treat the adjustable token as the reference and derive a BPT target from it.
+            // Single-sided add liquidity: exact token amount is zero,
+            // adjustable token has a finite budget.
+            // We treat the adjustable token as the reference and derive a BPT
+            // target from it.
 
-            const adjustableBudgetRaw = amountsIn[adjustableTokenIndex].amount;
+            const maxAjustableTokenAmount = amountsIn[adjustableTokenIndex];
 
-            const bptAmount =
-                await getBptAmountFromReferenceAmountnbalancedViaSwapFromAdjustableAmount(
-                    {
-                        chainId: input.chainId,
-                        rpcUrl: input.rpcUrl,
-                        referenceAmount: {
-                            address:
-                                amountsIn[adjustableTokenIndex].token.address,
-                            rawAmount: adjustableBudgetRaw,
-                            decimals:
-                                amountsIn[adjustableTokenIndex].token.decimals,
-                        },
-                        kind: AddLiquidityKind.Proportional,
-                        maxAdjustableAmountRaw: adjustableBudgetRaw,
+            // Initial guess is 50% of the provided maxAjustableAmountIn.
+            // It should result close to the desired bptAmount when
+            // centeredness = 1 and result in a smaller bptAmount than the
+            // desired when centeredness decreases.
+            const initialReferenceAmount = maxAjustableTokenAmount.amount / 2n;
+
+            const initialBptAmount = await getBptAmountFromReferenceAmount(
+                {
+                    chainId: input.chainId,
+                    rpcUrl: input.rpcUrl,
+                    referenceAmount: {
+                        address: maxAjustableTokenAmount.token.address,
+                        rawAmount: initialReferenceAmount,
+                        decimals: maxAjustableTokenAmount.token.decimals,
                     },
-                    poolState,
-                );
-
-            const bptToken = new Token(input.chainId, poolState.address, 18);
-            const bptOut = TokenAmount.fromRawAmount(
-                bptToken,
-                bptAmount.rawAmount,
+                    kind: AddLiquidityKind.Proportional,
+                },
+                poolState,
             );
 
-            // Query the router with exactAmount = 0 and maxAdjustableAmount = adjustableBudgetRaw.
-            const amountsInNumbers = await doAddLiquidityUnbalancedViaSwapQuery(
+            // First iteration to adjust bptAmount will overcorrect, resulting in
+            // an adjustedBptAmount greater than the desired output
+            const adjustedBptAmount = await queryAndAdjustBptAmount(
                 input.rpcUrl,
                 input.chainId,
                 input.pool,
                 sender,
-                bptAmount.rawAmount,
+                initialBptAmount.rawAmount,
                 exactToken,
                 0n,
-                adjustableBudgetRaw,
+                maxUint256,
                 addLiquidityUserData,
                 swapUserData,
+                adjustableTokenIndex,
+                maxAjustableTokenAmount.amount,
                 block,
             );
 
-            const finalAmountsIn = sortedTokens.map((token, index) =>
-                TokenAmount.fromRawAmount(token, amountsInNumbers[index]),
+            // Second iteration to get closer to the desired output from below.
+            // This ensures the result will favor leaving some dust behind instead
+            // of risking a revert by returning a finalBptAmount corresponding to
+            // a maxAdjustableAmount smaller than the amountIn provided by the user.
+            const finalBptAmount = await queryAndAdjustBptAmount(
+                input.rpcUrl,
+                input.chainId,
+                input.pool,
+                sender,
+                adjustedBptAmount,
+                exactToken,
+                0n,
+                maxUint256,
+                addLiquidityUserData,
+                swapUserData,
+                adjustableTokenIndex,
+                maxAjustableTokenAmount.amount,
+                block,
             );
+
+            const calculatedAmountsIn =
+                await doAddLiquidityUnbalancedViaSwapQuery(
+                    input.rpcUrl,
+                    input.chainId,
+                    input.pool,
+                    sender,
+                    finalBptAmount,
+                    exactToken,
+                    0n,
+                    maxUint256,
+                    addLiquidityUserData,
+                    swapUserData,
+                    block,
+                );
+
+            const finalAmountsIn = sortedTokens.map((token, index) =>
+                TokenAmount.fromRawAmount(token, calculatedAmountsIn[index]),
+            );
+
+            const bptToken = new Token(input.chainId, poolState.address, 18);
+            const bptOut = TokenAmount.fromRawAmount(bptToken, finalBptAmount);
 
             const output: AddLiquidityUnbalancedViaSwapQueryOutput = {
                 pool: input.pool,
@@ -139,7 +181,8 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             };
             return output;
         }
-        // Two token join - currently not supported
+
+        // TODO: check if the approach works for the generalized unbalanced case
         throw new SDKError(
             'UnbalancedJoinViaSwap',
             'AddLiquidityUnbalancedViaSwapV3.query',
@@ -150,11 +193,6 @@ export class AddLiquidityUnbalancedViaSwapV3 {
     buildCall(
         input: AddLiquidityUnbalancedViaSwapBuildCallInput,
     ): AddLiquidityUnbalancedViaSwapBuildCallOutput {
-        // the queryOutput returns the actual amountsIn for a calculated BPT amount.
-        // the BPT amount is calculated based on a proportional join helper with some
-        // inline bptAmount adjustments. (bpt gets increased by a certain percentage).
-        // Simply using slippage to decrease the exactBptAmount would open up the
-        // join with some freetom in the adjustable amount.
         const amounts = getAmountsCallUnbalancedViaSwap(input);
         const wethIsEth = input.wethIsEth ?? false;
 
