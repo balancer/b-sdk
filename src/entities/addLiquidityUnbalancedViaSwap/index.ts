@@ -22,7 +22,7 @@ import {
     AddLiquidityUnbalancedViaSwapBuildCallInput,
     AddLiquidityUnbalancedViaSwapBuildCallOutput,
 } from './types';
-import { queryAndAdjustBptAmount } from '../utils/unbalancedJoinViaSwapHelpers';
+import { queryAndAdjustBptAmount } from '../utils/unbalancedAddViaSwapHelpers';
 import { SDKError } from '@/utils/errors';
 import { AddLiquidityKind } from '../addLiquidity/types';
 
@@ -70,9 +70,9 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             input.amountsIn[adjustableTokenIndex].rawAmount === 0n
         ) {
             throw new SDKError(
-                'UnbalancedJoinViaSwap',
+                'UnbalancedAddViaSwap',
                 'AddLiquidityUnbalancedViaSwapV3.query',
-                'Single-sided joins with maxAdjustableAmount = 0 are not supported by UnbalancedAddViaSwapRouter. Please provide a non-zero adjustable amount or use a different path.',
+                'Single-sided adds with maxAdjustableAmount = 0 are not supported by UnbalancedAddViaSwapRouter. Please provide a non-zero adjustable amount or use a different path.',
             );
         }
         if (
@@ -184,9 +184,9 @@ export class AddLiquidityUnbalancedViaSwapV3 {
 
         // TODO: check if the approach works for the generalized unbalanced case
         throw new SDKError(
-            'UnbalancedJoinViaSwap',
+            'UnbalancedAddViaSwap',
             'AddLiquidityUnbalancedViaSwapV3.query',
-            'Two-token joins are not supported by The SDK yet. Please provide a single-sided join.',
+            'Two-token adds are not supported by The SDK yet. Please provide a single-sided add.',
         );
     }
 

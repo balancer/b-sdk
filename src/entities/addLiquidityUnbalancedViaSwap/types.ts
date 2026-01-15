@@ -19,7 +19,7 @@ export type AddLiquidityUnbalancedViaSwapInput = {
      * When true (and swapKind is GivenIn), the SDK will choose exactBptAmountOut
      * to minimize the adjustable token in as much as possible (subject to Vault
      * constraints such as min swap size), instead of staying as close as
-     * possible to the proportional join.
+     * possible to the proportional add liquidity.
      *
      * Default: false.
      */
