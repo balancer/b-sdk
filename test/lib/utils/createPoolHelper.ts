@@ -33,7 +33,8 @@ export async function doCreatePool(
             [PoolType.GyroE]: gyroECLPPoolFactoryAbiExtended,
             [PoolType.ReClamm]: reClammPoolFactoryAbiExtended,
             [PoolType.LiquidityBootstrapping]: lBPoolFactoryAbi_V3Extended,
-            [PoolType.LiquidityBootstrappingFixedPrice]: fixedPriceLBPoolFactoryAbi_V3,
+            [PoolType.LiquidityBootstrappingFixedPrice]:
+                fixedPriceLBPoolFactoryAbi_V3,
         },
     };
 

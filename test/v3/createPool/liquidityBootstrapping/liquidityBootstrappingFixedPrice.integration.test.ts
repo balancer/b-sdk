@@ -25,10 +25,7 @@ import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../../lib/utils/createPoolHelper';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { MAX_UINT256, PublicWalletClient } from '@/utils';
-import {
-    vaultExtensionAbi_V3,
-    balancerRouterAbiExtended,
-} from 'src/abi/';
+import { vaultExtensionAbi_V3, balancerRouterAbiExtended } from 'src/abi/';
 import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import {
     setTokenBalances,
@@ -152,7 +149,7 @@ describe('create liquidityBootstrapping fixed price pool test', () => {
             chainId,
             wethIsEth: false,
         };
-        
+
         // Build pool state with tokens in sorted order (WETH < BAL)
         const poolTokensWithIndices = [
             { ...WETH, index: 0 },
@@ -171,8 +168,10 @@ describe('create liquidityBootstrapping fixed price pool test', () => {
 
         // Check balances for all tokens in the same order as amountsIn
         // assertInitPool expects balanceDeltas to match the order of initPoolInput.amountsIn
-        const tokensForBalanceCheck = initPoolInput.amountsIn.map((a) => a.address);
-        
+        const tokensForBalanceCheck = initPoolInput.amountsIn.map(
+            (a) => a.address,
+        );
+
         const txOutput = await sendTransactionGetBalances(
             tokensForBalanceCheck,
             client,

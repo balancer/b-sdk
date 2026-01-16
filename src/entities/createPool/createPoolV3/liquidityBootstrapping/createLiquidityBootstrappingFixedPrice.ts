@@ -12,7 +12,9 @@ import { fixedPriceLBPoolFactoryAbi_V3 } from '@/abi';
 import { Hex } from '@/types';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
-export class CreatePoolLiquidityBootstrappingFixedPrice implements CreatePoolBase {
+export class CreatePoolLiquidityBootstrappingFixedPrice
+    implements CreatePoolBase
+{
     public buildCall(
         input: CreatePoolLiquidityBootstrappingFixedPriceInput,
     ): CreatePoolBuildCallOutput {

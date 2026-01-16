@@ -9,7 +9,10 @@ import {
     CreatePoolLiquidityBootstrappingFixedPriceInput,
 } from '../../types';
 
-import { lBPoolFactoryAbi_V3Extended, fixedPriceLBPoolFactoryAbi_V3 } from '@/abi';
+import {
+    lBPoolFactoryAbi_V3Extended,
+    fixedPriceLBPoolFactoryAbi_V3,
+} from '@/abi';
 
 import { Hex, PoolType } from '@/types';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
@@ -22,9 +25,10 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
             | CreatePoolLiquidityBootstrappingFixedPriceInput,
     ): CreatePoolBuildCallOutput {
         const callData = this.encodeCall(input);
-        const to = input.poolType === PoolType.LiquidityBootstrappingFixedPrice
-            ? AddressProvider.FixedPriceLBPoolFactory(input.chainId)
-            : AddressProvider.LBPoolFactory(input.chainId);
+        const to =
+            input.poolType === PoolType.LiquidityBootstrappingFixedPrice
+                ? AddressProvider.FixedPriceLBPoolFactory(input.chainId)
+                : AddressProvider.LBPoolFactory(input.chainId);
         return {
             callData,
             to,

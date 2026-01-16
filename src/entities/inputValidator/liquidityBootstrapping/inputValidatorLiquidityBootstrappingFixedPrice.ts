@@ -27,7 +27,7 @@ export class InputValidatorLiquidityBootstrappingFixedPrice extends InputValidat
         _removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
         _poolStateWithBalances: PoolStateWithBalances,
     ): void {}
-    
+
     validateInitPool(initPoolInput: InitPoolInput, poolState: PoolState): void {
         // Call base validation first
         super.validateInitPool(initPoolInput, poolState);
@@ -39,7 +39,7 @@ export class InputValidatorLiquidityBootstrappingFixedPrice extends InputValidat
         // - Exactly one token should have amount > 0 (project token)
         // - Exactly one token should have amount == 0 (reserve token)
         // - There should be exactly 2 tokens
-        
+
         if (poolState.tokens.length !== 2) {
             throw new SDKError(
                 'Input Validation',
@@ -153,10 +153,7 @@ export class InputValidatorLiquidityBootstrappingFixedPrice extends InputValidat
         }
         // cannot be in the past - technically allowed on the sc side.
         // will simply move startTime to now.
-        if (
-            params.startTimestamp <
-            BigInt(Math.floor(Date.now() / 1000))
-        ) {
+        if (params.startTimestamp < BigInt(Math.floor(Date.now() / 1000))) {
             throw new SDKError(
                 'Input Validation',
                 'Create Pool',
@@ -164,12 +161,7 @@ export class InputValidatorLiquidityBootstrappingFixedPrice extends InputValidat
             );
         }
         // tokens cannot be the same (contract requirement)
-        if (
-            isSameAddress(
-                params.projectToken,
-                params.reserveToken,
-            )
-        ) {
+        if (isSameAddress(params.projectToken, params.reserveToken)) {
             throw new SDKError(
                 'Input Validation',
                 'Create Pool',
