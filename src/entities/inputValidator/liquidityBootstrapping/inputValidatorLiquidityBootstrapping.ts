@@ -5,7 +5,10 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '../../removeLiquidity/types';
-import { CreatePoolLiquidityBootstrappingInput } from '../../createPool/types';
+import {
+    CreatePoolLiquidityBootstrappingInput,
+    CreatePoolLiquidityBootstrappingWithMigrationInput,
+} from '../../createPool/types';
 
 import { isSameAddress, SDKError } from '@/utils';
 
@@ -25,8 +28,12 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
         _removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
         _poolStateWithBalances: PoolStateWithBalances,
     ): void {}
-    validateCreatePool(input: CreatePoolLiquidityBootstrappingInput): void {
-        // start weights
+    validateCreatePool(
+        input:
+            | CreatePoolLiquidityBootstrappingInput
+            | CreatePoolLiquidityBootstrappingWithMigrationInput,
+    ): void {
+        // Validate weights for regular LBPs
         const startWeightsSum =
             input.lbpParams.projectTokenStartWeight +
             input.lbpParams.reserveTokenStartWeight;
@@ -48,6 +55,7 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
                 'End weights must sum to 100',
             );
         }
+
         // validate start and end times
         if (input.lbpParams.startTimestamp >= input.lbpParams.endTimestamp) {
             throw new SDKError(

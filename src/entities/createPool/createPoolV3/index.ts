@@ -26,6 +26,8 @@ export class CreatePoolV3 implements CreatePoolBase {
             [PoolType.ReClamm]: new CreatePoolReClamm(),
             [PoolType.LiquidityBootstrapping]:
                 new CreatePoolLiquidityBootstrapping(),
+            [PoolType.LiquidityBootstrappingFixedPrice]:
+                new CreatePoolLiquidityBootstrapping(),
         };
     }
 

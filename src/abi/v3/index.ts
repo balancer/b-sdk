@@ -10,6 +10,7 @@ export * from './stablePoolFactory';
 export * from './stableSurgePoolFactory';
 export * from './gyroECLPPoolFactory';
 export * from './lBPoolFactory';
+export * from './fixedPriceLBPoolFactory';
 export * from './reClammPoolFactory';
 export * from './weightedPool';
 export * from './stablePool';
