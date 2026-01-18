@@ -82,6 +82,7 @@ export enum ChainId {
     AVALANCHE = 43114,
     BASE_GOERLI = 84531,
     SEPOLIA = 11155111,
+    MONAD = 143,
     MONAD_TESTNET = 10143,
     HYPEREVM = 999,
     PLASMA = 9745,
@@ -104,6 +105,7 @@ export const API_CHAIN_NAMES: Record<number, string> = {
     [ChainId.AVALANCHE]: 'AVALANCHE',
     [ChainId.SEPOLIA]: 'SEPOLIA',
     [ChainId.SONIC]: 'SONIC',
+    [ChainId.MONAD]: 'MONAD',
     [ChainId.MONAD_TESTNET]: 'MONAD_TESTNET',
     [ChainId.HYPEREVM]: 'HYPEREVM',
     [ChainId.PLASMA]: 'PLASMA',
@@ -142,6 +144,7 @@ export const PERMIT2: Record<number, Address> = {
     [ChainId.HYPEREVM]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.MAINNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.MONAD_TESTNET]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+    [ChainId.MONAD]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.OPTIMISM]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.PLASMA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
     [ChainId.SEPOLIA]: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
@@ -285,6 +288,14 @@ export const NATIVE_ASSETS = {
         '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
         'OKB',
         'Okb',
+    ),
+    [ChainId.MONAD]: new NativeToken(
+        ChainId.MONAD,
+        NATIVE_ADDRESS,
+        18,
+        '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
+        'MON',
+        'Monad',
     ),
 };
 

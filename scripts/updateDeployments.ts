@@ -1,38 +1,16 @@
-import { Abi, Address } from 'viem';
+// pnpm run update:deployments
+
+import { Address } from 'viem';
 import { writeFileSync, readFileSync } from 'node:fs';
 import { sonic } from 'viem/chains';
 import { ChainId, PERMIT2 } from '../src/utils/constants';
-
-type SupportedNetworkResponse = {
-    name: string;
-    chainId: number;
-    blockExplorer: string;
-};
-
-type SupportedNetwork = {
-    networkName: string;
-    chainId: number;
-    deploymentsUrl: string;
-};
-
-type NetworkRegistryResponse = {
-    [key: string]: {
-        contracts: { name: string; address: Address }[];
-        status: 'ACTIVE' | 'DEPRECATED' | 'SCRIPT';
-        version: 'v2' | 'v3';
-    };
-};
-
-type AbiResponse = {
-    abi: Abi[];
-};
-
-// {contractName: {chainId: address}, ...}
-type ContractRegistry = {
-    [key: string]: {
-        [key: string]: Address;
-    };
-};
+import {
+    ContractRegistry,
+    SupportedNetwork,
+    SupportedNetworkResponse,
+    AbiResponse,
+    NetworkRegistryResponse,
+} from './scripts.types';
 
 // Create a map that looks like ['1': '[ChainId.MAINNET]', '10': '[ChainId.OPTIMISM]', ...]
 const chainIdToHumanKey = Object.fromEntries(
@@ -46,8 +24,7 @@ const targetContractsV2 = [
     'BalancerRelayer',
     'BalancerQueries',
     'WeightedPoolFactory',
-    'Authorizer', // only ABI?
-    // 'BatchRelayer', // Named "BatchRelayerLibrary" in SDK. TODO: investigate https://github.com/balancer/balancer-deployments/tree/master/v2/tasks/20231031-batch-relayer-v6
+    'Authorizer',
 ];
 
 // Update this list to add new contracts
