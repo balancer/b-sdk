@@ -132,9 +132,17 @@ export class InputValidatorLiquidityBootstrappingFixedPrice extends InputValidat
             );
         }
 
-        // Validate swap fee percentage bounds (contract: MIN = 0, MAX = 10%)
-        // FixedPriceLBPool.sol: _MIN_SWAP_FEE_PERCENTAGE = 0, _MAX_SWAP_FEE_PERCENTAGE = 10e16
+        // FixedPriceLBPool.sol: _MIN_SWAP_FEE_PERCENTAGE = 0, _MAX_SWAP_FEE_PERCENTAGE = 10e16 (10%)
+        // Note: Unlike regular LBPool (MIN = 0.001%), FixedPriceLBPool allows 0% minimum swap fee
+        const MIN_SWAP_FEE_PERCENTAGE = 0n; // 0% - FixedPriceLBPool allows zero swap fee
         const MAX_SWAP_FEE_PERCENTAGE = BigInt(10e16); // 10%
+        if (input.swapFeePercentage < MIN_SWAP_FEE_PERCENTAGE) {
+            throw new SDKError(
+                'Input Validation',
+                'Create Pool',
+                `Swap fee percentage cannot be less than ${MIN_SWAP_FEE_PERCENTAGE} (0%)`,
+            );
+        }
         if (input.swapFeePercentage > MAX_SWAP_FEE_PERCENTAGE) {
             throw new SDKError(
                 'Input Validation',

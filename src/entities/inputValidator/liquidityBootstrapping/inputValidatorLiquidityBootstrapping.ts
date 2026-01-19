@@ -89,5 +89,23 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
                 'Tokens must be different',
             );
         }
+
+        // LBPool inherits from WeightedPool: _MIN_SWAP_FEE_PERCENTAGE = 0.001e16 (0.001%), _MAX_SWAP_FEE_PERCENTAGE = 10e16 (10%)
+        const MIN_SWAP_FEE_PERCENTAGE = BigInt(10 ** 13); // 0.001% = 0.001e16 = 1e13
+        const MAX_SWAP_FEE_PERCENTAGE = BigInt(10e16); // 10%
+        if (input.swapFeePercentage < MIN_SWAP_FEE_PERCENTAGE) {
+            throw new SDKError(
+                'Input Validation',
+                'Create Pool',
+                `Swap fee percentage cannot be less than ${MIN_SWAP_FEE_PERCENTAGE} (0.001%)`,
+            );
+        }
+        if (input.swapFeePercentage > MAX_SWAP_FEE_PERCENTAGE) {
+            throw new SDKError(
+                'Input Validation',
+                'Create Pool',
+                `Swap fee percentage cannot exceed ${MAX_SWAP_FEE_PERCENTAGE} (10%)`,
+            );
+        }
     }
 }
