@@ -153,6 +153,7 @@ export class InputValidatorLiquidityBootstrappingFixedPrice extends InputValidat
         }
         // cannot be in the past - technically allowed on the sc side.
         // will simply move startTime to now.
+        // from LBPValidation.sol: "If the start time is in the past, "fast forward" to start now"
         if (params.startTimestamp < BigInt(Math.floor(Date.now() / 1000))) {
             throw new SDKError(
                 'Input Validation',
