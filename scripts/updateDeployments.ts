@@ -46,6 +46,7 @@ const targetContractsV3 = [
     'LBPMigrationRouter',
     'MevCaptureHook',
     'StableSurgeHook',
+    'UnbalancedAddViaSwapRouter',
 ];
 
 const targetContracts = [...targetContractsV2, ...targetContractsV3];
@@ -299,7 +300,15 @@ function exportAbis() {
             }';`,
     );
 
-    const exportAbisV3 = targetContractsV3.map(
+    const staticHelperAbisV3 = [
+        'weightedPool',
+        'stablePool',
+        'liquidityBootstrappingPool',
+        'gyro2CLP',
+        'gyroECLP',
+    ];
+
+    const exportAbisV3 = [...staticHelperAbisV3, ...targetContractsV3].map(
         (contract) =>
             `export * from './${
                 contract[0].toLowerCase() + contract.slice(1)
