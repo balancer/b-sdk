@@ -81,6 +81,7 @@ describe('create stableSurge pool test', () => {
             swapFeePercentage: parseEther('0.01'),
             pauseManager: testAddress,
             swapFeeManager: testAddress,
+            poolCreator: testAddress,
             enableDonation: false,
         };
 
