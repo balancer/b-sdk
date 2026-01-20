@@ -34,7 +34,7 @@ export class CreatePoolWeightedV3 implements CreatePoolBase {
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
             swapFeeManager: input.swapFeeManager,
-            poolCreator: zeroAddress,
+            poolCreator: input.poolCreator,
         };
 
         const args = [

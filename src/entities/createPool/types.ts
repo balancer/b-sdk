@@ -65,6 +65,7 @@ export type CreatePoolV3BaseInput<T = TokenConfig> = CreatePoolBaseInput & {
     protocolVersion: 3;
     pauseManager: Address;
     swapFeeManager: Address;
+    poolCreator: Address;
     swapFeePercentage: bigint;
     poolHooksContract: Address;
     enableDonation: boolean;

@@ -31,7 +31,7 @@ export class CreatePoolStableSurge implements CreatePoolBase {
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
             swapFeeManager: input.swapFeeManager,
-            poolCreator: zeroAddress, // balancer core pool types are not allowed to have a creator
+            poolCreator: input.poolCreator,
         };
 
         const args = [

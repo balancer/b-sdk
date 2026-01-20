@@ -7,7 +7,7 @@ import {
     PoolRoleAccounts,
 } from '../../types';
 import { stablePoolFactoryAbiExtended } from '@/abi';
-import { balancerV3Contracts, sortByAddress } from '@/utils';
+import { sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
@@ -31,7 +31,7 @@ export class CreatePoolStableV3 implements CreatePoolBase {
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
             swapFeeManager: input.swapFeeManager,
-            poolCreator: zeroAddress, // balancer core pool types are not allowed to have a creator
+            poolCreator: input.poolCreator,
         };
 
         const args = [
