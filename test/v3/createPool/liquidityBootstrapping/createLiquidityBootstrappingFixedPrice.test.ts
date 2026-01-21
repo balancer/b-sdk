@@ -5,6 +5,7 @@ import {
     PoolType,
     CreatePoolLiquidityBootstrappingFixedPriceInput,
     fixedPriceLBPoolFactoryAbi_V3,
+    CreatePool,
 } from 'src';
 import { CreatePoolLiquidityBootstrapping } from '@/entities/createPool/createPoolV3/liquidityBootstrapping/createLiquidityBootstrapping';
 import { TOKENS } from 'test/lib/utils/addresses';
@@ -34,7 +35,7 @@ type CreateFixedPriceLBPArgs = readonly [
 ];
 
 describe('CreatePoolLiquidityBootstrapping - FixedPrice Unit Tests', () => {
-    const createPool = new CreatePoolLiquidityBootstrapping();
+    const createPool = new CreatePool();
     let baseInput: CreatePoolLiquidityBootstrappingFixedPriceInput;
 
     beforeEach(() => {
