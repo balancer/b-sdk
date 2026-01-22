@@ -14,6 +14,7 @@ import { InputValidatorStable } from './stable/inputValidatorStable';
 import { InputValidatorBase } from './inputValidatorBase';
 import { InputValidatorWeighted } from './weighted/inputValidatorWeighted';
 import { InputValidatorLiquidityBootstrapping } from './liquidityBootstrapping/inputValidatorLiquidityBootstrapping';
+import { InputValidatorLiquidityBootstrappingFixedPrice } from './liquidityBootstrapping/inputValidatorLiquidityBootstrappingFixedPrice';
 import { ChainId, protocolVersionError, SDKError } from '@/utils';
 import { AddLiquidityBoostedInput } from '../addLiquidityBoosted/types';
 import { InputValidatorReClamm } from './reClamm/inputValidatorReClamm';
@@ -34,6 +35,8 @@ export class InputValidator {
             [PoolType.ReClamm]: new InputValidatorReClamm(),
             [PoolType.LiquidityBootstrapping]:
                 new InputValidatorLiquidityBootstrapping(),
+            [PoolType.LiquidityBootstrappingFixedPrice]:
+                new InputValidatorLiquidityBootstrappingFixedPrice(),
         };
     }
 

@@ -119,6 +119,53 @@ describe('LiquidityBootstrapping Input Validation', () => {
         );
     });
 
+    // Swap fee percentage validation
+    // Fees are 18-decimal, fixed point values, stored in the Vault using 24 bits.
+    // This provides 0.00001% resolution (any non-zero bits < 1e11 will cause precision loss).
+    // LBPool inherits from WeightedPool: _MIN_SWAP_FEE_PERCENTAGE = 0.001e16 (0.001%), _MAX_SWAP_FEE_PERCENTAGE = 10e16 (10%)
+
+    test('Swap fee percentage cannot be less than 0.001%', () => {
+        const invalidInput = {
+            ...createPoolInput,
+            swapFeePercentage: BigInt(10 ** 12), // 0.0001% = 1e12, which is below minimum of 0.001% (1e13)
+        };
+        expect(() => createPool.buildCall(invalidInput)).toThrowError(
+            inputValidationError(
+                'Create Pool',
+                'Swap fee percentage cannot be less than 10000000000000 (0.001%)',
+            ),
+        );
+    });
+
+    test('Swap fee percentage can be exactly 0.001% (minimum)', () => {
+        const validInput = {
+            ...createPoolInput,
+            swapFeePercentage: BigInt(10 ** 13), // 0.001% = 0.001e16 = 1e13
+        };
+        expect(() => createPool.buildCall(validInput)).not.toThrow();
+    });
+
+    test('Swap fee percentage cannot exceed 10%', () => {
+        const invalidInput = {
+            ...createPoolInput,
+            swapFeePercentage: parseUnits('0.11', 18), // 11%
+        };
+        expect(() => createPool.buildCall(invalidInput)).toThrowError(
+            inputValidationError(
+                'Create Pool',
+                'Swap fee percentage cannot exceed 100000000000000000 (10%)',
+            ),
+        );
+    });
+
+    test('Swap fee percentage can be exactly 10%', () => {
+        const validInput = {
+            ...createPoolInput,
+            swapFeePercentage: parseUnits('0.10', 18), // 10%
+        };
+        expect(() => createPool.buildCall(validInput)).not.toThrow();
+    });
+
     test('Valid input passes validation', () => {
         expect(() => createPool.buildCall(createPoolInput)).not.toThrow();
     });

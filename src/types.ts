@@ -16,6 +16,7 @@ export enum PoolType {
     Weighted = 'Weighted',
     ReClamm = 'ReClamm',
     LiquidityBootstrapping = 'LiquidityBootstrapping',
+    LiquidityBootstrappingFixedPrice = 'LiquidityBootstrappingFixedPrice',
 }
 
 export enum SwapKind {
