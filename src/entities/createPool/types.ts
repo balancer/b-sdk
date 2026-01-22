@@ -93,10 +93,12 @@ export type TokenConfigWithWeight = TokenConfig & {
 export type CreatePoolV3WeightedInput =
     CreatePoolV3BaseInput<TokenConfigWithWeight> & {
         poolType: PoolType.Weighted;
+        poolCreator: Address;
     };
 
 export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Stable;
+    poolCreator: Address;
     amplificationParameter: bigint;
 };
 
@@ -105,6 +107,7 @@ export type CreatePoolStableSurgeInput = Omit<
     'poolHooksContract' | 'poolType' | 'disableUnbalancedLiquidity'
 > & {
     poolType: PoolType.StableSurge;
+    poolCreator: Address;
 };
 
 export type CreatePoolGyroECLPInput = CreatePoolV3BaseInput & {

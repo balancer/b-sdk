@@ -76,6 +76,7 @@ const createPoolInput: CreatePoolV3StableInput = {
     poolHooksContract: zeroAddress,
     pauseManager: zeroAddress,
     swapFeeManager: zeroAddress,
+    poolCreator: zeroAddress,
     chainId,
     protocolVersion: 3,
     enableDonation: false,

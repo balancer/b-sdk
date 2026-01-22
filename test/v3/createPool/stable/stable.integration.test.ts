@@ -83,6 +83,7 @@ describe('create stable pool test', () => {
             poolHooksContract: zeroAddress,
             pauseManager: testAddress,
             swapFeeManager: testAddress,
+            poolCreator: testAddress,
             disableUnbalancedLiquidity: false,
             enableDonation: false,
         };

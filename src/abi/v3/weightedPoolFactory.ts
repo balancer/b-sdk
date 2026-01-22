@@ -27,12 +27,27 @@ export const weightedPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'CodeDeploymentFailed',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'Create2EmptyBytecode',
         type: 'error',
     },
     {
         inputs: [],
-        name: 'Create2FailedDeployment',
+        name: 'Disabled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'FailedDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'IndexOutOfBounds',
         type: 'error',
     },
     {
@@ -48,17 +63,7 @@ export const weightedPoolFactoryAbi_V3 = [
                 type: 'uint256',
             },
         ],
-        name: 'Create2InsufficientBalance',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'Disabled',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'IndexOutOfBounds',
+        name: 'InsufficientBalance',
         type: 'error',
     },
     {
@@ -74,6 +79,11 @@ export const weightedPoolFactoryAbi_V3 = [
     {
         inputs: [],
         name: 'StandardPoolWithCreator',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultNotSet',
         type: 'error',
     },
     {
@@ -231,6 +241,37 @@ export const weightedPoolFactoryAbi_V3 = [
             {
                 internalType: 'contract IAuthorizer',
                 name: '',
+                type: 'address',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getCreationCode',
+        outputs: [
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getCreationCodeContracts',
+        outputs: [
+            {
+                internalType: 'address',
+                name: 'contractA',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'contractB',
                 type: 'address',
             },
         ],

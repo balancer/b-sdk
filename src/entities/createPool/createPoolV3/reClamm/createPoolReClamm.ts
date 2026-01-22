@@ -7,7 +7,7 @@ import {
     CreatePoolReClammInput,
 } from '../../types';
 import { reClammPoolFactoryAbiExtended } from '@/abi';
-import { balancerV3Contracts, sortByAddress } from '@/utils';
+import { sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 

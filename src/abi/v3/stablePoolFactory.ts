@@ -37,7 +37,17 @@ export const stablePoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'Create2FailedDeployment',
+        name: 'Disabled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'FailedDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'IndexOutOfBounds',
         type: 'error',
     },
     {
@@ -53,17 +63,7 @@ export const stablePoolFactoryAbi_V3 = [
                 type: 'uint256',
             },
         ],
-        name: 'Create2InsufficientBalance',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'Disabled',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'IndexOutOfBounds',
+        name: 'InsufficientBalance',
         type: 'error',
     },
     {
@@ -84,6 +84,11 @@ export const stablePoolFactoryAbi_V3 = [
     {
         inputs: [],
         name: 'StandardPoolWithCreator',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultNotSet',
         type: 'error',
     },
     {

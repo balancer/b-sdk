@@ -41,6 +41,7 @@ describe('create stable pool input validations', () => {
             poolHooksContract: zeroAddress,
             pauseManager: zeroAddress,
             swapFeeManager: zeroAddress,
+            poolCreator: zeroAddress,
             chainId,
             protocolVersion: 3,
             enableDonation: false,
