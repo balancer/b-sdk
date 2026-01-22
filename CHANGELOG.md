@@ -1,5 +1,21 @@
 # @balancer/sdk
 
+## 5.1.0
+
+### Minor Changes
+
+- e34a2c0: new pool factories and monad contracts
+- 8b31785: Update LBPFactory to v3
+- 850d17c: add fixed price LBPs and improve input validators for LBPs
+
+### Patch Changes
+
+- d31fc84: Remove pool type Boosted
+- 8b144d5: Remove duplicate ABIs
+- e22d978: Add hooks to addresses
+- e49bbb0: Remove CSP createPool functionality
+- 568d700: Remove unnecessary dependencies
+
 ## 5.0.1
 
 ### Patch Changes
