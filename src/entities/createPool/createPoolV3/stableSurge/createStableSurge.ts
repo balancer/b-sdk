@@ -1,5 +1,5 @@
 import { getRandomBytes32 } from '@/entities/utils/getRandomBytes32';
-import { encodeFunctionData, zeroAddress } from 'viem';
+import { encodeFunctionData } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
@@ -7,7 +7,7 @@ import {
     CreatePoolStableSurgeInput,
 } from '../../types';
 import { stableSurgeFactoryAbiExtended } from '@/abi';
-import { balancerV3Contracts, sortByAddress } from '@/utils';
+import { sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 

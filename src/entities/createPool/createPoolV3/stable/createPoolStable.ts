@@ -1,5 +1,5 @@
 import { getRandomBytes32 } from '@/entities/utils/getRandomBytes32';
-import { encodeFunctionData, zeroAddress } from 'viem';
+import { encodeFunctionData } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolV3StableInput,
