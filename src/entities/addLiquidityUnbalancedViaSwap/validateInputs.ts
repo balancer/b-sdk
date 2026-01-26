@@ -1,60 +1,43 @@
 import { SDKError } from '@/utils';
 import { AddLiquidityUnbalancedViaSwapInput } from './types';
 import { PoolState } from '../types';
+import { validateTokensAddLiquidity } from '../inputValidator/utils/validateTokens';
+import { AddLiquidityKind } from '../addLiquidity/types';
 
 export const validateAddLiquidityUnbalancedViaSwapInput = (
     input: AddLiquidityUnbalancedViaSwapInput,
     poolState: PoolState,
 ): void => {
-    if (poolState.type !== 'RECLAMM') {
-        throw new SDKError(
-            'AddLiquidityUnbalancedViaSwap',
-            'validateInput',
-            'Weighted pools are not supported for unbalanced via swap',
-        );
-    }
-    if (!input.pool) {
-        throw new SDKError(
-            'AddLiquidityUnbalancedViaSwap',
-            'validateInput',
-            'Pool address is required',
-        );
-    }
+    validateTokensAddLiquidity(
+        {
+            ...input,
+            kind: AddLiquidityKind.Unbalanced,
+            amountsIn: [input.exactAmountIn, input.maxAdjustableAmountIn],
+        },
+        poolState,
+    );
 
-    if (!input.amountsIn || input.amountsIn.length !== 2) {
+    if (poolState.tokens.length !== 2) {
         throw new SDKError(
+            'Input Validation',
             'AddLiquidityUnbalancedViaSwap',
-            'validateInput',
-            'Exactly 2 token amounts are required for unbalanced via swap',
+            'Pool should have exactly 2 tokens',
         );
     }
 
-    if (
-        input.exactTokenIndex < 0 ||
-        input.exactTokenIndex >= input.amountsIn.length
-    ) {
+    if (input.maxAdjustableAmountIn.rawAmount <= 0n) {
         throw new SDKError(
+            'Input Validation',
             'AddLiquidityUnbalancedViaSwap',
-            'validateInput',
-            'exactTokenIndex must be 0 or 1 for two-token pools',
+            'maxAdjustableAmountIn should be greater than zero',
         );
     }
 
-    // Validate that at least one amount is greater than 0
-    for (const amount of input.amountsIn) {
-        if (amount.rawAmount > 0n) {
-            return;
-        }
-    }
-
-    // Validate that no token is the pool address
-    for (const amount of input.amountsIn) {
-        if (amount.address.toLowerCase() === input.pool.toLowerCase()) {
-            throw new SDKError(
-                'AddLiquidityUnbalancedViaSwap',
-                'validateInput',
-                'Token cannot be the same as pool address',
-            );
-        }
+    if (input.exactAmountIn.rawAmount !== 0n) {
+        throw new SDKError(
+            'Input Validation',
+            'AddLiquidityUnbalancedViaSwap',
+            'Only single sided adds are currently supported by the SDK, so exactAmountIn should be zero',
+        );
     }
 };

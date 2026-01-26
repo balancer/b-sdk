@@ -21,7 +21,6 @@ import {
     ChainId,
     PERMIT2,
     PublicWalletClient,
-    SwapKind,
     ReClammPoolStateWithBalances,
 } from '@/index';
 import {
@@ -34,10 +33,7 @@ import {
     AddLiquidityUnbalancedViaSwapV3,
     AddLiquidityUnbalancedViaSwapInput,
 } from '@/entities/addLiquidityUnbalancedViaSwap';
-import {
-    getPoolStateWithBalancesV3,
-    getReClammPoolStateWithBalances,
-} from '@/entities/utils/getPoolStateWithBalancesV3';
+import { getReClammPoolStateWithBalances } from '@/entities/utils/getPoolStateWithBalancesV3';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { appendFileSync } from 'node:fs';
 import {
@@ -223,20 +219,16 @@ describe('add liquidity unbalanced via swap test', () => {
                 const addLiquidityInput: AddLiquidityUnbalancedViaSwapInput = {
                     chainId,
                     rpcUrl,
-                    pool: reclammPoolState.address,
-                    amountsIn: [
-                        {
-                            rawAmount: parseUnits('0.01', WETH.decimals),
-                            decimals: WETH.decimals,
-                            address: WETH.address,
-                        },
-                        {
-                            rawAmount: 0n, // adjustableAmount = 0 (unsupported)
-                            decimals: DAI.decimals,
-                            address: DAI.address,
-                        },
-                    ],
-                    exactTokenIndex: 0, // WETH is exact, DAI is adjustable
+                    exactAmountIn: {
+                        rawAmount: parseUnits('0.01', WETH.decimals),
+                        decimals: WETH.decimals,
+                        address: WETH.address,
+                    },
+                    maxAdjustableAmountIn: {
+                        rawAmount: 0n, // maxAdjustbaleAmountIn = 0 -> not supported
+                        decimals: DAI.decimals,
+                        address: DAI.address,
+                    },
                     addLiquidityUserData: '0x',
                     swapUserData: '0x',
                     sender: testAddress,
@@ -254,20 +246,16 @@ describe('add liquidity unbalanced via swap test', () => {
                 const addLiquidityInput: AddLiquidityUnbalancedViaSwapInput = {
                     chainId,
                     rpcUrl,
-                    pool: reclammPoolState.address,
-                    amountsIn: [
-                        {
-                            rawAmount: parseUnits('0.01', WETH.decimals), // exactAmount > 0 (unsupported)
-                            decimals: WETH.decimals,
-                            address: WETH.address,
-                        },
-                        {
-                            rawAmount: parseUnits('100', DAI.decimals), // adjustableAmount > 0
-                            decimals: DAI.decimals,
-                            address: DAI.address,
-                        },
-                    ],
-                    exactTokenIndex: 0, // WETH is exact, DAI is adjustable
+                    exactAmountIn: {
+                        rawAmount: parseUnits('0.01', WETH.decimals), // exactAmount > 0 -> not supported
+                        decimals: WETH.decimals,
+                        address: WETH.address,
+                    },
+                    maxAdjustableAmountIn: {
+                        rawAmount: parseUnits('100', DAI.decimals),
+                        decimals: DAI.decimals,
+                        address: DAI.address,
+                    },
                     addLiquidityUserData: '0x',
                     swapUserData: '0x',
                     sender: testAddress,
@@ -327,22 +315,18 @@ describe('add liquidity unbalanced via swap test', () => {
                         {
                             chainId,
                             rpcUrl,
-                            pool: reclammPoolState.address,
-                            amountsIn: [
-                                {
-                                    // exact token (WETH) amount is zero
-                                    rawAmount: 0n,
-                                    decimals: WETH.decimals,
-                                    address: WETH.address,
-                                },
-                                {
-                                    // adjustable token (DAI) budget as a fraction of pool DAI balance
-                                    rawAmount: daiBudgetRaw,
-                                    decimals: DAI.decimals,
-                                    address: DAI.address,
-                                },
-                            ],
-                            exactTokenIndex: 0, // WETH is exact, DAI is adjustable
+                            exactAmountIn: {
+                                // exact token (WETH) amount is zero
+                                rawAmount: 0n,
+                                decimals: WETH.decimals,
+                                address: WETH.address,
+                            },
+                            maxAdjustableAmountIn: {
+                                // adjustable token (DAI) budget as a fraction of pool DAI balance
+                                rawAmount: daiBudgetRaw,
+                                decimals: DAI.decimals,
+                                address: DAI.address,
+                            },
                             addLiquidityUserData: '0x',
                             sender: testAddress,
                         };
@@ -373,21 +357,16 @@ describe('add liquidity unbalanced via swap test', () => {
                         expect(queryOutput.pool).toBe(reclammPoolState.address);
                         expect(queryOutput.chainId).toBe(chainId);
                         expect(queryOutput.protocolVersion).toBe(3);
-                        expect(queryOutput.amountsIn).toHaveLength(2);
                         expect(queryOutput.bptOut.amount).toBeGreaterThan(0n);
 
                         // Exact token is WETH with exactAmount = 0
-                        expect(queryOutput.exactToken.toLowerCase()).toBe(
-                            WETH.address.toLowerCase(),
-                        );
-                        expect(queryOutput.exactAmount).toBe(0n);
+                        expect(
+                            queryOutput.exactAmountIn.token.address.toLowerCase(),
+                        ).toBe(WETH.address.toLowerCase());
+                        expect(queryOutput.exactAmountIn.amount).toBe(0n);
 
                         // Adjustable token is DAI with some positive amount, within the budget
-                        expect(queryOutput.adjustableTokenIndex).toBe(1);
-                        const daiIn =
-                            queryOutput.amountsIn[
-                                queryOutput.adjustableTokenIndex
-                            ].amount;
+                        const daiIn = queryOutput.maxAdjustableAmountIn.amount;
                         expect(daiIn).toBeGreaterThan(0n);
                         expect(daiIn).toBeLessThanOrEqual(daiBudgetRaw);
 
@@ -399,13 +378,7 @@ describe('add liquidity unbalanced via swap test', () => {
                                 : (deltaRaw * 100000n) / daiBudgetRaw;
                         const deltaPct = `${(deltaPctMilli / 1000n).toString()}.${(deltaPctMilli % 1000n).toString().padStart(3, '0')}`;
 
-                        // WETH leg should remain zero
-                        const wethIn =
-                            queryOutput.amountsIn[
-                                queryOutput.adjustableTokenIndex === 0 ? 1 : 0
-                            ].amount;
-                        expect(wethIn).toBe(0n);
-
+                        const wethIn = queryOutput.exactAmountIn.amount;
                         // Execute the transaction
                         const deadline = 281474976710654n; // Large deadline for testing
                         // the queryoutput returns the actual amountsIn, not the
@@ -444,12 +417,14 @@ describe('add liquidity unbalanced via swap test', () => {
                                 {
                                     exactBptAmountOut:
                                         buildCallInput.bptOut.amount,
-                                    exactToken: buildCallInput.exactToken,
-                                    exactAmount: buildCallInput.exactAmount,
+                                    exactToken:
+                                        buildCallInput.exactAmountIn.token
+                                            .address,
+                                    exactAmount:
+                                        buildCallInput.exactAmountIn.amount,
                                     maxAdjustableAmount:
-                                        buildCallInput.amountsIn[
-                                            buildCallInput.adjustableTokenIndex
-                                        ].amount,
+                                        buildCallInput.maxAdjustableAmountIn
+                                            .amount,
                                     addLiquidityUserData: '0x',
                                     swapUserData: '0x',
                                 },
@@ -519,205 +494,6 @@ describe('add liquidity unbalanced via swap test', () => {
                         if (ENABLE_LOGGING) {
                             appendFileSync(
                                 'single-sided-adjustable-results.log',
-                                `${JSON.stringify({
-                                    ...logBase,
-                                    passed: false,
-                                    error: msg,
-                                    isAmountAboveMaxAdjustableAmount:
-                                        isAmountAboveMax,
-                                })}\n`,
-                            );
-                        }
-
-                        throw err;
-                    }
-                });
-            }
-        });
-
-        // SKIP as The router is not deployed on Gnosis yet
-        describe.skip('Gnosis ReClamm GNO/wstETH: single-sided from adjustable (wstETH exact = 0, GNO adjustable as % of pool GNO balance)', () => {
-            const gnosisChainId = ChainId.GNOSIS_CHAIN;
-            const RECLAMM_POOL = POOLS[gnosisChainId].reclammGNO_wstETH;
-            // Token metadata reused from Gnosis mapping (addresses/decimals match the pool)
-            const WSTETH = TOKENS[gnosisChainId].wstETH;
-            const GNO = TOKENS[gnosisChainId].GNO;
-
-            const FRACTIONS = [
-                { label: '0.1%', num: 1n, den: 1000n },
-                { label: '0.5%', num: 5n, den: 1000n },
-                { label: '1%', num: 1n, den: 100n },
-                { label: '5%', num: 5n, den: 100n },
-                { label: '10%', num: 1n, den: 10n },
-                { label: '20%', num: 2n, den: 10n },
-                { label: '30%', num: 3n, den: 10n },
-                { label: '40%', num: 4n, den: 10n },
-                { label: '50%', num: 1n, den: 2n },
-                { label: '60%', num: 3n, den: 5n },
-            ] as const;
-
-            let gnosisReclammPoolState: PoolState;
-            let gnosisRpcUrl: string;
-            let gnosisAddLiquidityUnbalancedViaSwap: AddLiquidityUnbalancedViaSwapV3;
-            let gnoPoolBalanceRaw: bigint;
-
-            beforeAll(async () => {
-                ({ rpcUrl: gnosisRpcUrl } = await startFork(
-                    ANVIL_NETWORKS[
-                        ChainId[gnosisChainId] as keyof typeof ANVIL_NETWORKS
-                    ],
-                ));
-
-                // Minimal PoolState: type, address, tokens with correct addresses/decimals.
-                gnosisReclammPoolState = {
-                    id: RECLAMM_POOL.id as Hex,
-                    address: RECLAMM_POOL.address as Address,
-                    type: 'RECLAMM',
-                    protocolVersion: 3,
-                    tokens: [
-                        {
-                            address: WSTETH.address,
-                            decimals: WSTETH.decimals,
-                            index: 0,
-                        },
-                        {
-                            address: GNO.address,
-                            decimals: GNO.decimals,
-                            index: 1,
-                        },
-                    ],
-                };
-
-                gnosisAddLiquidityUnbalancedViaSwap =
-                    new AddLiquidityUnbalancedViaSwapV3();
-
-                // Get pool balance for GNO (adjustable token)
-                const reclammWithBalances = await getPoolStateWithBalancesV3(
-                    gnosisReclammPoolState,
-                    gnosisChainId,
-                    gnosisRpcUrl,
-                );
-
-                const gnoToken = reclammWithBalances.tokens.find(
-                    (t) =>
-                        t.address.toLowerCase() === GNO.address.toLowerCase(),
-                );
-                if (!gnoToken) {
-                    throw new Error('GNO token not found in ReClamm pool');
-                }
-
-                gnoPoolBalanceRaw = parseUnits(
-                    gnoToken.balance,
-                    gnoToken.decimals,
-                );
-            });
-
-            for (const { label, num, den } of FRACTIONS) {
-                test(`Gnosis ReClamm single-sided adjustable with GNO budget = ${label} of pool GNO balance`, async () => {
-                    // Arbitrary sender; we only call `query`, no on-chain execution.
-                    const sender =
-                        '0x0000000000000000000000000000000000000001' as Address;
-
-                    const gnoBudgetRaw = (gnoPoolBalanceRaw * num) / den;
-
-                    const addLiquidityInput: AddLiquidityUnbalancedViaSwapInput =
-                        {
-                            chainId: gnosisChainId,
-                            rpcUrl: gnosisRpcUrl,
-                            pool: RECLAMM_POOL.address as Address,
-                            amountsIn: [
-                                {
-                                    // exact token (wstETH) amount is zero
-                                    rawAmount: 0n,
-                                    decimals: WSTETH.decimals,
-                                    address: WSTETH.address,
-                                },
-                                {
-                                    // adjustable token (GNO) budget as a fraction of pool GNO balance
-                                    rawAmount: gnoBudgetRaw,
-                                    decimals: GNO.decimals,
-                                    address: GNO.address,
-                                },
-                            ],
-                            exactTokenIndex: 0, // wstETH is exact, GNO is adjustable
-                            addLiquidityUserData: '0x',
-                            sender,
-                        };
-
-                    const logBase = {
-                        scenario: 'gnosis-reclamm-single-sided-adjustable',
-                        label,
-                        gnoBudgetRaw: gnoBudgetRaw.toString(),
-                    };
-
-                    try {
-                        const queryOutput =
-                            await gnosisAddLiquidityUnbalancedViaSwap.query(
-                                addLiquidityInput,
-                                reclammWithBalances,
-                            );
-
-                        // Assertions
-                        expect(queryOutput).toBeDefined();
-                        expect(queryOutput.pool).toBe(RECLAMM_POOL.address);
-                        expect(queryOutput.chainId).toBe(gnosisChainId);
-                        expect(queryOutput.protocolVersion).toBe(3);
-                        expect(queryOutput.amountsIn).toHaveLength(2);
-                        expect(queryOutput.bptOut.amount).toBeGreaterThan(0n);
-
-                        // Exact token is wstETH with exactAmount = 0
-                        expect(queryOutput.exactToken.toLowerCase()).toBe(
-                            WSTETH.address.toLowerCase(),
-                        );
-                        expect(queryOutput.exactAmount).toBe(0n);
-
-                        // Adjustable token is GNO with some positive amount, within the budget
-                        expect(queryOutput.adjustableTokenIndex).toBe(1);
-                        const gnoIn =
-                            queryOutput.amountsIn[
-                                queryOutput.adjustableTokenIndex
-                            ].amount;
-                        expect(gnoIn).toBeGreaterThan(0n);
-                        expect(gnoIn).toBeLessThanOrEqual(gnoBudgetRaw);
-
-                        const deltaRaw = gnoBudgetRaw - gnoIn;
-                        const deltaPctMilli =
-                            gnoBudgetRaw === 0n
-                                ? 0n
-                                : (deltaRaw * 100000n) / gnoBudgetRaw;
-                        const deltaPct = `${(deltaPctMilli / 1000n).toString()}.${(deltaPctMilli % 1000n).toString().padStart(3, '0')}`;
-
-                        // wstETH leg should remain zero
-                        const wstEthIn =
-                            queryOutput.amountsIn[
-                                queryOutput.adjustableTokenIndex === 0 ? 1 : 0
-                            ].amount;
-                        expect(wstEthIn).toBe(0n);
-
-                        if (ENABLE_LOGGING) {
-                            appendFileSync(
-                                'gnosis-single-sided-adjustable-results.log',
-                                `${JSON.stringify({
-                                    ...logBase,
-                                    passed: true,
-                                    gnoIn: gnoIn.toString(),
-                                    wstEthIn: wstEthIn.toString(),
-                                    deltaRaw: deltaRaw.toString(),
-                                    deltaPct: deltaPct,
-                                    bptOut: queryOutput.bptOut.amount.toString(),
-                                })}\n`,
-                            );
-                        }
-                    } catch (err: unknown) {
-                        const msg =
-                            err instanceof Error ? err.message : String(err);
-                        const isAmountAboveMax =
-                            msg.includes('AmountInAboveMaxAdjustableAmount') ||
-                            msg.includes('AmountInAboveMaxAdjustable');
-
-                        if (ENABLE_LOGGING) {
-                            appendFileSync(
-                                'gnosis-single-sided-adjustable-results.log',
                                 `${JSON.stringify({
                                     ...logBase,
                                     passed: false,
