@@ -2,7 +2,7 @@ export const stableSurgePoolFactoryAbi_V3 = [
     {
         inputs: [
             {
-                internalType: 'contract StableSurgeHook',
+                internalType: 'address',
                 name: 'stableSurgeHook',
                 type: 'address',
             },
@@ -37,7 +37,17 @@ export const stableSurgePoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'Create2FailedDeployment',
+        name: 'Disabled',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'FailedDeployment',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'IndexOutOfBounds',
         type: 'error',
     },
     {
@@ -53,17 +63,7 @@ export const stableSurgePoolFactoryAbi_V3 = [
                 type: 'uint256',
             },
         ],
-        name: 'Create2InsufficientBalance',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'Disabled',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'IndexOutOfBounds',
+        name: 'InsufficientBalance',
         type: 'error',
     },
     {
@@ -452,7 +452,7 @@ export const stableSurgePoolFactoryAbi_V3 = [
         name: 'getStableSurgeHook',
         outputs: [
             {
-                internalType: 'contract IStableSurgeHook',
+                internalType: 'address',
                 name: '',
                 type: 'address',
             },

@@ -26,7 +26,8 @@ export type CreatePoolInput =
     | CreatePoolGyroECLPInput
     | CreatePoolReClammInput
     | CreatePoolLiquidityBootstrappingInput
-    | CreatePoolLiquidityBootstrappingWithMigrationInput;
+    | CreatePoolLiquidityBootstrappingWithMigrationInput
+    | CreatePoolLiquidityBootstrappingFixedPriceInput;
 
 export type CreatePoolBuildCallOutput = {
     callData: Hex;
@@ -92,10 +93,12 @@ export type TokenConfigWithWeight = TokenConfig & {
 export type CreatePoolV3WeightedInput =
     CreatePoolV3BaseInput<TokenConfigWithWeight> & {
         poolType: PoolType.Weighted;
+        poolCreator: Address;
     };
 
 export type CreatePoolV3StableInput = CreatePoolV3BaseInput & {
     poolType: PoolType.Stable;
+    poolCreator: Address;
     amplificationParameter: bigint;
 };
 
@@ -104,6 +107,7 @@ export type CreatePoolStableSurgeInput = Omit<
     'poolHooksContract' | 'poolType' | 'disableUnbalancedLiquidity'
 > & {
     poolType: PoolType.StableSurge;
+    poolCreator: Address;
 };
 
 export type CreatePoolGyroECLPInput = CreatePoolV3BaseInput & {
@@ -172,3 +176,31 @@ export type CreatePoolLiquidityBootstrappingWithMigrationInput =
     CreatePoolLiquidityBootstrappingInput & {
         lbpMigrationParams: LBPMigrationParams;
     };
+
+export type FixedPriceLBPParams = {
+    owner: Address;
+    projectToken: Address;
+    reserveToken: Address;
+    startTimestamp: bigint;
+    endTimestamp: bigint;
+    projectTokenRate: bigint; // Fixed exchange rate (reserve tokens per project token, scaled to 18 decimals)
+};
+
+// Fixed Price LBP uses default liquidity management values (no setters available)
+// swapFeeManager replaced by FixedPriceLBPParams.owner
+// pauseManager is governance by default
+// the pool is the hook itself. No hooksetter available
+// Must be blockProjectTokenSwapsIn = true (buy-only)
+export type CreatePoolLiquidityBootstrappingFixedPriceInput = Omit<
+    CreatePoolV3BaseInput,
+    | 'pauseManager'
+    | 'swapFeeManager'
+    | 'poolHooksContract'
+    | 'enableDonation'
+    | 'disableUnbalancedLiquidity'
+    | 'tokens'
+> & {
+    fixedPriceLbpParams: FixedPriceLBPParams;
+    poolType: PoolType.LiquidityBootstrappingFixedPrice;
+    poolCreator?: Address;
+};

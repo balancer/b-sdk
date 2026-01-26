@@ -1,4 +1,4 @@
-export const weightedPoolFactoryAbi_V3 = [
+export const fixedPriceLBPoolFactoryAbi_V3 = [
     {
         inputs: [
             {
@@ -20,6 +20,11 @@ export const weightedPoolFactoryAbi_V3 = [
                 internalType: 'string',
                 name: 'poolVersion',
                 type: 'string',
+            },
+            {
+                internalType: 'address',
+                name: 'trustedRouter',
+                type: 'address',
             },
         ],
         stateMutability: 'nonpayable',
@@ -68,7 +73,53 @@ export const weightedPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'InvalidOwner',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidProjectToken',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidProjectTokenRate',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidReserveToken',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'resolvedStartTime',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'endTime',
+                type: 'uint256',
+            },
+        ],
+        name: 'InvalidStartTime',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidTrustedRouter',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'PoolPauseWindowDurationOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ReentrancyGuardReentrantCall',
         type: 'error',
     },
     {
@@ -79,6 +130,16 @@ export const weightedPoolFactoryAbi_V3 = [
     {
         inputs: [],
         name: 'StandardPoolWithCreator',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'TokenSwapsInUnsupported',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'TokensMustBeDifferent',
         type: 'error',
     },
     {
@@ -101,6 +162,105 @@ export const weightedPoolFactoryAbi_V3 = [
                 name: 'pool',
                 type: 'address',
             },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'startTime',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'endTime',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'projectTokenRate',
+                type: 'uint256',
+            },
+        ],
+        name: 'FixedPriceLBPoolCreated',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'projectToken',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'contract IERC20',
+                name: 'reserveToken',
+                type: 'address',
+            },
+        ],
+        name: 'LBPoolCreated',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'lockDurationAfterMigration',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'bptPercentageToMigrate',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'migrationWeightProjectToken',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'migrationWeightReserveToken',
+                type: 'uint256',
+            },
+        ],
+        name: 'MigrationParamsSet',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
         ],
         name: 'PoolCreated',
         type: 'event',
@@ -108,68 +268,56 @@ export const weightedPoolFactoryAbi_V3 = [
     {
         inputs: [
             {
-                internalType: 'string',
-                name: 'name',
-                type: 'string',
-            },
-            {
-                internalType: 'string',
-                name: 'symbol',
-                type: 'string',
-            },
-            {
                 components: [
                     {
+                        internalType: 'string',
+                        name: 'name',
+                        type: 'string',
+                    },
+                    {
+                        internalType: 'string',
+                        name: 'symbol',
+                        type: 'string',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'owner',
+                        type: 'address',
+                    },
+                    {
                         internalType: 'contract IERC20',
-                        name: 'token',
+                        name: 'projectToken',
                         type: 'address',
                     },
                     {
-                        internalType: 'enum TokenType',
-                        name: 'tokenType',
-                        type: 'uint8',
+                        internalType: 'contract IERC20',
+                        name: 'reserveToken',
+                        type: 'address',
                     },
                     {
-                        internalType: 'contract IRateProvider',
-                        name: 'rateProvider',
-                        type: 'address',
+                        internalType: 'uint256',
+                        name: 'startTime',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'endTime',
+                        type: 'uint256',
                     },
                     {
                         internalType: 'bool',
-                        name: 'paysYieldFees',
+                        name: 'blockProjectTokenSwapsIn',
                         type: 'bool',
                     },
                 ],
-                internalType: 'struct TokenConfig[]',
-                name: 'tokens',
-                type: 'tuple[]',
-            },
-            {
-                internalType: 'uint256[]',
-                name: 'normalizedWeights',
-                type: 'uint256[]',
-            },
-            {
-                components: [
-                    {
-                        internalType: 'address',
-                        name: 'pauseManager',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'swapFeeManager',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'poolCreator',
-                        type: 'address',
-                    },
-                ],
-                internalType: 'struct PoolRoleAccounts',
-                name: 'roleAccounts',
+                internalType: 'struct LBPCommonParams',
+                name: 'lbpCommonParams',
                 type: 'tuple',
+            },
+            {
+                internalType: 'uint256',
+                name: 'projectTokenRate',
+                type: 'uint256',
             },
             {
                 internalType: 'uint256',
@@ -177,24 +325,14 @@ export const weightedPoolFactoryAbi_V3 = [
                 type: 'uint256',
             },
             {
-                internalType: 'address',
-                name: 'poolHooksContract',
-                type: 'address',
-            },
-            {
-                internalType: 'bool',
-                name: 'enableDonation',
-                type: 'bool',
-            },
-            {
-                internalType: 'bool',
-                name: 'disableUnbalancedLiquidity',
-                type: 'bool',
-            },
-            {
                 internalType: 'bytes32',
                 name: 'salt',
                 type: 'bytes32',
+            },
+            {
+                internalType: 'address',
+                name: 'poolCreator',
+                type: 'address',
             },
         ],
         name: 'create',
@@ -352,6 +490,45 @@ export const weightedPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'getMaxBptLockDuration',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'pure',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getMigrationRouter',
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getMinReserveTokenMigrationWeight',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'pure',
+        type: 'function',
+    },
+    {
+        inputs: [],
         name: 'getNewPoolPauseWindowEndTime',
         outputs: [
             {
@@ -447,6 +624,19 @@ export const weightedPoolFactoryAbi_V3 = [
                 internalType: 'address[]',
                 name: 'pools',
                 type: 'address[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getTrustedRouter',
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
             },
         ],
         stateMutability: 'view',

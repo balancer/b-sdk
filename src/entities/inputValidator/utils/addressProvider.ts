@@ -81,6 +81,12 @@ export class AddressProvider {
             chainId,
         );
     }
+    static FixedPriceLBPoolFactory(chainId: ChainId): Hex {
+        return AddressProvider.getAddress(
+            balancerV3Contracts.FixedPriceLBPoolFactory,
+            chainId,
+        );
+    }
     static ReClammPoolFactory(chainId: ChainId): Hex {
         return AddressProvider.getAddress(
             balancerV3Contracts.ReClammPoolFactory,

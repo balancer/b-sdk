@@ -82,6 +82,7 @@ describe('create weighted pool test', () => {
             poolHooksContract: zeroAddress,
             pauseManager: testAddress,
             swapFeeManager: testAddress,
+            poolCreator: testAddress,
             disableUnbalancedLiquidity: false,
             chainId,
             protocolVersion,

@@ -1,26 +1,48 @@
 export const unbalancedAddViaSwapRouterAbi_V3 = [
     {
         inputs: [
-            { internalType: 'contract IVault', name: 'vault', type: 'address' },
-            { internalType: 'contract IWETH', name: 'weth', type: 'address' },
+            {
+                internalType: 'contract IVault',
+                name: 'vault',
+                type: 'address',
+            },
+            {
+                internalType: 'contract IWETH',
+                name: 'weth',
+                type: 'address',
+            },
             {
                 internalType: 'contract IPermit2',
                 name: 'permit2',
                 type: 'address',
             },
-            { internalType: 'string', name: 'routerVersion', type: 'string' },
+            {
+                internalType: 'string',
+                name: 'routerVersion',
+                type: 'string',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
     {
-        inputs: [{ internalType: 'address', name: 'target', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'target',
+                type: 'address',
+            },
+        ],
         name: 'AddressEmptyCode',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountIn',
+                type: 'uint256',
+            },
             {
                 internalType: 'uint256',
                 name: 'maxAdjustableAmount',
@@ -32,54 +54,130 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-            { internalType: 'uint256', name: 'exactAmount', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'amountIn',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'exactAmount',
+                type: 'uint256',
+            },
         ],
         name: 'AmountInDoesNotMatchExact',
         type: 'error',
     },
-    { inputs: [], name: 'ErrorSelectorNotFound', type: 'error' },
-    { inputs: [], name: 'EthTransfer', type: 'error' },
-    { inputs: [], name: 'FailedCall', type: 'error' },
-    { inputs: [], name: 'InputLengthMismatch', type: 'error' },
+    {
+        inputs: [],
+        name: 'ErrorSelectorNotFound',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'EthTransfer',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'FailedCall',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InputLengthMismatch',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'uint256', name: 'balance', type: 'uint256' },
-            { internalType: 'uint256', name: 'needed', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'balance',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'needed',
+                type: 'uint256',
+            },
         ],
         name: 'InsufficientBalance',
         type: 'error',
     },
-    { inputs: [], name: 'InsufficientEth', type: 'error' },
+    {
+        inputs: [],
+        name: 'InsufficientEth',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'token', type: 'address' },
+            {
+                internalType: 'contract IERC20',
+                name: 'token',
+                type: 'address',
+            },
         ],
         name: 'InsufficientPayment',
         type: 'error',
     },
-    { inputs: [], name: 'NotTwoTokenPool', type: 'error' },
-    { inputs: [], name: 'OperationNotSupported', type: 'error' },
-    { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
+    {
+        inputs: [],
+        name: 'NotTwoTokenPool',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'OperationNotSupported',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ReentrancyGuardReentrantCall',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'uint8', name: 'bits', type: 'uint8' },
-            { internalType: 'uint256', name: 'value', type: 'uint256' },
+            {
+                internalType: 'uint8',
+                name: 'bits',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
         ],
         name: 'SafeCastOverflowedUintDowncast',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+            },
+        ],
         name: 'SafeERC20FailedOperation',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+        ],
         name: 'SenderIsNotVault',
         type: 'error',
     },
-    { inputs: [], name: 'SwapDeadline', type: 'error' },
+    {
+        inputs: [],
+        name: 'SwapDeadline',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -89,7 +187,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'maxAmountsIn',
@@ -105,8 +207,16 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct AddLiquidityHookParams',
                 name: 'params',
@@ -115,18 +225,42 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'addLiquidityHook',
         outputs: [
-            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
-            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
-            { internalType: 'bytes', name: 'returnData', type: 'bytes' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bytes',
+                name: 'returnData',
+                type: 'bytes',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
-            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
-            { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'deadline',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bool',
+                name: 'wethIsEth',
+                type: 'bool',
+            },
             {
                 components: [
                     {
@@ -168,7 +302,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'addLiquidityUnbalanced',
         outputs: [
-            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'payable',
         type: 'function',
@@ -177,7 +315,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         inputs: [
             {
                 components: [
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'address',
                         name: 'sender',
@@ -188,7 +330,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'deadline',
                         type: 'uint256',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
                     {
                         components: [
                             {
@@ -236,7 +382,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'addLiquidityUnbalancedHook',
         outputs: [
-            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -245,7 +395,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         inputs: [],
         name: 'getPermit2',
         outputs: [
-            { internalType: 'contract IPermit2', name: '', type: 'address' },
+            {
+                internalType: 'contract IPermit2',
+                name: '',
+                type: 'address',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -253,7 +407,13 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
     {
         inputs: [],
         name: 'getSender',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
+        outputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -261,7 +421,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         inputs: [],
         name: 'getVault',
         outputs: [
-            { internalType: 'contract IVault', name: '', type: 'address' },
+            {
+                internalType: 'contract IVault',
+                name: '',
+                type: 'address',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -270,7 +434,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         inputs: [],
         name: 'getWeth',
         outputs: [
-            { internalType: 'contract IWETH', name: '', type: 'address' },
+            {
+                internalType: 'contract IWETH',
+                name: '',
+                type: 'address',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -284,7 +452,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'contract IERC20[]',
                         name: 'tokens',
@@ -300,8 +472,16 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'minBptAmountOut',
                         type: 'uint256',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct InitializeHookParams',
                 name: 'params',
@@ -310,16 +490,30 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'initializeHook',
         outputs: [
-            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountOut',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'bytes[]', name: 'data', type: 'bytes[]' }],
+        inputs: [
+            {
+                internalType: 'bytes[]',
+                name: 'data',
+                type: 'bytes[]',
+            },
+        ],
         name: 'multicall',
         outputs: [
-            { internalType: 'bytes[]', name: 'results', type: 'bytes[]' },
+            {
+                internalType: 'bytes[]',
+                name: 'results',
+                type: 'bytes[]',
+            },
         ],
         stateMutability: 'payable',
         type: 'function',
@@ -328,8 +522,16 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         inputs: [
             {
                 components: [
-                    { internalType: 'address', name: 'token', type: 'address' },
-                    { internalType: 'address', name: 'owner', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'token',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'owner',
+                        type: 'address',
+                    },
                     {
                         internalType: 'address',
                         name: 'spender',
@@ -340,7 +542,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'amount',
                         type: 'uint256',
                     },
-                    { internalType: 'uint256', name: 'nonce', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'nonce',
+                        type: 'uint256',
+                    },
                     {
                         internalType: 'uint256',
                         name: 'deadline',
@@ -401,11 +607,25 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                 name: 'permit2Batch',
                 type: 'tuple',
             },
-            { internalType: 'bytes', name: 'permit2Signature', type: 'bytes' },
-            { internalType: 'bytes[]', name: 'multicallData', type: 'bytes[]' },
+            {
+                internalType: 'bytes',
+                name: 'permit2Signature',
+                type: 'bytes',
+            },
+            {
+                internalType: 'bytes[]',
+                name: 'multicallData',
+                type: 'bytes[]',
+            },
         ],
         name: 'permitBatchAndCall',
-        outputs: [{ internalType: 'bytes[]', name: '', type: 'bytes[]' }],
+        outputs: [
+            {
+                internalType: 'bytes[]',
+                name: '',
+                type: 'bytes[]',
+            },
+        ],
         stateMutability: 'payable',
         type: 'function',
     },
@@ -418,7 +638,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'maxAmountsIn',
@@ -434,8 +658,16 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct AddLiquidityHookParams',
                 name: 'params',
@@ -444,17 +676,37 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'queryAddLiquidityHook',
         outputs: [
-            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
-            { internalType: 'uint256', name: 'bptAmountOut', type: 'uint256' },
-            { internalType: 'bytes', name: 'returnData', type: 'bytes' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bytes',
+                name: 'returnData',
+                type: 'bytes',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
-            { internalType: 'address', name: 'sender', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
             {
                 components: [
                     {
@@ -496,7 +748,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'queryAddLiquidityUnbalanced',
         outputs: [
-            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -505,7 +761,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         inputs: [
             {
                 components: [
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'address',
                         name: 'sender',
@@ -516,7 +776,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'deadline',
                         type: 'uint256',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
                     {
                         components: [
                             {
@@ -564,7 +828,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'queryAddLiquidityUnbalancedHook',
         outputs: [
-            { internalType: 'uint256[]', name: 'amountsIn', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: 'amountsIn',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -578,7 +846,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'minAmountsOut',
@@ -594,8 +866,16 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct RemoveLiquidityHookParams',
                 name: 'params',
@@ -604,21 +884,37 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'queryRemoveLiquidityHook',
         outputs: [
-            { internalType: 'uint256', name: 'bptAmountIn', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountIn',
+                type: 'uint256',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'amountsOut',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: 'returnData', type: 'bytes' },
+            {
+                internalType: 'bytes',
+                name: 'returnData',
+                type: 'bytes',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
-            { internalType: 'address', name: 'sender', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
             {
                 internalType: 'uint256',
                 name: 'exactBptAmountIn',
@@ -650,7 +946,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'contract IERC20',
                         name: 'tokenIn',
@@ -666,14 +966,26 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'amountGiven',
                         type: 'uint256',
                     },
-                    { internalType: 'uint256', name: 'limit', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'limit',
+                        type: 'uint256',
+                    },
                     {
                         internalType: 'uint256',
                         name: 'deadline',
                         type: 'uint256',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct SwapSingleTokenHookParams',
                 name: 'params',
@@ -681,7 +993,13 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
             },
         ],
         name: 'querySwapHook',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -694,7 +1012,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'sender',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'uint256[]',
                         name: 'minAmountsOut',
@@ -710,8 +1032,16 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct RemoveLiquidityHookParams',
                 name: 'params',
@@ -720,21 +1050,37 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
         ],
         name: 'removeLiquidityHook',
         outputs: [
-            { internalType: 'uint256', name: 'bptAmountIn', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'bptAmountIn',
+                type: 'uint256',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'amountsOut',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: 'returnData', type: 'bytes' },
+            {
+                internalType: 'bytes',
+                name: 'returnData',
+                type: 'bytes',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'pool', type: 'address' },
-            { internalType: 'address', name: 'sender', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
             {
                 internalType: 'uint256',
                 name: 'exactBptAmountIn',
@@ -771,7 +1117,11 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'kind',
                         type: 'uint8',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
                     {
                         internalType: 'contract IERC20',
                         name: 'tokenIn',
@@ -787,14 +1137,26 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
                         name: 'amountGiven',
                         type: 'uint256',
                     },
-                    { internalType: 'uint256', name: 'limit', type: 'uint256' },
+                    {
+                        internalType: 'uint256',
+                        name: 'limit',
+                        type: 'uint256',
+                    },
                     {
                         internalType: 'uint256',
                         name: 'deadline',
                         type: 'uint256',
                     },
-                    { internalType: 'bool', name: 'wethIsEth', type: 'bool' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bool',
+                        name: 'wethIsEth',
+                        type: 'bool',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct SwapSingleTokenHookParams',
                 name: 'params',
@@ -802,16 +1164,31 @@ export const unbalancedAddViaSwapRouterAbi_V3 = [
             },
         ],
         name: 'swapSingleTokenHook',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [],
         name: 'version',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
-    { stateMutability: 'payable', type: 'receive' },
+    {
+        stateMutability: 'payable',
+        type: 'receive',
+    },
 ] as const;

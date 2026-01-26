@@ -1,5 +1,5 @@
 import { getRandomBytes32 } from '@/entities/utils/getRandomBytes32';
-import { encodeFunctionData, zeroAddress } from 'viem';
+import { encodeFunctionData } from 'viem';
 import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
@@ -7,7 +7,7 @@ import {
     CreatePoolStableSurgeInput,
 } from '../../types';
 import { stableSurgeFactoryAbiExtended } from '@/abi';
-import { balancerV3Contracts, sortByAddress } from '@/utils';
+import { sortByAddress } from '@/utils';
 import { Hex } from '@/types';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
@@ -31,7 +31,7 @@ export class CreatePoolStableSurge implements CreatePoolBase {
         const roleAccounts: PoolRoleAccounts = {
             pauseManager: input.pauseManager,
             swapFeeManager: input.swapFeeManager,
-            poolCreator: zeroAddress, // balancer core pool types are not allowed to have a creator
+            poolCreator: input.poolCreator,
         };
 
         const args = [

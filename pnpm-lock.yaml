@@ -12,8 +12,8 @@ importers:
         specifier: 0.0.38
         version: 0.0.38
       viem:
-        specifier: 2.44.1
-        version: 2.44.1(typescript@5.8.3)
+        specifier: 2.44.4
+        version: 2.44.4(typescript@5.8.3)
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -3012,8 +3012,8 @@ packages:
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
-  viem@2.44.1:
-    resolution: {integrity: sha512-wfQda7PIJeF9hWiGKV628AfBwyYxyoc89OcgF4s4/chs2PY8ibUA7IG+DWdU4oAkjhHm9w47w1m2dwwOPBU+ng==}
+  viem@2.44.4:
+    resolution: {integrity: sha512-sJDLVl2EsS5Fo7GSWZME5CXEV7QRYkUJPeBw7ac+4XI3D4ydvMw/gjulTsT5pgqcpu70BploFnOAC6DLpan1Yg==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -6173,7 +6173,7 @@ snapshots:
 
   v8-compile-cache-lib@3.0.1: {}
 
-  viem@2.44.1(typescript@5.8.3):
+  viem@2.44.4(typescript@5.8.3):
     dependencies:
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
