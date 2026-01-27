@@ -52,6 +52,7 @@
         "graphql-tag": "^2.12.6",
         "pino-pretty": "13.0.0",
         "ts-node": "10.9.2",
+        "tsx": "^4.8.1",
         "tsup": "8.4.0",
         "typescript": "5.8.3",
         "vite": "6.4.1",
