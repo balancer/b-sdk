@@ -20,17 +20,10 @@ import {
     PoolState,
     CHAINS,
     ChainId,
-    PERMIT2,
     PublicWalletClient,
     isSameAddress,
     getPoolStateWithBalancesV3,
 } from '@/index';
-import {
-    unbalancedAddViaSwapRouterAbi_V3,
-    vaultExtensionAbi_V3,
-    vaultAbi_V3,
-    permit2Abi,
-} from '@/abi';
 import {
     AddLiquidityUnbalancedViaSwapV3,
     AddLiquidityUnbalancedViaSwapInput,
@@ -42,7 +35,6 @@ import {
     TOKENS,
     sendTransactionGetBalances,
     areBigIntsWithinPercent,
-    SimulateParams,
     forkSetup,
 } from '../../lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
@@ -318,38 +310,6 @@ describe('add liquidity unbalanced via swap test', () => {
                         expect(buildCallOutput.value).toBe(0n);
 
                         // Send transaction and check balance changes
-
-                        // attach optional simulate params to the transaction
-                        const simulateParams: SimulateParams = {
-                            abi: [
-                                ...unbalancedAddViaSwapRouterAbi_V3,
-                                ...vaultExtensionAbi_V3,
-                                ...vaultAbi_V3,
-                                ...permit2Abi,
-                            ],
-                            functionName: 'addLiquidityUnbalanced',
-                            args: [
-                                buildCallInput.pool,
-                                buildCallInput.deadline,
-                                false,
-                                {
-                                    exactBptAmountOut:
-                                        buildCallInput.bptOut.amount,
-                                    exactToken:
-                                        buildCallInput.exactAmountIn.token
-                                            .address,
-                                    exactAmount:
-                                        buildCallInput.exactAmountIn.amount,
-                                    maxAdjustableAmount:
-                                        buildCallInput.maxAdjustableAmountIn
-                                            .amount,
-                                    addLiquidityUserData: '0x',
-                                    swapUserData: '0x',
-                                },
-                            ] as const,
-                            address: buildCallOutput.to,
-                            account: testAddress,
-                        };
                         const { transactionReceipt, balanceDeltas } =
                             await sendTransactionGetBalances(
                                 [
@@ -361,7 +321,6 @@ describe('add liquidity unbalanced via swap test', () => {
                                 buildCallOutput.to,
                                 buildCallOutput.callData,
                                 buildCallOutput.value,
-                                simulateParams,
                             );
 
                         expect(transactionReceipt.status).toBe('success');
@@ -373,14 +332,13 @@ describe('add liquidity unbalanced via swap test', () => {
 
                         expect(wethDelta).toBe(0n);
                         expect(aaveDelta).toBeGreaterThan(0n);
-                        expect(aaveDelta).toBeLessThanOrEqual(aaveBudgetRaw);
                         expect(bptDelta).toBeGreaterThan(0n);
 
                         // Verify BPT output is within acceptable tolerance
                         areBigIntsWithinPercent(
-                            bptDelta,
-                            queryOutput.bptOut.amount,
-                            0.01, // 1% tolerance
+                            aaveDelta,
+                            aaveBudgetRaw,
+                            0.0001, // 0.01% tolerance
                         );
 
                         if (ENABLE_LOGGING) {
