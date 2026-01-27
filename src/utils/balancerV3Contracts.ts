@@ -122,9 +122,6 @@ export const balancerV3Contracts = {
         [ChainId.SONIC]: '0x93db4682A40721e7c698ea0a842389D10FA8Dae5',
         [ChainId.X_LAYER]: '0xc3ccacE87f6d3A81724075ADcb5ddd85a8A1bB68',
     },
-    UnbalancedAddViaSwapRouter: {
-        [ChainId.SEPOLIA]: '0xe7823b82B165434a6949f19451B866c0e06858dF',
-    },
     StablePoolFactory: {
         [ChainId.ARBITRUM_ONE]: '0x1FC7F1F84CFE61a04224AC8D3F87f56214FeC08c',
         [ChainId.AVALANCHE]: '0x16B50F6bF8C8Ca73C07e17762188c5DEEe7aE5Db',

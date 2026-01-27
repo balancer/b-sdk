@@ -22,7 +22,6 @@ import {
     AddLiquidityUnbalancedViaSwapBuildCallOutput,
 } from './types';
 import { queryAndAdjustBptAmount } from '../utils/unbalancedAddViaSwapHelpers';
-import { SDKError } from '@/utils/errors';
 import { AddLiquidityKind } from '../addLiquidity/types';
 
 // Export types

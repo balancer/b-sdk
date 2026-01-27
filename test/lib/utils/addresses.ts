@@ -59,6 +59,11 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0xda00000035fef4082F78dEF6A8903bee419FbF8E',
             decimals: 6,
         },
+        AAVE: {
+            address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+            decimals: 18,
+            slot: 0,
+        },
     },
     [ChainId.OPTIMISM]: {
         FRAX: {
@@ -301,6 +306,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             id: '0x5dd88b3aa3143173eb26552923922bdf33f50949',
             address: '0x5dd88b3aa3143173eb26552923922bdf33f50949',
             type: PoolType.Stable,
+            decimals: 18,
+            slot: 0,
+        },
+        AAVE_WETH: {
+            id: '0x9d1fcf346ea1b073de4d5834e25572cc6ad71f4d',
+            address: '0x9d1fcf346ea1b073de4d5834e25572cc6ad71f4d',
+            type: PoolType.ReClamm,
             decimals: 18,
             slot: 0,
         },
