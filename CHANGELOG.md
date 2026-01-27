@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 5.1.1
+
+### Patch Changes
+
+- dd5f5fd: bump viem from 2.44.4 to 2.45.0.
+  Update Sonic deployments with new factory addresses.
+
 ## 5.1.0
 
 ### Minor Changes
