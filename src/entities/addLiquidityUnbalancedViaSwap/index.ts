@@ -1,4 +1,4 @@
-import { encodeFunctionData, maxUint256, zeroAddress } from 'viem';
+import { encodeFunctionData, maxUint256, parseEther, zeroAddress } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { Token } from '@/entities/token';
 import { PoolState } from '@/entities/types';
@@ -23,6 +23,7 @@ import {
 } from './types';
 import { queryAndAdjustBptAmount } from '../utils/unbalancedAddViaSwapHelpers';
 import { AddLiquidityKind } from '../addLiquidity/types';
+import { MathSol, WAD } from '@/utils';
 
 // Export types
 export type {
@@ -114,7 +115,6 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             block,
         );
 
-        // TODO: remove this last query after debugging is done
         const calculatedAmountsIn = await doAddLiquidityUnbalancedViaSwapQuery(
             input.rpcUrl,
             input.chainId,
@@ -133,7 +133,17 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             TokenAmount.fromRawAmount(token, calculatedAmountsIn[index]),
         );
 
-        console.log('final amounts in: ', finalAmountsIn); // useful only for debugging
+        const percentageDiff =
+            WAD -
+            MathSol.divDownFixed(
+                finalAmountsIn[maxAdjustableTokenIndex].amount,
+                input.maxAdjustableAmountIn.rawAmount,
+            );
+        if (percentageDiff > parseEther('0.01')) {
+            console.warn(
+                'Calculated amount for maxAdjustableAmountIn too low could result in too much dust left behind.',
+            );
+        }
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
         const bptOut = TokenAmount.fromRawAmount(bptToken, finalBptAmount);
