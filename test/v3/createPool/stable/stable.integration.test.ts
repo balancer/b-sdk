@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/stable/stable.integration.test.ts
+// pnpm test v3/createPool/stable/stable.integration.test.ts
 
 import {
     Address,
@@ -115,6 +115,8 @@ describe('create stable pool test', () => {
             poolType,
             protocolVersion,
         );
+
+        console.log({ poolState });
 
         await setTokenBalances(
             client,

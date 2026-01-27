@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/weighted/weighted.integration.test.ts
+// pnpm test v3/createPool/weighted/weighted.integration.test.ts
 
 import {
     Address,

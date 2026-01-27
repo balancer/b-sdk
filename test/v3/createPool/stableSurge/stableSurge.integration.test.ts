@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/stableSurge/stableSurge.integration.test.ts
+// pnpm test v3/createPool/stableSurge/stableSurge.integration.test.ts
 import {
     Address,
     createTestClient,

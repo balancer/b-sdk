@@ -19,7 +19,7 @@ import {
     zeroAddress,
 } from 'viem';
 
-import { permit2Abi } from '@/abi';
+import { permit2Abi, balancerRouterAbiExtended } from '@/abi';
 import {
     VAULT_V2,
     MAX_UINT256,
@@ -323,6 +323,7 @@ export async function sendTransactionGetBalances(
     to: Address,
     data: Address,
     value?: bigint,
+    pool?: Address,
 ): Promise<TxOutput> {
     const balanceBefore = await getBalances(
         tokensForBalanceCheck,
@@ -331,28 +332,22 @@ export async function sendTransactionGetBalances(
     );
 
     // TODO - Leave this in as useful as basis for manual debug
-    // await client.simulateContract({
-    //     address:
-    //         BALANCER_COMPOSITE_LIQUIDITY_ROUTER_NESTED[client.chain?.id as number],
-    //     abi: [
-    //         ...balancerCompositeLiquidityRouterNestedAbi,
-    //         ...VAULT_V2V3Abi,
-    //         ...VAULT_V2ExtensionAbi_V3,
-    //         ...permit2Abi,
-    //     ],
-    //     functionName: 'addLiquidityUnbalancedNestedPool',
-    //     args: [
-    //         '0x0270daf4ee12ccb1abc8aa365054eecb1b7f4f6b',
-    //         [
-    //             '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8',
-    //             '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
-    //             '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
-    //         ],
-    //         [0n, 19000000n, 1000000000000000n],
-    //         0n, // 209352153002437020n,
-    //         '0x',
-    //     ],
-    // });
+    await client.simulateContract({
+        address: to,
+        abi: [...balancerRouterAbiExtended, ...permit2Abi],
+        functionName: 'initialize',
+        args: [
+            pool,
+            [
+                '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+                '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613',
+            ],
+            [1000000000000000000n, 2552000000000000000000n],
+            0n,
+            false,
+            '0x',
+        ],
+    });
 
     // Send transaction to local fork
     const hash = await client.sendTransaction({
@@ -366,6 +361,8 @@ export async function sendTransactionGetBalances(
     const transactionReceipt = (await client.waitForTransactionReceipt({
         hash,
     })) as TransactionReceipt;
+
+    console.log({ transactionReceipt });
 
     const { gasUsed, effectiveGasPrice } = transactionReceipt;
     const gasPrice = gasUsed * effectiveGasPrice;

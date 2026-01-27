@@ -51,11 +51,7 @@ describe('GyroECLP - create & init', () => {
     let poolAddressInvertedParams: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            7923022n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
@@ -148,6 +144,7 @@ describe('GyroECLP - create & init', () => {
 
     test('creation', async () => {
         expect(poolAddress).to.not.be.undefined;
+        console.log({ poolAddress });
         expect(poolAddressInvertedParams).to.not.be.undefined;
     });
 
@@ -207,6 +204,8 @@ describe('GyroECLP - create & init', () => {
             protocolVersion,
         );
 
+        console.log({ poolState, testAddress });
+
         const permit2 = await Permit2Helper.signInitPoolApproval({
             ...initPoolInput,
             client,
@@ -227,6 +226,7 @@ describe('GyroECLP - create & init', () => {
             initPoolBuildOutput.to,
             initPoolBuildOutput.callData,
             initPoolBuildOutput.value,
+            poolAddress,
         );
 
         assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
