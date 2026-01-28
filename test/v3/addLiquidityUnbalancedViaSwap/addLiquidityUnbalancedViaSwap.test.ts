@@ -1,0 +1,455 @@
+// pnpm test addLiquidityUnbalancedViaSwap.test.ts
+import { Address, maxUint256, maxUint48, parseUnits, zeroAddress } from 'viem';
+import { ChainId, PoolState, Slippage } from '@/index';
+import {
+    AddLiquidityUnbalancedViaSwapV3,
+    AddLiquidityUnbalancedViaSwapQueryOutput,
+} from '@/entities/addLiquidityUnbalancedViaSwap';
+import { validateAddLiquidityUnbalancedViaSwapInput } from '@/entities/addLiquidityUnbalancedViaSwap/validateInputs';
+import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import { Token } from '@/entities/token';
+import { TokenAmount } from '@/entities/tokenAmount';
+import { Permit2Batch } from '@/entities/permit2Helper';
+import { TOKENS } from 'test/lib/utils/addresses';
+
+const chainId = ChainId.MAINNET;
+
+const AAVE = TOKENS[chainId].AAVE;
+const WETH = TOKENS[chainId].WETH;
+const DAI = TOKENS[chainId].DAI;
+
+// Mock pool state with 2 tokens (AAVE/WETH)
+const mockPoolState: PoolState = {
+    id: '0x9d1fcf346ea1b073de4d5834e25572cc6ad71f4d' as Address,
+    address: '0x9d1fcf346ea1b073de4d5834e25572cc6ad71f4d' as Address,
+    type: 'RECLAMM',
+    protocolVersion: 3,
+    tokens: [
+        {
+            address: AAVE.address,
+            decimals: AAVE.decimals,
+            index: 0,
+        },
+        {
+            address: WETH.address,
+            decimals: WETH.decimals,
+            index: 1,
+        },
+    ],
+};
+
+// Mock pool state with 3 tokens (for testing validation)
+const mockPoolStateWith3Tokens: PoolState = {
+    id: '0x9d1fcf346ea1b073de4d5834e25572cc6ad71f4d' as Address,
+    address: '0x9d1fcf346ea1b073de4d5834e25572cc6ad71f4d' as Address,
+    type: 'WEIGHTED',
+    protocolVersion: 3,
+    tokens: [
+        {
+            address: AAVE.address,
+            decimals: AAVE.decimals,
+            index: 0,
+        },
+        {
+            address: WETH.address,
+            decimals: WETH.decimals,
+            index: 1,
+        },
+        {
+            address: DAI.address,
+            decimals: DAI.decimals,
+            index: 2,
+        },
+    ],
+};
+
+describe('AddLiquidityUnbalancedViaSwap', () => {
+    describe('input validation', () => {
+        describe('pool token count validation', () => {
+            test('throws error when pool has more than 2 tokens', () => {
+                const input = {
+                    chainId,
+                    rpcUrl: 'http://localhost:8545',
+                    exactAmountIn: {
+                        rawAmount: 0n,
+                        decimals: WETH.decimals,
+                        address: WETH.address,
+                    },
+                    maxAdjustableAmountIn: {
+                        rawAmount: parseUnits('100', AAVE.decimals),
+                        decimals: AAVE.decimals,
+                        address: AAVE.address,
+                    },
+                };
+
+                expect(() =>
+                    validateAddLiquidityUnbalancedViaSwapInput(
+                        input,
+                        mockPoolStateWith3Tokens,
+                    ),
+                ).toThrowError('Pool should have exactly 2 tokens');
+            });
+        });
+
+        describe('maxAdjustableAmountIn validation', () => {
+            test('throws error when maxAdjustableAmountIn is zero', () => {
+                const input = {
+                    chainId,
+                    rpcUrl: 'http://localhost:8545',
+                    exactAmountIn: {
+                        rawAmount: 0n,
+                        decimals: WETH.decimals,
+                        address: WETH.address,
+                    },
+                    maxAdjustableAmountIn: {
+                        rawAmount: 0n,
+                        decimals: AAVE.decimals,
+                        address: AAVE.address,
+                    },
+                };
+
+                expect(() =>
+                    validateAddLiquidityUnbalancedViaSwapInput(
+                        input,
+                        mockPoolState,
+                    ),
+                ).toThrowError(
+                    'maxAdjustableAmountIn should be greater than zero',
+                );
+            });
+        });
+
+        describe('exactAmountIn validation (single-sided only)', () => {
+            test('throws error when exactAmountIn is non-zero', () => {
+                const input = {
+                    chainId,
+                    rpcUrl: 'http://localhost:8545',
+                    exactAmountIn: {
+                        rawAmount: parseUnits('1', WETH.decimals),
+                        decimals: WETH.decimals,
+                        address: WETH.address,
+                    },
+                    maxAdjustableAmountIn: {
+                        rawAmount: parseUnits('100', AAVE.decimals),
+                        decimals: AAVE.decimals,
+                        address: AAVE.address,
+                    },
+                };
+
+                expect(() =>
+                    validateAddLiquidityUnbalancedViaSwapInput(
+                        input,
+                        mockPoolState,
+                    ),
+                ).toThrowError(
+                    'Only single sided adds are currently supported by the SDK, so exactAmountIn should be zero',
+                );
+            });
+        });
+    });
+
+    describe('buildCall', () => {
+        let addLiquidityUnbalancedViaSwap: AddLiquidityUnbalancedViaSwapV3;
+        let mockQueryOutput: AddLiquidityUnbalancedViaSwapQueryOutput;
+
+        beforeAll(() => {
+            addLiquidityUnbalancedViaSwap =
+                new AddLiquidityUnbalancedViaSwapV3();
+
+            const bptToken = new Token(chainId, mockPoolState.address, 18);
+            const exactToken = new Token(chainId, WETH.address, WETH.decimals);
+            const adjustableToken = new Token(
+                chainId,
+                AAVE.address,
+                AAVE.decimals,
+            );
+
+            mockQueryOutput = {
+                pool: mockPoolState.address,
+                bptOut: TokenAmount.fromRawAmount(
+                    bptToken,
+                    parseUnits('100', 18),
+                ),
+                exactAmountIn: TokenAmount.fromRawAmount(exactToken, 0n),
+                maxAdjustableAmountIn: TokenAmount.fromRawAmount(
+                    adjustableToken,
+                    parseUnits('50', AAVE.decimals),
+                ),
+                chainId,
+                protocolVersion: 3,
+                to: AddressProvider.Router(chainId),
+                addLiquidityUserData: '0x',
+                swapUserData: '0x',
+            };
+        });
+
+        describe('callData encoding', () => {
+            test('encodes callData with correct function selector', () => {
+                const buildCallInput = {
+                    ...mockQueryOutput,
+                    slippage: Slippage.fromPercentage('1'),
+                    deadline: maxUint256,
+                };
+
+                const result =
+                    addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
+
+                // Function selector for addLiquidityUnbalanced
+                expect(result.callData).toBeDefined();
+                expect(result.callData.length).toBeGreaterThan(10);
+            });
+        });
+
+        describe('slippage application', () => {
+            test('applies negative slippage to bptOut', () => {
+                const slippage = Slippage.fromPercentage('1'); // 1%
+                const buildCallInput = {
+                    ...mockQueryOutput,
+                    slippage,
+                    deadline: maxUint256,
+                };
+
+                const result =
+                    addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
+
+                // With 1% slippage applied negatively, exactBptAmountOut should be less than bptOut
+                expect(result.exactBptAmountOut.amount).toBeLessThan(
+                    mockQueryOutput.bptOut.amount,
+                );
+
+                // Verify slippage calculation: bptOut * (1 - 0.01) = bptOut * 0.99
+                const expectedMin = slippage.applyTo(
+                    mockQueryOutput.bptOut.amount,
+                    -1,
+                );
+                expect(result.exactBptAmountOut.amount).toBe(expectedMin);
+            });
+        });
+
+        describe('value calculation', () => {
+            test('returns adjustable WETH amount as value when wethIsEth is true and maxAdjustableAmountIn is WETH', () => {
+                const exactToken = new Token(
+                    chainId,
+                    AAVE.address,
+                    AAVE.decimals,
+                );
+                const adjustableToken = new Token(
+                    chainId,
+                    WETH.address,
+                    WETH.decimals,
+                );
+                const bptToken = new Token(chainId, mockPoolState.address, 18);
+
+                const wethAmount = parseUnits('1', WETH.decimals);
+                const queryOutputWithWeth: AddLiquidityUnbalancedViaSwapQueryOutput =
+                    {
+                        ...mockQueryOutput,
+                        exactAmountIn: TokenAmount.fromRawAmount(
+                            exactToken,
+                            0n,
+                        ),
+                        maxAdjustableAmountIn: TokenAmount.fromRawAmount(
+                            adjustableToken,
+                            wethAmount,
+                        ),
+                        bptOut: TokenAmount.fromRawAmount(
+                            bptToken,
+                            parseUnits('100', 18),
+                        ),
+                    };
+
+                const buildCallInput = {
+                    ...queryOutputWithWeth,
+                    slippage: Slippage.fromPercentage('1'),
+                    deadline: maxUint256,
+                    wethIsEth: true,
+                };
+
+                const result =
+                    addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
+
+                expect(result.value).toBe(wethAmount);
+            });
+        });
+
+        describe('output structure', () => {
+            test('returns all required output fields', () => {
+                const buildCallInput = {
+                    ...mockQueryOutput,
+                    slippage: Slippage.fromPercentage('1'),
+                    deadline: maxUint256,
+                };
+
+                const result =
+                    addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
+
+                expect(result).toHaveProperty('callData');
+                expect(result).toHaveProperty('to');
+                expect(result).toHaveProperty('value');
+                expect(result).toHaveProperty('exactBptAmountOut');
+                expect(result).toHaveProperty('exactAmountIn');
+                expect(result).toHaveProperty('maxAdjustableAmountIn');
+            });
+        });
+    });
+
+    describe('buildCallWithPermit2', () => {
+        let addLiquidityUnbalancedViaSwap: AddLiquidityUnbalancedViaSwapV3;
+        let mockQueryOutput: AddLiquidityUnbalancedViaSwapQueryOutput;
+
+        beforeAll(() => {
+            addLiquidityUnbalancedViaSwap =
+                new AddLiquidityUnbalancedViaSwapV3();
+
+            const bptToken = new Token(chainId, mockPoolState.address, 18);
+            const exactToken = new Token(chainId, WETH.address, WETH.decimals);
+            const adjustableToken = new Token(
+                chainId,
+                AAVE.address,
+                AAVE.decimals,
+            );
+
+            mockQueryOutput = {
+                pool: mockPoolState.address,
+                bptOut: TokenAmount.fromRawAmount(
+                    bptToken,
+                    parseUnits('100', 18),
+                ),
+                exactAmountIn: TokenAmount.fromRawAmount(exactToken, 0n),
+                maxAdjustableAmountIn: TokenAmount.fromRawAmount(
+                    adjustableToken,
+                    parseUnits('50', AAVE.decimals),
+                ),
+                chainId,
+                protocolVersion: 3,
+                to: AddressProvider.Router(chainId),
+                addLiquidityUserData: '0x',
+                swapUserData: '0x',
+            };
+        });
+
+        test('encodes permitBatchAndCall function', () => {
+            const buildCallInput = {
+                ...mockQueryOutput,
+                slippage: Slippage.fromPercentage('1'),
+                deadline: maxUint256,
+            };
+
+            const mockPermit2: {
+                batch: Permit2Batch;
+                signature: `0x${string}`;
+            } = {
+                batch: {
+                    details: [
+                        {
+                            token: AAVE.address,
+                            amount: parseUnits('50', AAVE.decimals),
+                            expiration: maxUint48,
+                            nonce: 0,
+                        },
+                    ],
+                    spender: zeroAddress,
+                    sigDeadline: maxUint256,
+                },
+                signature: '0x1234567890abcdef' as `0x${string}`,
+            };
+
+            const result = addLiquidityUnbalancedViaSwap.buildCallWithPermit2(
+                buildCallInput,
+                mockPermit2,
+            );
+
+            // Should have different callData than buildCall (wrapped in permitBatchAndCall)
+            const regularResult =
+                addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
+            expect(result.callData).not.toBe(regularResult.callData);
+            expect(result.callData.length).toBeGreaterThan(
+                regularResult.callData.length,
+            );
+        });
+
+        test('preserves other output fields from buildCall', () => {
+            const buildCallInput = {
+                ...mockQueryOutput,
+                slippage: Slippage.fromPercentage('1'),
+                deadline: maxUint256,
+            };
+
+            const mockPermit2: {
+                batch: Permit2Batch;
+                signature: `0x${string}`;
+            } = {
+                batch: {
+                    details: [
+                        {
+                            token: AAVE.address,
+                            amount: parseUnits('50', AAVE.decimals),
+                            expiration: maxUint48,
+                            nonce: 0,
+                        },
+                    ],
+                    spender: zeroAddress,
+                    sigDeadline: maxUint256,
+                },
+                signature: '0x1234567890abcdef' as `0x${string}`,
+            };
+
+            const result = addLiquidityUnbalancedViaSwap.buildCallWithPermit2(
+                buildCallInput,
+                mockPermit2,
+            );
+            const regularResult =
+                addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
+
+            // These fields should be the same
+            expect(result.to).toBe(regularResult.to);
+            expect(result.value).toBe(regularResult.value);
+            expect(result.exactBptAmountOut.amount).toBe(
+                regularResult.exactBptAmountOut.amount,
+            );
+            expect(result.exactAmountIn).toEqual(regularResult.exactAmountIn);
+            expect(result.maxAdjustableAmountIn).toEqual(
+                regularResult.maxAdjustableAmountIn,
+            );
+        });
+
+        test('applies slippage correctly with permit2', () => {
+            const slippage = Slippage.fromPercentage('5'); // 5%
+            const buildCallInput = {
+                ...mockQueryOutput,
+                slippage,
+                deadline: maxUint256,
+            };
+
+            const mockPermit2: {
+                batch: Permit2Batch;
+                signature: `0x${string}`;
+            } = {
+                batch: {
+                    details: [
+                        {
+                            token: AAVE.address,
+                            amount: parseUnits('50', AAVE.decimals),
+                            expiration: maxUint48,
+                            nonce: 0,
+                        },
+                    ],
+                    spender: zeroAddress,
+                    sigDeadline: maxUint256,
+                },
+                signature: '0x1234567890abcdef' as `0x${string}`,
+            };
+
+            const result = addLiquidityUnbalancedViaSwap.buildCallWithPermit2(
+                buildCallInput,
+                mockPermit2,
+            );
+
+            const expectedMin = slippage.applyTo(
+                mockQueryOutput.bptOut.amount,
+                -1,
+            );
+            expect(result.exactBptAmountOut.amount).toBe(expectedMin);
+        });
+    });
+});

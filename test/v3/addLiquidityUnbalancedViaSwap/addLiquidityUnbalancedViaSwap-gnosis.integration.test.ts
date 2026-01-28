@@ -133,62 +133,6 @@ describe('add liquidity unbalanced via swap test', () => {
     });
 
     describe('permit2 direct approval', () => {
-        describe('ReClamm pool: error cases for unsupported scenarios', () => {
-            test('throws error when adjustableAmount is 0 and exactAmount > 0', async () => {
-                const addLiquidityInput: AddLiquidityUnbalancedViaSwapInput = {
-                    chainId,
-                    rpcUrl,
-                    exactAmountIn: {
-                        rawAmount: parseUnits('0.01', GNO.decimals),
-                        decimals: GNO.decimals,
-                        address: GNO.address,
-                    },
-                    maxAdjustableAmountIn: {
-                        rawAmount: 0n, // maxAdjustbaleAmountIn = 0 -> not supported
-                        decimals: USDCe.decimals,
-                        address: USDCe.address,
-                    },
-                    addLiquidityUserData: '0x',
-                    swapUserData: '0x',
-                    sender: testAddress,
-                };
-
-                await expect(
-                    addLiquidityUnbalancedViaSwap.query(
-                        addLiquidityInput,
-                        poolState,
-                    ),
-                ).rejects.toThrow();
-            });
-
-            test('throws error when both amounts are > 0', async () => {
-                const addLiquidityInput: AddLiquidityUnbalancedViaSwapInput = {
-                    chainId,
-                    rpcUrl,
-                    exactAmountIn: {
-                        rawAmount: parseUnits('0.01', GNO.decimals), // exactAmount > 0 -> not supported
-                        decimals: GNO.decimals,
-                        address: GNO.address,
-                    },
-                    maxAdjustableAmountIn: {
-                        rawAmount: parseUnits('100', USDCe.decimals),
-                        decimals: USDCe.decimals,
-                        address: USDCe.address,
-                    },
-                    addLiquidityUserData: '0x',
-                    swapUserData: '0x',
-                    sender: testAddress,
-                };
-
-                await expect(
-                    addLiquidityUnbalancedViaSwap.query(
-                        addLiquidityInput,
-                        poolState,
-                    ),
-                ).rejects.toThrow();
-            });
-        });
-
         describe('ReClamm pool: single-sided from adjustable (WETH exact = 0, AAVE adjustable as % of pool AAVE balance)', () => {
             const FRACTIONS = [
                 { label: '0.1%', num: 1n, den: 1000n },
