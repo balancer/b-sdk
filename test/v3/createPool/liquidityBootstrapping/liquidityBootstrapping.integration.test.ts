@@ -26,11 +26,7 @@ import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import { doCreatePool } from '../../../lib/utils/createPoolHelper';
 import { TOKENS } from 'test/lib/utils/addresses';
 import { MAX_UINT256, PublicWalletClient } from '@/utils';
-import {
-    lBPMigrationRouterAbi_V3,
-    vaultExtensionAbi_V3,
-    weightedPoolFactoryAbiExtended_V3,
-} from 'src/abi/';
+import { lBPMigrationRouterAbi_V3, vaultExtensionAbi_V3 } from 'src/abi/';
 import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import {
     setTokenBalances,
@@ -312,13 +308,14 @@ describe('create liquidityBootstrapping pool test', () => {
         );
 
         // extract the address of the created weighted pool from the transaction receipt
+        // The PoolMigrated event is emitted by the LBPMigrationRouter and contains the new weighted pool address
         const {
-            args: { pool: newWeightedPoolAddress },
+            args: { weightedPool: newWeightedPoolAddress },
         } = findEventInReceiptLogs({
             receipt: txOutput.transactionReceipt,
-            eventName: 'PoolCreated',
-            abi: weightedPoolFactoryAbiExtended_V3,
-            to: AddressProvider.WeightedPoolFactory(chainId),
+            eventName: 'PoolMigrated',
+            abi: lBPMigrationRouterAbi_V3,
+            to: AddressProvider.LBPoolMigrationRouter(chainId),
         });
 
         expect(txOutput.balanceDeltas[0]).toBeGreaterThan(0n); // WETH
