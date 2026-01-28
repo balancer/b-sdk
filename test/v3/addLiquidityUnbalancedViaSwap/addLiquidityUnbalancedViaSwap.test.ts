@@ -344,7 +344,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                         {
                             token: AAVE.address,
                             amount: parseUnits('50', AAVE.decimals),
-                            expiration: maxUint48,
+                            expiration: Number(maxUint48),
                             nonce: 0,
                         },
                     ],
@@ -384,7 +384,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                         {
                             token: AAVE.address,
                             amount: parseUnits('50', AAVE.decimals),
-                            expiration: maxUint48,
+                            expiration: Number(maxUint48),
                             nonce: 0,
                         },
                     ],
@@ -430,7 +430,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                         {
                             token: AAVE.address,
                             amount: parseUnits('50', AAVE.decimals),
-                            expiration: maxUint48,
+                            expiration: Number(maxUint48),
                             nonce: 0,
                         },
                     ],
