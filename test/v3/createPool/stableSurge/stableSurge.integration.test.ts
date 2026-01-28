@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/stableSurge/stableSurge.integration.test.ts
+// pnpm test test/v3/createPool/stableSurge/stableSurge.integration.test.ts
 import {
     Address,
     createTestClient,
@@ -47,7 +47,11 @@ describe('create stableSurge pool test', () => {
     let poolAddress: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS.SEPOLIA,
+            undefined,
+            10140629n,
+        ));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],

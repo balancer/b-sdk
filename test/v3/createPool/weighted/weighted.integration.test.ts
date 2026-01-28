@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/weighted/weighted.integration.test.ts
+// pnpm test test/v3/createPool/weighted/weighted.integration.test.ts
 
 import {
     Address,
@@ -35,7 +35,11 @@ import {
 } from 'test/lib/utils/helper';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
-const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
+const { rpcUrl } = await startFork(
+    ANVIL_NETWORKS.SEPOLIA,
+    undefined,
+    10140629n,
+);
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 const poolType = PoolType.Weighted;
