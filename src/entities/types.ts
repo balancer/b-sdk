@@ -44,6 +44,17 @@ export type PoolStateWithUnderlyingBalances = {
     protocolVersion: 1 | 2 | 3;
 };
 
+export type ReClammPoolState = PoolState & {
+    virtualBalances: [HumanAmount, HumanAmount];
+    tokenRate: [HumanAmount, HumanAmount];
+};
+
+export type ReClammPoolStateWithBalances = PoolStateWithBalances & {
+    type: 'RECLAMM';
+    virtualBalances: [HumanAmount, HumanAmount];
+    tokenRates: [HumanAmount, HumanAmount];
+};
+
 export type AddLiquidityAmounts = {
     maxAmountsIn: bigint[];
     maxAmountsInWithoutBpt: bigint[];

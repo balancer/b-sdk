@@ -1,5 +1,5 @@
 import { PublicWalletClient } from '@/utils/types';
-import { TestActions } from 'viem';
+import { Abi, TestActions } from 'viem';
 import {
     AddLiquidity,
     AddLiquidityInput,

@@ -1,3 +1,5 @@
+// pnpm test test/validateNewChainSetup.test.ts
+
 import { API_CHAIN_NAMES, ChainId } from '@/utils';
 import { CHAINS, NATIVE_ASSETS } from '@/utils/constants';
 import { SorSwapPaths } from '@/data/providers/balancer-api/modules/sorSwapPaths';

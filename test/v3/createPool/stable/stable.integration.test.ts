@@ -1,4 +1,4 @@
-// pnpm test -- v3/createPool/stable/stable.integration.test.ts
+// pnpm test v3/createPool/stable/stable.integration.test.ts
 
 import {
     Address,
