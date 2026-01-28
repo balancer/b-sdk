@@ -36,5 +36,6 @@ export type AddLiquidityUnbalancedViaSwapBuildCallOutput = {
     to: Address;
     value: bigint;
     exactBptAmountOut: TokenAmount;
-    maxAdjustableAmount: TokenAmount;
+    exactAmountIn: TokenAmount;
+    maxAdjustableAmountIn: TokenAmount;
 };

@@ -49,7 +49,7 @@ const USDCe = TOKENS[chainId].USDCe;
 const GNO = TOKENS[chainId].GNO;
 
 // Toggle to control whether test results should be logged to files
-const ENABLE_LOGGING = true;
+const ENABLE_LOGGING = false;
 const fileName = 'reclamm-single-sided-adjustable-gnosis';
 
 class MockApi {

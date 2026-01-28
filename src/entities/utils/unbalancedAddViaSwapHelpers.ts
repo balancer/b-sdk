@@ -1,7 +1,7 @@
-import { Address, Hex } from 'viem';
+import { Address, maxUint256, zeroAddress } from 'viem';
 import { MathSol } from '@/utils';
-import { ChainId } from '@/utils/constants';
 import { doAddLiquidityUnbalancedViaSwapQuery } from '../addLiquidityUnbalancedViaSwap/doAddLiquidityUnbalancedViaSwapQuery';
+import { AddLiquidityUnbalancedViaSwapInput } from '../addLiquidityUnbalancedViaSwap';
 
 /**
  * Calculates a corrected BPT amount based on the ratio between the queried
@@ -35,38 +35,30 @@ export function calculateCorrectedBptAmount(
  * @returns An object containing the corrected BPT amount and the amounts from the query
  */
 export async function queryAndAdjustBptAmount(
-    rpcUrl: string,
-    chainId: ChainId,
+    input: AddLiquidityUnbalancedViaSwapInput,
     pool: Address,
-    sender: Address,
     bptAmount: bigint,
-    exactToken: Address,
-    exactAmount: bigint,
-    maxAdjustableAmount: bigint,
-    addLiquidityUserData: Hex,
-    swapUserData: Hex,
     adjustableTokenIndex: number,
-    targetAdjustableAmount: bigint,
     block?: bigint,
 ): Promise<bigint> {
     const amountsIn = await doAddLiquidityUnbalancedViaSwapQuery(
-        rpcUrl,
-        chainId,
+        input.rpcUrl,
+        input.chainId,
         pool,
-        sender,
+        input.sender ?? zeroAddress,
         bptAmount,
-        exactToken,
-        exactAmount,
-        maxAdjustableAmount,
-        addLiquidityUserData,
-        swapUserData,
+        input.exactAmountIn.address,
+        input.exactAmountIn.rawAmount,
+        maxUint256,
+        input.addLiquidityUserData ?? '0x',
+        input.swapUserData ?? '0x',
         block,
     );
 
     const correctedBptAmount = calculateCorrectedBptAmount(
         bptAmount,
         amountsIn[adjustableTokenIndex],
-        targetAdjustableAmount,
+        input.maxAdjustableAmountIn.rawAmount,
     );
 
     return correctedBptAmount;

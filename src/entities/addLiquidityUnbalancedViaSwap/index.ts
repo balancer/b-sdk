@@ -61,16 +61,13 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         // It should result close to the desired bptAmount when
         // centeredness = 1 and result in a smaller bptAmount than the
         // desired when centeredness decreases.
-        const initialReferenceAmount =
-            input.maxAdjustableAmountIn.rawAmount / 2n;
-
         const initialBptAmount = await getBptAmountFromReferenceAmount(
             {
                 chainId: input.chainId,
                 rpcUrl: input.rpcUrl,
                 referenceAmount: {
                     ...input.maxAdjustableAmountIn,
-                    rawAmount: initialReferenceAmount,
+                    rawAmount: input.maxAdjustableAmountIn.rawAmount / 2n,
                 },
                 kind: AddLiquidityKind.Proportional,
             },
@@ -80,18 +77,10 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         // First iteration to adjust bptAmount will overcorrect, resulting in
         // an adjustedBptAmount greater than the desired output
         const adjustedBptAmount = await queryAndAdjustBptAmount(
-            input.rpcUrl,
-            input.chainId,
+            input,
             poolState.address,
-            sender,
             initialBptAmount.rawAmount,
-            input.exactAmountIn.address,
-            0n,
-            maxUint256,
-            addLiquidityUserData,
-            swapUserData,
             maxAdjustableTokenIndex,
-            input.maxAdjustableAmountIn.rawAmount,
             block,
         );
 
@@ -100,18 +89,10 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         // of risking a revert by returning a finalBptAmount corresponding to
         // a maxAdjustableAmount smaller than the amountIn provided by the user.
         const finalBptAmount = await queryAndAdjustBptAmount(
-            input.rpcUrl,
-            input.chainId,
+            input,
             poolState.address,
-            sender,
             adjustedBptAmount,
-            input.exactAmountIn.address,
-            0n,
-            maxUint256,
-            addLiquidityUserData,
-            swapUserData,
             maxAdjustableTokenIndex,
-            input.maxAdjustableAmountIn.rawAmount,
             block,
         );
 
@@ -203,7 +184,8 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             to: AddressProvider.UnbalancedAddViaSwapRouter(input.chainId),
             value,
             exactBptAmountOut,
-            maxAdjustableAmount: input.maxAdjustableAmountIn,
+            exactAmountIn: input.exactAmountIn,
+            maxAdjustableAmountIn: input.maxAdjustableAmountIn,
         };
     }
 
