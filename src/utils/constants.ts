@@ -20,6 +20,7 @@ import {
     sonic,
     plasma,
     xLayer,
+    monad,
 } from 'viem/chains';
 import { monadTestnet, hyperEVM } from './customChains';
 export const ZERO_ADDRESS: Address =
@@ -131,6 +132,7 @@ export const CHAINS: Record<number, Chain> = {
     [ChainId.SEPOLIA]: sepolia,
     [ChainId.SONIC]: sonic,
     [ChainId.MONAD_TESTNET]: monadTestnet,
+    [ChainId.MONAD]: monad,
     [ChainId.HYPEREVM]: hyperEVM,
     [ChainId.PLASMA]: plasma,
     [ChainId.X_LAYER]: xLayer,
