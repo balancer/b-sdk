@@ -240,7 +240,11 @@ export async function startFork(
     }
     const rpcUrl = `http://127.0.0.1:${port}`;
 
-    console.log('Starting new fork', { port, forkBlockNumber: blockNumber ?? anvilOptions.forkBlockNumber, runningForks: Object.keys(runningForks).length });
+    console.log('Starting new fork', {
+        port,
+        forkBlockNumber: blockNumber ?? anvilOptions.forkBlockNumber,
+        runningForks: Object.keys(runningForks).length,
+    });
 
     // https://www.npmjs.com/package/@viem/anvil
     // Pass startTimeout directly to createAnvil - it defaults to 10_000ms
