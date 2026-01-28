@@ -10,7 +10,7 @@ type SupportedChain = {
     chainId: number | undefined;
 };
 
-describe('Validate new chain setup', () => {
+describe('Balancer API (sdk) supports all API chains', () => {
     let supportedChains: SupportedChain[] = [];
 
     beforeAll(async () => {
@@ -29,7 +29,8 @@ describe('Validate new chain setup', () => {
         });
     });
 
-    test('API supported chains have API_CHAIN_NAMES entries', () => {
+    test('API supported chains can be used to fetch SOR paths', () => {
+        // Check that every supported chain string has an entry in API_CHAIN_NAMES
         const missingEntries: string[] = [];
         for (const { name, chainId } of supportedChains) {
             if (chainId === undefined) {
@@ -47,6 +48,18 @@ describe('Validate new chain setup', () => {
         expect(missingEntries).toHaveLength(0);
     });
 
+    test('The Balancer Api (sdk) supports the api chains', () => {
+        const sorSwapPaths = new SorSwapPaths(
+            null as unknown as BalancerApiClient,
+        );
+
+        for (const { chainId } of supportedChains) {
+            if (chainId !== undefined) {
+                expect(sorSwapPaths.mapGqlChain(chainId)).toBeDefined();
+            }
+        }
+    });
+
     test('API supported chains have CHAINS entries', () => {
         const missingChains: string[] = [];
         for (const { name, chainId } of supportedChains) {
@@ -61,7 +74,7 @@ describe('Validate new chain setup', () => {
         expect(missingChains).toHaveLength(0);
     });
 
-    test('API supported chains have NATIVE_ASSETS entries', () => {
+    test('Native asset is defined for all API chains', () => {
         const missingNativeAssets: string[] = [];
         for (const { name, chainId } of supportedChains) {
             if (chainId === undefined) continue;
@@ -76,18 +89,6 @@ describe('Validate new chain setup', () => {
             );
         }
         expect(missingNativeAssets).toHaveLength(0);
-    });
-
-    test('Balancer API SDK supports all API chains', () => {
-        const sorSwapPaths = new SorSwapPaths(
-            null as unknown as BalancerApiClient,
-        );
-
-        for (const { chainId } of supportedChains) {
-            if (chainId !== undefined) {
-                expect(sorSwapPaths.mapGqlChain(chainId)).toBeDefined();
-            }
-        }
     });
 });
 
