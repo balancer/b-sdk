@@ -1,5 +1,5 @@
 import { API_CHAIN_NAMES, ChainId } from '@/utils';
-import { NATIVE_ASSETS } from '@/utils/constants';
+import { CHAINS, NATIVE_ASSETS } from '@/utils/constants';
 import { SorSwapPaths } from '@/data/providers/balancer-api/modules/sorSwapPaths';
 import { BalancerApiClient } from '@/data/providers/balancer-api/client';
 
@@ -10,7 +10,7 @@ type SupportedChain = {
     chainId: number | undefined;
 };
 
-describe('Balancer API (sdk) supports all API chains', () => {
+describe('Validate new chain setup', () => {
     let supportedChains: SupportedChain[] = [];
 
     beforeAll(async () => {
@@ -29,8 +29,7 @@ describe('Balancer API (sdk) supports all API chains', () => {
         });
     });
 
-    test('API supported chains can be used to fetch SOR paths', () => {
-        // Check that every supported chain string has an entry in API_CHAIN_NAMES
+    test('API supported chains have API_CHAIN_NAMES entries', () => {
         const missingEntries: string[] = [];
         for (const { name, chainId } of supportedChains) {
             if (chainId === undefined) {
@@ -47,38 +46,22 @@ describe('Balancer API (sdk) supports all API chains', () => {
 
         expect(missingEntries).toHaveLength(0);
     });
-    test('The Balancer Api (sdk) supports the api chains', () => {
-        const sorSwapPaths = new SorSwapPaths(
-            null as unknown as BalancerApiClient,
-        );
 
-        for (const { chainId } of supportedChains) {
-            if (chainId !== undefined) {
-                expect(sorSwapPaths.mapGqlChain(chainId)).toBeDefined();
+    test('API supported chains have CHAINS entries', () => {
+        const missingChains: string[] = [];
+        for (const { name, chainId } of supportedChains) {
+            if (chainId === undefined) continue;
+            if (!CHAINS[chainId]) {
+                missingChains.push(`${name} (${chainId})`);
             }
         }
-    });
-});
-describe('Native asset is defined for all API chains', () => {
-    let supportedChains: SupportedChain[] = [];
-
-    beforeAll(async () => {
-        const chainNames = await fetchSupportedChains(API_ENDPOINT);
-
-        // Build array of objects: { name, chainId }
-        supportedChains = chainNames.map((name: string) => {
-            // Find the chainId for this name in API_CHAIN_NAMES
-            const chainIdEntry = Object.entries(API_CHAIN_NAMES).find(
-                ([, apiName]) => apiName === name,
-            );
-            return {
-                name,
-                chainId: chainIdEntry ? Number(chainIdEntry[0]) : undefined,
-            };
-        });
+        if (missingChains.length > 0) {
+            console.error('Missing CHAINS entries for:', missingChains);
+        }
+        expect(missingChains).toHaveLength(0);
     });
 
-    test('Native asset is defined for all API chains', () => {
+    test('API supported chains have NATIVE_ASSETS entries', () => {
         const missingNativeAssets: string[] = [];
         for (const { name, chainId } of supportedChains) {
             if (chainId === undefined) continue;
@@ -93,6 +76,18 @@ describe('Native asset is defined for all API chains', () => {
             );
         }
         expect(missingNativeAssets).toHaveLength(0);
+    });
+
+    test('Balancer API SDK supports all API chains', () => {
+        const sorSwapPaths = new SorSwapPaths(
+            null as unknown as BalancerApiClient,
+        );
+
+        for (const { chainId } of supportedChains) {
+            if (chainId !== undefined) {
+                expect(sorSwapPaths.mapGqlChain(chainId)).toBeDefined();
+            }
+        }
     });
 });
 
