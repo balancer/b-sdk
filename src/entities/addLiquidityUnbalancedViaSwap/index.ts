@@ -23,7 +23,7 @@ import {
 } from './types';
 import { queryAndAdjustBptAmount } from '../utils/unbalancedAddViaSwapHelpers';
 import { AddLiquidityKind } from '../addLiquidity/types';
-import { MathSol, WAD } from '@/utils';
+import { MathSol, SDKError, WAD } from '@/utils';
 
 // Export types
 export type {
@@ -114,13 +114,20 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             TokenAmount.fromRawAmount(token, calculatedAmountsIn[index]),
         );
 
-        const percentageDiff =
-            WAD -
-            MathSol.divDownFixed(
-                finalAmountsIn[maxAdjustableTokenIndex].amount,
-                input.maxAdjustableAmountIn.rawAmount,
+        const calculatedVsProvidedRatio = MathSol.divDownFixed(
+            finalAmountsIn[maxAdjustableTokenIndex].amount,
+            input.maxAdjustableAmountIn.rawAmount,
+        );
+
+        if (calculatedVsProvidedRatio > WAD) {
+            throw new SDKError(
+                'Error',
+                'Add Liquidity Unbalanced Via Swap',
+                'Exact BPT out calculation failed. Please add a smaller or less unbalanced liquidity amount.',
             );
-        if (percentageDiff > parseEther('0.01')) {
+        }
+
+        if (WAD - calculatedVsProvidedRatio > parseEther('0.01')) {
             console.warn(
                 'Calculated amount for maxAdjustableAmountIn too low could result in too much dust left behind.',
             );
