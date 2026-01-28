@@ -167,6 +167,9 @@ function getAnvilOptions(
     };
 }
 
+// Counter to ensure unique ports for each fork instance
+let forkCounter = 0;
+
 // Controls the current running forks to avoid starting the same fork twice
 let runningForks: Record<number, Anvil> = {};
 
@@ -179,9 +182,14 @@ export async function stopAnvilForks() {
         }),
     );
     runningForks = {};
+    // Reset fork counter after stopping all forks to prevent unbounded growth
+    forkCounter = 0;
 }
 
 // Stop a specific anvil fork
+// Note: Since forks are no longer reused (each startFork() creates a new instance),
+// this function may not reliably find forks without tracking the exact port.
+// For cleanup, prefer using stopAnvilForks() which stops all forks.
 export async function stopAnvilFork(
     network: NetworkSetup,
     jobId = Number(process.env.VITEST_WORKER_ID) || 0,
@@ -190,8 +198,10 @@ export async function stopAnvilFork(
     const anvilOptions = getAnvilOptions(network, blockNumber);
 
     const defaultAnvilPort = 8545;
+    // Note: This port calculation doesn't account for forkCounter, so it may not find the fork
+    // if it was created with a counter offset. This function is kept for compatibility but
+    // stopAnvilForks() is recommended for cleanup.
     const port = (anvilOptions.port || defaultAnvilPort) + jobId;
-    // Avoid starting fork if it was running already
     if (!runningForks[port]) return;
 
     await runningForks[port].stop();
@@ -203,6 +213,9 @@ export async function stopAnvilFork(
     In vitest, each thread is assigned a unique, numerical id (`process.env.VITEST_POOL_ID`).
     When jobId is provided, the fork uses this id to create a different local rpc url (e.g. `http://127.0.0.1:<8545+jobId>/`
     so that tests can be run in parallel (depending on the number of threads of the host machine)
+    
+    IMPORTANT: Each call to startFork() creates a new fork instance with a unique port.
+    This ensures complete isolation between test suites, preventing state interference and snapshot collisions.
 */
 export async function startFork(
     network: NetworkSetup,
@@ -214,7 +227,11 @@ export async function startFork(
     const anvilOptions = getAnvilOptions(network, blockNumber);
 
     const defaultAnvilPort = 8545;
-    const port = (anvilOptions.port || defaultAnvilPort) + jobId;
+    const basePort = anvilOptions.port || defaultAnvilPort;
+    // Calculate unique port: basePort + jobId + (forkCounter * 100)
+    // This ensures each fork gets a unique port while maintaining network separation
+    const port = basePort + jobId + forkCounter * 100;
+    forkCounter++;
 
     if (!anvilOptions.forkUrl) {
         throw Error(
@@ -223,10 +240,7 @@ export async function startFork(
     }
     const rpcUrl = `http://127.0.0.1:${port}`;
 
-    console.log('checking rpcUrl', port, runningForks);
-
-    // Avoid starting fork if it was running already
-    if (runningForks[port]) return { rpcUrl };
+    console.log('Starting new fork', { port, forkBlockNumber: blockNumber ?? anvilOptions.forkBlockNumber, runningForks: Object.keys(runningForks).length });
 
     // https://www.npmjs.com/package/@viem/anvil
     // Pass startTimeout directly to createAnvil - it defaults to 10_000ms
