@@ -58,7 +58,7 @@ const auraBalSwap = async ({ rpcUrl, client, userAccount, chainId }) => {
     // Create AuraBalSwap instance which can be used to query & buildCalls
     const auraBalSwap = new AuraBalSwap(rpcUrl as string);
 
-    // Querys onchain to get result
+    // Queries onchain to get result
     const queryOutput = await auraBalSwap.query({
         tokenIn,
         tokenOut,
