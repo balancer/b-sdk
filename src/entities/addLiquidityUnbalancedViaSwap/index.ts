@@ -122,17 +122,14 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             input.maxAdjustableAmountIn.rawAmount,
         );
 
-        if (calculatedVsProvidedRatio > WAD) {
+        if (
+            calculatedVsProvidedRatio > WAD ||
+            WAD - calculatedVsProvidedRatio > parseEther('0.01')
+        ) {
             throw new SDKError(
                 'Error',
                 'Add Liquidity Unbalanced Via Swap',
-                'Exact BPT out calculation failed. Please add a smaller or less unbalanced liquidity amount.',
-            );
-        }
-
-        if (WAD - calculatedVsProvidedRatio > parseEther('0.01')) {
-            console.warn(
-                'Calculated amount for maxAdjustableAmountIn too low could result in too much dust left behind.',
+                'Exact BPT out calculation failed. Please add a smaller (less unbalanced) amount.',
             );
         }
 
@@ -146,7 +143,10 @@ export class AddLiquidityUnbalancedViaSwapV3 {
                 sortedTokens[exactAmountTokenIndex],
                 0n,
             ),
-            maxAdjustableAmountIn: finalAmountsIn[maxAdjustableTokenIndex],
+            maxAdjustableAmountIn: TokenAmount.fromInputAmount(
+                input.maxAdjustableAmountIn,
+                input.chainId,
+            ),
             chainId: input.chainId,
             protocolVersion: 3,
             to: AddressProvider.Router(input.chainId),
