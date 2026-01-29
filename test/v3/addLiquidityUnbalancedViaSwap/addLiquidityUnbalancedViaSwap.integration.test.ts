@@ -179,12 +179,6 @@ describe('add liquidity unbalanced via swap test', () => {
                         {
                             chainId,
                             rpcUrl,
-                            exactAmountIn: {
-                                // exact token (WETH) amount is zero
-                                rawAmount: 0n,
-                                decimals: WETH.decimals,
-                                address: WETH.address,
-                            },
                             maxAdjustableAmountIn: {
                                 // adjustable token (AAVE) budget as a fraction of pool AAVE balance
                                 rawAmount: aaveBudgetRaw,

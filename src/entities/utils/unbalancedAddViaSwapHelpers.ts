@@ -38,6 +38,7 @@ export async function queryAndAdjustBptAmount(
     input: AddLiquidityUnbalancedViaSwapInput,
     pool: Address,
     bptAmount: bigint,
+    exactToken: Address,
     adjustableTokenIndex: number,
     block?: bigint,
 ): Promise<bigint> {
@@ -47,8 +48,8 @@ export async function queryAndAdjustBptAmount(
         pool,
         input.sender ?? zeroAddress,
         bptAmount,
-        input.exactAmountIn.address,
-        input.exactAmountIn.rawAmount,
+        exactToken,
+        0n,
         maxUint256,
         input.addLiquidityUserData ?? '0x',
         input.swapUserData ?? '0x',

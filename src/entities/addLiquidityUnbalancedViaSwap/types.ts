@@ -6,7 +6,6 @@ import { InputAmount } from '@/types';
 export type AddLiquidityUnbalancedViaSwapInput = {
     chainId: number;
     rpcUrl: string;
-    exactAmountIn: InputAmount;
     maxAdjustableAmountIn: InputAmount;
     addLiquidityUserData?: Hex;
     swapUserData?: Hex;

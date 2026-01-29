@@ -53,6 +53,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         const maxAdjustableTokenIndex = sortedTokens.findIndex((token) =>
             token.isSameAddress(input.maxAdjustableAmountIn.address),
         );
+        const exactAmountTokenIndex = maxAdjustableTokenIndex === 0 ? 1 : 0;
 
         // We treat the adjustable token as the reference and derive a BPT
         // target from it.
@@ -80,6 +81,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             input,
             poolState.address,
             initialBptAmount.rawAmount,
+            sortedTokens[exactAmountTokenIndex].address,
             maxAdjustableTokenIndex,
             block,
         );
@@ -92,6 +94,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             input,
             poolState.address,
             adjustedBptAmount,
+            sortedTokens[exactAmountTokenIndex].address,
             maxAdjustableTokenIndex,
             block,
         );
@@ -102,7 +105,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             poolState.address,
             sender,
             finalBptAmount,
-            input.exactAmountIn.address,
+            sortedTokens[exactAmountTokenIndex].address,
             0n,
             maxUint256,
             addLiquidityUserData,
@@ -115,7 +118,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         );
 
         const calculatedVsProvidedRatio = MathSol.divDownFixed(
-            finalAmountsIn[maxAdjustableTokenIndex].amount,
+            finalAmountsIn[maxAdjustableTokenIndex].amount - 10n, // 10 wei of buffer for rounding issues
             input.maxAdjustableAmountIn.rawAmount,
         );
 
@@ -139,9 +142,9 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         const output: AddLiquidityUnbalancedViaSwapQueryOutput = {
             pool: poolState.address,
             bptOut,
-            exactAmountIn: TokenAmount.fromInputAmount(
-                input.exactAmountIn,
-                input.chainId,
+            exactAmountIn: TokenAmount.fromRawAmount(
+                sortedTokens[exactAmountTokenIndex],
+                0n,
             ),
             maxAdjustableAmountIn: finalAmountsIn[maxAdjustableTokenIndex],
             chainId: input.chainId,

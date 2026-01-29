@@ -12,7 +12,7 @@ export const validateAddLiquidityUnbalancedViaSwapInput = (
         {
             ...input,
             kind: AddLiquidityKind.Unbalanced,
-            amountsIn: [input.exactAmountIn, input.maxAdjustableAmountIn],
+            amountsIn: [input.maxAdjustableAmountIn],
         },
         poolState,
     );
@@ -30,14 +30,6 @@ export const validateAddLiquidityUnbalancedViaSwapInput = (
             'Input Validation',
             'AddLiquidityUnbalancedViaSwap',
             'maxAdjustableAmountIn should be greater than zero',
-        );
-    }
-
-    if (input.exactAmountIn.rawAmount !== 0n) {
-        throw new SDKError(
-            'Input Validation',
-            'AddLiquidityUnbalancedViaSwap',
-            'Only single sided adds are currently supported by the SDK, so exactAmountIn should be zero',
         );
     }
 };
