@@ -6,6 +6,7 @@ config();
 import {
     Address,
     createTestClient,
+    formatEther,
     http,
     maxUint256,
     parseUnits,
@@ -24,6 +25,7 @@ import {
     isSameAddress,
     getPoolStateWithBalancesV3,
     PoolTokenWithBalance,
+    MathSol,
 } from '@/index';
 import {
     AddLiquidityUnbalancedViaSwapV3,
@@ -283,11 +285,17 @@ describe('add liquidity unbalanced via swap test', () => {
                         expect(bptDelta).toBeGreaterThan(0n);
 
                         // Verify BPT output is within acceptable tolerance
-                        areBigIntsWithinPercent(
-                            maxAdjustableTokenDelta,
-                            maxAdjustableAmountGiven,
-                            0.0001, // 0.01% tolerance
+                        const actualVersusExpectedRatio = Number(
+                            formatEther(
+                                MathSol.divDownFixed(
+                                    maxAdjustableTokenDelta,
+                                    buildCallOutput.expectedAdjustableAmountIn
+                                        .amount,
+                                ),
+                            ),
                         );
+
+                        expect(actualVersusExpectedRatio).toBeCloseTo(1, 3); // 0.1% tolerance
 
                         if (ENABLE_LOGGING) {
                             appendFileSync(

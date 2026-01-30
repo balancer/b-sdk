@@ -164,6 +164,11 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             input.slippage.applyTo(input.bptOut.amount, -1),
         );
 
+        const expectedAdjustableAmountIn = TokenAmount.fromRawAmount(
+            input.maxAdjustableAmountIn.token,
+            input.slippage.applyTo(input.maxAdjustableAmountIn.amount, -1),
+        );
+
         const wethIsEth = input.wethIsEth ?? false;
 
         const callData = encodeFunctionData({
@@ -194,7 +199,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             to: AddressProvider.UnbalancedAddViaSwapRouter(input.chainId),
             value,
             exactBptAmountOut,
-            exactAmountIn: input.exactAmountIn,
+            expectedAdjustableAmountIn,
             maxAdjustableAmountIn: input.maxAdjustableAmountIn,
         };
     }
