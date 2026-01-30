@@ -4,6 +4,7 @@ import { ChainId, PoolState, Slippage } from '@/index';
 import {
     AddLiquidityUnbalancedViaSwapV3,
     AddLiquidityUnbalancedViaSwapQueryOutput,
+    AddLiquidityUnbalancedViaSwapInput,
 } from '@/entities/addLiquidityUnbalancedViaSwap';
 import { validateAddLiquidityUnbalancedViaSwapInput } from '@/entities/addLiquidityUnbalancedViaSwap/validateInputs';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
@@ -67,14 +68,9 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
     describe('input validation', () => {
         describe('pool token count validation', () => {
             test('throws error when pool has more than 2 tokens', () => {
-                const input = {
+                const input: AddLiquidityUnbalancedViaSwapInput = {
                     chainId,
                     rpcUrl: 'http://localhost:8545',
-                    exactAmountIn: {
-                        rawAmount: 0n,
-                        decimals: WETH.decimals,
-                        address: WETH.address,
-                    },
                     maxAdjustableAmountIn: {
                         rawAmount: parseUnits('100', AAVE.decimals),
                         decimals: AAVE.decimals,
@@ -93,14 +89,9 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
 
         describe('maxAdjustableAmountIn validation', () => {
             test('throws error when maxAdjustableAmountIn is zero', () => {
-                const input = {
+                const input: AddLiquidityUnbalancedViaSwapInput = {
                     chainId,
                     rpcUrl: 'http://localhost:8545',
-                    exactAmountIn: {
-                        rawAmount: 0n,
-                        decimals: WETH.decimals,
-                        address: WETH.address,
-                    },
                     maxAdjustableAmountIn: {
                         rawAmount: 0n,
                         decimals: AAVE.decimals,
@@ -115,34 +106,6 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                     ),
                 ).toThrowError(
                     'maxAdjustableAmountIn should be greater than zero',
-                );
-            });
-        });
-
-        describe('exactAmountIn validation (single-sided only)', () => {
-            test('throws error when exactAmountIn is non-zero', () => {
-                const input = {
-                    chainId,
-                    rpcUrl: 'http://localhost:8545',
-                    exactAmountIn: {
-                        rawAmount: parseUnits('1', WETH.decimals),
-                        decimals: WETH.decimals,
-                        address: WETH.address,
-                    },
-                    maxAdjustableAmountIn: {
-                        rawAmount: parseUnits('100', AAVE.decimals),
-                        decimals: AAVE.decimals,
-                        address: AAVE.address,
-                    },
-                };
-
-                expect(() =>
-                    validateAddLiquidityUnbalancedViaSwapInput(
-                        input,
-                        mockPoolState,
-                    ),
-                ).toThrowError(
-                    'Only single sided adds are currently supported by the SDK, so exactAmountIn should be zero',
                 );
             });
         });
@@ -287,7 +250,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 expect(result).toHaveProperty('to');
                 expect(result).toHaveProperty('value');
                 expect(result).toHaveProperty('exactBptAmountOut');
-                expect(result).toHaveProperty('exactAmountIn');
+                expect(result).toHaveProperty('expectedAdjustableAmountIn');
                 expect(result).toHaveProperty('maxAdjustableAmountIn');
             });
         });
