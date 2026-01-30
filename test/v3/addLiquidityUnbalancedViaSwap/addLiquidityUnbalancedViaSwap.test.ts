@@ -407,7 +407,9 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
             expect(result.exactBptAmountOut.amount).toBe(
                 regularResult.exactBptAmountOut.amount,
             );
-            expect(result.exactAmountIn).toEqual(regularResult.exactAmountIn);
+            expect(result.expectedAdjustableAmountIn).toEqual(
+                regularResult.expectedAdjustableAmountIn,
+            );
             expect(result.maxAdjustableAmountIn).toEqual(
                 regularResult.maxAdjustableAmountIn,
             );
