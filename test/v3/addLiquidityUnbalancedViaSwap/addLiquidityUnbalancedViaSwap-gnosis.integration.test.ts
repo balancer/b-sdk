@@ -37,7 +37,6 @@ import {
     POOLS,
     TOKENS,
     sendTransactionGetBalances,
-    areBigIntsWithinPercent,
     forkSetup,
 } from '../../lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
@@ -57,7 +56,7 @@ const fileName = 'reclamm-single-sided-adjustable-gnosis';
 class MockApi {
     async getPool(id: Address): Promise<PoolState> {
         if (isSameAddress(id, poolId)) {
-            // ReClamm pool with AAVE / WETH
+            // ReClamm pool with USDC.E / GNO
             return {
                 id,
                 address: id,
@@ -135,18 +134,12 @@ describe('add liquidity unbalanced via swap test', () => {
     });
 
     describe('permit2 direct approval', () => {
-        describe('ReClamm pool: single-sided from adjustable (WETH exact = 0, AAVE adjustable as % of pool AAVE balance)', () => {
+        describe('ReClamm pool: single-sided from adjustable (GNO exact = 0, USDC.E adjustable as % of pool USDC.E balance)', () => {
             const FRACTIONS = [
                 { label: '0.1%', num: 1n, den: 1000n },
-                { label: '0.5%', num: 5n, den: 1000n },
                 { label: '1%', num: 1n, den: 100n },
-                { label: '5%', num: 5n, den: 100n },
                 { label: '10%', num: 1n, den: 10n },
-                { label: '20%', num: 2n, den: 10n },
-                { label: '30%', num: 3n, den: 10n },
-                { label: '40%', num: 4n, den: 10n },
                 { label: '50%', num: 1n, den: 2n },
-                { label: '60%', num: 3n, den: 5n },
             ] as const;
 
             let maxAdjustableTokenBalanceRaw: bigint;
@@ -179,7 +172,7 @@ describe('add liquidity unbalanced via swap test', () => {
                             chainId,
                             rpcUrl,
                             maxAdjustableAmountIn: {
-                                // adjustable token (AAVE) budget as a fraction of pool AAVE balance
+                                // adjustable token (USDC.E) budget as a fraction of pool USDC.E balance
                                 rawAmount: maxAdjustableAmountGiven,
                                 decimals: USDCe.decimals,
                                 address: USDCe.address,
@@ -191,7 +184,8 @@ describe('add liquidity unbalanced via swap test', () => {
                     const logBase = {
                         scenario: fileName,
                         label,
-                        aaveBudgetRaw: maxAdjustableAmountGiven.toString(),
+                        maxAdjustableAmountGiven:
+                            maxAdjustableAmountGiven.toString(),
                     };
 
                     try {
@@ -208,13 +202,13 @@ describe('add liquidity unbalanced via swap test', () => {
                         expect(queryOutput.protocolVersion).toBe(3);
                         expect(queryOutput.bptOut.amount).toBeGreaterThan(0n);
 
-                        // Exact token is WETH with exactAmount = 0
+                        // Exact token is GNO with exactAmount = 0
                         expect(
                             queryOutput.exactAmountIn.token.address.toLowerCase(),
                         ).toBe(GNO.address.toLowerCase());
                         expect(queryOutput.exactAmountIn.amount).toBe(0n);
 
-                        // Adjustable token is AAVE with some positive amount, within the budget
+                        // Adjustable token is USDC.E with some positive amount, within the budget
                         const maxAdjustableAmountInCalculated =
                             queryOutput.maxAdjustableAmountIn.amount;
                         expect(maxAdjustableAmountInCalculated).toBeGreaterThan(

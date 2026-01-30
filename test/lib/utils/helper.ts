@@ -1,6 +1,5 @@
 import {
     Address,
-    Abi,
     Client,
     Hex,
     PublicActions,

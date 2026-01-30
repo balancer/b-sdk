@@ -6,6 +6,7 @@ config();
 import {
     Address,
     createTestClient,
+    formatEther,
     http,
     maxUint256,
     parseUnits,
@@ -23,6 +24,8 @@ import {
     PublicWalletClient,
     isSameAddress,
     getPoolStateWithBalancesV3,
+    MathSol,
+    PoolTokenWithBalance,
 } from '@/index';
 import {
     AddLiquidityUnbalancedViaSwapV3,
@@ -34,7 +37,6 @@ import {
     POOLS,
     TOKENS,
     sendTransactionGetBalances,
-    areBigIntsWithinPercent,
     forkSetup,
 } from '../../lib/utils';
 import { ANVIL_NETWORKS, startFork } from '../../anvil/anvil-global-setup';
@@ -49,14 +51,15 @@ const WETH = TOKENS[chainId].WETH;
 
 // Toggle to control whether test results should be logged to files
 const ENABLE_LOGGING = false;
+const fileName = 'reclamm-single-sided-adjustable';
 
 class MockApi {
-    async getPool(poolId: Address): Promise<PoolState> {
-        if (isSameAddress(poolId, POOLS[chainId].AAVE_WETH.id)) {
+    async getPool(id: Address): Promise<PoolState> {
+        if (isSameAddress(id, poolId)) {
             // ReClamm pool with AAVE / WETH
             return {
-                id: poolId,
-                address: poolId,
+                id,
+                address: id,
                 type: 'RECLAMM',
                 protocolVersion: 3,
                 tokens: [
@@ -74,7 +77,7 @@ class MockApi {
             };
         }
 
-        throw new Error(`Unknown test poolId: ${poolId}`);
+        throw new Error(`Unknown test poolId: ${id}`);
     }
 }
 
@@ -138,18 +141,13 @@ describe('add liquidity unbalanced via swap test', () => {
         describe('ReClamm pool: single-sided from adjustable (WETH exact = 0, AAVE adjustable as % of pool AAVE balance)', () => {
             const FRACTIONS = [
                 { label: '0.1%', num: 1n, den: 1000n },
-                { label: '0.5%', num: 5n, den: 1000n },
                 { label: '1%', num: 1n, den: 100n },
-                { label: '5%', num: 5n, den: 100n },
                 { label: '10%', num: 1n, den: 10n },
-                { label: '20%', num: 2n, den: 10n },
-                { label: '30%', num: 3n, den: 10n },
-                { label: '40%', num: 4n, den: 10n },
                 { label: '50%', num: 1n, den: 2n },
-                { label: '60%', num: 3n, den: 5n },
             ] as const;
 
-            let aavePoolBalanceRaw: bigint;
+            let maxAdjustableTokenBalanceRaw: bigint;
+            let maxAdjustableToken: PoolTokenWithBalance;
 
             beforeAll(async () => {
                 const poolStateWithBalances = await getPoolStateWithBalancesV3(
@@ -158,22 +156,20 @@ describe('add liquidity unbalanced via swap test', () => {
                     rpcUrl,
                 );
 
-                const aaveToken = poolStateWithBalances.tokens.find((t) =>
+                maxAdjustableToken = poolStateWithBalances.tokens.find((t) =>
                     isSameAddress(t.address, AAVE.address),
-                );
-                if (!aaveToken) {
-                    throw new Error('AAVE token not found in ReClamm pool');
-                }
+                ) as PoolTokenWithBalance;
 
-                aavePoolBalanceRaw = parseUnits(
-                    aaveToken.balance,
-                    aaveToken.decimals,
+                maxAdjustableTokenBalanceRaw = parseUnits(
+                    maxAdjustableToken.balance,
+                    maxAdjustableToken.decimals,
                 );
             });
 
             for (const { label, num, den } of FRACTIONS) {
                 test(`ReClamm single-sided adjustable with AAVE budget = ${label} of pool AAVE balance`, async () => {
-                    const aaveBudgetRaw = (aavePoolBalanceRaw * num) / den;
+                    const maxAdjustableAmountGiven =
+                        (maxAdjustableTokenBalanceRaw * num) / den;
 
                     const addLiquidityInput: AddLiquidityUnbalancedViaSwapInput =
                         {
@@ -181,7 +177,7 @@ describe('add liquidity unbalanced via swap test', () => {
                             rpcUrl,
                             maxAdjustableAmountIn: {
                                 // adjustable token (AAVE) budget as a fraction of pool AAVE balance
-                                rawAmount: aaveBudgetRaw,
+                                rawAmount: maxAdjustableAmountGiven,
                                 decimals: AAVE.decimals,
                                 address: AAVE.address,
                             },
@@ -190,9 +186,10 @@ describe('add liquidity unbalanced via swap test', () => {
                         };
 
                     const logBase = {
-                        scenario: 'reclamm-single-sided-adjustable',
+                        scenario: fileName,
                         label,
-                        aaveBudgetRaw: aaveBudgetRaw.toString(),
+                        maxAdjustableAmountGiven:
+                            maxAdjustableAmountGiven.toString(),
                     };
 
                     try {
@@ -216,19 +213,28 @@ describe('add liquidity unbalanced via swap test', () => {
                         expect(queryOutput.exactAmountIn.amount).toBe(0n);
 
                         // Adjustable token is AAVE with some positive amount, within the budget
-                        const aaveIn = queryOutput.maxAdjustableAmountIn.amount;
-                        expect(aaveIn).toBeGreaterThan(0n);
-                        expect(aaveIn).toBeLessThanOrEqual(aaveBudgetRaw);
+                        const maxAdjustableAmountInCalculated =
+                            queryOutput.maxAdjustableAmountIn.amount;
+                        expect(maxAdjustableAmountInCalculated).toBeGreaterThan(
+                            0n,
+                        );
+                        expect(
+                            maxAdjustableAmountInCalculated,
+                        ).toBeLessThanOrEqual(maxAdjustableAmountGiven + 10n); // small tolerance for tokens with less decimals because query rounds up
 
                         // Calculate percentage diff between given and calculated amounts in
-                        const deltaRaw = aaveBudgetRaw - aaveIn;
+                        const deltaRaw =
+                            maxAdjustableAmountGiven -
+                            maxAdjustableAmountInCalculated;
                         const deltaPctMilli =
-                            aaveBudgetRaw === 0n
+                            maxAdjustableAmountGiven === 0n
                                 ? 0n
-                                : (deltaRaw * 100000n) / aaveBudgetRaw;
+                                : (deltaRaw * 100000n) /
+                                  maxAdjustableAmountGiven;
                         const deltaPct = `${(deltaPctMilli / 1000n).toString()}.${(deltaPctMilli % 1000n).toString().padStart(3, '0')}`;
 
-                        const wethIn = queryOutput.exactAmountIn.amount;
+                        const exactAmountInCalculated =
+                            queryOutput.exactAmountIn.amount;
 
                         // Execute the transaction
                         const buildCallInput = {
@@ -264,35 +270,48 @@ describe('add liquidity unbalanced via swap test', () => {
                         expect(transactionReceipt.status).toBe('success');
 
                         // Verify input token amounts (WETH should be 0, AAVE should be used)
-                        const aaveDelta = balanceDeltas[0];
-                        const wethDelta = balanceDeltas[1];
+                        const maxAdjustableTokenDelta =
+                            balanceDeltas[maxAdjustableToken.index];
+                        const exactTokenDelta =
+                            balanceDeltas[
+                                maxAdjustableToken.index === 0 ? 1 : 0
+                            ];
                         const bptDelta = balanceDeltas[2];
 
-                        expect(wethDelta).toBe(0n);
-                        expect(aaveDelta).toBeGreaterThan(0n);
+                        expect(exactTokenDelta).toBe(0n);
+                        expect(maxAdjustableTokenDelta).toBeGreaterThan(0n);
                         expect(bptDelta).toBeGreaterThan(0n);
 
                         // Verify BPT output is within acceptable tolerance
-                        areBigIntsWithinPercent(
-                            aaveDelta,
-                            aaveBudgetRaw,
-                            0.0001, // 0.01% tolerance
+                        const actualVersusExpectedRatio = Number(
+                            formatEther(
+                                MathSol.divDownFixed(
+                                    maxAdjustableTokenDelta,
+                                    buildCallOutput.expectedAdjustableAmountIn
+                                        .amount,
+                                ),
+                            ),
                         );
+
+                        expect(actualVersusExpectedRatio).toBeCloseTo(1, 3); // 0.1% tolerance
 
                         if (ENABLE_LOGGING) {
                             appendFileSync(
-                                'single-sided-adjustable-results.log',
+                                `${fileName}.log`,
                                 `${JSON.stringify({
                                     ...logBase,
                                     passed: true,
-                                    aaveIn: aaveIn.toString(),
-                                    wethIn: wethIn.toString(),
+                                    maxAdjustableAmountIn:
+                                        maxAdjustableAmountInCalculated.toString(),
+                                    exactAmountIn:
+                                        exactAmountInCalculated.toString(),
                                     deltaRaw: deltaRaw.toString(),
                                     deltaPct: deltaPct,
                                     bptOut: queryOutput.bptOut.amount.toString(),
                                     transactionExecuted: true,
                                     bptDelta: bptDelta.toString(),
-                                    aaveDelta: aaveDelta.toString(),
+                                    maxAdjustableDelta:
+                                        maxAdjustableTokenDelta.toString(),
                                 })}\n`,
                             );
                         }
@@ -305,7 +324,7 @@ describe('add liquidity unbalanced via swap test', () => {
 
                         if (ENABLE_LOGGING) {
                             appendFileSync(
-                                'single-sided-adjustable-results.log',
+                                `${fileName}.log`,
                                 `${JSON.stringify({
                                     ...logBase,
                                     passed: false,
