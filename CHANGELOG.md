@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 5.1.2
+
+### Patch Changes
+
+- b29cef6: add monad to CHAINS export
+
 ## 5.1.1
 
 ### Patch Changes
