@@ -242,6 +242,17 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
         },
     },
+    [ChainId.MONAD]: {
+        BAL: {
+            address: '0xf23b4DB826DbA14c0e857029dfF076b1c0264843',
+            decimals: 6,
+            slot: 0, // not confirmed
+        },
+        WMON: {
+            address: '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
+            decimals: 18,
+        },
+    },
 };
 
 export type TestPool = TestToken & { id: Hex; type: PoolType };
@@ -431,6 +442,15 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         MOCK_USDT_xBTC_POOL: {
             address: '0x089664b3b67ad603cd45659f21b51d2b3305a502',
             id: '0x089664b3b67ad603cd45659f21b51d2b3305a502',
+            type: PoolType.Weighted,
+            decimals: 18,
+            slot: 0,
+        },
+    },
+    [ChainId.MONAD]: {
+        MOCK_WMON_BAL_POOL: {
+            address: '0x87F438EAf18cb8d0e4F1B08080acF225AB7AA0F3',
+            id: '0x87F438EAf18cb8d0e4F1B08080acF225AB7AA0F3',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,

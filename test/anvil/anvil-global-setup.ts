@@ -28,6 +28,7 @@ type NetworksWithFork = Extract<
     | 'HYPEREVM'
     | 'PLASMA'
     | 'X_LAYER'
+    | 'MONAD'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -46,6 +47,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     HYPEREVM: 9745,
     PLASMA: 9845,
     X_LAYER: 9945,
+    MONAD: 10045,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -134,6 +136,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         port: ANVIL_PORTS.X_LAYER,
         forkBlockNumber: 43138155n,
     },
+    MONAD: {
+        rpcEnv: 'MONAD_RPC_URL',
+        fallBackRpc: 'https://rpc.monad.xyz',
+        port: ANVIL_PORTS.X_LAYER,
+        forkBlockNumber: 43138155n,
+    }
 };
 
 function getAnvilOptions(
