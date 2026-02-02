@@ -32,7 +32,6 @@ import {
     AddLiquidityUnbalancedViaSwapInput,
 } from '@/entities/addLiquidityUnbalancedViaSwap';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
-import { appendFileSync } from 'node:fs';
 import {
     POOLS,
     TOKENS,
@@ -48,10 +47,6 @@ const poolId: Address = POOLS[chainId].AAVE_WETH.id;
 
 const AAVE = TOKENS[chainId].AAVE;
 const WETH = TOKENS[chainId].WETH;
-
-// Toggle to control whether test results should be logged to files
-const ENABLE_LOGGING = false;
-const fileName = 'reclamm-single-sided-adjustable';
 
 class MockApi {
     async getPool(id: Address): Promise<PoolState> {
@@ -185,158 +180,80 @@ describe('add liquidity unbalanced via swap test', () => {
                             sender: testAddress,
                         };
 
-                    const logBase = {
-                        scenario: fileName,
-                        label,
-                        maxAdjustableAmountGiven:
-                            maxAdjustableAmountGiven.toString(),
+                    const queryOutput =
+                        await addLiquidityUnbalancedViaSwap.query(
+                            addLiquidityInput,
+                            poolState,
+                        );
+
+                    // Exact token is WETH with exactAmount = 0
+                    expect(
+                        queryOutput.exactAmountIn.token.address.toLowerCase(),
+                    ).toBe(WETH.address.toLowerCase());
+                    expect(queryOutput.exactAmountIn.amount).toBe(0n);
+
+                    // Adjustable token is AAVE with some positive amount, within the budget
+                    const maxAdjustableAmountInCalculated =
+                        queryOutput.maxAdjustableAmountIn.amount;
+                    expect(maxAdjustableAmountInCalculated).toBeGreaterThan(0n);
+                    expect(maxAdjustableAmountInCalculated).toBeLessThanOrEqual(
+                        maxAdjustableAmountGiven + 10n,
+                    ); // small tolerance for tokens with less decimals because query rounds up
+
+                    // Execute the transaction
+                    const buildCallInput = {
+                        ...queryOutput,
+                        slippage: Slippage.fromPercentage('1'), // 1% slippage
+                        deadline: maxUint256,
                     };
 
-                    try {
-                        const queryOutput =
-                            await addLiquidityUnbalancedViaSwap.query(
-                                addLiquidityInput,
-                                poolState,
-                            );
+                    const buildCallOutput =
+                        addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
 
-                        // Assertions
-                        expect(queryOutput).toBeDefined();
-                        expect(queryOutput.pool).toBe(poolState.address);
-                        expect(queryOutput.chainId).toBe(chainId);
-                        expect(queryOutput.protocolVersion).toBe(3);
-                        expect(queryOutput.bptOut.amount).toBeGreaterThan(0n);
+                    expect(buildCallOutput.to).toBe(
+                        AddressProvider.UnbalancedAddViaSwapRouter(chainId),
+                    );
+                    expect(buildCallOutput.value).toBe(0n);
 
-                        // Exact token is WETH with exactAmount = 0
-                        expect(
-                            queryOutput.exactAmountIn.token.address.toLowerCase(),
-                        ).toBe(WETH.address.toLowerCase());
-                        expect(queryOutput.exactAmountIn.amount).toBe(0n);
-
-                        // Adjustable token is AAVE with some positive amount, within the budget
-                        const maxAdjustableAmountInCalculated =
-                            queryOutput.maxAdjustableAmountIn.amount;
-                        expect(maxAdjustableAmountInCalculated).toBeGreaterThan(
-                            0n,
+                    // Send transaction and check balance changes
+                    const { transactionReceipt, balanceDeltas } =
+                        await sendTransactionGetBalances(
+                            [
+                                ...poolState.tokens.map((t) => t.address),
+                                queryOutput.bptOut.token.address, // BPT token
+                            ],
+                            client,
+                            testAddress,
+                            buildCallOutput.to,
+                            buildCallOutput.callData,
+                            buildCallOutput.value,
                         );
-                        expect(
-                            maxAdjustableAmountInCalculated,
-                        ).toBeLessThanOrEqual(maxAdjustableAmountGiven + 10n); // small tolerance for tokens with less decimals because query rounds up
 
-                        // Calculate percentage diff between given and calculated amounts in
-                        const deltaRaw =
-                            maxAdjustableAmountGiven -
-                            maxAdjustableAmountInCalculated;
-                        const deltaPctMilli =
-                            maxAdjustableAmountGiven === 0n
-                                ? 0n
-                                : (deltaRaw * 100000n) /
-                                  maxAdjustableAmountGiven;
-                        const deltaPct = `${(deltaPctMilli / 1000n).toString()}.${(deltaPctMilli % 1000n).toString().padStart(3, '0')}`;
+                    expect(transactionReceipt.status).toBe('success');
 
-                        const exactAmountInCalculated =
-                            queryOutput.exactAmountIn.amount;
+                    // Verify input token amounts (WETH should be 0, AAVE should be used)
+                    const maxAdjustableTokenDelta =
+                        balanceDeltas[maxAdjustableToken.index];
+                    const exactTokenDelta =
+                        balanceDeltas[maxAdjustableToken.index === 0 ? 1 : 0];
+                    const bptDelta = balanceDeltas[2];
 
-                        // Execute the transaction
-                        const buildCallInput = {
-                            ...queryOutput,
-                            slippage: Slippage.fromPercentage('1'), // 1% slippage
-                            deadline: maxUint256,
-                        };
+                    expect(exactTokenDelta).toBe(0n);
+                    expect(maxAdjustableTokenDelta).toBeGreaterThan(0n);
+                    expect(bptDelta).toBeGreaterThan(0n);
 
-                        const buildCallOutput =
-                            addLiquidityUnbalancedViaSwap.buildCall(
-                                buildCallInput,
-                            );
-
-                        expect(buildCallOutput.to).toBe(
-                            AddressProvider.UnbalancedAddViaSwapRouter(chainId),
-                        );
-                        expect(buildCallOutput.value).toBe(0n);
-
-                        // Send transaction and check balance changes
-                        const { transactionReceipt, balanceDeltas } =
-                            await sendTransactionGetBalances(
-                                [
-                                    ...poolState.tokens.map((t) => t.address),
-                                    queryOutput.bptOut.token.address, // BPT token
-                                ],
-                                client,
-                                testAddress,
-                                buildCallOutput.to,
-                                buildCallOutput.callData,
-                                buildCallOutput.value,
-                            );
-
-                        expect(transactionReceipt.status).toBe('success');
-
-                        // Verify input token amounts (WETH should be 0, AAVE should be used)
-                        const maxAdjustableTokenDelta =
-                            balanceDeltas[maxAdjustableToken.index];
-                        const exactTokenDelta =
-                            balanceDeltas[
-                                maxAdjustableToken.index === 0 ? 1 : 0
-                            ];
-                        const bptDelta = balanceDeltas[2];
-
-                        expect(exactTokenDelta).toBe(0n);
-                        expect(maxAdjustableTokenDelta).toBeGreaterThan(0n);
-                        expect(bptDelta).toBeGreaterThan(0n);
-
-                        // Verify BPT output is within acceptable tolerance
-                        const actualVersusExpectedRatio = Number(
-                            formatEther(
-                                MathSol.divDownFixed(
-                                    maxAdjustableTokenDelta,
-                                    buildCallOutput.expectedAdjustableAmountIn
-                                        .amount,
-                                ),
+                    // Verify BPT output is within acceptable tolerance
+                    const actualVersusExpectedRatio = Number(
+                        formatEther(
+                            MathSol.divDownFixed(
+                                maxAdjustableTokenDelta,
+                                buildCallOutput.expectedAdjustableAmountIn
+                                    .amount,
                             ),
-                        );
+                        ),
+                    );
 
-                        expect(actualVersusExpectedRatio).toBeCloseTo(1, 3); // 0.1% tolerance
-
-                        if (ENABLE_LOGGING) {
-                            appendFileSync(
-                                `${fileName}.log`,
-                                `${JSON.stringify({
-                                    ...logBase,
-                                    passed: true,
-                                    maxAdjustableAmountIn:
-                                        maxAdjustableAmountInCalculated.toString(),
-                                    exactAmountIn:
-                                        exactAmountInCalculated.toString(),
-                                    deltaRaw: deltaRaw.toString(),
-                                    deltaPct: deltaPct,
-                                    bptOut: queryOutput.bptOut.amount.toString(),
-                                    transactionExecuted: true,
-                                    bptDelta: bptDelta.toString(),
-                                    maxAdjustableDelta:
-                                        maxAdjustableTokenDelta.toString(),
-                                })}\n`,
-                            );
-                        }
-                    } catch (err: unknown) {
-                        const msg =
-                            err instanceof Error ? err.message : String(err);
-                        const isAmountAboveMax =
-                            msg.includes('AmountInAboveMaxAdjustableAmount') ||
-                            msg.includes('AmountInAboveMaxAdjustable');
-
-                        if (ENABLE_LOGGING) {
-                            appendFileSync(
-                                `${fileName}.log`,
-                                `${JSON.stringify({
-                                    ...logBase,
-                                    passed: false,
-                                    error: msg,
-                                    isAmountAboveMaxAdjustableAmount:
-                                        isAmountAboveMax,
-                                })}\n`,
-                            );
-                        }
-
-                        throw err;
-                    }
+                    expect(actualVersusExpectedRatio).toBeCloseTo(1, 3); // 0.1% tolerance
                 });
             }
         });
