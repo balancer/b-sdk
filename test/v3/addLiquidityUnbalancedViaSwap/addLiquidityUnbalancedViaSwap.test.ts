@@ -158,13 +158,14 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                     addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
 
                 // Function selector for addLiquidityUnbalanced
-                expect(result.callData).toBeDefined();
-                expect(result.callData.length).toBeGreaterThan(10);
+                expect(result.callData).toBe(
+                    '0xaba40fa70000000000000000000000009d1fcf346ea1b073de4d5834e25572cc6ad71f4dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000055de6a779bbac0000000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002b5e3af16b188000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                );
             });
         });
 
         describe('slippage application', () => {
-            test('applies negative slippage to bptOut', () => {
+            test('applies negative slippage to bptOut and maxAdjustableAmountIn', () => {
                 const slippage = Slippage.fromPercentage('1'); // 1%
                 const buildCallInput = {
                     ...mockQueryOutput,
@@ -175,17 +176,20 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 const result =
                     addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
 
-                // With 1% slippage applied negatively, exactBptAmountOut should be less than bptOut
-                expect(result.exactBptAmountOut.amount).toBeLessThan(
-                    mockQueryOutput.bptOut.amount,
-                );
-
                 // Verify slippage calculation: bptOut * (1 - 0.01) = bptOut * 0.99
                 const expectedMin = slippage.applyTo(
                     mockQueryOutput.bptOut.amount,
                     -1,
                 );
                 expect(result.exactBptAmountOut.amount).toBe(expectedMin);
+
+                const expectedAmount = slippage.applyTo(
+                    mockQueryOutput.maxAdjustableAmountIn.amount,
+                    -1,
+                );
+                expect(result.expectedAdjustableAmountIn.amount).toBe(
+                    expectedAmount,
+                );
             });
         });
 
@@ -235,8 +239,8 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
             });
         });
 
-        describe('output structure', () => {
-            test('returns all required output fields', () => {
+        describe('contract address', () => {
+            test('returns proper contract address', () => {
                 const buildCallInput = {
                     ...mockQueryOutput,
                     slippage: Slippage.fromPercentage('1'),
@@ -246,12 +250,11 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 const result =
                     addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
 
-                expect(result).toHaveProperty('callData');
-                expect(result).toHaveProperty('to');
-                expect(result).toHaveProperty('value');
-                expect(result).toHaveProperty('exactBptAmountOut');
-                expect(result).toHaveProperty('expectedAdjustableAmountIn');
-                expect(result).toHaveProperty('maxAdjustableAmountIn');
+                expect(result.to).toEqual(
+                    AddressProvider.UnbalancedAddViaSwapRouter(
+                        buildCallInput.chainId,
+                    ),
+                );
             });
         });
     });

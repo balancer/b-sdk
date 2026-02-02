@@ -149,7 +149,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             ),
             chainId: input.chainId,
             protocolVersion: 3,
-            to: AddressProvider.Router(input.chainId),
+            to: AddressProvider.UnbalancedAddViaSwapRouter(input.chainId),
             addLiquidityUserData,
             swapUserData,
         };
