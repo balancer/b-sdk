@@ -141,7 +141,7 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: 'https://rpc.monad.xyz',
         port: ANVIL_PORTS.X_LAYER,
         forkBlockNumber: 43138155n,
-    }
+    },
 };
 
 function getAnvilOptions(

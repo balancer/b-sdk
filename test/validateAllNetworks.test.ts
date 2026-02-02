@@ -98,7 +98,6 @@ const NETWORK_CONFIG: Partial<
         poolKey: 'MOCK_WMON_BAL_POOL',
         inputAmountRaw: 10000n,
     },
-
 };
 
 // Optionally override fork block numbers for specific chains. Useful to select pools deployed on V3 after
