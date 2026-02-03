@@ -251,7 +251,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         WMON: {
             address: '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
             decimals: 18,
-            slot: 3
+            slot: 3,
         },
     },
 };
