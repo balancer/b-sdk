@@ -53,6 +53,7 @@ const CHAIN_ANVIL_MAP: Partial<Record<number, keyof typeof ANVIL_NETWORKS>> = {
     [ChainId.HYPEREVM]: 'HYPEREVM',
     [ChainId.PLASMA]: 'PLASMA',
     [ChainId.X_LAYER]: 'X_LAYER',
+    [ChainId.MONAD]: 'MONAD',
     // Add/remove mappings as needed for your test coverage
 };
 
@@ -92,6 +93,12 @@ const NETWORK_CONFIG: Partial<
         poolKey: 'MOCK_USDT_xBTC_POOL',
         inputAmountRaw: 10000n,
     },
+    [ChainId.MONAD]: {
+        tokenInKey: 'WMON',
+        tokenOutKey: 'AUSD',
+        poolKey: 'MOCK_WMON_AUSD_POOL',
+        inputAmountRaw: 1000000000000000n,
+    },
 };
 
 // Optionally override fork block numbers for specific chains. Useful to select pools deployed on V3 after
@@ -101,6 +108,7 @@ const BLOCK_NUMBER_OVERRIDES: Partial<Record<number, bigint>> = {
     [ChainId.MAINNET]: 22788192n,
     [ChainId.PLASMA]: 1274881n,
     [ChainId.X_LAYER]: 43173129n,
+    [ChainId.MONAD]: 52794217n,
 };
 
 // List of ChainIds to run the test for. Modify this array to select which chains to test.
@@ -108,6 +116,7 @@ const CHAINS_TO_TEST: number[] = [
     ChainId.SEPOLIA,
     ChainId.HYPEREVM,
     ChainId.PLASMA,
+    ChainId.MONAD,
     // ChainId.X_LAYER, // X_LAYER is not live and RPC is giving issues on CI (No Alchemy available)
 ];
 
