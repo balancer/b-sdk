@@ -143,8 +143,8 @@ describe('add liquidity unbalanced via swap test', () => {
                 { label: '50%', num: 1n, den: 2n },
             ] as const;
 
-            let maxAdjustableTokenBalanceRaw: bigint;
-            let maxAdjustableToken: PoolTokenWithBalance;
+            let expectedAdjustableTokenBalanceRaw: bigint;
+            let expectedAdjustableToken: PoolTokenWithBalance;
 
             beforeAll(async () => {
                 const poolStateWithBalances = await getPoolStateWithBalancesV3(
@@ -153,28 +153,28 @@ describe('add liquidity unbalanced via swap test', () => {
                     rpcUrl,
                 );
 
-                maxAdjustableToken = poolStateWithBalances.tokens.find((t) =>
-                    isSameAddress(t.address, AAVE.address),
+                expectedAdjustableToken = poolStateWithBalances.tokens.find(
+                    (t) => isSameAddress(t.address, AAVE.address),
                 ) as PoolTokenWithBalance;
 
-                maxAdjustableTokenBalanceRaw = parseUnits(
-                    maxAdjustableToken.balance,
-                    maxAdjustableToken.decimals,
+                expectedAdjustableTokenBalanceRaw = parseUnits(
+                    expectedAdjustableToken.balance,
+                    expectedAdjustableToken.decimals,
                 );
             });
 
             for (const { label, num, den } of FRACTIONS) {
                 test(`ReClamm single-sided adjustable with AAVE budget = ${label} of pool AAVE balance`, async () => {
-                    const maxAdjustableAmountGiven =
-                        (maxAdjustableTokenBalanceRaw * num) / den;
+                    const expectedAdjustableAmountGiven =
+                        (expectedAdjustableTokenBalanceRaw * num) / den;
 
                     const addLiquidityInput: AddLiquidityUnbalancedViaSwapInput =
                         {
                             chainId,
                             rpcUrl,
-                            maxAdjustableAmountIn: {
+                            expectedAdjustableAmountIn: {
                                 // adjustable token (AAVE) budget as a fraction of pool AAVE balance
-                                rawAmount: maxAdjustableAmountGiven,
+                                rawAmount: expectedAdjustableAmountGiven,
                                 decimals: AAVE.decimals,
                                 address: AAVE.address,
                             },
@@ -195,10 +195,10 @@ describe('add liquidity unbalanced via swap test', () => {
                     expect(queryOutput.exactAmountIn.amount).toBe(0n);
 
                     // Adjustable token is AAVE with some positive amount, within the budget
-                    const maxAdjustableAmountInCalculated =
-                        queryOutput.maxAdjustableAmountIn.amount;
-                    expect(maxAdjustableAmountInCalculated).toEqual(
-                        maxAdjustableAmountGiven,
+                    const expectedAdjustableAmountInCalculated =
+                        queryOutput.expectedAdjustableAmountIn.amount;
+                    expect(expectedAdjustableAmountInCalculated).toEqual(
+                        expectedAdjustableAmountGiven,
                     );
 
                     // Execute the transaction
@@ -233,21 +233,23 @@ describe('add liquidity unbalanced via swap test', () => {
                     expect(transactionReceipt.status).toBe('success');
 
                     // Verify input token amounts (WETH should be 0, AAVE should be used)
-                    const maxAdjustableTokenDelta =
-                        balanceDeltas[maxAdjustableToken.index];
+                    const adjustableTokenDelta =
+                        balanceDeltas[expectedAdjustableToken.index];
                     const exactTokenDelta =
-                        balanceDeltas[maxAdjustableToken.index === 0 ? 1 : 0];
+                        balanceDeltas[
+                            expectedAdjustableToken.index === 0 ? 1 : 0
+                        ];
                     const bptDelta = balanceDeltas[2];
 
                     expect(exactTokenDelta).toBe(0n);
-                    expect(maxAdjustableTokenDelta).toBeGreaterThan(0n);
+                    expect(adjustableTokenDelta).toBeGreaterThan(0n);
                     expect(bptDelta).toBeGreaterThan(0n);
 
                     // Verify BPT output is within acceptable tolerance
                     const actualVersusExpectedRatio = Number(
                         formatEther(
                             MathSol.divDownFixed(
-                                maxAdjustableTokenDelta,
+                                adjustableTokenDelta,
                                 buildCallOutput.expectedAdjustableAmountIn
                                     .amount,
                             ),
@@ -261,8 +263,8 @@ describe('add liquidity unbalanced via swap test', () => {
     });
 
     describe('permit2 signature', () => {
-        let maxAdjustableTokenBalanceRaw: bigint;
-        let maxAdjustableToken: PoolTokenWithBalance;
+        let expectedAdjustableTokenBalanceRaw: bigint;
+        let expectedAdjustableToken: PoolTokenWithBalance;
 
         beforeAll(async () => {
             const poolStateWithBalances = await getPoolStateWithBalancesV3(
@@ -271,26 +273,26 @@ describe('add liquidity unbalanced via swap test', () => {
                 rpcUrl,
             );
 
-            maxAdjustableToken = poolStateWithBalances.tokens.find((t) =>
+            expectedAdjustableToken = poolStateWithBalances.tokens.find((t) =>
                 isSameAddress(t.address, AAVE.address),
             ) as PoolTokenWithBalance;
 
-            maxAdjustableTokenBalanceRaw = parseUnits(
-                maxAdjustableToken.balance,
-                maxAdjustableToken.decimals,
+            expectedAdjustableTokenBalanceRaw = parseUnits(
+                expectedAdjustableToken.balance,
+                expectedAdjustableToken.decimals,
             );
         });
 
         test('buildCallWithPermit2', async () => {
-            const maxAdjustableAmountGiven =
-                maxAdjustableTokenBalanceRaw / 100n;
+            const expectedAdjustableAmountGiven =
+                expectedAdjustableTokenBalanceRaw / 100n;
 
             const addLiquidityInput: AddLiquidityUnbalancedViaSwapInput = {
                 chainId,
                 rpcUrl,
-                maxAdjustableAmountIn: {
+                expectedAdjustableAmountIn: {
                     // adjustable token (AAVE) budget as a fraction of pool AAVE balance
-                    rawAmount: maxAdjustableAmountGiven,
+                    rawAmount: expectedAdjustableAmountGiven,
                     decimals: AAVE.decimals,
                     address: AAVE.address,
                 },
@@ -310,10 +312,10 @@ describe('add liquidity unbalanced via swap test', () => {
             expect(queryOutput.exactAmountIn.amount).toBe(0n);
 
             // Adjustable token is AAVE with some positive amount, within the budget
-            const maxAdjustableAmountInCalculated =
-                queryOutput.maxAdjustableAmountIn.amount;
-            expect(maxAdjustableAmountInCalculated).toEqual(
-                maxAdjustableAmountGiven,
+            const expectedAdjustableAmountInCalculated =
+                queryOutput.expectedAdjustableAmountIn.amount;
+            expect(expectedAdjustableAmountInCalculated).toEqual(
+                expectedAdjustableAmountGiven,
             );
 
             // Execute the transaction
@@ -354,21 +356,21 @@ describe('add liquidity unbalanced via swap test', () => {
             expect(transactionReceipt.status).toBe('success');
 
             // Verify max adjustable input token amount is within acceptable tolerance
-            const maxAdjustableTokenDelta =
-                balanceDeltas[maxAdjustableToken.index];
+            const adjustableTokenDelta =
+                balanceDeltas[expectedAdjustableToken.index];
             const exactTokenDelta =
-                balanceDeltas[maxAdjustableToken.index === 0 ? 1 : 0];
+                balanceDeltas[expectedAdjustableToken.index === 0 ? 1 : 0];
             const bptDelta = balanceDeltas[2];
 
             expect(exactTokenDelta).toBe(0n);
-            expect(maxAdjustableTokenDelta).toBeGreaterThan(0n);
+            expect(adjustableTokenDelta).toBeGreaterThan(0n);
             expect(bptDelta).toEqual(queryOutput.bptOut.amount);
 
             // Verify BPT output is within acceptable tolerance
             const actualVersusExpectedRatio = Number(
                 formatEther(
                     MathSol.divDownFixed(
-                        maxAdjustableTokenDelta,
+                        adjustableTokenDelta,
                         buildCallOutput.expectedAdjustableAmountIn.amount,
                     ),
                 ),

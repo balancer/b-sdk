@@ -50,10 +50,11 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         // Convert pool state amounts to TokenAmount
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
 
-        const maxAdjustableTokenIndex = sortedTokens.findIndex((token) =>
-            token.isSameAddress(input.maxAdjustableAmountIn.address),
+        const expectedAdjustableTokenIndex = sortedTokens.findIndex((token) =>
+            token.isSameAddress(input.expectedAdjustableAmountIn.address),
         );
-        const exactAmountTokenIndex = maxAdjustableTokenIndex === 0 ? 1 : 0;
+        const exactAmountTokenIndex =
+            expectedAdjustableTokenIndex === 0 ? 1 : 0;
 
         // We treat the adjustable token as the reference and derive a BPT
         // target from it.
@@ -67,8 +68,8 @@ export class AddLiquidityUnbalancedViaSwapV3 {
                 chainId: input.chainId,
                 rpcUrl: input.rpcUrl,
                 referenceAmount: {
-                    ...input.maxAdjustableAmountIn,
-                    rawAmount: input.maxAdjustableAmountIn.rawAmount / 2n,
+                    ...input.expectedAdjustableAmountIn,
+                    rawAmount: input.expectedAdjustableAmountIn.rawAmount / 2n,
                 },
                 kind: AddLiquidityKind.Proportional,
             },
@@ -82,7 +83,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             poolState.address,
             initialBptAmount.rawAmount,
             sortedTokens[exactAmountTokenIndex].address,
-            maxAdjustableTokenIndex,
+            expectedAdjustableTokenIndex,
             block,
         );
 
@@ -95,7 +96,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             poolState.address,
             adjustedBptAmount,
             sortedTokens[exactAmountTokenIndex].address,
-            maxAdjustableTokenIndex,
+            expectedAdjustableTokenIndex,
             block,
         );
 
@@ -118,8 +119,8 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         );
 
         const calculatedVsProvidedRatio = MathSol.divDownFixed(
-            finalAmountsIn[maxAdjustableTokenIndex].amount - 10n, // 10 wei of buffer for rounding issues
-            input.maxAdjustableAmountIn.rawAmount,
+            finalAmountsIn[expectedAdjustableTokenIndex].amount - 10n, // 10 wei of buffer for rounding issues
+            input.expectedAdjustableAmountIn.rawAmount,
         );
 
         if (
@@ -143,8 +144,8 @@ export class AddLiquidityUnbalancedViaSwapV3 {
                 sortedTokens[exactAmountTokenIndex],
                 0n,
             ),
-            maxAdjustableAmountIn: TokenAmount.fromInputAmount(
-                input.maxAdjustableAmountIn,
+            expectedAdjustableAmountIn: TokenAmount.fromInputAmount(
+                input.expectedAdjustableAmountIn,
                 input.chainId,
             ),
             chainId: input.chainId,
@@ -159,14 +160,9 @@ export class AddLiquidityUnbalancedViaSwapV3 {
     buildCall(
         input: AddLiquidityUnbalancedViaSwapBuildCallInput,
     ): AddLiquidityUnbalancedViaSwapBuildCallOutput {
-        const exactBptAmountOut = TokenAmount.fromRawAmount(
-            input.bptOut.token,
-            input.slippage.applyTo(input.bptOut.amount, -1),
-        );
-
-        const expectedAdjustableAmountIn = TokenAmount.fromRawAmount(
-            input.maxAdjustableAmountIn.token,
-            input.slippage.applyTo(input.maxAdjustableAmountIn.amount, -1),
+        const maxAdjustableAmountIn = TokenAmount.fromRawAmount(
+            input.expectedAdjustableAmountIn.token,
+            input.slippage.applyTo(input.expectedAdjustableAmountIn.amount),
         );
 
         const wethIsEth = input.wethIsEth ?? false;
@@ -179,28 +175,25 @@ export class AddLiquidityUnbalancedViaSwapV3 {
                 input.deadline,
                 wethIsEth,
                 {
-                    exactBptAmountOut: exactBptAmountOut.amount,
+                    exactBptAmountOut: input.bptOut.amount,
                     exactToken: input.exactAmountIn.token.address,
                     exactAmount: input.exactAmountIn.amount,
-                    maxAdjustableAmount: input.maxAdjustableAmountIn.amount,
+                    maxAdjustableAmount: maxAdjustableAmountIn.amount,
                     addLiquidityUserData: input.addLiquidityUserData,
                     swapUserData: input.swapUserData,
                 },
             ] as const,
         });
 
-        const value = getValue(
-            [input.exactAmountIn, input.maxAdjustableAmountIn],
-            wethIsEth,
-        );
+        const value = getValue([maxAdjustableAmountIn], wethIsEth);
 
         return {
             callData,
             to: AddressProvider.UnbalancedAddViaSwapRouter(input.chainId),
             value,
-            exactBptAmountOut,
-            expectedAdjustableAmountIn,
-            maxAdjustableAmountIn: input.maxAdjustableAmountIn,
+            bptOut: input.bptOut,
+            expectedAdjustableAmountIn: input.expectedAdjustableAmountIn,
+            maxAdjustableAmountIn,
         };
     }
 

@@ -217,10 +217,10 @@ export class Permit2Helper {
         details.push(
             await getDetails(
                 input.client,
-                input.maxAdjustableAmountIn.token.address,
+                input.expectedAdjustableAmountIn.token.address,
                 input.owner,
                 spender,
-                input.maxAdjustableAmountIn.amount,
+                input.expectedAdjustableAmountIn.amount,
                 input.expiration,
                 input.nonce,
             ),

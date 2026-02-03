@@ -59,7 +59,7 @@ export async function queryAndAdjustBptAmount(
     const correctedBptAmount = calculateCorrectedBptAmount(
         bptAmount,
         amountsIn[adjustableTokenIndex],
-        input.maxAdjustableAmountIn.rawAmount,
+        input.expectedAdjustableAmountIn.rawAmount,
     );
 
     return correctedBptAmount;

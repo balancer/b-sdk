@@ -6,7 +6,7 @@ import { InputAmount } from '@/types';
 export type AddLiquidityUnbalancedViaSwapInput = {
     chainId: number;
     rpcUrl: string;
-    maxAdjustableAmountIn: InputAmount;
+    expectedAdjustableAmountIn: InputAmount;
     addLiquidityUserData?: Hex;
     swapUserData?: Hex;
     sender?: Address;
@@ -16,7 +16,7 @@ export type AddLiquidityUnbalancedViaSwapQueryOutput = {
     pool: Address;
     bptOut: TokenAmount;
     exactAmountIn: TokenAmount;
-    maxAdjustableAmountIn: TokenAmount;
+    expectedAdjustableAmountIn: TokenAmount;
     chainId: number;
     protocolVersion: 3;
     to: Address;
@@ -34,7 +34,7 @@ export type AddLiquidityUnbalancedViaSwapBuildCallOutput = {
     callData: Hex;
     to: Address;
     value: bigint;
-    exactBptAmountOut: TokenAmount;
+    bptOut: TokenAmount;
     expectedAdjustableAmountIn: TokenAmount;
     maxAdjustableAmountIn: TokenAmount;
 };

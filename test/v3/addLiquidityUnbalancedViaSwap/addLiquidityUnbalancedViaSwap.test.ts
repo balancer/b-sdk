@@ -71,7 +71,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 const input: AddLiquidityUnbalancedViaSwapInput = {
                     chainId,
                     rpcUrl: 'http://localhost:8545',
-                    maxAdjustableAmountIn: {
+                    expectedAdjustableAmountIn: {
                         rawAmount: parseUnits('100', AAVE.decimals),
                         decimals: AAVE.decimals,
                         address: AAVE.address,
@@ -87,12 +87,12 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
             });
         });
 
-        describe('maxAdjustableAmountIn validation', () => {
-            test('throws error when maxAdjustableAmountIn is zero', () => {
+        describe('expectedAdjustableAmountIn validation', () => {
+            test('throws error when expectedAdjustableAmountIn is zero', () => {
                 const input: AddLiquidityUnbalancedViaSwapInput = {
                     chainId,
                     rpcUrl: 'http://localhost:8545',
-                    maxAdjustableAmountIn: {
+                    expectedAdjustableAmountIn: {
                         rawAmount: 0n,
                         decimals: AAVE.decimals,
                         address: AAVE.address,
@@ -105,7 +105,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                         mockPoolState,
                     ),
                 ).toThrowError(
-                    'maxAdjustableAmountIn should be greater than zero',
+                    'expectedAdjustableAmountIn should be greater than zero',
                 );
             });
         });
@@ -134,7 +134,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                     parseUnits('100', 18),
                 ),
                 exactAmountIn: TokenAmount.fromRawAmount(exactToken, 0n),
-                maxAdjustableAmountIn: TokenAmount.fromRawAmount(
+                expectedAdjustableAmountIn: TokenAmount.fromRawAmount(
                     adjustableToken,
                     parseUnits('50', AAVE.decimals),
                 ),
@@ -159,13 +159,13 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
 
                 // Function selector for addLiquidityUnbalanced
                 expect(result.callData).toBe(
-                    '0xaba40fa70000000000000000000000009d1fcf346ea1b073de4d5834e25572cc6ad71f4dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000055de6a779bbac0000000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002b5e3af16b188000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                    '0xaba40fa70000000000000000000000009d1fcf346ea1b073de4d5834e25572cc6ad71f4dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000056bc75e2d63100000000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002bcd40a70853a000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
                 );
             });
         });
 
         describe('slippage application', () => {
-            test('applies negative slippage to bptOut and maxAdjustableAmountIn', () => {
+            test('applies slippage to expectedAdjustableAmountIn', () => {
                 const slippage = Slippage.fromPercentage('1'); // 1%
                 const buildCallInput = {
                     ...mockQueryOutput,
@@ -176,25 +176,18 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 const result =
                     addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
 
-                // Verify slippage calculation: bptOut * (1 - 0.01) = bptOut * 0.99
-                const expectedMin = slippage.applyTo(
-                    mockQueryOutput.bptOut.amount,
-                    -1,
+                // Verify slippage calculation: expectedAdjustableAmountIn * (1 + slippage)
+                const maxAdjustableAmount = slippage.applyTo(
+                    mockQueryOutput.expectedAdjustableAmountIn.amount,
                 );
-                expect(result.exactBptAmountOut.amount).toBe(expectedMin);
-
-                const expectedAmount = slippage.applyTo(
-                    mockQueryOutput.maxAdjustableAmountIn.amount,
-                    -1,
-                );
-                expect(result.expectedAdjustableAmountIn.amount).toBe(
-                    expectedAmount,
+                expect(result.maxAdjustableAmountIn.amount).toBe(
+                    maxAdjustableAmount,
                 );
             });
         });
 
         describe('value calculation', () => {
-            test('returns adjustable WETH amount as value when wethIsEth is true and maxAdjustableAmountIn is WETH', () => {
+            test('returns adjustable WETH amount as value when wethIsEth is true and expectedAdjustableAmountIn is WETH', () => {
                 const exactToken = new Token(
                     chainId,
                     AAVE.address,
@@ -215,7 +208,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                             exactToken,
                             0n,
                         ),
-                        maxAdjustableAmountIn: TokenAmount.fromRawAmount(
+                        expectedAdjustableAmountIn: TokenAmount.fromRawAmount(
                             adjustableToken,
                             wethAmount,
                         ),
@@ -225,9 +218,10 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                         ),
                     };
 
+                const slippage = Slippage.fromPercentage('1');
                 const buildCallInput = {
                     ...queryOutputWithWeth,
-                    slippage: Slippage.fromPercentage('1'),
+                    slippage,
                     deadline: maxUint256,
                     wethIsEth: true,
                 };
@@ -235,7 +229,9 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 const result =
                     addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
 
-                expect(result.value).toBe(wethAmount);
+                const maxWethAmount = slippage.applyTo(wethAmount);
+
+                expect(result.value).toBe(maxWethAmount);
             });
         });
 
@@ -282,7 +278,7 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                     parseUnits('100', 18),
                 ),
                 exactAmountIn: TokenAmount.fromRawAmount(exactToken, 0n),
-                maxAdjustableAmountIn: TokenAmount.fromRawAmount(
+                expectedAdjustableAmountIn: TokenAmount.fromRawAmount(
                     adjustableToken,
                     parseUnits('50', AAVE.decimals),
                 ),
@@ -370,14 +366,12 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
             // These fields should be the same
             expect(result.to).toBe(regularResult.to);
             expect(result.value).toBe(regularResult.value);
-            expect(result.exactBptAmountOut.amount).toBe(
-                regularResult.exactBptAmountOut.amount,
-            );
+            expect(result.bptOut.amount).toBe(regularResult.bptOut.amount);
             expect(result.expectedAdjustableAmountIn).toEqual(
                 regularResult.expectedAdjustableAmountIn,
             );
-            expect(result.maxAdjustableAmountIn).toEqual(
-                regularResult.maxAdjustableAmountIn,
+            expect(result.expectedAdjustableAmountIn).toEqual(
+                regularResult.expectedAdjustableAmountIn,
             );
         });
 
@@ -413,11 +407,13 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 mockPermit2,
             );
 
-            const expectedMin = slippage.applyTo(
-                mockQueryOutput.bptOut.amount,
-                -1,
+            // Verify slippage calculation: expectedAdjustableAmountIn * (1 + slippage)
+            const maxAdjustableAmount = slippage.applyTo(
+                mockQueryOutput.expectedAdjustableAmountIn.amount,
             );
-            expect(result.exactBptAmountOut.amount).toBe(expectedMin);
+            expect(result.maxAdjustableAmountIn.amount).toBe(
+                maxAdjustableAmount,
+            );
         });
     });
 });

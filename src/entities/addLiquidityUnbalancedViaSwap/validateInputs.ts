@@ -12,7 +12,7 @@ export const validateAddLiquidityUnbalancedViaSwapInput = (
         {
             ...input,
             kind: AddLiquidityKind.Unbalanced,
-            amountsIn: [input.maxAdjustableAmountIn],
+            amountsIn: [input.expectedAdjustableAmountIn],
         },
         poolState,
     );
@@ -25,11 +25,11 @@ export const validateAddLiquidityUnbalancedViaSwapInput = (
         );
     }
 
-    if (input.maxAdjustableAmountIn.rawAmount <= 0n) {
+    if (input.expectedAdjustableAmountIn.rawAmount <= 0n) {
         throw new SDKError(
             'Input Validation',
             'AddLiquidityUnbalancedViaSwap',
-            'maxAdjustableAmountIn should be greater than zero',
+            'expectedAdjustableAmountIn should be greater than zero',
         );
     }
 };
