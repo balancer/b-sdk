@@ -243,14 +243,15 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         },
     },
     [ChainId.MONAD]: {
-        BAL: {
-            address: '0xf23b4DB826DbA14c0e857029dfF076b1c0264843',
+        AUSD: {
+            address: '0x00000000efe302beaa2b3e6e1b18d08d69a9012a',
             decimals: 6,
             slot: 0, // not confirmed
         },
         WMON: {
             address: '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
             decimals: 18,
+            slot: 3
         },
     },
 };
@@ -448,9 +449,9 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         },
     },
     [ChainId.MONAD]: {
-        MOCK_WMON_BAL_POOL: {
-            address: '0x87F438EAf18cb8d0e4F1B08080acF225AB7AA0F3',
-            id: '0x87F438EAf18cb8d0e4F1B08080acF225AB7AA0F3',
+        MOCK_WMON_AUSD_POOL: {
+            address: '0x770133233a092dd26934d15699d9f6c1538c74e6',
+            id: '0x770133233a092dd26934d15699d9f6c1538c74e6',
             type: PoolType.Weighted,
             decimals: 18,
             slot: 0,

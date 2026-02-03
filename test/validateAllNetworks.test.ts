@@ -94,9 +94,9 @@ const NETWORK_CONFIG: Partial<
     },
     [ChainId.MONAD]: {
         tokenInKey: 'WMON',
-        tokenOutKey: 'BAL',
-        poolKey: 'MOCK_WMON_BAL_POOL',
-        inputAmountRaw: 10000n,
+        tokenOutKey: 'AUSD',
+        poolKey: 'MOCK_WMON_AUSD_POOL',
+        inputAmountRaw: 1000000000000000n,
     },
 };
 
@@ -115,7 +115,7 @@ const CHAINS_TO_TEST: number[] = [
     ChainId.SEPOLIA,
     ChainId.HYPEREVM,
     ChainId.PLASMA,
-    // ChainId.MONAD, // Once the pool is initialized, this chain can be run as well
+    ChainId.MONAD,
     // ChainId.X_LAYER, // X_LAYER is not live and RPC is giving issues on CI (No Alchemy available)
 ];
 

@@ -139,8 +139,8 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
     MONAD: {
         rpcEnv: 'MONAD_RPC_URL',
         fallBackRpc: 'https://rpc.monad.xyz',
-        port: ANVIL_PORTS.X_LAYER,
-        forkBlockNumber: 43138155n,
+        port: ANVIL_PORTS.MONAD,
+        forkBlockNumber: 52794217n,
     },
 };
 
