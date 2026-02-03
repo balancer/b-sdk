@@ -25,14 +25,20 @@ export function calculateCorrectedBptAmount(
         queriedAdjustableAmount,
         targetAdjustableAmount,
     );
+
     return MathSol.divDownFixed(bptAmount, correctionFactor);
+}
+
+export interface QueryAndAdjustBptAmountResult {
+    correctedBptAmount: bigint;
+    calculatedAdjustableAmount: bigint;
 }
 
 /**
  * Performs a query and applies BPT amount correction based on the ratio between
  * the queried maxAdjustableAmountIn and the user-provided target.
  *
- * @returns An object containing the corrected BPT amount and the amounts from the query
+ * @returns An object containing the corrected BPT amount and the calculated adjustable amount from the query
  */
 export async function queryAndAdjustBptAmount(
     input: AddLiquidityUnbalancedViaSwapInput,
@@ -41,7 +47,7 @@ export async function queryAndAdjustBptAmount(
     exactToken: Address,
     adjustableTokenIndex: number,
     block?: bigint,
-): Promise<bigint> {
+): Promise<QueryAndAdjustBptAmountResult> {
     const amountsIn = await doAddLiquidityUnbalancedViaSwapQuery(
         input.rpcUrl,
         input.chainId,
@@ -62,5 +68,8 @@ export async function queryAndAdjustBptAmount(
         input.expectedAdjustableAmountIn.rawAmount,
     );
 
-    return correctedBptAmount;
+    return {
+        correctedBptAmount,
+        calculatedAdjustableAmount: amountsIn[adjustableTokenIndex],
+    };
 }

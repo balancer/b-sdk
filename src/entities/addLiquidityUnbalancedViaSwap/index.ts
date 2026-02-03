@@ -43,10 +43,6 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         // adjustable token has a finite budget.
         validateAddLiquidityUnbalancedViaSwapInput(input, poolState);
 
-        const sender = input.sender ?? zeroAddress;
-        const addLiquidityUserData = input.addLiquidityUserData ?? '0x';
-        const swapUserData = input.swapUserData ?? '0x';
-
         // Convert pool state amounts to TokenAmount
         const sortedTokens = getSortedTokens(poolState.tokens, input.chainId);
 
@@ -76,57 +72,47 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             poolState,
         );
 
-        // First iteration to adjust bptAmount will overcorrect, resulting in
-        // an adjustedBptAmount greater than the desired output
-        const adjustedBptAmount = await queryAndAdjustBptAmount(
-            input,
-            poolState.address,
-            initialBptAmount.rawAmount,
-            sortedTokens[exactAmountTokenIndex].address,
-            expectedAdjustableTokenIndex,
-            block,
-        );
+        // Iteratively adjust BPT amount until we find an approximation that:
+        // 1. Is from below (calculated <= expected) to favor leaving dust
+        // 2. Is within 0.1% tolerance of the expected adjustable amount
+        const MAX_ITERATIONS = 4;
+        const TOLERANCE = parseEther('0.001'); // 0.1%
 
-        // Second iteration to get closer to the desired output from below.
-        // This ensures the result will favor leaving some dust behind instead
-        // of risking a revert by returning a finalBptAmount corresponding to
-        // a maxAdjustableAmount smaller than the amountIn provided by the user.
-        const finalBptAmount = await queryAndAdjustBptAmount(
-            input,
-            poolState.address,
-            adjustedBptAmount,
-            sortedTokens[exactAmountTokenIndex].address,
-            expectedAdjustableTokenIndex,
-            block,
-        );
+        let currentBptAmount = initialBptAmount.rawAmount;
+        let foundValidApproximation = false;
 
-        const calculatedAmountsIn = await doAddLiquidityUnbalancedViaSwapQuery(
-            input.rpcUrl,
-            input.chainId,
-            poolState.address,
-            sender,
-            finalBptAmount,
-            sortedTokens[exactAmountTokenIndex].address,
-            0n,
-            maxUint256,
-            addLiquidityUserData,
-            swapUserData,
-            block,
-        );
+        for (let i = 0; i < MAX_ITERATIONS; i++) {
+            const { correctedBptAmount, calculatedAdjustableAmount } =
+                await queryAndAdjustBptAmount(
+                    input,
+                    poolState.address,
+                    currentBptAmount,
+                    sortedTokens[exactAmountTokenIndex].address,
+                    expectedAdjustableTokenIndex,
+                    block,
+                );
 
-        const finalAmountsIn = sortedTokens.map((token, index) =>
-            TokenAmount.fromRawAmount(token, calculatedAmountsIn[index]),
-        );
+            // Check if current BPT amount produces a valid approximation:
+            // - Must be from below (ratio <= 1) to avoid transaction reverts
+            // - Must be within 0.1% tolerance
+            const ratio = MathSol.divDownFixed(
+                calculatedAdjustableAmount,
+                input.expectedAdjustableAmountIn.rawAmount,
+            );
 
-        const calculatedVsProvidedRatio = MathSol.divDownFixed(
-            finalAmountsIn[expectedAdjustableTokenIndex].amount - 10n, // 10 wei of buffer for rounding issues
-            input.expectedAdjustableAmountIn.rawAmount,
-        );
+            const isFromBelow = ratio <= WAD;
+            const isWithinTolerance = WAD - ratio <= TOLERANCE;
 
-        if (
-            calculatedVsProvidedRatio > WAD ||
-            WAD - calculatedVsProvidedRatio > parseEther('0.01')
-        ) {
+            if (isFromBelow && isWithinTolerance) {
+                foundValidApproximation = true;
+                break;
+            }
+
+            // Not within tolerance yet, continue with corrected BPT amount
+            currentBptAmount = correctedBptAmount;
+        }
+
+        if (!foundValidApproximation) {
             throw new SDKError(
                 'Error',
                 'Add Liquidity Unbalanced Via Swap',
@@ -135,7 +121,7 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         }
 
         const bptToken = new Token(input.chainId, poolState.address, 18);
-        const bptOut = TokenAmount.fromRawAmount(bptToken, finalBptAmount);
+        const bptOut = TokenAmount.fromRawAmount(bptToken, currentBptAmount);
 
         const output: AddLiquidityUnbalancedViaSwapQueryOutput = {
             pool: poolState.address,
@@ -151,8 +137,8 @@ export class AddLiquidityUnbalancedViaSwapV3 {
             chainId: input.chainId,
             protocolVersion: 3,
             to: AddressProvider.UnbalancedAddViaSwapRouter(input.chainId),
-            addLiquidityUserData,
-            swapUserData,
+            addLiquidityUserData: input.addLiquidityUserData ?? '0x',
+            swapUserData: input.swapUserData ?? '0x',
         };
         return output;
     }

@@ -141,6 +141,7 @@ describe('add liquidity unbalanced via swap test', () => {
                 { label: '1%', num: 1n, den: 100n },
                 { label: '10%', num: 1n, den: 10n },
                 { label: '50%', num: 1n, den: 2n },
+                { label: '100%', num: 1n, den: 1n },
             ] as const;
 
             let expectedAdjustableTokenBalanceRaw: bigint;
