@@ -153,7 +153,11 @@ const getTokenAmountsAndTotalShares = async (
     chainId: number,
     poolState: PoolState,
     publicClient: PublicClient,
-) => {
+): Promise<{
+    tokenAmounts: TokenAmount[];
+    totalShares: bigint;
+    tokenRates: readonly bigint[];
+}> => {
     // create contract calls to get total supply and balances for each pool token
     const totalSupplyContract = {
         address: AddressProvider.Vault(chainId),
@@ -168,9 +172,19 @@ const getTokenAmountsAndTotalShares = async (
         args: [poolState.address] as const,
     };
 
-    // execute multicall to get total supply and balances for each pool token
+    const getPoolDataContract = {
+        address: AddressProvider.Vault(chainId),
+        abi: vaultExtensionAbi_V3,
+        functionName: 'getPoolData' as const,
+        args: [poolState.address] as const,
+    };
+
     const outputs = await publicClient.multicall({
-        contracts: [totalSupplyContract, getBalanceContracts],
+        contracts: [
+            totalSupplyContract,
+            getBalanceContracts,
+            getPoolDataContract,
+        ],
     });
 
     // throw error if any of the calls failed
@@ -192,10 +206,16 @@ const getTokenAmountsAndTotalShares = async (
         readonly bigint[],
         readonly bigint[],
     ];
+
+    // extract tokenRates from getPoolData result
+    // getPoolData returns: { poolConfigBits, tokens, tokenInfo, balancesRaw, balancesLiveScaled18, tokenRates, decimalScalingFactors }
+    const tokenRates = (outputs[2].result as { tokenRates: readonly bigint[] })
+        .tokenRates;
+
     const poolTokens = getSortedTokens(poolState.tokens, chainId);
     const tokenAmounts = poolTokens.map((token, i) =>
         TokenAmount.fromRawAmount(token, balancesRaw[i]),
     );
 
-    return { tokenAmounts, totalShares };
+    return { tokenAmounts, totalShares, tokenRates };
 };

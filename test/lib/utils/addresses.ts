@@ -59,6 +59,11 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             address: '0xda00000035fef4082F78dEF6A8903bee419FbF8E',
             decimals: 6,
         },
+        AAVE: {
+            address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+            decimals: 18,
+            slot: 0,
+        },
     },
     [ChainId.OPTIMISM]: {
         FRAX: {
@@ -207,6 +212,11 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
             decimals: 18,
             slot: 51,
         },
+        USDCe: {
+            address: '0x2a22f9c3b484c3629090feed35f17ff8f88f76f0',
+            decimals: 18,
+            slot: 9,
+        },
     },
     [ChainId.HYPEREVM]: {
         feUSD: {
@@ -316,6 +326,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             decimals: 18,
             slot: 0,
         },
+        AAVE_WETH: {
+            id: '0x9d1fcf346ea1b073de4d5834e25572cc6ad71f4d',
+            address: '0x9d1fcf346ea1b073de4d5834e25572cc6ad71f4d',
+            type: PoolType.ReClamm,
+            decimals: 18,
+            slot: 0,
+        },
     },
     [ChainId.OPTIMISM]: {
         FRAX_USDC_MAI: {
@@ -417,6 +434,13 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
             address: '0xa91c3c043051e7e680b61d79b3a733d3e2c0fb5e',
             id: '0xa91c3c043051e7e680b61d79b3a733d3e2c0fb5e',
             type: PoolType.Stable,
+            decimals: 18,
+            slot: 0,
+        },
+        USDCe_GNO: {
+            address: '0x70b3b56773ace43fe86ee1d80cbe03176cbe4c09',
+            id: '0x70b3b56773ace43fe86ee1d80cbe03176cbe4c09',
+            type: PoolType.ReClamm,
             decimals: 18,
             slot: 0,
         },

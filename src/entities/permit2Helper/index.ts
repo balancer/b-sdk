@@ -31,6 +31,7 @@ import { getAmountsCall } from '../addLiquidity/helpers';
 import { AddLiquidityBufferBuildCallInput } from '../addLiquidityBuffer/types';
 import { InitBufferBuildCallInput } from '../initBuffer/types';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import { AddLiquidityUnbalancedViaSwapBuildCallInput } from '../addLiquidityUnbalancedViaSwap';
 
 export * from './allowanceTransfer';
 export * from './constants';
@@ -200,6 +201,30 @@ export class Permit2Helper {
                 input.nonces ? input.nonces[1] : undefined,
             ),
         ];
+        return signPermit2(input.client, input.owner, spender, details);
+    }
+
+    static async signAddLiquidityUnbalancedViaSwapApproval(
+        input: AddLiquidityUnbalancedViaSwapBuildCallInput & {
+            client: PublicWalletClient;
+            owner: Address | Account;
+            nonce?: number;
+            expiration?: number;
+        },
+    ): Promise<Permit2> {
+        const spender = AddressProvider.Router(input.chainId);
+        const details: PermitDetails[] = [];
+        details.push(
+            await getDetails(
+                input.client,
+                input.expectedAdjustableAmountIn.token.address,
+                input.owner,
+                spender,
+                input.expectedAdjustableAmountIn.amount,
+                input.expiration,
+                input.nonce,
+            ),
+        );
         return signPermit2(input.client, input.owner, spender, details);
     }
 

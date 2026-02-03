@@ -1,5 +1,6 @@
 export * from './addLiquidity';
 export * from './addLiquidity/types';
+export * from './addLiquidityUnbalancedViaSwap';
 export * from './addLiquidityBoosted';
 export * from './addLiquidityBoosted/types';
 export * from './addLiquidityBuffer';

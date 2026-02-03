@@ -92,6 +92,7 @@ export type GqlChain =
   | 'HYPEREVM'
   | 'MAINNET'
   | 'MODE'
+  | 'MONAD'
   | 'OPTIMISM'
   | 'PLASMA'
   | 'POLYGON'
@@ -1153,6 +1154,7 @@ export type GqlPoolLiquidityBootstrappingV3 = GqlPoolBase & {
   /** @deprecated Removed without replacement */
   investConfig: GqlPoolInvestConfig;
   isProjectTokenSwapInBlocked: Scalars['Boolean']['output'];
+  isSeedless: Scalars['Boolean']['output'];
   lbpName?: Maybe<Scalars['String']['output']>;
   lbpOwner: Scalars['String']['output'];
   liquidityManagement?: Maybe<LiquidityManagement>;
@@ -2761,6 +2763,7 @@ export type LiquidityBootstrappingPoolV3Params = {
   endTime: Scalars['Int']['output'];
   farcaster?: Maybe<Scalars['String']['output']>;
   isProjectTokenSwapInBlocked: Scalars['Boolean']['output'];
+  isSeedless: Scalars['Boolean']['output'];
   lbpName?: Maybe<Scalars['String']['output']>;
   lbpOwner: Scalars['String']['output'];
   projectToken: Scalars['String']['output'];
