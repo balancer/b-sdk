@@ -13,6 +13,7 @@ import {
     publicActions,
     TestActions,
     walletActions,
+    zeroAddress,
 } from 'viem';
 
 import {
@@ -318,12 +319,16 @@ describe('add liquidity unbalanced via swap test', () => {
                     expectedAdjustableAmountGiven,
                 );
 
+                const slippage = Slippage.fromPercentage('1'); // 1% slippage
+
                 // Execute the transaction
-                const buildCallInput = {
-                    ...queryOutput,
-                    slippage: Slippage.fromPercentage('1'), // 1% slippage
-                    deadline: maxUint256,
-                };
+                const buildCallInput: AddLiquidityUnbalancedViaSwapBuildCallInput =
+                    {
+                        ...queryOutput,
+                        slippage,
+                        deadline: maxUint256,
+                        wethIsEth: true,
+                    };
 
                 const buildCallOutput =
                     addLiquidityUnbalancedViaSwap.buildCall(buildCallInput);
@@ -331,7 +336,6 @@ describe('add liquidity unbalanced via swap test', () => {
                 expect(buildCallOutput.to).toBe(
                     AddressProvider.UnbalancedAddViaSwapRouter(chainId),
                 );
-                expect(buildCallOutput.value).toBe(0n);
 
                 // Send transaction and check balance changes
                 const { transactionReceipt, balanceDeltas } =
@@ -339,6 +343,7 @@ describe('add liquidity unbalanced via swap test', () => {
                         [
                             ...poolState.tokens.map((t) => t.address),
                             queryOutput.bptOut.token.address, // BPT token
+                            zeroAddress,
                         ],
                         client,
                         testAddress,
@@ -355,23 +360,23 @@ describe('add liquidity unbalanced via swap test', () => {
                 const exactTokenDelta =
                     balanceDeltas[expectedAdjustableToken.index === 0 ? 1 : 0];
                 const bptDelta = balanceDeltas[2];
-
-                // TODO: check value is within range for adjustableAmountIn provided
+                const ethDelta = balanceDeltas[3];
 
                 expect(exactTokenDelta).toBe(0n);
-                expect(adjustableTokenDelta).toBeGreaterThan(0n);
+                expect(adjustableTokenDelta).toBe(0n); // wethIsEth = true should affect eth instead of weth balance, so this is zero
                 expect(bptDelta).toBeGreaterThan(0n);
 
-                // Verify expectedAdjustableAmountIn is within acceptable tolerance
+                // Verify ethDelta and value are within acceptable tolerance
+                expect(ethDelta).toBeGreaterThan(0n);
+                const ethDeltaPlusSlippage = slippage.applyTo(ethDelta);
                 const actualVersusExpectedRatio = Number(
                     formatEther(
                         MathSol.divDownFixed(
-                            adjustableTokenDelta,
-                            buildCallOutput.expectedAdjustableAmountIn.amount,
+                            ethDeltaPlusSlippage,
+                            buildCallOutput.value,
                         ),
                     ),
                 );
-
                 expect(actualVersusExpectedRatio).toBeCloseTo(1, 3); // 0.1% tolerance
             });
         });

@@ -1,4 +1,4 @@
-import { encodeFunctionData, maxUint256, parseEther, zeroAddress } from 'viem';
+import { encodeFunctionData, parseEther } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { Token } from '@/entities/token';
 import { PoolState } from '@/entities/types';
@@ -13,7 +13,6 @@ import {
     getSortedTokens,
     getBptAmountFromReferenceAmount,
 } from '@/entities/utils';
-import { doAddLiquidityUnbalancedViaSwapQuery } from './doAddLiquidityUnbalancedViaSwapQuery';
 import { validateAddLiquidityUnbalancedViaSwapInput } from './validateInputs';
 import {
     AddLiquidityUnbalancedViaSwapInput,
