@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 5.1.3
+
+### Patch Changes
+
+- c8c2a65: fix-add-monad-addresses-and-update-tests
+
 ## 5.1.2
 
 ### Patch Changes
