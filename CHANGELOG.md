@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 5.2.0
+
+### Minor Changes
+
+- acc99c5: Add support for Add Liquidity Unbalanced Via Swap
+
 ## 5.1.3
 
 ### Patch Changes
