@@ -178,6 +178,7 @@ export const balancerV3Contracts = {
         [ChainId.OPTIMISM]: '0x03CBccbe8d2073A1dC186aE6Bcd95390Fcdff36f',
         [ChainId.PLASMA]: '0xf4743D026f3D07aF3747bb7d05BeD06D177241d7',
         [ChainId.SEPOLIA]: '0x5bd0bDc415489A2B75C3A1F276106193ea8BF589',
+        [ChainId.SONIC]: '0xBf957acb1bB6Fb31B9ad3042E41ae50B6676A809',
         [ChainId.X_LAYER]: '0xaD89051bEd8d96f045E8912aE1672c6C0bF8a85E',
     },
     Vault: {
