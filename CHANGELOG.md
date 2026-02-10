@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 5.2.1
+
+### Patch Changes
+
+- 210fcd7: Update Sonic UnbalancedAddViaSwapRouter address.
+
 ## 5.2.0
 
 ### Minor Changes
