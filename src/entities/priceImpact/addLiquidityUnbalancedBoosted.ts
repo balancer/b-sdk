@@ -32,7 +32,7 @@ import { Token } from '../token';
  * 4. swap between tokens zeroing out the `diffs` between `proportionalAmountsOut`
  *    and `exactAmountsIn`, leaving the remaining diff within a single
  *    token → `diffFinal` (see code below for detailed steps)
- * 5. `amountInitial` will be the the `exactAmountsIn` respective to `diffFinal` token
+ * 5. `amountInitial` will be the `exactAmountsIn` respective to `diffFinal` token
  * 6. price impact ABA = `diffFinal` / `amountInitial` / 2
  *
  * @param input same input used in the corresponding add liquidity operation
