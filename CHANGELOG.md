@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 5.2.2
+
+### Patch Changes
+
+- 19a8bf4: Bump viem from 2.45.1 to 2.46.2.
+
 ## 5.2.1
 
 ### Patch Changes
