@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 5.2.3
+
+### Patch Changes
+
+- 26cc5b0: Update GyroECLP factory to latest (longer pause window).
+
 ## 5.2.2
 
 ### Patch Changes
