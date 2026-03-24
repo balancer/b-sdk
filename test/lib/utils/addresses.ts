@@ -239,6 +239,7 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         weETH: {
             address: '0xA3D68b74bF0528fdD07263c60d6488749044914b',
             decimals: 18,
+            slot: 0,
         },
     },
     [ChainId.X_LAYER]: {
@@ -253,15 +254,15 @@ export const TOKENS: Record<number, Record<string, TestToken>> = {
         },
     },
     [ChainId.MONAD]: {
-        AUSD: {
-            address: '0x00000000efe302beaa2b3e6e1b18d08d69a9012a',
+        wnUSDTO: {
+            address: '0x4e8aaecce10ad9394e96fe5f2bd4e587a7b04298',
             decimals: 6,
-            slot: 0, // not confirmed
+            slot: 5,
         },
-        WMON: {
-            address: '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
-            decimals: 18,
-            slot: 3,
+        wnAUSD: {
+            address: '0x82c370ba90e38ef6acd8b1b078d34fd86fc6bac9',
+            decimals: 6,
+            slot: 5,
         },
     },
 };
@@ -473,10 +474,10 @@ export const POOLS: Record<number, Record<string, TestPool>> = {
         },
     },
     [ChainId.MONAD]: {
-        MOCK_WMON_AUSD_POOL: {
-            address: '0x770133233a092dd26934d15699d9f6c1538c74e6',
-            id: '0x770133233a092dd26934d15699d9f6c1538c74e6',
-            type: PoolType.Weighted,
+        wnAUSD_wnUSDC_wnUSDT0: {
+            address: '0x2daa146dfb7eaef0038f9f15b2ec1e4de003f72b',
+            id: '0x2daa146dfb7eaef0038f9f15b2ec1e4de003f72b',
+            type: PoolType.Stable,
             decimals: 18,
             slot: 0,
         },

@@ -17,6 +17,7 @@ import { POOLS, TOKENS, TestPool, TestToken } from 'test/lib/utils/addresses';
 import {
     approveSpenderOnTokens,
     approveTokens,
+    findTokenBalanceSlot,
     setTokenBalances,
 } from 'test/lib/utils/helper';
 import { assertSwapExactIn } from 'test/lib/utils/swapHelpers';
@@ -94,10 +95,10 @@ const NETWORK_CONFIG: Partial<
         inputAmountRaw: 10000n,
     },
     [ChainId.MONAD]: {
-        tokenInKey: 'WMON',
-        tokenOutKey: 'AUSD',
-        poolKey: 'MOCK_WMON_AUSD_POOL',
-        inputAmountRaw: 1000000000000000n,
+        tokenInKey: 'wnUSDTO',
+        tokenOutKey: 'wnAUSD',
+        poolKey: 'wnAUSD_wnUSDC_wnUSDT0',
+        inputAmountRaw: 1000000000n,
     },
 };
 
@@ -108,7 +109,7 @@ const BLOCK_NUMBER_OVERRIDES: Partial<Record<number, bigint>> = {
     [ChainId.MAINNET]: 22788192n,
     [ChainId.PLASMA]: 1274881n,
     [ChainId.X_LAYER]: 43173129n,
-    [ChainId.MONAD]: 52794217n,
+    [ChainId.MONAD]: 63533437n,
 };
 
 // List of ChainIds to run the test for. Modify this array to select which chains to test.
@@ -183,11 +184,30 @@ describe('validateAllNetworks', () => {
 
             // Set balances and approve
             if (tokenIn && tokenOut) {
+                const tokensWithKeys = [
+                    { key: config.tokenInKey, token: tokenIn },
+                    { key: config.tokenOutKey, token: tokenOut },
+                ];
+                const resolvedSlots = await Promise.all(
+                    tokensWithKeys.map(async ({ key, token }) => {
+                        if (token.slot !== undefined) return token.slot;
+                        const discoveredSlot = await findTokenBalanceSlot(
+                            client,
+                            testAddress,
+                            token.address,
+                        );
+                        console.log(
+                            `[slot-discovery] chainId=${chainId} tokenKey=${key} tokenAddress=${token.address} slot was undefined; discovered slot=${discoveredSlot}`,
+                        );
+                        return discoveredSlot;
+                    }),
+                );
+
                 await setTokenBalances(
                     client,
                     testAddress,
                     [tokenIn.address, tokenOut.address],
-                    [tokenIn.slot ?? 0, tokenOut.slot ?? 0],
+                    resolvedSlots,
                     [parseEther('100'), parseEther('100')],
                 );
                 if (PERMIT2[chainId]) {
