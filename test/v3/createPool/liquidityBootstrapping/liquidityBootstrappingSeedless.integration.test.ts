@@ -13,12 +13,12 @@ import {
     CHAINS,
     ChainId,
     PoolType,
-    PERMIT2,
     InitPool,
     CreatePoolLiquidityBootstrappingInput,
     LBPParams,
     InitPoolInput,
     CreatePool,
+    Permit2Helper,
 } from 'src';
 import { ANVIL_NETWORKS, startFork } from '../../../anvil/anvil-global-setup';
 import { TOKENS } from 'test/lib/utils/addresses';
@@ -31,7 +31,6 @@ import {
 import { assertInitPool } from 'test/lib/utils/initPoolHelper';
 import {
     setTokenBalances,
-    approveSpenderOnTokens,
     approveTokens,
     sendTransactionGetBalances,
 } from 'test/lib/utils/helper';
@@ -147,29 +146,7 @@ describe('create seedless liquidityBootstrapping pool test', () => {
         expect(isPoolRegistered).to.be.true;
     }, 120_000);
 
-    test('Initialization', async () => {
-        await setTokenBalances(
-            client,
-            testAddress,
-            [BAL.address],
-            [BAL.slot!],
-            [parseUnits('100', 18)],
-        );
-
-        await approveSpenderOnTokens(
-            client,
-            testAddress,
-            [BAL.address],
-            PERMIT2[chainId],
-        );
-
-        await approveTokens(
-            client,
-            testAddress,
-            [BAL.address],
-            protocolVersion,
-        );
-
+    describe('Initialization', () => {
         // BAL listed before USDC (reverse of Vault sort order: USDC=0, BAL=1)
         // to verify that buildCall resolves amounts by address, not array position.
         const initPoolInput: InitPoolInput = {
@@ -190,30 +167,84 @@ describe('create seedless liquidityBootstrapping pool test', () => {
             wethIsEth: false,
         };
 
-        const initPool = new InitPool();
-
-        const initPoolBuildOutput = initPool.buildCall(initPoolInput, {
+        const poolState = () => ({
             id: poolAddress,
             address: poolAddress,
             type: poolType,
-            protocolVersion: 3,
+            protocolVersion: 3 as const,
             tokens: [
                 { ...USDC, index: 0 },
                 { ...BAL, index: 1 },
             ],
         });
 
-        const txOutput = await sendTransactionGetBalances(
-            [BAL.address, USDC.address],
-            client,
-            testAddress,
-            initPoolBuildOutput.to,
-            initPoolBuildOutput.callData,
-            initPoolBuildOutput.value,
-        );
+        const initPool = new InitPool();
+        let snapshot: `0x${string}`;
 
-        assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
-    }, 120_000);
+        beforeAll(async () => {
+            await setTokenBalances(
+                client,
+                testAddress,
+                [BAL.address],
+                [BAL.slot!],
+                [parseUnits('100', 18)],
+            );
+
+            await approveTokens(
+                client,
+                testAddress,
+                [BAL.address],
+                protocolVersion,
+            );
+
+            snapshot = await client.snapshot();
+        }, 120_000);
+
+        test('permit2 direct approval', async () => {
+            const initPoolBuildOutput = initPool.buildCall(
+                initPoolInput,
+                poolState(),
+            );
+
+            const txOutput = await sendTransactionGetBalances(
+                [BAL.address, USDC.address],
+                client,
+                testAddress,
+                initPoolBuildOutput.to,
+                initPoolBuildOutput.callData,
+                initPoolBuildOutput.value,
+            );
+
+            assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
+        }, 120_000);
+
+        test('permit2 signature', async () => {
+            await client.revert({ id: snapshot });
+
+            const permit2 = await Permit2Helper.signInitPoolApproval({
+                ...initPoolInput,
+                client,
+                owner: testAddress,
+            });
+
+            const initPoolBuildOutput = initPool.buildCallWithPermit2(
+                initPoolInput,
+                poolState(),
+                permit2,
+            );
+
+            const txOutput = await sendTransactionGetBalances(
+                [BAL.address, USDC.address],
+                client,
+                testAddress,
+                initPoolBuildOutput.to,
+                initPoolBuildOutput.callData,
+                initPoolBuildOutput.value,
+            );
+
+            assertInitPool(initPoolInput, { txOutput, initPoolBuildOutput });
+        }, 120_000);
+    });
 
     test('Virtual reserve balance', async () => {
         const [virtualBalanceRaw, virtualBalanceScaled18] =
