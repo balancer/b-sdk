@@ -162,6 +162,7 @@ export type GqlHookType =
   | 'DIRECTIONAL_FEE'
   | 'EXIT_FEE'
   | 'FEE_TAKING'
+  | 'FIXED_LBP'
   | 'LBP'
   | 'LOTTERY'
   | 'MEV_TAX'
@@ -420,6 +421,8 @@ export type GqlPoolAprItemType =
   | 'AURA'
   /** Dynamic swap fee APR based on data from the last 24h */
   | 'DYNAMIC_SWAP_FEE_24H'
+  /** Rewards distributed by fuul.xyz */
+  | 'FUUL'
   /** Represents the yield from an IB (Interest-Bearing) asset APR in a pool. */
   | 'IB_YIELD'
   /** APR in a pool that can be earned through locking, i.e. veBAL */
@@ -786,6 +789,7 @@ export type GqlPoolFixedPriceLBP = GqlPoolBase & {
   hasNestedErc4626: Scalars['Boolean']['output'];
   hook?: Maybe<GqlHook>;
   id: Scalars['ID']['output'];
+  isProjectTokenSwapInBlocked: Scalars['Boolean']['output'];
   lbpName?: Maybe<Scalars['String']['output']>;
   lbpOwner: Scalars['String']['output'];
   liquidityManagement?: Maybe<LiquidityManagement>;
@@ -802,6 +806,7 @@ export type GqlPoolFixedPriceLBP = GqlPoolBase & {
   poolTokens: Array<GqlPoolTokenDetail>;
   projectToken: Scalars['String']['output'];
   projectTokenIndex: Scalars['Int']['output'];
+  projectTokenRate: Scalars['BigDecimal']['output'];
   protocolVersion: Scalars['Int']['output'];
   reserveToken: Scalars['String']['output'];
   reserveTokenIndex: Scalars['Int']['output'];
@@ -2508,11 +2513,17 @@ export type Query = {
   tokenGetHistoricalPrices: Array<GqlHistoricalTokenPrice>;
   /** Returns the price of a token priced in another token for a given range. */
   tokenGetRelativePriceChartData: Array<GqlTokenPriceChartDataItem>;
-  /** Returns dynamic data of a token such as price, market cap, etc. */
+  /**
+   * Returns dynamic data of a token such as price, market cap, etc.
+   * @deprecated Removed without replacement
+   */
   tokenGetTokenDynamicData?: Maybe<GqlTokenDynamicData>;
   /** Returns all allowed tokens for a given chain or chains */
   tokenGetTokens: Array<GqlToken>;
-  /** Returns dynamic data of a set of tokens such as price, market cap, etc. */
+  /**
+   * Returns dynamic data of a set of tokens such as price, market cap, etc.
+   * @deprecated Removed without replacement
+   */
   tokenGetTokensDynamicData: Array<GqlTokenDynamicData>;
   veBalGetTotalSupply: Scalars['AmountHumanReadable']['output'];
   veBalGetUser: GqlVeBalUserData;

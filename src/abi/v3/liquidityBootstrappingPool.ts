@@ -2,22 +2,10 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [
             {
-                internalType: 'string',
-                name: 'name',
-                type: 'string',
-            },
-            {
-                internalType: 'string',
-                name: 'symbol',
-                type: 'string',
-            },
-            {
                 components: [
-                    {
-                        internalType: 'address',
-                        name: 'owner',
-                        type: 'address',
-                    },
+                    { internalType: 'string', name: 'name', type: 'string' },
+                    { internalType: 'string', name: 'symbol', type: 'string' },
+                    { internalType: 'address', name: 'owner', type: 'address' },
                     {
                         internalType: 'contract IERC20',
                         name: 'projectToken',
@@ -28,6 +16,60 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'reserveToken',
                         type: 'address',
                     },
+                    {
+                        internalType: 'uint256',
+                        name: 'startTime',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'endTime',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'blockProjectTokenSwapsIn',
+                        type: 'bool',
+                    },
+                ],
+                internalType: 'struct LBPCommonParams',
+                name: 'lbpCommonParams',
+                type: 'tuple',
+            },
+            {
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'migrationRouter',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'lockDurationAfterMigration',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'bptPercentageToMigrate',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'migrationWeightProjectToken',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'migrationWeightReserveToken',
+                        type: 'uint256',
+                    },
+                ],
+                internalType: 'struct MigrationParams',
+                name: 'migrationParams',
+                type: 'tuple',
+            },
+            {
+                components: [
                     {
                         internalType: 'uint256',
                         name: 'projectTokenStartWeight',
@@ -50,18 +92,8 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                     },
                     {
                         internalType: 'uint256',
-                        name: 'startTime',
+                        name: 'reserveTokenVirtualBalance',
                         type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'endTime',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'blockProjectTokenSwapsIn',
-                        type: 'bool',
                     },
                 ],
                 internalType: 'struct LBPParams',
@@ -69,93 +101,93 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                 type: 'tuple',
             },
             {
-                internalType: 'contract IVault',
-                name: 'vault',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'trustedRouter',
-                type: 'address',
-            },
-            {
-                internalType: 'string',
-                name: 'version',
-                type: 'string',
+                components: [
+                    {
+                        internalType: 'contract IVault',
+                        name: 'vault',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'trustedRouter',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'string',
+                        name: 'poolVersion',
+                        type: 'string',
+                    },
+                ],
+                internalType: 'struct FactoryParams',
+                name: 'factoryParams',
+                type: 'tuple',
             },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
+    { inputs: [], name: 'AddingLiquidityNotAllowed', type: 'error' },
+    { inputs: [], name: 'BaseOutOfBounds', type: 'error' },
+    { inputs: [], name: 'ECDSAInvalidSignature', type: 'error' },
     {
-        inputs: [],
-        name: 'AddingLiquidityNotAllowed',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'BaseOutOfBounds',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'ECDSAInvalidSignature',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'uint256',
-                name: 'length',
-                type: 'uint256',
-            },
-        ],
+        inputs: [{ internalType: 'uint256', name: 'length', type: 'uint256' }],
         name: 'ECDSAInvalidSignatureLength',
         type: 'error',
     },
     {
-        inputs: [
-            {
-                internalType: 'bytes32',
-                name: 's',
-                type: 'bytes32',
-            },
-        ],
+        inputs: [{ internalType: 'bytes32', name: 's', type: 'bytes32' }],
         name: 'ECDSAInvalidSignatureS',
         type: 'error',
     },
     {
         inputs: [
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
         ],
         name: 'ERC2612ExpiredSignature',
         type: 'error',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'signer',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
-            },
+            { internalType: 'address', name: 'signer', type: 'address' },
+            { internalType: 'address', name: 'owner', type: 'address' },
         ],
         name: 'ERC2612InvalidSigner',
         type: 'error',
     },
+    { inputs: [], name: 'ExponentOutOfBounds', type: 'error' },
+    { inputs: [], name: 'InputLengthMismatch', type: 'error' },
     {
-        inputs: [],
-        name: 'ExponentOutOfBounds',
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'reserveTokenAmountOut',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'reserveTokenRealBalance',
+                type: 'uint256',
+            },
+        ],
+        name: 'InsufficientRealReserveBalance',
         type: 'error',
     },
+    {
+        inputs: [
+            { internalType: 'address', name: 'account', type: 'address' },
+            { internalType: 'uint256', name: 'currentNonce', type: 'uint256' },
+        ],
+        name: 'InvalidAccountNonce',
+        type: 'error',
+    },
+    { inputs: [], name: 'InvalidBptLockDuration', type: 'error' },
+    { inputs: [], name: 'InvalidBptPercentageToMigrate', type: 'error' },
+    { inputs: [], name: 'InvalidExponent', type: 'error' },
+    { inputs: [], name: 'InvalidMigrationWeights', type: 'error' },
+    { inputs: [], name: 'InvalidOwner', type: 'error' },
+    { inputs: [], name: 'InvalidProjectToken', type: 'error' },
+    { inputs: [], name: 'InvalidReserveToken', type: 'error' },
+    { inputs: [], name: 'InvalidShortString', type: 'error' },
     {
         inputs: [
             {
@@ -163,160 +195,53 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                 name: 'resolvedStartTime',
                 type: 'uint256',
             },
-            {
-                internalType: 'uint256',
-                name: 'endTime',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: 'endTime', type: 'uint256' },
         ],
-        name: 'GradualUpdateTimeTravel',
+        name: 'InvalidStartTime',
         type: 'error',
     },
+    { inputs: [], name: 'InvalidToken', type: 'error' },
+    { inputs: [], name: 'InvalidTokenConfiguration', type: 'error' },
+    { inputs: [], name: 'MaxInRatio', type: 'error' },
+    { inputs: [], name: 'MaxOutRatio', type: 'error' },
+    { inputs: [], name: 'MigrationRouterRequired', type: 'error' },
+    { inputs: [], name: 'MinWeight', type: 'error' },
+    { inputs: [], name: 'NormalizedWeightInvariant', type: 'error' },
+    { inputs: [], name: 'NotImplemented', type: 'error' },
     {
-        inputs: [],
-        name: 'InputLengthMismatch',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'account',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'currentNonce',
-                type: 'uint256',
-            },
-        ],
-        name: 'InvalidAccountNonce',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'InvalidExponent',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'InvalidShortString',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'InvalidToken',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'InvalidTokenConfiguration',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'MaxInRatio',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'MaxOutRatio',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'MinWeight',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'NormalizedWeightInvariant',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'NotImplemented',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
-            },
-        ],
+        inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
         name: 'OwnableInvalidOwner',
         type: 'error',
     },
     {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'account',
-                type: 'address',
-            },
-        ],
+        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
         name: 'OwnableUnauthorizedAccount',
         type: 'error',
     },
+    { inputs: [], name: 'ProductOutOfBounds', type: 'error' },
+    { inputs: [], name: 'RemovingLiquidityNotAllowed', type: 'error' },
     {
         inputs: [],
-        name: 'ProductOutOfBounds',
+        name: 'SeedlessLBPInitializationWithNonZeroReserve',
         type: 'error',
     },
     {
-        inputs: [],
-        name: 'RemovingLiquidityNotAllowed',
-        type: 'error',
-    },
-    {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-        ],
+        inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
         name: 'SenderIsNotVault',
         type: 'error',
     },
     {
-        inputs: [
-            {
-                internalType: 'string',
-                name: 'str',
-                type: 'string',
-            },
-        ],
+        inputs: [{ internalType: 'string', name: 'str', type: 'string' }],
         name: 'StringTooLong',
         type: 'error',
     },
-    {
-        inputs: [],
-        name: 'SwapOfProjectTokenIn',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'SwapsDisabled',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'WeightedPoolBptRateUnsupported',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'ZeroDivision',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'ZeroInvariant',
-        type: 'error',
-    },
+    { inputs: [], name: 'SwapOfProjectTokenIn', type: 'error' },
+    { inputs: [], name: 'SwapsDisabled', type: 'error' },
+    { inputs: [], name: 'TokensMustBeDifferent', type: 'error' },
+    { inputs: [], name: 'UnsupportedOperation', type: 'error' },
+    { inputs: [], name: 'WeightedPoolBptRateUnsupported', type: 'error' },
+    { inputs: [], name: 'ZeroDivision', type: 'error' },
+    { inputs: [], name: 'ZeroInvariant', type: 'error' },
     {
         anonymous: false,
         inputs: [
@@ -445,26 +370,14 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [],
         name: 'DOMAIN_SEPARATOR',
-        outputs: [
-            {
-                internalType: 'bytes32',
-                name: '',
-                type: 'bytes32',
-            },
-        ],
+        outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'PERMIT_TYPEHASH',
-        outputs: [
-            {
-                internalType: 'bytes32',
-                name: '',
-                type: 'bytes32',
-            },
-        ],
+        outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -477,98 +390,40 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'spender',
-                type: 'address',
-            },
+            { internalType: 'address', name: 'owner', type: 'address' },
+            { internalType: 'address', name: 'spender', type: 'address' },
         ],
         name: 'allowance',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'spender',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'spender', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'approve',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'account',
-                type: 'address',
-            },
-        ],
+        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
         name: 'balanceOf',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'uint256[]',
-                name: 'balancesLiveScaled18',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'uint256',
-                name: 'tokenInIndex',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'invariantRatio',
-                type: 'uint256',
-            },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
         ],
         name: 'computeBalance',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: 'newBalance',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'view',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'pure',
         type: 'function',
     },
     {
@@ -578,19 +433,11 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                 name: 'balancesLiveScaled18',
                 type: 'uint256[]',
             },
-            {
-                internalType: 'enum Rounding',
-                name: 'rounding',
-                type: 'uint8',
-            },
+            { internalType: 'enum Rounding', name: 'rounding', type: 'uint8' },
         ],
         name: 'computeInvariant',
         outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: 'invariant', type: 'uint256' },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -598,13 +445,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [],
         name: 'decimals',
-        outputs: [
-            {
-                internalType: 'uint8',
-                name: '',
-                type: 'uint8',
-            },
-        ],
+        outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
         stateMutability: 'pure',
         type: 'function',
     },
@@ -612,36 +453,16 @@ export const liquidityBootstrappingPoolAbi_V3 = [
         inputs: [],
         name: 'eip712Domain',
         outputs: [
-            {
-                internalType: 'bytes1',
-                name: 'fields',
-                type: 'bytes1',
-            },
-            {
-                internalType: 'string',
-                name: 'name',
-                type: 'string',
-            },
-            {
-                internalType: 'string',
-                name: 'version',
-                type: 'string',
-            },
-            {
-                internalType: 'uint256',
-                name: 'chainId',
-                type: 'uint256',
-            },
+            { internalType: 'bytes1', name: 'fields', type: 'bytes1' },
+            { internalType: 'string', name: 'name', type: 'string' },
+            { internalType: 'string', name: 'version', type: 'string' },
+            { internalType: 'uint256', name: 'chainId', type: 'uint256' },
             {
                 internalType: 'address',
                 name: 'verifyingContract',
                 type: 'address',
             },
-            {
-                internalType: 'bytes32',
-                name: 'salt',
-                type: 'bytes32',
-            },
+            { internalType: 'bytes32', name: 'salt', type: 'bytes32' },
             {
                 internalType: 'uint256[]',
                 name: 'extensions',
@@ -653,21 +474,9 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'spender',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'owner', type: 'address' },
+            { internalType: 'address', name: 'spender', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'emitApproval',
         outputs: [],
@@ -676,21 +485,9 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'from',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'from', type: 'address' },
+            { internalType: 'address', name: 'to', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'emitTransfer',
         outputs: [],
@@ -732,16 +529,8 @@ export const liquidityBootstrappingPoolAbi_V3 = [
         inputs: [],
         name: 'getGradualWeightUpdateParams',
         outputs: [
-            {
-                internalType: 'uint256',
-                name: 'startTime',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'endTime',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: 'startTime', type: 'uint256' },
+            { internalType: 'uint256', name: 'endTime', type: 'uint256' },
             {
                 internalType: 'uint256[]',
                 name: 'startWeights',
@@ -833,11 +622,6 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         type: 'uint256[]',
                     },
                     {
-                        internalType: 'uint256[]',
-                        name: 'normalizedWeights',
-                        type: 'uint256[]',
-                    },
-                    {
                         internalType: 'uint256',
                         name: 'staticSwapFeePercentage',
                         type: 'uint256',
@@ -867,6 +651,11 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'isSwapEnabled',
                         type: 'bool',
                     },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'normalizedWeights',
+                        type: 'uint256[]',
+                    },
                 ],
                 internalType: 'struct LBPoolDynamicData',
                 name: 'data',
@@ -890,16 +679,6 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                     {
                         internalType: 'uint256[]',
                         name: 'decimalScalingFactors',
-                        type: 'uint256[]',
-                    },
-                    {
-                        internalType: 'uint256[]',
-                        name: 'startWeights',
-                        type: 'uint256[]',
-                    },
-                    {
-                        internalType: 'uint256[]',
-                        name: 'endWeights',
                         type: 'uint256[]',
                     },
                     {
@@ -927,6 +706,46 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'isProjectTokenSwapInBlocked',
                         type: 'bool',
                     },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'startWeights',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'endWeights',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'reserveTokenVirtualBalance',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'migrationRouter',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'lockDurationAfterMigration',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'bptPercentageToMigrate',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'migrationWeightProjectToken',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'migrationWeightReserveToken',
+                        type: 'uint256',
+                    },
                 ],
                 internalType: 'struct LBPoolImmutableData',
                 name: 'data',
@@ -939,65 +758,82 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [],
         name: 'getMaximumInvariantRatio',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
         name: 'getMaximumSwapFeePercentage',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'getMinimumInvariantRatio',
+        name: 'getMigrationParameters',
         outputs: [
             {
-                internalType: 'uint256',
+                components: [
+                    {
+                        internalType: 'address',
+                        name: 'migrationRouter',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'lockDurationAfterMigration',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'bptPercentageToMigrate',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'migrationWeightProjectToken',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'migrationWeightReserveToken',
+                        type: 'uint256',
+                    },
+                ],
+                internalType: 'struct MigrationParams',
                 name: '',
-                type: 'uint256',
+                type: 'tuple',
             },
         ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getMigrationRouter',
+        outputs: [{ internalType: 'address', name: '', type: 'address' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getMinimumInvariantRatio',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
         name: 'getMinimumSwapFeePercentage',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
         name: 'getNormalizedWeights',
-        outputs: [
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-        ],
+        outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -1005,11 +841,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
         inputs: [],
         name: 'getProjectToken',
         outputs: [
-            {
-                internalType: 'contract IERC20',
-                name: '',
-                type: 'address',
-            },
+            { internalType: 'contract IERC20', name: '', type: 'address' },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -1017,13 +849,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [],
         name: 'getRate',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'pure',
         type: 'function',
     },
@@ -1031,11 +857,17 @@ export const liquidityBootstrappingPoolAbi_V3 = [
         inputs: [],
         name: 'getReserveToken',
         outputs: [
-            {
-                internalType: 'contract IERC20',
-                name: '',
-                type: 'address',
-            },
+            { internalType: 'contract IERC20', name: '', type: 'address' },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getReserveTokenVirtualBalance',
+        outputs: [
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -1043,12 +875,16 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [],
         name: 'getStaticSwapFeePercentage',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getTokenIndices',
         outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -1114,13 +950,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [],
         name: 'getTrustedRouter',
-        outputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-        ],
+        outputs: [{ internalType: 'address', name: '', type: 'address' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -1128,11 +958,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
         inputs: [],
         name: 'getVault',
         outputs: [
-            {
-                internalType: 'contract IVault',
-                name: '',
-                type: 'address',
-            },
+            { internalType: 'contract IVault', name: '', type: 'address' },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -1227,204 +1053,88 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [],
         name: 'isProjectTokenSwapInBlocked',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'isSwapEnabled',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'name',
-        outputs: [
-            {
-                internalType: 'string',
-                name: '',
-                type: 'string',
-            },
-        ],
+        outputs: [{ internalType: 'string', name: '', type: 'string' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
-        inputs: [
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
-            },
-        ],
+        inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
         name: 'nonces',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-            {
-                internalType: 'enum AddLiquidityKind',
-                name: '',
-                type: 'uint8',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
+            { internalType: 'address', name: '', type: 'address' },
+            { internalType: 'address', name: '', type: 'address' },
+            { internalType: 'enum AddLiquidityKind', name: '', type: 'uint8' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
             {
                 internalType: 'uint256[]',
                 name: 'amountsInRaw',
                 type: 'uint256[]',
             },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'bytes',
-                name: '',
-                type: 'bytes',
-            },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'bytes', name: '', type: 'bytes' },
         ],
         name: 'onAfterAddLiquidity',
         outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
+            { internalType: 'bool', name: '', type: 'bool' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bytes',
-                name: '',
-                type: 'bytes',
-            },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'bytes', name: '', type: 'bytes' },
         ],
         name: 'onAfterInitialize',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
+            { internalType: 'address', name: '', type: 'address' },
+            { internalType: 'address', name: '', type: 'address' },
             {
                 internalType: 'enum RemoveLiquidityKind',
                 name: '',
                 type: 'uint8',
             },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
             {
                 internalType: 'uint256[]',
                 name: 'amountsOutRaw',
                 type: 'uint256[]',
             },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'bytes',
-                name: '',
-                type: 'bytes',
-            },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'bytes', name: '', type: 'bytes' },
         ],
         name: 'onAfterRemoveLiquidity',
         outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
+            { internalType: 'bool', name: '', type: 'bool' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -1483,16 +1193,8 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'router',
                         type: 'address',
                     },
-                    {
-                        internalType: 'address',
-                        name: 'pool',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
+                    { internalType: 'address', name: 'pool', type: 'address' },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct AfterSwapParams',
                 name: '',
@@ -1501,66 +1203,24 @@ export const liquidityBootstrappingPoolAbi_V3 = [
         ],
         name: 'onAfterSwap',
         outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
+            { internalType: 'bool', name: '', type: 'bool' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'router',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-            {
-                internalType: 'enum AddLiquidityKind',
-                name: '',
-                type: 'uint8',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'bytes',
-                name: '',
-                type: 'bytes',
-            },
+            { internalType: 'address', name: 'router', type: 'address' },
+            { internalType: 'address', name: '', type: 'address' },
+            { internalType: 'enum AddLiquidityKind', name: '', type: 'uint8' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'bytes', name: '', type: 'bytes' },
         ],
         name: 'onBeforeAddLiquidity',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -1568,72 +1228,32 @@ export const liquidityBootstrappingPoolAbi_V3 = [
         inputs: [
             {
                 internalType: 'uint256[]',
-                name: '',
+                name: 'exactAmountsIn',
                 type: 'uint256[]',
             },
-            {
-                internalType: 'bytes',
-                name: '',
-                type: 'bytes',
-            },
+            { internalType: 'bytes', name: '', type: 'bytes' },
         ],
         name: 'onBeforeInitialize',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
+            { internalType: 'address', name: 'router', type: 'address' },
+            { internalType: 'address', name: '', type: 'address' },
             {
                 internalType: 'enum RemoveLiquidityKind',
                 name: '',
                 type: 'uint8',
             },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'uint256[]',
-                name: '',
-                type: 'uint256[]',
-            },
-            {
-                internalType: 'bytes',
-                name: '',
-                type: 'bytes',
-            },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            { internalType: 'bytes', name: '', type: 'bytes' },
         ],
         name: 'onBeforeRemoveLiquidity',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -1671,30 +1291,16 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'router',
                         type: 'address',
                     },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct PoolSwapParams',
                 name: '',
                 type: 'tuple',
             },
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
+            { internalType: 'address', name: '', type: 'address' },
         ],
         name: 'onBeforeSwap',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -1732,55 +1338,27 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'router',
                         type: 'address',
                     },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct PoolSwapParams',
                 name: '',
                 type: 'tuple',
             },
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: '', type: 'address' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
         ],
         name: 'onComputeDynamicSwapFeePercentage',
         outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
+            { internalType: 'bool', name: '', type: 'bool' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
         ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
+            { internalType: 'address', name: '', type: 'address' },
+            { internalType: 'address', name: 'pool', type: 'address' },
             {
                 components: [
                     {
@@ -1837,13 +1415,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
             },
         ],
         name: 'onRegister',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -1881,11 +1453,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'router',
                         type: 'address',
                     },
-                    {
-                        internalType: 'bytes',
-                        name: 'userData',
-                        type: 'bytes',
-                    },
+                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
                 ],
                 internalType: 'struct PoolSwapParams',
                 name: 'request',
@@ -1893,79 +1461,33 @@ export const liquidityBootstrappingPoolAbi_V3 = [
             },
         ],
         name: 'onSwap',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'owner',
-        outputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-        ],
+        outputs: [{ internalType: 'address', name: '', type: 'address' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'pendingOwner',
-        outputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-        ],
+        outputs: [{ internalType: 'address', name: '', type: 'address' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'owner',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'spender',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint256',
-                name: 'deadline',
-                type: 'uint256',
-            },
-            {
-                internalType: 'uint8',
-                name: 'v',
-                type: 'uint8',
-            },
-            {
-                internalType: 'bytes32',
-                name: 'r',
-                type: 'bytes32',
-            },
-            {
-                internalType: 'bytes32',
-                name: 's',
-                type: 'bytes32',
-            },
+            { internalType: 'address', name: 'owner', type: 'address' },
+            { internalType: 'address', name: 'spender', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+            { internalType: 'uint8', name: 'v', type: 'uint8' },
+            { internalType: 'bytes32', name: 'r', type: 'bytes32' },
+            { internalType: 'bytes32', name: 's', type: 'bytes32' },
         ],
         name: 'permit',
         outputs: [],
@@ -1981,109 +1503,51 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     },
     {
         inputs: [
-            {
-                internalType: 'bytes4',
-                name: 'interfaceId',
-                type: 'bytes4',
-            },
+            { internalType: 'bytes4', name: 'interfaceId', type: 'bytes4' },
         ],
         name: 'supportsInterface',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'symbol',
-        outputs: [
-            {
-                internalType: 'string',
-                name: '',
-                type: 'string',
-            },
-        ],
+        outputs: [{ internalType: 'string', name: '', type: 'string' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'totalSupply',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'to', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'transfer',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'from',
-                type: 'address',
-            },
-            {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
-            },
-            {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-            },
+            { internalType: 'address', name: 'from', type: 'address' },
+            { internalType: 'address', name: 'to', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
         ],
         name: 'transferFrom',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            {
-                internalType: 'address',
-                name: 'newOwner',
-                type: 'address',
-            },
+            { internalType: 'address', name: 'newOwner', type: 'address' },
         ],
         name: 'transferOwnership',
         outputs: [],
@@ -2093,13 +1557,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     {
         inputs: [],
         name: 'version',
-        outputs: [
-            {
-                internalType: 'string',
-                name: '',
-                type: 'string',
-            },
-        ],
+        outputs: [{ internalType: 'string', name: '', type: 'string' }],
         stateMutability: 'view',
         type: 'function',
     },
