@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 5.2.5
+
+### Patch Changes
+
+- ff98a2b: Bumps viem from 2.47.0 to 2.47.12.
+- ff98a2b: Bumps @balancer-labs/balancer-maths from 0.0.38 to 0.0.40.
+
 ## 5.2.4
 
 ### Patch Changes
