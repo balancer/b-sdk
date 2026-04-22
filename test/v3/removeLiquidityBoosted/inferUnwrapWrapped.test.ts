@@ -43,7 +43,8 @@ const duplicateAddressPool = {
 // a distinct underlying.
 const PLAIN_A = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as `0x${string}`;
 const ERC4626_B = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' as `0x${string}`;
-const UNDERLYING_B = '0xcccccccccccccccccccccccccccccccccccccccc' as `0x${string}`;
+const UNDERLYING_B =
+    '0xcccccccccccccccccccccccccccccccccccccccc' as `0x${string}`;
 
 const standardPool = {
     tokens: [
@@ -124,8 +125,7 @@ describe('inferUnwrapWrapped', () => {
 
     describe('address comparison', () => {
         it('matches addresses case-insensitively (mixed-case checksummed vs lowercased)', () => {
-            const mixedCasePlain =
-                PLAIN_TOKEN.toLowerCase() as `0x${string}`;
+            const mixedCasePlain = PLAIN_TOKEN.toLowerCase() as `0x${string}`;
             const mixedCaseERC4626 = ERC4626_TOKEN.toUpperCase().replace(
                 /^0X/,
                 '0x',

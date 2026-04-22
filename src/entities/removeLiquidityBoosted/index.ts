@@ -45,7 +45,10 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
         );
 
         // Infer per-slot unwrap flags using pool index order
-        const unwrapWrapped = inferUnwrapWrapped(poolState.tokens, input.tokensOut);
+        const unwrapWrapped = inferUnwrapWrapped(
+            poolState.tokens,
+            input.tokensOut,
+        );
 
         const [tokensOut, underlyingAmountsOut] =
             await doRemoveLiquidityProportionalQuery(
