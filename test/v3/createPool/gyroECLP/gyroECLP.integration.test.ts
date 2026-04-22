@@ -54,7 +54,7 @@ describe('GyroECLP - create & init', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.SEPOLIA,
             undefined,
-            7923022n,
+            10157239n,
         ));
         client = createTestClient({
             mode: 'anvil',

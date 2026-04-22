@@ -38,6 +38,8 @@ export async function doCreatePool(
         },
     };
 
+    console.log({ to });
+
     const hash = await client.sendTransaction({
         to,
         data: callData,
