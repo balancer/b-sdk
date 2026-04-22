@@ -60,6 +60,33 @@ export const boostedPool_steakUSDC_csUSDL: PoolStateWithUnderlyings = {
     ],
 };
 
+// ZCHF (plain) + svZCHF (ERC4626 with underlying = ZCHF)
+// Duplicate-address case: tokensOut[0] and tokensOut[1] can both be the ZCHF address
+export const boostedPool_ZCHF_svZCHF: PoolStateWithUnderlyings = {
+    id: '0x849d43118c2e3c4856af26ee96f1a9d72bc2774f',
+    address: '0x849d43118c2e3c4856af26ee96f1a9d72bc2774f',
+    type: 'Stable',
+    protocolVersion: 3,
+    tokens: [
+        {
+            index: 0,
+            address: '0xb58e61c3098d85632df34eecfb899a1ed80921cb', // ZCHF (plain)
+            decimals: 18,
+            underlyingToken: null,
+        },
+        {
+            index: 1,
+            address: '0xe5f130253ff137f9917c0107659a4c5262abf6b0', // svZCHF (ERC4626)
+            decimals: 18,
+            underlyingToken: {
+                address: '0xb58e61c3098d85632df34eecfb899a1ed80921cb', // ZCHF again
+                decimals: 18,
+                index: 1,
+            },
+        },
+    ],
+};
+
 // gnosis-chain
 
 export const boostedPool_sDAI_BRLA: PoolStateWithUnderlyings = {

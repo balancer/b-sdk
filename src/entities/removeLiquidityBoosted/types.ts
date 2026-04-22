@@ -8,6 +8,18 @@ export type RemoveLiquidityBoostedProportionalInput = {
     chainId: number;
     rpcUrl: string;
     bptIn: InputAmount;
+    /**
+     * One address per pool token, in the same order as `poolState.tokens`
+     * sorted by `index`. For each slot `i`:
+     *   - Pass the pool token address to receive the pool token as-is (no unwrap).
+     *   - Pass the ERC4626 underlying address to receive the unwrapped asset.
+     *   - Any other address throws a validation error.
+     *
+     * The ordering requirement is strict: unlike the previous flat-map
+     * implementation, addresses are resolved per slot, not as an unordered
+     * multiset. This is necessary to correctly handle pools where a plain
+     * token and the underlying of an ERC4626 share the same address.
+     */
     tokensOut: Address[];
     kind: RemoveLiquidityKind.Proportional;
     sender?: Address;

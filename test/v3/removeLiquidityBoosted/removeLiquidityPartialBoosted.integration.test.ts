@@ -109,7 +109,7 @@ describe('V3 remove liquidity partial boosted', () => {
                 decimals: 18,
                 rawAmount: bptAmount,
             },
-            tokensOut: [USDT.address, WETH.address],
+            tokensOut: [WETH.address, USDT.address],
             kind: RemoveLiquidityKind.Proportional,
         };
 
@@ -144,7 +144,7 @@ describe('V3 remove liquidity partial boosted', () => {
         expect(queryOutput.amountsOut.length).to.eq(
             partialBoostedPool_WETH_stataUSDT.tokens.length,
         );
-        validateTokenAmounts(queryOutput.amountsOut, [usdtToken, wethToken]);
+        validateTokenAmounts(queryOutput.amountsOut, [wethToken, usdtToken]);
     });
 
     describe('remove liquidity transaction', async () => {

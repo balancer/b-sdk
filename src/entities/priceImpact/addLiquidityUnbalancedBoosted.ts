@@ -68,6 +68,9 @@ export async function addLiquidityUnbalancedBoosted(
         chainId: input.chainId,
         rpcUrl: input.rpcUrl,
         bptIn: bptOut.toInputAmount(),
+        // poolTokens is already sorted by index (via getSortedTokens), so this
+        // satisfies the tokensOut pool-index-order contract on
+        // RemoveLiquidityBoostedProportionalInput.
         tokensOut: poolTokens.map((t) => t.address),
         kind: RemoveLiquidityKind.Proportional,
     };

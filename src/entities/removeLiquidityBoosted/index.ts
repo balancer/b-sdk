@@ -1,4 +1,4 @@
-import { Address, encodeFunctionData, zeroAddress } from 'viem';
+import { encodeFunctionData, zeroAddress } from 'viem';
 
 import {
     RemoveLiquidityBase,
@@ -24,8 +24,8 @@ import {
     RemoveLiquidityBoostedQueryOutput,
 } from './types';
 import { InputValidator } from '../inputValidator/inputValidator';
-import { buildPoolStateTokenMap } from '@/entities/utils';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
+import { inferUnwrapWrapped } from './inferUnwrapWrapped';
 
 export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
     private readonly inputValidator: InputValidator = new InputValidator();
@@ -40,16 +40,12 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             type: 'Boosted',
         });
 
-        const poolStateTokenMap = buildPoolStateTokenMap(poolState);
+        const poolTokens = [...poolState.tokens].sort(
+            (a, b) => a.index - b.index,
+        );
 
-        // Infer if token should be unwrapped using the tokensOut provided by user
-        const unwrapWrapped = input.tokensOut
-            .map((t) => {
-                const tokenOut = poolStateTokenMap[t.toLowerCase() as Address];
-                return tokenOut;
-            })
-            .sort((a, b) => a.index - b.index) // sort by index to match the order of the pool tokens
-            .map((t) => t.isUnderlyingToken);
+        // Infer per-slot unwrap flags using pool index order
+        const unwrapWrapped = inferUnwrapWrapped(poolState.tokens, input.tokensOut);
 
         const [tokensOut, underlyingAmountsOut] =
             await doRemoveLiquidityProportionalQuery(
@@ -64,11 +60,13 @@ export class RemoveLiquidityBoostedV3 implements RemoveLiquidityBase {
             );
 
         const amountsOut = underlyingAmountsOut.map((amount, i) => {
-            const tokenOut = tokensOut[i];
-            const { decimals } =
-                poolStateTokenMap[tokenOut.toLowerCase() as Address];
-
-            const token = new Token(input.chainId, tokenOut, decimals);
+            const pt = poolTokens[i];
+            const address = tokensOut[i];
+            const decimals =
+                unwrapWrapped[i] && pt.underlyingToken
+                    ? pt.underlyingToken.decimals
+                    : pt.decimals;
+            const token = new Token(input.chainId, address, decimals);
             return TokenAmount.fromRawAmount(token, amount);
         });
 
