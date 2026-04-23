@@ -35,11 +35,7 @@ import {
 } from 'test/lib/utils/helper';
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 
-const { rpcUrl } = await startFork(
-    ANVIL_NETWORKS.SEPOLIA,
-    undefined,
-    10140629n,
-);
+const { rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA);
 const protocolVersion = 3;
 const chainId = ChainId.SEPOLIA;
 const poolType = PoolType.Weighted;

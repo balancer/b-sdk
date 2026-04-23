@@ -50,7 +50,11 @@ describe('Buffer AddLiquidity', () => {
     const addLiquidityBuffer = new AddLiquidityBufferV3();
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS[ChainId[chainId]],
+            undefined,
+            7923022n,
+        ));
 
         client = createTestClient({
             mode: 'anvil',

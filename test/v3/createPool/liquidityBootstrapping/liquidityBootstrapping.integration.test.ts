@@ -70,11 +70,7 @@ describe('create liquidityBootstrapping pool test', () => {
     let migratePool: MigratePool;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            10042461n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],

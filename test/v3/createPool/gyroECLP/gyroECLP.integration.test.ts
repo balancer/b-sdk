@@ -51,11 +51,7 @@ describe('GyroECLP - create & init', () => {
     let poolAddressInvertedParams: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            7923022n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
