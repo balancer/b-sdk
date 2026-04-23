@@ -85,4 +85,4 @@ See `src/entities/addLiquidity/index.ts`, `src/entities/removeLiquidity/index.ts
 - **Biome** (not ESLint/Prettier) is the formatter and linter. Config in `biome.json`: single quotes, trailing commas, 4-space indent, 80-col line width, semicolons. Generated files under `src/data/providers/balancer-api/generated/` are ignored.
 - **dpdm** enforces no circular deps (`pnpm lint` fails on them).
 - Errors go through typed factories in `src/utils/errors.ts` (`SDKError`, `protocolVersionError`, `missingParameterError`, `exceedingParameterError`, `inputValidationError`) — use these instead of raw `throw new Error`.
-- Releases use **changesets**: add a changeset with `pnpm changeset` when your change is user-visible (the release workflow on `main` cuts PRs automatically; see `.github/workflows/release.yml`).
+- Releases use **changesets**. If your change touches `src/**`, add one — see `.agents/skills/changeset/SKILL.md` for the file format and bump-selection rules (write the file directly; `pnpm changeset` is interactive and agents can't drive it). The release workflow on `main` cuts version-bump PRs automatically; see `.github/workflows/release.yml`.
