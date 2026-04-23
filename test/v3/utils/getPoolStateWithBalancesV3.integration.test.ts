@@ -52,16 +52,16 @@ describe('add liquidity test', () => {
                         address: USDC.address,
                         decimals: USDC.decimals,
                         index: 0,
-                        balance: '6883.07511',
+                        balance: '6859.248467',
                     },
                     {
                         address: DAI.address,
                         decimals: DAI.decimals,
                         index: 1,
-                        balance: '6273.005585327880043442',
+                        balance: '6327.231507455409830142',
                     },
                 ],
-                totalShares: '6566.096765428824944083',
+                totalShares: '6582.79271994574606159',
             };
 
             expect(poolStateWithBalances).to.deep.eq(mockData);

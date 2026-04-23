@@ -73,11 +73,7 @@ describe('ReClamm', () => {
     let fullyBoostedPoolState: PoolState;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            8769420n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],

@@ -94,7 +94,7 @@ describe('Boosted AddLiquidity', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS[ChainId[chainId]],
             undefined,
-            undefined,
+            7923022n,
             1,
         ));
 

@@ -32,11 +32,7 @@ describe('query propagates LBP specific errors', () => {
 
     beforeAll(async () => {
         // set up chain and test client
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            8467070n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
 
         client = createTestClient({
             mode: 'anvil',

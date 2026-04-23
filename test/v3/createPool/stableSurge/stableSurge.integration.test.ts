@@ -47,11 +47,7 @@ describe('create stableSurge pool test', () => {
     let poolAddress: Address;
 
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(
-            ANVIL_NETWORKS.SEPOLIA,
-            undefined,
-            10140629n,
-        ));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
