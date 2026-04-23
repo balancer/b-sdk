@@ -15,12 +15,12 @@ Create `.changeset/<kebab-case-slug>.md` with this exact shape:
 "@balancer/sdk": <patch|minor|major>
 ---
 
-<one-line summary in the imperative, ending with a period.>
+<imperative summary ending with a period. For breaking or nuanced changes, add a `#` heading and prose paragraphs below it.>
 ```
 
 - `<kebab-case-slug>` should describe the change, e.g. `fix-v3-swap-limits`, `add-sonic-deployments`, `gyro-eclp-fork-block-fix`. It must be unique among existing `.changeset/*.md` files and must not be `README` or `config`.
 - The blank line between the closing `---` and the summary is required.
-- Keep the summary to one line. If more context is needed, add plain prose paragraphs below it — they show up verbatim in the CHANGELOG.
+- Default to a single-line summary. For `major` bumps or anything a consumer needs migration notes for, lead with a `#` heading, then add plain prose paragraphs — everything below the frontmatter lands verbatim in the CHANGELOG.
 
 ## Choosing the bump
 
@@ -41,16 +41,44 @@ You may skip a changeset **only** if the change is invisible to consumers of the
 
 If your diff touches `src/**` at all, add a changeset.
 
-## Reference
+## Reference Examples
 
-Real example from this repo (`.changeset/gyro-eclp-fork-block-fix.md` at commit `a77acd6f`):
+### Major — breaking change with migration notes
+
+```markdown
+---
+"@balancer/sdk": major
+---
+
+# Fix boosted V3 proportional remove tokensOut when the same address exits two pool legs
+
+RemoveLiquidityBoostedV3 no longer infers unwrapWrapped from a flat address map plus sort. tokensOut is interpreted per pool token index (same order as poolState.tokens sorted by index): each entry must be either that leg's pool token address or, for ERC4626 legs, its underlying address. This fixes incorrect unwrap flags (and reverts such as BufferNotInitialized) when one pool token is an ERC4626 share whose underlying is the same token as another pool leg.
+
+**Breaking change**: Callers must pass tokensOut in vault / pool token index order. Previously, unique addresses could be passed in any order because the SDK sorted by resolved index; that behavior is removed. Pass one address per pool token slot, aligned with sorted index. Concrete example: partialBoostedPool_WETH_stataUSDT has WETH at index 0 and stataUSDT at index 1; callers previously passing [USDT, WETH] must now pass [WETH, USDT].
+```
+
+### Minor — strictly additive feature
+
+```markdown
+---
+"@balancer/sdk": minor
+---
+
+Add support for Add Liquidity Unbalanced Via Swap.
+```
+
+### Patch — contract address updates and bug fixes
 
 ```markdown
 ---
 "@balancer/sdk": patch
 ---
 
-Bump GyroECLP integration test fork block to include factory deployment.
+Update GyroECLP factory to latest (longer pause window).
 ```
 
-Config lives at `.changeset/config.json`; `baseBranch` is `main` and `access` is `public`. The `Version Packages` PR is produced automatically by `.github/workflows/release.yml` — do not bump `package.json` or edit `CHANGELOG.md` by hand.
+
+
+## Guardrails
+
+Never edit `CHANGELOG.md` or bump `package.json` by hand — the `Version Packages` PR from `.github/workflows/release.yml` does both from merged changesets.
