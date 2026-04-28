@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 5.2.6
+
+### Patch Changes
+
+- 7ddf8bd: Bump viem dependency to v2.48.4
+
 ## 5.2.5
 
 ### Patch Changes
