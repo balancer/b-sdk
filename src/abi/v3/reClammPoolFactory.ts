@@ -7,6 +7,11 @@ export const reClammPoolFactoryAbi_V3 = [
                 type: 'address',
             },
             {
+                internalType: 'contract ReClammPoolHelper',
+                name: 'helper',
+                type: 'address',
+            },
+            {
                 internalType: 'uint32',
                 name: 'pauseWindowDuration',
                 type: 'uint32',
@@ -33,6 +38,16 @@ export const reClammPoolFactoryAbi_V3 = [
     {
         inputs: [],
         name: 'Create2EmptyBytecode',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DailyPriceShiftExponentTooHigh',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DailyPriceShiftExponentTooLow',
         type: 'error',
     },
     {
@@ -68,6 +83,21 @@ export const reClammPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
+        name: 'InvalidCenterednessMargin',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidInitialPrice',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidInitialTargetPrice',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'InvalidTokenType',
         type: 'error',
     },
@@ -79,6 +109,28 @@ export const reClammPoolFactoryAbi_V3 = [
     {
         inputs: [],
         name: 'PoolPauseWindowDurationOverflow',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'priceRatio',
+                type: 'uint256',
+            },
+        ],
+        name: 'PriceRatioAboveMax',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'priceRatio',
+                type: 'uint256',
+            },
+        ],
+        name: 'PriceRatioBelowMin',
         type: 'error',
     },
     {
@@ -104,12 +156,12 @@ export const reClammPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'StandardPoolWithCreator',
+        name: 'VaultNotSet',
         type: 'error',
     },
     {
         inputs: [],
-        name: 'VaultNotSet',
+        name: 'WrongHelperDeployment',
         type: 'error',
     },
     {
@@ -540,6 +592,19 @@ export const reClammPoolFactoryAbi_V3 = [
                 internalType: 'bool',
                 name: '',
                 type: 'bool',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'reClammPoolHelper',
+        outputs: [
+            {
+                internalType: 'contract ReClammPoolHelper',
+                name: '',
+                type: 'address',
             },
         ],
         stateMutability: 'view',
