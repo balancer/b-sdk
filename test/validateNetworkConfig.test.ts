@@ -198,10 +198,11 @@ const EXPECTED_MISSING: Partial<Record<ChainId, string[]>> = {
 };
 
 /** Sonic (146): ReClamm v3 factory not deployed yet — remove when on-chain matches default. */
-const RECLAMM_POOL_FACTORY_VERSION_BY_CHAIN: Partial<Record<ChainId, string>> = {
-    [ChainId.SONIC]:
-        '{"name":"ReClammPoolFactory","version":2,"deployment":"20250702-v3-reclamm-pool-v2"}',
-};
+const RECLAMM_POOL_FACTORY_VERSION_BY_CHAIN: Partial<Record<ChainId, string>> =
+    {
+        [ChainId.SONIC]:
+            '{"name":"ReClammPoolFactory","version":2,"deployment":"20250702-v3-reclamm-pool-v2"}',
+    };
 
 // ─── RPC resolution (env var with fallback, no Anvil) ───────────────────────
 
