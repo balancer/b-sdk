@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 5.2.9
+
+### Patch Changes
+
+- 467913d: Sonic reCLAMM factory V3.
+- 01552bc: Bump viem from 2.48.11 to 2.49.3
+
 ## 5.2.8
 
 ### Patch Changes
