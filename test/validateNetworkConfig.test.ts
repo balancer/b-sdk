@@ -197,13 +197,6 @@ const EXPECTED_MISSING: Partial<Record<ChainId, string[]>> = {
     [ChainId.X_LAYER]: ['MevCaptureHook'],
 };
 
-/** Sonic (146): ReClamm v3 factory not deployed yet — remove when on-chain matches default. */
-const RECLAMM_POOL_FACTORY_VERSION_BY_CHAIN: Partial<Record<ChainId, string>> =
-    {
-        [ChainId.SONIC]:
-            '{"name":"ReClammPoolFactory","version":2,"deployment":"20250702-v3-reclamm-pool-v2"}',
-    };
-
 // ─── RPC resolution (env var with fallback, no Anvil) ───────────────────────
 
 const CHAIN_RPC: Record<number, { rpcEnv: string; fallBackRpc: string }> = {
@@ -433,14 +426,8 @@ describe('Network Configuration Validation', () => {
 
                 switch (meta.callType) {
                     case 'version': {
-                        const defaultExpected =
-                            CONTRACT_CHECKS[meta.contractName].expectedVersion!;
                         const expected =
-                            meta.contractName === 'ReClammPoolFactory'
-                                ? (RECLAMM_POOL_FACTORY_VERSION_BY_CHAIN[
-                                      chainId
-                                  ] ?? defaultExpected)
-                                : defaultExpected;
+                            CONTRACT_CHECKS[meta.contractName].expectedVersion!;
                         if (expected === 'PLACEHOLDER') {
                             console.log(
                                 `[Chain ${chainId}] ${meta.contractName}.version() = "${value}"`,
