@@ -113,7 +113,7 @@ export const balancerV3Contracts = {
         [ChainId.OPTIMISM]: '0x3ccD78683efFffdDc1A16f5553C896ac6D3ab7FF',
         [ChainId.PLASMA]: '0x3ccD78683efFffdDc1A16f5553C896ac6D3ab7FF',
         [ChainId.SEPOLIA]: '0x0F5eF30D8440213dc7A9d7bbcf83322041a3e296',
-        [ChainId.SONIC]: '0x99c13B259138a8ad8badbBfB87A4074591310De0',
+        [ChainId.SONIC]: '0x78e48AEAf36666ae528De39c4300F09adb9722E8',
         [ChainId.X_LAYER]: '0x3ccD78683efFffdDc1A16f5553C896ac6D3ab7FF',
     },
     Router: {
