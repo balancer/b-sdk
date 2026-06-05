@@ -3,6 +3,7 @@ import pkg from './package.json';
 
 export default defineConfig({
     entry: ['src/index.ts'],
+    tsconfig: 'tsconfig.build.json',
     bundle: true,
     clean: true,
     dts: true,
