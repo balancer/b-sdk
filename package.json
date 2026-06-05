@@ -18,7 +18,7 @@
         "dist/"
     ],
     "scripts": {
-        "codegen": "graphql-codegen --config codegen.yml",
+        "codegen": "graphql-codegen-esm --config codegen.yml",
         "prebuild": "pnpm run codegen",
         "build": "tsup",
         "format": "biome format --write .",
