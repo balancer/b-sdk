@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write  # Required for OIDC
+  id-token: write  # Required for provenance attestations
   contents: write  # Required for pushing git tags
   pull-requests: write  # Required for changesets to create PRs
 
@@ -33,4 +33,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-
