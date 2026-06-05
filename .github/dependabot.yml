@@ -5,6 +5,9 @@ updates:
     schedule:
       interval: "weekly"
     allow:
-      - dependency-name: "@balancer-labs/balancer-maths"
-      - dependency-name: "viem"
+      - dependency-type: "all"
     open-pull-requests-limit: 5
+    cooldown:
+      semver-patch-days: 7
+      semver-minor-days: 7
+      semver-major-days: 14
