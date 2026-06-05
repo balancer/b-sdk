@@ -18,7 +18,6 @@ export * from './lBPoolFactory';
 export * from './fixedPriceLBPoolFactory';
 export * from './reClammPoolFactory';
 export * from './mockGyroEclpPool';
-export * from './lBPMigrationRouter';
 export * from './mevCaptureHook';
 export * from './stableSurgeHook';
 export * from './unbalancedAddViaSwapRouter';

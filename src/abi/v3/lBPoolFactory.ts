@@ -26,11 +26,6 @@ export const lBPoolFactoryAbi_V3 = [
                 name: 'trustedRouter',
                 type: 'address',
             },
-            {
-                internalType: 'address',
-                name: 'migrationRouter',
-                type: 'address',
-            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
@@ -78,21 +73,6 @@ export const lBPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'InvalidBptLockDuration',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'InvalidBptPercentageToMigrate',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'InvalidMigrationWeights',
-        type: 'error',
-    },
-    {
-        inputs: [],
         name: 'InvalidOwner',
         type: 'error',
     },
@@ -129,11 +109,6 @@ export const lBPoolFactoryAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'MigrationRouterRequired',
-        type: 'error',
-    },
-    {
-        inputs: [],
         name: 'MinWeight',
         type: 'error',
     },
@@ -155,11 +130,6 @@ export const lBPoolFactoryAbi_V3 = [
     {
         inputs: [],
         name: 'SenderNotAllowed',
-        type: 'error',
-    },
-    {
-        inputs: [],
-        name: 'StandardPoolWithCreator',
         type: 'error',
     },
     {
@@ -212,43 +182,6 @@ export const lBPoolFactoryAbi_V3 = [
                 name: 'pool',
                 type: 'address',
             },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'lockDurationAfterMigration',
-                type: 'uint256',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'bptPercentageToMigrate',
-                type: 'uint256',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'migrationWeightProjectToken',
-                type: 'uint256',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'migrationWeightReserveToken',
-                type: 'uint256',
-            },
-        ],
-        name: 'MigrationParamsSet',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
         ],
         name: 'PoolCreated',
         type: 'event',
@@ -272,12 +205,6 @@ export const lBPoolFactoryAbi_V3 = [
                 indexed: false,
                 internalType: 'bool',
                 name: 'blockProjectTokenSwapsIn',
-                type: 'bool',
-            },
-            {
-                indexed: false,
-                internalType: 'bool',
-                name: 'hasMigration',
                 type: 'bool',
             },
             {
@@ -388,146 +315,6 @@ export const lBPoolFactoryAbi_V3 = [
             },
         ],
         name: 'create',
-        outputs: [
-            {
-                internalType: 'address',
-                name: 'pool',
-                type: 'address',
-            },
-        ],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    {
-                        internalType: 'string',
-                        name: 'name',
-                        type: 'string',
-                    },
-                    {
-                        internalType: 'string',
-                        name: 'symbol',
-                        type: 'string',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'owner',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'contract IERC20',
-                        name: 'projectToken',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'contract IERC20',
-                        name: 'reserveToken',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'startTime',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'endTime',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'bool',
-                        name: 'blockProjectTokenSwapsIn',
-                        type: 'bool',
-                    },
-                ],
-                internalType: 'struct LBPCommonParams',
-                name: 'lbpCommonParams',
-                type: 'tuple',
-            },
-            {
-                components: [
-                    {
-                        internalType: 'address',
-                        name: 'migrationRouter',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'lockDurationAfterMigration',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'bptPercentageToMigrate',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'migrationWeightProjectToken',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'migrationWeightReserveToken',
-                        type: 'uint256',
-                    },
-                ],
-                internalType: 'struct MigrationParams',
-                name: 'migrationParams',
-                type: 'tuple',
-            },
-            {
-                components: [
-                    {
-                        internalType: 'uint256',
-                        name: 'projectTokenStartWeight',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'reserveTokenStartWeight',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'projectTokenEndWeight',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'reserveTokenEndWeight',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'reserveTokenVirtualBalance',
-                        type: 'uint256',
-                    },
-                ],
-                internalType: 'struct LBPParams',
-                name: 'lbpParams',
-                type: 'tuple',
-            },
-            {
-                internalType: 'uint256',
-                name: 'swapFeePercentage',
-                type: 'uint256',
-            },
-            {
-                internalType: 'bytes32',
-                name: 'salt',
-                type: 'bytes32',
-            },
-            {
-                internalType: 'address',
-                name: 'poolCreator',
-                type: 'address',
-            },
-        ],
-        name: 'createWithMigration',
         outputs: [
             {
                 internalType: 'address',
@@ -678,45 +465,6 @@ export const lBPoolFactoryAbi_V3 = [
             },
         ],
         stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getMaxBptLockDuration',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'pure',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getMigrationRouter',
-        outputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address',
-            },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getMinReserveTokenMigrationWeight',
-        outputs: [
-            {
-                internalType: 'uint256',
-                name: '',
-                type: 'uint256',
-            },
-        ],
-        stateMutability: 'pure',
         type: 'function',
     },
     {

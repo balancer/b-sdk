@@ -5,10 +5,7 @@ import {
     RemoveLiquidityInput,
     RemoveLiquidityRecoveryInput,
 } from '../../removeLiquidity/types';
-import {
-    CreatePoolLiquidityBootstrappingInput,
-    CreatePoolLiquidityBootstrappingWithMigrationInput,
-} from '../../createPool/types';
+import { CreatePoolLiquidityBootstrappingInput } from '../../createPool/types';
 
 import { isSameAddress, SDKError } from '@/utils';
 
@@ -28,11 +25,7 @@ export class InputValidatorLiquidityBootstrapping extends InputValidatorBase {
         _removeLiquidityRecoveryInput: RemoveLiquidityRecoveryInput,
         _poolStateWithBalances: PoolStateWithBalances,
     ): void {}
-    validateCreatePool(
-        input:
-            | CreatePoolLiquidityBootstrappingInput
-            | CreatePoolLiquidityBootstrappingWithMigrationInput,
-    ): void {
+    validateCreatePool(input: CreatePoolLiquidityBootstrappingInput): void {
         // Validate weights for regular LBPs
         const startWeightsSum =
             input.lbpParams.projectTokenStartWeight +

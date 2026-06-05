@@ -70,7 +70,7 @@ See `src/entities/addLiquidity/index.ts`, `src/entities/removeLiquidity/index.ts
 
 ### ABIs and contract addresses
 
-- `src/abi/v2/` and `src/abi/v3/` hold Viem-compatible ABIs. V3 has many more routers (`router`, `batchRouter`, `bufferRouter`, `compositeLiquidityRouter`, `unbalancedAddViaSwapRouter`, `lBPMigrationRouter`) and pool factories.
+- `src/abi/v2/` and `src/abi/v3/` hold Viem-compatible ABIs. V3 has many more routers (`router`, `batchRouter`, `bufferRouter`, `compositeLiquidityRouter`, `unbalancedAddViaSwapRouter`) and pool factories.
 - Per-chain contract address maps: `src/utils/balancerV2Contracts.ts` and `src/utils/balancerV3Contracts.ts`. Constants/chain metadata in `src/utils/constants.ts` (includes `ChainId`, `API_CHAIN_NAMES`, `CHAINS`, `PERMIT2`, `NATIVE_ASSETS`).
 - To add or update deployments, run `pnpm update:deployments` (see `scripts/updateDeployments.ts`) rather than editing the address maps by hand.
 

@@ -52,7 +52,6 @@ describe('create seedless liquidityBootstrapping pool test', () => {
     let poolAddress: Address;
     let seedlessEventArgs: {
         blockProjectTokenSwapsIn: boolean;
-        hasMigration: boolean;
         isSeedless: boolean;
     };
 
@@ -60,7 +59,7 @@ describe('create seedless liquidityBootstrapping pool test', () => {
         ({ rpcUrl } = await startFork(
             ANVIL_NETWORKS.MAINNET,
             undefined,
-            24049200n,
+            25094573n,
         ));
         client = createTestClient({
             mode: 'anvil',
@@ -133,7 +132,6 @@ describe('create seedless liquidityBootstrapping pool test', () => {
     test('Seedless flag', async () => {
         expect(seedlessEventArgs.isSeedless).to.be.true;
         expect(seedlessEventArgs.blockProjectTokenSwapsIn).to.be.true;
-        expect(seedlessEventArgs.hasMigration).to.be.false;
     }, 120_000);
 
     test('Registration', async () => {

@@ -44,7 +44,6 @@ const targetContractsV3 = [
     'FixedPriceLBPoolFactory',
     'ReClammPoolFactory',
     'MockGyroEclpPool',
-    'LBPMigrationRouter',
     'MevCaptureHook',
     'StableSurgeHook',
     'UnbalancedAddViaSwapRouter',

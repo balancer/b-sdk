@@ -39,38 +39,6 @@ export const liquidityBootstrappingPoolAbi_V3 = [
             {
                 components: [
                     {
-                        internalType: 'address',
-                        name: 'migrationRouter',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'lockDurationAfterMigration',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'bptPercentageToMigrate',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'migrationWeightProjectToken',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'migrationWeightReserveToken',
-                        type: 'uint256',
-                    },
-                ],
-                internalType: 'struct MigrationParams',
-                name: 'migrationParams',
-                type: 'tuple',
-            },
-            {
-                components: [
-                    {
                         internalType: 'uint256',
                         name: 'projectTokenStartWeight',
                         type: 'uint256',
@@ -180,10 +148,8 @@ export const liquidityBootstrappingPoolAbi_V3 = [
         name: 'InvalidAccountNonce',
         type: 'error',
     },
-    { inputs: [], name: 'InvalidBptLockDuration', type: 'error' },
-    { inputs: [], name: 'InvalidBptPercentageToMigrate', type: 'error' },
     { inputs: [], name: 'InvalidExponent', type: 'error' },
-    { inputs: [], name: 'InvalidMigrationWeights', type: 'error' },
+    { inputs: [], name: 'InvalidMinTokenBalance', type: 'error' },
     { inputs: [], name: 'InvalidOwner', type: 'error' },
     { inputs: [], name: 'InvalidProjectToken', type: 'error' },
     { inputs: [], name: 'InvalidReserveToken', type: 'error' },
@@ -204,7 +170,6 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     { inputs: [], name: 'InvalidTokenConfiguration', type: 'error' },
     { inputs: [], name: 'MaxInRatio', type: 'error' },
     { inputs: [], name: 'MaxOutRatio', type: 'error' },
-    { inputs: [], name: 'MigrationRouterRequired', type: 'error' },
     { inputs: [], name: 'MinWeight', type: 'error' },
     { inputs: [], name: 'NormalizedWeightInvariant', type: 'error' },
     { inputs: [], name: 'NotImplemented', type: 'error' },
@@ -237,6 +202,15 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     },
     { inputs: [], name: 'SwapOfProjectTokenIn', type: 'error' },
     { inputs: [], name: 'SwapsDisabled', type: 'error' },
+    {
+        inputs: [
+            { internalType: 'uint256', name: 'tokenIndex', type: 'uint256' },
+            { internalType: 'uint256', name: 'actualBalance', type: 'uint256' },
+            { internalType: 'uint256', name: 'minBalance', type: 'uint256' },
+        ],
+        name: 'TokenBalanceBelowMin',
+        type: 'error',
+    },
     { inputs: [], name: 'TokensMustBeDifferent', type: 'error' },
     { inputs: [], name: 'UnsupportedOperation', type: 'error' },
     { inputs: [], name: 'WeightedPoolBptRateUnsupported', type: 'error' },
@@ -721,31 +695,6 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'reserveTokenVirtualBalance',
                         type: 'uint256',
                     },
-                    {
-                        internalType: 'address',
-                        name: 'migrationRouter',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'lockDurationAfterMigration',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'bptPercentageToMigrate',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'migrationWeightProjectToken',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'migrationWeightReserveToken',
-                        type: 'uint256',
-                    },
                 ],
                 internalType: 'struct LBPoolImmutableData',
                 name: 'data',
@@ -771,48 +720,14 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     },
     {
         inputs: [],
-        name: 'getMigrationParameters',
+        name: 'getMinTokenBalances',
         outputs: [
             {
-                components: [
-                    {
-                        internalType: 'address',
-                        name: 'migrationRouter',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'lockDurationAfterMigration',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'bptPercentageToMigrate',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'migrationWeightProjectToken',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'migrationWeightReserveToken',
-                        type: 'uint256',
-                    },
-                ],
-                internalType: 'struct MigrationParams',
-                name: '',
-                type: 'tuple',
+                internalType: 'uint256[]',
+                name: 'minTokenBalances',
+                type: 'uint256[]',
             },
         ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getMigrationRouter',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -1034,6 +949,11 @@ export const liquidityBootstrappingPoolAbi_V3 = [
                         name: 'normalizedWeights',
                         type: 'uint256[]',
                     },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'minTokenBalances',
+                        type: 'uint256[]',
+                    },
                 ],
                 internalType: 'struct WeightedPoolImmutableData',
                 name: '',
@@ -1240,7 +1160,7 @@ export const liquidityBootstrappingPoolAbi_V3 = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'router', type: 'address' },
+            { internalType: 'address', name: '', type: 'address' },
             { internalType: 'address', name: '', type: 'address' },
             {
                 internalType: 'enum RemoveLiquidityKind',

@@ -5,7 +5,6 @@ import {
     CreatePoolBase,
     CreatePoolBuildCallOutput,
     CreatePoolLiquidityBootstrappingInput,
-    CreatePoolLiquidityBootstrappingWithMigrationInput,
     CreatePoolLiquidityBootstrappingFixedPriceInput,
 } from '../../types';
 
@@ -21,7 +20,6 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
     public buildCall(
         input:
             | CreatePoolLiquidityBootstrappingInput
-            | CreatePoolLiquidityBootstrappingWithMigrationInput
             | CreatePoolLiquidityBootstrappingFixedPriceInput,
     ): CreatePoolBuildCallOutput {
         const callData = this.encodeCall(input);
@@ -38,7 +36,6 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
     private encodeCall(
         input:
             | CreatePoolLiquidityBootstrappingInput
-            | CreatePoolLiquidityBootstrappingWithMigrationInput
             | CreatePoolLiquidityBootstrappingFixedPriceInput,
     ): Hex {
         if (input.poolType === PoolType.LiquidityBootstrappingFixedPrice) {
@@ -46,17 +43,12 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
                 input as CreatePoolLiquidityBootstrappingFixedPriceInput,
             );
         }
-        if ('lbpMigrationParams' in input && input.lbpMigrationParams) {
-            return this.encodeCallWithMigration(
-                input as CreatePoolLiquidityBootstrappingWithMigrationInput,
-            );
-        }
-        return this.encodeCallWithoutMigration(
+        return this.encodeCallWeighted(
             input as CreatePoolLiquidityBootstrappingInput,
         );
     }
 
-    private encodeCallWithoutMigration(
+    private encodeCallWeighted(
         input: CreatePoolLiquidityBootstrappingInput,
     ): Hex {
         const {
@@ -99,69 +91,6 @@ export class CreatePoolLiquidityBootstrapping implements CreatePoolBase {
         return encodeFunctionData({
             abi: lBPoolFactoryAbi_V3Extended,
             functionName: 'create',
-            args,
-        });
-    }
-
-    private encodeCallWithMigration(
-        input: CreatePoolLiquidityBootstrappingWithMigrationInput,
-    ): Hex {
-        const {
-            owner,
-            projectToken,
-            reserveToken,
-            startTimestamp,
-            endTimestamp,
-            blockProjectTokenSwapsIn,
-            projectTokenStartWeight,
-            reserveTokenStartWeight,
-            projectTokenEndWeight,
-            reserveTokenEndWeight,
-            reserveTokenVirtualBalance,
-        } = input.lbpParams;
-        const {
-            lockDurationAfterMigration,
-            bptPercentageToMigrate,
-            migrationWeightProjectToken,
-            migrationWeightReserveToken,
-        } = input.lbpMigrationParams;
-        const args = [
-            {
-                // LBPCommonParams
-                name: input.name || input.symbol,
-                symbol: input.symbol,
-                owner,
-                projectToken,
-                reserveToken,
-                startTime: startTimestamp,
-                endTime: endTimestamp,
-                blockProjectTokenSwapsIn,
-            },
-            {
-                // MigrationParams (auto-resolve migrationRouter from chain)
-                migrationRouter: AddressProvider.LBPoolMigrationRouter(
-                    input.chainId,
-                ),
-                lockDurationAfterMigration,
-                bptPercentageToMigrate,
-                migrationWeightProjectToken,
-                migrationWeightReserveToken,
-            },
-            {
-                // LBPParams (weights)
-                projectTokenStartWeight,
-                reserveTokenStartWeight,
-                projectTokenEndWeight,
-                reserveTokenEndWeight,
-                reserveTokenVirtualBalance: reserveTokenVirtualBalance ?? 0n,
-            },
-            input.swapFeePercentage,
-            input.salt || getRandomBytes32(),
-            input.poolCreator ?? zeroAddress,
-        ] as const;
-        return encodeFunctionData({
-            abi: lBPoolFactoryAbi_V3Extended,
-            functionName: 'createWithMigration',
             args,
         });
     }

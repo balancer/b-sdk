@@ -112,13 +112,9 @@ const CONTRACT_CHECKS: Record<string, ContractValidation> = {
             '{"name":"GyroECLPPoolFactory","version":2,"deployment":"20260126-v3-gyro-eclp-v2"}',
         hasGetVault: true,
     },
-    LBPMigrationRouter: {
-        expectedVersion:
-            '{"name":"LBPMigrationRouter","version":3,"deployment":"20251219-v3-liquidity-bootstrapping-pool-v3"}',
-    },
     LBPoolFactory: {
         expectedVersion:
-            '{"name":"LBPoolFactory","version":3,"deployment":"20251219-v3-liquidity-bootstrapping-pool-v3"}',
+            '{"name":"LBPoolFactory","version":4,"deployment":"20260501-v3-liquidity-bootstrapping-pool-v4"}',
         hasGetVault: true,
     },
     MevCaptureHook: {},
@@ -181,19 +177,11 @@ const CHAINS_TO_TEST: ChainId[] = [
 // ─── Expected-missing per chain (derived from balancerV3Contracts gaps) ─────
 
 const EXPECTED_MISSING: Partial<Record<ChainId, string[]>> = {
-    [ChainId.AVALANCHE]: [
-        'LBPoolFactory',
-        'FixedPriceLBPoolFactory',
-        'LBPMigrationRouter',
-    ],
-    [ChainId.OPTIMISM]: [
-        'LBPoolFactory',
-        'FixedPriceLBPoolFactory',
-        'LBPMigrationRouter',
-    ],
+    [ChainId.AVALANCHE]: ['FixedPriceLBPoolFactory'],
+    [ChainId.OPTIMISM]: ['FixedPriceLBPoolFactory'],
     [ChainId.MONAD]: ['MevCaptureHook'],
     [ChainId.PLASMA]: ['MevCaptureHook'],
-    [ChainId.SONIC]: ['MevCaptureHook', 'LBPMigrationRouter'],
+    [ChainId.SONIC]: ['MevCaptureHook'],
     [ChainId.X_LAYER]: ['MevCaptureHook'],
 };
 
