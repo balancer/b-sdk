@@ -24,7 +24,6 @@ import {
     liquidityBootstrappingPoolAbi_V3,
     gyro2CLPAbi_V3,
     gyroECLPAbi_V3,
-    lBPMigrationRouterAbi_V3,
     unbalancedAddViaSwapRouterAbi_V3,
 } from './v3';
 
@@ -77,12 +76,6 @@ export const balancerBufferRouterAbiExtended = [
 
 export const balancerBatchRouterAbiExtended = [
     ...batchRouterAbi_V3,
-    ...commonABIsV3,
-    ...poolABIsV3,
-];
-
-export const balancerMigrationRouterAbiExtended = [
-    ...lBPMigrationRouterAbi_V3,
     ...commonABIsV3,
     ...poolABIsV3,
 ];

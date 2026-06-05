@@ -32,7 +32,11 @@ const WETH = TOKENS[chainId].WETH;
 describe('PriceImpact V3', () => {
     let rpcUrl: string;
     beforeAll(async () => {
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+        ({ rpcUrl } = await startFork(
+            ANVIL_NETWORKS[ChainId[chainId]],
+            undefined,
+            10157239n,
+        ));
     });
 
     describe('Full Boosted Pool Boosted Pool AddLiquidity', () => {

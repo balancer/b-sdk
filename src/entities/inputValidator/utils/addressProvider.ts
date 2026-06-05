@@ -75,12 +75,6 @@ export class AddressProvider {
             chainId,
         );
     }
-    static LBPoolMigrationRouter(chainId: ChainId): Hex {
-        return AddressProvider.getAddress(
-            balancerV3Contracts.LBPMigrationRouter,
-            chainId,
-        );
-    }
     static FixedPriceLBPoolFactory(chainId: ChainId): Hex {
         return AddressProvider.getAddress(
             balancerV3Contracts.FixedPriceLBPoolFactory,

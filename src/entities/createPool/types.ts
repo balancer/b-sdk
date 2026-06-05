@@ -26,7 +26,6 @@ export type CreatePoolInput =
     | CreatePoolGyroECLPInput
     | CreatePoolReClammInput
     | CreatePoolLiquidityBootstrappingInput
-    | CreatePoolLiquidityBootstrappingWithMigrationInput
     | CreatePoolLiquidityBootstrappingFixedPriceInput;
 
 export type CreatePoolBuildCallOutput = {
@@ -163,19 +162,6 @@ export type CreatePoolLiquidityBootstrappingInput = Omit<
     poolType: PoolType.LiquidityBootstrapping;
     poolCreator?: Address;
 };
-
-// Updated migration params (lockDuration renamed, migrationRouter auto-resolved)
-export type LBPMigrationParams = {
-    lockDurationAfterMigration: bigint;
-    bptPercentageToMigrate: bigint;
-    migrationWeightProjectToken: bigint;
-    migrationWeightReserveToken: bigint;
-};
-
-export type CreatePoolLiquidityBootstrappingWithMigrationInput =
-    CreatePoolLiquidityBootstrappingInput & {
-        lbpMigrationParams: LBPMigrationParams;
-    };
 
 export type FixedPriceLBPParams = {
     owner: Address;

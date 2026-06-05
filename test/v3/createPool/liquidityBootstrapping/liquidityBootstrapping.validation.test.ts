@@ -10,7 +10,7 @@ import {
 } from 'src';
 import { TOKENS } from 'test/lib/utils/addresses';
 
-const chainId = ChainId.SEPOLIA;
+const chainId = ChainId.MAINNET;
 const BAL = TOKENS[chainId].BAL;
 const WETH = TOKENS[chainId].WETH;
 
