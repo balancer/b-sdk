@@ -57,7 +57,7 @@
         "typescript": "5.8.3",
         "vite": "6.4.1",
         "vite-tsconfig-paths": "5.1.4",
-        "vitest": "4.1.0"
+        "vitest": "4.1.7"
     },
     "packageManager": "pnpm@10.8.1",
     "engines": {
