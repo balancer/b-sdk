@@ -6,7 +6,7 @@ This file provides guidance to coding agents working in this repository.
 
 `@balancer/sdk` — TypeScript SDK for the Balancer Protocol. Published to npm, consumed by the Balancer frontend and integrators. Supports Balancer V2, Balancer V3, and CowAmm pools across many EVM chains (see `ChainId` in `src/utils/constants.ts`).
 
-Package manager: **pnpm** (`packageManager` pinned in `package.json`). Node `>=18`.
+Package manager: **pnpm** (`packageManager` pinned in `package.json`). Node `>=20` (CI uses 22; `@graphql-codegen/cli` 7.x requires Node 20.12+).
 
 ## Common Commands
 
