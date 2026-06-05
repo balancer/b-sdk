@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write  # Required for provenance attestations
+  id-token: write  # Required for npm OIDC trusted publishing
   contents: write  # Required for pushing git tags
   pull-requests: write  # Required for changesets to create PRs
 
@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        node-version: [22]
+        node-version: [24]
     timeout-minutes: 5
 
     steps:
@@ -25,11 +25,17 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
+      # Trusted publishing requires npm 11.5.1+ (Node 24 + explicit upgrade).
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+        shell: bash
+
       - name: Publish to NPM
         uses: changesets/action@v1.4.0
         with:
           publish: pnpm changeset:release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
+          # Empty string so changesets/action uses OIDC instead of a classic token.
+          # Trusted publisher must be configured for main.yml on npm.
+          NPM_TOKEN: ''
