@@ -7,8 +7,7 @@
         "url": "https://github.com/balancer/b-sdk"
     },
     "publishConfig": {
-        "access": "public",
-        "provenance": true
+        "access": "public"
     },
     "version": "6.0.0",
     "main": "dist/index.js",
