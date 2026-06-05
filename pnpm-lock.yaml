@@ -40,8 +40,8 @@ importers:
         specifier: 0.0.10
         version: 0.0.10
       dotenv:
-        specifier: 16.5.0
-        version: 16.5.0
+        specifier: 17.4.2
+        version: 17.4.2
       dpdm:
         specifier: 3.14.0
         version: 3.14.0
@@ -1821,8 +1821,8 @@ packages:
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
 
-  dotenv@16.5.0:
-    resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
   dpdm@3.14.0:
@@ -4958,7 +4958,7 @@ snapshots:
       no-case: 3.0.4
       tslib: 2.8.1
 
-  dotenv@16.5.0: {}
+  dotenv@17.4.2: {}
 
   dpdm@3.14.0:
     dependencies:
