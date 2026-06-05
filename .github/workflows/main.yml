@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
 
+permissions:
+  id-token: write  # Required for npm OIDC trusted publishing (caller workflow)
+  contents: write
+  pull-requests: write
+
 jobs:
   release:
     name: Release
