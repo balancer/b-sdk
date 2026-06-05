@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        node-version: [18]
+        node-version: [22]
     timeout-minutes: 5
 
     steps:
