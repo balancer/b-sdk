@@ -3,7 +3,6 @@ documents: src/data/providers/balancer-api/modules/**/*.ts
 generates:
   src/data/providers/balancer-api/generated/types.ts:
     plugins:
-      - typescript
       - typescript-operations
     config:
       scalars:
