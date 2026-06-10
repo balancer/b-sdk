@@ -12,6 +12,7 @@ export enum AddLiquidityKind {
     Unbalanced = 'Unbalanced',
     SingleToken = 'SingleToken',
     Proportional = 'Proportional',
+    UnbalancedViaSwap = 'UnbalancedViaSwap',
 }
 
 // This will be extended for each pools specific input requirements

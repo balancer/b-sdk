@@ -5,7 +5,10 @@
 import { encodeFunctionData, zeroAddress, Address } from 'viem';
 import { TokenAmount } from '@/entities/tokenAmount';
 import { Permit2 } from '@/entities/permit2Helper';
-import { getAmountsCall } from '../addLiquidity/helpers';
+import {
+    getAmountsCall,
+    unsupportedAddLiquidityInputKind,
+} from '../addLiquidity/helpers';
 import { PoolStateWithUnderlyings } from '@/entities/types';
 import {
     getAmounts,
@@ -224,6 +227,8 @@ export class AddLiquidityBoostedV3 {
                     input.protocolVersion,
                 );
             }
+            case AddLiquidityKind.UnbalancedViaSwap:
+                return unsupportedAddLiquidityInputKind(input.addLiquidityKind);
         }
 
         const value = getValue(input.amountsIn, wethIsEth);

@@ -2,6 +2,7 @@ import { Address, Hex } from 'viem';
 import { Slippage } from '../slippage';
 import { TokenAmount } from '../tokenAmount';
 import { InputAmount } from '@/types';
+import { AddLiquidityBaseQueryOutput } from '../addLiquidity/types';
 
 export type AddLiquidityUnbalancedViaSwapInput = {
     chainId: number;
@@ -12,17 +13,29 @@ export type AddLiquidityUnbalancedViaSwapInput = {
     sender?: Address;
 };
 
-export type AddLiquidityUnbalancedViaSwapQueryOutput = {
-    pool: Address;
-    bptOut: TokenAmount;
-    exactAmountIn: TokenAmount;
-    expectedAdjustableAmountIn: TokenAmount;
-    chainId: number;
-    protocolVersion: 3;
-    to: Address;
-    addLiquidityUserData: Hex;
-    swapUserData: Hex;
-};
+/**
+ * Query output for add liquidity unbalanced via swap.
+ *
+ * Extends {@link AddLiquidityBaseQueryOutput} for generic add-liquidity consumers.
+ * `amountsIn` holds **budget** amounts in sorted token order (not simulated router
+ * consumption); the adjustable slot matches `expectedAdjustableAmountIn`.
+ *
+ * Use flow-specific fields for `buildCall` and Permit2:
+ * - `pool` — router address argument (distinct from `poolId`)
+ * - `expectedAdjustableAmountIn` — user budget / permit ceiling
+ *
+ * Generic `signAddLiquidityApproval` does not apply; use
+ * `signAddLiquidityUnbalancedViaSwapApproval` instead.
+ */
+export type AddLiquidityUnbalancedViaSwapQueryOutput =
+    AddLiquidityBaseQueryOutput & {
+        protocolVersion: 3;
+        pool: Address;
+        exactAmountIn: TokenAmount;
+        expectedAdjustableAmountIn: TokenAmount;
+        addLiquidityUserData: Hex;
+        swapUserData: Hex;
+    };
 
 export type AddLiquidityUnbalancedViaSwapBuildCallInput = {
     slippage: Slippage;

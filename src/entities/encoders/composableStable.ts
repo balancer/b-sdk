@@ -1,6 +1,7 @@
 import { encodeAbiParameters } from 'viem';
 import { Address } from '../../types';
 import { AddLiquidityKind } from '../addLiquidity/types';
+import { unsupportedAddLiquidityInputKind } from '../addLiquidity/helpers';
 import {
     AddLiquidityAmounts,
     InitPoolAmountsComposableStable,
@@ -75,6 +76,8 @@ export class ComposableStableEncoder {
                     amounts.minimumBpt,
                 );
             }
+            case AddLiquidityKind.UnbalancedViaSwap:
+                return unsupportedAddLiquidityInputKind(kind);
         }
     }
 

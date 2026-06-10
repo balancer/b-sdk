@@ -1,6 +1,7 @@
 import { encodeAbiParameters } from 'viem';
 import { Hex } from '../../types';
 import { AddLiquidityKind } from '../addLiquidity/types';
+import { unsupportedAddLiquidityInputKind } from '../addLiquidity/helpers';
 import {
     AddLiquidityAmounts,
     InitPoolAmounts,
@@ -76,6 +77,8 @@ export class WeightedEncoder {
                     amounts.minimumBpt,
                 );
             }
+            case AddLiquidityKind.UnbalancedViaSwap:
+                return unsupportedAddLiquidityInputKind(kind);
         }
     };
 

@@ -138,6 +138,8 @@ function getCheck(output: AddLiquidityQueryOutput) {
             return { ...check, bptOut };
         case AddLiquidityKind.Unbalanced:
             return { ...check, amountsIn };
+        case AddLiquidityKind.UnbalancedViaSwap:
+            return { ...check, amountsIn };
     }
 }
 

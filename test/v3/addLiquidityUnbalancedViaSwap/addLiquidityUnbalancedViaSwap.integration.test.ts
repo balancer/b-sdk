@@ -28,6 +28,7 @@ import {
     MathSol,
     PoolTokenWithBalance,
     Permit2Helper,
+    AddLiquidityKind,
 } from '@/index';
 import {
     AddLiquidityUnbalancedViaSwapV3,
@@ -189,6 +190,25 @@ describe('add liquidity unbalanced via swap test', () => {
                             addLiquidityInput,
                             poolState,
                         );
+
+                    expect(queryOutput.poolType).toBe(poolState.type);
+                    expect(queryOutput.poolId).toBe(poolState.id);
+                    expect(queryOutput.addLiquidityKind).toBe(
+                        AddLiquidityKind.UnbalancedViaSwap,
+                    );
+                    expect(queryOutput.amountsIn).toHaveLength(2);
+                    expect(
+                        queryOutput.amountsIn[expectedAdjustableToken.index]
+                            .amount,
+                    ).toBe(expectedAdjustableAmountGiven);
+                    expect(
+                        queryOutput.amountsIn[
+                            expectedAdjustableToken.index === 0 ? 1 : 0
+                        ].amount,
+                    ).toBe(0n);
+                    expect(queryOutput.expectedAdjustableAmountIn).toEqual(
+                        queryOutput.amountsIn[expectedAdjustableToken.index],
+                    );
 
                     // Exact token is WETH with exactAmount = 0
                     expect(
