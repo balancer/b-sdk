@@ -1,5 +1,12 @@
 # @balancer/sdk
 
+## 6.1.0
+
+### Minor Changes
+
+- 6844134: Add price impact support for Add Liquidity Unbalanced Via Swap.
+- 233c1ab: Add base add-liquidity query fields to AddLiquidityUnbalancedViaSwapQueryOutput and introduce AddLiquidityKind.UnbalancedViaSwap.
+
 ## 6.0.0
 
 ### Major Changes
