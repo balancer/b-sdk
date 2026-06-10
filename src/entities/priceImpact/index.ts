@@ -24,6 +24,8 @@ import { addLiquidityUnbalancedBoosted } from './addLiquidityUnbalancedBoosted';
 import { addLiquidityNested } from './addLiquidityNested';
 import { priceImpactABA } from './helper';
 import { addLiquidityUnbalanced } from './addLiquidityUnbalanced';
+import { addLiquidityUnbalancedViaSwap } from './addLiquidityUnbalancedViaSwap';
+import { AddLiquidityUnbalancedViaSwapInput } from '../addLiquidityUnbalancedViaSwap';
 import { SDKError } from '@/utils/errors';
 
 export * from './helper';
@@ -109,6 +111,23 @@ export class PriceImpact {
         poolState: PoolState,
     ): Promise<PriceImpactAmount> => {
         return addLiquidityUnbalanced(input, poolState);
+    };
+
+    /**
+     * Calculate price impact on add liquidity unbalanced via swap operations.
+     *
+     * Adapted ABA for ReClamm: proportional remove + single GivenIn swap
+     * reconciliation (no single-token or unbalanced remove).
+     *
+     * @param input same input used in the corresponding add liquidity operation
+     * @param poolState same pool state used in the corresponding add liquidity operation
+     * @returns price impact amount
+     */
+    static addLiquidityUnbalancedViaSwap = async (
+        input: AddLiquidityUnbalancedViaSwapInput,
+        poolState: PoolState,
+    ): Promise<PriceImpactAmount> => {
+        return addLiquidityUnbalancedViaSwap(input, poolState);
     };
 
     static async addLiquidityUnbalancedBoosted(
