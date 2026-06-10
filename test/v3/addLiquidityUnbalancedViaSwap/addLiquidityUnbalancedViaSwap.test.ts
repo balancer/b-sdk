@@ -1,6 +1,6 @@
 // pnpm test addLiquidityUnbalancedViaSwap.test.ts
 import { Address, maxUint256, maxUint48, parseUnits, zeroAddress } from 'viem';
-import { ChainId, PoolState, Slippage } from '@/index';
+import { ChainId, PoolState, Slippage, AddLiquidityKind } from '@/index';
 import {
     AddLiquidityUnbalancedViaSwapV3,
     AddLiquidityUnbalancedViaSwapQueryOutput,
@@ -127,17 +127,25 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 AAVE.decimals,
             );
 
+            const exactAmountIn = TokenAmount.fromRawAmount(exactToken, 0n);
+            const expectedAdjustableAmountIn = TokenAmount.fromRawAmount(
+                adjustableToken,
+                parseUnits('50', AAVE.decimals),
+            );
+
             mockQueryOutput = {
+                poolType: mockPoolState.type,
+                poolId: mockPoolState.id,
+                addLiquidityKind: AddLiquidityKind.UnbalancedViaSwap,
                 pool: mockPoolState.address,
                 bptOut: TokenAmount.fromRawAmount(
                     bptToken,
                     parseUnits('100', 18),
                 ),
-                exactAmountIn: TokenAmount.fromRawAmount(exactToken, 0n),
-                expectedAdjustableAmountIn: TokenAmount.fromRawAmount(
-                    adjustableToken,
-                    parseUnits('50', AAVE.decimals),
-                ),
+                exactAmountIn,
+                expectedAdjustableAmountIn,
+                amountsIn: [expectedAdjustableAmountIn, exactAmountIn],
+                tokenInIndex: 0,
                 chainId,
                 protocolVersion: 3,
                 to: AddressProvider.Router(chainId),
@@ -201,17 +209,18 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 const bptToken = new Token(chainId, mockPoolState.address, 18);
 
                 const wethAmount = parseUnits('1', WETH.decimals);
+                const exactAmountIn = TokenAmount.fromRawAmount(exactToken, 0n);
+                const expectedAdjustableAmountIn = TokenAmount.fromRawAmount(
+                    adjustableToken,
+                    wethAmount,
+                );
                 const queryOutputWithWeth: AddLiquidityUnbalancedViaSwapQueryOutput =
                     {
                         ...mockQueryOutput,
-                        exactAmountIn: TokenAmount.fromRawAmount(
-                            exactToken,
-                            0n,
-                        ),
-                        expectedAdjustableAmountIn: TokenAmount.fromRawAmount(
-                            adjustableToken,
-                            wethAmount,
-                        ),
+                        exactAmountIn,
+                        expectedAdjustableAmountIn,
+                        amountsIn: [exactAmountIn, expectedAdjustableAmountIn],
+                        tokenInIndex: 1,
                         bptOut: TokenAmount.fromRawAmount(
                             bptToken,
                             parseUnits('100', 18),
@@ -271,17 +280,25 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
                 AAVE.decimals,
             );
 
+            const exactAmountIn = TokenAmount.fromRawAmount(exactToken, 0n);
+            const expectedAdjustableAmountIn = TokenAmount.fromRawAmount(
+                adjustableToken,
+                parseUnits('50', AAVE.decimals),
+            );
+
             mockQueryOutput = {
+                poolType: mockPoolState.type,
+                poolId: mockPoolState.id,
+                addLiquidityKind: AddLiquidityKind.UnbalancedViaSwap,
                 pool: mockPoolState.address,
                 bptOut: TokenAmount.fromRawAmount(
                     bptToken,
                     parseUnits('100', 18),
                 ),
-                exactAmountIn: TokenAmount.fromRawAmount(exactToken, 0n),
-                expectedAdjustableAmountIn: TokenAmount.fromRawAmount(
-                    adjustableToken,
-                    parseUnits('50', AAVE.decimals),
-                ),
+                exactAmountIn,
+                expectedAdjustableAmountIn,
+                amountsIn: [expectedAdjustableAmountIn, exactAmountIn],
+                tokenInIndex: 0,
                 chainId,
                 protocolVersion: 3,
                 to: AddressProvider.Router(chainId),

@@ -1,4 +1,4 @@
-import { MAX_UINT256, removeIndex } from '@/utils';
+import { MAX_UINT256, removeIndex, inputValidationError } from '@/utils';
 import { AddLiquidityAmounts, PoolState } from '../types';
 import {
     getAmounts,
@@ -10,6 +10,15 @@ import {
     AddLiquidityInput,
     AddLiquidityKind,
 } from './types';
+
+export const unsupportedAddLiquidityInputKind = (
+    _kind: AddLiquidityKind.UnbalancedViaSwap,
+): never => {
+    throw inputValidationError(
+        'AddLiquidity',
+        'AddLiquidityKind.UnbalancedViaSwap is only valid on AddLiquidityUnbalancedViaSwap query output; use AddLiquidityUnbalancedViaSwap instead',
+    );
+};
 
 export const getAmountsQuery = async (
     input: AddLiquidityInput,
@@ -85,5 +94,7 @@ export const getAmountsCall = (
                 maxAmountsInWithoutBpt: removeIndex(maxAmountsIn, bptIndex),
             };
         }
+        case AddLiquidityKind.UnbalancedViaSwap:
+            return unsupportedAddLiquidityInputKind(input.addLiquidityKind);
     }
 };

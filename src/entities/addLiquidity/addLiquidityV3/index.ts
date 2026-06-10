@@ -12,7 +12,7 @@ import {
 } from '@/entities/utils';
 import { Hex } from '@/types';
 import { missingParameterError } from '@/utils';
-import { getAmountsCall } from '../helpers';
+import { getAmountsCall, unsupportedAddLiquidityInputKind } from '../helpers';
 import {
     AddLiquidityBase,
     AddLiquidityBaseQueryOutput,
@@ -191,6 +191,8 @@ export class AddLiquidityV3 implements AddLiquidityBase {
                     });
                 }
                 break;
+            case AddLiquidityKind.UnbalancedViaSwap:
+                return unsupportedAddLiquidityInputKind(input.addLiquidityKind);
         }
 
         return {

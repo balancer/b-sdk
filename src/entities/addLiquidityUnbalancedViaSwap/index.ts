@@ -122,20 +122,33 @@ export class AddLiquidityUnbalancedViaSwapV3 {
         const bptToken = new Token(input.chainId, poolState.address, 18);
         const bptOut = TokenAmount.fromRawAmount(bptToken, currentBptAmount);
 
+        const exactAmountIn = TokenAmount.fromRawAmount(
+            sortedTokens[exactAmountTokenIndex],
+            0n,
+        );
+        const expectedAdjustableAmountIn = TokenAmount.fromInputAmount(
+            input.expectedAdjustableAmountIn,
+            input.chainId,
+        );
+        const amountsIn = sortedTokens.map((_, i) =>
+            i === exactAmountTokenIndex
+                ? exactAmountIn
+                : expectedAdjustableAmountIn,
+        );
+
         const output: AddLiquidityUnbalancedViaSwapQueryOutput = {
-            pool: poolState.address,
+            poolType: poolState.type,
+            poolId: poolState.id,
+            addLiquidityKind: AddLiquidityKind.UnbalancedViaSwap,
             bptOut,
-            exactAmountIn: TokenAmount.fromRawAmount(
-                sortedTokens[exactAmountTokenIndex],
-                0n,
-            ),
-            expectedAdjustableAmountIn: TokenAmount.fromInputAmount(
-                input.expectedAdjustableAmountIn,
-                input.chainId,
-            ),
+            amountsIn,
+            tokenInIndex: expectedAdjustableTokenIndex,
             chainId: input.chainId,
             protocolVersion: 3,
             to: AddressProvider.UnbalancedAddViaSwapRouter(input.chainId),
+            pool: poolState.address,
+            exactAmountIn,
+            expectedAdjustableAmountIn,
             addLiquidityUserData: input.addLiquidityUserData ?? '0x',
             swapUserData: input.swapUserData ?? '0x',
         };
