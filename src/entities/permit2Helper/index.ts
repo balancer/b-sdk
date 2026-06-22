@@ -212,7 +212,12 @@ export class Permit2Helper {
             expiration?: number;
         },
     ): Promise<Permit2> {
-        const spender = AddressProvider.Router(input.chainId);
+        const spender = AddressProvider.UnbalancedAddViaSwapRouter(
+            input.chainId,
+        );
+        const maxAdjustableAmountIn = input.slippage.applyTo(
+            input.expectedAdjustableAmountIn.amount,
+        );
         const details: PermitDetails[] = [];
         details.push(
             await getDetails(
@@ -220,7 +225,7 @@ export class Permit2Helper {
                 input.expectedAdjustableAmountIn.token.address,
                 input.owner,
                 spender,
-                input.expectedAdjustableAmountIn.amount,
+                maxAdjustableAmountIn,
                 input.expiration,
                 input.nonce,
             ),

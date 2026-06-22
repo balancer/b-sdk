@@ -10,10 +10,20 @@ import { validateAddLiquidityUnbalancedViaSwapInput } from '@/entities/addLiquid
 import { AddressProvider } from '@/entities/inputValidator/utils/addressProvider';
 import { Token } from '@/entities/token';
 import { TokenAmount } from '@/entities/tokenAmount';
-import { Permit2Batch } from '@/entities/permit2Helper';
+import { Permit2Batch, Permit2Helper } from '@/entities/permit2Helper';
+import { PublicWalletClient } from '@/utils';
 import { TOKENS } from 'test/lib/utils/addresses';
 
 const chainId = ChainId.MAINNET;
+
+const testOwner = '0x1111111111111111111111111111111111111111' as Address;
+
+const createMockClient = (clientChainId: ChainId): PublicWalletClient =>
+    ({
+        getChainId: async () => clientChainId,
+        readContract: async () => [0n, 0n, 0] as const,
+        signTypedData: async () => `0x${'00'.repeat(65)}` as `0x${string}`,
+    }) as unknown as PublicWalletClient;
 
 const AAVE = TOKENS[chainId].AAVE;
 const WETH = TOKENS[chainId].WETH;
@@ -430,6 +440,112 @@ describe('AddLiquidityUnbalancedViaSwap', () => {
             );
             expect(result.maxAdjustableAmountIn.amount).toBe(
                 maxAdjustableAmount,
+            );
+        });
+    });
+
+    describe('signAddLiquidityUnbalancedViaSwapApproval', () => {
+        test('uses UnbalancedAddViaSwapRouter as permit2 spender', async () => {
+            const bptToken = new Token(chainId, mockPoolState.address, 18);
+            const exactToken = new Token(chainId, WETH.address, WETH.decimals);
+            const adjustableToken = new Token(
+                chainId,
+                AAVE.address,
+                AAVE.decimals,
+            );
+            const exactAmountIn = TokenAmount.fromRawAmount(exactToken, 0n);
+            const expectedAdjustableAmountIn = TokenAmount.fromRawAmount(
+                adjustableToken,
+                parseUnits('50', AAVE.decimals),
+            );
+
+            const buildCallInput = {
+                poolType: mockPoolState.type,
+                poolId: mockPoolState.id,
+                addLiquidityKind: AddLiquidityKind.UnbalancedViaSwap,
+                pool: mockPoolState.address,
+                bptOut: TokenAmount.fromRawAmount(
+                    bptToken,
+                    parseUnits('100', 18),
+                ),
+                exactAmountIn,
+                expectedAdjustableAmountIn,
+                amountsIn: [expectedAdjustableAmountIn, exactAmountIn],
+                tokenInIndex: 0,
+                chainId,
+                protocolVersion: 3 as const,
+                to: AddressProvider.UnbalancedAddViaSwapRouter(chainId),
+                addLiquidityUserData: '0x' as const,
+                swapUserData: '0x' as const,
+                slippage: Slippage.fromPercentage('1'),
+                deadline: maxUint256,
+            };
+
+            const permit2 =
+                await Permit2Helper.signAddLiquidityUnbalancedViaSwapApproval({
+                    ...buildCallInput,
+                    client: createMockClient(chainId),
+                    owner: testOwner,
+                });
+
+            expect(permit2.batch.spender).toEqual(
+                AddressProvider.UnbalancedAddViaSwapRouter(chainId),
+            );
+            expect(permit2.batch.spender).not.toEqual(
+                AddressProvider.Router(chainId),
+            );
+        });
+
+        test('applies slippage to permit amount', async () => {
+            const slippage = Slippage.fromPercentage('5');
+            const adjustableToken = new Token(
+                chainId,
+                AAVE.address,
+                AAVE.decimals,
+            );
+            const expectedAdjustableAmountIn = TokenAmount.fromRawAmount(
+                adjustableToken,
+                parseUnits('50', AAVE.decimals),
+            );
+            const bptToken = new Token(chainId, mockPoolState.address, 18);
+            const exactToken = new Token(chainId, WETH.address, WETH.decimals);
+            const exactAmountIn = TokenAmount.fromRawAmount(exactToken, 0n);
+
+            const buildCallInput = {
+                poolType: mockPoolState.type,
+                poolId: mockPoolState.id,
+                addLiquidityKind: AddLiquidityKind.UnbalancedViaSwap,
+                pool: mockPoolState.address,
+                bptOut: TokenAmount.fromRawAmount(
+                    bptToken,
+                    parseUnits('100', 18),
+                ),
+                exactAmountIn,
+                expectedAdjustableAmountIn,
+                amountsIn: [expectedAdjustableAmountIn, exactAmountIn],
+                tokenInIndex: 0,
+                chainId,
+                protocolVersion: 3 as const,
+                to: AddressProvider.UnbalancedAddViaSwapRouter(chainId),
+                addLiquidityUserData: '0x' as const,
+                swapUserData: '0x' as const,
+                slippage,
+                deadline: maxUint256,
+            };
+
+            const permit2 =
+                await Permit2Helper.signAddLiquidityUnbalancedViaSwapApproval({
+                    ...buildCallInput,
+                    client: createMockClient(chainId),
+                    owner: testOwner,
+                });
+
+            const maxAdjustableAmount = slippage.applyTo(
+                expectedAdjustableAmountIn.amount,
+            );
+            expect(permit2.batch.details[0].amount).toBe(maxAdjustableAmount);
+            expect(permit2.batch.details[0].amount).not.toBe(
+                expectedAdjustableAmountIn.amount,
             );
         });
     });

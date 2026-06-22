@@ -22,7 +22,7 @@ export type AddLiquidityUnbalancedViaSwapInput = {
  *
  * Use flow-specific fields for `buildCall` and Permit2:
  * - `pool` — router address argument (distinct from `poolId`)
- * - `expectedAdjustableAmountIn` — user budget / permit ceiling
+ * - `expectedAdjustableAmountIn` — user budget; Permit2 signs budget + slippage
  *
  * Generic `signAddLiquidityApproval` does not apply; use
  * `signAddLiquidityUnbalancedViaSwapApproval` instead.
