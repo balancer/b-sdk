@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 6.1.1
+
+### Patch Changes
+
+- fdb61c7: Fix Permit2 spender for add liquidity unbalanced via swap to use UnbalancedAddViaSwapRouter, and sign the slippage-adjusted max adjustable amount.
+
 ## 6.1.0
 
 ### Minor Changes
