@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 6.2.0
+
+### Minor Changes
+
+- c6dab7b: Bump Viem to 2.55.18
+
 ## 6.1.1
 
 ### Patch Changes
