@@ -25,9 +25,10 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      # Trusted publishing requires npm 11.5.1+ (Node 24 + explicit upgrade).
+      # Trusted publishing requires npm 11.5.1+. Pin to 11.x: npm 12+ rejects
+      # pnpm's forwarded --git-checks (EUNKNOWNCONFIG) during changeset publish.
       - name: Upgrade npm for trusted publishing
-        run: npm install -g npm@latest
+        run: npm install -g npm@11.5.2
         shell: bash
 
       - name: Publish to NPM
