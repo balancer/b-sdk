@@ -35,7 +35,7 @@
     },
     "dependencies": {
         "@balancer-labs/balancer-maths": "0.0.40",
-        "viem": "2.55.18"
+        "viem": "2.56.0"
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
