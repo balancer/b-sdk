@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@balancer-labs/balancer-maths':
-        specifier: 0.0.40
-        version: 0.0.40
+        specifier: 0.0.41
+        version: 0.0.41
       viem:
         specifier: 2.56.0
         version: 2.56.0(typescript@5.9.3)
@@ -175,8 +175,8 @@ packages:
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
 
-  '@balancer-labs/balancer-maths@0.0.40':
-    resolution: {integrity: sha512-oSd9ozJctBv6D/CjPZwCsGRerOHwIRjOciOnwxxNQUaSeFlbm8YSEAdDtQ8eggTmJ75pxEBHrl+rC4IpbgAWBg==}
+  '@balancer-labs/balancer-maths@0.0.41':
+    resolution: {integrity: sha512-ihYLgOnFoVbyN1HJmLT2WH4DzCJt65PMfjtZVoXc4JaK+2Pd8dwcRVbpdLfyXAqfpVZAW9zqB/2JnBHemyuMrQ==}
     engines: {node: '>=18.x'}
 
   '@biomejs/biome@1.9.4':
@@ -3091,7 +3091,7 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@balancer-labs/balancer-maths@0.0.40': {}
+  '@balancer-labs/balancer-maths@0.0.41': {}
 
   '@biomejs/biome@1.9.4':
     optionalDependencies:
