@@ -34,7 +34,7 @@
         "update:deployments": "npx tsx ./scripts/updateDeployments.ts && pnpm format"
     },
     "dependencies": {
-        "@balancer-labs/balancer-maths": "0.0.40",
+        "@balancer-labs/balancer-maths": "0.0.41",
         "viem": "2.56.0"
     },
     "devDependencies": {
