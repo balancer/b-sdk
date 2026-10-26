@@ -9,7 +9,7 @@
     "publishConfig": {
         "access": "public"
     },
-    "version": "6.2.0",
+    "version": "6.2.1",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
@@ -35,7 +35,7 @@
     },
     "dependencies": {
         "@balancer-labs/balancer-maths": "0.0.40",
-        "viem": "2.56.0"
+        "viem": "2.57.11"
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",

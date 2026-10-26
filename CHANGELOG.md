@@ -1,5 +1,11 @@
 # @balancer/sdk
 
+## 6.2.1
+
+### Patch Changes
+
+- dc65dcf: Update viem to 2.57.11
+
 ## 6.2.0
 
 ### Minor Changes
