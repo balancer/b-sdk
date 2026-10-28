@@ -2,6 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@balancer/sdk/latest.svg)](https://www.npmjs.com/package/@balancer/sdk/v/latest)
 
+> **Deprecated.** This package is no longer maintained and `@balancer/sdk` will not receive further updates, releases, or support.
+
 WIP SDK for Balancer Protocol. Interfaces may have frequent breaking changes until a stable release.
 
 ## Local Setup
